@@ -1,0 +1,2 @@
+?package(galaxy):needs=text|vc section=Apps/Net\
+  title="galaxy" command="/usr/bin/galaxy"

@@ -1,0 +1,7 @@
+# .galaxyrc is an `galaxy' 0.0.0 configuration file,
+# this file ought to be in /etc/ and/or your home dirctory.
+
+log_path x_galaxy.log
+
+# End of configuration file.
+
