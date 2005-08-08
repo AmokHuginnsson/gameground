@@ -1,7 +1,7 @@
 /*
----       `galaxy' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski         ---
+---           `galaxy' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski            ---
 
-	rc_options.c - this file is integral part of `galaxy' project.
+	galaxyd.h - this file is integral part of `galaxy' project.
 
 	i.  You may not make any changes in Copyright information.
 	ii. You must attach Copyright information to any part of every copy
@@ -24,36 +24,10 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
+#ifndef __GALAXYD_H
+#define __GALAXYD_H
 
-#include <stdhapi.h>
-M_CVSID ( "$CVSHeader$" );
+int main_server ( void );
 
-#include "setup.h"
-
-using namespace stdhapi::hcore;
-
-bool set_variables ( HString & a_roOption, HString & a_roValue )
-	{
-	printf ( "option: [%s], value: [%s]\n", ( char * ) a_roOption,
-			( char * ) a_roValue );
-	return ( false );
-	}
-
-int process_galaxyrc_file ( void )
-	{
-	OVariable l_psVars [ ] =
-		{
-			{ D_HSTRING,	"log_path",										& setup.f_oLogPath },
-			{ D_INT,			"maximum_number_of_clients",	& setup.f_iMaximumNumberOfClients },
-			{ D_INT,			"port", 											& setup.f_iPort },
-			{ D_NONE, NULL, NULL }
-		};
-	rc_file::process_rc_file ( "galaxy", NULL, l_psVars, NULL );
-	if ( ! setup.f_oLogPath )
-		setup.f_oLogPath = "galaxy.log";
-	return ( 0 );
-	}
+#endif /* not __GALAXYD_H */
 

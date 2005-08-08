@@ -27,14 +27,37 @@ Copyright:
 #ifndef __SETUP_H
 #define __SETUP_H
 
+#include <libintl.h>
+
 struct OSetup
 	{
 	OSetup ( void ) : f_bQuiet ( false ), f_bVerbose ( false ),
-										f_bHelp ( false ), f_pcProgramName ( NULL ),
+										f_bHelp ( false ), f_bServer ( false ),
+										f_bClient ( false ), f_iMaximumNumberOfClients ( 4 ),
+										f_iPort ( 7777 ),
+										f_pcProgramName ( NULL ),
 										f_oLogPath ( ) {}
+	void test_setup ( void )
+		{
+		if ( f_bServer && f_bClient )
+			stdhapi::tools::util::failure ( 1, _ ( "galaxy cannot be server and client at the same time\n" ) );
+		if ( ! ( f_bServer || f_bClient ) )
+			stdhapi::tools::util::failure ( 2, _ ( "galaxy must be server or client\n" ) );
+		if ( f_bServer && ( f_iMaximumNumberOfClients < 2 ) )
+			stdhapi::tools::util::failure ( 3,
+					_ ( "galaxy is multiplayer game and makes sense only for at least two players\n" ) );
+		if ( f_iPort < 1024 )
+			stdhapi::tools::util::failure ( 4, _ ( "galaxy galaxy cannot run on restricted ports\n" ) );
+		}
 	bool f_bQuiet;			/* --quiet, --silent */
 	bool f_bVerbose;		/* --verbose */
 	bool f_bHelp;
+	/* galaxy specific bools */
+	bool f_bServer;
+	bool f_bClient;
+	/* galaxy specific integers */
+	int f_iMaximumNumberOfClients;
+	int f_iPort;
 	char * f_pcProgramName;
 	stdhapi::hcore::HString f_oLogPath;
 private:

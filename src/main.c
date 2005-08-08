@@ -30,6 +30,8 @@ Copyright:
 #include "setup.h"
 #include "cli_options.h"
 #include "rc_options.h"
+#include "galaxy.h"
+#include "galaxyd.h"
 
 using namespace std;
 using namespace stdhapi;
@@ -54,8 +56,13 @@ int main ( int a_iArgc, char * a_ppcArgv [ ] )
 		process_galaxyrc_file ( );
 		l_iOpt = decode_switches ( a_iArgc, a_ppcArgv );
 		hcore::log.rehash ( setup.f_oLogPath, setup.f_pcProgramName );
+		setup.test_setup ( );
 /*		if ( ! console::is_enabled ( ) )enter_curses (); / * enabling ncurses ablilities*/
 /* *BOOM* */
+		if ( setup.f_bServer )
+			l_iOpt = main_server ( );
+		else
+			l_iOpt = main_client ( );
 		if ( hconsole::is_enabled ( ) )leave_curses (); /* ending ncurses sesion */
 /* ... there is the place main loop ends. :OD-OT */
 		}
@@ -65,7 +72,7 @@ int main ( int a_iArgc, char * a_ppcArgv [ ] )
 		throw;
 		}
 	fprintf ( stderr, "Done.\n" );
-	return ( 0 );
+	return ( l_iOpt );
 	M_FINAL
 	}
 

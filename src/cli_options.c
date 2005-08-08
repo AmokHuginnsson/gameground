@@ -68,6 +68,11 @@ int decode_switches ( int a_iArgc, char ** a_ppcArgv )
 	int l_iUnknown = 0, l_iNonOption = 0;
 	OOption l_psOptions [ ] =
 		{
+			{ "server",		'S', OOption::D_NONE, D_BOOL, & setup.f_bServer,	NULL },
+			{ "client",		'C', OOption::D_NONE, D_BOOL, & setup.f_bClient,	NULL },
+			{ "maximum-number-of-clients",	'M', OOption::D_REQUIRED, D_INT,
+				& setup.f_iMaximumNumberOfClients,	NULL },
+			{ "port",			'P', OOption::D_REQUIRED, D_INT, & setup.f_iPort,	NULL },
 			{ "quiet",		'q', OOption::D_NONE,	D_BOOL,	& setup.f_bQuiet,		NULL },
 			{ "silent",		'q', OOption::D_NONE,	D_BOOL,	& setup.f_bQuiet,		NULL },
 			{ "verbose",	'v', OOption::D_NONE,	D_BOOL,	& setup.f_bVerbose,	NULL },
