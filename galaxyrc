@@ -2,7 +2,6 @@
 # this file ought to be in /etc/ and/or your home dirctory.
 
 log_path x_galaxy.log
-maximum_number_of_clients 4
 port 7777
 
 # End of configuration file.

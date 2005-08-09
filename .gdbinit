@@ -10,7 +10,8 @@ set print demangle on
 set print pretty on
 set print object on
 set environment TERM cons25
-tty /dev/ttyv9
+#tty /dev/pts/8
+set args -S -G 2
 define go
 	run
 	source .breaks

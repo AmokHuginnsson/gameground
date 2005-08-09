@@ -47,7 +47,6 @@ int process_galaxyrc_file ( void )
 	OVariable l_psVars [ ] =
 		{
 			{ D_HSTRING,	"log_path",										& setup.f_oLogPath },
-			{ D_INT,			"maximum_number_of_clients",	& setup.f_iMaximumNumberOfClients },
 			{ D_INT,			"port", 											& setup.f_iPort },
 			{ D_VOID, NULL, NULL }
 		};

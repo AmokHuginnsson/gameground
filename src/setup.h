@@ -33,7 +33,7 @@ struct OSetup
 	{
 	OSetup ( void ) : f_bQuiet ( false ), f_bVerbose ( false ),
 										f_bHelp ( false ), f_bServer ( false ),
-										f_bClient ( false ), f_iMaximumNumberOfClients ( 4 ),
+										f_bClient ( false ), f_iPlayers ( 4 ),
 										f_iPort ( 7777 ),
 										f_pcProgramName ( NULL ),
 										f_oLogPath ( ) {}
@@ -43,7 +43,7 @@ struct OSetup
 			stdhapi::tools::util::failure ( 1, _ ( "galaxy cannot be server and client at the same time\n" ) );
 		if ( ! ( f_bServer || f_bClient ) )
 			stdhapi::tools::util::failure ( 2, _ ( "galaxy must be server or client\n" ) );
-		if ( f_bServer && ( f_iMaximumNumberOfClients < 2 ) )
+		if ( f_bServer && ( f_iPlayers < 2 ) )
 			stdhapi::tools::util::failure ( 3,
 					_ ( "galaxy is multiplayer game and makes sense only for at least two players\n" ) );
 		if ( f_iPort < 1024 )
@@ -56,7 +56,7 @@ struct OSetup
 	bool f_bServer;
 	bool f_bClient;
 	/* galaxy specific integers */
-	int f_iMaximumNumberOfClients;
+	int f_iPlayers;
 	int f_iPort;
 	char * f_pcProgramName;
 	stdhapi::hcore::HString f_oLogPath;

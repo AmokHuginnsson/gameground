@@ -43,6 +43,7 @@ class HServer : public HProcess
 	{
 protected:
 	/*{*/
+	int f_iPlayers;
 	HSocket f_oSocket;
 	/*}*/
 public:
@@ -58,9 +59,9 @@ protected:
 	/*}*/
 	};
 
-HServer::HServer ( int a_iMaximumNumberOfClients )
-	: HProcess ( a_iMaximumNumberOfClients ),
-	f_oSocket ( HSocket::D_DEFAULTS, a_iMaximumNumberOfClients )
+HServer::HServer ( int a_iPlayers )
+	: HProcess ( a_iPlayers ), f_iPlayers ( a_iPlayers ),
+	f_oSocket ( HSocket::D_DEFAULTS, a_iPlayers )
 	{
 	M_PROLOG
 	return;
@@ -81,7 +82,14 @@ int HServer::handler_connection ( int )
 	{
 	M_PROLOG
 	HSocket * l_poClient = f_oSocket.accept ( );
+	M_ASSERT ( l_poClient );
 	M_REGISTER_FILE_DESCRIPTOR_HANDLER ( l_poClient->get_file_descriptor ( ), HServer::handler_message );
+	if ( f_oSocket.get_client_count ( ) >= f_iPlayers )
+		{
+		unregister_file_descriptor_handler ( f_oSocket.get_file_descriptor ( ) );
+		f_oSocket.close ( );
+		}
+	fprintf ( stdout, "%s\n", static_cast < char * > ( l_poClient->get_host_name ( ) ) );
 	return ( 0 );
 	M_EPILOG
 	}
@@ -105,6 +113,8 @@ int HServer::handler_message ( int a_iFileDescriptor )
 		{
 		unregister_file_descriptor_handler ( a_iFileDescriptor );
 		f_oSocket.shutdown_client ( a_iFileDescriptor );
+		if ( ! f_oSocket.get_client_count ( ) )
+			f_bLoop = false;
 		}
 	return ( 0 );
 	M_EPILOG
@@ -112,7 +122,7 @@ int HServer::handler_message ( int a_iFileDescriptor )
 
 int main_server ( void )
 	{
-	HServer l_oServer ( setup.f_iMaximumNumberOfClients );
+	HServer l_oServer ( setup.f_iPlayers );
 	l_oServer.init_server ( setup.f_iPort );
 	l_oServer.run ( );
 	return ( 0 );
