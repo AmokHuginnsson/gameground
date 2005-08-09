@@ -49,7 +49,7 @@ int process_galaxyrc_file ( void )
 			{ D_HSTRING,	"log_path",										& setup.f_oLogPath },
 			{ D_INT,			"maximum_number_of_clients",	& setup.f_iMaximumNumberOfClients },
 			{ D_INT,			"port", 											& setup.f_iPort },
-			{ D_NONE, NULL, NULL }
+			{ D_VOID, NULL, NULL }
 		};
 	rc_file::process_rc_file ( "galaxy", NULL, l_psVars, NULL );
 	if ( ! setup.f_oLogPath )
