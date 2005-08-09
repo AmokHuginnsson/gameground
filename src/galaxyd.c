@@ -39,18 +39,82 @@ using namespace stdhapi::hconsole;
 using namespace stdhapi::tools;
 using namespace stdhapi::tools::util;
 
+class HServer : public HProcess
+	{
+protected:
+	/*{*/
+	HSocket f_oSocket;
+	/*}*/
+public:
+	/*{*/
+	HServer ( int );
+	int init_server ( int );
+	using HProcess::run;
+	/*}*/
+protected:
+	/*{*/
+	int handler_connection ( int );
+	int handler_message ( int );
+	/*}*/
+	};
+
+HServer::HServer ( int a_iMaximumNumberOfClients )
+	: HProcess ( a_iMaximumNumberOfClients ),
+	f_oSocket ( HSocket::D_DEFAULTS, a_iMaximumNumberOfClients )
+	{
+	M_PROLOG
+	return;
+	M_EPILOG
+	}
+
+int HServer::init_server ( int a_iPort )
+	{
+	M_PROLOG
+	f_oSocket.listen ( "0.0.0.0", a_iPort );
+	M_REGISTER_FILE_DESCRIPTOR_HANDLER ( f_oSocket.get_file_descriptor ( ), HServer::handler_connection );
+	HProcess::init ( 3600 );
+	return ( 0 );
+	M_EPILOG
+	}
+
+int HServer::handler_connection ( int )
+	{
+	M_PROLOG
+	HSocket * l_poClient = f_oSocket.accept ( );
+	M_REGISTER_FILE_DESCRIPTOR_HANDLER ( l_poClient->get_file_descriptor ( ), HServer::handler_message );
+	return ( 0 );
+	M_EPILOG
+	}
+
+int HServer::handler_message ( int a_iFileDescriptor )
+	{
+	M_PROLOG
+	int l_iFileDescriptor = - 1;
+	HString l_oMessage;
+	HSocket * l_poClient = f_oSocket.get_client ( a_iFileDescriptor );
+	M_ASSERT ( l_poClient );
+	if ( l_poClient->read_until ( l_oMessage ) > 0 )
+		{
+		f_oSocket.rewind_client_list ( );
+		while ( f_oSocket.get_client_next ( l_iFileDescriptor, l_poClient ) )
+			if ( l_iFileDescriptor != a_iFileDescriptor )
+				l_poClient->write ( l_oMessage, l_oMessage.get_length ( ) );
+		fprintf ( stdout, l_oMessage );
+		}
+	else
+		{
+		unregister_file_descriptor_handler ( a_iFileDescriptor );
+		f_oSocket.shutdown_client ( a_iFileDescriptor );
+		}
+	return ( 0 );
+	M_EPILOG
+	}
+
 int main_server ( void )
 	{
-	char buf [ 2 ] = "\0";
-	HSocket l_oSocket ( HSocket::D_DEFAULTS, setup.f_iMaximumNumberOfClients );
-	l_oSocket.listen ( "0.0.0.0", setup.f_iPort );
-	HSocket * l_poClient = l_oSocket.accept ( );
-	while ( 1 )
-		{
-		l_poClient->read ( buf, 1 );
-		if ( fprintf ( stdout, buf ) <= 0 )
-			break;
-		}
+	HServer l_oServer ( setup.f_iMaximumNumberOfClients );
+	l_oServer.init_server ( setup.f_iPort );
+	l_oServer.run ( );
 	return ( 0 );
 	}
 
