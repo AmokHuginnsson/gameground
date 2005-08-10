@@ -46,8 +46,11 @@ int process_galaxyrc_file ( void )
 	{
 	OVariable l_psVars [ ] =
 		{
-			{ D_HSTRING,	"log_path",										& setup.f_oLogPath },
-			{ D_INT,			"port", 											& setup.f_iPort },
+			{ D_HSTRING,	"log_path",	& setup.f_oLogPath },
+			{ D_INT,			"port", 		& setup.f_iPort },
+			{ D_INT,			"emperors",	& setup.f_iEmperors },
+			{ D_HSTRING,	"login", 		& setup.f_oLogin },
+			{ D_INT,			"systems", 	& setup.f_iSystems },
 			{ D_VOID, NULL, NULL }
 		};
 	rc_file::process_rc_file ( "galaxy", NULL, l_psVars, NULL );

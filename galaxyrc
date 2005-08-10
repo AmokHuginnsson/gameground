@@ -3,6 +3,8 @@
 
 log_path x_galaxy.log
 port 7777
+emperors 4
+systems 16
 
 # End of configuration file.
 

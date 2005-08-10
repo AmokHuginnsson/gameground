@@ -43,7 +43,7 @@ class HServer : public HProcess
 	{
 protected:
 	/*{*/
-	int f_iPlayers;
+	int f_iEmperors;
 	HSocket f_oSocket;
 	/*}*/
 public:
@@ -60,7 +60,7 @@ protected:
 	};
 
 HServer::HServer ( int a_iPlayers )
-	: HProcess ( a_iPlayers ), f_iPlayers ( a_iPlayers ),
+	: HProcess ( a_iPlayers ), f_iEmperors ( a_iPlayers ),
 	f_oSocket ( HSocket::D_DEFAULTS, a_iPlayers )
 	{
 	M_PROLOG
@@ -84,7 +84,7 @@ int HServer::handler_connection ( int )
 	HSocket * l_poClient = f_oSocket.accept ( );
 	M_ASSERT ( l_poClient );
 	M_REGISTER_FILE_DESCRIPTOR_HANDLER ( l_poClient->get_file_descriptor ( ), HServer::handler_message );
-	if ( f_oSocket.get_client_count ( ) >= f_iPlayers )
+	if ( f_oSocket.get_client_count ( ) >= f_iEmperors )
 		{
 		unregister_file_descriptor_handler ( f_oSocket.get_file_descriptor ( ) );
 		f_oSocket.close ( );
@@ -144,7 +144,7 @@ int HServer::handler_message ( int a_iFileDescriptor )
 
 int main_server ( void )
 	{
-	HServer l_oServer ( setup.f_iPlayers );
+	HServer l_oServer ( setup.f_iEmperors );
 	l_oServer.init_server ( setup.f_iPort );
 	l_oServer.run ( );
 	return ( 0 );

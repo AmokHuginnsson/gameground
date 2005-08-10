@@ -29,13 +29,17 @@ Copyright:
 
 #include <libintl.h>
 
+#define D_DEFAULT_PLAYERS						4
+#define D_NEUTRAL_SYSTEM_PER_PLAYER	4
+
 struct OSetup
 	{
 	OSetup ( void ) : f_bQuiet ( false ), f_bVerbose ( false ),
 										f_bHelp ( false ), f_bServer ( false ),
-										f_bClient ( false ), f_iPlayers ( 4 ),
+										f_bClient ( false ), f_iEmperors ( D_DEFAULT_PLAYERS ),
 										f_iPort ( 7777 ),
-										f_pcProgramName ( NULL ),
+										f_iSystems ( D_DEFAULT_PLAYERS * D_NEUTRAL_SYSTEM_PER_PLAYER ),
+										f_oLogin ( ), f_oHost ( ), f_pcProgramName ( NULL ),
 										f_oLogPath ( ) {}
 	void test_setup ( void )
 		{
@@ -43,11 +47,15 @@ struct OSetup
 			stdhapi::tools::util::failure ( 1, _ ( "galaxy cannot be server and client at the same time\n" ) );
 		if ( ! ( f_bServer || f_bClient ) )
 			stdhapi::tools::util::failure ( 2, _ ( "galaxy must be server or client\n" ) );
-		if ( f_bServer && ( f_iPlayers < 2 ) )
+		if ( f_bServer && ( f_iEmperors < 2 ) )
 			stdhapi::tools::util::failure ( 3,
 					_ ( "galaxy is multiplayer game and makes sense only for at least two players\n" ) );
 		if ( f_iPort < 1024 )
-			stdhapi::tools::util::failure ( 4, _ ( "galaxy galaxy cannot run on restricted ports\n" ) );
+			stdhapi::tools::util::failure ( 4, _ ( "galaxy cannot run on restricted ports\n" ) );
+		if ( f_bClient && f_oHost.is_empty ( ) )
+			stdhapi::tools::util::failure ( 5, _ ( "as a client You must specify server host\n" ) );
+		if ( f_bClient && f_oLogin.is_empty ( ) )
+			stdhapi::tools::util::failure ( 6, _ ( "as a player You must specify Your name\n" ) );
 		}
 	bool f_bQuiet;			/* --quiet, --silent */
 	bool f_bVerbose;		/* --verbose */
@@ -56,8 +64,12 @@ struct OSetup
 	bool f_bServer;
 	bool f_bClient;
 	/* galaxy specific integers */
-	int f_iPlayers;
+	int f_iEmperors;
 	int f_iPort;
+	int f_iSystems;
+	/* galaxy specific strings */
+	stdhapi::hcore::HString f_oLogin;
+	stdhapi::hcore::HString f_oHost;
 	char * f_pcProgramName;
 	stdhapi::hcore::HString f_oLogPath;
 private:

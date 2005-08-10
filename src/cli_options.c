@@ -44,10 +44,17 @@ void usage ( void ) __attribute__ ( ( __noreturn__ ) );
 void usage ( void )
 	{
 	printf ( "%s - "
-"does very much usefull things ... really\n", setup.f_pcProgramName );
+"game about conquering the universum.\n", setup.f_pcProgramName );
 	printf ( "Usage: %s [OPTION]... [FILE]...\n", setup.f_pcProgramName );
 	printf (
 "Options:\n"
+"  -G, --server               setup a game server\n"
+"  -C, --client               connect to server\n"
+"  -P, --port {number}        set port number\n"
+"  -H, --host {name}          select host to connect\n"
+"  -L, --login {name}         set Your player name\n"
+"  -E, --emperors {count}     set number of players\n"
+"  -S, --systems {count}      set number of neutral systems\n"
 "  -q, --quiet, --silent      inhibit usual output\n"
 "  --verbose                  print more information\n"
 "  -h, --help                 display this help and exit\n"
@@ -68,10 +75,13 @@ int decode_switches ( int a_iArgc, char ** a_ppcArgv )
 	int l_iUnknown = 0, l_iNonOption = 0;
 	OOption l_psOptions [ ] =
 		{
-			{ "server",		'S', OOption::D_NONE, D_BOOL, & setup.f_bServer,	NULL },
+			{ "server",		'G', OOption::D_NONE, D_BOOL, & setup.f_bServer,	NULL },
 			{ "client",		'C', OOption::D_NONE, D_BOOL, & setup.f_bClient,	NULL },
-			{ "players",	'G', OOption::D_REQUIRED, D_INT, & setup.f_iPlayers,	NULL },
+			{ "emperors",	'E', OOption::D_REQUIRED, D_INT, & setup.f_iEmperors,	NULL },
 			{ "port",			'P', OOption::D_REQUIRED, D_INT, & setup.f_iPort,	NULL },
+			{ "login", 		'L', OOption::D_REQUIRED, D_HSTRING,	& setup.f_oLogin, NULL },
+			{ "systems",	'S', OOption::D_REQUIRED, D_INT,			& setup.f_iSystems, NULL },
+			{ "host",			'H', OOption::D_REQUIRED, D_HSTRING,	& setup.f_oHost, NULL },
 			{ "quiet",		'q', OOption::D_NONE,	D_BOOL,	& setup.f_bQuiet,		NULL },
 			{ "silent",		'q', OOption::D_NONE,	D_BOOL,	& setup.f_bQuiet,		NULL },
 			{ "verbose",	'v', OOption::D_NONE,	D_BOOL,	& setup.f_bVerbose,	NULL },
