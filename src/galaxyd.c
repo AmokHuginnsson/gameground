@@ -98,18 +98,40 @@ int HServer::handler_message ( int a_iFileDescriptor )
 	{
 	M_PROLOG
 	int l_iFileDescriptor = - 1;
+	int l_iMsgLength = 0;
 	HString l_oMessage;
+	HString l_oArgument;
+	HString l_oCommand;
 	HSocket * l_poClient = f_oSocket.get_client ( a_iFileDescriptor );
 	M_ASSERT ( l_poClient );
-	if ( l_poClient->read_until ( l_oMessage ) > 0 )
+	if ( ( l_iMsgLength = l_poClient->read_until ( l_oMessage ) ) > 0 )
 		{
-		f_oSocket.rewind_client_list ( );
-		while ( f_oSocket.get_client_next ( l_iFileDescriptor, l_poClient ) )
-			if ( l_iFileDescriptor != a_iFileDescriptor )
-				l_poClient->write ( l_oMessage, l_oMessage.get_length ( ) );
-		fprintf ( stdout, l_oMessage );
+		fprintf ( stdout, "<-%s\n", static_cast < char * > ( l_oMessage ) );
+		l_oCommand = l_oMessage.split ( ":", 0 );
+		l_oArgument = l_oMessage.split ( ":", 1 );
+		l_iMsgLength = l_oArgument.get_length ( );
+		if ( l_iMsgLength > 1 )
+			{
+			if ( l_oCommand == "SAY" )
+				{
+				l_oMessage = "MSG:" + l_oArgument + '\n';
+				f_oSocket.rewind_client_list ( );
+				while ( f_oSocket.get_client_next ( l_iFileDescriptor, l_poClient ) )
+					if ( l_iFileDescriptor != a_iFileDescriptor )
+						l_poClient->write ( l_oMessage, l_oMessage.get_length ( ) );
+				}
+			else if ( l_oCommand == "LOGIN" )
+				{
+				}
+			}
+		else
+			{
+			if ( l_oCommand == "QUIT" )
+				f_bLoop = false;
+			}
+		fprintf ( stdout, "->%s", static_cast < char * > ( l_oMessage ) );
 		}
-	else
+	else if ( l_iMsgLength < 0 )
 		{
 		unregister_file_descriptor_handler ( a_iFileDescriptor );
 		f_oSocket.shutdown_client ( a_iFileDescriptor );

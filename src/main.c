@@ -57,13 +57,15 @@ int main ( int a_iArgc, char * a_ppcArgv [ ] )
 		l_iOpt = decode_switches ( a_iArgc, a_ppcArgv );
 		hcore::log.rehash ( setup.f_oLogPath, setup.f_pcProgramName );
 		setup.test_setup ( );
-/*		if ( ! console::is_enabled ( ) )enter_curses (); / * enabling ncurses ablilities*/
 /* *BOOM* */
 		if ( setup.f_bServer )
 			l_iOpt = main_server ( );
 		else
+			{
+			if ( ! hconsole::is_enabled ( ) )enter_curses (); /* enabling ncurses ablilities*/
 			l_iOpt = main_client ( );
-		if ( hconsole::is_enabled ( ) )leave_curses (); /* ending ncurses sesion */
+			if ( hconsole::is_enabled ( ) )leave_curses (); /* ending ncurses sesion */
+			}
 /* ... there is the place main loop ends. :OD-OT */
 		}
 	catch ( ... )
