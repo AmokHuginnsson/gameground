@@ -29,6 +29,7 @@ Copyright:
 
 #include <libintl.h>
 
+#define D_BOARD_SIZE 16
 #define D_DEFAULT_PLAYERS						4
 #define D_NEUTRAL_SYSTEM_PER_PLAYER	4
 
@@ -39,6 +40,7 @@ struct OSetup
 										f_bClient ( false ), f_iEmperors ( D_DEFAULT_PLAYERS ),
 										f_iPort ( 7777 ),
 										f_iSystems ( D_DEFAULT_PLAYERS * D_NEUTRAL_SYSTEM_PER_PLAYER ),
+										f_iBoardSize ( D_BOARD_SIZE ),
 										f_oLogin ( ), f_oHost ( ), f_pcProgramName ( NULL ),
 										f_oLogPath ( ) {}
 	void test_setup ( void )
@@ -56,6 +58,8 @@ struct OSetup
 			stdhapi::tools::util::failure ( 5, _ ( "as a client You must specify server host\n" ) );
 		if ( f_bClient && f_oLogin.is_empty ( ) )
 			stdhapi::tools::util::failure ( 6, _ ( "as a player You must specify Your name\n" ) );
+		if ( f_bServer && ( ( f_iBoardSize < 2 ) || ( f_iBoardSize > 20 ) ) )
+			stdhapi::tools::util::failure ( 7, _ ( "bad board size specified\n" ) );
 		}
 	bool f_bQuiet;			/* --quiet, --silent */
 	bool f_bVerbose;		/* --verbose */
@@ -67,6 +71,7 @@ struct OSetup
 	int f_iEmperors;
 	int f_iPort;
 	int f_iSystems;
+	int f_iBoardSize;
 	/* galaxy specific strings */
 	stdhapi::hcore::HString f_oLogin;
 	stdhapi::hcore::HString f_oHost;

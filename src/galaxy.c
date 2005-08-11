@@ -33,7 +33,6 @@ M_CVSID ( "$CVSHeader$" );
 
 #include "setup.h"
 
-#define D_BOARD_SIZE 20
 #define D_ATTR_BOARD	 ( D_FG_CYAN | D_BG_BLACK )
 #define D_ATTR_CURSOR  ( D_FG_WHITE | D_BG_BLACK )
 
@@ -106,8 +105,8 @@ protected:
 
 HBoard::HBoard ( HWindow * a_poParent )
 	: HControl ( a_poParent, 1, 1,
-			D_BOARD_SIZE + 1 /* for label */ + 2 /* for borders */,
-			D_BOARD_SIZE * 3 /* for System */ + 2 /* for borders */ ,
+			setup.f_iBoardSize + 1 /* for label */ + 2 /* for borders */,
+			setup.f_iBoardSize * 3 /* for System */ + 2 /* for borders */ ,
 			"&galaxy\n" ), f_iCursorY ( 0 ), f_iCursorX ( 0 )
 	{
 	M_PROLOG
@@ -131,21 +130,21 @@ void HBoard::refresh ( void )
 	if ( f_bFocused )
 		M_IRV ( curs_set ( D_CURSOR_INVISIBLE ) );
 	l_oPen = ',';
-	for ( l_iCtr = 0; l_iCtr < D_BOARD_SIZE; l_iCtr ++ )
+	for ( l_iCtr = 0; l_iCtr < setup.f_iBoardSize; l_iCtr ++ )
 		l_oPen += "-+-";
 	l_oPen += '.';
 	hconsole::c_printf ( f_iRowRaw, f_iColumnRaw, D_ATTR_BOARD, l_oPen );
 	l_oPen = '}';
-	for ( l_iCtr = 0; l_iCtr < D_BOARD_SIZE; l_iCtr ++ )
+	for ( l_iCtr = 0; l_iCtr < setup.f_iBoardSize; l_iCtr ++ )
 		l_oPen += " - ";
 	l_oPen += '{';
-	for ( l_iCtr = 0; l_iCtr < D_BOARD_SIZE; l_iCtr ++ )
+	for ( l_iCtr = 0; l_iCtr < setup.f_iBoardSize; l_iCtr ++ )
 		hconsole::c_printf ( f_iRowRaw + l_iCtr + 1, f_iColumnRaw, D_ATTR_BOARD, l_oPen );
 	l_oPen = '`';
-	for ( l_iCtr = 0; l_iCtr < D_BOARD_SIZE; l_iCtr ++ )
+	for ( l_iCtr = 0; l_iCtr < setup.f_iBoardSize; l_iCtr ++ )
 		l_oPen += "-+-";
 	l_oPen += '\'';
-	hconsole::c_printf ( f_iRowRaw + D_BOARD_SIZE + 1, f_iColumnRaw, D_ATTR_BOARD, l_oPen );
+	hconsole::c_printf ( f_iRowRaw + setup.f_iBoardSize + 1, f_iColumnRaw, D_ATTR_BOARD, l_oPen );
 	hconsole::c_printf ( f_iRowRaw + 1 + f_iCursorY, f_iColumnRaw + 1 + f_iCursorX * 3, D_ATTR_CURSOR, "{" );
 	hconsole::c_printf ( f_iRowRaw + 1 + f_iCursorY, f_iColumnRaw + 3 + f_iCursorX * 3, D_ATTR_CURSOR, "}" );
 	M_EPILOG
@@ -160,7 +159,7 @@ int HBoard::process_input ( int a_iCode )
 		{
 		case ( KEY_DOWN ):
 			{
-			if ( f_iCursorY < ( D_BOARD_SIZE - 1 ) )
+			if ( f_iCursorY < ( setup.f_iBoardSize - 1 ) )
 				f_iCursorY ++;
 			break;
 			}
@@ -178,7 +177,7 @@ int HBoard::process_input ( int a_iCode )
 			}
 		case ( KEY_RIGHT ):
 			{
-			if ( f_iCursorX < ( D_BOARD_SIZE - 1 ) )
+			if ( f_iCursorX < ( setup.f_iBoardSize - 1 ) )
 				f_iCursorX ++;
 			break;
 			}
@@ -243,7 +242,7 @@ void HClient::init_client ( HString & a_roHost, int a_iPort )
 	M_REGISTER_FILE_DESCRIPTOR_HANDLER ( f_oSocket.get_file_descriptor ( ), HClient::handler_message );
 	l_oMessage = "LOGIN:";
 	l_oMessage += setup.f_oLogin + '\n';
-	f_oSocket.write ( l_oMessage, l_oMessage.get_length ( ) );
+	f_oSocket.write_until_eos ( l_oMessage );
 	HTUIProcess::init_tui ( "galaxy", & f_oWindow );
 	return;
 	M_EPILOG

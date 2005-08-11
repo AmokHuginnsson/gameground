@@ -39,16 +39,67 @@ using namespace stdhapi::hconsole;
 using namespace stdhapi::tools;
 using namespace stdhapi::tools::util;
 
+class HFleet
+	{
+protected:
+	/*{*/
+	int f_iSize;
+	int f_iEmperor;
+	int f_iArrivalTime;
+	/*}*/
+public:
+	/*{*/
+	/*}*/
+protected:
+	/*{*/
+	/*}*/
+	};
+
+class HSystem
+	{
+protected:
+	/*{*/
+	int f_iCoordinatesX;
+	int f_iCoordinatesY;
+	int f_iProduction;
+	int f_iFleet;
+	int f_iEmperor;
+	HList < HFleet > f_oAttackers;
+	/*}*/
+public:
+	/*{*/
+	/*}*/
+protected:
+	/*{*/
+	/*}*/
+	};
+
+class HGalaxy
+	{
+protected:
+	/*{*/
+	/*}*/
+public:
+	/*{*/
+	HGalaxy ( int, int, int );
+	virtual ~HGalaxy ( void );
+	/*}*/
+protected:
+	/*{*/
+	/*}*/
+	};
+
 class HServer : public HProcess
 	{
 protected:
 	/*{*/
 	int f_iEmperors;
 	HSocket f_oSocket;
+	HGalaxy & f_oGalaxy;
 	/*}*/
 public:
 	/*{*/
-	HServer ( int );
+	HServer ( int, HGalaxy & );
 	int init_server ( int );
 	using HProcess::run;
 	/*}*/
@@ -59,9 +110,23 @@ protected:
 	/*}*/
 	};
 
-HServer::HServer ( int a_iPlayers )
+HGalaxy::HGalaxy ( int, int, int )
+	{
+	M_PROLOG
+	return;
+	M_EPILOG
+	}
+
+HGalaxy::~HGalaxy ( void )
+	{
+	M_PROLOG
+	return;
+	M_EPILOG
+	}
+
+HServer::HServer ( int a_iPlayers, HGalaxy & a_roGalaxy )
 	: HProcess ( a_iPlayers ), f_iEmperors ( a_iPlayers ),
-	f_oSocket ( HSocket::D_DEFAULTS, a_iPlayers )
+	f_oSocket ( HSocket::D_DEFAULTS, a_iPlayers ), f_oGalaxy ( a_roGalaxy )
 	{
 	M_PROLOG
 	return;
@@ -118,7 +183,7 @@ int HServer::handler_message ( int a_iFileDescriptor )
 				f_oSocket.rewind_client_list ( );
 				while ( f_oSocket.get_client_next ( l_iFileDescriptor, l_poClient ) )
 					if ( l_iFileDescriptor != a_iFileDescriptor )
-						l_poClient->write ( l_oMessage, l_oMessage.get_length ( ) );
+						l_poClient->write_until_eos ( l_oMessage );
 				}
 			else if ( l_oCommand == "LOGIN" )
 				{
@@ -144,7 +209,8 @@ int HServer::handler_message ( int a_iFileDescriptor )
 
 int main_server ( void )
 	{
-	HServer l_oServer ( setup.f_iEmperors );
+	HGalaxy l_oGalaxy ( setup.f_iBoardSize, setup.f_iSystems, setup.f_iEmperors );
+	HServer l_oServer ( setup.f_iEmperors, l_oGalaxy );
 	l_oServer.init_server ( setup.f_iPort );
 	l_oServer.run ( );
 	return ( 0 );

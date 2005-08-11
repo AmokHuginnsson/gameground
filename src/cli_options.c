@@ -55,6 +55,7 @@ void usage ( void )
 "  -L, --login {name}         set Your player name\n"
 "  -E, --emperors {count}     set number of players\n"
 "  -S, --systems {count}      set number of neutral systems\n"
+"  -B, --board {size}         size of the galaxy board\n"
 "  -q, --quiet, --silent      inhibit usual output\n"
 "  --verbose                  print more information\n"
 "  -h, --help                 display this help and exit\n"
@@ -81,6 +82,7 @@ int decode_switches ( int a_iArgc, char ** a_ppcArgv )
 			{ "port",			'P', OOption::D_REQUIRED, D_INT, & setup.f_iPort,	NULL },
 			{ "login", 		'L', OOption::D_REQUIRED, D_HSTRING,	& setup.f_oLogin, NULL },
 			{ "systems",	'S', OOption::D_REQUIRED, D_INT,			& setup.f_iSystems, NULL },
+			{ "board",		'B', OOption::D_REQUIRED, D_INT,			& setup.f_iBoardSize, NULL },
 			{ "host",			'H', OOption::D_REQUIRED, D_HSTRING,	& setup.f_oHost, NULL },
 			{ "quiet",		'q', OOption::D_NONE,	D_BOOL,	& setup.f_bQuiet,		NULL },
 			{ "silent",		'q', OOption::D_NONE,	D_BOOL,	& setup.f_bQuiet,		NULL },

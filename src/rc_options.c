@@ -51,6 +51,7 @@ int process_galaxyrc_file ( void )
 			{ D_INT,			"emperors",	& setup.f_iEmperors },
 			{ D_HSTRING,	"login", 		& setup.f_oLogin },
 			{ D_INT,			"systems", 	& setup.f_iSystems },
+			{ D_INT,			"board",		& setup.f_iBoardSize },
 			{ D_VOID, NULL, NULL }
 		};
 	rc_file::process_rc_file ( "galaxy", NULL, l_psVars, NULL );
