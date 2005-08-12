@@ -68,6 +68,7 @@ protected:
 	/*}*/
 public:
 	/*{*/
+	HSystem ( void );
 	/*}*/
 protected:
 	/*{*/
@@ -78,6 +79,11 @@ class HGalaxy
 	{
 protected:
 	/*{*/
+	int f_iBoardSize;
+	int f_iSystems;
+	int f_iEmperors;
+	int f_iRound;
+	HArray < HSystem > f_oSystems;
 	/*}*/
 public:
 	/*{*/
@@ -110,7 +116,19 @@ protected:
 	/*}*/
 	};
 
-HGalaxy::HGalaxy ( int, int, int )
+HSystem::HSystem ( void ) : f_iCoordinatesX ( - 1 ), f_iCoordinatesY ( - 1 ),
+														f_iProduction ( - 1 ), f_iFleet ( - 1 ),
+														f_iEmperor ( - 1 ), f_oAttackers ( )
+	{
+	M_PROLOG
+	return;
+	M_EPILOG
+	}
+
+HGalaxy::HGalaxy ( int a_iBoardSize, int a_iSystems, int a_iEmperors )
+	: f_iBoardSize ( a_iBoardSize ), f_iSystems ( a_iSystems ),
+	f_iEmperors ( a_iEmperors ), f_iRound ( 0 ),
+	f_oSystems ( a_iSystems + a_iEmperors )
 	{
 	M_PROLOG
 	return;
