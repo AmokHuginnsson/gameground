@@ -46,18 +46,24 @@ struct OSetup
 	void test_setup ( void )
 		{
 		if ( f_bServer && f_bClient )
-			stdhapi::tools::util::failure ( 1, _ ( "galaxy cannot be server and client at the same time\n" ) );
+			stdhapi::tools::util::failure ( 1,
+					_ ( "galaxy cannot be server and client at the same time\n" ) );
 		if ( ! ( f_bServer || f_bClient ) )
-			stdhapi::tools::util::failure ( 2, _ ( "galaxy must be server or client\n" ) );
+			stdhapi::tools::util::failure ( 2,
+					_ ( "galaxy must be server or client\n" ) );
 		if ( f_bServer && ( f_iEmperors < 2 ) )
 			stdhapi::tools::util::failure ( 3,
-					_ ( "galaxy is multiplayer game and makes sense only for at least two players\n" ) );
+					_ ( "galaxy is multiplayer game and makes sense"
+						" only for at least two players\n" ) );
 		if ( f_iPort < 1024 )
-			stdhapi::tools::util::failure ( 4, _ ( "galaxy cannot run on restricted ports\n" ) );
+			stdhapi::tools::util::failure ( 4,
+					_ ( "galaxy cannot run on restricted ports\n" ) );
 		if ( f_bClient && f_oHost.is_empty ( ) )
-			stdhapi::tools::util::failure ( 5, _ ( "as a client You must specify server host\n" ) );
+			stdhapi::tools::util::failure ( 5,
+					_ ( "as a client You must specify server host\n" ) );
 		if ( f_bClient && f_oLogin.is_empty ( ) )
-			stdhapi::tools::util::failure ( 6, _ ( "as a player You must specify Your name\n" ) );
+			stdhapi::tools::util::failure ( 6,
+					_ ( "as a player You must specify Your name\n" ) );
 		if ( f_bServer && ( ( f_iBoardSize < 2 ) || ( f_iBoardSize > 20 ) ) )
 			stdhapi::tools::util::failure ( 7, _ ( "bad board size specified\n" ) );
 		}

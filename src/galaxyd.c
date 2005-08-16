@@ -25,8 +25,6 @@ Copyright:
 */
 
 #include <stdhapi.h>
-
-#include "hexception.h"
 M_CVSID ( "$CVSHeader$" );
 #include "galaxyd.h"
 
@@ -39,6 +37,7 @@ using namespace stdhapi::hconsole;
 using namespace stdhapi::tools;
 using namespace stdhapi::tools::util;
 
+class HSystem;
 class HFleet
 	{
 protected:
@@ -53,14 +52,16 @@ public:
 protected:
 	/*{*/
 	/*}*/
+	friend class HSystem;
 	};
 
+class HGalaxy;
 class HSystem
 	{
 protected:
 	/*{*/
-	int f_iCoordinatesX;
-	int f_iCoordinatesY;
+	int f_iCoordinateX;
+	int f_iCoordinateY;
 	int f_iProduction;
 	int f_iFleet;
 	int f_iEmperor;
@@ -73,6 +74,7 @@ public:
 protected:
 	/*{*/
 	/*}*/
+	friend class HGalaxy;
 	};
 
 class HGalaxy
@@ -93,6 +95,7 @@ public:
 protected:
 	/*{*/
 	/*}*/
+	friend class HServer;
 	};
 
 class HServer : public HProcess
@@ -116,7 +119,7 @@ protected:
 	/*}*/
 	};
 
-HSystem::HSystem ( void ) : f_iCoordinatesX ( - 1 ), f_iCoordinatesY ( - 1 ),
+HSystem::HSystem ( void ) : f_iCoordinateX ( - 1 ), f_iCoordinateY ( - 1 ),
 														f_iProduction ( - 1 ), f_iFleet ( - 1 ),
 														f_iEmperor ( - 1 ), f_oAttackers ( )
 	{
@@ -131,6 +134,34 @@ HGalaxy::HGalaxy ( int a_iBoardSize, int a_iSystems, int a_iEmperors )
 	f_oSystems ( a_iSystems + a_iEmperors )
 	{
 	M_PROLOG
+	int l_iCtr = 0, l_iCtrLoc = 0;
+	HRandomizer l_oRandom;
+	HSystem l_oSystem;
+	l_oRandom.set ( time ( NULL ) );
+	for ( l_iCtr = 0; l_iCtr < ( a_iEmperors + a_iSystems ); l_iCtr ++ )
+		{
+		l_oSystem.f_iCoordinateX = l_oRandom.rnd ( f_iBoardSize );
+		l_oSystem.f_iCoordinateY = l_oRandom.rnd ( f_iBoardSize );
+		if ( l_iCtr )
+			{
+			for ( l_iCtrLoc = 0; l_iCtrLoc < l_iCtr; l_iCtrLoc ++ )
+				if ( ( l_oSystem.f_iCoordinateX
+							== f_oSystems [ l_iCtrLoc ].f_iCoordinateX )
+						&& ( l_oSystem.f_iCoordinateY
+							== f_oSystems [ l_iCtrLoc ].f_iCoordinateY ) )
+					break;
+			if ( l_iCtrLoc < l_iCtr )
+				{
+				l_iCtr --;
+				continue;
+				}
+			}
+		f_oSystems [ l_iCtr ] = l_oSystem;
+		}
+	for ( l_iCtr = 0; l_iCtr < a_iEmperors; l_iCtr ++ )
+		f_oSystems [ l_iCtr ].f_iProduction = 10;
+	for ( ; l_iCtr < ( a_iEmperors + a_iSystems ); l_iCtr ++ )
+		f_oSystems [ l_iCtr ].f_iProduction = l_oRandom.rnd ( 16 );
 	return;
 	M_EPILOG
 	}
