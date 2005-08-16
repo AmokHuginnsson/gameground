@@ -37,6 +37,9 @@ using namespace stdhapi::hconsole;
 using namespace stdhapi::tools;
 using namespace stdhapi::tools::util;
 
+namespace
+{
+
 class HSystem;
 class HFleet
 	{
@@ -73,6 +76,11 @@ public:
 	/*}*/
 protected:
 	/*{*/
+	/*}*/
+private:
+	/*{*/
+	HSystem ( HSystem const & );
+	HSystem * operator = ( HSystem const & );
 	/*}*/
 	friend class HGalaxy;
 	};
@@ -154,18 +162,19 @@ HGalaxy::HGalaxy ( int a_iBoardSize, int a_iSystems, int a_iEmperors )
 	M_PROLOG
 	int l_iCtr = 0, l_iCtrLoc = 0;
 	HRandomizer l_oRandom;
-	HSystem l_oSystem;
+	HSystem * l_poSystem = NULL;
 	l_oRandom.set ( time ( NULL ) );
 	for ( l_iCtr = 0; l_iCtr < ( a_iEmperors + a_iSystems ); l_iCtr ++ )
 		{
-		l_oSystem.f_iCoordinateX = l_oRandom.rnd ( f_iBoardSize );
-		l_oSystem.f_iCoordinateY = l_oRandom.rnd ( f_iBoardSize );
+		l_poSystem = & f_oSystems [ l_iCtr ];
+		l_poSystem->f_iCoordinateX = l_oRandom.rnd ( f_iBoardSize );
+		l_poSystem->f_iCoordinateY = l_oRandom.rnd ( f_iBoardSize );
 		if ( l_iCtr )
 			{
 			for ( l_iCtrLoc = 0; l_iCtrLoc < l_iCtr; l_iCtrLoc ++ )
-				if ( ( l_oSystem.f_iCoordinateX
+				if ( ( l_poSystem->f_iCoordinateX
 							== f_oSystems [ l_iCtrLoc ].f_iCoordinateX )
-						&& ( l_oSystem.f_iCoordinateY
+						&& ( l_poSystem->f_iCoordinateY
 							== f_oSystems [ l_iCtrLoc ].f_iCoordinateY ) )
 					break;
 			if ( l_iCtrLoc < l_iCtr )
@@ -174,7 +183,6 @@ HGalaxy::HGalaxy ( int a_iBoardSize, int a_iSystems, int a_iEmperors )
 				continue;
 				}
 			}
-		f_oSystems [ l_iCtr ] = l_oSystem;
 		}
 	for ( l_iCtr = 0; l_iCtr < a_iEmperors; l_iCtr ++ )
 		f_oSystems [ l_iCtr ].f_iProduction = f_oSystems [ l_iCtr ].f_iFleet = 10;
@@ -376,6 +384,8 @@ int HServer::handler_message ( int a_iFileDescriptor )
 	return ( 0 );
 	M_EPILOG
 	}
+
+}
 
 int main_server ( void )
 	{
