@@ -49,6 +49,21 @@ using namespace stdhapi::hconsole;
 using namespace stdhapi::tools;
 using namespace stdhapi::tools::util;
 
+class HBoard;
+class HSystem
+	{
+protected:
+	/*{*/
+	/*}*/
+public:
+	/*{*/
+	/*}*/
+protected:
+	/*{*/
+	/*}*/
+	friend class HBoard;
+	};
+
 class HBoard : public HControl
 	{
 protected:
@@ -79,6 +94,7 @@ public:
 	HGalaxyWindow ( char const * const );
 	virtual ~HGalaxyWindow ( void );
 	virtual int init ( void );
+	HBoard * get_board ( void );
 	/*}*/
 protected:
 	/*{*/
@@ -96,6 +112,7 @@ protected:
 	/*{*/
 	HSocket f_oSocket;
 	HGalaxyWindow f_oWindow;
+	HBoard * f_poBoard;
 	/*}*/
 public:
 	/*{*/
@@ -106,6 +123,11 @@ public:
 	/*}*/
 protected:
 	/*{*/
+	/*}*/
+private:
+	/*{*/
+	HClient ( HClient const & );
+	HClient & operator = ( HClient const & );
 	/*}*/
 	};
 
@@ -225,8 +247,13 @@ int HGalaxyWindow::init ( void )
 	M_EPILOG
 	}
 
+HBoard * HGalaxyWindow::get_board ( void )
+	{
+	return ( f_poBoard );
+	}
+
 HClient::HClient ( char const * const a_pcProgramName )
-	: f_oSocket ( ), f_oWindow ( a_pcProgramName )
+	: f_oSocket ( ), f_oWindow ( a_pcProgramName ), f_poBoard ( NULL )
 	{
 	M_PROLOG
 	return;
@@ -246,9 +273,10 @@ void HClient::init_client ( HString & a_roHost, int a_iPort )
 	HString l_oMessage;
 	f_oSocket.connect ( a_roHost, a_iPort );
 	M_REGISTER_FILE_DESCRIPTOR_HANDLER ( f_oSocket.get_file_descriptor ( ), HClient::handler_message );
-	l_oMessage = "LOGIN:";
+	l_oMessage = "GLX:LOGIN:";
 	l_oMessage += setup.f_oLogin + '\n';
 	f_oSocket.write_until_eos ( l_oMessage );
+	f_poBoard = f_oWindow.get_board ( );
 	HTUIProcess::init_tui ( "galaxy", & f_oWindow );
 	return;
 	M_EPILOG
