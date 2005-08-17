@@ -41,6 +41,7 @@ namespace
 {
 
 class HSystem;
+class HGalaxy;
 class HFleet
 	{
 protected:
@@ -56,6 +57,7 @@ protected:
 	/*{*/
 	/*}*/
 	friend class HSystem;
+	friend class HGalaxy;
 	};
 
 class HGalaxy;
@@ -90,6 +92,7 @@ class HGalaxy
 	typedef void ( HGalaxy::*handler_t ) ( int, HString & );
 	typedef HMap < HString, handler_t > handlers_t;
 	typedef HMap < int, HString > names_t;
+	typedef HArray < int > colors_t;
 protected:
 	/*{*/
 	int f_iBoardSize;
@@ -100,6 +103,7 @@ protected:
 	HSocket * f_poSocket;
 	handlers_t f_oHandlers;
 	names_t f_oNames;
+	colors_t f_oColors;
 	/*}*/
 public:
 	/*{*/
@@ -111,9 +115,10 @@ public:
 protected:
 	/*{*/
 	void handler_login ( int, HString & );
-	void assign_system ( int );
+	int assign_system ( int, int & );
 	void broadcast ( HString & );
 	void handler_message ( int, HString & );
+	void handler_move ( int, HString & );
 	/*}*/
 private:
 	/*{*/
@@ -157,7 +162,7 @@ HGalaxy::HGalaxy ( int a_iBoardSize, int a_iSystems, int a_iEmperors )
 	: f_iBoardSize ( a_iBoardSize ), f_iSystems ( a_iSystems ),
 	f_iEmperors ( a_iEmperors ), f_iRound ( 0 ),
 	f_oSystems ( a_iSystems + a_iEmperors ), f_poSocket ( NULL ),
-	f_oHandlers ( 16 ), f_oNames ( a_iEmperors )
+	f_oHandlers ( 16 ), f_oNames ( a_iEmperors ), f_oColors ( a_iEmperors )
 	{
 	M_PROLOG
 	int l_iCtr = 0, l_iCtrLoc = 0;
@@ -185,10 +190,11 @@ HGalaxy::HGalaxy ( int a_iBoardSize, int a_iSystems, int a_iEmperors )
 			}
 		}
 	for ( l_iCtr = 0; l_iCtr < a_iEmperors; l_iCtr ++ )
-		f_oSystems [ l_iCtr ].f_iProduction = f_oSystems [ l_iCtr ].f_iFleet = 10;
-	for ( ; l_iCtr < ( a_iEmperors + a_iSystems ); l_iCtr ++ )
+		f_oColors [ l_iCtr ] = - 1;
+	for ( l_iCtr = 0; l_iCtr < ( a_iEmperors + a_iSystems ); l_iCtr ++ )
 		f_oSystems [ l_iCtr ].f_iProduction = f_oSystems [ l_iCtr ].f_iFleet = l_oRandom.rnd ( 16 );
 	f_oHandlers [ "LOGIN" ] = & HGalaxy::handler_login;
+	f_oHandlers [ "MOVE" ] = & HGalaxy::handler_login;
 	f_oHandlers [ "SAY" ] = & HGalaxy::handler_message;
 	return;
 	M_EPILOG
@@ -229,52 +235,62 @@ void HGalaxy::process_command ( int a_iFileDescriptor, HString & a_roCommand )
 void HGalaxy::handler_login ( int a_iFileDescriptor, HString & a_roName )
 	{
 	M_PROLOG
-	int l_iCtr = 0;
+	int l_iCtr = 0, l_iSysNo = - 1, l_iEmperor = - 1;
 	HSocket * l_poClient = NULL;
+	HString l_oName;
 	HString l_oMessage = "GLX:MSG:Emperor ";
 	f_oNames [ a_iFileDescriptor ] = a_roName;
 	l_oMessage += a_roName;
 	l_oMessage += " invaded the galaxy.\n";
-	assign_system ( a_iFileDescriptor );
+	l_iSysNo = assign_system ( a_iFileDescriptor, l_iEmperor );
 	broadcast ( l_oMessage );
 	l_poClient = f_poSocket->get_client ( a_iFileDescriptor );
 	l_oMessage.format ( "GLX:SETUP:board_size=%d\n", f_iBoardSize );
 	l_poClient->write_until_eos ( l_oMessage );
 	l_oMessage.format ( "GLX:SETUP:systems=%d\n", f_iEmperors + f_iSystems );
 	l_poClient->write_until_eos ( l_oMessage );
+	for ( l_iCtr = 0; l_iCtr < f_iEmperors; l_iCtr ++ )
+		{
+		if ( ( f_oColors [ l_iCtr ] >= 0 )
+				&& ( f_oNames.get ( f_oColors [ l_iCtr ], l_oName ) ) )
+			{
+			l_oMessage.format ( "GLX:SETUP:emperor=%d,%s\n",
+					l_iCtr, static_cast < char * > ( l_oName ) );
+			broadcast ( l_oMessage );
+			}
+		}
 	for ( l_iCtr = 0; l_iCtr < ( f_iEmperors + f_iSystems ); l_iCtr ++ )
 		{
 		l_oMessage.format ( "GLX:SETUP:system_coordinates=%d,%d,%d\n",
 				l_iCtr, f_oSystems [ l_iCtr ].f_iCoordinateX,
 				f_oSystems [ l_iCtr ].f_iCoordinateY );
 		l_poClient->write_until_eos ( l_oMessage );
-		if ( f_oSystems [ l_iCtr ].f_iEmperor == a_iFileDescriptor )
-			{
-			l_oMessage.format ( "GLX:PLAY:system_info=%d,%d,%s,%d\n",
-					l_iCtr, f_oSystems [ l_iCtr ].f_iProduction,
-					static_cast < char * > ( a_roName ),
-					f_oSystems [ l_iCtr ].f_iFleet );
-			l_poClient->write_until_eos ( l_oMessage );
-			}
 		}
+	f_oSystems [ l_iSysNo ].f_iProduction = 10;
+	f_oSystems [ l_iSysNo ].f_iFleet = 10;
+	l_oMessage.format ( "GLX:PLAY:system_info=%d,%d,%d,%d\n",
+			l_iSysNo, f_oSystems [ l_iSysNo ].f_iProduction, l_iEmperor,
+			f_oSystems [ l_iSysNo ].f_iFleet );
+	l_poClient->write_until_eos ( l_oMessage );
+	l_poClient->write_until_eos ( "GLX:SETUP:ok\n" );
 	return;
 	M_EPILOG
 	}
 
-void HGalaxy::assign_system ( int a_iFileDescriptor )
+int HGalaxy::assign_system ( int a_iFileDescriptor, int & a_riColor )
 	{
 	M_PROLOG
-	int l_iCtr = 0;
-	for ( l_iCtr = 0; l_iCtr < f_iEmperors; l_iCtr ++ )
-		{
-		if ( f_oSystems [ l_iCtr ].f_iEmperor < 0 )
-			{
-			f_oSystems [ l_iCtr ].f_iEmperor = a_iFileDescriptor;
-			break;
-			}
-		}
-	M_ASSERT ( l_iCtr < f_iEmperors );
-	return;
+	int l_iCtr = - 1;
+	HRandomizer l_oRnd;
+	l_oRnd.set ( time ( NULL ) );
+	a_riColor = 0;
+	while ( f_oColors [ a_riColor ] >= 0 )
+		a_riColor ++;
+	f_oColors [ a_riColor ] = a_iFileDescriptor;
+	while ( f_oSystems [ l_iCtr = l_oRnd.rnd ( f_iEmperors + f_iSystems ) ].f_iEmperor >= 0 )
+		;
+	f_oSystems [ l_iCtr ].f_iEmperor = a_iFileDescriptor;
+	return ( l_iCtr );
 	M_EPILOG
 	}
 
@@ -306,6 +322,30 @@ void HGalaxy::handler_message ( int a_iFileDescriptor, HString & a_roMessage )
 		}
 	else
 		f_poSocket->shutdown_client ( a_iFileDescriptor );
+	return;
+	M_EPILOG
+	}
+
+void HGalaxy::handler_move ( int a_iFileDescriptor, HString & a_roMove )
+	{
+	M_PROLOG
+	int l_iSource = - 1, l_iDestination = - 1, l_iDX = 0, l_iDY = 0;
+	HFleet l_oFleet;
+	l_oFleet.f_iEmperor = a_iFileDescriptor;
+	l_iSource = strtol ( a_roMove.split ( "'", 0 ), NULL, 10 );
+	l_iDestination = strtol ( a_roMove.split ( "'", 1 ), NULL, 10 );
+	l_oFleet.f_iSize = strtol ( a_roMove.split ( "'", 2 ), NULL, 10 );
+	if ( ( l_iSource == l_iDestination )
+			|| ( f_oSystems [ l_iSource ].f_iEmperor != a_iFileDescriptor )
+			|| ( f_oSystems [ l_iSource ].f_iFleet < l_oFleet.f_iSize ) )
+		f_poSocket->shutdown_client ( a_iFileDescriptor );
+	else
+		{
+		l_iDX = f_oSystems [ l_iSource ].f_iCoordinateX - f_oSystems [ l_iDestination ].f_iCoordinateX;
+		l_iDY = f_oSystems [ l_iSource ].f_iCoordinateY - f_oSystems [ l_iDestination ].f_iCoordinateY;
+		l_oFleet.f_iArrivalTime = f_iRound + static_cast < int > ( sqrt ( l_iDX * l_iDX + l_iDY * l_iDY ) + 0.5 );
+		f_oSystems [ l_iDestination ].f_oAttackers.add_head ( ) = l_oFleet;
+		}
 	return;
 	M_EPILOG
 	}

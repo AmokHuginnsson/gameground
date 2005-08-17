@@ -63,9 +63,16 @@ int main ( int a_iArgc, char * a_ppcArgv [ ] )
 			l_iOpt = main_server ( );
 		else
 			{
-			if ( ! hconsole::is_enabled ( ) )enter_curses (); /* enabling ncurses ablilities*/
-			l_iOpt = main_client ( );
-			if ( hconsole::is_enabled ( ) )leave_curses (); /* ending ncurses sesion */
+			if ( ! hconsole::is_enabled ( ) )
+				enter_curses (); /* enabling ncurses ablilities */
+			if ( ( n_iHeight >= 25 ) && ( n_iWidth >= 80 ) )
+				l_iOpt = main_client ( );
+			else
+				l_iOpt = 1;
+			if ( hconsole::is_enabled ( ) )
+				leave_curses (); /* ending ncurses sesion */
+			if ( l_iOpt )
+				fprintf ( stdout, "Your terminal is too small.\n" );
 			}
 /* ... there is the place main loop ends. :OD-OT */
 		}

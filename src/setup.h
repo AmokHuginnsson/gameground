@@ -32,6 +32,8 @@ Copyright:
 #define D_BOARD_SIZE 16
 #define D_DEFAULT_PLAYERS						4
 #define D_NEUTRAL_SYSTEM_PER_PLAYER	4
+#define D_MAX_BOARD_SIZE						20
+#define D_MAX_SYSTEM_COUNT					36
 
 struct OSetup
 	{
@@ -64,8 +66,10 @@ struct OSetup
 		if ( f_bClient && f_oLogin.is_empty ( ) )
 			stdhapi::tools::util::failure ( 6,
 					_ ( "as a player You must specify Your name\n" ) );
-		if ( f_bServer && ( ( f_iBoardSize < 2 ) || ( f_iBoardSize > 20 ) ) )
+		if ( f_bServer && ( ( f_iBoardSize < 2 ) || ( f_iBoardSize > D_MAX_BOARD_SIZE ) ) )
 			stdhapi::tools::util::failure ( 7, _ ( "bad board size specified\n" ) );
+		if ( f_bServer && ( ( f_iEmperors + f_iSystems ) > D_MAX_SYSTEM_COUNT ) )
+			stdhapi::tools::util::failure ( 8, _ ( "bad total system count\n" ) );
 		}
 	bool f_bQuiet;			/* --quiet, --silent */
 	bool f_bVerbose;		/* --verbose */
