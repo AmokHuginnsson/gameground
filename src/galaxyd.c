@@ -223,7 +223,7 @@ void HGalaxy::process_command ( int a_iFileDescriptor, HString & a_roCommand )
 	HString l_oArgument;
 	handler_t HANDLER;
 	l_oMnemonic = a_roCommand.split ( ":", 0 );
-	l_oArgument = a_roCommand.split ( ":", 1 );
+	l_oArgument = a_roCommand.mid ( l_oMnemonic.get_length ( ) + 1 );
 	if ( f_oHandlers.get ( l_oMnemonic, HANDLER ) )
 		( this->*HANDLER ) ( a_iFileDescriptor, l_oArgument );
 	else
@@ -242,8 +242,8 @@ void HGalaxy::handler_login ( int a_iFileDescriptor, HString & a_roName )
 	f_oNames [ a_iFileDescriptor ] = a_roName;
 	l_oMessage += a_roName;
 	l_oMessage += " invaded the galaxy.\n";
-	l_iSysNo = assign_system ( a_iFileDescriptor, l_iEmperor );
 	broadcast ( l_oMessage );
+	l_iSysNo = assign_system ( a_iFileDescriptor, l_iEmperor );
 	l_poClient = f_poSocket->get_client ( a_iFileDescriptor );
 	l_oMessage.format ( "GLX:SETUP:board_size=%d\n", f_iBoardSize );
 	l_poClient->write_until_eos ( l_oMessage );

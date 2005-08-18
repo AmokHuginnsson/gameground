@@ -109,6 +109,56 @@ int n_piColors [ ] =
 	( D_FG_BROWN | D_BG_BLACK )
 	};
 
+class HLogPad : public HControl
+	{
+	class HLogLine
+		{
+		typedef enum
+			{
+			D_NONE,
+			D_ATTRIBUTE,
+			D_TEXT,
+			D_TEXT_EOL
+			} type_t;
+	protected:
+		/*{*/
+		type_t f_eType;
+		int f_iAttribute;
+		HString f_oText;
+		/*}*/
+	public:
+		/*{*/
+		HLogLine ( void );
+		virtual ~HLogLine ( void );
+		/*}*/
+	protected:
+		/*{*/
+		/*}*/
+		friend class HLogPad;
+		};
+protected:
+	typedef HList < HLogLine > contents_t;
+	/*{*/
+	int f_iOffsetRow;
+	int f_iOffsetColumn;
+	int f_iAttribute;
+	contents_t f_oContents;
+	HString f_oVarTmpBuffer;
+	/*}*/
+public:
+	/*{*/
+	HLogPad ( HWindow *, int, int, int, int, char const * const );
+	virtual ~HLogPad ( void );
+	void add ( int, HString & );
+	void add ( HString & );
+	void add ( int );
+	/*}*/
+protected:
+	/*{*/
+	virtual void refresh ( void );
+	/*}*/
+	};
+
 class HBoard;
 class HClient;
 class HGalaxyWindow;
@@ -185,6 +235,7 @@ protected:
 	HEditControl * f_poEmperorName;
 	HEditControl * f_poProduction;
 	HEditControl * f_poFleet;
+	HLogPad * f_poLogPad;
 	systems_t * f_poSystems;
 	emperors_t * f_poEmperors;
 	/*}*/
@@ -241,6 +292,143 @@ private:
 	HClient & operator = ( HClient const & );
 	/*}*/
 	};
+
+HLogPad::HLogLine::HLogLine ( void )
+	: f_eType ( D_NONE ), f_iAttribute ( - 1 ), f_oText ( )
+	{
+	M_PROLOG
+	return;
+	M_EPILOG
+	}
+
+HLogPad::HLogLine::~HLogLine ( void )
+	{
+	M_PROLOG
+	return;
+	M_EPILOG
+	}
+
+HLogPad::HLogPad ( HWindow * a_poParent, int a_iRow, int a_iColumn,
+		int a_iHeight, int a_iWidth, char const * const a_pcLabel )
+	: HControl ( a_poParent, a_iRow, a_iColumn, a_iHeight, a_iWidth, a_pcLabel ),
+	f_iOffsetRow ( 0 ), f_iOffsetColumn ( 0 ), f_iAttribute ( 0 ),
+	f_oContents ( ), f_oVarTmpBuffer ( )
+	{
+	M_PROLOG
+	return;
+	M_EPILOG
+	}
+
+HLogPad::~HLogPad ( void )
+	{
+	M_PROLOG
+	return;
+	M_EPILOG
+	}
+
+void HLogPad::refresh ( void )
+	{
+	M_PROLOG
+	int l_iCtr = 0;
+	int l_iColumn = 0;
+	HLogLine * l_poLogLine;
+	draw_label ( );
+	f_oVarTmpBuffer.hs_realloc ( f_iWidthRaw + 1 );
+	memset ( static_cast < char * > ( f_oVarTmpBuffer ), ' ', f_iWidthRaw );
+	f_iAttribute = M_ATTR_DATA ( );
+	for ( l_iCtr = 0; l_iCtr < f_iHeightRaw; l_iCtr ++ )
+		c_printf ( f_iRowRaw + l_iCtr, f_iColumnRaw, f_iAttribute, f_oVarTmpBuffer );
+	if ( f_oContents.quantity ( ) )
+		{
+		l_poLogLine = & f_oContents.go ( f_iOffsetRow );
+		for ( l_iCtr = 0;	l_poLogLine && ( l_iCtr < f_iHeightRaw ); )
+			{
+			if ( l_poLogLine->f_eType == HLogLine::D_ATTRIBUTE )
+				f_iAttribute = l_poLogLine->f_iAttribute;
+			else
+				{
+				c_printf ( f_iRowRaw + l_iCtr, f_iColumnRaw + l_iColumn, f_iAttribute, l_poLogLine->f_oText );
+				if ( l_poLogLine->f_eType == HLogLine::D_TEXT_EOL )
+					{
+					l_iColumn = 0;
+					l_iCtr ++;
+					}
+				else
+					l_iColumn += l_poLogLine->f_oText.get_length ( );
+				}
+			l_poLogLine = f_oContents.to_tail ( 1, D_TREAT_AS_OPENED );
+			}
+		}
+	return;
+	M_EPILOG
+	}
+
+void HLogPad::add ( int a_iAttribute )
+	{
+	M_PROLOG
+	HLogLine l_oLogLine;
+	l_oLogLine.f_eType = HLogLine::D_ATTRIBUTE;
+	l_oLogLine.f_iAttribute = a_iAttribute;
+	f_oContents.add_tail ( ) = l_oLogLine;
+	return;
+	M_EPILOG
+	}
+
+void HLogPad::add ( HString & a_roText )
+	{
+	M_PROLOG
+	int l_iIndexNL = 0, l_iIndexChar = 0;
+	HLogLine l_oLogLine;
+	HLogLine * l_poLogLine = NULL;
+	if ( f_oContents.quantity ( ) )
+		l_poLogLine = & f_oContents.tail ( );
+	if ( ! l_poLogLine || ( l_poLogLine->f_eType != HLogLine::D_TEXT ) )
+		{
+		l_poLogLine = & l_oLogLine;
+		l_poLogLine->f_eType = HLogLine::D_TEXT;
+		l_poLogLine->f_oText = "";
+		}
+	f_oVarTmpBuffer = a_roText;
+	while ( static_cast < char * > ( f_oVarTmpBuffer ) [ 0 ] )
+		{
+		l_iIndexNL = f_oVarTmpBuffer.find_one_of ( "\r\n" );
+		if ( l_iIndexNL >= 0 )
+			{
+			l_poLogLine->f_oText += f_oVarTmpBuffer.left ( l_iIndexNL );
+			l_poLogLine->f_eType = HLogLine::D_TEXT_EOL;
+			l_iIndexChar = f_oVarTmpBuffer.find_other_than ( "\r\n", l_iIndexNL + 1 );
+			if ( l_iIndexChar >= 0 )
+				f_oVarTmpBuffer = f_oVarTmpBuffer.mid ( l_iIndexChar );
+			else
+				f_oVarTmpBuffer = "";
+			}
+		else
+			{
+			l_poLogLine->f_oText += f_oVarTmpBuffer;
+			f_oVarTmpBuffer = "";
+			}
+		if ( l_poLogLine == & l_oLogLine )
+			f_oContents.add_tail ( l_poLogLine );
+		l_poLogLine = & l_oLogLine;
+		l_poLogLine->f_eType = HLogLine::D_TEXT;
+		l_poLogLine->f_oText = "";
+		}
+	if ( ( l_iIndexNL = f_oContents.quantity ( ) ) > f_iHeightRaw )
+		f_iOffsetRow = l_iIndexNL - f_iHeightRaw;
+	n_bNeedRepaint = true;
+	refresh ( );
+	return;
+	M_EPILOG
+	}
+
+void HLogPad::add ( int a_iAttribute, HString & a_roText )
+	{
+	M_PROLOG
+	add ( a_iAttribute );
+	add ( a_roText );
+	return;
+	M_EPILOG
+	}
 
 HSystem::HSystem ( void ) : f_iCoordinateX ( - 1 ), f_iCoordinateY ( - 1 ),
 														f_iColor ( - 1 ),
@@ -373,8 +561,8 @@ void HBoard::set_systems ( systems_t * a_poSystems )
 HGalaxyWindow::HGalaxyWindow ( char const * const a_pcWindowTitle )
 	: HWindow ( a_pcWindowTitle ), f_poBoard ( NULL ),
 	f_poSystemName ( NULL ), f_poEmperorName ( NULL ),
-	f_poProduction ( NULL ), f_poFleet ( NULL ), f_poSystems ( NULL ),
-	f_poEmperors ( NULL )
+	f_poProduction ( NULL ), f_poFleet ( NULL ), f_poLogPad ( NULL ),
+	f_poSystems ( NULL ), f_poEmperors ( NULL )
 	{
 	M_PROLOG
 	return;
@@ -400,6 +588,7 @@ int HGalaxyWindow::init ( void )
 	f_poEmperorName = new HEditControl ( this, 4, 64, 1, 16, " Emperor \n", 64, "", D_MASK_EXTENDED );
 	f_poProduction = new HEditControl ( this, 7, 64, 1, 7, "Product\n", 6, "", D_MASK_DIGITS );
 	f_poFleet = new HEditControl ( this, 7, 72, 1, 7, "Fleet\n", 6, "", D_MASK_DIGITS );
+	f_poLogPad = new HLogPad ( this, 10, 64, - 3, - 1, " Event log \n" );
 	return ( 0 );
 	M_EPILOG
 	}
@@ -506,7 +695,7 @@ void HClient::process_command ( HString & a_roCommand )
 	HString l_oArgument;
 	handler_t HANDLER;
 	l_oMnemonic = a_roCommand.split ( ":", 0 );
-	l_oArgument = a_roCommand.split ( ":", 1 );
+	l_oArgument = a_roCommand.mid ( l_oMnemonic.get_length ( ) + 1 );
 	if ( f_oHandlers.get ( l_oMnemonic, HANDLER ) )
 		( this->*HANDLER ) ( l_oArgument );
 	else
@@ -570,9 +759,11 @@ void HClient::handler_play ( HString & a_roCommand )
 	M_EPILOG
 	}
 
-void HClient::handler_msg ( HString & )
+void HClient::handler_msg ( HString & a_roMessage )
 	{
 	M_PROLOG
+	a_roMessage += '\n';
+	f_oWindow.f_poLogPad->add ( a_roMessage );
 	return;
 	M_EPILOG
 	}
