@@ -66,7 +66,7 @@ struct OSetup
 		if ( f_bClient && f_oLogin.is_empty ( ) )
 			stdhapi::tools::util::failure ( 6,
 					_ ( "as a player You must specify Your name\n" ) );
-		if ( f_bServer && ( ( f_iBoardSize < 2 ) || ( f_iBoardSize > D_MAX_BOARD_SIZE ) ) )
+		if ( f_bServer && ( ( f_iBoardSize < 6 ) || ( f_iBoardSize > D_MAX_BOARD_SIZE ) ) )
 			stdhapi::tools::util::failure ( 7, _ ( "bad board size specified\n" ) );
 		if ( f_bServer && ( ( f_iEmperors + f_iSystems ) > D_MAX_SYSTEM_COUNT ) )
 			stdhapi::tools::util::failure ( 8, _ ( "bad total system count\n" ) );
