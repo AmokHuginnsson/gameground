@@ -221,6 +221,7 @@ public:
 	int get_color ( void ) const;
 	client_state_t get_state ( void ) const;
 	void set_state ( client_state_t );
+	virtual void msg ( int, char const * const ) = 0;
 	/*}*/
 	};
 
@@ -269,13 +270,14 @@ protected:
 	HEditControl * f_poProduction;
 	HEditControl * f_poFleet;
 	HLogPad * f_poLogPad;
+	HClient * f_poClient;
 	systems_t * f_poSystems;
 	emperors_t * f_poEmperors;
 	moves_t * f_poMoves;
 	/*}*/
 public:
 	/*{*/
-	HGalaxyWindow ( char const * const, int &, int &, client_state_t & );
+	HGalaxyWindow ( char const * const, HClient *, int &, int &, client_state_t & );
 	virtual ~HGalaxyWindow ( void );
 	virtual int init ( void );
 	HBoard * get_board ( void );
@@ -285,8 +287,10 @@ protected:
 	/*{*/
 	int handler_enter ( int, void * );
 	int handler_esc ( int, void * );
+	int handler_space ( int, void * );
 	virtual void on_show_system_info ( int );
 	virtual void make_move ( int, int );
+	virtual void msg ( int, char const * const );
 	/*}*/
 private:
 	/*{*/
@@ -319,6 +323,7 @@ public:
 	virtual ~HClient ( void );
 	void init_client ( HString &, int );
 	int handler_message ( int );
+	void end_round ( void );
 	/*}*/
 protected:
 	/*{*/
@@ -377,6 +382,33 @@ void HEventListener::set_state ( client_state_t a_eState )
 	{
 	M_PROLOG
 	f_reState = a_eState;
+	switch ( f_reState )
+		{
+		case ( D_LOCKED ):
+			{
+			msg ( D_FG_WHITE, "A waiting for Galaxy events ..." );
+			break;
+			}
+		case ( D_NORMAL ):
+			{
+			msg ( D_FG_WHITE, "Make Your moves ..." );
+			break;
+			}
+		case ( D_SELECT ):
+			{
+			msg ( D_FG_WHITE, "Select destination for Your fleet ..." );
+			break;
+			}
+		case ( D_INPUT ):
+			{
+			msg ( D_FG_WHITE, "How many destroyers You wish to send ?" );
+			break;
+			}
+		default :
+			{
+			break;
+			}
+		}
 	return;
 	M_EPILOG
 	}
@@ -482,6 +514,8 @@ int HBoard::process_input ( int a_iCode )
 	int l_iCode = 0, l_iSysNo = - 1;
 	client_state_t l_eState = f_roListener.get_state ( );
 	a_iCode = HControl::process_input ( a_iCode );
+	if ( l_eState == D_LOCKED )
+		return ( a_iCode == '\t' ? '\t' : D_KEY_ENTER );
 	if ( f_iBoardSize >= 0 )
 		{
 		switch ( a_iCode )
@@ -598,11 +632,14 @@ int HBoard::distance ( int a_iSource, int a_iDestination )
 	M_EPILOG
 	}
 
-HGalaxyWindow::HGalaxyWindow ( char const * const a_pcWindowTitle, int & a_riRound,
-		int & a_riColor, client_state_t & a_reState )
-	: HWindow ( a_pcWindowTitle ), HEventListener ( a_riRound, a_riColor, a_reState ), f_poBoard ( NULL ),
-	f_poSystemName ( NULL ), f_poEmperorName ( NULL ),
+HGalaxyWindow::HGalaxyWindow ( char const * const a_pcWindowTitle,
+		HClient * a_poClient,
+		int & a_riRound, int & a_riColor, client_state_t & a_reState )
+	: HWindow ( a_pcWindowTitle ),
+	HEventListener ( a_riRound, a_riColor, a_reState ),
+	f_poBoard ( NULL ), f_poSystemName ( NULL ), f_poEmperorName ( NULL ),
 	f_poProduction ( NULL ), f_poFleet ( NULL ), f_poLogPad ( NULL ),
+	f_poClient ( a_poClient ),
 	f_poSystems ( NULL ), f_poEmperors ( NULL ), f_poMoves ( NULL )
 	{
 	M_PROLOG
@@ -633,6 +670,7 @@ int HGalaxyWindow::init ( void )
 	f_poLogPad->enable ( true );
 	M_REGISTER_POSTPROCESS_HANDLER ( D_KEY_ENTER, NULL, HGalaxyWindow::handler_enter );
 	M_REGISTER_POSTPROCESS_HANDLER ( D_KEY_ESC, NULL, HGalaxyWindow::handler_esc );
+	M_REGISTER_POSTPROCESS_HANDLER ( ' ', NULL, HGalaxyWindow::handler_space );
 	return ( 0 );
 	M_EPILOG
 	}
@@ -675,13 +713,18 @@ void HGalaxyWindow::on_show_system_info ( int a_iSystem )
 	M_EPILOG
 	}
 
-void HGalaxyWindow::make_move ( int, int )
+void HGalaxyWindow::make_move ( int a_iSourceSystem, int a_iDestinationSystem )
 	{
 	M_PROLOG
-	f_poBoard->enable ( false );
-	f_poLogPad->enable ( false );
-	f_poFleet->enable ( true );
-	f_poFleet->set_focus ( );
+	if ( a_iSourceSystem != a_iDestinationSystem )
+		{
+		f_poBoard->enable ( false );
+		f_poLogPad->enable ( false );
+		f_poFleet->enable ( true );
+		f_poFleet->set_focus ( );
+		}
+	else
+		handler_esc ( 0, NULL );
 	return;
 	M_EPILOG
 	}
@@ -691,24 +734,35 @@ int HGalaxyWindow::handler_enter ( int a_iCode, void * )
 	M_PROLOG
 	int l_iFleet = 0;
 	HMove * l_poMove = NULL;
-	if ( f_poFocusedChild == f_poFleet )
+	if ( f_reState == D_INPUT )
 		{
-		l_iFleet = strtol ( f_poFleet->get ( ).get < char const * > ( ), NULL, 10 );
-		if ( l_iFleet <= ( * f_poSystems ) [ f_poBoard->f_iSourceSystem ].f_iFleet )
+		if ( f_poFocusedChild == f_poFleet )
 			{
-			f_poFleet->enable ( false );
-			f_poBoard->enable ( true );
-			f_poLogPad->enable ( true );
-			f_poBoard->set_focus ( );
-			l_poMove = & f_poMoves->add_tail ( );
-			l_poMove->f_iSourceSystem = f_poBoard->f_iSourceSystem;
-			l_poMove->f_iDestinationSystem = f_poBoard->f_iDestinationSystem;
-			l_poMove->f_iFleet = l_iFleet;
-			( * f_poSystems ) [ f_poBoard->f_iSourceSystem ].f_iFleet -= l_iFleet;
-			f_reState = D_NORMAL;
+			l_iFleet = strtol ( f_poFleet->get ( ).get < char const * > ( ), NULL, 10 );
+			if ( ( l_iFleet > 0 )
+					&& ( l_iFleet <= ( * f_poSystems ) [ f_poBoard->f_iSourceSystem ].f_iFleet ) )
+				{
+				f_poFleet->enable ( false );
+				f_poBoard->enable ( true );
+				f_poLogPad->enable ( true );
+				f_poBoard->set_focus ( );
+				l_poMove = & f_poMoves->add_tail ( );
+				l_poMove->f_iSourceSystem = f_poBoard->f_iSourceSystem;
+				l_poMove->f_iDestinationSystem = f_poBoard->f_iDestinationSystem;
+				l_poMove->f_iFleet = l_iFleet;
+				( * f_poSystems ) [ f_poBoard->f_iSourceSystem ].f_iFleet -= l_iFleet;
+				set_state ( D_NORMAL );
+				}
+			else if ( l_iFleet > 0 )
+				f_poStatusBar->message ( D_FG_RED, "Not enough resources!" );
+			else
+				f_poStatusBar->message ( D_FG_RED, "Run! Run! Emperor is mad!" );
+			a_iCode = 0;
 			}
-		else
-			f_poStatusBar->message ( D_FG_RED, "Not enough resources!" );
+		}
+	else if ( f_reState == D_LOCKED )
+		{
+		f_poStatusBar->message ( D_FG_RED, f_riRound >= 0 ? "Wait for new round!" : "Challange not started yet!" );
 		a_iCode = 0;
 		}
 	return ( a_iCode );
@@ -733,9 +787,25 @@ int HGalaxyWindow::handler_esc ( int, void * )
 	M_EPILOG
 	}
 
+int HGalaxyWindow::handler_space ( int, void * )
+	{
+	M_PROLOG
+	if ( f_reState == D_NORMAL )
+		f_poClient->end_round ( );
+	return ( 0 );
+	M_EPILOG
+	}
+
+void HGalaxyWindow::msg ( int a_iAttr, char const * const a_pcMsg )
+	{
+	M_PROLOG
+	f_poStatusBar->message ( a_iAttr, a_pcMsg );
+	M_EPILOG
+	}
+
 HClient::HClient ( char const * const a_pcProgramName )
-	: f_iColor ( - 1 ), f_iRound ( 0 ), f_eState ( D_NORMAL ), f_oSocket ( ),
-	f_oWindow ( a_pcProgramName, f_iRound, f_iColor, f_eState ),
+	: f_iColor ( - 1 ), f_iRound ( - 1 ), f_eState ( D_LOCKED ), f_oSocket ( ),
+	f_oWindow ( a_pcProgramName, this, f_iRound, f_iColor, f_eState ),
 	f_poBoard ( NULL ), f_oSystems ( 0 ), f_oHandlers ( 16 ), f_oEmperors ( 16 ),
 	f_oMoves ( )
 	{
@@ -843,7 +913,11 @@ void HClient::handler_setup ( HString & a_roCommand )
 			f_iColor = l_iIndex;
 		}
 	else if ( l_oVariable == "ok" )
+		{
 		f_oWindow.refresh ( );
+		f_oWindow.set_state ( D_NORMAL );
+		f_iRound = 0;
+		}
 	return;
 	M_EPILOG
 	}
@@ -851,7 +925,7 @@ void HClient::handler_setup ( HString & a_roCommand )
 void HClient::handler_play ( HString & a_roCommand )
 	{
 	M_PROLOG
-	int l_iSysNo = - 1, l_iColor = 0;
+	int l_iSysNo = - 1, l_iColor = 0, l_iProduction = - 1, l_iAttacker = - 1;
 	HString l_oVariable;
 	HString l_oValue;
 	l_oVariable = a_roCommand.split ( "=", 0 );
@@ -859,9 +933,12 @@ void HClient::handler_play ( HString & a_roCommand )
 	if ( l_oVariable == "system_info" )
 		{
 		l_iSysNo = strtol ( l_oValue.split ( ",", 0 ), NULL, 10 );
-		f_oSystems [ l_iSysNo ].f_iProduction = strtol ( l_oValue.split ( ",", 1 ), NULL, 10 );
+		l_iProduction = strtol ( l_oValue.split ( ",", 1 ), NULL, 10 );
+		if ( l_iProduction >= 0 )
+			f_oSystems [ l_iSysNo ].f_iProduction = l_iProduction;
 		f_oSystems [ l_iSysNo ].f_iFleet = strtol ( l_oValue.split ( ",", 3 ), NULL, 10 );
 		l_iColor = strtol ( l_oValue.split ( ",", 2 ), NULL, 10 );
+		l_iAttacker = strtol ( l_oValue.split ( ",", 4 ), NULL, 10 ) - 1;
 		if ( l_iColor != f_oSystems [ l_iSysNo ].f_iColor )
 			{
 			if ( f_oEmperors.get ( l_iColor, l_oValue ) )
@@ -877,17 +954,35 @@ void HClient::handler_play ( HString & a_roCommand )
 				}
 			f_oSystems [ l_iSysNo ].f_iColor = l_iColor;
 			}
-		else
+		else if ( l_iProduction >= 0 )
 			{
-			f_oWindow.f_poLogPad->add ( "Reinforcements for " );
-			f_oWindow.f_poLogPad->add ( n_piColors [ l_iColor ] );
-			f_oWindow.f_poLogPad->add ( n_pcSystemNames [ l_iSysNo ] );
-			f_oWindow.f_poLogPad->add ( D_ATTR_NORMAL );
-			f_oWindow.f_poLogPad->add ( " arrived.\n" );
+			if ( l_iAttacker >= 0 )
+				{
+				f_oWindow.f_poLogPad->add ( n_piColors [ f_oSystems [ l_iSysNo ].f_iColor ] );
+				f_oWindow.f_poLogPad->add ( n_pcSystemNames [ l_iSysNo ] );
+				f_oWindow.f_poLogPad->add ( D_ATTR_NORMAL );
+				f_oWindow.f_poLogPad->add ( " resisted attack from " );
+				f_oWindow.f_poLogPad->add ( n_piColors [ l_iColor ] );
+				f_oWindow.f_poLogPad->add ( l_oValue );
+				f_oWindow.f_poLogPad->add ( D_ATTR_NORMAL );
+				f_oWindow.f_poLogPad->add ( ".\n" );
+				}
+			else
+				{
+				f_oWindow.f_poLogPad->add ( "Reinforcements for " );
+				f_oWindow.f_poLogPad->add ( n_piColors [ l_iColor ] );
+				f_oWindow.f_poLogPad->add ( n_pcSystemNames [ l_iSysNo ] );
+				f_oWindow.f_poLogPad->add ( D_ATTR_NORMAL );
+				f_oWindow.f_poLogPad->add ( " arrived.\n" );
+				}
 			}
 		}
 	else if ( l_oVariable == "round" )
+		{
 		f_iRound = strtol ( l_oValue, NULL, 10 );
+		f_oWindow.set_state ( D_NORMAL );
+		f_oWindow.refresh ( );
+		}
 	return;
 	M_EPILOG
 	}
@@ -909,6 +1004,31 @@ void HClient::handler_msg ( HString & a_roMessage )
 	f_oWindow.f_poLogPad->add ( "Kot ma wpierdol" );
 	f_oWindow.f_poLogPad->add ( D_FG_RED );
 	f_oWindow.f_poLogPad->add ( ".\n" );
+	f_oWindow.f_poLogPad->add ( D_ATTR_NORMAL );
+	return;
+	M_EPILOG
+	}
+
+void HClient::end_round ( void )
+	{
+	M_PROLOG
+	HMove * l_poMove = NULL;
+	HString l_oMessage;
+	f_oWindow.set_state ( D_LOCKED );
+	if ( f_oMoves.quantity ( ) )
+		{
+		for ( l_poMove = & f_oMoves.go ( 0 ); l_poMove;
+				l_poMove = f_oMoves.to_tail ( 1, D_TREAT_AS_OPENED ) )
+			{
+			l_oMessage.format ( "GLX:PLAY:move=%d,%d,%d\n",
+					l_poMove->f_iSourceSystem,
+					l_poMove->f_iDestinationSystem,
+					l_poMove->f_iFleet );
+			f_oSocket.write_until_eos ( l_oMessage );
+			}
+		f_oMoves.flush ( );
+		}
+	f_oSocket.write_until_eos ( "GLX:PLAY:end_round\n" );
 	return;
 	M_EPILOG
 	}
