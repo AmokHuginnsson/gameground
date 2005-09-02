@@ -167,6 +167,7 @@ HSystem::HSystem ( void ) : f_iId ( - 1 ),
 void HSystem::do_round ( HGalaxy & a_roGalaxy )
 	{
 	M_PROLOG
+	int l_iColor = 0;
 	HFleet * l_poFleet = NULL;
 	HSocket * l_poSocket = NULL;
 	HString l_oMessage;
@@ -181,49 +182,52 @@ void HSystem::do_round ( HGalaxy & a_roGalaxy )
 			if ( l_poFleet->f_iArrivalTime <= 0 )
 				{
 				l_poSocket = a_roGalaxy.get_socket ( f_iEmperor );
-				if ( l_poFleet->f_iEmperor == f_iEmperor )
+				l_iColor = a_roGalaxy.get_color ( f_iEmperor );
+				if ( l_poFleet->f_iEmperor == f_iEmperor ) /* reinforcements */
 					{
 					f_iFleet += l_poFleet->f_iSize;
 					if ( l_poSocket )
 						{
-						l_oMessage.format ( "GLX:PLAY:system_info=%d,%d,%d,%d\n",
-								f_iId, f_iProduction, a_roGalaxy.get_color ( f_iEmperor ), f_iFleet );
+						l_oMessage.format ( "GLX:PLAY:system_info=%c,%d,%d,%d,%d\n",
+								'r', f_iId, f_iProduction, l_iColor, f_iFleet );
 						l_poSocket->write_until_eos ( l_oMessage );
 						}
 					}
-				else if ( l_poFleet->f_iSize <= f_iFleet )
+				else if ( l_poFleet->f_iSize <= f_iFleet ) /* failed attack */
 					{
 					f_iFleet -= l_poFleet->f_iSize;
-					if ( l_poSocket )
+					l_iColor = a_roGalaxy.get_color ( l_poFleet->f_iEmperor );
+					if ( l_poSocket ) /* defender */
 						{
-						l_oMessage.format ( "GLX:PLAY:system_info=%d,%d,%d,%d,%d\n",
-								f_iId, f_iProduction, a_roGalaxy.get_color ( f_iEmperor ),
-								f_iFleet, a_roGalaxy.get_color ( l_poFleet->f_iEmperor ) + 1 );
+						l_oMessage.format ( "GLX:PLAY:system_info=%c,%d,%d,%d,%d\n",
+								's', f_iId, f_iProduction,
+								l_iColor, f_iFleet );
 						l_poSocket->write_until_eos ( l_oMessage );
 						}
-					l_poSocket = a_roGalaxy.get_socket ( f_iEmperor );
-					if ( l_poSocket )
+					l_poSocket = a_roGalaxy.get_socket ( l_poFleet->f_iEmperor );
+					if ( l_poSocket ) /* attacker */
 						{
-						l_oMessage.format ( "GLX:PLAY:system_info=%d,%d,%d,%d\n",
-								f_iId, - 1, a_roGalaxy.get_color ( f_iEmperor ), - 1 );
+						l_oMessage.format ( "GLX:PLAY:system_info=%c,%d,%d,%d,%d\n",
+								'f', f_iId, f_iProduction, a_roGalaxy.get_color ( f_iEmperor ), - 1 );
 						l_poSocket->write_until_eos ( l_oMessage );
 						}
 					}
 				else if ( l_poFleet->f_iSize > f_iFleet )
 					{
 					f_iEmperor = l_poFleet->f_iEmperor;
-					if ( l_poSocket )
+					f_iFleet = l_poFleet->f_iSize - f_iFleet;
+					l_iColor = a_roGalaxy.get_color ( f_iEmperor );
+					if ( l_poSocket ) /* loser */
 						{
-						l_oMessage.format ( "GLX:PLAY:system_info=%d,%d,%d,%d\n",
-								f_iId, - 1, a_roGalaxy.get_color ( f_iEmperor ), - 1 );
+						l_oMessage.format ( "GLX:PLAY:system_info=%c,%d,%d,%d,%d\n",
+								'd', f_iId, f_iProduction, l_iColor, - 1 );
 						l_poSocket->write_until_eos ( l_oMessage );
 						}
-					f_iFleet = l_poFleet->f_iSize - f_iFleet;
 					l_poSocket = a_roGalaxy.get_socket ( f_iEmperor );
-					if ( l_poSocket )
+					if ( l_poSocket ) /* winner */
 						{
-						l_oMessage.format ( "GLX:PLAY:system_info=%d,%d,%d,%d\n",
-								f_iId, f_iProduction, a_roGalaxy.get_color ( f_iEmperor ), f_iFleet );
+						l_oMessage.format ( "GLX:PLAY:system_info=%c,%d,%d,%d,%d\n",
+								'c', f_iId, f_iProduction, l_iColor, f_iFleet );
 						l_poSocket->write_until_eos ( l_oMessage );
 						}
 					}
@@ -245,8 +249,8 @@ void HSystem::do_round ( HGalaxy & a_roGalaxy )
 		l_poSocket = a_roGalaxy.get_socket ( f_iEmperor );
 		if ( l_poSocket )
 			{
-			l_oMessage.format ( "GLX:PLAY:system_info=%d,%d,%d,%d\n",
-					f_iId, - 1, a_roGalaxy.get_color ( f_iEmperor ), f_iFleet );
+			l_oMessage.format ( "GLX:PLAY:system_info=%c,%d,%d,%d,%d\n",
+					'i', f_iId, - 1, a_roGalaxy.get_color ( f_iEmperor ), f_iFleet );
 			l_poSocket->write_until_eos ( l_oMessage );
 			}
 		}
@@ -365,8 +369,8 @@ void HGalaxy::handler_login ( int a_iFileDescriptor, HString & a_roName )
 		}
 	f_oSystems [ l_iSysNo ].f_iProduction = 10;
 	f_oSystems [ l_iSysNo ].f_iFleet = 10;
-	l_oMessage.format ( "GLX:PLAY:system_info=%d,%d,%d,%d\n",
-			l_iSysNo, f_oSystems [ l_iSysNo ].f_iProduction, l_iEmperor,
+	l_oMessage.format ( "GLX:PLAY:system_info=%c,%d,%d,%d,%d\n",
+			'c', l_iSysNo, f_oSystems [ l_iSysNo ].f_iProduction, l_iEmperor,
 			f_oSystems [ l_iSysNo ].f_iFleet );
 	l_poClient->write_until_eos ( l_oMessage );
 	f_iReady ++;
@@ -461,7 +465,7 @@ void HGalaxy::handler_play ( int a_iFileDescriptor, HString & a_roCommand )
 		f_iReady ++;
 		if ( f_iReady >= f_iEmperors )
 			{
-			for ( l_iCtr = 0; l_iCtr < f_iSystems; l_iCtr ++ )
+			for ( l_iCtr = 0; l_iCtr < ( f_iSystems + f_iEmperors ); l_iCtr ++ )
 				f_oSystems [ l_iCtr ].do_round ( * this );
 			f_iRound ++;
 			l_oValue.format ( "GLX:PLAY:round=%d\n", f_iRound );

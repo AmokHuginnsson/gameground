@@ -500,7 +500,7 @@ void HBoard::refresh ( void )
 				{
 				c_printf ( f_iRowRaw - 1, f_iColumnRaw + 28,
 						f_bFocused ? D_FG_WHITE : D_ATTR_NORMAL, "%4d",
-						distance ( f_iSourceSystem, l_iSysNo ) );
+						distance ( f_iSourceSystem, l_iSysNo ) + f_roListener.get_round ( ) );
 				}
 			}
 		c_printf ( f_iRowRaw - 1, f_iColumnRaw + 32, f_bFocused ? D_ATTR_BOARD : D_ATTR_NORMAL, "}--." );
@@ -567,7 +567,7 @@ int HBoard::process_input ( int a_iCode )
 			case ( D_KEY_ENTER ):
 				{
 				l_iSysNo = get_sys_no ( f_iCursorX, f_iCursorY );
-				if ( l_iSysNo > 0 )
+				if ( l_iSysNo >= 0 )
 					{
 					if ( l_eState == D_NORMAL )
 						{
@@ -925,23 +925,26 @@ void HClient::handler_setup ( HString & a_roCommand )
 void HClient::handler_play ( HString & a_roCommand )
 	{
 	M_PROLOG
-	int l_iSysNo = - 1, l_iColor = 0, l_iProduction = - 1, l_iAttacker = - 1;
+	char l_cEvent = 0;
+	int l_iSysNo = - 1, l_iColor = 0, l_iProduction = - 1;
 	HString l_oVariable;
 	HString l_oValue;
 	l_oVariable = a_roCommand.split ( "=", 0 );
 	l_oValue = a_roCommand.split ( "=", 1 );
 	if ( l_oVariable == "system_info" )
 		{
-		l_iSysNo = strtol ( l_oValue.split ( ",", 0 ), NULL, 10 );
-		l_iProduction = strtol ( l_oValue.split ( ",", 1 ), NULL, 10 );
+		l_cEvent = l_oValue [ 0 ];
+		l_iSysNo = strtol ( l_oValue.split ( ",", 1 ), NULL, 10 );
+		l_iProduction = strtol ( l_oValue.split ( ",", 2 ), NULL, 10 );
 		if ( l_iProduction >= 0 )
 			f_oSystems [ l_iSysNo ].f_iProduction = l_iProduction;
-		f_oSystems [ l_iSysNo ].f_iFleet = strtol ( l_oValue.split ( ",", 3 ), NULL, 10 );
-		l_iColor = strtol ( l_oValue.split ( ",", 2 ), NULL, 10 );
-		l_iAttacker = strtol ( l_oValue.split ( ",", 4 ), NULL, 10 ) - 1;
-		if ( l_iColor != f_oSystems [ l_iSysNo ].f_iColor )
+		f_oSystems [ l_iSysNo ].f_iFleet = strtol ( l_oValue.split ( ",", 4 ), NULL, 10 );
+		l_iColor = strtol ( l_oValue.split ( ",", 3 ), NULL, 10 );
+		f_oEmperors.get ( l_iColor, l_oValue );
+		switch ( l_cEvent )
 			{
-			if ( f_oEmperors.get ( l_iColor, l_oValue ) )
+			case ( 'c' ): /* conquered */
+			case ( 'd' ): /* defeted */
 				{
 				f_oWindow.f_poLogPad->add ( n_piColors [ l_iColor ] );
 				f_oWindow.f_poLogPad->add ( l_oValue );
@@ -951,12 +954,25 @@ void HClient::handler_play ( HString & a_roCommand )
 				f_oWindow.f_poLogPad->add ( n_pcSystemNames [ l_iSysNo ] );
 				f_oWindow.f_poLogPad->add ( D_ATTR_NORMAL );
 				f_oWindow.f_poLogPad->add ( ".\n" );
+				f_oSystems [ l_iSysNo ].f_iColor = l_iColor;
+				break;
 				}
-			f_oSystems [ l_iSysNo ].f_iColor = l_iColor;
-			}
-		else if ( l_iProduction >= 0 )
-			{
-			if ( l_iAttacker >= 0 )
+			case ( 'r' ): /* reinforcements */
+				{
+				f_oWindow.f_poLogPad->add ( "Reinforcements for " );
+				f_oWindow.f_poLogPad->add ( n_piColors [ l_iColor ] );
+				f_oWindow.f_poLogPad->add ( n_pcSystemNames [ l_iSysNo ] );
+				f_oWindow.f_poLogPad->add ( D_ATTR_NORMAL );
+				f_oWindow.f_poLogPad->add ( " arrived.\n" );
+				break;
+				}
+			case ( 'f' ): /* failed to conquer */
+				{
+				f_oSystems [ l_iSysNo ].f_iColor = l_iColor;
+				l_iColor = f_iColor;
+				f_oEmperors.get ( l_iColor, l_oValue );
+				}
+			case ( 's' ): /* resisted attack */
 				{
 				f_oWindow.f_poLogPad->add ( n_piColors [ f_oSystems [ l_iSysNo ].f_iColor ] );
 				f_oWindow.f_poLogPad->add ( n_pcSystemNames [ l_iSysNo ] );
@@ -966,14 +982,12 @@ void HClient::handler_play ( HString & a_roCommand )
 				f_oWindow.f_poLogPad->add ( l_oValue );
 				f_oWindow.f_poLogPad->add ( D_ATTR_NORMAL );
 				f_oWindow.f_poLogPad->add ( ".\n" );
+				break;
 				}
-			else
+			case ( 'i' ): /* info */
+			default :
 				{
-				f_oWindow.f_poLogPad->add ( "Reinforcements for " );
-				f_oWindow.f_poLogPad->add ( n_piColors [ l_iColor ] );
-				f_oWindow.f_poLogPad->add ( n_pcSystemNames [ l_iSysNo ] );
-				f_oWindow.f_poLogPad->add ( D_ATTR_NORMAL );
-				f_oWindow.f_poLogPad->add ( " arrived.\n" );
+				break;
 				}
 			}
 		}
