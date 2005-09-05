@@ -94,7 +94,7 @@ class HGalaxy
 	typedef void ( HGalaxy::*handler_t ) ( int, HString & );
 	typedef HMap < HString, handler_t > handlers_t;
 	typedef HMap < int, HString > names_t;
-	typedef HArray < int > colors_t;
+	typedef HArray < int > int_array_t;
 protected:
 	/*{*/
 	int f_iBoardSize;
@@ -106,7 +106,8 @@ protected:
 	HSocket * f_poSocket;
 	handlers_t f_oHandlers;
 	names_t f_oNames;
-	colors_t f_oColors;
+	int_array_t f_oColors;
+	int_array_t f_oEmperorCounter;
 	/*}*/
 public:
 	/*{*/
@@ -116,6 +117,7 @@ public:
 	void process_command ( int, HString & );
 	int get_color ( int );
 	HSocket * get_socket ( int );
+	void mark_alive ( int );
 	/*}*/
 protected:
 	/*{*/
@@ -241,7 +243,10 @@ void HSystem::do_round ( HGalaxy & a_roGalaxy )
 					break;
 				}
 			else
+				{
+				a_roGalaxy.mark_alive ( l_poFleet->f_iEmperor );
 				l_poFleet = f_oAttackers.to_tail ( 1, D_TREAT_AS_OPENED );
+				}
 			}
 		}
 	else if ( f_iEmperor >= 0 )
@@ -254,6 +259,7 @@ void HSystem::do_round ( HGalaxy & a_roGalaxy )
 			l_poSocket->write_until_eos ( l_oMessage );
 			}
 		}
+	a_roGalaxy.mark_alive ( f_iEmperor );
 	return;
 	M_EPILOG
 	}
@@ -262,7 +268,8 @@ HGalaxy::HGalaxy ( int a_iBoardSize, int a_iSystems, int a_iEmperors )
 	: f_iBoardSize ( a_iBoardSize ), f_iSystems ( a_iSystems ),
 	f_iEmperors ( a_iEmperors ), f_iRound ( 0 ), f_iReady ( 0 ),
 	f_oSystems ( a_iSystems + a_iEmperors ), f_poSocket ( NULL ),
-	f_oHandlers ( 16 ), f_oNames ( a_iEmperors ), f_oColors ( a_iEmperors )
+	f_oHandlers ( 16 ), f_oNames ( a_iEmperors ), f_oColors ( a_iEmperors ),
+	f_oEmperorCounter ( a_iEmperors, 0 )
 	{
 	M_PROLOG
 	int l_iCtr = 0, l_iCtrLoc = 0;
@@ -339,12 +346,13 @@ void HGalaxy::handler_login ( int a_iFileDescriptor, HString & a_roName )
 	int l_iCtr = 0, l_iSysNo = - 1, l_iEmperor = - 1;
 	HSocket * l_poClient = NULL;
 	HString l_oName;
-	HString l_oMessage = "GLX:MSG:Emperor ";
+	HString l_oMessage;
+	l_iSysNo = assign_system ( a_iFileDescriptor, l_iEmperor );
+	l_oMessage.format ( "GLX:MSG:Emperor ;$%d;", l_iEmperor );
 	f_oNames [ a_iFileDescriptor ] = a_roName;
 	l_oMessage += a_roName;
-	l_oMessage += " invaded the galaxy.\n";
+	l_oMessage += ";$12; invaded the galaxy.\n";
 	broadcast ( l_oMessage );
-	l_iSysNo = assign_system ( a_iFileDescriptor, l_iEmperor );
 	l_poClient = f_poSocket->get_client ( a_iFileDescriptor );
 	l_oMessage.format ( "GLX:SETUP:board_size=%d\n", f_iBoardSize );
 	l_poClient->write_until_eos ( l_oMessage );
@@ -465,8 +473,39 @@ void HGalaxy::handler_play ( int a_iFileDescriptor, HString & a_roCommand )
 		f_iReady ++;
 		if ( f_iReady >= f_iEmperors )
 			{
+			f_iReady = 0;
+			for ( l_iCtr = 0; l_iCtr < f_iEmperors; l_iCtr ++ )
+				if ( f_oEmperorCounter [ l_iCtr ] > 0 )
+					f_oEmperorCounter [ l_iCtr ] = 0;
 			for ( l_iCtr = 0; l_iCtr < ( f_iSystems + f_iEmperors ); l_iCtr ++ )
 				f_oSystems [ l_iCtr ].do_round ( * this );
+			for ( l_iCtr = 0; l_iCtr < f_iEmperors; l_iCtr ++ )
+				{
+				if ( ! f_oEmperorCounter [ l_iCtr ] )
+					{
+					f_oEmperorCounter [ l_iCtr ] = - 1;
+					if ( f_oNames.get ( f_oColors [ l_iCtr ], l_oValue ) )
+						{
+						l_oVariable.format ( "GLX:MSG:Once mighty empire of ;$%d;%s;$12; fall in ruins.\n",
+								l_iCtr, static_cast < char const * const > ( l_oValue ) );
+						broadcast ( l_oVariable );
+						}
+					}
+				else
+					f_iReady ++;
+				}
+			if ( f_iReady == 1 )
+				{
+				for ( l_iCtr = 0; l_iCtr < f_iEmperors; l_iCtr ++ )
+					{
+					if ( ( f_oEmperorCounter [ l_iCtr ] > 0 ) && f_oNames.get ( f_oColors [ l_iCtr ], l_oValue ) )
+						{
+						l_oVariable.format ( "GLX:MSG:The invincible ;$%d;%s;$12; crushed the galaxy.\n",
+								l_iCtr, static_cast < char const * const > ( l_oValue ) );
+						broadcast ( l_oVariable );
+						}
+					}
+				}
 			f_iRound ++;
 			l_oValue.format ( "GLX:PLAY:round=%d\n", f_iRound );
 			broadcast ( l_oValue );
@@ -494,6 +533,16 @@ int HGalaxy::get_color ( int a_iEmperor )
 			return ( l_iCtr );
 		}
 	return ( - 1 );
+	M_EPILOG
+	}
+
+void HGalaxy::mark_alive ( int a_iEmperor )
+	{
+	M_PROLOG
+	if ( a_iEmperor >= 0 )
+		a_iEmperor = get_color ( a_iEmperor );
+	if ( a_iEmperor >= 0 )
+		f_oEmperorCounter [ a_iEmperor ] ++;
 	M_EPILOG
 	}
 

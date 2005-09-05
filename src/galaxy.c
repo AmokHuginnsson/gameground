@@ -53,7 +53,7 @@ using namespace stdhapi::tools::util;
 namespace
 {
 
-char const * const n_pcSystemNames [ ] =
+char const * const n_ppcSystemNamesLatin [ ] =
 	{
 	"Aldebaran",
 	"Betelgeuse",
@@ -93,7 +93,7 @@ char const * const n_pcSystemNames [ ] =
 	"Decimum"
 	};
 
-char const * const n_pcSystemNames2 [ ] =
+char const * const n_ppcSystemNamesNorse [ ] =
 	{
 	"Aegir",
 	"Balder",
@@ -133,6 +133,8 @@ char const * const n_pcSystemNames2 [ ] =
 	"Yggdrasil"
 	};
 
+char const * const * n_ppcSystemNames = NULL;
+
 int n_piColors [ ] =
 	{
 	( D_FG_BRIGHTBLUE | D_BG_BLACK ),
@@ -146,7 +148,11 @@ int n_piColors [ ] =
 	( D_FG_RED | D_BG_BLACK ),
 	( D_FG_CYAN | D_BG_BLACK ),
 	( D_FG_MAGENTA | D_BG_BLACK ),
-	( D_FG_BROWN | D_BG_BLACK )
+	( D_FG_BROWN | D_BG_BLACK ),
+	( D_FG_LIGHTGRAY | D_BG_BLACK ),
+	( D_FG_LIGHTGRAY | D_BG_BLACK ),
+	( D_FG_LIGHTGRAY | D_BG_BLACK ),
+	( D_FG_LIGHTGRAY | D_BG_BLACK )
 	};
 
 class HBoard;
@@ -215,6 +221,7 @@ protected:
 public:
 	/*{*/
 	HEventListener ( int const &, int const &, client_state_t & );
+	virtual ~HEventListener ( void );
 	virtual void on_show_system_info ( int ) = 0;
 	virtual void make_move ( int, int ) = 0;
 	int get_round ( void ) const;
@@ -357,6 +364,13 @@ HEventListener::HEventListener ( int const & a_riRound, int const & a_riColor,
 	M_EPILOG
 	}
 
+HEventListener::~HEventListener ( void )
+	{
+	M_PROLOG
+	return;
+	M_EPILOG
+	}
+
 int HEventListener::get_round ( void ) const
 	{
 	M_PROLOG
@@ -435,7 +449,7 @@ void HBoard::refresh ( void )
 	{
 	M_PROLOG
 	int l_iCtr = 0, l_iSystems = 0, l_iSysNo = - 1, l_iCoordX = - 1, l_iCoordY = - 1;
-	int l_iColor = - 1;
+	int l_iColor = - 1, l_iRound = f_roListener.get_round ( );
 	client_state_t l_eState = f_roListener.get_state ( );
 	HString l_oPen;
 	HBoard::draw_label ( );
@@ -489,7 +503,8 @@ void HBoard::refresh ( void )
 				f_iColumnRaw + 3 + f_iCursorX * 3,
 				f_bFocused ? D_ATTR_CURSOR : D_ATTR_NORMAL, "}" );
 		c_printf ( f_iRowRaw - 1, f_iColumnRaw + 8, f_bFocused ? D_ATTR_BOARD : D_ATTR_NORMAL, ",--{" );
-		c_printf ( f_iRowRaw - 1, f_iColumnRaw + 13, D_ATTR_NORMAL, "%4d", f_roListener.get_round ( ) );
+		if ( l_iRound >= 0 )
+			c_printf ( f_iRowRaw - 1, f_iColumnRaw + 13, D_ATTR_NORMAL, "%4d", l_iRound );
 		c_printf ( f_iRowRaw - 1, f_iColumnRaw + 17, f_bFocused ? D_ATTR_BOARD : D_ATTR_NORMAL, "}--." );
 		c_printf ( f_iRowRaw - 1, f_iColumnRaw + 23, f_bFocused ? D_ATTR_BOARD : D_ATTR_NORMAL, ",--{" );
 		c_printf ( f_iRowRaw - 1, f_iColumnRaw + 28, f_bFocused ? D_FG_WHITE : D_ATTR_NORMAL, "    " );
@@ -500,7 +515,7 @@ void HBoard::refresh ( void )
 				{
 				c_printf ( f_iRowRaw - 1, f_iColumnRaw + 28,
 						f_bFocused ? D_FG_WHITE : D_ATTR_NORMAL, "%4d",
-						distance ( f_iSourceSystem, l_iSysNo ) + f_roListener.get_round ( ) );
+						distance ( f_iSourceSystem, l_iSysNo ) + l_iRound );
 				}
 			}
 		c_printf ( f_iRowRaw - 1, f_iColumnRaw + 32, f_bFocused ? D_ATTR_BOARD : D_ATTR_NORMAL, "}--." );
@@ -700,7 +715,7 @@ void HGalaxyWindow::on_show_system_info ( int a_iSystem )
 	f_poFleet->set ( "" );
 	if ( a_iSystem >= 0 )
 		{
-		f_poSystemName->set ( n_pcSystemNames [ a_iSystem ] );
+		f_poSystemName->set ( n_ppcSystemNames [ a_iSystem ] );
 		if ( ( * f_poSystems ) [ a_iSystem ].f_iProduction >= 0 )
 			f_poProduction->set ( HString ( ( * f_poSystems ) [ a_iSystem ].f_iProduction ) );
 		if ( ( * f_poSystems ) [ a_iSystem ].f_iFleet >= 0 )
@@ -951,7 +966,7 @@ void HClient::handler_play ( HString & a_roCommand )
 				f_oWindow.f_poLogPad->add ( D_ATTR_NORMAL );
 				f_oWindow.f_poLogPad->add ( " conquered " );
 				f_oWindow.f_poLogPad->add ( n_piColors [ f_oSystems [ l_iSysNo ].f_iColor ] );
-				f_oWindow.f_poLogPad->add ( n_pcSystemNames [ l_iSysNo ] );
+				f_oWindow.f_poLogPad->add ( n_ppcSystemNames [ l_iSysNo ] );
 				f_oWindow.f_poLogPad->add ( D_ATTR_NORMAL );
 				f_oWindow.f_poLogPad->add ( ".\n" );
 				f_oSystems [ l_iSysNo ].f_iColor = l_iColor;
@@ -961,7 +976,7 @@ void HClient::handler_play ( HString & a_roCommand )
 				{
 				f_oWindow.f_poLogPad->add ( "Reinforcements for " );
 				f_oWindow.f_poLogPad->add ( n_piColors [ l_iColor ] );
-				f_oWindow.f_poLogPad->add ( n_pcSystemNames [ l_iSysNo ] );
+				f_oWindow.f_poLogPad->add ( n_ppcSystemNames [ l_iSysNo ] );
 				f_oWindow.f_poLogPad->add ( D_ATTR_NORMAL );
 				f_oWindow.f_poLogPad->add ( " arrived.\n" );
 				break;
@@ -975,7 +990,7 @@ void HClient::handler_play ( HString & a_roCommand )
 			case ( 's' ): /* resisted attack */
 				{
 				f_oWindow.f_poLogPad->add ( n_piColors [ f_oSystems [ l_iSysNo ].f_iColor ] );
-				f_oWindow.f_poLogPad->add ( n_pcSystemNames [ l_iSysNo ] );
+				f_oWindow.f_poLogPad->add ( n_ppcSystemNames [ l_iSysNo ] );
 				f_oWindow.f_poLogPad->add ( D_ATTR_NORMAL );
 				f_oWindow.f_poLogPad->add ( " resisted attack from " );
 				f_oWindow.f_poLogPad->add ( n_piColors [ l_iColor ] );
@@ -1004,20 +1019,24 @@ void HClient::handler_play ( HString & a_roCommand )
 void HClient::handler_msg ( HString & a_roMessage )
 	{
 	M_PROLOG
-	a_roMessage += '\n';
-	f_oWindow.f_poLogPad->add ( a_roMessage );
-	f_oWindow.f_poLogPad->add ( D_ATTR_NORMAL );
-	f_oWindow.f_poLogPad->add ( "Ala ma kota" );
-	f_oWindow.f_poLogPad->add ( D_FG_GREEN );
-	f_oWindow.f_poLogPad->add ( "." );
-	f_oWindow.f_poLogPad->add ( D_ATTR_NORMAL );
-	f_oWindow.f_poLogPad->add ( " Very_long_text:_Litwo_ojczyzno_moja_Ty_jeste¶_jak_zdrowie_..." );
-	f_oWindow.f_poLogPad->add ( D_FG_WHITE );
-	f_oWindow.f_poLogPad->add ( "Some more text.\n" );
-	f_oWindow.f_poLogPad->add ( D_ATTR_NORMAL );
-	f_oWindow.f_poLogPad->add ( "Kot ma wpierdol" );
-	f_oWindow.f_poLogPad->add ( D_FG_RED );
-	f_oWindow.f_poLogPad->add ( ".\n" );
+	int l_iIndex = 0, l_iOffset = 0;
+	int l_iLength = a_roMessage.get_length ( );
+	HString l_oPart;
+	while ( l_iIndex < l_iLength )
+		{
+		l_iOffset = a_roMessage.find ( ';', l_iIndex );
+		if ( l_iOffset < 0 )
+			l_iOffset = l_iLength;
+		l_oPart = a_roMessage.mid ( l_iIndex, l_iOffset - l_iIndex );
+		if ( l_oPart.is_empty ( ) )
+			break;
+		if ( l_oPart [ 0 ] == '$' ) /* color */
+			f_oWindow.f_poLogPad->add ( n_piColors [ strtol ( l_oPart.mid ( 1 ), NULL, 10 ) ] );
+		else /* text */
+			f_oWindow.f_poLogPad->add ( l_oPart );
+		l_iIndex = l_iOffset + 1;
+		}
+	f_oWindow.f_poLogPad->add ( "\n" );
 	f_oWindow.f_poLogPad->add ( D_ATTR_NORMAL );
 	return;
 	M_EPILOG
@@ -1051,6 +1070,10 @@ void HClient::end_round ( void )
 
 int main_client ( void )
 	{
+	if ( HTime ( ).get_hour ( ) % 2 )
+		n_ppcSystemNames = n_ppcSystemNamesNorse;
+	else
+		n_ppcSystemNames = n_ppcSystemNamesLatin;
 	HClient l_oClient ( setup.f_oLogin );
 	l_oClient.init_client ( setup.f_oHost, setup.f_iPort );
 	l_oClient.run ( );
