@@ -249,7 +249,7 @@ void HSystem::do_round ( HGalaxy & a_roGalaxy )
 				}
 			}
 		}
-	else if ( f_iEmperor >= 0 )
+	if ( f_iEmperor >= 0 )
 		{
 		l_poSocket = a_roGalaxy.get_socket ( f_iEmperor );
 		if ( l_poSocket )
