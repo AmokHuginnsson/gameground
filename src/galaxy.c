@@ -539,24 +539,28 @@ int HBoard::process_input ( int a_iCode )
 				{
 				if ( f_iCursorY < ( f_iBoardSize - 1 ) )
 					f_iCursorY ++;
+				else f_iCursorY = 0;
 				break;
 				}
 			case ( KEY_UP ):
 				{
 				if ( f_iCursorY > 0 )
 					f_iCursorY --;
+				else f_iCursorY = f_iBoardSize - 1;
 				break;
 				}
 			case ( KEY_LEFT ):
 				{
 				if ( f_iCursorX > 0 )
 					f_iCursorX --;
+				else f_iCursorX = f_iBoardSize - 1;
 				break;
 				}
 			case ( KEY_RIGHT ):
 				{
 				if ( f_iCursorX < ( f_iBoardSize - 1 ) )
 					f_iCursorX ++;
+				else f_iCursorX = 0;
 				break;
 				}
 			case ( KEY_HOME ):
@@ -641,6 +645,10 @@ int HBoard::distance ( int a_iSource, int a_iDestination )
 		{
 		l_iDX = ( * f_poSystems ) [ a_iSource ].f_iCoordinateX - ( * f_poSystems ) [ a_iDestination ].f_iCoordinateX;
 		l_iDY = ( * f_poSystems ) [ a_iSource ].f_iCoordinateY - ( * f_poSystems ) [ a_iDestination ].f_iCoordinateY;
+		l_iDX = ( l_iDX >= 0 ) ? l_iDX : - l_iDX;
+		l_iDY = ( l_iDY >= 0 ) ? l_iDY : - l_iDY;
+		l_iDX = ( ( f_iBoardSize - l_iDX ) < l_iDX ) ? f_iBoardSize - l_iDX : l_iDX;
+		l_iDY = ( ( f_iBoardSize - l_iDY ) < l_iDY ) ? f_iBoardSize - l_iDY : l_iDY;
 		l_iDistance = static_cast < int > ( sqrt ( l_iDX * l_iDX + l_iDY * l_iDY ) + 0.5 );
 		}
 	return ( l_iDistance );

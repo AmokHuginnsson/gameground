@@ -464,6 +464,10 @@ void HGalaxy::handler_play ( int a_iFileDescriptor, HString & a_roCommand )
 			f_oSystems [ l_iSource ].f_iFleet -= l_oFleet.f_iSize;
 			l_iDX = f_oSystems [ l_iSource ].f_iCoordinateX - f_oSystems [ l_iDestination ].f_iCoordinateX;
 			l_iDY = f_oSystems [ l_iSource ].f_iCoordinateY - f_oSystems [ l_iDestination ].f_iCoordinateY;
+			l_iDX = ( l_iDX >= 0 ) ? l_iDX : - l_iDX;
+			l_iDY = ( l_iDY >= 0 ) ? l_iDY : - l_iDY;
+			l_iDX = ( ( f_iBoardSize - l_iDX ) < l_iDX ) ? f_iBoardSize - l_iDX : l_iDX;
+			l_iDY = ( ( f_iBoardSize - l_iDY ) < l_iDY ) ? f_iBoardSize - l_iDY : l_iDY;
 			l_oFleet.f_iArrivalTime = static_cast < int > ( sqrt ( l_iDX * l_iDX + l_iDY * l_iDY ) + 0.5 );
 			f_oSystems [ l_iDestination ].f_oAttackers.add_head ( ) = l_oFleet;
 			}
