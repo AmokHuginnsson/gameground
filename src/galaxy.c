@@ -1016,7 +1016,16 @@ void HClient::handler_play ( HString & a_roCommand )
 		}
 	else if ( l_oVariable == "round" )
 		{
+		f_oWindow.f_poLogPad->add ( D_ATTR_CURSOR );
+		f_oWindow.f_poLogPad->add ( "----- " );
+		f_oWindow.f_poLogPad->add ( D_ATTR_NORMAL );
+		f_oWindow.f_poLogPad->add ( " round: " );
 		f_iRound = strtol ( l_oValue, NULL, 10 );
+		l_oValue.format ( "%d", f_iRound );
+		f_oWindow.f_poLogPad->add ( D_ATTR_CURSOR );
+		f_oWindow.f_poLogPad->add ( l_oValue );
+		f_oWindow.f_poLogPad->add ( " -----\n" );
+		f_oWindow.f_poLogPad->add ( D_ATTR_NORMAL );
 		f_oWindow.set_state ( D_NORMAL );
 		f_oWindow.refresh ( );
 		}

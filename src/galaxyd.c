@@ -366,6 +366,13 @@ void HGalaxy::handler_login ( int a_iFileDescriptor, HString & a_roName )
 			l_oMessage.format ( "GLX:SETUP:emperor=%d,%s\n",
 					l_iCtr, static_cast < char * > ( l_oName ) );
 			broadcast ( l_oMessage );
+			if ( l_iCtr != l_iEmperor )
+				{
+				l_oMessage.format ( "GLX:MSG:Emperor ;$%d;", l_iCtr );
+				l_oMessage += l_oName;
+				l_oMessage += ";$12; invaded the galaxy.\n";
+				l_poClient->write_until_eos ( l_oMessage );
+				}
 			}
 		}
 	for ( l_iCtr = 0; l_iCtr < ( f_iEmperors + f_iSystems ); l_iCtr ++ )
@@ -443,7 +450,8 @@ void HGalaxy::handler_message ( int a_iFileDescriptor, HString & a_roMessage )
 void HGalaxy::handler_play ( int a_iFileDescriptor, HString & a_roCommand )
 	{
 	M_PROLOG
-	int l_iSource = - 1, l_iDestination = - 1, l_iDX = 0, l_iDY = 0, l_iCtr = 0;
+	int l_iSource = - 1, l_iDestination = - 1, l_iDX = 0, l_iDY = 0;
+	int l_iCtr = 0, l_iDead = 0, l_iColor = 0;
 	HString l_oVariable;
 	HString l_oValue;
 	HFleet l_oFleet;
@@ -474,7 +482,9 @@ void HGalaxy::handler_play ( int a_iFileDescriptor, HString & a_roCommand )
 		}
 	else if ( l_oVariable == "end_round" )
 		{
-		f_iReady ++;
+		l_iColor = get_color ( a_iFileDescriptor );
+		if ( ( l_iColor >= 0 ) && ( f_oEmperorCounter [ l_iColor ] >= 0 ) )
+			f_iReady ++;
 		if ( f_iReady >= f_iEmperors )
 			{
 			f_iReady = 0;
@@ -495,8 +505,10 @@ void HGalaxy::handler_play ( int a_iFileDescriptor, HString & a_roCommand )
 						broadcast ( l_oVariable );
 						}
 					}
-				else
+				if ( f_oEmperorCounter [ l_iCtr ] >= 0 )
 					f_iReady ++;
+				else
+					l_iDead ++;
 				}
 			if ( f_iReady == 1 )
 				{
@@ -513,7 +525,7 @@ void HGalaxy::handler_play ( int a_iFileDescriptor, HString & a_roCommand )
 			f_iRound ++;
 			l_oValue.format ( "GLX:PLAY:round=%d\n", f_iRound );
 			broadcast ( l_oValue );
-			f_iReady = 0;
+			f_iReady = l_iDead;
 			}
 		}
 	return;
