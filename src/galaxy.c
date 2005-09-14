@@ -133,6 +133,8 @@ char const * const n_ppcSystemNamesNorse [ ] =
 	"Yggdrasil"
 	};
 
+char const * const n_pcSymbols = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+
 char const * const * n_ppcSystemNames = NULL;
 
 int n_piColors [ ] =
@@ -975,6 +977,8 @@ void HClient::handler_play ( HString & a_roCommand )
 				f_oWindow.f_poLogPad->add ( " conquered " );
 				f_oWindow.f_poLogPad->add ( n_piColors [ f_oSystems [ l_iSysNo ].f_iColor ] );
 				f_oWindow.f_poLogPad->add ( n_ppcSystemNames [ l_iSysNo ] );
+				l_oValue.format ( "(%c)", n_pcSymbols [ l_iSysNo ] );
+				f_oWindow.f_poLogPad->add ( l_oValue );
 				f_oWindow.f_poLogPad->add ( D_ATTR_NORMAL );
 				f_oWindow.f_poLogPad->add ( ".\n" );
 				f_oSystems [ l_iSysNo ].f_iColor = l_iColor;
@@ -985,6 +989,8 @@ void HClient::handler_play ( HString & a_roCommand )
 				f_oWindow.f_poLogPad->add ( "Reinforcements for " );
 				f_oWindow.f_poLogPad->add ( n_piColors [ l_iColor ] );
 				f_oWindow.f_poLogPad->add ( n_ppcSystemNames [ l_iSysNo ] );
+				l_oValue.format ( "(%c)", n_pcSymbols [ l_iSysNo ] );
+				f_oWindow.f_poLogPad->add ( l_oValue );
 				f_oWindow.f_poLogPad->add ( D_ATTR_NORMAL );
 				f_oWindow.f_poLogPad->add ( " arrived.\n" );
 				break;
@@ -999,6 +1005,8 @@ void HClient::handler_play ( HString & a_roCommand )
 				{
 				f_oWindow.f_poLogPad->add ( n_piColors [ f_oSystems [ l_iSysNo ].f_iColor ] );
 				f_oWindow.f_poLogPad->add ( n_ppcSystemNames [ l_iSysNo ] );
+				l_oVariable.format ( "(%c)", n_pcSymbols [ l_iSysNo ] );
+				f_oWindow.f_poLogPad->add ( l_oVariable );
 				f_oWindow.f_poLogPad->add ( D_ATTR_NORMAL );
 				f_oWindow.f_poLogPad->add ( " resisted attack from " );
 				f_oWindow.f_poLogPad->add ( n_piColors [ l_iColor ] );
