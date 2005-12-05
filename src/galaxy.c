@@ -27,14 +27,6 @@ Copyright:
 #include <stdhapi.h>
 M_CVSID ( "$CVSHeader$" );
 
-#ifdef HAVE_NCURSES_H
-#	include <ncurses.h>
-#elif defined ( HAVE_NCURSES_NCURSES_H )
-#	include <ncurses/ncurses.h>
-#else /* HAVE_NCURSES_NCURSES_H */
-#	error "No ncurses header available."
-#endif /* not HAVE_NCURSES_NCURSES_H */
-
 #include "galaxy.h"
 
 #include "setup.h"
@@ -532,60 +524,60 @@ int HBoard::process_input ( int a_iCode )
 	client_state_t l_eState = f_roListener.get_state ( );
 	a_iCode = HControl::process_input ( a_iCode );
 	if ( l_eState == D_LOCKED )
-		return ( a_iCode == '\t' ? '\t' : D_KEY_ENTER );
+		return ( a_iCode == '\t' ? KEY_CODES::D_TAB : KEY_CODES::D_ENTER );
 	if ( f_iBoardSize >= 0 )
 		{
 		switch ( a_iCode )
 			{
-			case ( KEY_DOWN ):
+			case ( KEY_CODES::D_DOWN ):
 				{
 				if ( f_iCursorY < ( f_iBoardSize - 1 ) )
 					f_iCursorY ++;
 				else f_iCursorY = 0;
 				break;
 				}
-			case ( KEY_UP ):
+			case ( KEY_CODES::D_UP ):
 				{
 				if ( f_iCursorY > 0 )
 					f_iCursorY --;
 				else f_iCursorY = f_iBoardSize - 1;
 				break;
 				}
-			case ( KEY_LEFT ):
+			case ( KEY_CODES::D_LEFT ):
 				{
 				if ( f_iCursorX > 0 )
 					f_iCursorX --;
 				else f_iCursorX = f_iBoardSize - 1;
 				break;
 				}
-			case ( KEY_RIGHT ):
+			case ( KEY_CODES::D_RIGHT ):
 				{
 				if ( f_iCursorX < ( f_iBoardSize - 1 ) )
 					f_iCursorX ++;
 				else f_iCursorX = 0;
 				break;
 				}
-			case ( KEY_HOME ):
+			case ( KEY_CODES::D_HOME ):
 				{
 				f_iCursorX = 0;
 				break;
 				}
-			case ( KEY_END ):
+			case ( KEY_CODES::D_END ):
 				{
 				f_iCursorX = f_iBoardSize - 1;
 				break;
 				}
-			case ( KEY_PPAGE ):
+			case ( KEY_CODES::D_PAGE_UP ):
 				{
 				f_iCursorY = 0;
 				break;
 				}
-			case ( KEY_NPAGE ):
+			case ( KEY_CODES::D_PAGE_DOWN ):
 				{
 				f_iCursorY = f_iBoardSize - 1;
 				break;
 				}
-			case ( D_KEY_ENTER ):
+			case ( KEY_CODES::D_ENTER ):
 				{
 				l_iSysNo = get_sys_no ( f_iCursorX, f_iCursorY );
 				if ( l_iSysNo >= 0 )
@@ -693,8 +685,8 @@ int HGalaxyWindow::init ( void )
 	f_poFleet = new HEditControl ( this, 7, 72, 1, 7, "Fleet\n", 6, "", D_MASK_DIGITS );
 	f_poLogPad = new HLogPad ( this, 10, 64, - 3, - 1, " Event log \n" );
 	f_poLogPad->enable ( true );
-	M_REGISTER_POSTPROCESS_HANDLER ( D_KEY_ENTER, NULL, HGalaxyWindow::handler_enter );
-	M_REGISTER_POSTPROCESS_HANDLER ( D_KEY_ESC, NULL, HGalaxyWindow::handler_esc );
+	M_REGISTER_POSTPROCESS_HANDLER ( KEY_CODES::D_ENTER, NULL, HGalaxyWindow::handler_enter );
+	M_REGISTER_POSTPROCESS_HANDLER ( KEY_CODES::D_ESC, NULL, HGalaxyWindow::handler_esc );
 	M_REGISTER_POSTPROCESS_HANDLER ( ' ', NULL, HGalaxyWindow::handler_space );
 	return ( 0 );
 	M_EPILOG
@@ -1076,7 +1068,7 @@ void HClient::end_round ( void )
 	if ( f_oMoves.quantity ( ) )
 		{
 		for ( l_poMove = & f_oMoves.go ( 0 ); l_poMove;
-				l_poMove = f_oMoves.to_tail ( 1, D_TREAT_AS_OPENED ) )
+				l_poMove = f_oMoves.to_tail ( 1, moves_t::D_TREAT_AS_OPENED ) )
 			{
 			l_oMessage.format ( "GLX:PLAY:move=%d,%d,%d\n",
 					l_poMove->f_iSourceSystem,

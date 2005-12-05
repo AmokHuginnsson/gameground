@@ -65,13 +65,14 @@ class HSystem
 	{
 protected:
 	/*{*/
+	typedef HList < HFleet > attackers_t;
 	int f_iId;
 	int f_iCoordinateX;
 	int f_iCoordinateY;
 	int f_iProduction;
 	int f_iFleet;
 	int f_iEmperor;
-	HList < HFleet > f_oAttackers;
+	attackers_t f_oAttackers;
 	/*}*/
 public:
 	/*{*/
@@ -233,7 +234,8 @@ void HSystem::do_round ( HGalaxy & a_roGalaxy )
 						l_poSocket->write_until_eos ( l_oMessage );
 						}
 					}
-				f_oAttackers.remove_element ( D_FORCE_REMOVE_ELEMENT | D_TREAT_AS_OPENED, & l_poFleet );
+				f_oAttackers.remove_element (
+						attackers_t::D_FORCE_REMOVE_ELEMENT | attackers_t::D_TREAT_AS_OPENED, & l_poFleet );
 				if ( l_poFleet && f_oAttackers.quantity ( ) )
 					{
 					l_poFleet = & f_oAttackers.present ( );
@@ -245,7 +247,7 @@ void HSystem::do_round ( HGalaxy & a_roGalaxy )
 			else
 				{
 				a_roGalaxy.mark_alive ( l_poFleet->f_iEmperor );
-				l_poFleet = f_oAttackers.to_tail ( 1, D_TREAT_AS_OPENED );
+				l_poFleet = f_oAttackers.to_tail ( 1, attackers_t::D_TREAT_AS_OPENED );
 				}
 			}
 		}
@@ -364,7 +366,7 @@ void HGalaxy::handler_login ( int a_iFileDescriptor, HString & a_roName )
 				&& ( f_oNames.get ( f_oColors [ l_iCtr ], l_oName ) ) )
 			{
 			l_oMessage.format ( "GLX:SETUP:emperor=%d,%s\n",
-					l_iCtr, static_cast < char * > ( l_oName ) );
+					l_iCtr, static_cast < char const * const > ( l_oName ) );
 			broadcast ( l_oMessage );
 			if ( l_iCtr != l_iEmperor )
 				{
@@ -593,7 +595,7 @@ int HServer::handler_connection ( int )
 		unregister_file_descriptor_handler ( f_oSocket.get_file_descriptor ( ) );
 		f_oSocket.close ( );
 		}
-	fprintf ( stdout, "%s\n", static_cast < char * > ( l_poClient->get_host_name ( ) ) );
+	fprintf ( stdout, "%s\n", static_cast < char const * const > ( l_poClient->get_host_name ( ) ) );
 	return ( 0 );
 	M_EPILOG
 	}
@@ -610,7 +612,7 @@ int HServer::handler_message ( int a_iFileDescriptor )
 		{
 		if ( ( l_iMsgLength = l_poClient->read_until ( l_oMessage ) ) > 0 )
 			{
-			fprintf ( stdout, "<-%s\n", static_cast < char * > ( l_oMessage ) );
+			fprintf ( stdout, "<-%s\n", static_cast < char const * const > ( l_oMessage ) );
 			l_oCommand = l_oMessage.split ( ":", 0 );
 			l_oArgument = l_oMessage.mid ( l_oCommand.get_length ( ) + 1 );
 			l_iMsgLength = l_oArgument.get_length ( );
