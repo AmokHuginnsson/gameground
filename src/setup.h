@@ -37,6 +37,23 @@ Copyright:
 
 struct OSetup
 	{
+	bool f_bQuiet;			/* --quiet, --silent */
+	bool f_bVerbose;		/* --verbose */
+	bool f_bHelp;
+	/* galaxy specific bools */
+	bool f_bServer;
+	bool f_bClient;
+	/* galaxy specific integers */
+	int f_iEmperors;
+	int f_iPort;
+	int f_iSystems;
+	int f_iBoardSize;
+	/* galaxy specific strings */
+	stdhapi::hcore::HString f_oLogin;
+	stdhapi::hcore::HString f_oHost;
+	char * f_pcProgramName;
+	stdhapi::hcore::HString f_oLogPath;
+	/* self-sufficient */
 	OSetup ( void ) : f_bQuiet ( false ), f_bVerbose ( false ),
 										f_bHelp ( false ), f_bServer ( false ),
 										f_bClient ( false ), f_iEmperors ( D_DEFAULT_PLAYERS ),
@@ -71,22 +88,6 @@ struct OSetup
 		if ( f_bServer && ( ( f_iEmperors + f_iSystems ) > D_MAX_SYSTEM_COUNT ) )
 			stdhapi::tools::util::failure ( 8, _ ( "bad total system count\n" ) );
 		}
-	bool f_bQuiet;			/* --quiet, --silent */
-	bool f_bVerbose;		/* --verbose */
-	bool f_bHelp;
-	/* galaxy specific bools */
-	bool f_bServer;
-	bool f_bClient;
-	/* galaxy specific integers */
-	int f_iEmperors;
-	int f_iPort;
-	int f_iSystems;
-	int f_iBoardSize;
-	/* galaxy specific strings */
-	stdhapi::hcore::HString f_oLogin;
-	stdhapi::hcore::HString f_oHost;
-	char * f_pcProgramName;
-	stdhapi::hcore::HString f_oLogPath;
 private:
 	OSetup ( OSetup const & );
 	OSetup & operator = ( OSetup const & );
