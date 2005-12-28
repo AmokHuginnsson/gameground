@@ -64,6 +64,7 @@ struct OSetup
 										f_oLogPath ( ) {}
 	void test_setup ( void )
 		{
+		M_PROLOG
 		if ( f_bServer && f_bClient )
 			stdhapi::tools::util::failure ( 1,
 					_ ( "galaxy cannot be server and client at the same time\n" ) );
@@ -87,6 +88,8 @@ struct OSetup
 			stdhapi::tools::util::failure ( 7, _ ( "bad board size specified\n" ) );
 		if ( f_bServer && ( ( f_iEmperors + f_iSystems ) > D_MAX_SYSTEM_COUNT ) )
 			stdhapi::tools::util::failure ( 8, _ ( "bad total system count\n" ) );
+		return;
+		M_EPILOG
 		}
 private:
 	OSetup ( OSetup const & );
