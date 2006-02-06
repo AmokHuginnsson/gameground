@@ -5,6 +5,7 @@ import javax.swing.*;
 import java.net.URL;
 
 class HGUIMain extends JPanel implements ActionListener {
+	public static final long serialVersionUID = 17l;
 	JPanel _mainPanel;
 	JPanel _up;
 	JPanel _down;
@@ -15,8 +16,9 @@ class HGUIMain extends JPanel implements ActionListener {
 	JRadioButton _radio0;
 	JRadioButton _radio1;
 	JRadioButton _radio2;
+	JRadioButton _active;
 	AudioClip clip;
-	public HGUIMain(String label) {
+	public HGUIMain( String $label ) {
 		_radio0 = new JRadioButton( "Wilk" );
 		_radio1 = new JRadioButton( "Kruk" );
 		_radio2 = new JRadioButton( "Nied¼wie¼" );
@@ -32,6 +34,7 @@ class HGUIMain extends JPanel implements ActionListener {
 		_radios.add( _radio1 );
 		_radios.add( _radio2 );
 		
+		setLayout( new BoxLayout( this, BoxLayout.X_AXIS ) );
 		_mainPanel.setLayout( new BoxLayout( _mainPanel, BoxLayout.Y_AXIS ) );
 		_mainPanel.add( _up );
 		_mainPanel.add( _down );
@@ -54,14 +57,13 @@ class HGUIMain extends JPanel implements ActionListener {
 	}
 	public void actionPerformed( ActionEvent $event ) {
 		Object source = $event.getSource();
-		if ( source == go ) {
-			System.out.println( "go" );		
-			_edit1.setText( _edit0.getText() );
+		if ( ( _active != null ) && ( source == go ) ) {
+			_edit1.setText( _active.getText() );
 		} else if ( source.getClass().getName() == "javax.swing.JRadioButton" ) {
-			System.out.println( "radio" );
-			_edit0.setText( ( ( JRadioButton ) source ).getText() );
-		} else {
-			System.out.println( source.getClass().getName() );
+			_active = ( JRadioButton ) source;
+			_edit0.setText( _active.getText() );
+//		} else {
+//			System.out.println( source.getClass().getName() );
 		}
 	}
 }
@@ -71,15 +73,30 @@ public class /* Application or applet name: */ Galaxy extends JApplet {
 	private static JFrame _frame;
 
 	public void init() {
-		add( new HGUIMain ("Push Me") );
-	} 
+		add( new HGUIMain("Push Me") );
+	}
 
-	static public void main (String argv[]) {
+	static public void main( String $argv[] ) {
 		_frame = new JFrame();
-		_frame.add( new HGUIMain( "Push Me" ) );
-		_frame.pack();
+		JApplet applet = new Galaxy();
+		_frame.add( applet );
+		applet.init();
+		applet.start();
+		_frame.setSize( 400, 200 );
+		class HAppTerminator extends WindowAdapter {
+			JApplet _applet;
+			public HAppTerminator( JApplet $applet ) {
+				_applet = $applet;
+			}
+		}
+		_frame.addWindowListener( new HAppTerminator( applet ) { // Handle window close requests
+			public void windowClosing( WindowEvent e ) {
+				_applet.stop();
+				_applet.destroy();
+				System.exit( 0 );
+			}
+		} );
 		_frame.setVisible( true );
 	}
 }
-
 
