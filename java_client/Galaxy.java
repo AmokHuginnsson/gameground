@@ -1,72 +1,36 @@
-import java.awt.*;
-import java.applet.*;
-import java.awt.event.*;
-import javax.swing.*;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import org.swixml.SwingEngine;
+import javax.swing.*;
 
 class HGUIMain extends JPanel implements ActionListener {
 	public static final long serialVersionUID = 17l;
-	JPanel _mainPanel;
-	JPanel _up;
-	JPanel _down;
-	JTextField _edit0;
-	JTextField _edit1;
-	JButton go;
-	ButtonGroup _radios;
-	JRadioButton _radio0;
-	JRadioButton _radio1;
-	JRadioButton _radio2;
+	public JTextField _edit0;
+	public JTextField _edit1;
+	public JButton _go;
+	public JRadioButton _radio0;
+	public JRadioButton _radio1;
+	public JRadioButton _radio2;
 	JRadioButton _active;
-	AudioClip clip;
 	public HGUIMain( String $label ) throws Exception {
-		new SwingEngine( this ).insert( "xml/helloworld.xml", this );
-		//new SwingEngine( this ).insert( new URL( $label, "xml/helloworld.xml" ), this );
-		_radio0 = new JRadioButton( "Wilk" );
-		_radio1 = new JRadioButton( "Kruk" );
-		_radio2 = new JRadioButton( "Nied¼wie¼" );
-		_radios = new ButtonGroup();
-		_edit0 = new JTextField( 20 );
-		_edit1 = new JTextField( 20 );
-		go = new JButton( "Go !" );
-		_mainPanel = new JPanel();
-		_up = new JPanel();
-		_down = new JPanel();
-		
-		_radios.add( _radio0 );
-		_radios.add( _radio1 );
-		_radios.add( _radio2 );
-		
-		setLayout( new BoxLayout( this, BoxLayout.X_AXIS ) );
-		_mainPanel.setLayout( new BoxLayout( _mainPanel, BoxLayout.Y_AXIS ) );
-		_mainPanel.add( _up );
-		_mainPanel.add( _down );
-		_up.add( _radio0 );
-		_up.add( _radio1 );
-		_up.add( _radio2 );
-		_up.add( _edit0 );
-		_up.add( _edit1 );
-		_down.add( go );
-		
-		setSize( 400, 200 );
-		add( _mainPanel );
-		_up.setSize( 380, 100 );
-		_up.doLayout();
-
-		go.addActionListener( this );
+//		new SwingEngine( this ).insert( HGUIMain.class.getResource( "galaxy.xml" ), this );
+		new SwingEngine( this ).insert( new InputStreamReader( HGUIMain.class.getResourceAsStream( "galaxy.xml" ) ), this );
+		_go.addActionListener( this );
 		_radio0.addActionListener( this );
 		_radio1.addActionListener( this );
 		_radio2.addActionListener( this );
 	}
 	public void actionPerformed( ActionEvent $event ) {
 		Object source = $event.getSource();
-		if ( ( _active != null ) && ( source == go ) ) {
+		if ( ( _active != null ) && ( source == _go ) ) {
 			_edit1.setText( _active.getText() );
 		} else if ( source.getClass().getName() == "javax.swing.JRadioButton" ) {
 			_active = ( JRadioButton ) source;
 			_edit0.setText( _active.getText() );
-//		} else {
-//			System.out.println( source.getClass().getName() );
 		}
 	}
 }
@@ -77,7 +41,7 @@ public class /* Application or applet name: */ Galaxy extends JApplet {
 
 	public void init() {
 		try {
-			add( new HGUIMain( "xml/helloworld.xml" ) );
+			add( new HGUIMain( "" ) );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 		}
