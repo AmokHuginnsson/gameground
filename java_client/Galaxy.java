@@ -1,12 +1,7 @@
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.Container;
-import org.swixml.SwingEngine;
-import javax.swing.*;
+import javax.swing.JApplet;
+import javax.swing.JFrame;
 
 public class /* Application or applet name: */ Galaxy extends JApplet {
 	public static final long serialVersionUID = 13l;
