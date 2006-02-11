@@ -3,6 +3,7 @@ import java.applet.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.net.URL;
+import org.swixml.SwingEngine;
 
 class HGUIMain extends JPanel implements ActionListener {
 	public static final long serialVersionUID = 17l;
@@ -18,7 +19,9 @@ class HGUIMain extends JPanel implements ActionListener {
 	JRadioButton _radio2;
 	JRadioButton _active;
 	AudioClip clip;
-	public HGUIMain( String $label ) {
+	public HGUIMain( String $label ) throws Exception {
+		new SwingEngine( this ).insert( "xml/helloworld.xml", this );
+		//new SwingEngine( this ).insert( new URL( $label, "xml/helloworld.xml" ), this );
 		_radio0 = new JRadioButton( "Wilk" );
 		_radio1 = new JRadioButton( "Kruk" );
 		_radio2 = new JRadioButton( "Nied¼wie¼" );
@@ -73,7 +76,11 @@ public class /* Application or applet name: */ Galaxy extends JApplet {
 	private static JFrame _frame;
 
 	public void init() {
-		add( new HGUIMain("Push Me") );
+		try {
+			add( new HGUIMain( "xml/helloworld.xml" ) );
+		} catch ( Exception e ) {
+			e.printStackTrace();
+		}
 	}
 
 	static public void main( String $argv[] ) {

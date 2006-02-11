@@ -1,11 +1,11 @@
 all: galaxy.jar
 
 galaxy.jar: Galaxy.java
-	javac -Xlint Galaxy.java
+	javac -Xlint -cp jdom.jar:swixml.jar Galaxy.java
 	jar cf galaxy.jar *.class
 
 run: galaxy.jar
-	java -cp galaxy.jar Galaxy
+	java -cp jdom.jar:swixml.jar:galaxy.jar Galaxy
 
 dist:
 	$(MAKE)
