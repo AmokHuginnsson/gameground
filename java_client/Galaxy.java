@@ -4,36 +4,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.Container;
 import org.swixml.SwingEngine;
 import javax.swing.*;
-
-class HGUIMain extends JPanel implements ActionListener {
-	public static final long serialVersionUID = 17l;
-	public JTextField _edit0;
-	public JTextField _edit1;
-	public JButton _go;
-	public JRadioButton _radio0;
-	public JRadioButton _radio1;
-	public JRadioButton _radio2;
-	JRadioButton _active;
-	public HGUIMain( String $label ) throws Exception {
-//		new SwingEngine( this ).insert( HGUIMain.class.getResource( "galaxy.xml" ), this );
-		new SwingEngine( this ).insert( new InputStreamReader( HGUIMain.class.getResourceAsStream( "galaxy.xml" ) ), this );
-		_go.addActionListener( this );
-		_radio0.addActionListener( this );
-		_radio1.addActionListener( this );
-		_radio2.addActionListener( this );
-	}
-	public void actionPerformed( ActionEvent $event ) {
-		Object source = $event.getSource();
-		if ( ( _active != null ) && ( source == _go ) ) {
-			_edit1.setText( _active.getText() );
-		} else if ( source.getClass().getName() == "javax.swing.JRadioButton" ) {
-			_active = ( JRadioButton ) source;
-			_edit0.setText( _active.getText() );
-		}
-	}
-}
 
 public class /* Application or applet name: */ Galaxy extends JApplet {
 	public static final long serialVersionUID = 13l;
@@ -41,7 +14,7 @@ public class /* Application or applet name: */ Galaxy extends JApplet {
 
 	public void init() {
 		try {
-			add( new HGUIMain( "" ) );
+			add( new HGUIMain() );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 		}
