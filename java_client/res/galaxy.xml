@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="iso8859-2"?>
+<panel layout="BoxLayout">
+	<vbox size="400,200">
+		<panel>
+			<buttongroup>
+				<radiobutton id="_radio0" text="Wilk" />
+				<radiobutton id="_radio1" text="Kruk" />
+				<radiobutton id="_radio2" text="Niedźwiedź" />
+			</buttongroup>
+			<textfield id="_edit0" columns="20" Text="" />
+			<textfield id="_edit1" columns="20" Text="" />
+		</panel>
+		<panel>
+			<button id="_go" text="GO !" action="submit" />
+		</panel>
+	</vbox>
+</panel>
