@@ -4,22 +4,45 @@
 <!ENTITY v_height "30">
 ]>
 <applet>
-	<panel layout="BoxLayout" preferredsize="400,400">
+	<panel id="_setup" layout="BoxLayout" preferredsize="400,400">
 		<vbox size="400,201">
 			<panel maximumsize="300,30">
-				<label>Galaxy</label>
+				<label font="-BOLDITALIC-30" foreground="blue">Galaxy</label>
 			</panel>
-			<panel>
-				<label labelfor="_name">Your name:</label>
-				<textfield id="_name" columns="20" Text="" />
-				<label labelfor="_server">Server:</label>
-				<textfield id="_server" columns="24" Text="" />
-				<label labelfor="_port">Port:</label>
-				<textfield id="_port" columns="5" Text="" />
+			<panel layout="GridBagLayout">
+				<label labelfor="_name">
+					<gridbagconstraints gridx="0" gridy="0" ipadx="10" anchor="GridBagConstraints.WEST" />
+					Your name:
+				</label>
+				<textfield id="_name" columns="16" text="" tooltiptext="Your preferred in game name." >
+					<gridbagconstraints gridx="1" gridy="0" anchor="GridBagConstraints.WEST" />
+				</textfield>
+				<label labelfor="_server">
+					<gridbagconstraints gridx="0" gridy="1" anchor="GridBagConstraints.WEST" />
+					Server:
+				</label>
+				<textfield id="_server" columns="24" text="" tooltiptext="Address of the server that hosts the game." >
+					<gridbagconstraints gridx="1" gridy="1" anchor="GridBagConstraints.WEST" />
+				</textfield>
+				<label labelfor="_port">
+					<gridbagconstraints gridx="0" gridy="2" anchor="GridBagConstraints.WEST" />
+					Port:
+				</label>
+				<textfield id="_port" columns="5" text="5555" tooltiptext="Port that game server is bound to.">
+					<gridbagconstraints gridx="1" gridy="2" anchor="GridBagConstraints.WEST" />
+				</textfield>
 			</panel>
 			<panel>
 				<button id="_connect" text="Connect !" action="submit" />
 			</panel>
 		</vbox>
 	</panel>
+	<panel id="_main" layout="BoxLayout" preferredsize="400,400" visible="false">
+		<vbox size="400,201">
+			<label>
+				oops
+			</label>
+		</vbox>
+	</panel>
+	<!-- messagetype does not work so there is no reason to fight with it here. optionpane id="_message" visible="false" message="Your setup contains following errors:" messagetype="JOptionPane.ERROR_MESSAGE" /-->
 </applet>

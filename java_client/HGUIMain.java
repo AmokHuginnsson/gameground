@@ -17,6 +17,8 @@ class HGUIMain extends JPanel implements ActionListener {
 		public JTextField _server;
 		public JTextField _port;
 		public JButton _connect;
+		public JPanel _setup;
+		public JPanel _main;
 	}
 	public HWidgets _widgets;
 	public HGUIMain() throws Exception {
@@ -24,10 +26,30 @@ class HGUIMain extends JPanel implements ActionListener {
 		_widgets.insert( new InputStreamReader( HGUIMain.class.getResourceAsStream( "galaxy.xml" ) ), this );
 		_widgets._connect.addActionListener( this );
 	}
+	void onConnectClick() {
+		String errors = "";
+		if ( _widgets._name.getText().compareTo( "" ) == 0 )
+			errors += "name not set\n";
+		if ( _widgets._server.getText().compareTo( "" ) == 0 )
+			errors += "server not set\n";
+		if ( ( _widgets._port.getText().compareTo( "" ) == 0 )
+				|| ( new Integer( _widgets._port.getText() ).intValue() <= 1024 ) )
+			errors += "invalid port number (must be over 1024)";
+		if( errors.compareTo( "" ) != 0 ) {
+			JOptionPane.showMessageDialog( this,
+					"Your setup contains following errors:\n" + errors,
+					"Galaxy - error ...", JOptionPane.ERROR_MESSAGE );
+		} else {
+			JOptionPane.showMessageDialog( this, errors );
+			_widgets._setup.setVisible( false );
+			_widgets._setup = null;
+			_widgets._main.setVisible( true );
+		}
+	}
 	public void actionPerformed( ActionEvent $event ) {
 		Object source = $event.getSource();
 		if ( source == _widgets._connect ) {
-			_widgets._name.setText( "AAA" );
+			onConnectClick();
 		}
 	}
 }
