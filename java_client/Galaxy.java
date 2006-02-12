@@ -21,7 +21,7 @@ public class /* Application or applet name: */ Galaxy extends JApplet {
 		_frame.add( applet );
 		applet.init();
 		applet.start();
-		_frame.setSize( 400, 200 );
+		_frame.setSize( applet.getPreferredSize().width, applet.getPreferredSize().height );
 		class HAppTerminator extends WindowAdapter {
 			JApplet _applet;
 			public HAppTerminator( JApplet $applet ) {
