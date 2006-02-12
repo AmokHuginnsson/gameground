@@ -39,9 +39,11 @@
 	</panel>
 	<panel id="_main" layout="BoxLayout" preferredsize="400,400" visible="false">
 		<vbox size="400,201">
-			<label>
-				oops
-			</label>
+			<panel layout="FlowLayout">
+				<label>Emperor </label>
+				<label id="_emperor"></label>
+			</panel>
+			<panel id="_board" />
 		</vbox>
 	</panel>
 	<!-- messagetype does not work so there is no reason to fight with it here. optionpane id="_message" visible="false" message="Your setup contains following errors:" messagetype="JOptionPane.ERROR_MESSAGE" /-->
