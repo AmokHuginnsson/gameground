@@ -21,12 +21,15 @@ class HGUIMain extends JPanel implements ActionListener {
 		public JPanel _setup;
 		public JPanel _main;
 		public JLabel _emperor;
-		public JPanel _board;
+		public HBoard _board;
+		public HWidgets() {
+			super.getTaglib().registerTag( "hboard", HBoard.class );
+		}
 	}
 	public HWidgets _widgets;
 	public HGUIMain() throws Exception {
 		_widgets = new HWidgets();
-		_widgets.insert( new InputStreamReader( HGUIMain.class.getResourceAsStream( "res/galaxy.xml" ) ), this );
+		_widgets.insert( new InputStreamReader( getClass().getResourceAsStream( "res/galaxy.xml" ) ), this );
 		_widgets._connect.addActionListener( this );
 	}
 	void onConnectClick() {

@@ -4,7 +4,7 @@
 <!ENTITY v_height "30">
 ]>
 <applet>
-	<panel id="_setup" layout="BoxLayout" preferredsize="400,400">
+	<panel id="_setup" layout="BoxLayout" preferredsize="800,700">
 		<vbox size="400,201">
 			<panel maximumsize="300,30">
 				<label font="-BOLDITALIC-30" foreground="blue">Galaxy</label>
@@ -37,13 +37,13 @@
 			</panel>
 		</vbox>
 	</panel>
-	<panel id="_main" layout="BoxLayout" preferredsize="400,400" visible="false">
-		<vbox size="400,201">
-			<panel layout="FlowLayout">
+	<panel id="_main" layout="BoxLayout" preferredsize="800,700" visible="false">
+		<vbox size="700,700">
+			<panel layout="FlowLayout" maximumsize="300,30">
 				<label>Emperor </label>
 				<label id="_emperor"></label>
 			</panel>
-			<panel id="_board" />
+			<hboard id="_board" minimumsize="640,640" />
 		</vbox>
 	</panel>
 	<!-- messagetype does not work so there is no reason to fight with it here. optionpane id="_message" visible="false" message="Your setup contains following errors:" messagetype="JOptionPane.ERROR_MESSAGE" /-->
