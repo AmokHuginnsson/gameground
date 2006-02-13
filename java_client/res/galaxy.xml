@@ -33,7 +33,7 @@
 				</textfield>
 			</panel>
 			<panel>
-				<button id="_connect" text="Connect !" action="submit" />
+				<button id="_connect" text="Connect !" action="submit" tooltiptext="Click me to start the game." />
 			</panel>
 		</vbox>
 	</panel>

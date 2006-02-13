@@ -42,8 +42,12 @@ class HGUIMain extends JPanel implements ActionListener {
 			_emperor = new String( _widgets._name.getText() );
 		if ( _widgets._server.getText().compareTo( "" ) == 0 )
 			errors += "server not set\n";
-		if ( ( _widgets._port.getText().compareTo( "" ) == 0 )
-				|| ( new Integer( _widgets._port.getText() ).intValue() <= 1024 ) )
+		int port = -1;
+		try {
+			port = new Integer( _widgets._port.getText() ).intValue();
+		} catch ( NumberFormatException e ) {
+		}
+		if ( port <= 1024 )
 			errors += "invalid port number (must be over 1024)";
 		if( errors.compareTo( "" ) != 0 ) {
 			JOptionPane.showMessageDialog( this,
