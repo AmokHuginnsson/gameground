@@ -3,7 +3,7 @@ all: galaxy.jar
 *.class: *.java
 	javac -Xlint -cp jdom.jar:swixml.jar *.java
 
-galaxy.jar: *.class res/galaxy.xml
+galaxy.jar: *.class res/galaxy.xml res/*.xpm
 	jar cf galaxy.jar res *.class
 
 run: galaxy.jar

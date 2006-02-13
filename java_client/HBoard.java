@@ -46,7 +46,7 @@ public class HBoard extends JPanel {
 	protected void paintComponent( Graphics g ) {
 		g.drawImage( _images._background, 0, 0, this );
 		for ( int i = 0; i < 9; ++ i )
-			g.drawImage( _images._planets[i], i * 40, i * 40, this );
+			g.drawImage( _images._planets[i], 200 + i * 25, 300, this );
 	}
 }
 
