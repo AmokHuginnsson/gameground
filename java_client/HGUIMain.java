@@ -29,7 +29,9 @@ class HGUIMain extends JPanel implements ActionListener {
 	public HWidgets _widgets;
 	public HGUIMain() throws Exception {
 		_widgets = new HWidgets();
+		HImages images = new HImages();
 		_widgets.insert( new InputStreamReader( getClass().getResourceAsStream( "res/galaxy.xml" ) ), this );
+		_widgets._board.setImages( images );
 		_widgets._connect.addActionListener( this );
 	}
 	void onConnectClick() {
