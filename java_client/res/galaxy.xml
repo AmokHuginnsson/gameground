@@ -39,12 +39,17 @@
 		</vbox>
 	</panel>
 	<panel id="_main" layout="BoxLayout" preferredsize="&v_width;,&v_height;" visible="false">
-		<vbox size="700,&v_height;">
+		<vbox size="&v_width;,&v_height;">
 			<panel layout="FlowLayout" maximumsize="&v_width;,30">
 				<label>Emperor </label>
 				<label id="_emperor"></label>
 			</panel>
-			<hboard id="_board" minimumsize="640,640" />
+			<hbox size="&v_width;640" layout="BoxLayout">
+				<hboard id="_board" minimumsize="640,640" />
+				<scrollpane>
+					<editorpane />
+				</scrollpane>
+			</hbox>
 		</vbox>
 	</panel>
 	<!-- messagetype does not work so there is no reason to fight with it here. optionpane id="_message" visible="false" message="Your setup contains following errors:" messagetype="JOptionPane.ERROR_MESSAGE" /-->

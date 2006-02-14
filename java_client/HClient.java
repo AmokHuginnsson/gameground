@@ -16,7 +16,7 @@ class HClient extends Thread {
 	PrintWriter _out;
 	Socket _socket;
 //--------------------------------------------//
-	HClient( String $emperor, String $server, int $port ) throws Exception {
+	public HClient( String $emperor, String $server, int $port ) throws Exception {
 		_emperor = $emperor;
 		_handlers = new HashMap<String,Method>();
 		_handlers.put( "SETUP", HClient.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );

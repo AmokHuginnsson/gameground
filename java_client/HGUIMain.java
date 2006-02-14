@@ -62,7 +62,7 @@ class HGUIMain extends JPanel implements ActionListener {
 					"Your setup contains following errors:\n" + errors,
 					"Galaxy - error ...", JOptionPane.ERROR_MESSAGE );
 		} else {
-			try {
+/*			try {
 				_client = new HClient( emperor, server, port );
 				_client.start();
 			} catch ( Exception e ) {
@@ -70,7 +70,7 @@ class HGUIMain extends JPanel implements ActionListener {
 						"Galaxy client was unable to connect to server:\n" + e.getMessage(),
 						"Galaxy - error ...", JOptionPane.ERROR_MESSAGE );
 				return;
-			}
+			}*/
 			_widgets._setup.setVisible( false );
 			_widgets._setup = null;
 			_widgets._main.setVisible( true );

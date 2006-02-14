@@ -867,7 +867,6 @@ int HClient::handler_message ( int )
 	if ( ( l_iMsgLength = f_oSocket.read_until ( l_oMessage ) ) > 0 )
 		{
 		l_oCommand = l_oMessage.split ( ":", 0 );
-		l_oCommand = l_oMessage.split ( ":", 0 );
 		l_oArgument = l_oMessage.mid ( l_oCommand.get_length ( ) + 1 );
 		l_iMsgLength = l_oArgument.get_length ( );
 		if ( ( l_iMsgLength > 1 ) && ( l_oCommand == "GLX" ) )
