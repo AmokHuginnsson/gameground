@@ -7,7 +7,7 @@ galaxy.jar: *.class res/galaxy.xml res/*.xpm
 	jar cf galaxy.jar res *.class
 
 run: galaxy.jar
-	java -Djava.security.manager -cp jdom.jar:swixml.jar:galaxy.jar Galaxy
+	java -Djava.security.manager -Djava.security.policy=galaxy.policy -cp jdom.jar:swixml.jar:galaxy.jar Galaxy
 
 dist:
 	$(MAKE)

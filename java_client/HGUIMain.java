@@ -1,6 +1,5 @@
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.net.Socket;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.Container;
@@ -13,10 +12,7 @@ import javax.swing.JOptionPane;
 
 class HGUIMain extends JPanel implements ActionListener {
 	public static final long serialVersionUID = 17l;
-	String _emperor;
-	String _server;
-	int _port;
-	Socket _socket;
+	HClient _client;
 	public class HWidgets extends SwingEngine {
 		/* This is one dirty hack.
 		 * To make it work you have to edit org/swixml/SwingEngine.java
@@ -44,20 +40,22 @@ class HGUIMain extends JPanel implements ActionListener {
 	}
 	void onConnectClick() {
 		String errors = "";
+		String emperor = "";
 		if ( _widgets._name.getText().compareTo( "" ) == 0 )
 			errors += "name not set\n";
 		else
-			_emperor = new String( _widgets._name.getText() );
+			emperor = new String( _widgets._name.getText() );
+		String server = "";
 		if ( _widgets._server.getText().compareTo( "" ) == 0 )
 			errors += "server not set\n";
 		else
-			_server = new String( _widgets._server.getText() );
-		_port = -1;
+			server = new String( _widgets._server.getText() );
+		int port = -1;
 		try {
-			_port = new Integer( _widgets._port.getText() ).intValue();
+			port = new Integer( _widgets._port.getText() ).intValue();
 		} catch ( NumberFormatException e ) {
 		}
-		if ( _port <= 1024 )
+		if ( port <= 1024 )
 			errors += "invalid port number (must be over 1024)";
 		if( errors.compareTo( "" ) != 0 ) {
 			JOptionPane.showMessageDialog( this,
@@ -65,18 +63,18 @@ class HGUIMain extends JPanel implements ActionListener {
 					"Galaxy - error ...", JOptionPane.ERROR_MESSAGE );
 		} else {
 			try {
-				_socket = new Socket( _server, _port );
+				_client = new HClient( emperor, server, port );
+				_client.start();
 			} catch ( Exception e ) {
 				JOptionPane.showMessageDialog( this,
 						"Galaxy client was unable to connect to server:\n" + e.getMessage(),
 						"Galaxy - error ...", JOptionPane.ERROR_MESSAGE );
-				e.printStackTrace();
 				return;
 			}
 			_widgets._setup.setVisible( false );
 			_widgets._setup = null;
 			_widgets._main.setVisible( true );
-			_widgets._emperor.setText( _emperor );
+			_widgets._emperor.setText( emperor );
 		}
 	}
 	public void actionPerformed( ActionEvent $event ) {
