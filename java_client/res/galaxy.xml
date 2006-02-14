@@ -4,53 +4,50 @@
 <!ENTITY v_height "700">
 <!ENTITY v_port "7777">
 ]>
-<applet>
-	<panel id="_setup" layout="BoxLayout" preferredsize="&v_width;,&v_height;">
-		<vbox size="&v_width;,200">
-			<panel maximumsize="&v_width;,30">
-				<label font="-BOLDITALIC-30" foreground="blue">Galaxy</label>
-			</panel>
-			<panel layout="GridBagLayout">
-				<label labelfor="_name">
-					<gridbagconstraints gridx="0" gridy="0" ipadx="10" anchor="GridBagConstraints.WEST" />
-					Your name:
-				</label>
-				<textfield id="_name" columns="16" text="Amok" tooltiptext="Your preferred in game name." >
-					<gridbagconstraints gridx="1" gridy="0" anchor="GridBagConstraints.WEST" />
-				</textfield>
-				<label labelfor="_server">
-					<gridbagconstraints gridx="0" gridy="1" anchor="GridBagConstraints.WEST" />
-					Server:
-				</label>
-				<textfield id="_server" columns="24" text="127.0.0.1" tooltiptext="Address of the server that hosts the game." >
-					<gridbagconstraints gridx="1" gridy="1" anchor="GridBagConstraints.WEST" />
-				</textfield>
-				<label labelfor="_port">
-					<gridbagconstraints gridx="0" gridy="2" anchor="GridBagConstraints.WEST" />
-					Port:
-				</label>
-				<textfield id="_port" columns="5" text="&v_port;" tooltiptext="Port that game server is bound to.">
-					<gridbagconstraints gridx="1" gridy="2" anchor="GridBagConstraints.WEST" />
-				</textfield>
-			</panel>
-			<panel>
-				<button id="_connect" text="Connect !" action="submit" tooltiptext="Click me to start the game." />
-			</panel>
-		</vbox>
-	</panel>
-	<panel id="_main" layout="BoxLayout" preferredsize="&v_width;,&v_height;" visible="false">
-		<vbox size="&v_width;,&v_height;">
-			<panel layout="FlowLayout" maximumsize="&v_width;,30">
-				<label>Emperor </label>
-				<label id="_emperor"></label>
-			</panel>
-			<hbox size="&v_width;640" layout="BoxLayout">
-				<hboard id="_board" minimumsize="640,640" />
-				<scrollpane>
-					<editorpane />
-				</scrollpane>
-			</hbox>
-		</vbox>
+<applet background="black">
+	<panel id="_setup" layout="BoxLayout" preferredsize="&v_width;,&v_height;"><!--{{{-->
+		<panel bounds="0,0,&v_width;,50">
+			<label font="-BOLDITALIC-30" foreground="blue">Galaxy</label>
+		</panel>
+		<panel bounds="0,100,&v_width;,60" layout="GridBagLayout">
+			<label labelfor="_name">
+				<gridbagconstraints gridx="0" gridy="0" ipadx="10" anchor="GridBagConstraints.WEST" />
+				Your name:
+			</label>
+			<textfield id="_name" columns="16" text="Amok" tooltiptext="Your preferred in game name." >
+				<gridbagconstraints gridx="1" gridy="0" anchor="GridBagConstraints.WEST" />
+			</textfield>
+			<label labelfor="_server">
+				<gridbagconstraints gridx="0" gridy="1" anchor="GridBagConstraints.WEST" />
+				Server:
+			</label>
+			<textfield id="_server" columns="24" text="127.0.0.1" tooltiptext="Address of the server that hosts the game." >
+				<gridbagconstraints gridx="1" gridy="1" anchor="GridBagConstraints.WEST" />
+			</textfield>
+			<label labelfor="_port">
+				<gridbagconstraints gridx="0" gridy="2" anchor="GridBagConstraints.WEST" />
+				Port:
+			</label>
+			<textfield id="_port" columns="5" text="&v_port;" tooltiptext="Port that game server is bound to.">
+				<gridbagconstraints gridx="1" gridy="2" anchor="GridBagConstraints.WEST" />
+			</textfield>
+		</panel>
+		<panel bounds="0,200,&v_width;,50">
+			<button id="_connect" text="Connect !" action="submit" tooltiptext="Click me to start the game." />
+		</panel>
+	</panel><!--}}}-->
+	<panel id="_main" layout="BoxLayout" background="black" preferredsize="&v_width;,&v_height;" visible="false">
+		<panel bounds="0,0,&v_width;,30" background="black" layout="FlowLayout">
+			<label foreground="white">Emperor </label>
+			<label id="_emperor" foreground="green"></label>
+			<label foreground="white" labelfor="_fleet">Fleet size: </label>
+			<textfield id="_fleet" columns="4" foreground="black" background="green" editable="false" tooltiptext="Enter number of ships You want to send in this fleet." />
+			<button id="_endTurn" text="End turn !" action="submit" tooltiptext="Click me to end this turn." />
+		</panel>
+		<hboard id="_board" bounds="0,30,640,640" border="MatteBorder(1,1,1,1,0000a0)" />
+		<scrollpane bounds="640,30,160,640">
+			<editorpane id="_log" foreground="white" background="black" carretcolor="black" editable="false" />
+		</scrollpane>
 	</panel>
 	<!-- messagetype does not work so there is no reason to fight with it here. optionpane id="_message" visible="false" message="Your setup contains following errors:" messagetype="JOptionPane.ERROR_MESSAGE" /-->
 </applet>
