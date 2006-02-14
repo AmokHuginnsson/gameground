@@ -3,7 +3,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.awt.Image;
 import java.awt.Graphics;
-import javax.swing.*;
+import javax.swing.JPanel;
+import javax.swing.ImageIcon;
 
 class HImages {
 	static int PLANETS_ICON_COUNT = 9;

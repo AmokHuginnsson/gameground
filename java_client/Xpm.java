@@ -18,7 +18,7 @@ import java.awt.Image;
 import java.util.Map;
 import java.util.HashMap;
 import java.awt.Toolkit;
-import java.awt.image.*;
+import java.awt.image.MemoryImageSource;
 // rgb data originally from
 // ! $XConsortium: rgb.txt, v 10.41 94/02/20 18:39:36 rws Exp $
 
