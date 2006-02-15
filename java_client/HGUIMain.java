@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JEditorPane;
 
 class HGUIMain extends JPanel implements ActionListener {
 	public static final long serialVersionUID = 17l;
@@ -26,6 +27,7 @@ class HGUIMain extends JPanel implements ActionListener {
 		public JPanel _main;
 		public JLabel _emperor;
 		public HBoard _board;
+		public JEditorPane _log;
 		public HWidgets() {
 			super.getTaglib().registerTag( "hboard", HBoard.class );
 		}
@@ -75,6 +77,7 @@ class HGUIMain extends JPanel implements ActionListener {
 			_widgets._setup = null;
 			_widgets._main.setVisible( true );
 			_widgets._emperor.setText( emperor );
+			_log.
 		}
 	}
 	public void actionPerformed( ActionEvent $event ) {
