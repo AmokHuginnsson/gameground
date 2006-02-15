@@ -7,9 +7,11 @@ import javax.swing.JPanel;
 import javax.swing.ImageIcon;
 
 class HImages {
+//--------------------------------------------//
 	static int PLANETS_ICON_COUNT = 9;
 	public Image _background;
 	public Image[] _planets;
+//--------------------------------------------//
 	public HImages() {
 		_planets = new Image[PLANETS_ICON_COUNT];
 		_background = loadImage( "res/god.png" );
@@ -19,7 +21,7 @@ class HImages {
 			_planets[ i ] = loadImage( path );
 		}
 	}
-	Image loadImage( String $path ) {
+	private Image loadImage( String $path ) {
 		try {
 			InputStream in = getClass().getResourceAsStream( $path );
 			int size = in.available();
@@ -39,10 +41,16 @@ class HImages {
 }
 
 public class HBoard extends JPanel {
+//--------------------------------------------//
 	public static final long serialVersionUID = 7l;
+	int _size;
 	HImages _images;
+//--------------------------------------------//
 	public void setImages( HImages $images ) {
 		_images = $images;
+	}
+	void setSize( int $size ) {
+		_size = $size;
 	}
 	protected void paintComponent( Graphics g ) {
 		g.drawImage( _images._background, 0, 0, this );
