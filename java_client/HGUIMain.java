@@ -22,6 +22,7 @@ class HGUIMain extends JPanel implements ActionListener {
 	}
 	public static class Colors {
 		public static int NORMAL = 12;
+		public static int WHITE = 15;
 	}
 	public class HWidgets extends SwingEngine {
 		/* This is one dirty hack.
@@ -60,7 +61,7 @@ class HGUIMain extends JPanel implements ActionListener {
 			_colors[ 12 ] = Color.lightGray;
 			_colors[ 13 ] = Color.gray;
 			_colors[ 14 ] = Color.darkGray;
-			_colors[ 15 ] = Color.lightGray;
+			_colors[ 15 ] = Color.white;
 		}
 	}
 //--------------------------------------------//
