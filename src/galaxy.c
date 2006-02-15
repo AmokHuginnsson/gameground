@@ -966,7 +966,8 @@ void HClient::handler_play ( HString & a_roCommand )
 				f_oWindow.f_poLogPad->add ( l_oValue );
 				f_oWindow.f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
 				f_oWindow.f_poLogPad->add ( " conquered " );
-				f_oWindow.f_poLogPad->add ( n_piColors [ f_oSystems [ l_iSysNo ].f_iColor ] );
+				int l_iTemp = f_oSystems [ l_iSysNo ].f_iColor;
+				f_oWindow.f_poLogPad->add ( ( l_iTemp >= 0 ) ? n_piColors [ l_iTemp ] : COLORS::D_ATTR_NORMAL );
 				f_oWindow.f_poLogPad->add ( n_ppcSystemNames [ l_iSysNo ] );
 				l_oValue.format ( "(%c)", n_pcSymbols [ l_iSysNo ] );
 				f_oWindow.f_poLogPad->add ( l_oValue );
