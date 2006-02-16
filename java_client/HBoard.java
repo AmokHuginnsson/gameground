@@ -8,7 +8,7 @@ import javax.swing.ImageIcon;
 
 class HImages {
 //--------------------------------------------//
-	static int PLANETS_ICON_COUNT = 9;
+	static int PLANETS_ICON_COUNT = 10;
 	public Image _background;
 	public Image[] _planets;
 //--------------------------------------------//
@@ -17,7 +17,7 @@ class HImages {
 		_background = loadImage( "res/god.png" );
 		for ( int i = 0; i < PLANETS_ICON_COUNT; ++ i ) {
 			String path = "res/planet";
-			path += ( i + 1 ) + ".xpm";
+			path += i + ".xpm";
 			_planets[ i ] = loadImage( path );
 		}
 	}
@@ -54,8 +54,8 @@ public class HBoard extends JPanel {
 	}
 	protected void paintComponent( Graphics g ) {
 		g.drawImage( _images._background, 0, 0, this );
-		for ( int i = 0; i < 9; ++ i )
-			g.drawImage( _images._planets[i], 200 + i * 25, 300, this );
+		for ( int i = 0; i < 10; ++ i )
+			g.drawImage( _images._planets[i], 160 + i * 32, 300, this );
 	}
 }
 
