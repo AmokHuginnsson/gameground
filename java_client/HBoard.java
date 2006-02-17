@@ -5,20 +5,21 @@ import java.awt.Image;
 import java.awt.Graphics;
 import javax.swing.JPanel;
 import javax.swing.ImageIcon;
+import java.awt.Color;
 
 class HImages {
 //--------------------------------------------//
 	static int PLANETS_ICON_COUNT = 36;
 	public Image _background;
-	public Image[] _planets;
+	public Image[] _systems;
 //--------------------------------------------//
 	public HImages() {
-		_planets = new Image[PLANETS_ICON_COUNT];
+		_systems = new Image[PLANETS_ICON_COUNT];
 		_background = loadImage( "res/god.png" );
 		for ( int i = 0; i < PLANETS_ICON_COUNT; ++ i ) {
 			String path = "res/system";
 			path += i + ".xpm";
-			_planets[ i ] = loadImage( path );
+			_systems[ i ] = loadImage( path );
 		}
 	}
 	private Image loadImage( String $path ) {
@@ -44,24 +45,66 @@ public class HBoard extends JPanel {
 //--------------------------------------------//
 	public static final long serialVersionUID = 7l;
 	int _size;
+	int _diameter;
 	HImages _images;
+	HGUIMain _gui;
+	HSystem[] _systems;
 //--------------------------------------------//
+	public HBoard() {
+		_size = -1;
+	}
+	void setGui( HGUIMain $gui ) {
+		_gui = $gui;
+	}
 	public void setImages( HImages $images ) {
 		_images = $images;
 	}
 	void setSize( int $size ) {
 		_size = $size;
+		_diameter = 640 / $size;
+	}
+	void setSystems( HSystem[] $systems ) {
+		_systems = $systems;
+//		updateUI();
+	}
+	private void drawSystem( Graphics $gs, int $no, int $coordX, int $coordY, int $color ) {
+		$gs.drawImage( _images._systems[$no],
+				$coordX * _diameter + ( _diameter - 32 ) / 2,
+				$coordY * _diameter + ( _diameter - 32 ) / 2, this );
+		if ( $color >= 0 ) {
+			$gs.setColor ( _gui._widgets._colors[ $color ] );
+			$gs.drawRect ( $coordX * _diameter + 1,
+					$coordY * _diameter + 1,
+					_diameter - 2, _diameter - 2 );
+			$gs.drawRect ( $coordX * _diameter + 2,
+					$coordY * _diameter + 2,
+					_diameter - 4, _diameter - 4 );
+		}
 	}
 	protected void paintComponent( Graphics g ) {
 		g.drawImage( _images._background, 0, 0, this );
-		for ( int i = 0; i < 10; ++ i )
-			g.drawImage( _images._planets[i], 160 + i * 32, 256, this );
-		for ( int i = 10; i < 20; ++ i )
-			g.drawImage( _images._planets[i], 160 + ( i - 10 ) * 32, 288, this );
-		for ( int i = 20; i < 30; ++ i )
-			g.drawImage( _images._planets[i], 160 + ( i - 20 ) * 32, 320, this );
-		for ( int i = 30; i < 36; ++ i )
-			g.drawImage( _images._planets[i], 160 + ( i - 30 ) * 32, 352, this );
+		if ( _size > 0 ) {
+			int systemCount = _gui._client.getSystemCount();
+			if ( _systems != null ) {
+				for ( int i = 0; i < systemCount; ++ i )
+					drawSystem( g, i, _systems[ i ]._coordinateX, _systems[ i ]._coordinateY, _systems[ i ]._color );
+			}
+			/*
+			for ( int i = 0; i < 10; ++ i )
+				drawSystem( g, i, i + 5, 8, i );
+			for ( int i = 0; i < 10; ++ i )
+				drawSystem( g, i + 10, i + 5, 9, i );
+			for ( int i = 0; i < 10; ++ i )
+				drawSystem( g, i + 20, i + 5, 10, i );
+			for ( int i = 0; i < 6; ++ i )
+				drawSystem( g, i + 30, i + 5, 11, i );
+			*/
+			g.setColor( Color.darkGray );
+			for ( int i = 0; i < _size; ++ i )
+				g.drawLine( 0, i * _diameter, 640, i * _diameter );
+			for ( int i = 0; i < _size; ++ i )
+				g.drawLine( i * _diameter, 0, i * _diameter, 640 );
+		}
 	}
 }
 

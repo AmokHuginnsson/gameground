@@ -118,10 +118,14 @@ class HGUIMain extends JPanel implements ActionListener {
 		_widgets._setup = null;
 		_widgets._main.setVisible( true );
 		_widgets._emperor.setText( $emperor );
+		_widgets._board.setGui( this );
 		_log = ( DefaultStyledDocument )_widgets._log.getStyledDocument();
 //		log( "##", 0 );log( " ##", 1 );log( " ##", 2 );log( " ##", 3 );log( " ##", 4 );log( " ##\n", 5 );
 //		log( "##", 6 );log( " ##", 7 );log( " ##", 8 );log( " ##", 9 );log( " ##", 10 );log( " ##\n", 11 );
 //		log( "##", 12 );log( " ##", 13 );log( " ##\n", 14 );
+		synchronized ( _client ) {
+			_client.notify();
+		}
 	}
 	void onConnectClick() {
 		String errors = "";
