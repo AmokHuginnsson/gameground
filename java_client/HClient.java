@@ -141,7 +141,6 @@ class HClient extends Thread {
 					_loop = false;
 				else {
 					_systems = new HSystem[_systemCount = new Integer( value ).intValue()];
-					_gui._widgets._board.setSystems( _systems );
 				}
 			} else if ( variable.compareTo( "system_coordinates" ) == 0 ) {
 				tokens = value.split( ",", 3 );
@@ -151,6 +150,8 @@ class HClient extends Thread {
 				_systems[index] = new HSystem();
 				_systems[index]._coordinateX = coordX;
 				_systems[index]._coordinateY = coordY;
+				if ( index == ( _systemCount - 1 ) )
+					_gui._widgets._board.setSystems( _systems );
 			} else if ( variable.compareTo( "emperor" ) == 0 ) {
 				tokens = value.split( ",", 2 );
 				index = new Integer( tokens[0] ).intValue();
@@ -285,13 +286,16 @@ class HClient extends Thread {
 	}
 	public void run() {
 		synchronized( this ) {
-			try {
-				wait();
-			} catch ( java.lang.InterruptedException e ) {
-				e.printStackTrace();
-				System.exit( 1 );
+			if ( _gui._log == null ) {
+				try {
+					wait();
+				} catch ( java.lang.InterruptedException e ) {
+					e.printStackTrace();
+					System.exit( 1 );
+				}
 			}
 		}
+		System.out.println( "Thread started." );
 		try {
 			String message = "";
 			String command;

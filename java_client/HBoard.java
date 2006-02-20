@@ -3,9 +3,12 @@ import java.io.InputStream;
 import java.net.URL;
 import java.awt.Image;
 import java.awt.Graphics;
+import java.awt.event.MouseEvent;
+import java.awt.event.ActionListener;
+import java.awt.Color;
 import javax.swing.JPanel;
 import javax.swing.ImageIcon;
-import java.awt.Color;
+import javax.swing.event.MouseInputListener;
 
 class HImages {
 //--------------------------------------------//
@@ -41,17 +44,45 @@ class HImages {
 	}
 }
 
-public class HBoard extends JPanel {
+public class HBoard extends JPanel implements MouseInputListener {
 //--------------------------------------------//
 	public static final long serialVersionUID = 7l;
 	int _size;
 	int _diameter;
+	int _cursorX;
+	int _cursorY;
 	HImages _images;
 	HGUIMain _gui;
 	HSystem[] _systems;
 //--------------------------------------------//
 	public HBoard() {
 		_size = -1;
+		_cursorX = -1;
+		_cursorY = -1;
+	}
+	public void mouseMoved( MouseEvent $event ) {
+		int cursorX = $event.getX() / _diameter;
+		int cursorY = $event.getY() / _diameter;
+		if ( ( _cursorX != cursorX ) || ( _cursorY != cursorY ) ) {
+			_cursorX = cursorX;
+			_cursorY = cursorY;
+			repaint();
+		}
+	}
+	public void mouseDragged( MouseEvent $event ) {
+	}
+	public void mouseEntered( MouseEvent $event ) {
+	}
+	public void mouseReleased( MouseEvent $event ) {
+	}
+	public void mousePressed( MouseEvent $event ) {
+	}
+	public void mouseClicked( MouseEvent $event ) {
+	}
+	public void mouseExited( MouseEvent $event ) {
+		_cursorX = -1;
+		_cursorY = -1;
+		repaint();
 	}
 	void setGui( HGUIMain $gui ) {
 		_gui = $gui;
@@ -65,14 +96,19 @@ public class HBoard extends JPanel {
 	}
 	void setSystems( HSystem[] $systems ) {
 		_systems = $systems;
-//		updateUI();
+		addMouseMotionListener( this );
+		addMouseListener( this );
+		repaint();
 	}
 	private void drawSystem( Graphics $gs, int $no, int $coordX, int $coordY, int $color ) {
 		$gs.drawImage( _images._systems[$no],
 				$coordX * _diameter + ( _diameter - 32 ) / 2,
 				$coordY * _diameter + ( _diameter - 32 ) / 2, this );
-		if ( $color >= 0 ) {
-			$gs.setColor ( _gui._widgets._colors[ $color ] );
+		if ( ( $color >= 0 ) || ( ( $coordX == _cursorX ) && ( $coordY == _cursorY ) ) ) {
+			if ( ( $coordX == _cursorX ) && ( $coordY == _cursorY ) )
+				$gs.setColor ( _gui._widgets._colors[ HGUIMain.Colors.WHITE ] );
+			else
+				$gs.setColor ( _gui._widgets._colors[ $color ] );
 			$gs.drawRect ( $coordX * _diameter + 1,
 					$coordY * _diameter + 1,
 					_diameter - 2, _diameter - 2 );
@@ -84,8 +120,8 @@ public class HBoard extends JPanel {
 	protected void paintComponent( Graphics g ) {
 		g.drawImage( _images._background, 0, 0, this );
 		if ( _size > 0 ) {
-			int systemCount = _gui._client.getSystemCount();
 			if ( _systems != null ) {
+				int systemCount = _gui._client.getSystemCount();
 				for ( int i = 0; i < systemCount; ++ i )
 					drawSystem( g, i, _systems[ i ]._coordinateX, _systems[ i ]._coordinateY, _systems[ i ]._color );
 			}

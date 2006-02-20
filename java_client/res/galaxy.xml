@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="iso8859-2"?>
 <!DOCTYPE applet [
-<!ENTITY v_width "800">
+<!ENTITY v_width "900">
 <!ENTITY v_height "700">
 <!ENTITY v_port "7777">
+<!ENTITY v_bar_height "30">
 ]>
 <applet background="black">
 	<panel id="_setup" layout="BoxLayout" preferredsize="&v_width;,&v_height;"><!--{{{-->
-		<panel bounds="0,0,&v_width;,50">
-			<label font="-BOLDITALIC-30" foreground="blue">Galaxy</label>
+		<panel bounds="0,0,&v_width;,90">
+			<label font="-BOLDITALIC-70" foreground="blue">Galaxy</label>
 		</panel>
 		<panel bounds="0,100,&v_width;,60" layout="GridBagLayout">
 			<label labelfor="_name">
@@ -36,19 +37,55 @@
 			<button id="_connect" text="Connect !" action="submit" tooltiptext="Click me to start the game." />
 		</panel>
 	</panel><!--}}}-->
-	<panel id="_main" layout="BoxLayout" background="black" preferredsize="&v_width;,&v_height;" visible="false">
-		<panel bounds="0,0,&v_width;,30" background="black" layout="FlowLayout(FlowLayout.LEFT)">
-			<label font="-BOLDITALIC-20" foreground="blue">Galaxy</label>
-			<label foreground="white">Emperor </label>
+	<panel id="_main" layout="BoxLayout" background="black" preferredsize="&v_width;,&v_height;" visible="false"><!--{{{-->
+		<panel bounds="0,0,160,&v_bar_height;" alignmentx="TOP" layout="BorderLayout" constraints="BorderLayout.TOP" background="black">
+			<label font="-BOLDITALIC-22" foreground="blue">Galaxy</label>
+		</panel>
+		<panel bounds="160,0,200,&v_bar_height;" background="black">
+			<label foreground="white" labelfor="_emperor">Emperor </label>
 			<label id="_emperor" foreground="green"></label>
+		</panel>
+		<panel bounds="320,0,200,&v_bar_height;" background="black">
 			<label foreground="white" labelfor="_fleet">Fleet size: </label>
 			<textfield id="_fleet" columns="4" foreground="black" background="green" editable="false" tooltiptext="Enter number of ships You want to send in this fleet." />
+		</panel>
+		<panel bounds="540,0,100,&v_bar_height;" background="black">
 			<button id="_endTurn" text="End turn !" action="submit" tooltiptext="Click me to end this turn." />
 		</panel>
-		<hboard id="_board" bounds="0,30,640,640" border="MatteBorder(1,1,1,1,0000a0)" />
-		<scrollpane bounds="640,30,160,640" border="MatteBorder(1,1,1,1,0000a0)">
+		<panel bounds="640,0,260,60" layout="GridBagLayout" background="black">
+			<label labelfor="_system">
+				<gridbagconstraints gridx="0" gridy="0" anchor="GridBagConstraints.WEST" />
+				System:
+			</label>
+			<label id="_system">
+				<gridbagconstraints gridx="1" gridy="0" anchor="GridBagConstraints.WEST" />
+			</label>
+			<label labelfor="_emperorI" background="black" foreground="lightgray">
+				<gridbagconstraints gridx="0" gridy="1" ipadx="10" anchor="GridBagConstraints.WEST" />
+				Emperor:
+			</label>
+			<label id="_emperorI">
+				<gridbagconstraints gridx="1" gridy="1" anchor="GridBagConstraints.WEST" />
+			</label>
+			<label labelfor="_productionI">
+				<gridbagconstraints gridx="0" gridy="2" anchor="GridBagConstraints.WEST" />
+				Production:
+			</label>
+			<label id="_productionI">
+				<gridbagconstraints gridx="1" gridy="2" anchor="GridBagConstraints.WEST" />
+			</label>
+			<label labelfor="_fleetI">
+				<gridbagconstraints gridx="2" gridy="2" anchor="GridBagConstraints.WEST" />
+				Fleet:
+			</label>
+			<label id="_fleetI">
+				<gridbagconstraints gridx="3" gridy="2" anchor="GridBagConstraints.WEST" />
+			</label>
+		</panel>
+		<hboard id="_board" bounds="0,&v_bar_height;,640,640" border="MatteBorder(1,1,1,1,0000a0)" />
+		<scrollpane bounds="640,60,260,610" border="MatteBorder(1,0,1,1,0000a0)">
 			<textpane id="_log" foreground="white" background="black" carretcolor="black" editable="false" />
 		</scrollpane>
-	</panel>
+	</panel><!--}}}-->
 	<!-- messagetype does not work so there is no reason to fight with it here. optionpane id="_message" visible="false" message="Your setup contains following errors:" messagetype="JOptionPane.ERROR_MESSAGE" /-->
 </applet>
