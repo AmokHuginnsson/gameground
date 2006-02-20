@@ -295,7 +295,6 @@ class HClient extends Thread {
 				}
 			}
 		}
-		System.out.println( "Thread started." );
 		try {
 			String message = "";
 			String command;

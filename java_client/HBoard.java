@@ -66,6 +66,10 @@ public class HBoard extends JPanel implements MouseInputListener {
 		if ( ( _cursorX != cursorX ) || ( _cursorY != cursorY ) ) {
 			_cursorX = cursorX;
 			_cursorY = cursorY;
+			_gui._widgets._systemInfo.setText( "" );
+			_gui._widgets._emperorInfo.setText( "" );
+			_gui._widgets._productionInfo.setText( "" );
+			_gui._widgets._fleetInfo.setText( "" );
 			repaint();
 		}
 	}
@@ -105,10 +109,25 @@ public class HBoard extends JPanel implements MouseInputListener {
 				$coordX * _diameter + ( _diameter - 32 ) / 2,
 				$coordY * _diameter + ( _diameter - 32 ) / 2, this );
 		if ( ( $color >= 0 ) || ( ( $coordX == _cursorX ) && ( $coordY == _cursorY ) ) ) {
-			if ( ( $coordX == _cursorX ) && ( $coordY == _cursorY ) )
+			if ( ( $coordX == _cursorX ) && ( $coordY == _cursorY ) ) {
 				$gs.setColor ( _gui._widgets._colors[ HGUIMain.Colors.WHITE ] );
-			else
+				_gui._widgets._systemInfo.setText( _gui._client._systemNames[ $no ] );
+				if ( $color >= 0 ) {
+					_gui._widgets._emperorInfo.setText( _gui._client._emperors.get( $color ) );
+				} else {
+					_gui._widgets._emperorInfo.setText( "" );
+				}
+				if ( _systems[ $no ]._production >= 0 )
+					_gui._widgets._productionInfo.setText( String.valueOf( _systems[ $no ]._production ) );
+				else
+					_gui._widgets._productionInfo.setText( "?" );
+				if ( _systems[ $no ]._fleet >= 0 )
+					_gui._widgets._fleetInfo.setText( String.valueOf( _systems[ $no ]._fleet ) );
+				else
+					_gui._widgets._fleetInfo.setText( "?" );
+			}	else {
 				$gs.setColor ( _gui._widgets._colors[ $color ] );
+			}
 			$gs.drawRect ( $coordX * _diameter + 1,
 					$coordY * _diameter + 1,
 					_diameter - 2, _diameter - 2 );

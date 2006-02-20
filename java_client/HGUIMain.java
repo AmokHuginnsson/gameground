@@ -36,6 +36,10 @@ class HGUIMain extends JPanel implements ActionListener {
 		public JPanel _setup;
 		public JPanel _main;
 		public JLabel _emperor;
+		public JLabel _systemInfo;
+		public JLabel _emperorInfo;
+		public JLabel _productionInfo;
+		public JLabel _fleetInfo;
 		public HBoard _board;
 		public JTextPane _log;
 		public Color[] _colors;
@@ -126,6 +130,7 @@ class HGUIMain extends JPanel implements ActionListener {
 		synchronized ( _client ) {
 			_client.notify();
 		}
+		_widgets._emperor.setForeground( _widgets._colors[ _client._color ] );
 	}
 	void onConnectClick() {
 		String errors = "";
