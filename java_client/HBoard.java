@@ -82,11 +82,34 @@ public class HBoard extends JPanel implements MouseInputListener {
 	public void mousePressed( MouseEvent $event ) {
 	}
 	public void mouseClicked( MouseEvent $event ) {
+		if ( _systems != null ) {
+			int sysNo = getSysNo( $event.getX() / _diameter, $event.getY() / _diameter );
+			if ( sysNo >= 0 ) {
+				if ( _gui._state != HGUIMain.State.LOCKED ) {
+					if ( _gui._state == HGUIMain.State.NORMAL ) {
+						if ( _systems[ sysNo ]._color == _gui._client._color ) {
+							_gui._widgets._fleet.setEditable( true );
+							_gui._widgets._fleet.setText( String.valueOf( _systems[ sysNo ]._fleet ) );
+							_gui._state = HGUIMain.State.SELECT;
+						}
+					}
+				}
+			}
+		}
 	}
 	public void mouseExited( MouseEvent $event ) {
 		_cursorX = -1;
 		_cursorY = -1;
 		repaint();
+	}
+	int getSysNo( int $coordX, int $coordY ) {
+		int systemCount = _gui._client.getSystemCount();
+		for ( int i = 0; i < systemCount; ++ i ) {
+			if ( ( _systems[ i ]._coordinateX == $coordX ) && ( _systems[ i ]._coordinateY == $coordY ) ) {
+				return i;
+			}
+		}
+		return -1;
 	}
 	void setGui( HGUIMain $gui ) {
 		_gui = $gui;

@@ -18,7 +18,10 @@ import javax.swing.text.SimpleAttributeSet;
 
 class HGUIMain extends JPanel implements ActionListener {
 	enum State {
-		NORMAL;
+		NORMAL,
+		SELECT,
+		INPUT,
+		LOCKED
 	}
 	public static class Colors {
 		public static int NORMAL = 12;
@@ -32,6 +35,7 @@ class HGUIMain extends JPanel implements ActionListener {
 		public JTextField _name;
 		public JTextField _server;
 		public JTextField _port;
+		public JTextField _fleet;
 		public JButton _connect;
 		public JPanel _setup;
 		public JPanel _main;
@@ -81,6 +85,7 @@ class HGUIMain extends JPanel implements ActionListener {
 		_widgets.insert( new InputStreamReader( getClass().getResourceAsStream( "res/galaxy.xml" ) ), this );
 		_widgets._board.setImages( images );
 		_widgets._connect.addActionListener( this );
+		_state = State.LOCKED;
 	}
 	void setState( State $state ) {
 		_state = $state;
