@@ -2,6 +2,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.Container;
 import org.swixml.SwingEngine;
 import java.awt.Color;
@@ -16,7 +18,7 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.Style;
 import javax.swing.text.SimpleAttributeSet; 
 
-class HGUIMain extends JPanel implements ActionListener {
+class HGUIMain extends JPanel implements ActionListener, KeyListener {
 	enum State {
 		NORMAL,
 		SELECT,
@@ -81,11 +83,13 @@ class HGUIMain extends JPanel implements ActionListener {
 	DefaultStyledDocument _log;
 //--------------------------------------------//
 	public HGUIMain() throws Exception {
+		super();
 		_widgets = new HWidgets();
 		HImages images = new HImages();
 		_widgets.insert( new InputStreamReader( getClass().getResourceAsStream( "res/galaxy.xml" ) ), this );
 		_widgets._board.setImages( images );
 		_widgets._connect.addActionListener( this );
+		addKeyListener( this );
 		_state = State.LOCKED;
 	}
 	void setState( State $state ) {
@@ -107,6 +111,13 @@ class HGUIMain extends JPanel implements ActionListener {
 	}
 	public State getState() {
 		return _state;
+	}
+	public void keyTyped( KeyEvent $event ) {
+		System.out.println( $event.getKeyChar() );
+	}
+	public void keyPressed( KeyEvent $event ) {
+	}
+	public void keyReleased( KeyEvent $event ) {
 	}
 	void log( String $message, int $color ) {
 		try {
