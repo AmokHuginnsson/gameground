@@ -83,9 +83,13 @@
 			</label>
 		</panel>
 		<hboard id="_board" bounds="0,&v_bar_height;,640,640" border="MatteBorder(1,1,1,1,0000a0)" />
-		<scrollpane bounds="640,60,260,610" border="MatteBorder(1,0,1,1,0000a0)">
+		<scrollpane bounds="640,60,260,550" border="MatteBorder(1,0,1,1,0000a0)">
 			<textpane id="_log" foreground="white" background="black" carretcolor="black" editable="false" />
 		</scrollpane>
+		<panel bounds="640,610,260,60" background="black" border="MatteBorder(0,0,1,1,0000a0)">
+			<label id="_tips" foreground="lightGray" preferredsize="258,58" verticalalignment="TOP">
+			</label>
+		</panel>
 	</panel><!--}}}-->
 	<!-- messagetype does not work so there is no reason to fight with it here. optionpane id="_message" visible="false" message="Your setup contains following errors:" messagetype="JOptionPane.ERROR_MESSAGE" /-->
 </applet>

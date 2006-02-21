@@ -47,18 +47,23 @@ class HImages {
 public class HBoard extends JPanel implements MouseInputListener {
 //--------------------------------------------//
 	public static final long serialVersionUID = 7l;
+	boolean _help;
 	int _size;
 	int _diameter;
 	int _cursorX;
 	int _cursorY;
+	int _sourceSystem;
 	HImages _images;
 	HGUIMain _gui;
 	HSystem[] _systems;
 //--------------------------------------------//
 	public HBoard() {
+		_help = false;
 		_size = -1;
 		_cursorX = -1;
 		_cursorY = -1;
+		_diameter = -1;
+		_sourceSystem = -1;
 	}
 	public void mouseMoved( MouseEvent $event ) {
 		int cursorX = $event.getX() / _diameter;
@@ -78,20 +83,32 @@ public class HBoard extends JPanel implements MouseInputListener {
 	public void mouseEntered( MouseEvent $event ) {
 	}
 	public void mouseReleased( MouseEvent $event ) {
+		if ( $event.getButton() == MouseEvent.BUTTON3 ) {
+			_help = false;
+			repaint();
+		}
 	}
 	public void mousePressed( MouseEvent $event ) {
+		if ( $event.getButton() == MouseEvent.BUTTON3 ) {
+			_help = true;
+			repaint();
+		}
 	}
 	public void mouseClicked( MouseEvent $event ) {
 		if ( _systems != null ) {
 			int sysNo = getSysNo( $event.getX() / _diameter, $event.getY() / _diameter );
 			if ( sysNo >= 0 ) {
-				if ( _gui._state != HGUIMain.State.LOCKED ) {
-					if ( _gui._state == HGUIMain.State.NORMAL ) {
+				if ( _gui.getState() != HGUIMain.State.LOCKED ) {
+					if ( _gui.getState() == HGUIMain.State.NORMAL ) {
 						if ( _systems[ sysNo ]._color == _gui._client._color ) {
-							_gui._widgets._fleet.setEditable( true );
-							_gui._widgets._fleet.setText( String.valueOf( _systems[ sysNo ]._fleet ) );
-							_gui._state = HGUIMain.State.SELECT;
+							_gui.setState( HGUIMain.State.SELECT );
+							_sourceSystem = sysNo;
 						}
+					} else if ( _gui.getState() == HGUIMain.State.SELECT ) {
+						_gui._widgets._fleet.setEditable( true );
+						_gui._widgets._fleet.setText( String.valueOf( _systems[ _sourceSystem ]._fleet ) );
+						_gui._widgets._fleet.selectAll();
+						_gui.setState( HGUIMain.State.INPUT );
 					}
 				}
 			}
@@ -157,6 +174,10 @@ public class HBoard extends JPanel implements MouseInputListener {
 			$gs.drawRect ( $coordX * _diameter + 2,
 					$coordY * _diameter + 2,
 					_diameter - 4, _diameter - 4 );
+		}
+		if ( _help ) {
+			$gs.setColor ( _gui._widgets._colors[ HGUIMain.Colors.WHITE ] );
+			$gs.drawString( _gui._client._systemNames[ $no ], $coordX * _diameter + 2, ( $coordY + 1 ) * _diameter - 2 );
 		}
 	}
 	protected void paintComponent( Graphics g ) {

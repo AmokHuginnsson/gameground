@@ -44,6 +44,7 @@ class HGUIMain extends JPanel implements ActionListener {
 		public JLabel _emperorInfo;
 		public JLabel _productionInfo;
 		public JLabel _fleetInfo;
+		public JLabel _tips;
 		public HBoard _board;
 		public JTextPane _log;
 		public Color[] _colors;
@@ -74,7 +75,7 @@ class HGUIMain extends JPanel implements ActionListener {
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
-	State _state;
+	private State _state;
 	HClient _client;
 	public HWidgets _widgets;
 	DefaultStyledDocument _log;
@@ -88,7 +89,24 @@ class HGUIMain extends JPanel implements ActionListener {
 		_state = State.LOCKED;
 	}
 	void setState( State $state ) {
+		switch ( $state ) {
+			case LOCKED:
+				_widgets._tips.setText( "A waiting for Galaxy events ..." );
+				break;
+			case NORMAL:
+				_widgets._tips.setText( "Make Your imperial fleet moves ..." );
+				break;
+			case SELECT:
+				_widgets._tips.setText( "Select destination for Your fleet ..." );
+				break;
+			case INPUT:
+				_widgets._tips.setText( "How many destroyers You wish to send ?" );
+				break;
+		}
 		_state = $state;
+	}
+	public State getState() {
+		return _state;
 	}
 	void log( String $message, int $color ) {
 		try {

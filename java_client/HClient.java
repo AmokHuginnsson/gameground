@@ -125,14 +125,14 @@ class HClient extends Thread {
 		_loop = true;
 	}
 	void handlerSetup( String $command ) {
-		System.out.println( "handlerSetup: " + $command );
 		int index = - 1, coordX = - 1, coordY = - 1;
 		String variable;
-		String value;
+		String value = "";
 		String[] tokens = new String[3];
 		tokens = $command.split ( "=", 2 );
 		variable = tokens[0];
-		value = tokens[1];
+		if ( java.lang.reflect.Array.getLength( tokens ) > 1 )
+			value = tokens[1];
 		try {
 			if ( variable.compareTo( "board_size" ) == 0 ) {
 				_gui._widgets._board.setSize( new Integer( value ).intValue() );
@@ -200,16 +200,14 @@ class HClient extends Thread {
 						_gui.log( value, temp );
 						_gui.log( ".\n", HGUIMain.Colors.NORMAL );
 						_systems[ sysNo ]._color = color;
-						break;
-					}
+					} break;
 					case ( 'r' ): { /* reinforcements */
 						_gui.log( "Reinforcements for ", HGUIMain.Colors.NORMAL );
 						_gui.log( _systemNames[ sysNo ], color );
 						value = "(" + _symbols[ sysNo ] + ")";
 						_gui.log( value, color );
 						_gui.log( " arrived.\n", HGUIMain.Colors.NORMAL );
-						break;
-					}
+					} break;
 					case ( 'f' ): { /* failed to conquer */
 						_systems[ sysNo ]._color = color;
 						color = _color;
@@ -222,12 +220,10 @@ class HClient extends Thread {
 						_gui.log( " resisted attack from ", HGUIMain.Colors.NORMAL );
 						_gui.log( value, color );
 						_gui.log( ".\n", HGUIMain.Colors.NORMAL );
-						break;
-					}
+					} break;
 					case ( 'i' ): /* info */
-					default :{
+					default :
 						break;
-					}
 				}
 			} else if ( variable.compareTo( "round" ) == 0 ) {
 				_gui.log( "----- ", HGUIMain.Colors.WHITE );
@@ -278,7 +274,11 @@ class HClient extends Thread {
 			try {
 				handler.invoke( this, argument );
 			} catch ( java.lang.IllegalAccessException e ) {
+				e.printStackTrace();
+				System.exit( 1 );
 			} catch ( java.lang.reflect.InvocationTargetException e ) {
+				e.printStackTrace();
+				System.exit( 1 );
 			}
 		} else {
 			_loop = false;
