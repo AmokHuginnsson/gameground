@@ -9,7 +9,9 @@ public class /* Application or applet name: */ Galaxy extends JApplet {
 
 	public void init() {
 		try {
-			add( new HGUIMain() );
+			add( new HGUIMain( this ) );
+			setFocusable( true );
+			requestFocus();
 		} catch ( Exception e ) {
 			e.printStackTrace();
 		}
@@ -37,5 +39,16 @@ public class /* Application or applet name: */ Galaxy extends JApplet {
 		} );
 		_frame.setVisible( true );
 	}
+
+	public void addGlobalKeyListener( java.awt.Component $component, java.awt.event.KeyListener $who ) {
+		$component.addKeyListener( $who );
+		if ( $component instanceof java.awt.Container ) {
+			java.awt.Component[] components = ((java.awt.Container)$component).getComponents();
+			for ( int i = 0; i < components.length ; ++ i ) {
+				addGlobalKeyListener( components[i], $who );
+			}
+		}
+	}
+
 }
 

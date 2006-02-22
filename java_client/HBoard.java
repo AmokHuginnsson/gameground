@@ -53,6 +53,7 @@ public class HBoard extends JPanel implements MouseInputListener {
 	int _cursorX;
 	int _cursorY;
 	int _sourceSystem;
+	int _destinationSystem;
 	HImages _images;
 	HGUIMain _gui;
 	HSystem[] _systems;
@@ -105,10 +106,13 @@ public class HBoard extends JPanel implements MouseInputListener {
 							_sourceSystem = sysNo;
 						}
 					} else if ( _gui.getState() == HGUIMain.State.SELECT ) {
-						_gui._widgets._fleet.setEditable( true );
-						_gui._widgets._fleet.setText( String.valueOf( _systems[ _sourceSystem ]._fleet ) );
-						_gui._widgets._fleet.selectAll();
-						_gui.setState( HGUIMain.State.INPUT );
+						if ( sysNo != _sourceSystem ) {
+							_gui._widgets._fleet.setEditable( true );
+							_gui._widgets._fleet.setText( String.valueOf( _systems[ _sourceSystem ]._fleet ) );
+							_gui._widgets._fleet.selectAll();
+							_gui.setState( HGUIMain.State.INPUT );
+							_destinationSystem = sysNo;
+						}
 					}
 				}
 			}

@@ -41,20 +41,32 @@
 		<panel bounds="0,0,100,&v_bar_height;" layout="BorderLayout" constraints="BorderLayout.TOP" background="black">
 			<label font="-BOLDITALIC-22" foreground="blue">Galaxy</label>
 		</panel>
-		<panel bounds="150,0,120,&v_bar_height;" background="black">
+		<panel bounds="120,0,120,&v_bar_height;" background="black">
 			<label foreground="lightGray" labelfor="_emperor">Emperor </label>
 			<label id="_emperor" foreground="lightGray"></label>
 		</panel>
-		<panel bounds="340,0,120,&v_bar_height;" background="black">
-			<label foreground="lightGray" labelfor="_fleet">Fleet size: </label>
-			<textfield id="_fleet" columns="4" foreground="black" background="green" editable="false" tooltiptext="Enter number of ships You want to send in this fleet." />
+		<panel bounds="280,0,60,&v_bar_height;" background="black">
+			<label foreground="lightGray" labelfor="_fleet">Fleet size </label>
 		</panel>
-		<panel bounds="460,0,80,&v_bar_height;" background="black">
-			<label foreground="lightGray" labelfor="_turn">Turn </label>
-			<label id="_turn" foreground="lightGray">  0</label>
+		<panel bounds="340,-2,60,&v_bar_height;" background="black">
+			<textfield id="_fleet" columns="4" foreground="black" background="green" carretcolor="black" focusable="true" editable="false" layout="BorderLayout" constraints="BorderLayout.NORTH" tooltiptext="Enter number of ships You want to send in this fleet." />
 		</panel>
-		<panel bounds="540,0,99,&v_bar_height;" background="black">
-			<button id="_endTurn" text="End turn !" action="submit" tooltiptext="Click me to end this turn." />
+		<panel bounds="400,0,140,&v_bar_height;" background="black">
+			<label foreground="lightGray" labelfor="_turn" preferredsize="30,&v_bar_height;" verticalalignment="TOP">
+				Turn
+			</label>
+			<label id="_turn" foreground="lightGray" preferredsize="18,&v_bar_height;" verticalalignment="TOP" horizontalalignment="RIGHT">
+				0
+			</label>
+			<label foreground="lightGray" labelfor="_arrival" preferredsize="40,&v_bar_height;" verticalalignment="TOP" horizontalalignment="RIGHT">
+				arrival
+			</label>
+			<label id="_arrival" foreground="lightGray" preferredsize="18,&v_bar_height;" verticalalignment="TOP" horizontalalignment="RIGHT">
+				0
+			</label>
+		</panel>
+		<panel bounds="540,-5,99,&v_bar_height;" background="black">
+			<button id="_endTurn" text="End turn !" action="submit" tooltiptext="Click me to end this turn." focusable="false" />
 		</panel>
 		<panel bounds="639,0,261,60" layout="GridBagLayout" background="black" foreground="lightGray" border="MatteBorder(1,1,0,1,0000a0)">
 			<label labelfor="_systemInfo" foreground="">
@@ -88,13 +100,13 @@
 		</panel>
 		<hboard id="_board" bounds="0,&v_bar_height;,640,640" border="MatteBorder(1,1,1,1,0000a0)" />
 		<scrollpane bounds="640,60,260,550" border="MatteBorder(1,0,1,1,0000a0)">
-			<textpane id="_log" foreground="white" background="black" carretcolor="black" editable="false" />
+			<textpane id="_log" foreground="lightGray" background="black" carretcolor="black" editable="false" focusable="false" />
 		</scrollpane>
-		<panel bounds="640,610,260,60" background="black" border="MatteBorder(0,0,1,1,0000a0)">
-			<label id="_tips" foreground="lightGray" preferredsize="258,58" verticalalignment="TOP">
+		<scrollpane bounds="640,610,260,60" border="MatteBorder(0,0,1,1,0000a0)">
+			<textpane id="_tips" foreground="lightGray" background="black" carretcolor="black" editable="false" focusable="false">
 				Wait for match to begin ...
-			</label>
-		</panel>
+			</textpane>
+		</scrollpane>
 	</panel><!--}}}-->
 	<!-- messagetype does not work so there is no reason to fight with it here. optionpane id="_message" visible="false" message="Your setup contains following errors:" messagetype="JOptionPane.ERROR_MESSAGE" /-->
 </applet>

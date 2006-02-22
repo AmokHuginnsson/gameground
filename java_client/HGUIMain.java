@@ -39,6 +39,7 @@ class HGUIMain extends JPanel implements ActionListener, KeyListener {
 		public JTextField _port;
 		public JTextField _fleet;
 		public JButton _connect;
+		public JButton _endTurn;
 		public JPanel _setup;
 		public JPanel _main;
 		public JLabel _emperor;
@@ -46,9 +47,9 @@ class HGUIMain extends JPanel implements ActionListener, KeyListener {
 		public JLabel _emperorInfo;
 		public JLabel _productionInfo;
 		public JLabel _fleetInfo;
-		public JLabel _tips;
 		public HBoard _board;
 		public JTextPane _log;
+		public JTextPane _tips;
 		public Color[] _colors;
 		public SimpleAttributeSet _attribute;
 		public int _color;
@@ -79,18 +80,22 @@ class HGUIMain extends JPanel implements ActionListener, KeyListener {
 	public static final long serialVersionUID = 17l;
 	private State _state;
 	HClient _client;
+	java.util.List<HMove> _moves;
 	public HWidgets _widgets;
 	DefaultStyledDocument _log;
 //--------------------------------------------//
-	public HGUIMain() throws Exception {
+	public HGUIMain( Galaxy $applet ) throws Exception {
 		super();
 		_widgets = new HWidgets();
 		HImages images = new HImages();
 		_widgets.insert( new InputStreamReader( getClass().getResourceAsStream( "res/galaxy.xml" ) ), this );
 		_widgets._board.setImages( images );
 		_widgets._connect.addActionListener( this );
-		addKeyListener( this );
+		_widgets._endTurn.addActionListener( this );
+		$applet.addGlobalKeyListener( $applet, this );
+		$applet.addGlobalKeyListener( this, this );
 		_state = State.LOCKED;
+		_moves = java.util.Collections.<HMove>synchronizedList( new java.util.LinkedList<HMove>() );
 	}
 	void setState( State $state ) {
 		switch ( $state ) {
@@ -113,7 +118,37 @@ class HGUIMain extends JPanel implements ActionListener, KeyListener {
 		return _state;
 	}
 	public void keyTyped( KeyEvent $event ) {
-		System.out.println( $event.getKeyChar() );
+		if ( _widgets._board._systems != null ) {
+			System.out.println( $event.getKeyChar() );
+			if ( $event.getKeyChar() == KeyEvent.VK_ENTER ) {
+				if ( _state == State.INPUT ) {
+					int fleet;
+					try {
+						fleet = new Integer( _widgets._fleet.getText() ).intValue();
+					} catch ( NumberFormatException e ) {
+						return;
+					}
+					HMove move = new HMove();
+					move._sourceSystem = _widgets._board._sourceSystem;
+					move._destinationSystem = _widgets._board._destinationSystem;
+					move._fleet = fleet;
+					_moves.add( move );
+					_widgets._fleet.setEditable( false );
+					_widgets._fleet.setText( "" );
+					setState( State.NORMAL );
+				}
+			} else if ( $event.getKeyChar() == KeyEvent.VK_SPACE ) {
+				_widgets._endTurn.doClick();
+			} else if ( $event.getKeyChar() == KeyEvent.VK_ESCAPE ) {
+				if ( _state == State.INPUT ) {
+					_widgets._fleet.setEditable( false );
+					_widgets._fleet.setText( "" );
+					setState( State.SELECT );
+				} else if ( _state == State.SELECT ) {
+					setState( State.NORMAL );
+				}
+			}
+		}
 	}
 	public void keyPressed( KeyEvent $event ) {
 	}
@@ -193,10 +228,15 @@ class HGUIMain extends JPanel implements ActionListener, KeyListener {
 			initBoard( emperor, server, port );
 		}
 	}
+	void onEndTurn() {
+		System.out.println( "End turn!" );
+	}
 	public void actionPerformed( ActionEvent $event ) {
 		Object source = $event.getSource();
 		if ( source == _widgets._connect ) {
 			onConnectClick();
+		} else if ( source == _widgets._endTurn ) {
+			onEndTurn();
 		}
 	}
 }
