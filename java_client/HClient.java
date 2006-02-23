@@ -105,7 +105,7 @@ class HClient extends Thread {
 	String[] _systemNames;
 //--------------------------------------------//
 	public HClient( HGUIMain $gui, String $emperor, String $server, int $port ) throws Exception {
-		_round = -1;
+		_round = 0;
 		_systemCount = 0;
 		_gui = $gui;
 		_emperor = $emperor;
@@ -234,6 +234,7 @@ class HClient extends Thread {
 				_gui.log( HGUIMain.Colors.NORMAL );
 				_gui.setState ( HGUIMain.State.NORMAL );
 				_gui._widgets._round.setText( value );
+				_gui._widgets._board.repaint();
 			}
 		} catch ( NumberFormatException e ) {
 			e.printStackTrace();

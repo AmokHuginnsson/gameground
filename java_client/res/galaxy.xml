@@ -38,10 +38,10 @@
 		</panel>
 	</panel><!--}}}-->
 	<panel id="_main" layout="BoxLayout" background="black" preferredsize="&v_width;,&v_height;" visible="false"><!--{{{-->
-		<panel bounds="0,0,100,&v_bar_height;" layout="BorderLayout" constraints="BorderLayout.TOP" background="black">
+		<panel bounds="0,0,90,&v_bar_height;" layout="BorderLayout" constraints="BorderLayout.TOP" background="black">
 			<label font="-BOLDITALIC-22" foreground="blue">Galaxy</label>
 		</panel>
-		<panel bounds="120,0,120,&v_bar_height;" background="black">
+		<panel bounds="90,0,180,&v_bar_height;" background="black">
 			<label foreground="lightGray" labelfor="_emperor">Emperor </label>
 			<label id="_emperor" foreground="lightGray"></label>
 		</panel>
