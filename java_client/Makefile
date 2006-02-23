@@ -25,4 +25,4 @@ dist:
 
 clean:
 	cln .
-	/bin/rm -rf build galaxy.jar *.class
+	/bin/rm -rf build *.class
