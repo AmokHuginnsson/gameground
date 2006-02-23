@@ -109,7 +109,7 @@ class HGUIMain extends JPanel implements ActionListener, KeyListener {
 		_moves = java.util.Collections.<HMove>synchronizedList( new java.util.LinkedList<HMove>() );
 	}
 	void setState( State $state ) {
-		_widgets._arrival.setText( "0" );
+		_widgets._arrival.setText( String.valueOf( _client._round ) );
 		switch ( $state ) {
 			case LOCKED:
 				_widgets._tips.setText( "A waiting for Galaxy events ..." );
@@ -182,6 +182,7 @@ class HGUIMain extends JPanel implements ActionListener, KeyListener {
 				$color = 15;
 			StyleConstants.setForeground( _widgets._attribute, _widgets._colors[ $color ] );
 			_log.insertString( _log.getLength(), $message, _widgets._attribute );
+			_widgets._log.setCaretPosition( _log.getLength() );
 		} catch ( javax.swing.text.BadLocationException e ) {
 			e.printStackTrace();
 		}
@@ -190,6 +191,7 @@ class HGUIMain extends JPanel implements ActionListener, KeyListener {
 		try {
 			StyleConstants.setForeground( _widgets._attribute, _widgets._colors[ _widgets._color ] );
 			_log.insertString( _log.getLength(), $message, _widgets._attribute );
+			_widgets._log.setCaretPosition( _log.getLength() );
 		} catch ( javax.swing.text.BadLocationException e ) {
 			e.printStackTrace();
 		}

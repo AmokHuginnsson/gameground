@@ -217,7 +217,7 @@ class HClient extends Thread {
 						temp = ( temp >= 0 ) ? temp : HGUIMain.Colors.NORMAL;
 						_gui.log( _systemNames[ sysNo ], temp );
 						variable = "(" + _symbols[ sysNo ] + ")";
-						_gui.log( variable, _systems[ sysNo ]._color );
+						_gui.log( variable, temp );
 						_gui.log( " resisted attack from ", HGUIMain.Colors.NORMAL );
 						_gui.log( value, color );
 						_gui.log( ".\n", HGUIMain.Colors.NORMAL );

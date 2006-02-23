@@ -109,6 +109,7 @@ public class HBoard extends JPanel implements MouseInputListener {
 						if ( sysNo != _sourceSystem ) {
 							_gui._widgets._fleet.setEditable( true );
 							_gui._widgets._fleet.setText( String.valueOf( _systems[ _sourceSystem ]._fleet ) );
+							_gui._widgets._fleet.requestFocus();
 							_gui._widgets._fleet.selectAll();
 							_gui.setState( HGUIMain.State.INPUT );
 							_destinationSystem = sysNo;
@@ -204,7 +205,7 @@ public class HBoard extends JPanel implements MouseInputListener {
 		if ( _size > 0 ) {
 			if ( _systems != null ) {
 				int systemCount = _gui._client.getSystemCount();
-				_gui._widgets._arrival.setText( "0" );
+				_gui._widgets._arrival.setText( String.valueOf( _gui._client._round ) );
 				for ( int i = 0; i < systemCount; ++ i )
 					drawSystem( g, i, _systems[ i ]._coordinateX, _systems[ i ]._coordinateY, _systems[ i ]._color );
 			}
