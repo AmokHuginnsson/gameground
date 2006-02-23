@@ -168,7 +168,6 @@ class HClient extends Thread {
 		}
 	}
 	void handlerPlay( String $command ) {
-		System.out.println( "handlerPlay: " + $command );
 		char event = 0;
 		int sysNo = - 1, color = 0, production = - 1;
 		String variable;
@@ -214,7 +213,9 @@ class HClient extends Thread {
 						value = _emperors.get( color );
 					}
 					case ( 's' ): { /* resisted attack */
-						_gui.log( _systemNames[ sysNo ], _systems[ sysNo ]._color );
+						int temp = _systems[ sysNo ]._color;
+						temp = ( temp >= 0 ) ? temp : HGUIMain.Colors.NORMAL;
+						_gui.log( _systemNames[ sysNo ], temp );
 						variable = "(" + _symbols[ sysNo ] + ")";
 						_gui.log( variable, _systems[ sysNo ]._color );
 						_gui.log( " resisted attack from ", HGUIMain.Colors.NORMAL );
@@ -232,6 +233,7 @@ class HClient extends Thread {
 				_gui.log( value + " -----\n", HGUIMain.Colors.WHITE );
 				_gui.log( HGUIMain.Colors.NORMAL );
 				_gui.setState ( HGUIMain.State.NORMAL );
+				_gui._widgets._round.setText( value );
 			}
 		} catch ( NumberFormatException e ) {
 			e.printStackTrace();
@@ -262,7 +264,6 @@ class HClient extends Thread {
 		}
 		_gui.log( "\n" );
 		_gui.log( HGUIMain.Colors.NORMAL );
-		System.out.println( "handlerMessage:" + $message );
 	}
 	void processCommand( String $command ) {
 		String[] tokens = new String[2];
@@ -309,7 +310,7 @@ class HClient extends Thread {
 						processCommand( argument );
 					else
 						break;
-					System.out.println( message );
+					/* System.out.println( message ); */
 				}
 			}
 		} catch ( java.io.IOException e ) {

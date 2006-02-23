@@ -15,14 +15,14 @@
 				<gridbagconstraints gridx="0" gridy="0" ipadx="10" anchor="GridBagConstraints.WEST" />
 				Your name:
 			</label>
-			<textfield id="_name" columns="16" text="Amok" tooltiptext="Your preferred in game name." >
+			<textfield id="_name" columns="16" tooltiptext="Your preferred in game name." >
 				<gridbagconstraints gridx="1" gridy="0" anchor="GridBagConstraints.WEST" />
 			</textfield>
 			<label labelfor="_server">
 				<gridbagconstraints gridx="0" gridy="1" anchor="GridBagConstraints.WEST" />
 				Server:
 			</label>
-			<textfield id="_server" columns="24" text="127.0.0.1" tooltiptext="Address of the server that hosts the game." >
+			<textfield id="_server" columns="24" tooltiptext="Address of the server that hosts the game." >
 				<gridbagconstraints gridx="1" gridy="1" anchor="GridBagConstraints.WEST" />
 			</textfield>
 			<label labelfor="_port">
@@ -52,10 +52,10 @@
 			<textfield id="_fleet" columns="4" foreground="black" background="green" carretcolor="black" focusable="true" editable="false" layout="BorderLayout" constraints="BorderLayout.NORTH" tooltiptext="Enter number of ships You want to send in this fleet." />
 		</panel>
 		<panel bounds="400,0,140,&v_bar_height;" background="black">
-			<label foreground="lightGray" labelfor="_turn" preferredsize="30,&v_bar_height;" verticalalignment="TOP">
+			<label foreground="lightGray" labelfor="_round" preferredsize="30,&v_bar_height;" verticalalignment="TOP">
 				Turn
 			</label>
-			<label id="_turn" foreground="lightGray" preferredsize="18,&v_bar_height;" verticalalignment="TOP" horizontalalignment="RIGHT">
+			<label id="_round" foreground="lightGray" preferredsize="18,&v_bar_height;" verticalalignment="TOP" horizontalalignment="RIGHT">
 				0
 			</label>
 			<label foreground="lightGray" labelfor="_arrival" preferredsize="40,&v_bar_height;" verticalalignment="TOP" horizontalalignment="RIGHT">

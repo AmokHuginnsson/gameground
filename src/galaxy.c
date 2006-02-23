@@ -995,7 +995,8 @@ void HClient::handler_play ( HString & a_roCommand )
 				}
 			case ( 's' ): /* resisted attack */
 				{
-				f_oWindow.f_poLogPad->add ( n_piColors [ f_oSystems [ l_iSysNo ].f_iColor ] );
+				int l_iTemp = f_oSystems [ l_iSysNo ].f_iColor;
+				f_oWindow.f_poLogPad->add ( ( l_iTemp >= 0 ) ? n_piColors [ l_iTemp ] : COLORS::D_ATTR_NORMAL );
 				f_oWindow.f_poLogPad->add ( n_ppcSystemNames [ l_iSysNo ] );
 				l_oVariable.format ( "(%c)", n_pcSymbols [ l_iSysNo ] );
 				f_oWindow.f_poLogPad->add ( l_oVariable );

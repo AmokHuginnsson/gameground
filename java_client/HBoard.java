@@ -123,6 +123,19 @@ public class HBoard extends JPanel implements MouseInputListener {
 		_cursorY = -1;
 		repaint();
 	}
+	int distance( int $source, int $destination ) {
+		int dx = 0, dy = 0, distance = 0;
+		if ( $source != $destination ) {
+			dx = _systems[$source]._coordinateX - _systems[$destination]._coordinateX;
+			dy = _systems[$source]._coordinateY - _systems[$destination]._coordinateY;
+			dx = ( dx >= 0 ) ? dx : - dx;
+			dy = ( dy >= 0 ) ? dy : - dy;
+			dx = ( ( _size - dx ) < dx ) ? _size - dx : dx;
+			dy = ( ( _size - dy ) < dy ) ? _size - dy : dy;
+			distance = (int) ( java.lang.Math.sqrt ( (double) ( dx * dx + dy * dy ) ) + 0.5 );
+		}
+		return ( distance );
+	}
 	int getSysNo( int $coordX, int $coordY ) {
 		int systemCount = _gui._client.getSystemCount();
 		for ( int i = 0; i < systemCount; ++ i ) {
@@ -169,6 +182,8 @@ public class HBoard extends JPanel implements MouseInputListener {
 					_gui._widgets._fleetInfo.setText( String.valueOf( _systems[ $no ]._fleet ) );
 				else
 					_gui._widgets._fleetInfo.setText( "?" );
+				if ( _gui.getState() == HGUIMain.State.SELECT )
+					_gui._widgets._arrival.setText( String.valueOf( _gui._client._round + distance( _sourceSystem, $no ) ) );
 			}	else {
 				$gs.setColor ( _gui._widgets._colors[ $color ] );
 			}
@@ -189,6 +204,7 @@ public class HBoard extends JPanel implements MouseInputListener {
 		if ( _size > 0 ) {
 			if ( _systems != null ) {
 				int systemCount = _gui._client.getSystemCount();
+				_gui._widgets._arrival.setText( "0" );
 				for ( int i = 0; i < systemCount; ++ i )
 					drawSystem( g, i, _systems[ i ]._coordinateX, _systems[ i ]._coordinateY, _systems[ i ]._color );
 			}

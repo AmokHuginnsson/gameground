@@ -47,6 +47,8 @@ class HGUIMain extends JPanel implements ActionListener, KeyListener {
 		public JLabel _emperorInfo;
 		public JLabel _productionInfo;
 		public JLabel _fleetInfo;
+		public JLabel _round;
+		public JLabel _arrival;
 		public HBoard _board;
 		public JTextPane _log;
 		public JTextPane _tips;
@@ -90,6 +92,15 @@ class HGUIMain extends JPanel implements ActionListener, KeyListener {
 		HImages images = new HImages();
 		_widgets.insert( new InputStreamReader( getClass().getResourceAsStream( "res/galaxy.xml" ) ), this );
 		_widgets._board.setImages( images );
+		String serverAddress = "";
+		try {
+			serverAddress = $applet.getCodeBase().getHost();
+		} catch ( java.lang.NullPointerException e ) {
+		} finally {
+			if ( serverAddress.compareTo( "" ) == 0 )
+				serverAddress = "127.0.0.1";
+		}
+		_widgets._server.setText( serverAddress );
 		_widgets._connect.addActionListener( this );
 		_widgets._endRound.addActionListener( this );
 		$applet.addGlobalKeyListener( $applet, this );
@@ -98,6 +109,7 @@ class HGUIMain extends JPanel implements ActionListener, KeyListener {
 		_moves = java.util.Collections.<HMove>synchronizedList( new java.util.LinkedList<HMove>() );
 	}
 	void setState( State $state ) {
+		_widgets._arrival.setText( "0" );
 		switch ( $state ) {
 			case LOCKED:
 				_widgets._tips.setText( "A waiting for Galaxy events ..." );
@@ -124,7 +136,6 @@ class HGUIMain extends JPanel implements ActionListener, KeyListener {
 	}
 	public void keyTyped( KeyEvent $event ) {
 		if ( _widgets._board._systems != null ) {
-			System.out.println( $event.getKeyChar() );
 			if ( $event.getKeyChar() == KeyEvent.VK_ENTER ) {
 				if ( _state == State.INPUT ) {
 					int fleet = -1;
