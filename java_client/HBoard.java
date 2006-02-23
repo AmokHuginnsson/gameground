@@ -101,7 +101,7 @@ public class HBoard extends JPanel implements MouseInputListener {
 			if ( sysNo >= 0 ) {
 				if ( _gui.getState() != HGUIMain.State.LOCKED ) {
 					if ( _gui.getState() == HGUIMain.State.NORMAL ) {
-						if ( _systems[ sysNo ]._color == _gui._client._color ) {
+						if ( ( _systems[ sysNo ]._color == _gui._client._color ) && ( _systems[ sysNo ]._fleet > 0 ) ) {
 							_gui.setState( HGUIMain.State.SELECT );
 							_sourceSystem = sysNo;
 						}

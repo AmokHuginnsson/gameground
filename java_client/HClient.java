@@ -319,5 +319,15 @@ class HClient extends Thread {
 	int getSystemCount() {
 		return _systemCount;
 	}
+	void endRound( java.util.List<HMove> $moves ) {
+		_gui.setState( HGUIMain.State.LOCKED );
+		for ( java.util.ListIterator i = $moves.listIterator(); i.hasNext(); ) {
+			HMove move = (HMove)i.next();
+			String message = "GLX:PLAY:move=" + move._sourceSystem + "," + move._destinationSystem + "," + move._fleet;
+			_out.println( message );
+		}
+		_out.println( "GLX:PLAY:end_round" );
+		$moves.clear();
+	}
 }
 

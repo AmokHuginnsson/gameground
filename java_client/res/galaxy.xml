@@ -66,7 +66,7 @@
 			</label>
 		</panel>
 		<panel bounds="540,-5,99,&v_bar_height;" background="black">
-			<button id="_endTurn" text="End turn !" action="submit" tooltiptext="Click me to end this turn." focusable="false" />
+			<button id="_endRound" text="End round !" action="submit" tooltiptext="Click me to end this turn." focusable="false" />
 		</panel>
 		<panel bounds="639,0,261,60" layout="GridBagLayout" background="black" foreground="lightGray" border="MatteBorder(1,1,0,1,0000a0)">
 			<label labelfor="_systemInfo" foreground="">
