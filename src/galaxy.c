@@ -265,11 +265,13 @@ class HGalaxyWindow : public HWindow, public HEventListener
 	{
 protected:
 	/*{*/
+	HString f_oVarTmpBuffer;
 	HBoard * f_poBoard;
 	HEditControl * f_poSystemName;
 	HEditControl * f_poEmperorName;
 	HEditControl * f_poProduction;
 	HEditControl * f_poFleet;
+	HEditControl * f_poMessageInput;
 	HLogPad * f_poLogPad;
 	HClient * f_poClient;
 	systems_t * f_poSystems;
@@ -325,6 +327,7 @@ public:
 	void init_client ( HString &, int );
 	int handler_message ( int );
 	void end_round ( void );
+	void send_message ( HString const & );
 	/*}*/
 protected:
 	/*{*/
@@ -654,8 +657,10 @@ HGalaxyWindow::HGalaxyWindow ( char const * const a_pcWindowTitle,
 		int & a_riRound, int & a_riColor, client_state_t & a_reState )
 	: HWindow ( a_pcWindowTitle ),
 	HEventListener ( a_riRound, a_riColor, a_reState ),
+	f_oVarTmpBuffer ( ),
 	f_poBoard ( NULL ), f_poSystemName ( NULL ), f_poEmperorName ( NULL ),
-	f_poProduction ( NULL ), f_poFleet ( NULL ), f_poLogPad ( NULL ),
+	f_poProduction ( NULL ), f_poFleet ( NULL ), f_poMessageInput ( NULL ),
+	f_poLogPad ( NULL ),
 	f_poClient ( a_poClient ),
 	f_poSystems ( NULL ), f_poEmperors ( NULL ), f_poMoves ( NULL )
 	{
@@ -679,12 +684,14 @@ int HGalaxyWindow::init ( void )
 	f_poBoard->set_systems ( f_poSystems );
 	f_poBoard->enable ( true );
 	f_poBoard->set_focus ( );
-	f_poSystemName = new HEditControl ( this, 1, 64, 1, 16, " System name \n", 64, "", D_MASK_EXTENDED );
-	f_poEmperorName = new HEditControl ( this, 4, 64, 1, 16, " Emperor \n", 64, "", D_MASK_EXTENDED );
-	f_poProduction = new HEditControl ( this, 7, 64, 1, 7, "Product\n", 6, "", D_MASK_DIGITS );
-	f_poFleet = new HEditControl ( this, 7, 72, 1, 7, "Fleet\n", 6, "", D_MASK_DIGITS );
-	f_poLogPad = new HLogPad ( this, 10, 64, - 3, - 1, " Event log \n" );
+	f_poSystemName = new HEditControl ( this, 1, 64, 1, 16, " System name \n", 64, "", n_pcMaskExtended );
+	f_poEmperorName = new HEditControl ( this, 4, 64, 1, 16, " Emperor \n", 64, "", n_pcMaskExtended );
+	f_poProduction = new HEditControl ( this, 7, 64, 1, 7, "Product\n", 6, "", n_pcMaskDigits );
+	f_poFleet = new HEditControl ( this, 7, 72, 1, 7, "Fleet\n", 6, "", n_pcMaskDigits );
+	f_poLogPad = new HLogPad ( this, 10, 64, - 5, - 1, " Event &log \n" );
+	f_poMessageInput = new HEditControl ( this, - 4, 64, 1, - 1, " &Message \n", 255, "", n_pcMaskLoose );
 	f_poLogPad->enable ( true );
+	f_poMessageInput->enable ( true );
 	M_REGISTER_POSTPROCESS_HANDLER ( '\r', NULL, HGalaxyWindow::handler_enter );
 	M_REGISTER_POSTPROCESS_HANDLER ( KEY_CODES::D_ESC, NULL, HGalaxyWindow::handler_esc );
 	M_REGISTER_POSTPROCESS_HANDLER ( ' ', NULL, HGalaxyWindow::handler_space );
@@ -751,11 +758,23 @@ int HGalaxyWindow::handler_enter ( int a_iCode, void * )
 	M_PROLOG
 	int l_iFleet = 0;
 	HMove * l_poMove = NULL;
-	if ( f_reState == D_INPUT )
+	if ( f_poFocusedChild == f_poMessageInput )
+		{
+		if ( f_poMessageInput->get ( ).get < HString const & > ( ).find_other_than ( n_pcWhiteSpace ) >= 0 )
+			{
+			f_oVarTmpBuffer = "GLX:SAY:";
+			f_oVarTmpBuffer += f_poMessageInput->get ( ).get < char const * const > ( );
+			f_oVarTmpBuffer += "\n";
+			f_poClient->send_message ( f_oVarTmpBuffer );
+			f_poMessageInput->set ( "" );
+			}
+		a_iCode = 0;
+		}
+	else if ( f_reState == D_INPUT )
 		{
 		if ( f_poFocusedChild == f_poFleet )
 			{
-			l_iFleet = strtol ( f_poFleet->get ( ).get < char const * > ( ), NULL, 10 );
+			l_iFleet = strtol ( f_poFleet->get ( ).get < char const * const > ( ), NULL, 10 );
 			if ( ( l_iFleet > 0 )
 					&& ( l_iFleet <= ( * f_poSystems ) [ f_poBoard->f_iSourceSystem ].f_iFleet ) )
 				{
@@ -1080,6 +1099,14 @@ void HClient::end_round ( void )
 		f_oMoves.flush ( );
 		}
 	f_oSocket.write_until_eos ( "GLX:PLAY:end_round\n" );
+	return;
+	M_EPILOG
+	}
+
+void HClient::send_message ( HString const & a_oMessage )
+	{
+	M_PROLOG
+	f_oSocket.write_until_eos ( a_oMessage );
 	return;
 	M_EPILOG
 	}

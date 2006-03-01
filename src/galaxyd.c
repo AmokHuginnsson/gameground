@@ -436,9 +436,11 @@ void HGalaxy::handler_message ( int a_iFileDescriptor, HString & a_roMessage )
 	HString l_oMessage;
 	if ( f_oNames.get ( a_iFileDescriptor, l_oName ) )
 		{
-		l_oMessage = "GLX:MSG:";
+		l_oMessage = "GLX:MSG:$";
+		l_oMessage += get_color ( a_iFileDescriptor );
+		l_oMessage += ';';
 		l_oMessage += l_oName;
-		l_oMessage += ": ";
+		l_oMessage += ";$12;: ";
 		l_oMessage += a_roMessage;
 		l_oMessage += '\n';
 		broadcast ( l_oMessage );

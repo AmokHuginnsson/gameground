@@ -38,6 +38,7 @@ class HGUIMain extends JPanel implements ActionListener, KeyListener {
 		public JTextField _server;
 		public JTextField _port;
 		public JTextField _fleet;
+		public JTextField _messageInput;
 		public JButton _connect;
 		public JButton _endRound;
 		public JPanel _setup;
@@ -137,37 +138,50 @@ class HGUIMain extends JPanel implements ActionListener, KeyListener {
 	public void keyTyped( KeyEvent $event ) {
 		if ( _widgets._board._systems != null ) {
 			if ( $event.getKeyChar() == KeyEvent.VK_ENTER ) {
-				if ( _state == State.INPUT ) {
-					int fleet = -1;
-					try {
-						fleet = new Integer( _widgets._fleet.getText() ).intValue();
-					} catch ( NumberFormatException e ) {
-					} finally {
-						if ( fleet < 1 ) {
-							_widgets._tips.setText( "Run! Run! Emperor is mad ..." );
-							return;
-						} else if ( fleet > _client._systems[ _widgets._board._sourceSystem ]._fleet ) {
-							_widgets._tips.setText( "Not enough resources!" );
-							return;
-						}
+				if ( _widgets._messageInput.isFocusOwner() ) {
+					String message = _widgets._messageInput.getText( );
+					if ( message.matches( ".*\\S+.*" ) ) {	
+						_client._out.println( "GLX:SAY:" + message );
+						_widgets._messageInput.setText( "" );
 					}
-					HMove move = new HMove();
-					move._sourceSystem = _widgets._board._sourceSystem;
-					move._destinationSystem = _widgets._board._destinationSystem;
-					move._fleet = fleet;
-					_client._systems[ _widgets._board._sourceSystem ]._fleet -= fleet;
-					_moves.add( move );
-					cleanEdit();
-					setState( State.NORMAL );
+				} else {
+					if ( _state == State.INPUT ) {
+						int fleet = -1;
+						try {
+							fleet = new Integer( _widgets._fleet.getText() ).intValue();
+						} catch ( NumberFormatException e ) {
+						} finally {
+							if ( fleet < 1 ) {
+								_widgets._tips.setText( "Run! Run! Emperor is mad ..." );
+								return;
+							} else if ( fleet > _client._systems[ _widgets._board._sourceSystem ]._fleet ) {
+								_widgets._tips.setText( "Not enough resources!" );
+								return;
+							}
+						}
+						HMove move = new HMove();
+						move._sourceSystem = _widgets._board._sourceSystem;
+						move._destinationSystem = _widgets._board._destinationSystem;
+						move._fleet = fleet;
+						_client._systems[ _widgets._board._sourceSystem ]._fleet -= fleet;
+						_moves.add( move );
+						cleanEdit();
+						setState( State.NORMAL );
+					}
 				}
-			} else if ( $event.getKeyChar() == KeyEvent.VK_SPACE ) {
+			} else if ( ( $event.getKeyChar() == KeyEvent.VK_SPACE )
+					&& ( ! _widgets._messageInput.isFocusOwner() ) ) {
 				_widgets._endRound.doClick();
 			} else if ( $event.getKeyChar() == KeyEvent.VK_ESCAPE ) {
-				if ( _state == State.INPUT ) {
-					cleanEdit();
-					setState( State.SELECT );
-				} else if ( _state == State.SELECT ) {
-					setState( State.NORMAL );
+				if ( _widgets._messageInput.isFocusOwner() ) {
+					_widgets._board.requestFocus();
+				} else {
+					if ( _state == State.INPUT ) {
+						cleanEdit();
+						setState( State.SELECT );
+					} else if ( _state == State.SELECT ) {
+						setState( State.NORMAL );
+					}
 				}
 			}
 		}
@@ -253,6 +267,7 @@ class HGUIMain extends JPanel implements ActionListener, KeyListener {
 		}
 	}
 	void onEndRound() {
+		_widgets._board.requestFocus();
 		if ( _state == State.INPUT )
 			keyTyped( new KeyEvent( _widgets._fleet, KeyEvent.KEY_TYPED,
 						(long)0, 0, KeyEvent.VK_UNDEFINED, (char)KeyEvent.VK_ENTER ) );
