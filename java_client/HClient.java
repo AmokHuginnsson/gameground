@@ -207,12 +207,13 @@ class HClient extends Thread {
 						_gui.log( value, color );
 						_gui.log( " arrived.\n", HGUIMain.Colors.NORMAL );
 					} break;
-					case ( 'f' ): { /* failed to conquer */
-						_systems[ sysNo ]._color = color;
-						color = _color;
-						value = _emperors.get( color );
-					}
+					case ( 'f' ):
 					case ( 's' ): { /* resisted attack */
+						if ( event == 'f' ) { /* failed to conquer */
+							_systems[ sysNo ]._color = color;
+							color = _color;
+							value = _emperors.get( color );
+						}
 						int temp = _systems[ sysNo ]._color;
 						temp = ( temp >= 0 ) ? temp : HGUIMain.Colors.NORMAL;
 						_gui.log( _systemNames[ sysNo ], temp );
