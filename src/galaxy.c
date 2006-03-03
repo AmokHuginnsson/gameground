@@ -692,9 +692,9 @@ int HGalaxyWindow::init ( void )
 	f_poMessageInput = new HEditControl ( this, - 4, 64, 1, - 1, " &Message \n", 255, "", n_pcMaskLoose );
 	f_poLogPad->enable ( true );
 	f_poMessageInput->enable ( true );
-	M_REGISTER_POSTPROCESS_HANDLER ( '\r', NULL, HGalaxyWindow::handler_enter );
-	M_REGISTER_POSTPROCESS_HANDLER ( KEY_CODES::D_ESC, NULL, HGalaxyWindow::handler_esc );
-	M_REGISTER_POSTPROCESS_HANDLER ( ' ', NULL, HGalaxyWindow::handler_space );
+	register_postprocess_handler ( '\r', NULL, & HGalaxyWindow::handler_enter );
+	register_postprocess_handler ( KEY_CODES::D_ESC, NULL, & HGalaxyWindow::handler_esc );
+	register_postprocess_handler ( ' ', NULL, & HGalaxyWindow::handler_space );
 	return ( 0 );
 	M_EPILOG
 	}
