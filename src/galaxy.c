@@ -451,7 +451,7 @@ void HBoard::refresh ( void )
 	HString l_oPen;
 	HBoard::draw_label ( );
 	if ( f_bFocused )
-		M_IRV ( curs_set ( CURSOR::D_CURSOR_INVISIBLE ) );
+		M_IRV ( curs_set ( CURSOR::D_INVISIBLE ) );
 	if ( f_iBoardSize >= 0 )
 		{
 		f_iHeight = f_iBoardSize + 1 /* for label */ + 2 /* for borders */;
@@ -865,7 +865,7 @@ void HClient::init_client ( HString & a_roHost, int a_iPort )
 	M_PROLOG
 	HString l_oMessage;
 	f_oSocket.connect ( a_roHost, a_iPort );
-	M_REGISTER_FILE_DESCRIPTOR_HANDLER ( f_oSocket.get_file_descriptor ( ), HClient::handler_message );
+	register_file_descriptor_handler ( f_oSocket.get_file_descriptor ( ), & HClient::handler_message );
 	l_oMessage = "GLX:LOGIN:";
 	l_oMessage += setup.f_oLogin + '\n';
 	f_oSocket.write_until_eos ( l_oMessage );

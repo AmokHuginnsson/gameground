@@ -579,7 +579,7 @@ int HServer::init_server ( int a_iPort )
 	{
 	M_PROLOG
 	f_oSocket.listen ( "0.0.0.0", a_iPort );
-	M_REGISTER_FILE_DESCRIPTOR_HANDLER ( f_oSocket.get_file_descriptor ( ), HServer::handler_connection );
+	register_file_descriptor_handler ( f_oSocket.get_file_descriptor ( ), & HServer::handler_connection );
 	HProcess::init ( 3600 );
 	f_roGalaxy.set_socket ( & f_oSocket );
 	return ( 0 );
@@ -591,7 +591,7 @@ int HServer::handler_connection ( int )
 	M_PROLOG
 	HSocket * l_poClient = f_oSocket.accept ( );
 	M_ASSERT ( l_poClient );
-	M_REGISTER_FILE_DESCRIPTOR_HANDLER ( l_poClient->get_file_descriptor ( ), HServer::handler_message );
+	register_file_descriptor_handler ( l_poClient->get_file_descriptor ( ), & HServer::handler_message );
 	if ( f_oSocket.get_client_count ( ) >= f_iEmperors )
 		{
 		unregister_file_descriptor_handler ( f_oSocket.get_file_descriptor ( ) );
