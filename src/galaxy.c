@@ -451,7 +451,7 @@ void HBoard::refresh ( void )
 	HString l_oPen;
 	HBoard::draw_label ( );
 	if ( f_bFocused )
-		M_IRV ( curs_set ( CURSOR::D_INVISIBLE ) );
+		curs_set ( CURSOR::D_INVISIBLE );
 	if ( f_iBoardSize >= 0 )
 		{
 		f_iHeight = f_iBoardSize + 1 /* for label */ + 2 /* for borders */;
