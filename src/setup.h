@@ -88,6 +88,8 @@ struct OSetup
 			stdhapi::tools::util::failure ( 7, _ ( "bad board size specified\n" ) );
 		if ( f_bServer && ( ( f_iEmperors + f_iSystems ) > D_MAX_SYSTEM_COUNT ) )
 			stdhapi::tools::util::failure ( 8, _ ( "bad total system count\n" ) );
+		if ( f_bServer && ( f_iSystems < 0 ) )
+			stdhapi::tools::util::failure ( 9, _ ( "neutral system count has to be nonnegative number\n" ) );
 		return;
 		M_EPILOG
 		}
