@@ -176,6 +176,8 @@ void HSystem::do_round ( HGalaxy & a_roGalaxy )
 	HString l_oMessage;
 	if ( f_iEmperor >= 0 )
 		f_iFleet += f_iProduction;
+	else
+		f_iFleet = f_iProduction;
 	if ( f_oAttackers.quantity ( ) )
 		{
 		l_poFleet = & f_oAttackers.go ( 0 );
