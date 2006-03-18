@@ -123,6 +123,10 @@ public class HBoard extends JPanel implements MouseInputListener {
 		_cursorX = -1;
 		_cursorY = -1;
 		repaint();
+		_gui._widgets._systemInfo.setText( "" );
+		_gui._widgets._emperorInfo.setText( "" );
+		_gui._widgets._productionInfo.setText( "" );
+		_gui._widgets._fleetInfo.setText( "" );
 	}
 	int distance( int $source, int $destination ) {
 		int dx = 0, dy = 0, distance = 0;
@@ -170,11 +174,10 @@ public class HBoard extends JPanel implements MouseInputListener {
 			if ( ( $coordX == _cursorX ) && ( $coordY == _cursorY ) ) {
 				$gs.setColor ( _gui._widgets._colors[ HGUIMain.Colors.WHITE ] );
 				_gui._widgets._systemInfo.setText( _gui._client._systemNames[ $no ] );
-				if ( $color >= 0 ) {
+				if ( $color >= 0 )
 					_gui._widgets._emperorInfo.setText( _gui._client._emperors.get( $color ) );
-				} else {
+				else
 					_gui._widgets._emperorInfo.setText( "" );
-				}
 				if ( _systems[ $no ]._production >= 0 )
 					_gui._widgets._productionInfo.setText( String.valueOf( _systems[ $no ]._production ) );
 				else
