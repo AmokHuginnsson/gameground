@@ -160,6 +160,7 @@ class HClient extends Thread {
 					_color = index;
 			} else if ( variable.compareTo( "ok" ) == 0 ) {
 				_gui.setState ( HGUIMain.State.NORMAL );
+				_gui._widgets._emperor.setForeground( _gui._widgets._colors[ _color ] );
 				_round = 0;
 			}
 		} catch ( NumberFormatException e ) {

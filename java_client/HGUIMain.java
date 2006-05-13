@@ -237,7 +237,6 @@ class HGUIMain extends JPanel implements ActionListener, KeyListener {
 		synchronized ( _client ) {
 			_client.notify();
 		}
-		_widgets._emperor.setForeground( _widgets._colors[ _client._color ] );
 	}
 	void onConnectClick() {
 		String errors = "";
