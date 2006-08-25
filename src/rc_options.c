@@ -29,7 +29,7 @@ Copyright:
 #include <stdio.h>
 
 #include <yaal.h>
-M_CVSID ( "$CVSHeader: galaxy/src/rc_options.c,v 1.8 2006/01/24 11:51:47 amok Exp $" )
+M_VCSID ( "$CVSHeader: galaxy/src/rc_options.c,v 1.8 2006/01/24 11:51:47 amok Exp $" )
 
 #include "setup.h"
 

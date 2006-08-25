@@ -25,7 +25,7 @@ Copyright:
 */
 
 #include <yaal.h> /* all hAPI headers */
-M_CVSID ( "$CVSHeader: galaxy/src/main.c,v 1.7 2005/12/28 15:58:00 amok Exp $" )
+M_VCSID ( "$CVSHeader: galaxy/src/main.c,v 1.7 2005/12/28 15:58:00 amok Exp $" )
 
 #include "version.h"
 #include "setup.h"

@@ -25,7 +25,7 @@ Copyright:
 */
 
 #include <yaal.h>
-M_CVSID ( "$CVSHeader: galaxy/src/galaxyd.c,v 1.20 2006/01/24 11:51:47 amok Exp $" )
+M_VCSID ( "$CVSHeader: galaxy/src/galaxyd.c,v 1.20 2006/01/24 11:51:47 amok Exp $" )
 #include "galaxyd.h"
 
 #include "setup.h"
