@@ -24,18 +24,18 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#include <stdhapi.h>
-M_CVSID ( "$CVSHeader$" )
+#include <yaal.h>
+M_CVSID ( "$CVSHeader: galaxy/src/galaxyd.c,v 1.20 2006/01/24 11:51:47 amok Exp $" )
 #include "galaxyd.h"
 
 #include "setup.h"
 
 using namespace std;
-using namespace stdhapi;
-using namespace stdhapi::hcore;
-using namespace stdhapi::hconsole;
-using namespace stdhapi::tools;
-using namespace stdhapi::tools::util;
+using namespace yaal;
+using namespace yaal::hcore;
+using namespace yaal::hconsole;
+using namespace yaal::tools;
+using namespace yaal::tools::util;
 
 namespace
 {

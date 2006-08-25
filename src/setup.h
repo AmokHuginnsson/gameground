@@ -49,10 +49,10 @@ struct OSetup
 	int f_iSystems;
 	int f_iBoardSize;
 	/* galaxy specific strings */
-	stdhapi::hcore::HString f_oLogin;
-	stdhapi::hcore::HString f_oHost;
+	yaal::hcore::HString f_oLogin;
+	yaal::hcore::HString f_oHost;
 	char * f_pcProgramName;
-	stdhapi::hcore::HString f_oLogPath;
+	yaal::hcore::HString f_oLogPath;
 	/* self-sufficient */
 	OSetup ( void ) : f_bQuiet ( false ), f_bVerbose ( false ),
 										f_bHelp ( false ), f_bServer ( false ),
@@ -66,30 +66,30 @@ struct OSetup
 		{
 		M_PROLOG
 		if ( f_bServer && f_bClient )
-			stdhapi::tools::util::failure ( 1,
+			yaal::tools::util::failure ( 1,
 					_ ( "galaxy cannot be server and client at the same time\n" ) );
 		if ( ! ( f_bServer || f_bClient ) )
-			stdhapi::tools::util::failure ( 2,
+			yaal::tools::util::failure ( 2,
 					_ ( "galaxy must be server or client\n" ) );
 		if ( f_bServer && ( f_iEmperors < 2 ) )
-			stdhapi::tools::util::failure ( 3,
+			yaal::tools::util::failure ( 3,
 					_ ( "galaxy is multiplayer game and makes sense"
 						" only for at least two players\n" ) );
 		if ( f_iPort < 1024 )
-			stdhapi::tools::util::failure ( 4,
+			yaal::tools::util::failure ( 4,
 					_ ( "galaxy cannot run on restricted ports\n" ) );
 		if ( f_bClient && f_oHost.is_empty ( ) )
-			stdhapi::tools::util::failure ( 5,
+			yaal::tools::util::failure ( 5,
 					_ ( "as a client You must specify server host\n" ) );
 		if ( f_bClient && f_oLogin.is_empty ( ) )
-			stdhapi::tools::util::failure ( 6,
+			yaal::tools::util::failure ( 6,
 					_ ( "as a player You must specify Your name\n" ) );
 		if ( f_bServer && ( ( f_iBoardSize < 6 ) || ( f_iBoardSize > D_MAX_BOARD_SIZE ) ) )
-			stdhapi::tools::util::failure ( 7, _ ( "bad board size specified\n" ) );
+			yaal::tools::util::failure ( 7, _ ( "bad board size specified\n" ) );
 		if ( f_bServer && ( ( f_iEmperors + f_iSystems ) > D_MAX_SYSTEM_COUNT ) )
-			stdhapi::tools::util::failure ( 8, _ ( "bad total system count\n" ) );
+			yaal::tools::util::failure ( 8, _ ( "bad total system count\n" ) );
 		if ( f_bServer && ( f_iSystems < 0 ) )
-			stdhapi::tools::util::failure ( 9, _ ( "neutral system count has to be nonnegative number\n" ) );
+			yaal::tools::util::failure ( 9, _ ( "neutral system count has to be nonnegative number\n" ) );
 		return;
 		M_EPILOG
 		}

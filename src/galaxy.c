@@ -24,8 +24,8 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#include <stdhapi.h>
-M_CVSID ( "$CVSHeader$" )
+#include <yaal.h>
+M_CVSID ( "$CVSHeader: galaxy/src/galaxy.c,v 1.21 2006/01/24 11:51:46 amok Exp $" )
 
 #include "galaxy.h"
 
@@ -36,11 +36,11 @@ M_CVSID ( "$CVSHeader$" )
 #define D_ATTR_CURSOR  				( COLORS::D_FG_WHITE | COLORS::D_BG_BLACK )
 
 using namespace std;
-using namespace stdhapi;
-using namespace stdhapi::hcore;
-using namespace stdhapi::hconsole;
-using namespace stdhapi::tools;
-using namespace stdhapi::tools::util;
+using namespace yaal;
+using namespace yaal::hcore;
+using namespace yaal::hconsole;
+using namespace yaal::tools;
+using namespace yaal::tools::util;
 
 namespace
 {
