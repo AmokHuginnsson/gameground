@@ -91,8 +91,8 @@ CWARNING_FLAGS =	\
 						-Wunreachable-code\ # too much warrnings
 #						-Waggregate-return\ # useless for C++
 CXXWARNING_FLAGS		=	\
+						-Weffc++\
 						-Wsign-promo
-#						-Weffc++\
 #						-Wold-style-cast\ # lots of warrnings from libc headers
 #						-Woverloaded-virtual\ # too much unecessary warrnings
 ifeq ($(HD),1)
