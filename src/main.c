@@ -1,7 +1,7 @@
 /*
 ---            `galaxy' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski             ---
 
-	main.c - this file is integral part of `galaxy' project.
+	main.cxx - this file is integral part of `galaxy' project.
 
 	i.  You may not make any changes in Copyright information.
 	ii. You must attach Copyright information to any part of every copy
@@ -25,7 +25,7 @@ Copyright:
 */
 
 #include <yaal.h> /* all hAPI headers */
-M_VCSID ( "$CVSHeader: galaxy/src/main.c,v 1.7 2005/12/28 15:58:00 amok Exp $" )
+M_VCSID ( "$Id$" )
 
 #include "version.h"
 #include "setup.h"
