@@ -24,7 +24,7 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#include <yaal.h>
+#include <yaal/yaal.h>
 M_VCSID ( "$Id$" )
 
 #include "galaxy.h"
@@ -194,7 +194,7 @@ protected:
 	};
 
 typedef HArray < HSystem > systems_t;
-typedef HMap < int, HString > emperors_t;
+typedef HHashMap < int, HString > emperors_t;
 typedef HList < HMove > moves_t;
 typedef enum
 	{
@@ -306,7 +306,7 @@ private:
 class HClient : public HTUIProcess
 	{
 	typedef void ( HClient::*handler_t ) ( HString & );
-	typedef HMap < HString, handler_t > handlers_t;
+	typedef HHashMap < HString, handler_t > handlers_t;
 protected:
 	/*{*/
 	int f_iColor;

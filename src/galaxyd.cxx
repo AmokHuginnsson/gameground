@@ -24,7 +24,7 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#include <yaal.h>
+#include <yaal/yaal.h>
 M_VCSID ( "$Id$" )
 #include "galaxyd.h"
 
@@ -93,8 +93,8 @@ private:
 class HGalaxy
 	{
 	typedef void ( HGalaxy::*handler_t ) ( int, HString & );
-	typedef HMap < HString, handler_t > handlers_t;
-	typedef HMap < int, HString > names_t;
+	typedef HHashMap < HString, handler_t > handlers_t;
+	typedef HHashMap < int, HString > names_t;
 	typedef HArray < int > int_array_t;
 protected:
 	/*{*/
