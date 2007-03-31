@@ -242,7 +242,7 @@ public:
 	/*{*/
 	HBoard ( HWindow *, HEventListener & );
 	virtual ~HBoard ( void );
-	virtual void refresh ( void );
+	virtual void do_refresh ( void );
 	virtual int process_input ( int );
 	void set_systems ( systems_t * );
 	/*}*/
@@ -280,6 +280,7 @@ protected:
 	/*}*/
 public:
 	/*{*/
+	typedef HPointer<HGalaxyWindow,HPointerScalar,HPointerRelaxed> ptr_t;
 	HGalaxyWindow ( char const * const, HClient *, int &, int &, client_state_t & );
 	virtual ~HGalaxyWindow ( void );
 	virtual int init ( void );
@@ -313,7 +314,7 @@ protected:
 	int f_iRound;
 	client_state_t f_eState;
 	HSocket f_oSocket;
-	HGalaxyWindow f_oWindow;
+	HGalaxyWindow::ptr_t f_oWindow;
 	HBoard * f_poBoard;
 	systems_t f_oSystems;
 	handlers_t f_oHandlers;
@@ -442,7 +443,7 @@ HBoard::~HBoard ( void )
 	M_EPILOG
 	}
 
-void HBoard::refresh ( void )
+void HBoard::do_refresh ( void )
 	{
 	M_PROLOG
 	int l_iCtr = 0, l_iSystems = 0, l_iSysNo = - 1, l_iCoordX = - 1, l_iCoordY = - 1;
@@ -758,7 +759,7 @@ int HGalaxyWindow::handler_enter ( int a_iCode, void * )
 	M_PROLOG
 	int l_iFleet = 0;
 	HMove * l_poMove = NULL;
-	if ( f_poFocusedChild == f_poMessageInput )
+	if ( (*f_oFocusedChild) == f_poMessageInput )
 		{
 		if ( f_poMessageInput->get ( ).get < HString const & > ( ).find_other_than ( n_pcWhiteSpace ) >= 0 )
 			{
@@ -772,7 +773,7 @@ int HGalaxyWindow::handler_enter ( int a_iCode, void * )
 		}
 	else if ( f_reState == D_INPUT )
 		{
-		if ( f_poFocusedChild == f_poFleet )
+		if ( (*f_oFocusedChild) == f_poFleet )
 			{
 			l_iFleet = strtol ( f_poFleet->get ( ).get < char const * const > ( ), NULL, 10 );
 			if ( ( l_iFleet > 0 )
@@ -790,15 +791,15 @@ int HGalaxyWindow::handler_enter ( int a_iCode, void * )
 				set_state ( D_NORMAL );
 				}
 			else if ( l_iFleet > 0 )
-				f_poStatusBar->message ( COLORS::D_FG_RED, "Not enough resources!" );
+				f_oStatusBar->message ( COLORS::D_FG_RED, "Not enough resources!" );
 			else
-				f_poStatusBar->message ( COLORS::D_FG_RED, "Run! Run! Emperor is mad!" );
+				f_oStatusBar->message ( COLORS::D_FG_RED, "Run! Run! Emperor is mad!" );
 			a_iCode = 0;
 			}
 		}
 	else if ( f_reState == D_LOCKED )
 		{
-		f_poStatusBar->message ( COLORS::D_FG_RED, f_riRound >= 0 ? "Wait for new round!" : "Challange not started yet!" );
+		f_oStatusBar->message ( COLORS::D_FG_RED, f_riRound >= 0 ? "Wait for new round!" : "Challange not started yet!" );
 		a_iCode = 0;
 		}
 	return ( a_iCode );
@@ -835,13 +836,13 @@ int HGalaxyWindow::handler_space ( int, void * )
 void HGalaxyWindow::msg ( int a_iAttr, char const * const a_pcMsg )
 	{
 	M_PROLOG
-	f_poStatusBar->message ( a_iAttr, a_pcMsg );
+	f_oStatusBar->message ( a_iAttr, a_pcMsg );
 	M_EPILOG
 	}
 
 HClient::HClient ( char const * const a_pcProgramName )
 	: f_iColor ( - 1 ), f_iRound ( - 1 ), f_eState ( D_LOCKED ), f_oSocket ( ),
-	f_oWindow ( a_pcProgramName, this, f_iRound, f_iColor, f_eState ),
+	f_oWindow ( new HGalaxyWindow( a_pcProgramName, this, f_iRound, f_iColor, f_eState ) ),
 	f_poBoard ( NULL ), f_oSystems ( 0 ), f_oHandlers ( 16 ), f_oEmperors ( 16 ),
 	f_oMoves ( )
 	{
@@ -869,9 +870,9 @@ void HClient::init_client ( HString & a_roHost, int a_iPort )
 	l_oMessage = "GLX:LOGIN:";
 	l_oMessage += setup.f_oLogin + '\n';
 	f_oSocket.write_until_eos ( l_oMessage );
-	f_poBoard = f_oWindow.get_board ( );
-	f_oWindow.set_data ( & f_oSystems, & f_oEmperors, & f_oMoves );
-	HTUIProcess::init_tui ( "galaxy", & f_oWindow );
+	f_poBoard = f_oWindow->get_board ( );
+	f_oWindow->set_data ( & f_oSystems, & f_oEmperors, & f_oMoves );
+	HTUIProcess::init_tui ( "galaxy", f_oWindow );
 	return;
 	M_EPILOG
 	}
@@ -924,7 +925,7 @@ void HClient::handler_setup ( HString & a_roCommand )
 	l_oVariable = a_roCommand.split ( "=", 0 );
 	l_oValue = a_roCommand.split ( "=", 1 );
 	if ( l_oVariable == "board_size" )
-		f_oWindow.f_poBoard->f_iBoardSize = strtol ( l_oValue, NULL, 10 );
+		f_oWindow->f_poBoard->f_iBoardSize = strtol ( l_oValue, NULL, 10 );
 	else if ( l_oVariable == "systems" )
 		{
 		if ( f_oSystems.get_size ( ) )
@@ -949,8 +950,8 @@ void HClient::handler_setup ( HString & a_roCommand )
 		}
 	else if ( l_oVariable == "ok" )
 		{
-		f_oWindow.refresh ( );
-		f_oWindow.set_state ( D_NORMAL );
+		f_oWindow->refresh ( );
+		f_oWindow->set_state ( D_NORMAL );
 		f_iRound = 0;
 		}
 	return;
@@ -981,29 +982,29 @@ void HClient::handler_play ( HString & a_roCommand )
 			case ( 'c' ): /* conquered */
 			case ( 'd' ): /* defeted */
 				{
-				f_oWindow.f_poLogPad->add ( n_piColors [ l_iColor ] );
-				f_oWindow.f_poLogPad->add ( l_oValue );
-				f_oWindow.f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
-				f_oWindow.f_poLogPad->add ( " conquered " );
+				f_oWindow->f_poLogPad->add ( n_piColors [ l_iColor ] );
+				f_oWindow->f_poLogPad->add ( l_oValue );
+				f_oWindow->f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
+				f_oWindow->f_poLogPad->add ( " conquered " );
 				int l_iTemp = f_oSystems [ l_iSysNo ].f_iColor;
-				f_oWindow.f_poLogPad->add ( ( l_iTemp >= 0 ) ? n_piColors [ l_iTemp ] : COLORS::D_ATTR_NORMAL );
-				f_oWindow.f_poLogPad->add ( n_ppcSystemNames [ l_iSysNo ] );
+				f_oWindow->f_poLogPad->add ( ( l_iTemp >= 0 ) ? n_piColors [ l_iTemp ] : COLORS::D_ATTR_NORMAL );
+				f_oWindow->f_poLogPad->add ( n_ppcSystemNames [ l_iSysNo ] );
 				l_oValue.format ( "(%c)", n_pcSymbols [ l_iSysNo ] );
-				f_oWindow.f_poLogPad->add ( l_oValue );
-				f_oWindow.f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
-				f_oWindow.f_poLogPad->add ( ".\n" );
+				f_oWindow->f_poLogPad->add ( l_oValue );
+				f_oWindow->f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
+				f_oWindow->f_poLogPad->add ( ".\n" );
 				f_oSystems [ l_iSysNo ].f_iColor = l_iColor;
 				break;
 				}
 			case ( 'r' ): /* reinforcements */
 				{
-				f_oWindow.f_poLogPad->add ( "Reinforcements for " );
-				f_oWindow.f_poLogPad->add ( n_piColors [ l_iColor ] );
-				f_oWindow.f_poLogPad->add ( n_ppcSystemNames [ l_iSysNo ] );
+				f_oWindow->f_poLogPad->add ( "Reinforcements for " );
+				f_oWindow->f_poLogPad->add ( n_piColors [ l_iColor ] );
+				f_oWindow->f_poLogPad->add ( n_ppcSystemNames [ l_iSysNo ] );
 				l_oValue.format ( "(%c)", n_pcSymbols [ l_iSysNo ] );
-				f_oWindow.f_poLogPad->add ( l_oValue );
-				f_oWindow.f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
-				f_oWindow.f_poLogPad->add ( " arrived.\n" );
+				f_oWindow->f_poLogPad->add ( l_oValue );
+				f_oWindow->f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
+				f_oWindow->f_poLogPad->add ( " arrived.\n" );
 				break;
 				}
 			case ( 'f' ): /* failed to conquer */
@@ -1015,16 +1016,16 @@ void HClient::handler_play ( HString & a_roCommand )
 			case ( 's' ): /* resisted attack */
 				{
 				int l_iTemp = f_oSystems [ l_iSysNo ].f_iColor;
-				f_oWindow.f_poLogPad->add ( ( l_iTemp >= 0 ) ? n_piColors [ l_iTemp ] : COLORS::D_ATTR_NORMAL );
-				f_oWindow.f_poLogPad->add ( n_ppcSystemNames [ l_iSysNo ] );
+				f_oWindow->f_poLogPad->add ( ( l_iTemp >= 0 ) ? n_piColors [ l_iTemp ] : COLORS::D_ATTR_NORMAL );
+				f_oWindow->f_poLogPad->add ( n_ppcSystemNames [ l_iSysNo ] );
 				l_oVariable.format ( "(%c)", n_pcSymbols [ l_iSysNo ] );
-				f_oWindow.f_poLogPad->add ( l_oVariable );
-				f_oWindow.f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
-				f_oWindow.f_poLogPad->add ( " resisted attack from " );
-				f_oWindow.f_poLogPad->add ( n_piColors [ l_iColor ] );
-				f_oWindow.f_poLogPad->add ( l_oValue );
-				f_oWindow.f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
-				f_oWindow.f_poLogPad->add ( ".\n" );
+				f_oWindow->f_poLogPad->add ( l_oVariable );
+				f_oWindow->f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
+				f_oWindow->f_poLogPad->add ( " resisted attack from " );
+				f_oWindow->f_poLogPad->add ( n_piColors [ l_iColor ] );
+				f_oWindow->f_poLogPad->add ( l_oValue );
+				f_oWindow->f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
+				f_oWindow->f_poLogPad->add ( ".\n" );
 				break;
 				}
 			case ( 'i' ): /* info */
@@ -1036,18 +1037,18 @@ void HClient::handler_play ( HString & a_roCommand )
 		}
 	else if ( l_oVariable == "round" )
 		{
-		f_oWindow.f_poLogPad->add ( D_ATTR_CURSOR );
-		f_oWindow.f_poLogPad->add ( "----- " );
-		f_oWindow.f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
-		f_oWindow.f_poLogPad->add ( " round: " );
+		f_oWindow->f_poLogPad->add ( D_ATTR_CURSOR );
+		f_oWindow->f_poLogPad->add ( "----- " );
+		f_oWindow->f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
+		f_oWindow->f_poLogPad->add ( " round: " );
 		f_iRound = strtol ( l_oValue, NULL, 10 );
 		l_oValue.format ( "%d", f_iRound );
-		f_oWindow.f_poLogPad->add ( D_ATTR_CURSOR );
-		f_oWindow.f_poLogPad->add ( l_oValue );
-		f_oWindow.f_poLogPad->add ( " -----\n" );
-		f_oWindow.f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
-		f_oWindow.set_state ( D_NORMAL );
-		f_oWindow.refresh ( );
+		f_oWindow->f_poLogPad->add ( D_ATTR_CURSOR );
+		f_oWindow->f_poLogPad->add ( l_oValue );
+		f_oWindow->f_poLogPad->add ( " -----\n" );
+		f_oWindow->f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
+		f_oWindow->set_state ( D_NORMAL );
+		f_oWindow->refresh ( );
 		}
 	return;
 	M_EPILOG
@@ -1068,13 +1069,13 @@ void HClient::handler_msg ( HString & a_roMessage )
 		if ( l_oPart.is_empty ( ) )
 			break;
 		if ( l_oPart [ 0 ] == '$' ) /* color */
-			f_oWindow.f_poLogPad->add ( n_piColors [ strtol ( l_oPart.mid ( 1 ), NULL, 10 ) ] );
+			f_oWindow->f_poLogPad->add ( n_piColors [ strtol ( l_oPart.mid ( 1 ), NULL, 10 ) ] );
 		else /* text */
-			f_oWindow.f_poLogPad->add ( l_oPart );
+			f_oWindow->f_poLogPad->add ( l_oPart );
 		l_iIndex = l_iOffset + 1;
 		}
-	f_oWindow.f_poLogPad->add ( "\n" );
-	f_oWindow.f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
+	f_oWindow->f_poLogPad->add ( "\n" );
+	f_oWindow->f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
 	return;
 	M_EPILOG
 	}
@@ -1084,8 +1085,8 @@ void HClient::end_round ( void )
 	M_PROLOG
 	HMove * l_poMove = NULL;
 	HString l_oMessage;
-	f_oWindow.set_state ( D_LOCKED );
-	if ( f_oMoves.quantity ( ) )
+	f_oWindow->set_state ( D_LOCKED );
+	if ( f_oMoves.size ( ) )
 		{
 		for ( l_poMove = & f_oMoves.go ( 0 ); l_poMove;
 				l_poMove = f_oMoves.to_tail ( 1, moves_t::D_TREAT_AS_OPENED ) )

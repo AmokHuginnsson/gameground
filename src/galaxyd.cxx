@@ -178,7 +178,7 @@ void HSystem::do_round ( HGalaxy & a_roGalaxy )
 		f_iFleet += f_iProduction;
 	else
 		f_iFleet = f_iProduction;
-	if ( f_oAttackers.quantity ( ) )
+	if ( f_oAttackers.size ( ) )
 		{
 		l_poFleet = & f_oAttackers.go ( 0 );
 		while ( l_poFleet )
@@ -236,9 +236,8 @@ void HSystem::do_round ( HGalaxy & a_roGalaxy )
 						l_poSocket->write_until_eos ( l_oMessage );
 						}
 					}
-				f_oAttackers.remove_element (
-						attackers_t::D_FORCE_REMOVE_ELEMENT | attackers_t::D_TREAT_AS_OPENED, & l_poFleet );
-				if ( l_poFleet && f_oAttackers.quantity ( ) )
+				f_oAttackers.remove_element ( attackers_t::D_TREAT_AS_OPENED, & l_poFleet );
+				if ( l_poFleet && f_oAttackers.size ( ) )
 					{
 					l_poFleet = & f_oAttackers.present ( );
 					continue;
