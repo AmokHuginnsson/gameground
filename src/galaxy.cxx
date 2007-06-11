@@ -459,25 +459,25 @@ void HBoard::do_refresh ( void )
 		f_iWidth = f_iBoardSize * 3 /* for System */ + 2 /* for borders */;
 		if ( f_iBoardSize < 12 )
 			{
-			c_printf ( f_iRowRaw, f_iColumnRaw + 35, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, "{" );
-			c_printf ( f_iRowRaw + 1, f_iColumnRaw + 20, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, "-+--+--+--+--+-'" );
+			c_cmvprintf ( f_iRowRaw, f_iColumnRaw + 35, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, "{" );
+			c_cmvprintf ( f_iRowRaw + 1, f_iColumnRaw + 20, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, "-+--+--+--+--+-'" );
 			}
 		l_oPen = ',';
 		for ( l_iCtr = 0; l_iCtr < f_iBoardSize; l_iCtr ++ )
 			l_oPen += "-+-";
 		l_oPen += '.';
-		c_printf ( f_iRowRaw, f_iColumnRaw, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, l_oPen );
+		c_cmvprintf ( f_iRowRaw, f_iColumnRaw, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, l_oPen );
 		l_oPen = '}';
 		for ( l_iCtr = 0; l_iCtr < f_iBoardSize; l_iCtr ++ )
 			l_oPen += " - ";
 		l_oPen += '{';
 		for ( l_iCtr = 0; l_iCtr < f_iBoardSize; l_iCtr ++ )
-			c_printf ( f_iRowRaw + l_iCtr + 1, f_iColumnRaw, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, l_oPen );
+			c_cmvprintf ( f_iRowRaw + l_iCtr + 1, f_iColumnRaw, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, l_oPen );
 		l_oPen = '`';
 		for ( l_iCtr = 0; l_iCtr < f_iBoardSize; l_iCtr ++ )
 			l_oPen += "-+-";
 		l_oPen += '\'';
-		c_printf ( f_iRowRaw + f_iBoardSize + 1, f_iColumnRaw, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, l_oPen );
+		c_cmvprintf ( f_iRowRaw + f_iBoardSize + 1, f_iColumnRaw, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, l_oPen );
 		if ( ( l_iSystems = f_poSystems->get_size ( ) ) )
 			{
 			for ( l_iCtr = 0; l_iCtr < l_iSystems; l_iCtr ++ )
@@ -485,7 +485,7 @@ void HBoard::do_refresh ( void )
 				l_iCoordX = ( * f_poSystems ) [ l_iCtr ].f_iCoordinateX;
 				l_iCoordY = ( * f_poSystems ) [ l_iCtr ].f_iCoordinateY;
 				l_iColor = ( * f_poSystems ) [ l_iCtr ].f_iColor;
-				c_printf ( f_iRowRaw + 1 + l_iCoordY,
+				c_cmvprintf ( f_iRowRaw + 1 + l_iCoordY,
 						f_iColumnRaw + 1 + l_iCoordX * 3,
 						( ( l_iColor >= 0 ) && f_bFocused ) ? n_piColors [ l_iColor ] : D_ATTR_NEUTRAL_SYSTEM, "(%c)",
 						l_iCtr + ( l_iCtr < 26 ? 'A' : ( l_iCtr < 35 ? '1' - 26 : '0' - 35 ) ) );
@@ -494,29 +494,29 @@ void HBoard::do_refresh ( void )
 				}
 			f_roListener.on_show_system_info ( l_iSysNo );
 			}
-		c_printf ( f_iRowRaw + 1 + f_iCursorY,
+		c_cmvprintf ( f_iRowRaw + 1 + f_iCursorY,
 				f_iColumnRaw + 1 + f_iCursorX * 3,
 				f_bFocused ? D_ATTR_CURSOR : COLORS::D_ATTR_NORMAL, "{" );
-		c_printf ( f_iRowRaw + 1 + f_iCursorY,
+		c_cmvprintf ( f_iRowRaw + 1 + f_iCursorY,
 				f_iColumnRaw + 3 + f_iCursorX * 3,
 				f_bFocused ? D_ATTR_CURSOR : COLORS::D_ATTR_NORMAL, "}" );
-		c_printf ( f_iRowRaw - 1, f_iColumnRaw + 8, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, ",--{" );
+		c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 8, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, ",--{" );
 		if ( l_iRound >= 0 )
-			c_printf ( f_iRowRaw - 1, f_iColumnRaw + 13, COLORS::D_ATTR_NORMAL, "%4d", l_iRound );
-		c_printf ( f_iRowRaw - 1, f_iColumnRaw + 17, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, "}--." );
-		c_printf ( f_iRowRaw - 1, f_iColumnRaw + 23, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, ",--{" );
-		c_printf ( f_iRowRaw - 1, f_iColumnRaw + 28, f_bFocused ? COLORS::D_FG_WHITE : COLORS::D_ATTR_NORMAL, "    " );
+			c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 13, COLORS::D_ATTR_NORMAL, "%4d", l_iRound );
+		c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 17, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, "}--." );
+		c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 23, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, ",--{" );
+		c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 28, f_bFocused ? COLORS::D_FG_WHITE : COLORS::D_ATTR_NORMAL, "    " );
 		if ( ( l_eState == D_SELECT ) || ( l_eState == D_INPUT ) )
 			{
 			l_iSysNo = get_sys_no ( f_iCursorX, f_iCursorY );
 			if ( l_iSysNo >= 0 )
 				{
-				c_printf ( f_iRowRaw - 1, f_iColumnRaw + 28,
+				c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 28,
 						f_bFocused ? COLORS::D_FG_WHITE : COLORS::D_ATTR_NORMAL, "%4d",
 						distance ( f_iSourceSystem, l_iSysNo ) + l_iRound );
 				}
 			}
-		c_printf ( f_iRowRaw - 1, f_iColumnRaw + 32, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, "}--." );
+		c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 32, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, "}--." );
 		}
 	M_EPILOG
 	}
@@ -612,7 +612,7 @@ int HBoard::process_input ( int a_iCode )
 				}
 			}
 		if ( ! l_iCode )
-			refresh ( );
+			schedule_refresh();
 		}
 	return ( l_iCode );
 	M_EPILOG
@@ -682,9 +682,9 @@ int HGalaxyWindow::init ( void )
 	M_PROLOG
 	HWindow::init ( );
 	f_poBoard = new HBoard ( this, * this );
-	f_poBoard->set_systems ( f_poSystems );
 	f_poBoard->enable ( true );
-	f_poBoard->set_focus ( );
+	f_poBoard->set_focus();
+	f_poBoard->set_systems ( f_poSystems );
 	f_poSystemName = new HEditControl ( this, 1, 64, 1, 16, " System name \n", 64, "", n_pcMaskExtended );
 	f_poEmperorName = new HEditControl ( this, 4, 64, 1, 16, " Emperor \n", 64, "", n_pcMaskExtended );
 	f_poProduction = new HEditControl ( this, 7, 64, 1, 7, "Product\n", 6, "", n_pcMaskDigits );
@@ -693,9 +693,9 @@ int HGalaxyWindow::init ( void )
 	f_poMessageInput = new HEditControl ( this, - 4, 64, 1, - 1, " &Message \n", 255, "", n_pcMaskLoose );
 	f_poLogPad->enable ( true );
 	f_poMessageInput->enable ( true );
-	register_postprocess_handler ( '\r', NULL, & HGalaxyWindow::handler_enter );
-	register_postprocess_handler ( KEY_CODES::D_ESC, NULL, & HGalaxyWindow::handler_esc );
-	register_postprocess_handler ( ' ', NULL, & HGalaxyWindow::handler_space );
+	register_postprocess_handler ( '\r', NULL, &HGalaxyWindow::handler_enter );
+	register_postprocess_handler ( KEY_CODES::D_ESC, NULL, &HGalaxyWindow::handler_esc );
+	register_postprocess_handler ( ' ', NULL, &HGalaxyWindow::handler_space );
 	return ( 0 );
 	M_EPILOG
 	}
@@ -819,7 +819,7 @@ int HGalaxyWindow::handler_esc ( int, void * )
 		}
 	else if ( f_reState == D_SELECT )
 		f_reState = D_NORMAL;
-	refresh ( );
+	schedule_refresh ( );
 	return ( 0 );
 	M_EPILOG
 	}
@@ -950,7 +950,7 @@ void HClient::handler_setup ( HString & a_roCommand )
 		}
 	else if ( l_oVariable == "ok" )
 		{
-		f_oWindow->refresh ( );
+		f_oWindow->schedule_refresh ( );
 		f_oWindow->set_state ( D_NORMAL );
 		f_iRound = 0;
 		}
@@ -1048,7 +1048,7 @@ void HClient::handler_play ( HString & a_roCommand )
 		f_oWindow->f_poLogPad->add ( " -----\n" );
 		f_oWindow->f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
 		f_oWindow->set_state ( D_NORMAL );
-		f_oWindow->refresh ( );
+		f_oWindow->schedule_refresh ( );
 		}
 	return;
 	M_EPILOG
