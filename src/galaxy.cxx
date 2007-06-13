@@ -870,9 +870,9 @@ void HClient::init_client ( HString & a_roHost, int a_iPort )
 	l_oMessage = "GLX:LOGIN:";
 	l_oMessage += setup.f_oLogin + '\n';
 	f_oSocket.write_until_eos ( l_oMessage );
-	f_poBoard = f_oWindow->get_board ( );
 	f_oWindow->set_data ( & f_oSystems, & f_oEmperors, & f_oMoves );
 	HTUIProcess::init_tui ( "galaxy", f_oWindow );
+	f_poBoard = f_oWindow->get_board ( );
 	return;
 	M_EPILOG
 	}
