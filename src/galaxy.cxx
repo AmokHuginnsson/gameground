@@ -242,14 +242,14 @@ public:
 	/*{*/
 	HBoard ( HWindow *, HEventListener & );
 	virtual ~HBoard ( void );
-	virtual void do_refresh ( void );
-	virtual int process_input ( int );
 	void set_systems ( systems_t * );
 	/*}*/
 protected:
 	/*{*/
 	int get_sys_no ( int, int );
 	int distance ( int, int );
+	virtual void do_refresh ( void );
+	virtual int do_process_input ( int );
 	/*}*/
 private:
 	/*{*/
@@ -521,12 +521,12 @@ void HBoard::do_refresh ( void )
 	M_EPILOG
 	}
 
-int HBoard::process_input ( int a_iCode )
+int HBoard::do_process_input( int a_iCode )
 	{
 	M_PROLOG
 	int l_iCode = 0, l_iSysNo = - 1;
 	client_state_t l_eState = f_roListener.get_state ( );
-	a_iCode = HControl::process_input ( a_iCode );
+	a_iCode = HControl::do_process_input ( a_iCode );
 	if ( l_eState == D_LOCKED )
 		return ( a_iCode == '\t' ? '\t' : '\r' );
 	if ( f_iBoardSize >= 0 )
@@ -612,7 +612,11 @@ int HBoard::process_input ( int a_iCode )
 				}
 			}
 		if ( ! l_iCode )
+			{
+			l_iSysNo = get_sys_no ( f_iCursorX, f_iCursorY );
+			f_roListener.on_show_system_info( l_iSysNo );
 			schedule_refresh();
+			}
 		}
 	return ( l_iCode );
 	M_EPILOG
@@ -896,6 +900,7 @@ int HClient::handler_message ( int )
 		}
 	else if ( l_iMsgLength < 0 )
 		f_bLoop = false;
+	refresh();
 	return ( 0 );
 	M_EPILOG
 	}
