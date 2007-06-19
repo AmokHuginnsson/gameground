@@ -598,7 +598,6 @@ int HBoard::do_process_input( int a_iCode )
 					else if ( l_eState == D_SELECT )
 						{
 						f_iDestinationSystem = l_iSysNo;
-						f_roListener.set_state ( D_INPUT );
 						f_roListener.make_move ( f_iSourceSystem, l_iSysNo );
 						return ( 0 );
 						}
@@ -747,6 +746,7 @@ void HGalaxyWindow::make_move ( int a_iSourceSystem, int a_iDestinationSystem )
 	M_PROLOG
 	if ( a_iSourceSystem != a_iDestinationSystem )
 		{
+		set_state ( D_INPUT );
 		f_poBoard->enable ( false );
 		f_poLogPad->enable ( false );
 		f_poFleet->enable ( true );
@@ -819,11 +819,11 @@ int HGalaxyWindow::handler_esc ( int, void * )
 		f_poBoard->enable ( true );
 		f_poLogPad->enable ( true );
 		f_poBoard->set_focus ( );
-		f_reState = D_SELECT;
+		set_state( D_SELECT );
 		}
 	else if ( f_reState == D_SELECT )
-		f_reState = D_NORMAL;
-	schedule_refresh ( );
+		set_state( D_NORMAL );
+	schedule_refresh();
 	return ( 0 );
 	M_EPILOG
 	}
