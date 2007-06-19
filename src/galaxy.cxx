@@ -235,26 +235,27 @@ protected:
 	int f_iBoardSize;
 	int f_iSourceSystem;
 	int f_iDestinationSystem;
-	systems_t * f_poSystems;
-	HEventListener & f_roListener;
+	systems_t* f_poSystems;
+	HEventListener& f_roListener;
 	/*}*/
 public:
 	/*{*/
-	HBoard ( HWindow *, HEventListener & );
-	virtual ~HBoard ( void );
-	void set_systems ( systems_t * );
+	HBoard( HWindow*, HEventListener& );
+	virtual ~HBoard( void );
+	void set_systems( systems_t* );
 	/*}*/
 protected:
 	/*{*/
-	int get_sys_no ( int, int );
-	int distance ( int, int );
-	virtual void do_refresh ( void );
-	virtual int do_process_input ( int );
+	int get_sys_no( int, int );
+	int distance( int, int );
+	virtual void do_refresh( void );
+	virtual int do_process_input( int );
+	virtual int do_click( mouse::OMouse& );
 	/*}*/
 private:
 	/*{*/
-	HBoard ( HBoard const & );
-	HBoard & operator = ( HBoard const & );
+	HBoard( HBoard const& );
+	HBoard& operator = ( HBoard const& );
 	/*}*/
 	friend class HClient;
 	friend class HGalaxyWindow;
@@ -266,17 +267,17 @@ class HGalaxyWindow : public HWindow, public HEventListener
 protected:
 	/*{*/
 	HString f_oVarTmpBuffer;
-	HBoard * f_poBoard;
-	HEditControl * f_poSystemName;
-	HEditControl * f_poEmperorName;
-	HEditControl * f_poProduction;
-	HEditControl * f_poFleet;
-	HEditControl * f_poMessageInput;
-	HLogPad * f_poLogPad;
-	HClient * f_poClient;
-	systems_t * f_poSystems;
-	emperors_t * f_poEmperors;
-	moves_t * f_poMoves;
+	HBoard* f_poBoard;
+	HEditControl* f_poSystemName;
+	HEditControl* f_poEmperorName;
+	HEditControl* f_poProduction;
+	HEditControl* f_poFleet;
+	HEditControl* f_poMessageInput;
+	HLogPad* f_poLogPad;
+	HClient* f_poClient;
+	systems_t* f_poSystems;
+	emperors_t* f_poEmperors;
+	moves_t* f_poMoves;
 	/*}*/
 public:
 	/*{*/
@@ -619,6 +620,23 @@ int HBoard::do_process_input( int a_iCode )
 		}
 	return ( l_iCode );
 	M_EPILOG
+	}
+
+int HBoard::do_click( mouse::OMouse& a_rsMouse )
+	{
+	if ( ! HControl::do_click( a_rsMouse ) )
+		return ( 1 );
+	if ( ( a_rsMouse.f_iRow > 1 )
+			&& ( a_rsMouse.f_iRow < ( f_iBoardSize + 2 ) )
+			&& ( a_rsMouse.f_iColumn > 1 )
+			&& ( a_rsMouse.f_iColumn < ( ( f_iBoardSize * 3 ) + 2 ) ) )
+		{
+		f_iCursorY = a_rsMouse.f_iRow - 2;
+		f_iCursorX = ( a_rsMouse.f_iColumn - 2 ) / 3;
+		f_roListener.on_show_system_info( get_sys_no ( f_iCursorX, f_iCursorY ) );
+		schedule_refresh();
+		}
+	return ( 0 );
 	}
 
 void HBoard::set_systems ( systems_t * a_poSystems )
