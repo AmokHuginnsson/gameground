@@ -31,8 +31,8 @@ M_VCSID ( "$Id$" )
 #include "setup.h"
 #include "cli_options.h"
 #include "rc_options.h"
-#include "galaxy.h"
 #include "galaxyd.h"
+#include "server.h"
 
 using namespace std;
 using namespace yaal;
@@ -40,8 +40,18 @@ using namespace yaal::hcore;
 using namespace yaal::hconsole;
 using namespace yaal::tools;
 using namespace yaal::tools::util;
+using namespace galaxy;
 
 OSetup setup;
+
+int main_server( void )
+	{
+	HServer l_oServer( setup.f_iMaxConnections );
+	l_oServer.register_logic( HLogic::ptr_t( new HGalaxy( setup.f_iBoardSize, setup.f_iSystems, setup.f_iEmperors ) ) );
+	l_oServer.init_server( setup.f_iPort );
+	l_oServer.run();
+	return ( 0 );
+	}
 
 int main ( int a_iArgc, char * a_ppcArgv [ ] )
 	{
@@ -65,13 +75,13 @@ int main ( int a_iArgc, char * a_ppcArgv [ ] )
 			l_iOpt = main_server ( );
 		else
 			{
-			if ( ! hconsole::is_enabled ( ) )
+			if ( ! hconsole::is_enabled() )
 				enter_curses (); /* enabling ncurses ablilities */
 			if ( ( n_iHeight >= 25 ) && ( n_iWidth >= 80 ) )
-				l_iOpt = main_client ( );
+				l_iOpt = main_client();
 			else
 				l_iOpt = 1;
-			if ( hconsole::is_enabled ( ) )
+			if ( hconsole::is_enabled() )
 				leave_curses (); /* ending ncurses sesion */
 			if ( l_iOpt )
 				fprintf ( stdout, "Your terminal is too small.\n" );

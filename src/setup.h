@@ -30,6 +30,7 @@ Copyright:
 #include <libintl.h>
 
 #define D_BOARD_SIZE 16
+#define D_DEFAULT_MAX_CONNECTIONS		64
 #define D_DEFAULT_PLAYERS						4
 #define D_NEUTRAL_SYSTEM_PER_PLAYER	4
 #define D_MAX_BOARD_SIZE						20
@@ -43,6 +44,7 @@ struct OSetup
 	/* galaxy specific bools */
 	bool f_bServer;
 	bool f_bClient;
+	int	f_iMaxConnections;
 	/* galaxy specific integers */
 	int f_iEmperors;
 	int f_iPort;
@@ -56,7 +58,8 @@ struct OSetup
 	/* self-sufficient */
 	OSetup ( void ) : f_bQuiet ( false ), f_bVerbose ( false ),
 										f_bHelp ( false ), f_bServer ( false ),
-										f_bClient ( false ), f_iEmperors ( D_DEFAULT_PLAYERS ),
+										f_bClient ( false ), f_iMaxConnections( D_DEFAULT_MAX_CONNECTIONS ),
+										f_iEmperors ( D_DEFAULT_PLAYERS ),
 										f_iPort ( 7777 ),
 										f_iSystems ( D_DEFAULT_PLAYERS * D_NEUTRAL_SYSTEM_PER_PLAYER ),
 										f_iBoardSize ( D_BOARD_SIZE ),
@@ -71,25 +74,28 @@ struct OSetup
 		if ( ! ( f_bServer || f_bClient ) )
 			yaal::tools::util::failure ( 2,
 					_ ( "galaxy must be server or client\n" ) );
-		if ( f_bServer && ( f_iEmperors < 2 ) )
+		if ( f_bServer && ( f_iMaxConnections < 2 ) )
 			yaal::tools::util::failure ( 3,
+					_ ( "this server hosts multiplayer games only\n" ) );
+		if ( f_bServer && ( f_iEmperors < 2 ) )
+			yaal::tools::util::failure ( 4,
 					_ ( "galaxy is multiplayer game and makes sense"
 						" only for at least two players\n" ) );
 		if ( f_iPort < 1024 )
-			yaal::tools::util::failure ( 4,
+			yaal::tools::util::failure ( 5,
 					_ ( "galaxy cannot run on restricted ports\n" ) );
 		if ( f_bClient && f_oHost.is_empty ( ) )
-			yaal::tools::util::failure ( 5,
+			yaal::tools::util::failure ( 6,
 					_ ( "as a client You must specify server host\n" ) );
 		if ( f_bClient && f_oLogin.is_empty ( ) )
-			yaal::tools::util::failure ( 6,
+			yaal::tools::util::failure ( 7,
 					_ ( "as a player You must specify Your name\n" ) );
 		if ( f_bServer && ( ( f_iBoardSize < 6 ) || ( f_iBoardSize > D_MAX_BOARD_SIZE ) ) )
-			yaal::tools::util::failure ( 7, _ ( "bad board size specified\n" ) );
+			yaal::tools::util::failure ( 8, _ ( "bad board size specified\n" ) );
 		if ( f_bServer && ( ( f_iEmperors + f_iSystems ) > D_MAX_SYSTEM_COUNT ) )
-			yaal::tools::util::failure ( 8, _ ( "bad total system count\n" ) );
+			yaal::tools::util::failure ( 9, _ ( "bad total system count\n" ) );
 		if ( f_bServer && ( f_iSystems < 0 ) )
-			yaal::tools::util::failure ( 9, _ ( "neutral system count has to be nonnegative number\n" ) );
+			yaal::tools::util::failure ( 10, _ ( "neutral system count has to be nonnegative number\n" ) );
 		return;
 		M_EPILOG
 		}
