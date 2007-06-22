@@ -33,6 +33,7 @@ M_VCSID ( "$Id$" )
 #include "rc_options.h"
 #include "galaxyd.h"
 #include "server.h"
+#include "galaxy.h"
 
 using namespace std;
 using namespace yaal;

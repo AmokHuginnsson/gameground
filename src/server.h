@@ -44,6 +44,7 @@ public:
 	/*{*/
 	HServer( int );
 	int init_server( int );
+	void register_logic( HLogic::ptr_t );
 	using yaal::hcore::HProcess::run;
 	/*}*/
 protected:
