@@ -53,7 +53,7 @@ int HServer::init_server( int a_iPort )
 	register_file_descriptor_handler ( f_oSocket.get_file_descriptor ( ), &HServer::handler_connection );
 	HProcess::init ( 3600 );
 	for ( logics_t::HIterator it = f_oLogics.begin(); it != f_oLogics.end(); ++ it )
-		it->second->set_socket ( &f_oSocket );
+		it->second->set_socket( &f_oSocket );
 	return ( 0 );
 	M_EPILOG
 	}
@@ -61,15 +61,15 @@ int HServer::init_server( int a_iPort )
 int HServer::handler_connection( int )
 	{
 	M_PROLOG
-	HSocket::ptr_t l_oClient = f_oSocket.accept ( );
-	M_ASSERT ( l_oClient );
-	register_file_descriptor_handler ( l_oClient->get_file_descriptor(), &HServer::handler_message );
+	HSocket::ptr_t l_oClient = f_oSocket.accept();
+	M_ASSERT( !! l_oClient );
+	register_file_descriptor_handler( l_oClient->get_file_descriptor(), &HServer::handler_message );
 	if ( f_oSocket.get_client_count() >= f_iMaxConnections )
 		{
-		unregister_file_descriptor_handler ( f_oSocket.get_file_descriptor ( ) );
+		unregister_file_descriptor_handler( f_oSocket.get_file_descriptor() );
 		f_oSocket.close();
 		}
-	fprintf ( stdout, "%s\n", static_cast < char const * const > ( l_oClient->get_host_name ( ) ) );
+	fprintf( stdout, "%s\n", static_cast<char const* const>( l_oClient->get_host_name() ) );
 	return ( 0 );
 	M_EPILOG
 	}
@@ -81,32 +81,32 @@ int HServer::handler_message( int a_iFileDescriptor )
 	HString l_oMessage;
 	HString l_oArgument;
 	HString l_oCommand;
-	HSocket::ptr_t l_oClient = f_oSocket.get_client ( a_iFileDescriptor );
+	HSocket::ptr_t l_oClient = f_oSocket.get_client( a_iFileDescriptor );
 	if ( !! l_oClient )
 		{
-		if ( ( l_iMsgLength = l_oClient->read_until ( l_oMessage ) ) > 0 )
+		if ( ( l_iMsgLength = l_oClient->read_until( l_oMessage ) ) > 0 )
 			{
-			fprintf ( stdout, "<-%s\n", static_cast < char const * const > ( l_oMessage ) );
-			l_oCommand = l_oMessage.split ( ":", 0 );
-			l_oArgument = l_oMessage.mid ( l_oCommand.get_length ( ) + 1 );
-			l_iMsgLength = l_oArgument.get_length ( );
+			fprintf( stdout, "<-%s\n", static_cast<char const* const>( l_oMessage ) );
+			l_oCommand = l_oMessage.split( ":", 0 );
+			l_oArgument = l_oMessage.mid( l_oCommand.get_length() + 1 );
+			l_iMsgLength = l_oArgument.get_length();
 			if ( ( l_iMsgLength > 1 ) && ( l_oCommand == "GLX" ) )
-				f_roGalaxy.process_command ( a_iFileDescriptor, l_oArgument );
+				f_roGalaxy.process_command( a_iFileDescriptor, l_oArgument );
 			else if ( l_oCommand == "QUIT" )
 				f_bLoop = false;
 			}
 		else if ( l_iMsgLength < 0 )
 			{
-			unregister_file_descriptor_handler ( a_iFileDescriptor );
-			f_oSocket.shutdown_client ( a_iFileDescriptor );
-			if ( ! f_oSocket.get_client_count ( ) )
+			unregister_file_descriptor_handler( a_iFileDescriptor );
+			f_oSocket.shutdown_client( a_iFileDescriptor );
+			if ( ! f_oSocket.get_client_count() )
 				f_bLoop = false;
 			}
 		}
 	else
 		{
-		unregister_file_descriptor_handler ( a_iFileDescriptor );
-		if ( ! f_oSocket.get_client_count ( ) )
+		unregister_file_descriptor_handler( a_iFileDescriptor );
+		if ( ! f_oSocket.get_client_count() )
 			f_bLoop = false;
 		}
 	return ( 0 );
