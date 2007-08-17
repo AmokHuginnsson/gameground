@@ -452,33 +452,34 @@ void HBoard::do_refresh ( void )
 	client_state_t l_eState = f_roListener.get_state ( );
 	HString l_oPen;
 	HBoard::draw_label ( );
+	HConsole& cons = HCons::get_instance();
 	if ( f_bFocused )
-		curs_set ( CURSOR::D_INVISIBLE );
+		cons.curs_set ( CURSOR::D_INVISIBLE );
 	if ( f_iBoardSize >= 0 )
 		{
 		f_iHeight = f_iBoardSize + 1 /* for label */ + 2 /* for borders */;
 		f_iWidth = f_iBoardSize * 3 /* for System */ + 2 /* for borders */;
 		if ( f_iBoardSize < 12 )
 			{
-			c_cmvprintf ( f_iRowRaw, f_iColumnRaw + 35, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, "{" );
-			c_cmvprintf ( f_iRowRaw + 1, f_iColumnRaw + 20, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, "-+--+--+--+--+-'" );
+			cons.c_cmvprintf ( f_iRowRaw, f_iColumnRaw + 35, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, "{" );
+			cons.c_cmvprintf ( f_iRowRaw + 1, f_iColumnRaw + 20, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, "-+--+--+--+--+-'" );
 			}
 		l_oPen = ',';
 		for ( l_iCtr = 0; l_iCtr < f_iBoardSize; l_iCtr ++ )
 			l_oPen += "-+-";
 		l_oPen += '.';
-		c_cmvprintf ( f_iRowRaw, f_iColumnRaw, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, l_oPen );
+		cons.c_cmvprintf ( f_iRowRaw, f_iColumnRaw, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, l_oPen );
 		l_oPen = '}';
 		for ( l_iCtr = 0; l_iCtr < f_iBoardSize; l_iCtr ++ )
 			l_oPen += " - ";
 		l_oPen += '{';
 		for ( l_iCtr = 0; l_iCtr < f_iBoardSize; l_iCtr ++ )
-			c_cmvprintf ( f_iRowRaw + l_iCtr + 1, f_iColumnRaw, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, l_oPen );
+			cons.c_cmvprintf ( f_iRowRaw + l_iCtr + 1, f_iColumnRaw, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, l_oPen );
 		l_oPen = '`';
 		for ( l_iCtr = 0; l_iCtr < f_iBoardSize; l_iCtr ++ )
 			l_oPen += "-+-";
 		l_oPen += '\'';
-		c_cmvprintf ( f_iRowRaw + f_iBoardSize + 1, f_iColumnRaw, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, l_oPen );
+		cons.c_cmvprintf ( f_iRowRaw + f_iBoardSize + 1, f_iColumnRaw, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, l_oPen );
 		if ( ( l_iSystems = f_poSystems->get_size ( ) ) )
 			{
 			for ( l_iCtr = 0; l_iCtr < l_iSystems; l_iCtr ++ )
@@ -486,7 +487,7 @@ void HBoard::do_refresh ( void )
 				l_iCoordX = ( * f_poSystems ) [ l_iCtr ].f_iCoordinateX;
 				l_iCoordY = ( * f_poSystems ) [ l_iCtr ].f_iCoordinateY;
 				l_iColor = ( * f_poSystems ) [ l_iCtr ].f_iColor;
-				c_cmvprintf ( f_iRowRaw + 1 + l_iCoordY,
+				cons.c_cmvprintf ( f_iRowRaw + 1 + l_iCoordY,
 						f_iColumnRaw + 1 + l_iCoordX * 3,
 						( ( l_iColor >= 0 ) && f_bFocused ) ? n_piColors [ l_iColor ] : D_ATTR_NEUTRAL_SYSTEM, "(%c)",
 						l_iCtr + ( l_iCtr < 26 ? 'A' : ( l_iCtr < 35 ? '1' - 26 : '0' - 35 ) ) );
@@ -495,29 +496,29 @@ void HBoard::do_refresh ( void )
 				}
 			f_roListener.on_show_system_info ( l_iSysNo );
 			}
-		c_cmvprintf ( f_iRowRaw + 1 + f_iCursorY,
+		cons.c_cmvprintf ( f_iRowRaw + 1 + f_iCursorY,
 				f_iColumnRaw + 1 + f_iCursorX * 3,
 				f_bFocused ? D_ATTR_CURSOR : COLORS::D_ATTR_NORMAL, "{" );
-		c_cmvprintf ( f_iRowRaw + 1 + f_iCursorY,
+		cons.c_cmvprintf ( f_iRowRaw + 1 + f_iCursorY,
 				f_iColumnRaw + 3 + f_iCursorX * 3,
 				f_bFocused ? D_ATTR_CURSOR : COLORS::D_ATTR_NORMAL, "}" );
-		c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 8, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, ",--{" );
+		cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 8, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, ",--{" );
 		if ( l_iRound >= 0 )
-			c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 13, COLORS::D_ATTR_NORMAL, "%4d", l_iRound );
-		c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 17, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, "}--." );
-		c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 23, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, ",--{" );
-		c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 28, f_bFocused ? COLORS::D_FG_WHITE : COLORS::D_ATTR_NORMAL, "    " );
+			cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 13, COLORS::D_ATTR_NORMAL, "%4d", l_iRound );
+		cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 17, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, "}--." );
+		cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 23, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, ",--{" );
+		cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 28, f_bFocused ? COLORS::D_FG_WHITE : COLORS::D_ATTR_NORMAL, "    " );
 		if ( ( l_eState == D_SELECT ) || ( l_eState == D_INPUT ) )
 			{
 			l_iSysNo = get_sys_no ( f_iCursorX, f_iCursorY );
 			if ( l_iSysNo >= 0 )
 				{
-				c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 28,
+				cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 28,
 						f_bFocused ? COLORS::D_FG_WHITE : COLORS::D_ATTR_NORMAL, "%4d",
 						distance ( f_iSourceSystem, l_iSysNo ) + l_iRound );
 				}
 			}
-		c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 32, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, "}--." );
+		cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 32, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, "}--." );
 		}
 	M_EPILOG
 	}
