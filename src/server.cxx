@@ -39,7 +39,7 @@ using namespace yaal::tools::util;
 
 HServer::HServer( int a_iConnections )
 	: HProcess( a_iConnections ), f_iMaxConnections( a_iConnections ),
-	f_oSocket( HSocket::D_DEFAULTS, a_iConnections ), f_oLogics()
+	f_oSocket( HSocket::D_DEFAULTS, a_iConnections ), f_oClients(), f_oLogics()
 	{
 	M_PROLOG
 	return;
@@ -52,9 +52,16 @@ int HServer::init_server( int a_iPort )
 	f_oSocket.listen ( "0.0.0.0", a_iPort );
 	register_file_descriptor_handler ( f_oSocket.get_file_descriptor ( ), &HServer::handler_connection );
 	HProcess::init ( 3600 );
-	for ( logics_t::HIterator it = f_oLogics.begin(); it != f_oLogics.end(); ++ it )
-		it->second->set_socket( &f_oSocket );
 	return ( 0 );
+	M_EPILOG
+	}
+
+void HServer::broadcast( HString const& a_roMessage )
+	{
+	M_PROLOG
+	for ( clients_t::HIterator it = f_oClients.begin(); it != f_oClients.end(); ++ it )
+		it->second->write_until_eos ( a_roMessage );
+	return;
 	M_EPILOG
 	}
 
@@ -90,8 +97,8 @@ int HServer::handler_message( int a_iFileDescriptor )
 			l_oCommand = l_oMessage.split( ":", 0 );
 			l_oArgument = l_oMessage.mid( l_oCommand.get_length() + 1 );
 			l_iMsgLength = l_oArgument.get_length();
-			if ( ( l_iMsgLength > 1 ) && ( l_oCommand == "GLX" ) )
-				f_roGalaxy.process_command( a_iFileDescriptor, l_oArgument );
+			if ( ( l_iMsgLength > 1 ) && ( l_oCommand == "msg" ) )
+				broadcast( l_oArgument );
 			else if ( l_oCommand == "QUIT" )
 				f_bLoop = false;
 			}

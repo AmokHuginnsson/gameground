@@ -36,8 +36,10 @@ class HServer : public yaal::hcore::HProcess
 protected:
 	/*{*/
 	typedef yaal::hcore::HMap<yaal::hcore::HString, HLogic::ptr_t> logics_t;
+	typedef yaal::hcore::HMap<int, yaal::hcore::HSocket::ptr_t> clients_t;
 	int f_iMaxConnections;
 	yaal::hcore::HSocket f_oSocket;
+	clients_t f_oClients;
 	logics_t f_oLogics;
 	/*}*/
 public:
@@ -49,6 +51,7 @@ public:
 	/*}*/
 protected:
 	/*{*/
+	void broadcast( yaal::hcore::HString const& );
 	int handler_connection( int );
 	int handler_message( int );
 	/*}*/
