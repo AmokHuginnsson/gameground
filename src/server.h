@@ -29,31 +29,39 @@ Copyright:
 
 #include <yaal/yaal.h>
 
+#include "clientinfo.h"
 #include "logic.h"
 
 class HServer : public yaal::hcore::HProcess
 	{
 protected:
 	/*{*/
+	typedef void ( HServer::* handler_t )( HClientInfo&, yaal::hcore::HString const& );
 	typedef yaal::hcore::HMap<yaal::hcore::HString, HLogic::ptr_t> logics_t;
-	typedef yaal::hcore::HMap<int, yaal::hcore::HSocket::ptr_t> clients_t;
+	typedef yaal::hcore::HMap<yaal::hcore::HString, handler_t> handlers_t;
+	typedef yaal::hcore::HMap<int, HClientInfo> clients_t;
 	int f_iMaxConnections;
 	yaal::hcore::HSocket f_oSocket;
 	clients_t f_oClients;
 	logics_t f_oLogics;
+	handlers_t f_oHandlers;
 	/*}*/
 public:
 	/*{*/
 	HServer( int );
 	int init_server( int );
-	void register_logic( HLogic::ptr_t );
 	using yaal::hcore::HProcess::run;
 	/*}*/
 protected:
 	/*{*/
-	void broadcast( yaal::hcore::HString const& );
 	int handler_connection( int );
 	int handler_message( int );
+	void kick_client( yaal::hcore::HSocket::ptr_t&, char const* const = NULL );
+	void broadcast( HClientInfo&, yaal::hcore::HString const& );
+	void set_client_name( HClientInfo&, yaal::hcore::HString const& );
+	void pass_command( HClientInfo&, yaal::hcore::HString const& );
+	void create_game( HClientInfo&, yaal::hcore::HString const& );
+	void join_game( HClientInfo&, yaal::hcore::HString const& );
 	/*}*/
 	};
 

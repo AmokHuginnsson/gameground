@@ -39,7 +39,7 @@ using namespace yaal::tools::util;
 
 HServer::HServer( int a_iConnections )
 	: HProcess( a_iConnections ), f_iMaxConnections( a_iConnections ),
-	f_oSocket( HSocket::D_DEFAULTS, a_iConnections ), f_oClients(), f_oLogics()
+	f_oSocket( HSocket::D_DEFAULTS, a_iConnections ), f_oClients(), f_oLogics(), f_oHandlers()
 	{
 	M_PROLOG
 	return;
@@ -50,17 +50,87 @@ int HServer::init_server( int a_iPort )
 	{
 	M_PROLOG
 	f_oSocket.listen ( "0.0.0.0", a_iPort );
-	register_file_descriptor_handler ( f_oSocket.get_file_descriptor ( ), &HServer::handler_connection );
+	register_file_descriptor_handler ( f_oSocket.get_file_descriptor(), &HServer::handler_connection );
+	f_oHandlers[ "msg" ] = &HServer::broadcast;
+	f_oHandlers[ "name" ] = &HServer::set_client_name;
+	f_oHandlers[ "cmd" ] = &HServer::pass_command;
+	f_oHandlers[ "create" ] = &HServer::create_game;
+	f_oHandlers[ "join" ] = &HServer::join_game;
 	HProcess::init ( 3600 );
 	return ( 0 );
 	M_EPILOG
 	}
 
-void HServer::broadcast( HString const& a_roMessage )
+void HServer::broadcast( HClientInfo&, HString const& a_roMessage )
 	{
 	M_PROLOG
 	for ( clients_t::HIterator it = f_oClients.begin(); it != f_oClients.end(); ++ it )
-		it->second->write_until_eos ( a_roMessage );
+		it->second.f_oSocket->write_until_eos ( a_roMessage );
+	return;
+	M_EPILOG
+	}
+
+void HServer::set_client_name( HClientInfo& a_roInfo, HString const& a_oName )
+	{
+	M_PROLOG
+	clients_t::HIterator it;
+	for ( it = f_oClients.begin(); it != f_oClients.end(); ++ it )
+		{
+		if ( ( it->second.f_oName == a_oName ) && ( it->second.f_oSocket != a_roInfo.f_oSocket ) )
+			{
+			a_roInfo.f_oSocket->write_until_eos ( "err:Name taken." );
+			break;
+			}
+		}
+	if ( it == f_oClients.end() )
+		a_roInfo.f_oName = a_oName;
+	return;
+	M_EPILOG
+	}
+
+void HServer::pass_command( HClientInfo& a_roInfo, HString const& a_oCommand )
+	{
+	M_PROLOG
+	if ( ! a_roInfo.f_oLogic )
+		a_roInfo.f_oSocket->write_until_eos( "err:Connect to some game first." );
+	else
+		a_roInfo.f_oLogic->process_command( &a_roInfo, a_oCommand );
+	return;
+	M_EPILOG
+	}
+
+void HServer::create_game( HClientInfo& a_roInfo, HString const& a_oName )
+	{
+	M_PROLOG
+	if ( a_roInfo.f_oName.is_empty() )
+		a_roInfo.f_oSocket->write_until_eos( "err:Set your name first." );
+	else
+		{
+		logics_t::HIterator it = f_oLogics.find( a_oName );
+		if ( it != f_oLogics.end() )
+			a_roInfo.f_oSocket->write_until_eos( "err:Game already exists." );
+		else
+			{
+			}
+		}
+	return;
+	M_EPILOG
+	}
+
+void HServer::join_game( HClientInfo& a_roInfo, HString const& a_oName )
+	{
+	M_PROLOG
+	if ( a_roInfo.f_oName.is_empty() )
+		a_roInfo.f_oSocket->write_until_eos( "err:Set your name first." );
+	else
+		{
+		logics_t::HIterator it = f_oLogics.find( a_oName );
+		if ( it == f_oLogics.end() )
+			a_roInfo.f_oSocket->write_until_eos( "err:Game does not exists." );
+		else
+			{
+			}
+		}
 	return;
 	M_EPILOG
 	}
@@ -76,6 +146,8 @@ int HServer::handler_connection( int )
 		unregister_file_descriptor_handler( f_oSocket.get_file_descriptor() );
 		f_oSocket.close();
 		}
+	else
+		f_oClients[ l_oClient->get_file_descriptor() ].f_oSocket = l_oClient;
 	fprintf( stdout, "%s\n", static_cast<char const* const>( l_oClient->get_host_name() ) );
 	return ( 0 );
 	M_EPILOG
@@ -88,35 +160,54 @@ int HServer::handler_message( int a_iFileDescriptor )
 	HString l_oMessage;
 	HString l_oArgument;
 	HString l_oCommand;
+	clients_t::HIterator clientIt;
 	HSocket::ptr_t l_oClient = f_oSocket.get_client( a_iFileDescriptor );
-	if ( !! l_oClient )
+	if ( ! l_oClient )
+		kick_client( l_oClient );
+	else if ( ( clientIt = f_oClients.find( a_iFileDescriptor ) ) == f_oClients.end() )
+		kick_client( l_oClient );
+	else if ( ( l_iMsgLength = l_oClient->read_until( l_oMessage ) ) < 0 )
+		kick_client( l_oClient, _( "Read failure." ) );
+	else if ( l_iMsgLength > 0 )
 		{
-		if ( ( l_iMsgLength = l_oClient->read_until( l_oMessage ) ) > 0 )
+		fprintf( stdout, "<-%s\n", static_cast<char const* const>( l_oMessage ) );
+		l_oCommand = l_oMessage.split( ":", 0 );
+		l_oArgument = l_oMessage.mid( l_oCommand.get_length() + 1 );
+		l_iMsgLength = l_oArgument.get_length();
+		if ( l_iMsgLength <= 1 )
 			{
-			fprintf( stdout, "<-%s\n", static_cast<char const* const>( l_oMessage ) );
-			l_oCommand = l_oMessage.split( ":", 0 );
-			l_oArgument = l_oMessage.mid( l_oCommand.get_length() + 1 );
-			l_iMsgLength = l_oArgument.get_length();
-			if ( ( l_iMsgLength > 1 ) && ( l_oCommand == "msg" ) )
-				broadcast( l_oArgument );
-			else if ( l_oCommand == "QUIT" )
+			if ( l_oCommand == "QUIT" )
 				f_bLoop = false;
+			else
+				kick_client( l_oClient, _( "Malformed data." ) );
 			}
-		else if ( l_iMsgLength < 0 )
+		else
 			{
-			unregister_file_descriptor_handler( a_iFileDescriptor );
-			f_oSocket.shutdown_client( a_iFileDescriptor );
-			if ( ! f_oSocket.get_client_count() )
-				f_bLoop = false;
+			handlers_t::HIterator it = f_oHandlers.find( l_oCommand );
+			if ( it != f_oHandlers.end() )
+				( this->*it->second )( clientIt->second, l_oArgument );
+			else
+				kick_client( l_oClient, _( "Unknown command." ) );
 			}
-		}
-	else
-		{
-		unregister_file_descriptor_handler( a_iFileDescriptor );
-		if ( ! f_oSocket.get_client_count() )
-			f_bLoop = false;
 		}
 	return ( 0 );
+	M_EPILOG
+	}
+
+void HServer::kick_client( yaal::hcore::HSocket::ptr_t& a_oClient, char const* const a_pcReason )
+	{
+	M_PROLOG
+	if ( !! a_oClient )
+		{
+		a_oClient->write_until_eos( a_pcReason );
+		f_oSocket.shutdown_client( a_oClient->get_file_descriptor() );
+		}
+	int l_iFileDescriptor = a_oClient->get_file_descriptor();
+	unregister_file_descriptor_handler( l_iFileDescriptor );
+	f_oClients.remove( l_iFileDescriptor );
+	if ( ! f_oSocket.get_client_count() )
+		f_bLoop = false;
+	return;
 	M_EPILOG
 	}
 

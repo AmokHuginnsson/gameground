@@ -48,7 +48,6 @@ OSetup setup;
 int main_server( void )
 	{
 	HServer l_oServer( setup.f_iMaxConnections );
-	l_oServer.register_logic( HLogic::ptr_t( new HGalaxy( setup.f_iBoardSize, setup.f_iSystems, setup.f_iEmperors ) ) );
 	l_oServer.init_server( setup.f_iPort );
 	l_oServer.run();
 	return ( 0 );

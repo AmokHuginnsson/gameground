@@ -450,4 +450,8 @@ void HGalaxy::mark_alive ( int a_iEmperor )
 	M_EPILOG
 	}
 
+/*
+	l_oServer.register_logic( HLogic::ptr_t( new HGalaxy( setup.f_iBoardSize, setup.f_iSystems, setup.f_iEmperors ) ) );
+*/
+
 }

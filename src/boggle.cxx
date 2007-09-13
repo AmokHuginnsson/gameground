@@ -81,7 +81,7 @@ void HBoggle::dump( void )
 	return;
 	}
 
-int main( int, char ** )
+int create_game( int, char ** )
 	{
 	HBoggle boggle;
 	boggle.generate_game();

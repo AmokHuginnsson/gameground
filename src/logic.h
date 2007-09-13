@@ -29,13 +29,15 @@ Copyright:
 
 #include <yaal/yaal.h>
 
+struct HClientInfo;
+
 class HLogic
 	{
 public:
 	typedef yaal::hcore::HPointer<HLogic, yaal::hcore::HPointerScalar, yaal::hcore::HPointerRelaxed> ptr_t;
 private:
-	typedef void ( HLogic::*handler_t ) ( int, yaal::hcore::HString & );
-	typedef yaal::hcore::HMap<int, yaal::hcore::HSocket::ptr_t> clients_t;
+	typedef void ( HLogic::*handler_t ) ( int, yaal::hcore::HString& );
+	typedef yaal::hcore::HSet<HClientInfo*> clients_t;
 	typedef yaal::hcore::HHashMap<yaal::hcore::HString, handler_t> handlers_t;
 protected:
 	/*{*/
@@ -47,20 +49,20 @@ public:
 	HLogic( void );
 	virtual ~HLogic( void );
 	void set_socket( yaal::hcore::HSocket::ptr_t );
-	virtual void process_command( int, yaal::hcore::HString & ) = 0;
+	virtual void process_command( HClientInfo*, yaal::hcore::HString const& ) = 0;
 	yaal::hcore::HSocket::ptr_t get_socket( int );
 	/*}*/
 protected:
 	/*{*/
-	void handler_login ( int, yaal::hcore::HString & );
-	void broadcast( yaal::hcore::HString const & );
-	void handler_message ( int, yaal::hcore::HString & );
-	void handler_play ( int, yaal::hcore::HString & );
+	void handler_login ( int, yaal::hcore::HString& );
+	void broadcast( yaal::hcore::HString const& );
+	void handler_message ( int, yaal::hcore::HString& );
+	void handler_play ( int, yaal::hcore::HString& );
 	/*}*/
 private:
 	/*{*/
-	HLogic ( HLogic const & );
-	HLogic & operator = ( HLogic const & );
+	HLogic( HLogic const & );
+	HLogic& operator = ( HLogic const& );
 	/*}*/
 	friend class HServer;
 	};
