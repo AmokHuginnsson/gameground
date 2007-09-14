@@ -41,7 +41,7 @@ class HFleet
 protected:
 	/*{*/
 	int f_iSize;
-	int f_iEmperor;
+	OClientInfo* f_poEmperor;
 	int f_iArrivalTime;
 	/*}*/
 public:
@@ -65,31 +65,35 @@ protected:
 	int f_iCoordinateY;
 	int f_iProduction;
 	int f_iFleet;
-	int f_iEmperor;
+	OClientInfo* f_poEmperor;
 	attackers_t f_oAttackers;
 	/*}*/
 public:
 	/*{*/
 	HSystem ( void );
-	void do_round ( HGalaxy & );
+	void do_round( HGalaxy & );
 	/*}*/
 protected:
 	/*{*/
 	/*}*/
 private:
 	/*{*/
-	HSystem ( HSystem const & );
-	HSystem * operator = ( HSystem const & );
+	HSystem( HSystem const& );
+	HSystem* operator = ( HSystem const& );
 	/*}*/
 	friend class HGalaxy;
 	};
 
 class HGalaxy : public HLogic
 	{
-	typedef void ( HGalaxy::*handler_t ) ( int, yaal::hcore::HString & );
-	typedef yaal::hcore::HHashMap < yaal::hcore::HString, handler_t > handlers_t;
-	typedef yaal::hcore::HHashMap < int, yaal::hcore::HString > names_t;
-	typedef yaal::hcore::HArray < int > int_array_t;
+	struct OEmperorInfo
+		{
+		int f_iColor;
+		int f_iSystems;
+		};
+	typedef void ( HGalaxy::*handler_t ) ( OClientInfo*, yaal::hcore::HString const& );
+	typedef yaal::hcore::HHashMap<yaal::hcore::HString, handler_t> handlers_t;
+	typedef yaal::hcore::HMap<OClientInfo*, OEmperorInfo> emperors_t;
 protected:
 	/*{*/
 	int f_iBoardSize;
@@ -97,35 +101,31 @@ protected:
 	int f_iEmperors;
 	int f_iRound;
 	int f_iReady;
-	yaal::hcore::HArray < HSystem > f_oSystems;
-	yaal::hcore::HSocket::ptr_t f_oSocket;
+	yaal::hcore::HArray<HSystem> f_oSystems;
 	handlers_t f_oHandlers;
-	names_t f_oNames;
-	int_array_t f_oColors;
-	int_array_t f_oEmperorCounter;
+	emperors_t f_oEmperors;
 	/*}*/
 public:
 	/*{*/
-	HGalaxy ( int, int, int );
-	virtual ~HGalaxy ( void );
-	void set_socket ( yaal::hcore::HSocket::ptr_t );
-	void process_command ( int, yaal::hcore::HString & );
-	int get_color ( int );
-	yaal::hcore::HSocket::ptr_t get_socket ( int );
-	void mark_alive ( int );
+	HGalaxy( int, int, int );
+	virtual ~HGalaxy( void );
+	void process_command( OClientInfo*, yaal::hcore::HString& );
+	int get_color( OClientInfo* );
+	void mark_alive( OClientInfo* );
 	/*}*/
 protected:
 	/*{*/
-	void handler_login ( int, yaal::hcore::HString & );
-	int assign_system ( int, int & );
-	void broadcast ( yaal::hcore::HString const & );
-	void handler_message ( int, yaal::hcore::HString & );
-	void handler_play ( int, yaal::hcore::HString & );
+	OEmperorInfo* get_emperor_info( OClientInfo* );
+	int assign_system( OClientInfo* );
+	void broadcast( OClientInfo*, yaal::hcore::HString const& );
+	virtual bool do_accept( OClientInfo* );
+	void handler_message( OClientInfo*, yaal::hcore::HString const& );
+	void handler_play( OClientInfo*, yaal::hcore::HString const& );
 	/*}*/
 private:
 	/*{*/
-	HGalaxy ( HGalaxy const & );
-	HGalaxy & operator = ( HGalaxy const & );
+	HGalaxy( HGalaxy const& );
+	HGalaxy& operator = ( HGalaxy const& );
 	/*}*/
 	friend class HServer;
 	};

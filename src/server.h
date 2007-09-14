@@ -36,10 +36,10 @@ class HServer : public yaal::hcore::HProcess
 	{
 protected:
 	/*{*/
-	typedef void ( HServer::* handler_t )( HClientInfo&, yaal::hcore::HString const& );
+	typedef void ( HServer::* handler_t )( OClientInfo&, yaal::hcore::HString const& );
 	typedef yaal::hcore::HMap<yaal::hcore::HString, HLogic::ptr_t> logics_t;
 	typedef yaal::hcore::HMap<yaal::hcore::HString, handler_t> handlers_t;
-	typedef yaal::hcore::HMap<int, HClientInfo> clients_t;
+	typedef yaal::hcore::HMap<int, OClientInfo> clients_t;
 	int f_iMaxConnections;
 	yaal::hcore::HSocket f_oSocket;
 	clients_t f_oClients;
@@ -57,11 +57,11 @@ protected:
 	int handler_connection( int );
 	int handler_message( int );
 	void kick_client( yaal::hcore::HSocket::ptr_t&, char const* const = NULL );
-	void broadcast( HClientInfo&, yaal::hcore::HString const& );
-	void set_client_name( HClientInfo&, yaal::hcore::HString const& );
-	void pass_command( HClientInfo&, yaal::hcore::HString const& );
-	void create_game( HClientInfo&, yaal::hcore::HString const& );
-	void join_game( HClientInfo&, yaal::hcore::HString const& );
+	void broadcast( OClientInfo&, yaal::hcore::HString const& );
+	void set_client_name( OClientInfo&, yaal::hcore::HString const& );
+	void pass_command( OClientInfo&, yaal::hcore::HString const& );
+	void create_game( OClientInfo&, yaal::hcore::HString const& );
+	void join_game( OClientInfo&, yaal::hcore::HString const& );
 	/*}*/
 	};
 

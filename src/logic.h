@@ -29,15 +29,15 @@ Copyright:
 
 #include <yaal/yaal.h>
 
-struct HClientInfo;
+struct OClientInfo;
 
 class HLogic
 	{
 public:
 	typedef yaal::hcore::HPointer<HLogic, yaal::hcore::HPointerScalar, yaal::hcore::HPointerRelaxed> ptr_t;
+	typedef yaal::hcore::HSet<OClientInfo*> clients_t;
 private:
-	typedef void ( HLogic::*handler_t ) ( int, yaal::hcore::HString& );
-	typedef yaal::hcore::HSet<HClientInfo*> clients_t;
+	typedef void ( HLogic::*handler_t ) ( OClientInfo*, yaal::hcore::HString const& );
 	typedef yaal::hcore::HHashMap<yaal::hcore::HString, handler_t> handlers_t;
 protected:
 	/*{*/
@@ -48,16 +48,15 @@ public:
 	/*{*/
 	HLogic( void );
 	virtual ~HLogic( void );
-	void set_socket( yaal::hcore::HSocket::ptr_t );
-	virtual void process_command( HClientInfo*, yaal::hcore::HString const& ) = 0;
-	yaal::hcore::HSocket::ptr_t get_socket( int );
+	virtual void process_command( OClientInfo*, yaal::hcore::HString const& ) = 0;
 	/*}*/
 protected:
 	/*{*/
-	void handler_login ( int, yaal::hcore::HString& );
-	void broadcast( yaal::hcore::HString const& );
-	void handler_message ( int, yaal::hcore::HString& );
-	void handler_play ( int, yaal::hcore::HString& );
+	virtual bool do_accept( OClientInfo* );
+	void broadcast( OClientInfo*, yaal::hcore::HString const& );
+	void handler_message( OClientInfo*, yaal::hcore::HString const& );
+	void handler_play( OClientInfo*, yaal::hcore::HString const& );
+	void kick_client( OClientInfo* );
 	/*}*/
 private:
 	/*{*/

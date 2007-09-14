@@ -29,7 +29,7 @@ Copyright:
 
 #include "logic.h"
 
-struct HClientInfo
+struct OClientInfo
 	{
 	yaal::hcore::HString f_oName;
 	yaal::hcore::HSocket::ptr_t f_oSocket;

@@ -61,7 +61,7 @@ int HServer::init_server( int a_iPort )
 	M_EPILOG
 	}
 
-void HServer::broadcast( HClientInfo&, HString const& a_roMessage )
+void HServer::broadcast( OClientInfo&, HString const& a_roMessage )
 	{
 	M_PROLOG
 	for ( clients_t::HIterator it = f_oClients.begin(); it != f_oClients.end(); ++ it )
@@ -70,7 +70,7 @@ void HServer::broadcast( HClientInfo&, HString const& a_roMessage )
 	M_EPILOG
 	}
 
-void HServer::set_client_name( HClientInfo& a_roInfo, HString const& a_oName )
+void HServer::set_client_name( OClientInfo& a_roInfo, HString const& a_oName )
 	{
 	M_PROLOG
 	clients_t::HIterator it;
@@ -88,7 +88,7 @@ void HServer::set_client_name( HClientInfo& a_roInfo, HString const& a_oName )
 	M_EPILOG
 	}
 
-void HServer::pass_command( HClientInfo& a_roInfo, HString const& a_oCommand )
+void HServer::pass_command( OClientInfo& a_roInfo, HString const& a_oCommand )
 	{
 	M_PROLOG
 	if ( ! a_roInfo.f_oLogic )
@@ -99,7 +99,7 @@ void HServer::pass_command( HClientInfo& a_roInfo, HString const& a_oCommand )
 	M_EPILOG
 	}
 
-void HServer::create_game( HClientInfo& a_roInfo, HString const& a_oName )
+void HServer::create_game( OClientInfo& a_roInfo, HString const& a_oName )
 	{
 	M_PROLOG
 	if ( a_roInfo.f_oName.is_empty() )
@@ -117,7 +117,7 @@ void HServer::create_game( HClientInfo& a_roInfo, HString const& a_oName )
 	M_EPILOG
 	}
 
-void HServer::join_game( HClientInfo& a_roInfo, HString const& a_oName )
+void HServer::join_game( OClientInfo& a_roInfo, HString const& a_oName )
 	{
 	M_PROLOG
 	if ( a_roInfo.f_oName.is_empty() )
