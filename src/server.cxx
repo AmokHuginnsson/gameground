@@ -95,11 +95,7 @@ void HServer::pass_command( OClientInfo& a_roInfo, HString const& a_oCommand )
 	if ( ! a_roInfo.f_oLogic )
 		a_roInfo.f_oSocket->write_until_eos( "err:Connect to some game first." );
 	else
-		{
 		a_roInfo.f_oLogic->process_command( &a_roInfo, a_oCommand );
-		if ( ! a_roInfo.f_oLogic->active_clients() )
-			f_oLogics.remove( a_roInfo.f_oLogic->get_name() );
-		}
 	return;
 	M_EPILOG
 	}
@@ -195,7 +191,11 @@ int HServer::handler_message( int a_iFileDescriptor )
 			{
 			handlers_t::HIterator it = f_oHandlers.find( l_oCommand );
 			if ( it != f_oHandlers.end() )
+				{
 				( this->*it->second )( clientIt->second, l_oArgument );
+				if ( ( !! clientIt->second.f_oLogic ) && ( ! clientIt->second.f_oLogic->active_clients() ) )
+					f_oLogics.remove( clientIt->second.f_oLogic->get_name() );
+				}
 			else
 				kick_client( l_oClient, _( "Unknown command." ) );
 			}
@@ -207,13 +207,15 @@ int HServer::handler_message( int a_iFileDescriptor )
 void HServer::kick_client( yaal::hcore::HSocket::ptr_t& a_oClient, char const* const a_pcReason )
 	{
 	M_PROLOG
-	if ( !! a_oClient )
-		{
-		a_oClient->write_until_eos( a_pcReason );
-		f_oSocket.shutdown_client( a_oClient->get_file_descriptor() );
-		}
+	M_ASSERT( !! a_oClient );
 	int l_iFileDescriptor = a_oClient->get_file_descriptor();
+	a_oClient->write_until_eos( a_pcReason );
+	f_oSocket.shutdown_client( l_iFileDescriptor );
 	unregister_file_descriptor_handler( l_iFileDescriptor );
+	clients_t::HIterator clientIt = f_oClients.find( l_iFileDescriptor );
+	M_ASSERT( clientIt != f_oClients.end() );
+	if ( ( !! clientIt->second.f_oLogic ) && ( ! clientIt->second.f_oLogic->active_clients() ) )
+		f_oLogics.remove( clientIt->second.f_oLogic->get_name() );
 	f_oClients.remove( l_iFileDescriptor );
 	if ( ! f_oSocket.get_client_count() )
 		f_bLoop = false;
