@@ -53,6 +53,7 @@ public:
 protected:
 	/*{*/
 	virtual bool do_accept( OClientInfo* );
+	virtual void do_kick( OClientInfo* );
 	void broadcast( OClientInfo*, yaal::hcore::HString const& );
 	void handler_message( OClientInfo*, yaal::hcore::HString const& );
 	void handler_play( OClientInfo*, yaal::hcore::HString const& );

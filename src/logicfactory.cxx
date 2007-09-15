@@ -29,3 +29,16 @@ Copyright:
 M_VCSID ( "$Id$" )
 #include "logicfactory.h"
 
+using namespace yaal;
+using namespace yaal::hcore;
+using namespace yaal::hconsole;
+using namespace yaal::tools;
+using namespace yaal::tools::util;
+
+void HLogicFactory::register_logic_creator( HString const& a_oName, creator_t CREATOR )
+	{
+	M_PROLOG
+	f_oCreators[ a_oName ] = CREATOR;
+	return;
+	M_EPILOG
+	}

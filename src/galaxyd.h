@@ -109,7 +109,7 @@ public:
 	/*{*/
 	HGalaxy( int, int, int );
 	virtual ~HGalaxy( void );
-	void process_command( OClientInfo*, yaal::hcore::HString& );
+	void process_command( OClientInfo*, yaal::hcore::HString const& );
 	int get_color( OClientInfo* );
 	void mark_alive( OClientInfo* );
 	/*}*/
@@ -119,6 +119,7 @@ protected:
 	int assign_system( OClientInfo* );
 	void broadcast( OClientInfo*, yaal::hcore::HString const& );
 	virtual bool do_accept( OClientInfo* );
+	virtual void do_kick( OClientInfo* );
 	void handler_message( OClientInfo*, yaal::hcore::HString const& );
 	void handler_play( OClientInfo*, yaal::hcore::HString const& );
 	/*}*/

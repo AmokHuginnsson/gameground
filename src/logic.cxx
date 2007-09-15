@@ -29,6 +29,7 @@ M_VCSID ( "$Id$" )
 #include "logic.h"
 
 #include "setup.h"
+#include "clientinfo.h"
 
 using namespace std;
 using namespace yaal;
@@ -45,3 +46,21 @@ HLogic::~HLogic( void )
 	{
 	}
 
+void HLogic::kick_client( OClientInfo* a_poClientInfo )
+	{
+	M_PROLOG
+	do_kick( a_poClientInfo );
+	a_poClientInfo->f_oLogic = HLogic::ptr_t();
+	return;
+	M_EPILOG
+	}
+
+bool HLogic::do_accept( OClientInfo* )
+	{
+	return ( true );
+	}
+
+void HLogic::do_kick( OClientInfo* )
+	{
+	return;
+	}
