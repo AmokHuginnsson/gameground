@@ -29,6 +29,7 @@ M_VCSID ( "$Id$" )
 #include "server.h"
 
 #include "setup.h"
+#include "logicfactory.h"
 
 using namespace std;
 using namespace yaal;
@@ -94,24 +95,34 @@ void HServer::pass_command( OClientInfo& a_roInfo, HString const& a_oCommand )
 	if ( ! a_roInfo.f_oLogic )
 		a_roInfo.f_oSocket->write_until_eos( "err:Connect to some game first." );
 	else
+		{
 		a_roInfo.f_oLogic->process_command( &a_roInfo, a_oCommand );
+		if ( ! a_roInfo.f_oLogic->active_clients() )
+			f_oLogics.remove( a_roInfo.f_oLogic->get_name() );
+		}
 	return;
 	M_EPILOG
 	}
 
-void HServer::create_game( OClientInfo& a_roInfo, HString const& a_oName )
+void HServer::create_game( OClientInfo& a_roInfo, HString const& a_oArg )
 	{
 	M_PROLOG
 	if ( a_roInfo.f_oName.is_empty() )
 		a_roInfo.f_oSocket->write_until_eos( "err:Set your name first." );
 	else
 		{
-		logics_t::HIterator it = f_oLogics.find( a_oName );
+		HString l_oType = a_oArg.split( ":", 0 );
+		HString l_oName = a_oArg.split( ":", 1 );
+		HLogicFactory& factory = HLogicFactoryInstance::get_instance();
+		logics_t::HIterator it = f_oLogics.find( l_oName );
 		if ( it != f_oLogics.end() )
 			a_roInfo.f_oSocket->write_until_eos( "err:Game already exists." );
+		else if ( ! factory.is_type_valid( l_oType ) )
+			kick_client( a_roInfo.f_oSocket, _( "No such game type." ) );
+		else if ( l_oName.is_empty() )
+			kick_client( a_roInfo.f_oSocket, _( "No game name given." ) );
 		else
-			{
-			}
+			f_oLogics[ l_oName ] = factory.create_logic( l_oType, l_oName );
 		}
 	return;
 	M_EPILOG
@@ -127,9 +138,8 @@ void HServer::join_game( OClientInfo& a_roInfo, HString const& a_oName )
 		logics_t::HIterator it = f_oLogics.find( a_oName );
 		if ( it == f_oLogics.end() )
 			a_roInfo.f_oSocket->write_until_eos( "err:Game does not exists." );
-		else
-			{
-			}
+		else if ( ! it->second->accept_client( &a_roInfo ) )
+			a_roInfo.f_oLogic = it->second;
 		}
 	return;
 	M_EPILOG

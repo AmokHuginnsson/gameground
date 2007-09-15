@@ -43,12 +43,16 @@ protected:
 	/*{*/
 	handlers_t f_oHandlers;
 	clients_t f_oClients;
+	yaal::hcore::HString f_oName;
 	/*}*/
 public:
 	/*{*/
-	HLogic( void );
+	HLogic( yaal::hcore::HString const& );
 	virtual ~HLogic( void );
 	virtual void process_command( OClientInfo*, yaal::hcore::HString const& ) = 0;
+	bool accept_client( OClientInfo* );
+	int active_clients( void ) const;
+	yaal::hcore::HString const& get_name() const;
 	/*}*/
 protected:
 	/*{*/
@@ -61,7 +65,7 @@ protected:
 	/*}*/
 private:
 	/*{*/
-	HLogic( HLogic const & );
+	HLogic( HLogic const& );
 	HLogic& operator = ( HLogic const& );
 	/*}*/
 	friend class HServer;

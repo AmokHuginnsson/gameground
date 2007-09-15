@@ -107,7 +107,7 @@ protected:
 	/*}*/
 public:
 	/*{*/
-	HGalaxy( int, int, int );
+	HGalaxy( yaal::hcore::HString const&, int, int, int );
 	virtual ~HGalaxy( void );
 	void process_command( OClientInfo*, yaal::hcore::HString const& );
 	int get_color( OClientInfo* );

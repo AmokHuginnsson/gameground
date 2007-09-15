@@ -35,13 +35,13 @@ Copyright:
 
 class HLogicFactory
 	{
-	typedef HLogic::ptr_t ( *creator_t )( void );
+	typedef HLogic::ptr_t ( *creator_t )( yaal::hcore::HString const& );
 	typedef yaal::hcore::HMap<yaal::hcore::HString, creator_t> creators_t;
 	creators_t f_oCreators;
 public:
-	typedef yaal::hcore::HPointer<HLogicFactory, yaal::hcore::HPointerScalar, yaal::hcore::HPointerRelaxed> ptr_t;
 	void register_logic_creator( yaal::hcore::HString const&, creator_t );
-	HLogic::ptr_t create_logic( yaal::hcore::HString const& );
+	HLogic::ptr_t create_logic( yaal::hcore::HString const&, yaal::hcore::HString const& );
+	bool is_type_valid( yaal::hcore::HString const& );
 	};
 
 typedef yaal::hcore::HSingleton<HLogicFactory> HLogicFactoryInstance;

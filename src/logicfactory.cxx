@@ -24,6 +24,8 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
+#include <libintl.h>
+
 #include <yaal/yaal.h>
 
 M_VCSID ( "$Id$" )
@@ -38,7 +40,33 @@ using namespace yaal::tools::util;
 void HLogicFactory::register_logic_creator( HString const& a_oName, creator_t CREATOR )
 	{
 	M_PROLOG
+	creators_t::HIterator it = f_oCreators.find( a_oName );
+	if ( it != f_oCreators.end() )
+		M_THROW( _( "Logic already registered" ), errno );
 	f_oCreators[ a_oName ] = CREATOR;
 	return;
 	M_EPILOG
 	}
+
+HLogic::ptr_t HLogicFactory::create_logic( HString const& a_oType, HString const& a_oArgv )
+	{
+	M_PROLOG
+	HLogic::ptr_t l_oLogic;
+	creators_t::HIterator it = f_oCreators.find( a_oType );
+	if ( it != f_oCreators.end() )
+		l_oLogic = ( it->second )( a_oArgv );
+	return ( l_oLogic );
+	M_EPILOG
+	}
+
+bool HLogicFactory::is_type_valid( yaal::hcore::HString const& a_oType )
+	{
+	M_PROLOG
+	bool valid = false;
+	creators_t::HIterator it = f_oCreators.find( a_oType );
+	if ( it != f_oCreators.end() )
+		valid = true;
+	return ( valid );
+	M_EPILOG
+	}
+

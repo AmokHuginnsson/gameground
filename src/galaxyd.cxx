@@ -122,8 +122,8 @@ void HSystem::do_round( HGalaxy& a_roGalaxy )
 	M_EPILOG
 	}
 
-HGalaxy::HGalaxy( int a_iBoardSize, int a_iSystems, int a_iEmperors )
-	: f_iBoardSize( a_iBoardSize ), f_iSystems( a_iSystems ),
+HGalaxy::HGalaxy( HString const& a_oName, int a_iBoardSize, int a_iSystems, int a_iEmperors )
+	: HLogic( a_oName ), f_iBoardSize( a_iBoardSize ), f_iSystems( a_iSystems ),
 	f_iEmperors( a_iEmperors ), f_iRound( 0 ), f_iReady( 0 ),
 	f_oSystems( a_iSystems + a_iEmperors ),
 	f_oHandlers( 16 ), f_oEmperors()
@@ -437,10 +437,10 @@ void HGalaxy::do_kick( OClientInfo* a_poClientInfo )
 namespace logic_factory
 {
 
-HLogic::ptr_t create_logic_galaxy( void )
+HLogic::ptr_t create_logic_galaxy( HString const& a_oArgv )
 	{
 	M_PROLOG
-	return ( HLogic::ptr_t( new galaxy::HGalaxy( setup.f_iBoardSize, setup.f_iSystems, setup.f_iEmperors ) ) );
+	return ( HLogic::ptr_t( new galaxy::HGalaxy( a_oArgv, setup.f_iBoardSize, setup.f_iSystems, setup.f_iEmperors ) ) );
 	M_EPILOG
 	}
 

@@ -38,7 +38,8 @@ using namespace yaal::hconsole;
 using namespace yaal::tools;
 using namespace yaal::tools::util;
 
-HLogic::HLogic( void ) : f_oHandlers( setup.f_iMaxConnections ), f_oClients()
+HLogic::HLogic( HString const& a_oName )
+	: f_oHandlers( setup.f_iMaxConnections ), f_oClients(), f_oName( a_oName )
 	{
 	}
 
@@ -51,6 +52,7 @@ void HLogic::kick_client( OClientInfo* a_poClientInfo )
 	M_PROLOG
 	do_kick( a_poClientInfo );
 	a_poClientInfo->f_oLogic = HLogic::ptr_t();
+	f_oClients.remove( a_poClientInfo );
 	return;
 	M_EPILOG
 	}
@@ -64,3 +66,28 @@ void HLogic::do_kick( OClientInfo* )
 	{
 	return;
 	}
+
+bool HLogic::accept_client( OClientInfo* a_poClientInfo )
+	{
+	M_PROLOG
+	bool rejected = false;
+	if ( do_accept( a_poClientInfo ) )
+		f_oClients.insert( a_poClientInfo );
+	else
+		rejected = true;
+	return ( rejected );
+	M_EPILOG
+	}
+
+int HLogic::active_clients( void ) const
+	{
+	M_PROLOG
+	return ( f_oClients.size() );
+	M_EPILOG
+	}
+
+HString const& HLogic::get_name( void ) const
+	{
+	return ( f_oName );
+	}
+
