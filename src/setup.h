@@ -59,6 +59,7 @@ struct OSetup
 	/* galaxy specific strings */
 	yaal::hcore::HString f_oLogin;
 	yaal::hcore::HString f_oHost;
+	yaal::hcore::HString f_oGame;
 	char * f_pcProgramName;
 	yaal::hcore::HString f_oLogPath;
 	/* self-sufficient */
@@ -70,8 +71,8 @@ struct OSetup
 										f_iSystems ( D_DEFAULT_PLAYERS * D_NEUTRAL_SYSTEM_PER_PLAYER ),
 										f_iBoardSize ( D_BOARD_SIZE ), f_iPlayers( D_PLAYERS ),
 										f_iRoundTime( D_ROUND_TIME ), f_iMaxRounds( D_MAX_ROUNDS ),
-										f_oLogin ( ), f_oHost ( ), f_pcProgramName ( NULL ),
-										f_oLogPath ( ) {}
+										f_oLogin(), f_oHost(), f_oGame(), f_pcProgramName( NULL ),
+										f_oLogPath() {}
 	void test_setup ( void )
 		{
 		M_PROLOG
