@@ -29,12 +29,15 @@ Copyright:
 
 #include <libintl.h>
 
-#define D_BOARD_SIZE 16
+#define D_BOARD_SIZE 								16
 #define D_DEFAULT_MAX_CONNECTIONS		64
 #define D_DEFAULT_PLAYERS						4
 #define D_NEUTRAL_SYSTEM_PER_PLAYER	4
 #define D_MAX_BOARD_SIZE						20
 #define D_MAX_SYSTEM_COUNT					36
+#define D_PLAYERS 									4
+#define D_ROUND_TIME								180
+#define D_MAX_ROUNDS								5
 
 struct OSetup
 	{
@@ -50,6 +53,9 @@ struct OSetup
 	int f_iPort;
 	int f_iSystems;
 	int f_iBoardSize;
+	int f_iPlayers;
+	int f_iRoundTime;
+	int f_iMaxRounds;
 	/* galaxy specific strings */
 	yaal::hcore::HString f_oLogin;
 	yaal::hcore::HString f_oHost;
@@ -62,7 +68,8 @@ struct OSetup
 										f_iEmperors ( D_DEFAULT_PLAYERS ),
 										f_iPort ( 7777 ),
 										f_iSystems ( D_DEFAULT_PLAYERS * D_NEUTRAL_SYSTEM_PER_PLAYER ),
-										f_iBoardSize ( D_BOARD_SIZE ),
+										f_iBoardSize ( D_BOARD_SIZE ), f_iPlayers( D_PLAYERS ),
+										f_iRoundTime( D_ROUND_TIME ), f_iMaxRounds( D_MAX_ROUNDS ),
 										f_oLogin ( ), f_oHost ( ), f_pcProgramName ( NULL ),
 										f_oLogPath ( ) {}
 	void test_setup ( void )
