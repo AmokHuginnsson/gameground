@@ -890,7 +890,7 @@ void HClient::init_client ( HString & a_roHost, int a_iPort )
 	HString l_oMessage;
 	f_oSocket.connect ( a_roHost, a_iPort );
 	register_file_descriptor_handler ( f_oSocket.get_file_descriptor ( ), & HClient::handler_message );
-	l_oMessage = "GLX:LOGIN:";
+	l_oMessage = "name:";
 	l_oMessage += setup.f_oLogin + '\n';
 	f_oSocket.write_until_eos ( l_oMessage );
 	f_oWindow->set_data ( & f_oSystems, & f_oEmperors, & f_oMoves );

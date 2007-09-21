@@ -40,7 +40,7 @@ using namespace yaal::tools::util;
 
 HServer::HServer( int a_iConnections )
 	: HProcess( a_iConnections ), f_iMaxConnections( a_iConnections ),
-	f_oSocket( HSocket::D_DEFAULTS, a_iConnections ), f_oClients(), f_oLogics(), f_oHandlers()
+	f_oSocket( HSocket::TYPE::D_DEFAULT, a_iConnections ), f_oClients(), f_oLogics(), f_oHandlers()
 	{
 	M_PROLOG
 	return;
@@ -118,7 +118,12 @@ void HServer::create_game( OClientInfo& a_roInfo, HString const& a_oArg )
 		else if ( l_oName.is_empty() )
 			kick_client( a_roInfo.f_oSocket, _( "No game name given." ) );
 		else
-			f_oLogics[ l_oName ] = factory.create_logic( l_oType, l_oName );
+			{
+			HLogic::ptr_t l_oLogic;
+			f_oLogics[ l_oName ] = l_oLogic = factory.create_logic( l_oType, l_oName );
+			if ( ! l_oLogic->accept_client( &a_roInfo ) )
+				a_roInfo.f_oLogic = l_oLogic;
+			}
 		}
 	return;
 	M_EPILOG
