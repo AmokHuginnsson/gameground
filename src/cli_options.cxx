@@ -111,7 +111,7 @@ int decode_switches ( int a_iArgc, char ** a_ppcArgv )
 		{
 			{ D_SERVER_LONG,			D_SERVER_SHORT,			OOption::D_NONE, D_BOOL, &setup.f_bServer,	NULL },
 			{ D_CLIENT_LONG,			D_CLIENT_SHORT,			OOption::D_NONE, D_BOOL, &setup.f_bClient,	NULL },
-			{ D_NEW_GAME_LONG,		D_NEW_GAME_SHORT,		OOption::D_REQUIRED, D_HSTRING, &setup.f_oGame,	NULL },
+			{ D_NEW_GAME_LONG,		D_NEW_GAME_SHORT,		OOption::D_REQUIRED, D_HSTRING, &setup.f_oGameType,	NULL },
 			{ D_JOIN_GAME_LONG,		D_JOIN_GAME_SHORT,	OOption::D_REQUIRED, D_HSTRING, &setup.f_oGame,	NULL },
 			{ D_EMPERORS_LONG,		D_EMPERORS_SHORT,		OOption::D_REQUIRED, D_INT, &setup.f_iEmperors,	NULL },
 			{ D_PORT_LONG,				D_PORT_SHORT,				OOption::D_REQUIRED, D_INT, &setup.f_iPort,	NULL },
