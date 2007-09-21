@@ -36,12 +36,22 @@ Copyright:
 class HLogicFactory
 	{
 	typedef HLogic::ptr_t ( *creator_t )( yaal::hcore::HString const& );
-	typedef yaal::hcore::HMap<yaal::hcore::HString, creator_t> creators_t;
+public:
+	struct OCreator
+		{
+		OCreator( void ) : f_oInfo(), CREATOR( NULL ) {}
+		yaal::hcore::HString f_oInfo;
+		creator_t CREATOR;
+		};
+	typedef yaal::hcore::HMap<yaal::hcore::HString, OCreator> creators_t;
+private:
 	creators_t f_oCreators;
 public:
 	void register_logic_creator( yaal::hcore::HString const&, creator_t );
 	HLogic::ptr_t create_logic( yaal::hcore::HString const&, yaal::hcore::HString const& );
 	bool is_type_valid( yaal::hcore::HString const& );
+	creators_t::HIterator begin( void );
+	creators_t::HIterator end( void );
 	};
 
 typedef yaal::hcore::HSingleton<HLogicFactory> HLogicFactoryInstance;

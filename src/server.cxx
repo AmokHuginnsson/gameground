@@ -165,7 +165,11 @@ int HServer::handler_connection( int )
 		f_oSocket.close();
 		}
 	else
-		f_oClients[ l_oClient->get_file_descriptor() ].f_oSocket = l_oClient;
+		{
+		OClientInfo& info = f_oClients[ l_oClient->get_file_descriptor() ];
+		info.f_oSocket = l_oClient;
+		send_logics_info( info );
+		}
 	fprintf( stdout, "%s\n", static_cast<char const* const>( l_oClient->get_host_name() ) );
 	return ( 0 );
 	M_EPILOG
@@ -229,8 +233,20 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& a_oClient, char const* c
 	if ( ( !! clientIt->second.f_oLogic ) && ( ! clientIt->second.f_oLogic->active_clients() ) )
 		f_oLogics.remove( clientIt->second.f_oLogic->get_name() );
 	f_oClients.remove( l_iFileDescriptor );
-	if ( ! f_oSocket.get_client_count() )
-		f_bLoop = false;
+	return;
+	M_EPILOG
+	}
+
+void HServer::send_logics_info( OClientInfo& a_roInfo )
+	{
+	M_PROLOG
+	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
+	for( HLogicFactory::creators_t::HIterator it = factory.begin();
+			it != factory.end(); ++ it )
+		{
+		a_roInfo.f_oSocket->write_until_eos( it->second.f_oInfo );
+		a_roInfo.f_oSocket->write_until_eos( "\n" );
+		}
 	return;
 	M_EPILOG
 	}

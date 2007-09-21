@@ -62,6 +62,7 @@ protected:
 	void pass_command( OClientInfo&, yaal::hcore::HString const& );
 	void create_game( OClientInfo&, yaal::hcore::HString const& );
 	void join_game( OClientInfo&, yaal::hcore::HString const& );
+	void send_logics_info( OClientInfo& );
 	/*}*/
 	};
 

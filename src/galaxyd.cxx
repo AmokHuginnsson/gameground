@@ -468,7 +468,9 @@ bool registrar( void )
 	M_PROLOG
 	bool volatile failed = false;
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
-	factory.register_logic_creator( "glx", create_logic_galaxy );
+	HString l_oSetup;
+	l_oSetup.format( "%s:%d,%d,%d", "glx", setup.f_iBoardSize, setup.f_iSystems, setup.f_iEmperors );
+	factory.register_logic_creator( l_oSetup, create_logic_galaxy );
 	return ( failed );
 	M_EPILOG
 	}

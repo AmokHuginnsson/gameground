@@ -37,13 +37,17 @@ using namespace yaal::hconsole;
 using namespace yaal::tools;
 using namespace yaal::tools::util;
 
-void HLogicFactory::register_logic_creator( HString const& a_oName, creator_t CREATOR )
+void HLogicFactory::register_logic_creator( HString const& a_oInfo, creator_t CREATOR )
 	{
 	M_PROLOG
-	creators_t::HIterator it = f_oCreators.find( a_oName );
+	HString l_oName = a_oInfo.split( ":", 0 );
+	creators_t::HIterator it = f_oCreators.find( l_oName );
 	if ( it != f_oCreators.end() )
 		M_THROW( _( "Logic already registered" ), errno );
-	f_oCreators[ a_oName ] = CREATOR;
+	OCreator l_oCreator;
+	l_oCreator.f_oInfo = a_oInfo;
+	l_oCreator.CREATOR = CREATOR;
+	f_oCreators[ l_oName ] = l_oCreator;
 	return;
 	M_EPILOG
 	}
@@ -54,7 +58,7 @@ HLogic::ptr_t HLogicFactory::create_logic( HString const& a_oType, HString const
 	HLogic::ptr_t l_oLogic;
 	creators_t::HIterator it = f_oCreators.find( a_oType );
 	if ( it != f_oCreators.end() )
-		l_oLogic = ( it->second )( a_oArgv );
+		l_oLogic = ( it->second.CREATOR )( a_oArgv );
 	return ( l_oLogic );
 	M_EPILOG
 	}
@@ -70,3 +74,12 @@ bool HLogicFactory::is_type_valid( yaal::hcore::HString const& a_oType )
 	M_EPILOG
 	}
 
+HLogicFactory::creators_t::HIterator HLogicFactory::begin( void )
+	{
+	return ( f_oCreators.begin() );
+	}
+
+HLogicFactory::creators_t::HIterator HLogicFactory::end( void )
+	{
+	return ( f_oCreators.end() );
+	}
