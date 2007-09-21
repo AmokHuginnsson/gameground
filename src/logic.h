@@ -71,5 +71,7 @@ private:
 	friend class HServer;
 	};
 
+typedef yaal::hcore::HExceptionT<HLogic> HLogicException;
+
 #endif /* not __LOGIC_H */
 

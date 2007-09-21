@@ -440,14 +440,23 @@ namespace logic_factory
 HLogic::ptr_t create_logic_galaxy( HString const& a_oArgv )
 	{
 	M_PROLOG
-	HString l_oName = a_oArgv.split( ":", 0 );
-	HString l_oBoardSize = a_oArgv.split( ":", 1 );
-	HString l_oSystems = a_oArgv.split( ":", 2 );
-	HString l_oEmperors = a_oArgv.split( ":", 3 );
-	return ( HLogic::ptr_t( new galaxy::HGalaxy( a_oArgv,
-					strtol( l_oBoardSize, NULL, 10 ),
-					strtol( l_oSystems, NULL, 10 ),
-					strtol( l_oEmperors, NULL, 10 ) ) ) );
+	HString l_oName = a_oArgv.split( ",", 0 );
+	HString l_oBoardSize = a_oArgv.split( ",", 0 );
+	HString l_oSystems = a_oArgv.split( ",", 1 );
+	HString l_oEmperors = a_oArgv.split( ",", 2 );
+	int l_iBoardSize = strtol( l_oBoardSize, NULL, 10 );
+	int l_iSystems = strtol( l_oSystems, NULL, 10 );
+	int l_iEmperors = strtol( l_oEmperors, NULL, 10 );
+	char* l_pcMessage = NULL;
+	if ( OSetup::test_glx_emperors( l_iEmperors, l_pcMessage )
+			|| OSetup::test_glx_emperors_systems( l_iEmperors, l_iSystems, l_pcMessage )
+			|| OSetup::test_glx_systems( l_iSystems, l_pcMessage )
+			|| OSetup::test_glx_board_size( l_iBoardSize, l_pcMessage ) )
+		throw HLogicException( l_pcMessage );
+	return ( HLogic::ptr_t( new galaxy::HGalaxy( l_oName,
+					l_iBoardSize,
+					l_iSystems,
+					l_iEmperors ) ) );
 	M_EPILOG
 	}
 

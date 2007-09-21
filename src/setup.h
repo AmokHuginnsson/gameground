@@ -70,34 +70,54 @@ struct OSetup
 		M_PROLOG
 		if ( f_bServer && f_bClient )
 			yaal::tools::util::failure ( 1,
-					_ ( "galaxy cannot be server and client at the same time\n" ) );
+					_( "galaxy cannot be server and client at the same time\n" ) );
 		if ( ! ( f_bServer || f_bClient ) )
 			yaal::tools::util::failure ( 2,
-					_ ( "galaxy must be server or client\n" ) );
+					_( "galaxy must be server or client\n" ) );
 		if ( f_bServer && ( f_iMaxConnections < 2 ) )
 			yaal::tools::util::failure ( 3,
-					_ ( "this server hosts multiplayer games only\n" ) );
-		if ( f_bServer && ( f_iEmperors < 2 ) )
-			yaal::tools::util::failure ( 4,
-					_ ( "galaxy is multiplayer game and makes sense"
-						" only for at least two players\n" ) );
+					_( "this server hosts multiplayer games only\n" ) );
+		char* l_pcMessage = NULL;
+		if ( test_glx_emperors( f_iEmperors, l_pcMessage ) )
+			yaal::tools::util::failure ( 4, l_pcMessage );
 		if ( f_iPort < 1024 )
 			yaal::tools::util::failure ( 5,
-					_ ( "galaxy cannot run on restricted ports\n" ) );
+					_( "galaxy cannot run on restricted ports\n" ) );
 		if ( f_bClient && f_oHost.is_empty ( ) )
 			yaal::tools::util::failure ( 6,
-					_ ( "as a client You must specify server host\n" ) );
+					_( "as a client You must specify server host\n" ) );
 		if ( f_bClient && f_oLogin.is_empty ( ) )
 			yaal::tools::util::failure ( 7,
-					_ ( "as a player You must specify Your name\n" ) );
-		if ( f_bServer && ( ( f_iBoardSize < 6 ) || ( f_iBoardSize > D_MAX_BOARD_SIZE ) ) )
-			yaal::tools::util::failure ( 8, _ ( "bad board size specified\n" ) );
-		if ( f_bServer && ( ( f_iEmperors + f_iSystems ) > D_MAX_SYSTEM_COUNT ) )
-			yaal::tools::util::failure ( 9, _ ( "bad total system count\n" ) );
-		if ( f_bServer && ( f_iSystems < 0 ) )
-			yaal::tools::util::failure ( 10, _ ( "neutral system count has to be nonnegative number\n" ) );
+					_( "as a player You must specify Your name\n" ) );
+		if ( test_glx_board_size( f_iBoardSize, l_pcMessage ) )
+			yaal::tools::util::failure ( 8, l_pcMessage );
+		if ( test_glx_emperors_systems( f_iEmperors, f_iSystems, l_pcMessage ) )
+			yaal::tools::util::failure ( 9, l_pcMessage );
+		if ( test_glx_systems( f_iSystems, l_pcMessage ) )
+			yaal::tools::util::failure ( 10, l_pcMessage );
 		return;
 		M_EPILOG
+		}
+	static bool test_glx_emperors( int a_iEmperors, char*& a_rpcMessage )
+		{
+		return ( ( a_iEmperors < 2 )
+				&& ( a_rpcMessage = _( "galaxy is multiplayer game and makes sense"
+						" only for at least two players\n" ) ) );
+		}
+	static bool test_glx_emperors_systems( int a_iEmperors, int a_iSystems, char*& a_rpcMessage )
+		{
+		return ( ( ( a_iEmperors + a_iSystems ) > D_MAX_SYSTEM_COUNT )
+				&& ( a_rpcMessage = _( "bad total system count\n" ) ) );
+		}
+	static bool test_glx_systems( int a_iSystems, char*& a_rpcMessage )
+		{
+		return ( ( a_iSystems < 0 )
+				&& ( a_rpcMessage = _( "neutral system count has to be nonnegative number\n" ) ) );
+		}
+	static bool test_glx_board_size( int a_iBoardSize, char*& a_rpcMessage )
+		{
+		return ( ( ( a_iBoardSize < 6 ) || ( a_iBoardSize > D_MAX_BOARD_SIZE ) )
+				&& ( a_rpcMessage = _( "bad board size specified\n" ) ) );
 		}
 private:
 	OSetup ( OSetup const & );

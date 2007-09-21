@@ -120,9 +120,16 @@ void HServer::create_game( OClientInfo& a_roInfo, HString const& a_oArg )
 		else
 			{
 			HLogic::ptr_t l_oLogic;
-			f_oLogics[ l_oName ] = l_oLogic = factory.create_logic( l_oType, l_oName );
-			if ( ! l_oLogic->accept_client( &a_roInfo ) )
-				a_roInfo.f_oLogic = l_oLogic;
+			try
+				{
+				f_oLogics[ l_oName ] = l_oLogic = factory.create_logic( l_oType, l_oName );
+				if ( ! l_oLogic->accept_client( &a_roInfo ) )
+					a_roInfo.f_oLogic = l_oLogic;
+				}
+			catch ( HLogicException& e )
+				{
+				kick_client( a_roInfo.f_oSocket, e.what() );
+				}
 			}
 		}
 	return;
