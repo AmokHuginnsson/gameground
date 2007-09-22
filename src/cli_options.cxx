@@ -96,11 +96,17 @@ void usage ( void )
 	throw ( setup.f_bHelp ? 0 : 1 );
 	}
 
-void version ( void ) __attribute__ ( ( __noreturn__ ) );
-void version ( void )
+void version( void ) __attribute__ ( ( __noreturn__ ) );
+void version( void )
 	{
 	printf ( "`galaxy' %s\n", VER );
 	throw ( 0 );
+	}
+
+void set_verbosity( void )
+	{
+	++ setup.f_iVerbose;
+	return;
 	}
 
 int decode_switches ( int a_iArgc, char ** a_ppcArgv )
@@ -121,7 +127,7 @@ int decode_switches ( int a_iArgc, char ** a_ppcArgv )
 			{ D_HOST_LONG,				D_HOST_SHORT,				OOption::D_REQUIRED, D_HSTRING,	&setup.f_oHost, NULL },
 			{ D_QUIET_LONG	,			D_QUIET_SHORT,			OOption::D_NONE,	D_BOOL,	&setup.f_bQuiet,		NULL },
 			{ D_SILENT_LONG,			D_QUIET_SHORT,			OOption::D_NONE,	D_BOOL,	&setup.f_bQuiet,		NULL },
-			{ D_VERBOSE_LONG,			D_VERBOSE_SHORT,		OOption::D_NONE,	D_BOOL,	&setup.f_bVerbose,	NULL },
+			{ D_VERBOSE_LONG,			D_VERBOSE_SHORT,		OOption::D_NONE,	D_VOID,	NULL,	set_verbosity },
 			{ D_HELP_LONG,				D_HELP_SHORT,				OOption::D_NONE,	D_BOOL,	&setup.f_bHelp,		usage },
 			{ D_VERSION_LONG,			D_VERSION_SHORT,		OOption::D_NONE,	D_VOID,	NULL,								version }
 		};

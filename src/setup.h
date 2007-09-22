@@ -42,8 +42,8 @@ Copyright:
 struct OSetup
 	{
 	bool f_bQuiet;			/* --quiet, --silent */
-	bool f_bVerbose;		/* --verbose */
 	bool f_bHelp;
+	int f_iVerbose;		/* --verbose */
 	/* galaxy specific bools */
 	bool f_bServer;
 	bool f_bClient;
@@ -64,13 +64,13 @@ struct OSetup
 	char * f_pcProgramName;
 	yaal::hcore::HString f_oLogPath;
 	/* self-sufficient */
-	OSetup ( void ) : f_bQuiet ( false ), f_bVerbose ( false ),
-										f_bHelp ( false ), f_bServer ( false ),
-										f_bClient ( false ), f_iMaxConnections( D_DEFAULT_MAX_CONNECTIONS ),
-										f_iEmperors ( D_DEFAULT_PLAYERS ),
-										f_iPort ( 7777 ),
-										f_iSystems ( D_DEFAULT_PLAYERS * D_NEUTRAL_SYSTEM_PER_PLAYER ),
-										f_iBoardSize ( D_BOARD_SIZE ), f_iPlayers( D_PLAYERS ),
+	OSetup ( void ) : f_bQuiet( false ), f_bHelp( false ),
+										f_iVerbose( 0 ), f_bServer( false ),
+										f_bClient( false ), f_iMaxConnections( D_DEFAULT_MAX_CONNECTIONS ),
+										f_iEmperors( D_DEFAULT_PLAYERS ),
+										f_iPort( 7777 ),
+										f_iSystems( D_DEFAULT_PLAYERS * D_NEUTRAL_SYSTEM_PER_PLAYER ),
+										f_iBoardSize( D_BOARD_SIZE ), f_iPlayers( D_PLAYERS ),
 										f_iRoundTime( D_ROUND_TIME ), f_iMaxRounds( D_MAX_ROUNDS ),
 										f_oLogin(), f_oHost(), f_oGameType(), f_oGame(), f_pcProgramName( NULL ),
 										f_oLogPath() {}

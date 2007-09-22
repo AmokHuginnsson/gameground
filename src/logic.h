@@ -54,6 +54,7 @@ public:
 	int active_clients( void ) const;
 	yaal::hcore::HString const& get_name() const;
 	virtual yaal::hcore::HString get_info() const = 0;
+	void kick_client( OClientInfo* );
 	/*}*/
 protected:
 	/*{*/
@@ -62,7 +63,6 @@ protected:
 	void broadcast( OClientInfo*, yaal::hcore::HString const& );
 	void handler_message( OClientInfo*, yaal::hcore::HString const& );
 	void handler_play( OClientInfo*, yaal::hcore::HString const& );
-	void kick_client( OClientInfo* );
 	/*}*/
 private:
 	/*{*/

@@ -24,6 +24,8 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
+#include <iostream>
+
 #include <yaal/yaal.h>
 M_VCSID ( "$Id$" )
 
@@ -337,6 +339,7 @@ protected:
 	void handler_setup ( HString & );
 	void handler_play ( HString & );
 	void handler_msg ( HString & );
+	void handler_error ( HString & );
 	/*}*/
 private:
 	/*{*/
@@ -786,7 +789,7 @@ int HGalaxyWindow::handler_enter ( int a_iCode, void * )
 		{
 		if ( f_poMessageInput->get ( ).get < HString const & > ( ).find_other_than ( n_pcWhiteSpace ) >= 0 )
 			{
-			f_oVarTmpBuffer = "GLX:SAY:";
+			f_oVarTmpBuffer = "cmd:GLX:SAY:";
 			f_oVarTmpBuffer += f_poMessageInput->get ( ).get < char const * const > ( );
 			f_oVarTmpBuffer += "\n";
 			f_poClient->send_message ( f_oVarTmpBuffer );
@@ -870,9 +873,11 @@ HClient::HClient ( char const * const a_pcProgramName )
 	f_oMoves ( )
 	{
 	M_PROLOG
-	f_oHandlers [ "SETUP" ] = & HClient::handler_setup;
-	f_oHandlers [ "PLAY" ] = & HClient::handler_play;
-	f_oHandlers [ "MSG" ] = & HClient::handler_msg;
+	f_oHandlers [ "SETUP" ] = &HClient::handler_setup;
+	f_oHandlers [ "PLAY" ] = &HClient::handler_play;
+	f_oHandlers [ "MSG" ] = &HClient::handler_msg;
+	f_oHandlers [ "err" ] = &HClient::handler_error;
+	f_oHandlers [ "kck" ] = &HClient::handler_error;
 	return;
 	M_EPILOG
 	}
@@ -895,7 +900,15 @@ void HClient::init_client ( HString & a_roHost, int a_iPort )
 	f_oSocket.write_until_eos ( l_oMessage );
 	f_oWindow->set_data ( & f_oSystems, & f_oEmperors, & f_oMoves );
 	HTUIProcess::init_tui ( "galaxy", f_oWindow );
-	f_poBoard = f_oWindow->get_board ( );
+	f_poBoard = f_oWindow->get_board();
+	if ( ! setup.f_oGameType.is_empty() )
+		l_oMessage.format( "create:glx:%s,%d,%d,%d\n",
+				static_cast<char const* const>( setup.f_oGame ),
+				setup.f_iEmperors, setup.f_iBoardSize, setup.f_iSystems );
+	else
+		l_oMessage.format( "join:%s\n",
+				static_cast<char const* const>( setup.f_oGame ) );
+	f_oSocket.write_until_eos( l_oMessage );
 	return;
 	M_EPILOG
 	}
@@ -905,17 +918,19 @@ int HClient::handler_message ( int )
 	M_PROLOG
 	int l_iMsgLength = 0;
 	HString l_oMessage;
-	HString l_oArgument;
 	HString l_oCommand;
 	if ( ( l_iMsgLength = f_oSocket.read_until ( l_oMessage ) ) > 0 )
 		{
-		l_oCommand = l_oMessage.split ( ":", 0 );
-		l_oArgument = l_oMessage.mid ( l_oCommand.get_length ( ) + 1 );
-		l_iMsgLength = l_oArgument.get_length ( );
-		if ( ( l_iMsgLength > 1 ) && ( l_oCommand == "GLX" ) )
-			process_command ( l_oArgument );
-		else
+		while ( ( l_oCommand = l_oMessage.split( ":", 0 ) ) == "GLX" )
+			l_oMessage = l_oMessage.mid( l_oCommand.get_length() + 1 );
+		l_iMsgLength = l_oMessage.get_length();
+		if ( l_iMsgLength < 1 )
+			{
+			hcore::log << "got empty message from server" << endl;
 			f_bLoop = false;
+			}
+		else
+			process_command( l_oMessage );
 		}
 	else if ( l_iMsgLength < 0 )
 		f_bLoop = false;
@@ -924,18 +939,23 @@ int HClient::handler_message ( int )
 	M_EPILOG
 	}
 
-void HClient::process_command ( HString & a_roCommand )
+void HClient::process_command( HString& a_roCommand )
 	{
 	M_PROLOG
 	HString l_oMnemonic;
 	HString l_oArgument;
 	handler_t HANDLER;
+	if ( setup.f_iVerbose > 2 )
+		hcore::log << "msg: " << a_roCommand << endl;
 	l_oMnemonic = a_roCommand.split ( ":", 0 );
-	l_oArgument = a_roCommand.mid ( l_oMnemonic.get_length ( ) + 1 );
-	if ( f_oHandlers.get ( l_oMnemonic, HANDLER ) )
-		( this->*HANDLER ) ( l_oArgument );
+	l_oArgument = a_roCommand.mid( l_oMnemonic.get_length() + 1 );
+	if ( f_oHandlers.get( l_oMnemonic, HANDLER ) )
+		( this->*HANDLER )( l_oArgument );
 	else
+		{
+		hcore::log << "unknown mnemonic: " << l_oMnemonic << ", (the argument: " << l_oArgument << ")" << endl;
 		f_bLoop = false;
+		}
 	return;
 	M_EPILOG
 	}
@@ -982,7 +1002,7 @@ void HClient::handler_setup ( HString & a_roCommand )
 	M_EPILOG
 	}
 
-void HClient::handler_play ( HString & a_roCommand )
+void HClient::handler_play ( HString& a_roCommand )
 	{
 	M_PROLOG
 	char l_cEvent = 0;
@@ -1078,7 +1098,15 @@ void HClient::handler_play ( HString & a_roCommand )
 	M_EPILOG
 	}
 
-void HClient::handler_msg ( HString & a_roMessage )
+void HClient::handler_error( HString& a_roMessage )
+	{
+	M_PROLOG
+	hcore::log << "error: " << a_roMessage << endl;
+	return;
+	M_EPILOG
+	}
+
+void HClient::handler_msg( HString& a_roMessage )
 	{
 	M_PROLOG
 	int l_iIndex = 0, l_iOffset = 0;
@@ -1115,7 +1143,7 @@ void HClient::end_round ( void )
 		for ( l_poMove = & f_oMoves.go ( 0 ); l_poMove;
 				l_poMove = f_oMoves.to_tail ( 1, moves_t::D_TREAT_AS_OPENED ) )
 			{
-			l_oMessage.format ( "GLX:PLAY:move=%d,%d,%d\n",
+			l_oMessage.format ( "cmd:GLX:PLAY:move=%d,%d,%d\n",
 					l_poMove->f_iSourceSystem,
 					l_poMove->f_iDestinationSystem,
 					l_poMove->f_iFleet );
@@ -1123,7 +1151,7 @@ void HClient::end_round ( void )
 			}
 		f_oMoves.flush ( );
 		}
-	f_oSocket.write_until_eos ( "GLX:PLAY:end_round\n" );
+	f_oSocket.write_until_eos ( "cmd:GLX:PLAY:end_round\n" );
 	return;
 	M_EPILOG
 	}

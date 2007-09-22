@@ -193,7 +193,7 @@ bool HGalaxy::do_accept( OClientInfo* a_poClientInfo )
 	bool rejected = false;
 	int l_iCtr = 0, l_iColor = -1, l_iSysNo = -1;
 	HString l_oMessage;
-	if ( f_iReady < ( f_iEmperors - 1 ) )
+	if ( f_iReady < f_iEmperors )
 		{
 		l_iSysNo = assign_system( a_poClientInfo ); /* assign mother system for new emperor */
 		l_oMessage.format ( "GLX:MSG:Emperor ;$%d;", l_iColor = get_emperor_info( a_poClientInfo )->f_iColor );
@@ -280,8 +280,8 @@ int HGalaxy::assign_system( OClientInfo* a_poClientInfo )
 void HGalaxy::broadcast( OClientInfo*, HString const& a_roMessage )
 	{
 	M_PROLOG
-	for ( clients_t::HIterator it = f_oClients.begin(); it != f_oClients.end(); ++ it )
-		(*it)->f_oSocket->write_until_eos ( a_roMessage );
+	for ( emperors_t::HIterator it = f_oEmperors.begin(); it != f_oEmperors.end(); ++ it )
+		it->first->f_oSocket->write_until_eos ( a_roMessage );
 	return;
 	M_EPILOG
 	}
@@ -448,16 +448,16 @@ HLogic::ptr_t create_logic_galaxy( HString const& a_oArgv )
 	{
 	M_PROLOG
 	HString l_oName = a_oArgv.split( ",", 0 );
-	HString l_oBoardSize = a_oArgv.split( ",", 1 );
-	HString l_oSystems = a_oArgv.split( ",", 2 );
-	HString l_oEmperors = a_oArgv.split( ",", 3 );
+	HString l_oEmperors = a_oArgv.split( ",", 1 );
+	HString l_oBoardSize = a_oArgv.split( ",", 2 );
+	HString l_oSystems = a_oArgv.split( ",", 3 );
+	int l_iEmperors = strtol( l_oEmperors, NULL, 10 );
 	int l_iBoardSize = strtol( l_oBoardSize, NULL, 10 );
 	int l_iSystems = strtol( l_oSystems, NULL, 10 );
-	int l_iEmperors = strtol( l_oEmperors, NULL, 10 );
 	char* l_pcMessage = NULL;
 	cout << "new glx: ( " << l_oName << " ) {" << endl;
-	cout << "board_size = " << l_iBoardSize << endl;
 	cout << "emperors = " << l_iEmperors << endl;
+	cout << "board_size = " << l_iBoardSize << endl;
 	cout << "systems = " << l_iSystems << endl;
 	cout << "};" << endl;
 	if ( OSetup::test_glx_emperors( l_iEmperors, l_pcMessage )

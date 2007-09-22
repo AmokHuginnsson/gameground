@@ -87,7 +87,7 @@ void HServer::set_client_name( OClientInfo& a_roInfo, HString const& a_oName )
 		{
 		if ( ( it->second.f_oName == a_oName ) && ( it->second.f_oSocket != a_roInfo.f_oSocket ) )
 			{
-			a_roInfo.f_oSocket->write_until_eos ( "err:Name taken." );
+			a_roInfo.f_oSocket->write_until_eos ( "err:Name taken.\n" );
 			break;
 			}
 		}
@@ -112,7 +112,7 @@ void HServer::create_game( OClientInfo& a_roInfo, HString const& a_oArg )
 	{
 	M_PROLOG
 	if ( a_roInfo.f_oName.is_empty() )
-		a_roInfo.f_oSocket->write_until_eos( "err:Set your name first." );
+		a_roInfo.f_oSocket->write_until_eos( "err:Set your name first.\n" );
 	else
 		{
 		HString l_oType = a_oArg.split( ":", 0 );
@@ -121,7 +121,7 @@ void HServer::create_game( OClientInfo& a_roInfo, HString const& a_oArg )
 		HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 		logics_t::HIterator it = f_oLogics.find( l_oName );
 		if ( it != f_oLogics.end() )
-			a_roInfo.f_oSocket->write_until_eos( "err:Game already exists." );
+			a_roInfo.f_oSocket->write_until_eos( "err:Game already exists.\n" );
 		else if ( ! factory.is_type_valid( l_oType ) )
 			kick_client( a_roInfo.f_oSocket, _( "No such game type." ) );
 		else if ( l_oName.is_empty() )
@@ -152,14 +152,16 @@ void HServer::join_game( OClientInfo& a_roInfo, HString const& a_oName )
 	{
 	M_PROLOG
 	if ( a_roInfo.f_oName.is_empty() )
-		a_roInfo.f_oSocket->write_until_eos( "err:Set your name first." );
+		a_roInfo.f_oSocket->write_until_eos( "err:Set your name first.\n" );
 	else
 		{
 		logics_t::HIterator it = f_oLogics.find( a_oName );
 		if ( it == f_oLogics.end() )
-			a_roInfo.f_oSocket->write_until_eos( "err:Game does not exists." );
+			a_roInfo.f_oSocket->write_until_eos( "err:Game does not exists.\n" );
 		else if ( ! it->second->accept_client( &a_roInfo ) )
 			a_roInfo.f_oLogic = it->second;
+		else
+			a_roInfo.f_oSocket->write_until_eos( "err:Game is full.\n" );
 		}
 	return;
 	M_EPILOG
@@ -228,13 +230,21 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& a_oClient, char const* c
 	M_PROLOG
 	M_ASSERT( !! a_oClient );
 	int l_iFileDescriptor = a_oClient->get_file_descriptor();
+	a_oClient->write_until_eos( "kck:" );
 	a_oClient->write_until_eos( a_pcReason );
+	a_oClient->write_until_eos( "\n" );
 	f_oSocket.shutdown_client( l_iFileDescriptor );
 	unregister_file_descriptor_handler( l_iFileDescriptor );
 	clients_t::HIterator clientIt = f_oClients.find( l_iFileDescriptor );
 	M_ASSERT( clientIt != f_oClients.end() );
-	if ( ( !! clientIt->second.f_oLogic ) && ( ! clientIt->second.f_oLogic->active_clients() ) )
-		f_oLogics.remove( clientIt->second.f_oLogic->get_name() );
+	cout << "client " <<  clientIt->second.f_oName << " was kicked because of: " << a_pcReason << endl;
+	if ( !! clientIt->second.f_oLogic )
+		{
+		HLogic::ptr_t l_oLogic = clientIt->second.f_oLogic;
+		l_oLogic->kick_client( &clientIt->second );
+		if ( ! l_oLogic->active_clients() )
+			f_oLogics.remove( l_oLogic->get_name() );
+		}
 	f_oClients.remove( l_iFileDescriptor );
 	return;
 	M_EPILOG
