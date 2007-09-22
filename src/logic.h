@@ -53,6 +53,7 @@ public:
 	bool accept_client( OClientInfo* );
 	int active_clients( void ) const;
 	yaal::hcore::HString const& get_name() const;
+	virtual yaal::hcore::HString get_info() const = 0;
 	/*}*/
 protected:
 	/*{*/

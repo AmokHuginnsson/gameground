@@ -24,6 +24,8 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
+#include <iostream>
+
 #include <yaal/yaal.h>
 M_VCSID ( "$Id$" )
 #include "galaxyd.h"
@@ -432,6 +434,11 @@ void HGalaxy::do_kick( OClientInfo* a_poClientInfo )
 	M_EPILOG
 	}
 
+yaal::hcore::HString HGalaxy::get_info() const
+	{
+	return ( HString( "glx," ) + f_oName + "," + f_oEmperors.size() + "," + f_iEmperors + "," + f_iBoardSize + "," + f_iSystems );
+	}
+
 }
 
 namespace logic_factory
@@ -441,13 +448,18 @@ HLogic::ptr_t create_logic_galaxy( HString const& a_oArgv )
 	{
 	M_PROLOG
 	HString l_oName = a_oArgv.split( ",", 0 );
-	HString l_oBoardSize = a_oArgv.split( ",", 0 );
-	HString l_oSystems = a_oArgv.split( ",", 1 );
-	HString l_oEmperors = a_oArgv.split( ",", 2 );
+	HString l_oBoardSize = a_oArgv.split( ",", 1 );
+	HString l_oSystems = a_oArgv.split( ",", 2 );
+	HString l_oEmperors = a_oArgv.split( ",", 3 );
 	int l_iBoardSize = strtol( l_oBoardSize, NULL, 10 );
 	int l_iSystems = strtol( l_oSystems, NULL, 10 );
 	int l_iEmperors = strtol( l_oEmperors, NULL, 10 );
 	char* l_pcMessage = NULL;
+	cout << "new glx: ( " << l_oName << " ) {" << endl;
+	cout << "board_size = " << l_iBoardSize << endl;
+	cout << "emperors = " << l_iEmperors << endl;
+	cout << "systems = " << l_iSystems << endl;
+	cout << "};" << endl;
 	if ( OSetup::test_glx_emperors( l_iEmperors, l_pcMessage )
 			|| OSetup::test_glx_emperors_systems( l_iEmperors, l_iSystems, l_pcMessage )
 			|| OSetup::test_glx_systems( l_iSystems, l_pcMessage )

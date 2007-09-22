@@ -71,7 +71,7 @@ bool HLogic::accept_client( OClientInfo* a_poClientInfo )
 	{
 	M_PROLOG
 	bool rejected = false;
-	if ( do_accept( a_poClientInfo ) )
+	if ( ! do_accept( a_poClientInfo ) )
 		f_oClients.insert( a_poClientInfo );
 	else
 		rejected = true;

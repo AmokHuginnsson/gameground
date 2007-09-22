@@ -24,6 +24,8 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
+#include <iostream>
+
 #include <yaal/yaal.h>
 M_VCSID ( "$Id$" )
 #include "server.h"
@@ -57,6 +59,12 @@ int HServer::init_server( int a_iPort )
 	f_oHandlers[ "cmd" ] = &HServer::pass_command;
 	f_oHandlers[ "create" ] = &HServer::create_game;
 	f_oHandlers[ "join" ] = &HServer::join_game;
+	f_oHandlers[ "logics" ] = &HServer::get_logics_info;
+	f_oHandlers[ "shutdown" ] = &HServer::handler_shutdown;
+	f_oHandlers[ "players" ] = &HServer::get_players_info;
+	f_oHandlers[ "games" ] = &HServer::get_games_info;
+	f_oHandlers[ "game" ] = &HServer::get_game_info;
+	f_oHandlers[ "quit" ] = &HServer::handler_quit;
 	HProcess::init ( 3600 );
 	return ( 0 );
 	M_EPILOG
@@ -108,7 +116,8 @@ void HServer::create_game( OClientInfo& a_roInfo, HString const& a_oArg )
 	else
 		{
 		HString l_oType = a_oArg.split( ":", 0 );
-		HString l_oName = a_oArg.split( ":", 1 );
+		HString l_oConfiguration = a_oArg.split( ":", 1 );
+		HString l_oName = l_oConfiguration.split( ":,", 0 );
 		HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 		logics_t::HIterator it = f_oLogics.find( l_oName );
 		if ( it != f_oLogics.end() )
@@ -122,9 +131,12 @@ void HServer::create_game( OClientInfo& a_roInfo, HString const& a_oArg )
 			HLogic::ptr_t l_oLogic;
 			try
 				{
-				f_oLogics[ l_oName ] = l_oLogic = factory.create_logic( l_oType, l_oName );
+				l_oLogic = factory.create_logic( l_oType, l_oConfiguration );
 				if ( ! l_oLogic->accept_client( &a_roInfo ) )
+					{
+					f_oLogics[ l_oName ] = l_oLogic;
 					a_roInfo.f_oLogic = l_oLogic;
+					}
 				}
 			catch ( HLogicException& e )
 				{
@@ -165,12 +177,8 @@ int HServer::handler_connection( int )
 		f_oSocket.close();
 		}
 	else
-		{
-		OClientInfo& info = f_oClients[ l_oClient->get_file_descriptor() ];
-		info.f_oSocket = l_oClient;
-		send_logics_info( info );
-		}
-	fprintf( stdout, "%s\n", static_cast<char const* const>( l_oClient->get_host_name() ) );
+		f_oClients[ l_oClient->get_file_descriptor() ].f_oSocket = l_oClient;
+	cout << static_cast<char const* const>( l_oClient->get_host_name() ) << endl;
 	return ( 0 );
 	M_EPILOG
 	}
@@ -192,17 +200,12 @@ int HServer::handler_message( int a_iFileDescriptor )
 		kick_client( l_oClient, _( "Read failure." ) );
 	else if ( l_iMsgLength > 0 )
 		{
-		fprintf( stdout, "<-%s\n", static_cast<char const* const>( l_oMessage ) );
+		cout << "<-" << static_cast<char const* const>( l_oMessage ) << endl;
 		l_oCommand = l_oMessage.split( ":", 0 );
 		l_oArgument = l_oMessage.mid( l_oCommand.get_length() + 1 );
-		l_iMsgLength = l_oArgument.get_length();
-		if ( l_iMsgLength <= 1 )
-			{
-			if ( l_oCommand == "QUIT" )
-				f_bLoop = false;
-			else
-				kick_client( l_oClient, _( "Malformed data." ) );
-			}
+		l_iMsgLength = l_oCommand.get_length();
+		if ( l_iMsgLength < 1 )
+			kick_client( l_oClient, _( "Malformed data." ) );
 		else
 			{
 			handlers_t::HIterator it = f_oHandlers.find( l_oCommand );
@@ -247,6 +250,83 @@ void HServer::send_logics_info( OClientInfo& a_roInfo )
 		a_roInfo.f_oSocket->write_until_eos( it->second.f_oInfo );
 		a_roInfo.f_oSocket->write_until_eos( "\n" );
 		}
+	return;
+	M_EPILOG
+	}
+
+void HServer::get_logics_info( OClientInfo& a_roInfo, HString const& )
+	{
+	M_PROLOG
+	send_logics_info( a_roInfo );
+	return;
+	M_EPILOG
+	}
+
+void HServer::handler_shutdown( OClientInfo&, HString const& )
+	{
+	f_bLoop = false;
+	return;
+	}
+
+void HServer::handler_quit( OClientInfo& a_roInfo, HString const& )
+	{
+	kick_client( a_roInfo.f_oSocket, "bye\n" );
+	return;
+	}
+
+void HServer::get_players_info( OClientInfo& a_roInfo, HString const& )
+	{
+	M_PROLOG
+	send_players_info( a_roInfo );
+	return;
+	M_EPILOG
+	}
+
+void HServer::get_games_info( OClientInfo& a_roInfo, HString const& )
+	{
+	M_PROLOG
+	send_games_info( a_roInfo );
+	return;
+	M_EPILOG
+	}
+
+void HServer::get_game_info( OClientInfo& a_roInfo, HString const& a_oName )
+	{
+	M_PROLOG
+	send_game_info( a_roInfo, a_oName );
+	return;
+	M_EPILOG
+	}
+
+void HServer::send_players_info( OClientInfo& a_roInfo )
+	{
+	M_PROLOG
+	for( clients_t::HIterator it = f_oClients.begin();
+			it != f_oClients.end(); ++ it )
+		{
+		if ( ! it->second.f_oName.is_empty() )
+			a_roInfo.f_oSocket->write_until_eos( it->second.f_oName + "," + ( !! it->second.f_oLogic ? it->second.f_oLogic->get_name() : HString() ) + "\n" );
+		}
+	return;
+	M_EPILOG
+	}
+
+void HServer::send_games_info( OClientInfo& a_roInfo )
+	{
+	M_PROLOG
+	for( logics_t::HIterator it = f_oLogics.begin();
+			it != f_oLogics.end(); ++ it )
+		{
+		a_roInfo.f_oSocket->write_until_eos( it->second->get_info() );
+		a_roInfo.f_oSocket->write_until_eos( "\n" );
+		}
+	return;
+	M_EPILOG
+	}
+
+void HServer::send_game_info( OClientInfo& /*a_roInfo*/, HString const& )
+	{
+	M_PROLOG
 	return;
 	M_EPILOG
 	}

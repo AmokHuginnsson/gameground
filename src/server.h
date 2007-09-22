@@ -56,13 +56,22 @@ protected:
 	/*{*/
 	int handler_connection( int );
 	int handler_message( int );
+	void handler_shutdown( OClientInfo&, yaal::hcore::HString const& );
+	void handler_quit( OClientInfo&, yaal::hcore::HString const& );
 	void kick_client( yaal::hcore::HSocket::ptr_t&, char const* const = NULL );
 	void broadcast( OClientInfo&, yaal::hcore::HString const& );
 	void set_client_name( OClientInfo&, yaal::hcore::HString const& );
 	void pass_command( OClientInfo&, yaal::hcore::HString const& );
 	void create_game( OClientInfo&, yaal::hcore::HString const& );
 	void join_game( OClientInfo&, yaal::hcore::HString const& );
+	void get_logics_info( OClientInfo&, yaal::hcore::HString const& );
+	void get_players_info( OClientInfo&, yaal::hcore::HString const& );
+	void get_games_info( OClientInfo&, yaal::hcore::HString const& );
+	void get_game_info( OClientInfo&, yaal::hcore::HString const& );
 	void send_logics_info( OClientInfo& );
+	void send_players_info( OClientInfo& );
+	void send_games_info( OClientInfo& );
+	void send_game_info( OClientInfo&, yaal::hcore::HString const& );
 	/*}*/
 	};
 

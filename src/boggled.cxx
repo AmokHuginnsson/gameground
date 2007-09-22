@@ -211,6 +211,11 @@ void HBoggle::do_kick( OClientInfo* a_poClientInfo )
 	M_EPILOG
 	}
 
+yaal::hcore::HString HBoggle::get_info() const
+	{
+	return ( HString( "bgl," ) + f_oName + "," + f_oPlayers.size() + "," + f_iPlayers + "," + f_iRoundTime + "," + f_iMaxRounds );
+	}
+
 }
 
 namespace logic_factory
