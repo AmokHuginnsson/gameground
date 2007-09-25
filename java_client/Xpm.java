@@ -590,7 +590,7 @@ public class Xpm {
 				}
 				pixchar = new Integer( tmpchar & 0xffff );
 
-				pixval = ( Integer )colorlookup.get( pixchar );
+				pixval = colorlookup.get( pixchar );
 				if ( pixval == null ) {
 					if ( debugflag ) {
 						debug( "HEY MORON: no value stored "+

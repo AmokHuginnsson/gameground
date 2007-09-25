@@ -1,7 +1,9 @@
 import java.lang.reflect.Method;
 import java.lang.Class;
-import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.HashMap;
+import java.util.Collections;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.PrintWriter;
@@ -10,11 +12,12 @@ import java.net.Socket;
 class HClient extends Thread {
 //--------------------------------------------//
 	boolean _loop;
+	HLogic _logic;
 	int _color;
 	int _systemCount;
 	int _round;
-	Map<String,Method> _handlers;
-	Map<Integer,String> _emperors;
+	SortedMap<String,Method> _handlers;
+	HashMap<Integer,String> _emperors;
 	String _emperor;
 	BufferedReader _in;
 	PrintWriter _out;
@@ -109,7 +112,7 @@ class HClient extends Thread {
 		_systemCount = 0;
 		_gui = $gui;
 		_emperor = $emperor;
-		_handlers = new HashMap<String,Method>();
+		_handlers = java.util.Collections.synchronizedSortedMap( new TreeMap<String,Method>() );
 		_emperors = new HashMap<Integer,String>();
 		_handlers.put( "SETUP", HClient.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
 		_handlers.put( "PLAY", HClient.class.getDeclaredMethod( "handlerPlay", new Class[]{ String.class } ) );
@@ -123,6 +126,9 @@ class HClient extends Thread {
 		else
 			_systemNames = _systemNamesLatin;
 		_loop = true;
+	}
+	public static void registerLogic( HLogic $logic ) {
+		return;
 	}
 	void handlerSetup( String $command ) {
 		int index = - 1, coordX = - 1, coordY = - 1;
