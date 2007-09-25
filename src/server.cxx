@@ -194,33 +194,40 @@ int HServer::handler_message( int a_iFileDescriptor )
 	HString l_oCommand;
 	clients_t::HIterator clientIt;
 	HSocket::ptr_t l_oClient = f_oSocket.get_client( a_iFileDescriptor );
-	if ( ! l_oClient )
-		kick_client( l_oClient );
-	else if ( ( clientIt = f_oClients.find( a_iFileDescriptor ) ) == f_oClients.end() )
-		kick_client( l_oClient );
-	else if ( ( l_iMsgLength = l_oClient->read_until( l_oMessage ) ) < 0 )
-		kick_client( l_oClient, _( "Read failure." ) );
-	else if ( l_iMsgLength > 0 )
+	try
 		{
-		cout << "<-" << static_cast<char const* const>( l_oMessage ) << endl;
-		l_oCommand = l_oMessage.split( ":", 0 );
-		l_oArgument = l_oMessage.mid( l_oCommand.get_length() + 1 );
-		l_iMsgLength = l_oCommand.get_length();
-		if ( l_iMsgLength < 1 )
-			kick_client( l_oClient, _( "Malformed data." ) );
-		else
+		if ( ! l_oClient )
+			kick_client( l_oClient );
+		else if ( ( clientIt = f_oClients.find( a_iFileDescriptor ) ) == f_oClients.end() )
+			kick_client( l_oClient );
+		else if ( ( l_iMsgLength = l_oClient->read_until( l_oMessage ) ) < 0 )
+			kick_client( l_oClient, _( "Read failure." ) );
+		else if ( l_iMsgLength > 0 )
 			{
-			handlers_t::HIterator it = f_oHandlers.find( l_oCommand );
-			if ( it != f_oHandlers.end() )
-				{
-				HLogic::ptr_t l_oLogic = clientIt->second.f_oLogic;
-				( this->*it->second )( clientIt->second, l_oArgument );
-				if ( ( !! l_oLogic ) && ( ! l_oLogic->active_clients() ) )
-					f_oLogics.remove( l_oLogic->get_name() );
-				}
+			cout << "<-" << static_cast<char const* const>( l_oMessage ) << endl;
+			l_oCommand = l_oMessage.split( ":", 0 );
+			l_oArgument = l_oMessage.mid( l_oCommand.get_length() + 1 );
+			l_iMsgLength = l_oCommand.get_length();
+			if ( l_iMsgLength < 1 )
+				kick_client( l_oClient, _( "Malformed data." ) );
 			else
-				kick_client( l_oClient, _( "Unknown command." ) );
+				{
+				handlers_t::HIterator it = f_oHandlers.find( l_oCommand );
+				if ( it != f_oHandlers.end() )
+					{
+					HLogic::ptr_t l_oLogic = clientIt->second.f_oLogic;
+					( this->*it->second )( clientIt->second, l_oArgument );
+					if ( ( !! l_oLogic ) && ( ! l_oLogic->active_clients() ) )
+						f_oLogics.remove( l_oLogic->get_name() );
+					}
+				else
+					kick_client( l_oClient, _( "Unknown command." ) );
+				}
 			}
+		}
+	catch ( HOpenSSLException& )
+		{
+		kick_client( l_oClient );
 		}
 	return ( 0 );
 	M_EPILOG
@@ -231,14 +238,18 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& a_oClient, char const* c
 	M_PROLOG
 	M_ASSERT( !! a_oClient );
 	int l_iFileDescriptor = a_oClient->get_file_descriptor();
-	a_oClient->write_until_eos( "kck:" );
-	a_oClient->write_until_eos( a_pcReason );
-	a_oClient->write_until_eos( "\n" );
+	if ( a_pcReason )
+		{
+		a_oClient->write_until_eos( "kck:" );
+		a_oClient->write_until_eos( a_pcReason );
+		a_oClient->write_until_eos( "\n" );
+		}
 	f_oSocket.shutdown_client( l_iFileDescriptor );
 	unregister_file_descriptor_handler( l_iFileDescriptor );
 	clients_t::HIterator clientIt = f_oClients.find( l_iFileDescriptor );
 	M_ASSERT( clientIt != f_oClients.end() );
-	cout << "client " <<  clientIt->second.f_oName << " was kicked because of: " << a_pcReason << endl;
+	cout << "client " <<  clientIt->second.f_oName
+		<< " was kicked because of: " << ( a_pcReason ? a_pcReason : "connection error" )<< endl;
 	if ( !! clientIt->second.f_oLogic )
 		{
 		HLogic::ptr_t l_oLogic = clientIt->second.f_oLogic;
