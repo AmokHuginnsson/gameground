@@ -229,8 +229,8 @@ bool HGalaxy::do_accept( OClientInfo* a_poClientInfo )
 					f_oSystems [ l_iCtr ].f_iCoordinateY );
 			a_poClientInfo->f_oSocket->write_until_eos ( l_oMessage );
 			}
-		f_oSystems [ l_iSysNo ].f_iProduction = 10;
-		f_oSystems [ l_iSysNo ].f_iFleet = 10;
+		f_oSystems[ l_iSysNo ].f_iProduction = 10;
+		f_oSystems[ l_iSysNo ].f_iFleet = 10;
 		l_oMessage.format ( "GLX:PLAY:system_info=%c,%d,%d,%d,%d\n",
 				'c', l_iSysNo, f_oSystems [ l_iSysNo ].f_iProduction, l_iColor,
 				f_oSystems [ l_iSysNo ].f_iFleet );
@@ -253,8 +253,6 @@ int HGalaxy::assign_system( OClientInfo* a_poClientInfo )
 	{
 	M_PROLOG
 	OEmperorInfo info;
-	HRandomizer l_oRnd;
-	l_oRnd.set ( time ( NULL ) );
 	typedef HSet<int> integer_set_t;
 	integer_set_t l_oUsed;
 	for ( emperors_t::HIterator it = f_oEmperors.begin(); it != f_oEmperors.end(); ++ it )
@@ -266,13 +264,18 @@ int HGalaxy::assign_system( OClientInfo* a_poClientInfo )
 	info.f_iColor = l_iCtr;
 	info.f_iSystems = 1;
 	int l_iRivals = f_oEmperors.size();
+	HRandomizer l_oRnd;
+	randomizer_helper::init_randomizer_from_time( l_oRnd );
+	int l_iMotherSystem = l_oRnd.rnd( f_iEmperors + f_iSystems - l_iRivals );
 	f_oEmperors[ a_poClientInfo ] = info;
-	int l_iMotherSystem = l_oRnd.rnd ( f_iEmperors + f_iSystems - l_iRivals );
 	l_iCtr = 0;
 	for ( int i = 0; i < l_iMotherSystem; ++ i, ++ l_iCtr )
-		if ( f_oSystems[ l_iCtr ].f_poEmperor != NULL )
+		while ( f_oSystems[ l_iCtr ].f_poEmperor != NULL )
 			++ l_iCtr;
-	f_oSystems [ l_iCtr ].f_poEmperor = a_poClientInfo;
+	while ( f_oSystems[ l_iCtr ].f_poEmperor != NULL )
+		++ l_iCtr;
+	M_ASSERT( ! f_oSystems[ l_iCtr ].f_poEmperor );
+	f_oSystems[ l_iCtr ].f_poEmperor = a_poClientInfo;
 	return ( l_iCtr );
 	M_EPILOG
 	}

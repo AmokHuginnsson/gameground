@@ -1102,6 +1102,7 @@ void HClient::handler_error( HString& a_roMessage )
 	{
 	M_PROLOG
 	hcore::log << "error: " << a_roMessage << endl;
+	f_bLoop = false;
 	return;
 	M_EPILOG
 	}
