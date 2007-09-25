@@ -101,7 +101,7 @@ void HServer::pass_command( OClientInfo& a_roInfo, HString const& a_oCommand )
 	{
 	M_PROLOG
 	if ( ! a_roInfo.f_oLogic )
-		a_roInfo.f_oSocket->write_until_eos( "err:Connect to some game first." );
+		a_roInfo.f_oSocket->write_until_eos( "err:Connect to some game first.\n" );
 	else
 		a_roInfo.f_oLogic->process_command( &a_roInfo, a_oCommand );
 	return;
@@ -213,9 +213,10 @@ int HServer::handler_message( int a_iFileDescriptor )
 			handlers_t::HIterator it = f_oHandlers.find( l_oCommand );
 			if ( it != f_oHandlers.end() )
 				{
+				HLogic::ptr_t l_oLogic = clientIt->second.f_oLogic;
 				( this->*it->second )( clientIt->second, l_oArgument );
-				if ( ( !! clientIt->second.f_oLogic ) && ( ! clientIt->second.f_oLogic->active_clients() ) )
-					f_oLogics.remove( clientIt->second.f_oLogic->get_name() );
+				if ( ( !! l_oLogic ) && ( ! l_oLogic->active_clients() ) )
+					f_oLogics.remove( l_oLogic->get_name() );
 				}
 			else
 				kick_client( l_oClient, _( "Unknown command." ) );
@@ -280,7 +281,7 @@ void HServer::handler_shutdown( OClientInfo&, HString const& )
 
 void HServer::handler_quit( OClientInfo& a_roInfo, HString const& )
 	{
-	kick_client( a_roInfo.f_oSocket, "bye\n" );
+	kick_client( a_roInfo.f_oSocket, "bye" );
 	return;
 	}
 

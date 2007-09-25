@@ -70,7 +70,7 @@ void HSystem::do_round( HGalaxy& a_roGalaxy )
 			it->f_iArrivalTime --;
 			if ( it->f_iArrivalTime <= 0 )
 				{
-				l_iColor = a_roGalaxy.get_color( f_poEmperor );
+				l_iColor = f_poEmperor ? a_roGalaxy.get_color( f_poEmperor ) : 0;
 				if ( it->f_poEmperor == f_poEmperor ) /* reinforcements */
 					{
 					f_iFleet += it->f_iSize;
@@ -85,9 +85,10 @@ void HSystem::do_round( HGalaxy& a_roGalaxy )
 					l_oMessage.format ( "GLX:PLAY:system_info=%c,%d,%d,%d,%d\n",
 							's', f_iId, f_iProduction,
 							l_iColor, f_iFleet );
-					f_poEmperor->f_oSocket->write_until_eos ( l_oMessage ); /* defender */
+					if ( f_poEmperor )
+						f_poEmperor->f_oSocket->write_until_eos ( l_oMessage ); /* defender */
 					l_oMessage.format ( "GLX:PLAY:system_info=%c,%d,%d,%d,%d\n",
-							'f', f_iId, f_iProduction, a_roGalaxy.get_color ( f_poEmperor ), - 1 );
+							'f', f_iId, f_iProduction, f_poEmperor ? a_roGalaxy.get_color ( f_poEmperor ) : 0, - 1 );
 					it->f_poEmperor->f_oSocket->write_until_eos ( l_oMessage ); /* attacker */
 					}
 				else if ( it->f_iSize > f_iFleet )
@@ -96,7 +97,8 @@ void HSystem::do_round( HGalaxy& a_roGalaxy )
 					l_iColor = a_roGalaxy.get_color ( it->f_poEmperor );
 					l_oMessage.format ( "GLX:PLAY:system_info=%c,%d,%d,%d,%d\n",
 							'd', f_iId, f_iProduction, l_iColor, - 1 );
-					f_poEmperor->f_oSocket->write_until_eos ( l_oMessage ); /* loser */
+					if ( f_poEmperor )
+						f_poEmperor->f_oSocket->write_until_eos ( l_oMessage ); /* loser */
 					f_poEmperor = it->f_poEmperor;
 					l_oMessage.format ( "GLX:PLAY:system_info=%c,%d,%d,%d,%d\n",
 							'c', f_iId, f_iProduction, l_iColor, f_iFleet );
@@ -119,7 +121,8 @@ void HSystem::do_round( HGalaxy& a_roGalaxy )
 				'i', f_iId, - 1, a_roGalaxy.get_color ( f_poEmperor ), f_iFleet );
 		f_poEmperor->f_oSocket->write_until_eos ( l_oMessage );
 		}
-	a_roGalaxy.mark_alive( f_poEmperor );
+	if ( f_poEmperor )
+		a_roGalaxy.mark_alive( f_poEmperor );
 	return;
 	M_EPILOG
 	}
@@ -177,8 +180,11 @@ void HGalaxy::process_command( OClientInfo* a_poClientInfo, HString const& a_roC
 	HString l_oMnemonic;
 	HString l_oArgument;
 	handler_t HANDLER;
-	l_oMnemonic = a_roCommand.split ( ":", 0 );
-	l_oArgument = a_roCommand.mid ( l_oMnemonic.get_length ( ) + 1 );
+	l_oArgument = a_roCommand;
+	while ( ( l_oMnemonic = l_oArgument.split( ":", 0 ) ) == "GLX" )
+		l_oArgument = l_oArgument.mid( l_oMnemonic.get_length() + 1 );
+	l_oMnemonic = l_oArgument.split ( ":", 0 );
+	l_oArgument = l_oArgument.mid ( l_oMnemonic.get_length ( ) + 1 );
 	if ( f_oHandlers.get ( l_oMnemonic, HANDLER ) )
 		( this->*HANDLER ) ( a_poClientInfo, l_oArgument );
 	else
@@ -334,8 +340,8 @@ void HGalaxy::handler_play ( OClientInfo* a_poClientInfo, HString const& a_roCom
 			l_iDY = ( l_iDY >= 0 ) ? l_iDY : - l_iDY;
 			l_iDX = ( ( f_iBoardSize - l_iDX ) < l_iDX ) ? f_iBoardSize - l_iDX : l_iDX;
 			l_iDY = ( ( f_iBoardSize - l_iDY ) < l_iDY ) ? f_iBoardSize - l_iDY : l_iDY;
-			l_oFleet.f_iArrivalTime = static_cast < int > ( sqrt ( l_iDX * l_iDX + l_iDY * l_iDY ) + 0.5 );
-			f_oSystems [ l_iDestination ].f_oAttackers.add_head ( ) = l_oFleet;
+			l_oFleet.f_iArrivalTime = static_cast<int>( ::sqrt( l_iDX * l_iDX + l_iDY * l_iDY ) + 0.5 );
+			f_oSystems[ l_iDestination ].f_oAttackers.add_head() = l_oFleet;
 			}
 		}
 	else if ( l_oVariable == "end_round" )
@@ -344,6 +350,8 @@ void HGalaxy::handler_play ( OClientInfo* a_poClientInfo, HString const& a_roCom
 		M_ASSERT( l_poInfo );
 		if ( l_poInfo->f_iSystems >= 0 )
 			f_iReady ++;
+		cout << "emperors: " << f_iEmperors << endl;
+		cout << "ready: " << f_iReady << endl;
 		if ( f_iReady >= f_iEmperors )
 			{
 			f_iReady = 0;
