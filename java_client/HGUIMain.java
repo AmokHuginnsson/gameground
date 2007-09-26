@@ -91,7 +91,7 @@ class HGUIMain extends JPanel implements ActionListener, KeyListener {
 		super();
 		_widgets = new HWidgets();
 		HImages images = new HImages();
-		_widgets.insert( new InputStreamReader( getClass().getResourceAsStream( "res/galaxy.xml" ) ), this );
+		_widgets.insert( new InputStreamReader( getClass().getResourceAsStream( "res/gameground.xml" ) ), this );
 		_widgets._board.setImages( images );
 		String serverAddress = "";
 		try {

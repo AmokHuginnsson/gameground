@@ -1,4 +1,4 @@
-all: galaxy.jar
+all: gameground.jar
 
 *.class: *.java
 	javac -Xlint -cp jdom.jar:swixml.jar *.java
@@ -6,22 +6,22 @@ all: galaxy.jar
 build_dir:
 	mkdir -p build
 
-galaxy.jar: build_dir *.class res/galaxy.xml res/*.xpm
+gameground.jar: build_dir *.class res/gameground.xml res/*.xpm
 	cd build; \
 	/bin/rm -rf *; \
 	jar xf ../jdom.jar; \
 	jar xf ../swixml.jar; \
 	cp -a ../*.class ../res .; \
-	jar cf galaxy.jar res org *.class;
+	jar cf gameground.jar res org *.class;
 
-run: galaxy.jar
-	java -Djava.security.manager -Djava.security.policy=galaxy.policy -cp build/galaxy.jar Galaxy
+run: gameground.jar
+	java -Djava.security.manager -Djava.security.policy=gameground.policy -cp build/gameground.jar Galaxy
 
 dist:
 	$(MAKE)
-	@mv build/galaxy.jar galaxy.jar.keep
+	@mv build/gameground.jar gameground.jar.keep
 	@$(MAKE) clean
-	@mv galaxy.jar.keep galaxy.jar
+	@mv gameground.jar.keep gameground.jar
 
 clean:
 	cln .
