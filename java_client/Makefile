@@ -15,7 +15,7 @@ gameground.jar: build_dir *.class res/gameground.xml res/*.xpm
 	jar cf gameground.jar res org *.class;
 
 run: gameground.jar
-	java -Djava.security.manager -Djava.security.policy=gameground.policy -cp build/gameground.jar Galaxy
+	java -Djava.security.manager -Djava.security.policy=gameground.policy -cp build/gameground.jar GameGround
 
 dist:
 	$(MAKE)

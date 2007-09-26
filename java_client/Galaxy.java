@@ -3,7 +3,7 @@ import java.awt.event.WindowEvent;
 import javax.swing.JApplet;
 import javax.swing.JFrame;
 
-public class /* Application or applet name: */ Galaxy extends JApplet {
+public class /* Application or applet name: */ GameGround extends JApplet {
 	public static final long serialVersionUID = 13l;
 	private static JFrame _frame;
 
@@ -19,7 +19,7 @@ public class /* Application or applet name: */ Galaxy extends JApplet {
 
 	static public void main( String $argv[] ) {
 		_frame = new JFrame();
-		JApplet applet = new Galaxy();
+		JApplet applet = new GameGround();
 		_frame.add( applet );
 		applet.init();
 		applet.start();

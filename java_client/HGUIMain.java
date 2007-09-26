@@ -87,7 +87,7 @@ class HGUIMain extends JPanel implements ActionListener, KeyListener {
 	public HWidgets _widgets;
 	DefaultStyledDocument _log;
 //--------------------------------------------//
-	public HGUIMain( Galaxy $applet ) throws Exception {
+	public HGUIMain( GameGround $applet ) throws Exception {
 		super();
 		_widgets = new HWidgets();
 		HImages images = new HImages();
@@ -113,7 +113,7 @@ class HGUIMain extends JPanel implements ActionListener, KeyListener {
 		_widgets._arrival.setText( String.valueOf( _client._round ) );
 		switch ( $state ) {
 			case LOCKED:
-				_widgets._tips.setText( "A waiting for Galaxy events ..." );
+				_widgets._tips.setText( "A waiting for GameGround events ..." );
 				break;
 			case NORMAL:
 				_widgets._tips.setText( "Make Your imperial fleet moves ..." );
@@ -221,8 +221,8 @@ class HGUIMain extends JPanel implements ActionListener, KeyListener {
 			_client.start();
 		} catch ( Exception e ) {
 			JOptionPane.showMessageDialog( this,
-					"Galaxy client was unable to connect to server:\n" + e.getMessage(),
-					"Galaxy - error ...", JOptionPane.ERROR_MESSAGE );
+					"GameGround client was unable to connect to server:\n" + e.getMessage(),
+					"GameGround - error ...", JOptionPane.ERROR_MESSAGE );
 			return;
 		}
 		_widgets._setup.setVisible( false );
@@ -260,7 +260,7 @@ class HGUIMain extends JPanel implements ActionListener, KeyListener {
 		if( errors.compareTo( "" ) != 0 ) {
 			JOptionPane.showMessageDialog( this,
 					"Your setup contains following errors:\n" + errors,
-					"Galaxy - error ...", JOptionPane.ERROR_MESSAGE );
+					"GameGround - error ...", JOptionPane.ERROR_MESSAGE );
 		} else {
 			initBoard( emperor, server, port );
 		}

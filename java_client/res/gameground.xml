@@ -4,17 +4,20 @@
 <!ENTITY v_height "700">
 <!ENTITY v_port "7777">
 <!ENTITY v_bar_height "30">
-<!--ENTITY border "MatteBorder(2,2,2,2,red)" -->
+<!ENTITY v_login_screen_width "600">
+<!ENTITY v_title_height "90">
+<!ENTITY v_pad "30">
+<!--ENTITY border "MatteBorder(2,2,2,2,red)"-->
 <!ENTITY border "EmptyBorder(2,2,2,2,red)">
 ]>
 <applet background="black">
 	<panel id="_setup" layout="FlowLayout" preferredsize="&v_width;,&v_height;" focuscycleroot="true"><!--{{{-->
 		<vbox>
-			<glue preferredsize="0,30" border="&border;" />
-			<panel bounds="0,0,&v_width;,90">
-				<label font="-BOLDITALIC-70" foreground="blue">Galaxy</label>
+			<glue preferredsize="&v_login_screen_width;,&v_pad;" border="&border;" />
+			<panel preferredsize="&v_login_screen_width;,&v_title_height;" border="&border;">
+				<label font="-BOLDITALIC-70" foreground="blue" layout="box" horizontalalignment="CENTER" preferredsize="&v_login_screen_width;,&v_title_height;" border="&border;">Game Ground</label>
 			</panel>
-			<glue preferredsize="0,30" border="&border;" />
+			<glue preferredsize="0,&v_pad;" border="&border;" />
 			<panel bounds="0,100,&v_width;,60" layout="GridBagLayout">
 				<label labelfor="_name">
 					<gridbagconstraints gridx="0" gridy="0" ipadx="10" anchor="GridBagConstraints.WEST" />
@@ -38,7 +41,7 @@
 					<gridbagconstraints gridx="1" gridy="2" anchor="GridBagConstraints.WEST" />
 				</textfield>
 			</panel>
-			<glue preferredsize="0,30" border="&border;" />
+			<glue preferredsize="0,&v_pad;" border="&border;" />
 			<panel bounds="0,200,&v_width;,50">
 				<button id="_connect" text="Connect !" action="submit" tooltiptext="Click me to start the game." />
 			</panel>
