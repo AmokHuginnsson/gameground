@@ -6,7 +6,7 @@
 <!ENTITY v_bar_height "30">
 ]>
 <applet background="black">
-	<panel id="_setup" layout="BoxLayout" preferredsize="&v_width;,&v_height;" focuscycleroot="true"><!--{{{-->
+	<panel id="_setup" layout="null" preferredsize="&v_width;,&v_height;" focuscycleroot="true"><!--{{{-->
 		<panel bounds="0,0,&v_width;,90">
 			<label font="-BOLDITALIC-70" foreground="blue">Galaxy</label>
 		</panel>
