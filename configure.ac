@@ -1,9 +1,9 @@
-dnl configure.ac is integral part of galaxy project.
+dnl configure.ac is integral part of gameground project.
 
 dnl Initialization data.
-AC_INIT([[galaxy]],[[0.0.0]],[[amok@frihet.ath.cx]])
+AC_INIT([[gameground]],[[0.0.0]],[[amok@frihet.ath.cx]])
 
-AC_MSG_RESULT([--- Welcome to galaxy configurator ---                   [[0%]]])
+AC_MSG_RESULT([--- Welcome to gameground configurator ---                   [[0%]]])
 AC_MSG_RESULT([--- Initialization ... ---                               [[6%]]])
 
 dnl Unique file in project: galaxyrc is sample configuration file.
@@ -11,10 +11,10 @@ AC_MSG_RESULT([--- Finding base directory ... ---                      [[12%]]])
 AC_CONFIG_SRCDIR([[galaxyrc]])
 AC_CONFIG_AUX_DIR([../yaal/aux])
 
-dnl galaxy is not Free Software.
-AC_COPYRIGHT([[galaxy (c) 2003 All rights reserved.]])
+dnl gameground is not Free Software.
+AC_COPYRIGHT([[gameground (c) 2003 All rights reserved.]])
 
-dnl galaxy is still in alpha stage.
+dnl gameground is still in alpha stage.
 AC_REVISION([[$ Revision: 0.0.0 $]])
 
 dnl We select default language.
@@ -57,7 +57,7 @@ dnl Looking for main libc headers
 AC_MSG_RESULT([--- Looking for main libc headers ... ---               [[41%]]])
 AC_HEADER_MAJOR
 
-dnl We need to know what operating system galaxy will be compiled on.
+dnl We need to know what operating system gameground will be compiled on.
 AC_MSG_RESULT([--- Guessing host operating system ... ---              [[64%]]])
 AC_CHECK_FILE(
 	[[/etc/rc]],
