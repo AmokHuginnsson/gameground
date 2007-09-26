@@ -1,7 +1,7 @@
-# .galaxyrc is an `galaxy' 0.0.0 configuration file,
+# .galaxyrc is an `gameground' 0.0.0 configuration file,
 # this file ought to be in /etc/ and/or your home dirctory.
 
-log_path x_galaxy.log
+log_path x_gameground.log
 port 7777
 emperors 4
 systems 16

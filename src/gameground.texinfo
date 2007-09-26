@@ -1,6 +1,6 @@
 \input texinfo @c -*-texinfo-*-
 @c %**start of header
-@setfilename galaxy.info
+@setfilename gameground.info
 @settitle does very much of very many different usefull things ... really.
 @finalout
 @setchapternewpage odd
@@ -9,7 +9,7 @@
 @set VERSION 0.1.0
 
 @ifinfo
-This file documents the @code{galaxy} command which does very much of very many different usefull things ... really.
+This file documents the @code{gameground} command which does very much of very many different usefull things ... really.
 
 Copyright (C) 1978 Amok Berserker
 
@@ -32,9 +32,9 @@ by the Foundation.
 @end ifinfo
 
 @titlepage
-@title galaxy
+@title gameground
 @subtitle does very much of very many different usefull things ... really.
-@subtitle for galaxy Version @value{VERSION}
+@subtitle for gameground Version @value{VERSION}
 @author by Amok Berserker
 
 @page
@@ -56,17 +56,17 @@ by the Foundation.
 @node Top, Instructions, (dir), (dir)
 
 @ifinfo
-This file documents the @code{galaxy} command to does very much of very many different usefull things ... really..
+This file documents the @code{gameground} command to does very much of very many different usefull things ... really..
 @end ifinfo
 
 @c All the menus can be updated with the EMACS command
 @c texinfo-all-menus-update, which is normally bound to C-c C-u C-a.
 @menu
 * Instructions::                How to read this manual. 
-* Copying::                     How you can copy and share @code{galaxy}.
+* Copying::                     How you can copy and share @code{gameground}.
 * Overview::                    Preliminary information.
-* Sample::                      Sample output from @code{galaxy}.
-* Invoking galaxy::                How to run @code{galaxy}.
+* Sample::                      Sample output from @code{gameground}.
+* Invoking gameground::                How to run @code{gameground}.
 * Problems::                    Reporting bugs.
 * Concept Index::               Index of concepts.
 @end menu
@@ -116,35 +116,35 @@ Copyright:
 @cindex greetings
 @cindex overview
 
-The @code{galaxy} program produces a familiar, friendly greeting.
+The @code{gameground} program produces a familiar, friendly greeting.
 It allows nonprogrammers to use a classic computer science tool which
 would otherwise be unavailable to them. 
 
-@code{galaxy} was written by Amok Berserker.
+@code{gameground} was written by Amok Berserker.
 
-@node Sample, Invoking galaxy, Overview, Top
+@node Sample, Invoking gameground, Overview, Top
 @chapter Sample Output
 @cindex sample
 
-Here are some realistic examples of running @code{galaxy}.
+Here are some realistic examples of running @code{gameground}.
 
-This is the output of the command @samp{galaxy}:
+This is the output of the command @samp{gameground}:
 
 @example
 hello, world!
 @end example
 
-This is the output of the command @samp{galaxy --help}:
+This is the output of the command @samp{gameground --help}:
 
 @example
 does very much of very many different usefull things ... really.
-Usage: galaxy [options]
+Usage: gameground [options]
   -h, --help                    Print a summary of the options
   -v, --version                 Print the version number
 @end example
 
-@node Invoking galaxy, Problems, Sample, Top
-@chapter Invoking @code{galaxy}
+@node Invoking gameground, Problems, Sample, Top
+@chapter Invoking @code{gameground}
 @cindex invoking
 @cindex version
 @cindex options
@@ -152,13 +152,13 @@ Usage: galaxy [options]
 @cindex help
 @cindex getting help
 
-The format for running the @code{galaxy} program is:
+The format for running the @code{gameground} program is:
 
 @example
-galaxy @var{option} @dots{}
+gameground @var{option} @dots{}
 @end example
 
-@code{galaxy} supports the following options:
+@code{gameground} supports the following options:
 
 @table @samp
 @item --quiet
@@ -175,22 +175,22 @@ Print an informative help message describing the options and then exit.
 
 @item --version
 @itemx -v
-Print the version number of @code{galaxy} on the standard error output
+Print the version number of @code{gameground} on the standard error output
 and then exit.
 @end table
 
-@node Problems, Concept Index, Invoking galaxy, Top
+@node Problems, Concept Index, Invoking gameground, Top
 @chapter Reporting Bugs
 @cindex bugs
 @cindex problems
 
-If you find a bug in @code{galaxy}, please send electronic mail to
+If you find a bug in @code{gameground}, please send electronic mail to
 @w{@samp{amok@@frihet.ath.cx}}.  Include the version number, which you can
-find by running @w{@samp{galaxy --version}}.  Also include in your message the
+find by running @w{@samp{gameground --version}}.  Also include in your message the
 output that the program produced and the output you expected.@refill
 
 If you have other questions, comments or suggestions about
-@code{galaxy}, contact the author via electronic mail to
+@code{gameground}, contact the author via electronic mail to
 @w{@samp{amok@@frihet.ath.cx}}.  The author will try to help you out, although
 he may not have time to fix your problems.
 

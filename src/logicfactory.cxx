@@ -1,7 +1,7 @@
 /*
----           `galaxy' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski            ---
+---           `gameground' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski            ---
 
-	logicfactory.cxx - this file is integral part of `galaxy' project.
+	logicfactory.cxx - this file is integral part of `gameground' project.
 
 	i.  You may not make any changes in Copyright information.
 	ii. You must attach Copyright information to any part of every copy

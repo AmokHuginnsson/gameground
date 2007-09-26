@@ -1,10 +1,10 @@
 Begin3
-Title:		`galaxy'
+Title:		`gameground'
 Version:	@VERSION@
 Entered-date:	@ISODATE@
 Description:	does very much of very many different usefull things ... really.
 		@configure_input@
-		Please edit `galaxy'.lsm.in to fix the Keywords and
+		Please edit `gameground'.lsm.in to fix the Keywords and
 		Primary-site entries, add several more lines of
 		description here if appropriate, and to delete these
 		instructions.
@@ -12,8 +12,8 @@ Keywords:	[substitute your keywords here]
 Author: 	amok@utgard (Amok Berserker)
 Maintained-by:	amok@utgard (Amok Berserker)
 Primary-site:	metlab.unc.edu pub/Linux/apps/some/directory
-		31k `galaxy'-@VERSION@.tar.gz
-		500  `galaxy'.lsm
+		31k `gameground'-@VERSION@.tar.gz
+		500  `gameground'.lsm
 Alternate-site: 
 Original-site:  
 Platforms:      

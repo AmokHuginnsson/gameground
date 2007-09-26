@@ -3,12 +3,12 @@ dnl configure.ac is integral part of gameground project.
 dnl Initialization data.
 AC_INIT([[gameground]],[[0.0.0]],[[amok@frihet.ath.cx]])
 
-AC_MSG_RESULT([--- Welcome to gameground configurator ---                   [[0%]]])
+AC_MSG_RESULT([--- Welcome to gameground configurator ---               [[0%]]])
 AC_MSG_RESULT([--- Initialization ... ---                               [[6%]]])
 
-dnl Unique file in project: galaxyrc is sample configuration file.
+dnl Unique file in project: gamegroundrc is sample configuration file.
 AC_MSG_RESULT([--- Finding base directory ... ---                      [[12%]]])
-AC_CONFIG_SRCDIR([[galaxyrc]])
+AC_CONFIG_SRCDIR([[gamegroundrc]])
 AC_CONFIG_AUX_DIR([../yaal/aux])
 
 dnl gameground is not Free Software.

@@ -1,7 +1,7 @@
 /*
----             `galaxy' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski              ---
+---             `gameground' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski              ---
 
-	cli_options.cxx - this file is integral part of `galaxy' project.
+	cli_options.cxx - this file is integral part of `gameground' project.
 
 	i.  You may not make any changes in Copyright information.
 	ii. You must attach Copyright information to any part of every copy
@@ -99,7 +99,7 @@ void usage ( void )
 void version( void ) __attribute__ ( ( __noreturn__ ) );
 void version( void )
 	{
-	printf ( "`galaxy' %s\n", VER );
+	printf ( "`gameground' %s\n", VER );
 	throw ( 0 );
 	}
 

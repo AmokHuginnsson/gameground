@@ -1,7 +1,7 @@
 /*
----       `galaxy' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski         ---
+---       `gameground' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski         ---
 
-	rc_options.cxx - this file is integral part of `galaxy' project.
+	rc_options.cxx - this file is integral part of `gameground' project.
 
 	i.  You may not make any changes in Copyright information.
 	ii. You must attach Copyright information to any part of every copy
@@ -56,9 +56,9 @@ int process_galaxyrc_file ( void )
 			{ D_INT,			"board",		& setup.f_iBoardSize },
 			{ D_VOID, NULL, NULL }
 		};
-	rc_file::process_rc_file ( "galaxy", NULL, l_psVars, NULL );
+	rc_file::process_rc_file ( "gameground", NULL, l_psVars, NULL );
 	if ( ! setup.f_oLogPath )
-		setup.f_oLogPath = "galaxy.log";
+		setup.f_oLogPath = "gameground.log";
 	return ( 0 );
 	}
 

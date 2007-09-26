@@ -1,4 +1,4 @@
-%define name	`galaxy'
+%define name	`gameground'
 %define version @VERSION@
 %define release 1
 %define builddir $RPM_BUILD_DIR/%{name}-%{version}
@@ -27,7 +27,7 @@ Summary:		does very much of very many different usefull things ... really.
 %description
 connect ...
 @configure_input@
-Please edit `galaxy'.spec.in to add several more lines of description
+Please edit `gameground'.spec.in to add several more lines of description
 here if appropriate, and to delete these instructions.
 
 %prep
