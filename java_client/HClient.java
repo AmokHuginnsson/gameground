@@ -13,93 +13,13 @@ class HClient extends Thread {
 //--------------------------------------------//
 	boolean _loop;
 	HLogic _logic;
-	int _color;
-	int _systemCount;
-	int _round;
 	SortedMap<String,Method> _handlers;
 	HashMap<Integer,String> _emperors;
-	String _emperor;
+	String _name;
 	BufferedReader _in;
 	PrintWriter _out;
 	Socket _socket;
 	HSystem[] _systems;
-	HGUIMain _gui;
-	private String[] _systemNamesLatin = {
-		"Aldebaran",
-		"Betelgeuse",
-		"Canis Major",
-		"Deneb",
-		"Eridanus",
-		"Fomalhaut",
-		"Gemini",
-		"Hydra",
-		"Izar",
-		"Jabhat al Akrab",
-		"Kochab",
-		"Lupus",
-		"Monoceros",
-		"Norma",
-		"Orion",
-		"Procyon",
-		"Quantum",
-		"Reticulum",
-		"Sirius",
-		"Taurus",
-		"Ursa Minor",
-		"Vega",
-		"Warrior",
-		"Xerkses",
-		"Yarn",
-		"Zubenelgenubi",
-		"Primum",
-		"Secundum",
-		"Tertium",
-		"Quartum",
-		"Quintum",
-		"Sextum",
-		"Septimum",
-		"Octavum",
-		"Nonum",
-		"Decimum"
-	};
-	private String[] _systemNamesNorse = {
-		"Aegir",
-		"Balder",
-		"C-Frey",
-		"D-Tyr",
-		"E-Frigg",
-		"Freya",
-		"Gullveig",
-		"Hel",
-		"Idun",
-		"Jord",
-		"Kvasir",
-		"Loki",
-		"Magni",
-		"Njord",
-		"Odin",
-		"P-Forseti",
-		"Q-Hod",
-		"Ran",
-		"Skadi",
-		"Thor",
-		"Ull",
-		"Ve",
-		"W-Vidar",
-		"X-Sif",
-		"Ymir",
-		"Z-Heimdall",
-		"Asgard",
-		"Vanaheim",
-		"Alfheim",
-		"Jotunheim",
-		"Hrimthursheim",
-		"Muspellheim",
-		"Midgard",
-		"Svartalfheim",
-		"Niflheim",
-		"Yggdrasil"
-	};
 	char[] _symbols = {
 		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
 		'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
@@ -107,147 +27,20 @@ class HClient extends Thread {
 	};
 	String[] _systemNames;
 //--------------------------------------------//
-	public HClient( HGUIMain $gui, String $emperor, String $server, int $port ) throws Exception {
-		_round = 0;
-		_systemCount = 0;
-		_gui = $gui;
-		_emperor = $emperor;
-		_handlers = java.util.Collections.synchronizedSortedMap( new TreeMap<String,Method>() );
-		_emperors = new HashMap<Integer,String>();
-		_handlers.put( "SETUP", HClient.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
-		_handlers.put( "PLAY", HClient.class.getDeclaredMethod( "handlerPlay", new Class[]{ String.class } ) );
-		_handlers.put( "MSG", HClient.class.getDeclaredMethod( "handlerMessage", new Class[]{ String.class } ) );
-		_socket = new Socket( $server, $port );
-		_out = new PrintWriter( _socket.getOutputStream(), true );
-		_in = new BufferedReader( new InputStreamReader( _socket.getInputStream() ) );
-		_out.println( "GLX:LOGIN:" + _emperor );
-		if ( ( java.util.Calendar.getInstance().get( java.util.Calendar.HOUR_OF_DAY ) % 2 ) == 1 )
-			_systemNames = _systemNamesNorse;
-		else
-			_systemNames = _systemNamesLatin;
-		_loop = true;
-	}
 	public static void registerLogic( HLogic $logic ) {
 		return;
 	}
-	void handlerSetup( String $command ) {
-		int index = - 1, coordX = - 1, coordY = - 1;
-		String variable;
-		String value = "";
-		String[] tokens = new String[3];
-		tokens = $command.split ( "=", 2 );
-		variable = tokens[0];
-		if ( java.lang.reflect.Array.getLength( tokens ) > 1 )
-			value = tokens[1];
-		try {
-			if ( variable.compareTo( "board_size" ) == 0 ) {
-				_gui._widgets._board.setSize( new Integer( value ).intValue() );
-			} else if ( variable.compareTo( "systems" ) == 0 ) {
-				if ( _systems != null )
-					_loop = false;
-				else {
-					_systems = new HSystem[_systemCount = new Integer( value ).intValue()];
-				}
-			} else if ( variable.compareTo( "system_coordinates" ) == 0 ) {
-				tokens = value.split( ",", 3 );
-				index = new Integer( tokens[0] ).intValue();
-				coordX = new Integer( tokens[1] ).intValue();
-				coordY = new Integer( tokens[2] ).intValue();
-				_systems[index] = new HSystem();
-				_systems[index]._coordinateX = coordX;
-				_systems[index]._coordinateY = coordY;
-				if ( index == ( _systemCount - 1 ) )
-					_gui._widgets._board.setSystems( _systems );
-			} else if ( variable.compareTo( "emperor" ) == 0 ) {
-				tokens = value.split( ",", 2 );
-				index = new Integer( tokens[0] ).intValue();
-				_emperors.put( index, tokens[1] );
-				if ( _emperors.get( index ).compareTo( _emperor ) == 0 )
-					_color = index;
-			} else if ( variable.compareTo( "ok" ) == 0 ) {
-				_gui.setState ( HGUIMain.State.NORMAL );
-				_gui._widgets._emperor.setForeground( _gui._widgets._colors[ _color ] );
-				_round = 0;
-			}
-		} catch ( NumberFormatException e ) {
-			e.printStackTrace();
-			System.exit( 1 );
-		}
+	public HClient() throws Exception {
+		_gui = $gui;
+		_handlers = java.util.Collections.synchronizedSortedMap( new TreeMap<String,Method>() );
+		_handlers.put( "MSG", HClient.class.getDeclaredMethod( "handlerMessage", new Class[]{ String.class } ) );
+		_loop = true;
 	}
-	void handlerPlay( String $command ) {
-		char event = 0;
-		int sysNo = - 1, color = 0, production = - 1;
-		String variable;
-		String value;
-		String[] tokens = new String[5];
-		tokens = $command.split ( "=", 2 );
-		variable = tokens[0];
-		value = tokens[1];
-		try {
-			if ( variable.compareTo( "system_info" ) == 0 ) {
-				event = value.charAt( 0 );
-				tokens = value.split ( ",", 5 );
-				sysNo = new Integer( tokens[1] ).intValue();
-				production = new Integer( tokens[2] ).intValue();
-				if ( production >= 0 )
-					_systems[ sysNo ]._production = production;
-				_systems[ sysNo ]._fleet = new Integer( tokens[4] ).intValue();
-				color = new Integer( tokens[3] ).intValue();
-				value = _emperors.get( color );
-				switch ( event ) {
-					case ( 'c' ): /* conquered */
-					case ( 'd' ): { /* defeted */
-						_gui.log( value, color );
-						_gui.log( " conquered ", HGUIMain.Colors.NORMAL );
-						int temp = _systems[ sysNo ]._color;
-						temp = ( temp >= 0 ) ? temp : HGUIMain.Colors.NORMAL;
-						_gui.log( _systemNames[ sysNo ], temp );
-						value = "(" + _symbols[ sysNo ] + ")";
-						_gui.log( value, temp );
-						_gui.log( ".\n", HGUIMain.Colors.NORMAL );
-						_systems[ sysNo ]._color = color;
-					} break;
-					case ( 'r' ): { /* reinforcements */
-						_gui.log( "Reinforcements for ", HGUIMain.Colors.NORMAL );
-						_gui.log( _systemNames[ sysNo ], color );
-						value = "(" + _symbols[ sysNo ] + ")";
-						_gui.log( value, color );
-						_gui.log( " arrived.\n", HGUIMain.Colors.NORMAL );
-					} break;
-					case ( 'f' ):
-					case ( 's' ): { /* resisted attack */
-						if ( event == 'f' ) { /* failed to conquer */
-							_systems[ sysNo ]._color = color;
-							color = _color;
-							value = _emperors.get( color );
-						}
-						int temp = _systems[ sysNo ]._color;
-						temp = ( temp >= 0 ) ? temp : HGUIMain.Colors.NORMAL;
-						_gui.log( _systemNames[ sysNo ], temp );
-						variable = "(" + _symbols[ sysNo ] + ")";
-						_gui.log( variable, temp );
-						_gui.log( " resisted attack from ", HGUIMain.Colors.NORMAL );
-						_gui.log( value, color );
-						_gui.log( ".\n", HGUIMain.Colors.NORMAL );
-					} break;
-					case ( 'i' ): /* info */
-					default :
-						break;
-				}
-			} else if ( variable.compareTo( "round" ) == 0 ) {
-				_gui.log( "----- ", HGUIMain.Colors.WHITE );
-				_gui.log( " round: ", HGUIMain.Colors.NORMAL );
-				_round = new Integer( value ).intValue();
-				_gui.log( value + " -----\n", HGUIMain.Colors.WHITE );
-				_gui.log( HGUIMain.Colors.NORMAL );
-				_gui.setState ( HGUIMain.State.NORMAL );
-				_gui._widgets._round.setText( value );
-				_gui._widgets._board.repaint();
-			}
-		} catch ( NumberFormatException e ) {
-			e.printStackTrace();
-			System.exit( 1 );
-		}
+	void connect( String $server, String $port ) {
+		_socket = new Socket( $server, $port );
+		_out = new PrintWriter( _socket.getOutputStream(), true );
+		_in = new BufferedReader( new InputStreamReader( _socket.getInputStream() ) );
+		_out.println( "name:" + _name );
 	}
 	void handlerMessage( String $message ) {
 		int index = 0, offset = 0;
