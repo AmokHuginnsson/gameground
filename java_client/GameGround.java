@@ -1,20 +1,55 @@
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.HashMap;
+import java.util.Collections;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.JApplet;
 import javax.swing.JFrame;
 
+class CallStack {
+	public static void print() {
+		System.out.println("Call Stack:");
+		StackTraceElement[] ste = (new Throwable()).getStackTrace();
+		for (int i=1;i<ste.length;i++){
+			System.out.println("Class: "+ste[i].getClassName());
+			System.out.println("Method: "+ste[i].getMethodName());
+			System.out.println("Line Number: "+ste[i].getLineNumber()+"\n");
+		}
+	}
+}
+
 public class /* Application or applet name: */ GameGround extends JApplet {
 	public static final long serialVersionUID = 13l;
 	private static JFrame _frame;
+	private static SortedMap<String,HAbstractLogic> _logics;
+	private static GameGround _instance;
 
 	public void init() {
 		try {
-			add( new HGUIMain( this ) );
-			setFocusable( true );
-			requestFocus();
+			setFace( "login" );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 		}
+	}
+
+	public static GameGround getInstance() {
+		return ( _instance );
+	}
+
+	public void setFace( String $face ) {
+		removeAll();
+		HAbstractLogic logic = _logics.get( $face );
+		if ( logic != null ) {
+			add( logic.getGUI() );
+			setFocusable( true );
+			requestFocus();
+		} else {
+			System.out.println( "No such logic." );
+			CallStack.print();
+			System.exit( 1 );
+		}
+		return;
 	}
 
 	static public void main( String $argv[] ) {

@@ -1,3 +1,4 @@
+import java.lang.reflect.Method;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.awt.event.ActionEvent;
@@ -6,20 +7,20 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.Container;
 import org.swixml.SwingEngine;
-import java.awt.Color;
 import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.StyleConstants;
 import javax.swing.text.Style;
-import javax.swing.text.SimpleAttributeSet; 
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.HashMap;
+import java.io.PrintWriter;
 
 class HSystemNames {
-	private String[] _systemNamesLatin = {
+	static private String[] _systemNamesLatin = {
 		"Aldebaran",
 		"Betelgeuse",
 		"Canis Major",
@@ -57,7 +58,7 @@ class HSystemNames {
 		"Nonum",
 		"Decimum"
 	};
-	private String[] _systemNamesNorse = {
+	static private String[] _systemNamesNorse = {
 		"Aegir",
 		"Balder",
 		"C-Frey",
@@ -95,6 +96,13 @@ class HSystemNames {
 		"Niflheim",
 		"Yggdrasil"
 	};
+	public final static int NORSE = 1;
+	public final static int LATIN = 2;
+	public static String[] getNames( int $set ) {
+		if ( $set == NORSE )
+			return ( _systemNamesNorse );
+		return ( _systemNamesLatin );
+	}
 }
 
 class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
@@ -104,11 +112,7 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		INPUT,
 		LOCKED
 	}
-	public static class Colors {
-		public static int NORMAL = 12;
-		public static int WHITE = 15;
-	}
-	public class HGUIface extends SwingEngine {
+	public class HGUILocal extends HGUIface {
 		/* This is one dirty hack.
 		 * To make it work you have to edit org/swixml/SwingEngine.java
 		 * and comment out all setAccessible() invocations.
@@ -127,39 +131,30 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		public HBoard _board;
 		public JTextPane _log;
 		public JTextPane _tips;
-		public Color[] _colors;
-		public SimpleAttributeSet _attribute;
-		public int _color;
-		public HGUIface() {
+		public HGUILocal() {
+			super();
 			super.getTaglib().registerTag( "hboard", HBoard.class );
-			_attribute = new SimpleAttributeSet();
-			_color = Colors.NORMAL;
-			_colors = new Color[ 16 ];
-			_colors[ 0 ] = new Color( 0x80, 0x80, 0xff ); /* bright blue */
-			_colors[ 1 ] = new Color( 0x80, 0xff, 0x80 ); /* bright green */
-			_colors[ 2 ] = new Color( 0xff, 0x80, 0x80 ); /* bright red */
-			_colors[ 3 ] = Color.cyan; /* bright cyan */
-			_colors[ 4 ] = Color.magenta; /* bright magenta */
-			_colors[ 5 ] = Color.yellow; /* yellow */
-			_colors[ 6 ] = Color.blue; /* blue */
-			_colors[ 7 ] = new Color( 0x00, 0xa0, 0x00 ); /* green */
-			_colors[ 8 ] = Color.red; /* red */
-			_colors[ 9 ] = new Color( 0x00, 0xa0, 0xa0 );; /* cyan */
-			_colors[ 10 ] = new Color( 0xa0, 0x00, 0xa0 ); /* magenta */
-			_colors[ 11 ] = new Color( 0xa0, 0xa0, 0x00 ); /* brown? */
-			_colors[ 12 ] = Color.lightGray;
-			_colors[ 13 ] = Color.gray;
-			_colors[ 14 ] = Color.darkGray;
-			_colors[ 15 ] = Color.white;
 		}
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
 	private State _state;
+	int _round;
+	int _color;
+	int _systemCount;
+	String[] _systemNames;
+	PrintWriter _out;
+	String _emperor;
+	HashMap<Integer,String> _emperors;
 	HClient _client;
 	java.util.List<HMove> _moves;
-	public HGUIface _gui;
-	DefaultStyledDocument _log;
+	HSystem[] _systems;
+ 	char[] _symbols = {
+		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+		'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+		'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'
+	};
+	public HGUILocal _gui;
 //--------------------------------------------//
 	public HGalaxy( String $emperor ) throws Exception {
 		_round = 0;
@@ -170,22 +165,18 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		_handlers.put( "SETUP", HClient.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
 		_handlers.put( "PLAY", HClient.class.getDeclaredMethod( "handlerPlay", new Class[]{ String.class } ) );
 		_handlers.put( "MSG", HClient.class.getDeclaredMethod( "handlerMessage", new Class[]{ String.class } ) );
-		_socket = new Socket( $server, $port );
-		_out = new PrintWriter( _socket.getOutputStream(), true );
-		_in = new BufferedReader( new InputStreamReader( _socket.getInputStream() ) );
 		_out.println( "GLX:LOGIN:" + _emperor );
 		if ( ( java.util.Calendar.getInstance().get( java.util.Calendar.HOUR_OF_DAY ) % 2 ) == 1 )
-			_systemNames = _systemNamesNorse;
+			_systemNames = HSystemNames.getNames( HSystemNames.NORSE );
 		else
-			_systemNames = _systemNamesLatin;
-		_loop = true;
+			_systemNames = HSystemNames.getNames( HSystemNames.LATIN );
 	}
 	public HGalaxy( GameGround $applet ) throws Exception {
 		super();
-		_gui = new HGUIface();
+		_gui = new HGUILocal();
 		HImages images = new HImages();
-		_widgets.insert( new InputStreamReader( getClass().getResourceAsStream( "res/gameground.xml" ) ), this );
-		_widgets._board.setImages( images );
+		_gui.insert( new InputStreamReader( getClass().getResourceAsStream( "res/gameground.xml" ) ), this );
+		_gui._board.setImages( images );
 		String serverAddress = "";
 		try {
 			serverAddress = $applet.getCodeBase().getHost();
@@ -194,9 +185,7 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 			if ( serverAddress.compareTo( "" ) == 0 )
 				serverAddress = "127.0.0.1";
 		}
-		_widgets._server.setText( serverAddress );
-		_widgets._connect.addActionListener( this );
-		_widgets._endRound.addActionListener( this );
+		_gui._endRound.addActionListener( this );
 		$applet.addGlobalKeyListener( $applet, this );
 		$applet.addGlobalKeyListener( this, this );
 		_state = State.LOCKED;
@@ -213,13 +202,12 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 			value = tokens[1];
 		try {
 			if ( variable.compareTo( "board_size" ) == 0 ) {
-				_gui._widgets._board.setSize( new Integer( value ).intValue() );
+				_gui._board.setSize( new Integer( value ).intValue() );
 			} else if ( variable.compareTo( "systems" ) == 0 ) {
-				if ( _systems != null )
-					_loop = false;
-				else {
+				if ( _systems != null ) {
+// FIXME					_loop = false;
+				} else
 					_systems = new HSystem[_systemCount = new Integer( value ).intValue()];
-				}
 			} else if ( variable.compareTo( "system_coordinates" ) == 0 ) {
 				tokens = value.split( ",", 3 );
 				index = new Integer( tokens[0] ).intValue();
@@ -229,7 +217,7 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 				_systems[index]._coordinateX = coordX;
 				_systems[index]._coordinateY = coordY;
 				if ( index == ( _systemCount - 1 ) )
-					_gui._widgets._board.setSystems( _systems );
+					_gui._board.setSystems( _systems );
 			} else if ( variable.compareTo( "emperor" ) == 0 ) {
 				tokens = value.split( ",", 2 );
 				index = new Integer( tokens[0] ).intValue();
@@ -237,8 +225,8 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 				if ( _emperors.get( index ).compareTo( _emperor ) == 0 )
 					_color = index;
 			} else if ( variable.compareTo( "ok" ) == 0 ) {
-				_gui.setState ( HGUIMain.State.NORMAL );
-				_gui._widgets._emperor.setForeground( _gui._widgets._colors[ _color ] );
+				setState ( State.NORMAL );
+				_gui._emperor.setForeground( _gui._colors[ _color ] );
 				_round = 0;
 			}
 		} catch ( NumberFormatException e ) {
@@ -270,21 +258,21 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 					case ( 'c' ): /* conquered */
 					case ( 'd' ): { /* defeted */
 						_gui.log( value, color );
-						_gui.log( " conquered ", HGUIMain.Colors.NORMAL );
+						_gui.log( " conquered ", HGUIface.Colors.NORMAL );
 						int temp = _systems[ sysNo ]._color;
-						temp = ( temp >= 0 ) ? temp : HGUIMain.Colors.NORMAL;
+						temp = ( temp >= 0 ) ? temp : HGUIface.Colors.NORMAL;
 						_gui.log( _systemNames[ sysNo ], temp );
 						value = "(" + _symbols[ sysNo ] + ")";
 						_gui.log( value, temp );
-						_gui.log( ".\n", HGUIMain.Colors.NORMAL );
+						_gui.log( ".\n", HGUIface.Colors.NORMAL );
 						_systems[ sysNo ]._color = color;
 					} break;
 					case ( 'r' ): { /* reinforcements */
-						_gui.log( "Reinforcements for ", HGUIMain.Colors.NORMAL );
+						_gui.log( "Reinforcements for ", HGUIface.Colors.NORMAL );
 						_gui.log( _systemNames[ sysNo ], color );
 						value = "(" + _symbols[ sysNo ] + ")";
 						_gui.log( value, color );
-						_gui.log( " arrived.\n", HGUIMain.Colors.NORMAL );
+						_gui.log( " arrived.\n", HGUIface.Colors.NORMAL );
 					} break;
 					case ( 'f' ):
 					case ( 's' ): { /* resisted attack */
@@ -294,27 +282,27 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 							value = _emperors.get( color );
 						}
 						int temp = _systems[ sysNo ]._color;
-						temp = ( temp >= 0 ) ? temp : HGUIMain.Colors.NORMAL;
+						temp = ( temp >= 0 ) ? temp : HGUIface.Colors.NORMAL;
 						_gui.log( _systemNames[ sysNo ], temp );
 						variable = "(" + _symbols[ sysNo ] + ")";
 						_gui.log( variable, temp );
-						_gui.log( " resisted attack from ", HGUIMain.Colors.NORMAL );
+						_gui.log( " resisted attack from ", HGUIface.Colors.NORMAL );
 						_gui.log( value, color );
-						_gui.log( ".\n", HGUIMain.Colors.NORMAL );
+						_gui.log( ".\n", HGUIface.Colors.NORMAL );
 					} break;
 					case ( 'i' ): /* info */
 					default :
 						break;
 				}
 			} else if ( variable.compareTo( "round" ) == 0 ) {
-				_gui.log( "----- ", HGUIMain.Colors.WHITE );
-				_gui.log( " round: ", HGUIMain.Colors.NORMAL );
+				_gui.log( "----- ", HGUIface.Colors.WHITE );
+				_gui.log( " round: ", HGUIface.Colors.NORMAL );
 				_round = new Integer( value ).intValue();
-				_gui.log( value + " -----\n", HGUIMain.Colors.WHITE );
-				_gui.log( HGUIMain.Colors.NORMAL );
-				_gui.setState ( HGUIMain.State.NORMAL );
-				_gui._widgets._round.setText( value );
-				_gui._widgets._board.repaint();
+				_gui.log( value + " -----\n", HGUIface.Colors.WHITE );
+				_gui.log( HGUIface.Colors.NORMAL );
+				setState ( State.NORMAL );
+				_gui._round.setText( value );
+				_gui._board.repaint();
 			}
 		} catch ( NumberFormatException e ) {
 			e.printStackTrace();
@@ -322,19 +310,19 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		}
 	}
 	void setState( State $state ) {
-		_widgets._arrival.setText( String.valueOf( _client._round ) );
+		_gui._arrival.setText( String.valueOf( _round ) );
 		switch ( $state ) {
 			case LOCKED:
-				_widgets._tips.setText( "A waiting for GameGround events ..." );
+				_gui._tips.setText( "A waiting for GameGround events ..." );
 				break;
 			case NORMAL:
-				_widgets._tips.setText( "Make Your imperial fleet moves ..." );
+				_gui._tips.setText( "Make Your imperial fleet moves ..." );
 				break;
 			case SELECT:
-				_widgets._tips.setText( "Select destination for Your fleet ..." );
+				_gui._tips.setText( "Select destination for Your fleet ..." );
 				break;
 			case INPUT:
-				_widgets._tips.setText( "How many destroyers You wish to send ?" );
+				_gui._tips.setText( "How many destroyers You wish to send ?" );
 				break;
 		}
 		_state = $state;
@@ -343,50 +331,50 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		return _state;
 	}
 	void cleanEdit() {
-		_widgets._fleet.setEditable( false );
-		_widgets._fleet.setText( "" );
-		_widgets._board.requestFocus();
+		_gui._fleet.setEditable( false );
+		_gui._fleet.setText( "" );
+		_gui._board.requestFocus();
 	}
 	public void keyTyped( KeyEvent $event ) {
-		if ( _widgets._board._systems != null ) {
+		if ( _gui._board._systems != null ) {
 			if ( $event.getKeyChar() == KeyEvent.VK_ENTER ) {
-				if ( _widgets._messageInput.isFocusOwner() ) {
-					String message = _widgets._messageInput.getText( );
+				if ( _gui._messageInput.isFocusOwner() ) {
+					String message = _gui._messageInput.getText( );
 					if ( message.matches( ".*\\S+.*" ) ) {	
 						_client._out.println( "GLX:SAY:" + message );
-						_widgets._messageInput.setText( "" );
+						_gui._messageInput.setText( "" );
 					}
 				} else {
 					if ( _state == State.INPUT ) {
 						int fleet = -1;
 						try {
-							fleet = new Integer( _widgets._fleet.getText() ).intValue();
+							fleet = new Integer( _gui._fleet.getText() ).intValue();
 						} catch ( NumberFormatException e ) {
 						} finally {
 							if ( fleet < 1 ) {
-								_widgets._tips.setText( "Run! Run! Emperor is mad ..." );
+								_gui._tips.setText( "Run! Run! Emperor is mad ..." );
 								return;
-							} else if ( fleet > _client._systems[ _widgets._board._sourceSystem ]._fleet ) {
-								_widgets._tips.setText( "Not enough resources!" );
+							} else if ( fleet > _systems[ _gui._board._sourceSystem ]._fleet ) {
+								_gui._tips.setText( "Not enough resources!" );
 								return;
 							}
 						}
 						HMove move = new HMove();
-						move._sourceSystem = _widgets._board._sourceSystem;
-						move._destinationSystem = _widgets._board._destinationSystem;
+						move._sourceSystem = _gui._board._sourceSystem;
+						move._destinationSystem = _gui._board._destinationSystem;
 						move._fleet = fleet;
-						_client._systems[ _widgets._board._sourceSystem ]._fleet -= fleet;
+						_systems[ _gui._board._sourceSystem ]._fleet -= fleet;
 						_moves.add( move );
 						cleanEdit();
 						setState( State.NORMAL );
 					}
 				}
 			} else if ( ( $event.getKeyChar() == KeyEvent.VK_SPACE )
-					&& ( ! _widgets._messageInput.isFocusOwner() ) ) {
-				_widgets._endRound.doClick();
+					&& ( ! _gui._messageInput.isFocusOwner() ) ) {
+				_gui._endRound.doClick();
 			} else if ( $event.getKeyChar() == KeyEvent.VK_ESCAPE ) {
-				if ( _widgets._messageInput.isFocusOwner() ) {
-					_widgets._board.requestFocus();
+				if ( _gui._messageInput.isFocusOwner() ) {
+					_gui._board.requestFocus();
 				} else {
 					if ( _state == State.INPUT ) {
 						cleanEdit();
@@ -402,47 +390,10 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 	}
 	public void keyReleased( KeyEvent $event ) {
 	}
-	void log( String $message, int $color ) {
-		try {
-			if ( $color > 15 )
-				$color = 15;
-			StyleConstants.setForeground( _widgets._attribute, _widgets._colors[ $color ] );
-			_log.insertString( _log.getLength(), $message, _widgets._attribute );
-			_widgets._log.setCaretPosition( _log.getLength() );
-		} catch ( javax.swing.text.BadLocationException e ) {
-			e.printStackTrace();
-		}
-	}
-	void log( String $message ) {
-		try {
-			StyleConstants.setForeground( _widgets._attribute, _widgets._colors[ _widgets._color ] );
-			_log.insertString( _log.getLength(), $message, _widgets._attribute );
-			_widgets._log.setCaretPosition( _log.getLength() );
-		} catch ( javax.swing.text.BadLocationException e ) {
-			e.printStackTrace();
-		}
-	}
-	void log( int $color ) {
-		if ( $color > 15 )
-			$color = 15;
-		_widgets._color = $color;
-	}
 	void initBoard( String $emperor, String $server, int $port ) {
-		try {
-			_client = new HClient( this, $emperor, $server, $port );
-			_client.start();
-		} catch ( Exception e ) {
-			JOptionPane.showMessageDialog( this,
-					"GameGround client was unable to connect to server:\n" + e.getMessage(),
-					"GameGround - error ...", JOptionPane.ERROR_MESSAGE );
-			return;
-		}
-		_widgets._setup.setVisible( false );
-		_widgets._setup = null;
-		_widgets._main.setVisible( true );
-		_widgets._emperor.setText( $emperor );
-		_widgets._board.setGui( this );
-		_log = ( DefaultStyledDocument )_widgets._log.getStyledDocument();
+		_main.setVisible( true );
+		_gui._emperor.setText( $emperor );
+		_gui._board.setGui( this );
 //		log( "##", 0 );log( " ##", 1 );log( " ##", 2 );log( " ##", 3 );log( " ##", 4 );log( " ##\n", 5 );
 //		log( "##", 6 );log( " ##", 7 );log( " ##", 8 );log( " ##", 9 );log( " ##", 10 );log( " ##\n", 11 );
 //		log( "##", 12 );log( " ##", 13 );log( " ##\n", 14 );
@@ -450,49 +401,33 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 			_client.notify();
 		}
 	}
-	void onConnectClick() {
-		String errors = "";
-		String emperor = "";
-		if ( _widgets._name.getText().compareTo( "" ) == 0 )
-			errors += "name not set\n";
-		else
-			emperor = new String( _widgets._name.getText() );
-		String server = "";
-		if ( _widgets._server.getText().compareTo( "" ) == 0 )
-			errors += "server not set\n";
-		else
-			server = new String( _widgets._server.getText() );
-		int port = -1;
-		try {
-			port = new Integer( _widgets._port.getText() ).intValue();
-		} catch ( NumberFormatException e ) {
-		}
-		if ( port <= 1024 )
-			errors += "invalid port number (must be over 1024)";
-		if( errors.compareTo( "" ) != 0 ) {
-			JOptionPane.showMessageDialog( this,
-					"Your setup contains following errors:\n" + errors,
-					"GameGround - error ...", JOptionPane.ERROR_MESSAGE );
-		} else {
-			initBoard( emperor, server, port );
-		}
-	}
 	void onEndRound() {
-		_widgets._board.requestFocus();
+		_gui._board.requestFocus();
 		if ( _state == State.INPUT )
-			keyTyped( new KeyEvent( _widgets._fleet, KeyEvent.KEY_TYPED,
+			keyTyped( new KeyEvent( _gui._fleet, KeyEvent.KEY_TYPED,
 						(long)0, 0, KeyEvent.VK_UNDEFINED, (char)KeyEvent.VK_ENTER ) );
 		if ( _state == State.NORMAL ) {
-			_client.endRound( _moves );
+			endRound( _moves );
 		}
 	}
 	public void actionPerformed( ActionEvent $event ) {
 		Object source = $event.getSource();
-		if ( source == _widgets._connect ) {
-			onConnectClick();
-		} else if ( source == _widgets._endRound ) {
+		if ( source == _gui._endRound ) {
 			onEndRound();
 		}
+	}
+	int getSystemCount() {
+		return _systemCount;
+	}
+	void endRound( java.util.List<HMove> $moves ) {
+		setState( State.LOCKED );
+		for ( java.util.ListIterator i = $moves.listIterator(); i.hasNext(); ) {
+			HMove move = (HMove)i.next();
+			String message = "GLX:PLAY:move=" + move._sourceSystem + "," + move._destinationSystem + "," + move._fleet;
+			_out.println( message );
+		}
+		_out.println( "GLX:PLAY:end_round" );
+		$moves.clear();
 	}
 }
 

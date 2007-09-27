@@ -55,7 +55,7 @@ public class HBoard extends JPanel implements MouseInputListener {
 	int _sourceSystem;
 	int _destinationSystem;
 	HImages _images;
-	HGalaxy _gui;
+	HGalaxy _logic;
 	HSystem[] _systems;
 //--------------------------------------------//
 	public HBoard() {
@@ -72,10 +72,10 @@ public class HBoard extends JPanel implements MouseInputListener {
 		if ( ( _cursorX != cursorX ) || ( _cursorY != cursorY ) ) {
 			_cursorX = cursorX;
 			_cursorY = cursorY;
-			_gui._widgets._systemInfo.setText( "" );
-			_gui._widgets._emperorInfo.setText( "" );
-			_gui._widgets._productionInfo.setText( "" );
-			_gui._widgets._fleetInfo.setText( "" );
+			_logic._gui._systemInfo.setText( "" );
+			_logic._gui._emperorInfo.setText( "" );
+			_logic._gui._productionInfo.setText( "" );
+			_logic._gui._fleetInfo.setText( "" );
 			repaint();
 		}
 	}
@@ -99,19 +99,19 @@ public class HBoard extends JPanel implements MouseInputListener {
 		if ( _systems != null ) {
 			int sysNo = getSysNo( $event.getX() / _diameter, $event.getY() / _diameter );
 			if ( sysNo >= 0 ) {
-				if ( _gui.getState() != HGalaxy.State.LOCKED ) {
-					if ( _gui.getState() == HGalaxy.State.NORMAL ) {
-						if ( ( _systems[ sysNo ]._color == _gui._client._color ) && ( _systems[ sysNo ]._fleet > 0 ) ) {
-							_gui.setState( HGalaxy.State.SELECT );
+				if ( _logic.getState() != HGalaxy.State.LOCKED ) {
+					if ( _logic.getState() == HGalaxy.State.NORMAL ) {
+						if ( ( _systems[ sysNo ]._color == _logic._gui._color ) && ( _systems[ sysNo ]._fleet > 0 ) ) {
+							_logic.setState( HGalaxy.State.SELECT );
 							_sourceSystem = sysNo;
 						}
-					} else if ( _gui.getState() == HGalaxy.State.SELECT ) {
+					} else if ( _logic.getState() == HGalaxy.State.SELECT ) {
 						if ( sysNo != _sourceSystem ) {
-							_gui._widgets._fleet.setEditable( true );
-							_gui._widgets._fleet.setText( String.valueOf( _systems[ _sourceSystem ]._fleet ) );
-							_gui._widgets._fleet.requestFocus();
-							_gui._widgets._fleet.selectAll();
-							_gui.setState( HGalaxy.State.INPUT );
+							_logic._gui._fleet.setEditable( true );
+							_logic._gui._fleet.setText( String.valueOf( _systems[ _sourceSystem ]._fleet ) );
+							_logic._gui._fleet.requestFocus();
+							_logic._gui._fleet.selectAll();
+							_logic.setState( HGalaxy.State.INPUT );
 							_destinationSystem = sysNo;
 						}
 					}
@@ -123,10 +123,10 @@ public class HBoard extends JPanel implements MouseInputListener {
 		_cursorX = -1;
 		_cursorY = -1;
 		repaint();
-		_gui._widgets._systemInfo.setText( "" );
-		_gui._widgets._emperorInfo.setText( "" );
-		_gui._widgets._productionInfo.setText( "" );
-		_gui._widgets._fleetInfo.setText( "" );
+		_logic._gui._systemInfo.setText( "" );
+		_logic._gui._emperorInfo.setText( "" );
+		_logic._gui._productionInfo.setText( "" );
+		_logic._gui._fleetInfo.setText( "" );
 	}
 	int distance( int $source, int $destination ) {
 		int dx = 0, dy = 0, distance = 0;
@@ -142,7 +142,7 @@ public class HBoard extends JPanel implements MouseInputListener {
 		return ( distance );
 	}
 	int getSysNo( int $coordX, int $coordY ) {
-		int systemCount = _gui._client.getSystemCount();
+		int systemCount = _logic._client.getSystemCount();
 		for ( int i = 0; i < systemCount; ++ i ) {
 			if ( ( _systems[ i ]._coordinateX == $coordX ) && ( _systems[ i ]._coordinateY == $coordY ) ) {
 				return i;
@@ -151,7 +151,7 @@ public class HBoard extends JPanel implements MouseInputListener {
 		return -1;
 	}
 	void setGui( HGalaxy $gui ) {
-		_gui = $gui;
+		_logic = $gui;
 	}
 	public void setImages( HImages $images ) {
 		_images = $images;
@@ -172,24 +172,24 @@ public class HBoard extends JPanel implements MouseInputListener {
 				$coordY * _diameter + ( _diameter - 32 ) / 2, this );
 		if ( ( $color >= 0 ) || ( ( $coordX == _cursorX ) && ( $coordY == _cursorY ) ) ) {
 			if ( ( $coordX == _cursorX ) && ( $coordY == _cursorY ) ) {
-				$gs.setColor ( _gui._widgets._colors[ HGalaxy.Colors.WHITE ] );
-				_gui._widgets._systemInfo.setText( _gui._client._systemNames[ $no ] );
+				$gs.setColor ( _logic._gui._colors[ HGalaxy.Colors.WHITE ] );
+				_logic._gui._systemInfo.setText( _logic._client._systemNames[ $no ] );
 				if ( $color >= 0 )
-					_gui._widgets._emperorInfo.setText( _gui._client._emperors.get( $color ) );
+					_logic._gui._emperorInfo.setText( _logic._client._emperors.get( $color ) );
 				else
-					_gui._widgets._emperorInfo.setText( "" );
+					_logic._gui._emperorInfo.setText( "" );
 				if ( _systems[ $no ]._production >= 0 )
-					_gui._widgets._productionInfo.setText( String.valueOf( _systems[ $no ]._production ) );
+					_logic._gui._productionInfo.setText( String.valueOf( _systems[ $no ]._production ) );
 				else
-					_gui._widgets._productionInfo.setText( "?" );
+					_logic._gui._productionInfo.setText( "?" );
 				if ( _systems[ $no ]._fleet >= 0 )
-					_gui._widgets._fleetInfo.setText( String.valueOf( _systems[ $no ]._fleet ) );
+					_logic._gui._fleetInfo.setText( String.valueOf( _systems[ $no ]._fleet ) );
 				else
-					_gui._widgets._fleetInfo.setText( "?" );
-				if ( _gui.getState() == HGalaxy.State.SELECT )
-					_gui._widgets._arrival.setText( String.valueOf( _gui._client._round + distance( _sourceSystem, $no ) ) );
+					_logic._gui._fleetInfo.setText( "?" );
+				if ( _logic.getState() == HGalaxy.State.SELECT )
+					_logic._gui._arrival.setText( String.valueOf( _logic._round + distance( _sourceSystem, $no ) ) );
 			}	else {
-				$gs.setColor ( _gui._widgets._colors[ $color ] );
+				$gs.setColor ( _logic._gui._colors[ $color ] );
 			}
 			$gs.drawRect ( $coordX * _diameter + 1,
 					$coordY * _diameter + 1,
@@ -199,16 +199,16 @@ public class HBoard extends JPanel implements MouseInputListener {
 					_diameter - 4, _diameter - 4 );
 		}
 		if ( _help ) {
-			$gs.setColor ( _gui._widgets._colors[ HGalaxy.Colors.WHITE ] );
-			$gs.drawString( _gui._client._systemNames[ $no ], $coordX * _diameter + 2, ( $coordY + 1 ) * _diameter - 2 );
+			$gs.setColor ( _logic._gui._colors[ HGalaxy.Colors.WHITE ] );
+			$gs.drawString( _logic._client._systemNames[ $no ], $coordX * _diameter + 2, ( $coordY + 1 ) * _diameter - 2 );
 		}
 	}
 	protected void paintComponent( Graphics g ) {
 		g.drawImage( _images._background, 0, 0, this );
 		if ( _size > 0 ) {
 			if ( _systems != null ) {
-				int systemCount = _gui._client.getSystemCount();
-				_gui._widgets._arrival.setText( String.valueOf( _gui._client._round ) );
+				int systemCount = _logic._client.getSystemCount();
+				_logic._gui._arrival.setText( String.valueOf( _logic._round ) );
 				for ( int i = 0; i < systemCount; ++ i )
 					drawSystem( g, i, _systems[ i ]._coordinateX, _systems[ i ]._coordinateY, _systems[ i ]._color );
 			}

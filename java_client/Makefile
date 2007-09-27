@@ -1,12 +1,16 @@
+JAVA=$(shell find . -maxdepth 1 -name '*.java')
+CLASS=$(patsubst %.java,%.class,$(JAVA))
+
 all: gameground.jar
 
-*.class: *.java
-	javac -Xlint -cp jdom.jar:swixml.jar *.java
+%.class: %.java
+	@echo -n "gcc";
+	javac -Xlint -sourcepath . -cp .:jdom.jar:swixml.jar $(<)
 
 build_dir:
 	mkdir -p build
 
-gameground.jar: build_dir *.class res/gameground.xml res/*.xpm
+gameground.jar: build_dir $(CLASS) res/gameground.xml res/*.xpm
 	cd build; \
 	/bin/rm -rf *; \
 	jar xf ../jdom.jar; \

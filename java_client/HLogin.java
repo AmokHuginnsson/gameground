@@ -5,7 +5,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.Container;
-import org.swixml.SwingEngine;
 import java.awt.Color;
 import javax.swing.JPanel;
 import javax.swing.JButton;
@@ -19,7 +18,7 @@ import javax.swing.text.Style;
 import javax.swing.text.SimpleAttributeSet; 
 
 class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
-	public class HGUIface extends SwingEngine {
+	public class HGUILocal extends HGUIface {
 		/* This is one dirty hack.
 		 * To make it work you have to edit org/swixml/SwingEngine.java
 		 * and comment out all setAccessible() invocations.
@@ -29,17 +28,17 @@ class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
 		public JTextField _port;
 		public JButton _connect;
 		public JPanel _login;
-		public HGUIface() {
+		public HGUILocal() {
 		}
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
 	HClient _client;
-	public HGUIface _gui;
+	HGUILocal _gui;
 //--------------------------------------------//
 	public HLogin( GameGround $applet ) throws Exception {
 		super();
-		_gui = new HGUIface();
+		_gui = new HGUILocal();
 		_gui.insert( new InputStreamReader( getClass().getResourceAsStream( "res/gameground.xml" ) ), this );
 		String serverAddress = "";
 		try {
@@ -62,11 +61,11 @@ class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
 	}
 	void onConnectClick() {
 		String errors = "";
-		String emperor = "";
+		String login = "";
 		if ( _gui._name.getText().compareTo( "" ) == 0 )
 			errors += "name not set\n";
 		else
-			emperor = new String( _gui._name.getText() );
+			login = new String( _gui._name.getText() );
 		String server = "";
 		if ( _gui._server.getText().compareTo( "" ) == 0 )
 			errors += "server not set\n";
@@ -84,7 +83,16 @@ class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
 					"Your setup contains following errors:\n" + errors,
 					"GameGround - error ...", JOptionPane.ERROR_MESSAGE );
 		} else {
-			initBoard( emperor, server, port );
+/* FIXME			try {
+				_client = new HClient( this, login, $server, $port );
+				_client.start();
+			} catch ( Exception e ) {
+				JOptionPane.showMessageDialog( this,
+						"GameGround client was unable to connect to server:\n" + e.getMessage(),
+						"GameGround - error ...", JOptionPane.ERROR_MESSAGE );
+				return;
+			} */
+			GameGround.getInstance().setFace( "browser" );
 		}
 	}
 	public void actionPerformed( ActionEvent $event ) {
