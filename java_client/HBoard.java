@@ -142,7 +142,7 @@ public class HBoard extends JPanel implements MouseInputListener {
 		return ( distance );
 	}
 	int getSysNo( int $coordX, int $coordY ) {
-		int systemCount = _logic._client.getSystemCount();
+		int systemCount = _logic.getSystemCount();
 		for ( int i = 0; i < systemCount; ++ i ) {
 			if ( ( _systems[ i ]._coordinateX == $coordX ) && ( _systems[ i ]._coordinateY == $coordY ) ) {
 				return i;
@@ -172,10 +172,10 @@ public class HBoard extends JPanel implements MouseInputListener {
 				$coordY * _diameter + ( _diameter - 32 ) / 2, this );
 		if ( ( $color >= 0 ) || ( ( $coordX == _cursorX ) && ( $coordY == _cursorY ) ) ) {
 			if ( ( $coordX == _cursorX ) && ( $coordY == _cursorY ) ) {
-				$gs.setColor ( _logic._gui._colors[ HGalaxy.Colors.WHITE ] );
-				_logic._gui._systemInfo.setText( _logic._client._systemNames[ $no ] );
+				$gs.setColor ( _logic._gui._colors[ HGUIface.Colors.WHITE ] );
+				_logic._gui._systemInfo.setText( _logic._systemNames[ $no ] );
 				if ( $color >= 0 )
-					_logic._gui._emperorInfo.setText( _logic._client._emperors.get( $color ) );
+					_logic._gui._emperorInfo.setText( _logic._emperors.get( $color ) );
 				else
 					_logic._gui._emperorInfo.setText( "" );
 				if ( _systems[ $no ]._production >= 0 )
@@ -199,15 +199,15 @@ public class HBoard extends JPanel implements MouseInputListener {
 					_diameter - 4, _diameter - 4 );
 		}
 		if ( _help ) {
-			$gs.setColor ( _logic._gui._colors[ HGalaxy.Colors.WHITE ] );
-			$gs.drawString( _logic._client._systemNames[ $no ], $coordX * _diameter + 2, ( $coordY + 1 ) * _diameter - 2 );
+			$gs.setColor ( _logic._gui._colors[ HGUIface.Colors.WHITE ] );
+			$gs.drawString( _logic._systemNames[ $no ], $coordX * _diameter + 2, ( $coordY + 1 ) * _diameter - 2 );
 		}
 	}
 	protected void paintComponent( Graphics g ) {
 		g.drawImage( _images._background, 0, 0, this );
 		if ( _size > 0 ) {
 			if ( _systems != null ) {
-				int systemCount = _logic._client.getSystemCount();
+				int systemCount = _logic.getSystemCount();
 				_logic._gui._arrival.setText( String.valueOf( _logic._round ) );
 				for ( int i = 0; i < systemCount; ++ i )
 					drawSystem( g, i, _systems[ i ]._coordinateX, _systems[ i ]._coordinateY, _systems[ i ]._color );
