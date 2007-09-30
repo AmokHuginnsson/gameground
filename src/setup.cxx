@@ -35,10 +35,10 @@ void OSetup::test_setup( void )
 	M_PROLOG
 	if ( f_bServer && f_bClient )
 		yaal::tools::util::failure ( 1,
-				_( "galaxy cannot be server and client at the same time\n" ) );
+				_( "gameground cannot be server and client at the same time\n" ) );
 	if ( ! ( f_bServer || f_bClient ) )
 		yaal::tools::util::failure ( 2,
-				_( "galaxy must be server or client\n" ) );
+				_( "gameground must be server or client\n" ) );
 	if ( f_bServer && ( f_iMaxConnections < 2 ) )
 		yaal::tools::util::failure ( 3,
 				_( "this server hosts multiplayer games only\n" ) );

@@ -1,24 +1,37 @@
 JAVA=$(shell find . -maxdepth 1 -name '*.java')
-CLASS=$(patsubst %.java,%.class,$(JAVA))
+CLASS=$(patsubst ./%.java,./build/%.class,$(JAVA))
+RESOURCES=$(shell find res -maxdepth 1)
+RES_DEST=$(patsubst %,./build/%,$(RESOURCES))
+ENVIRON=./build/META-INF/info.xml
+TARGET=./build/gameground.jar
 
-all: gameground.jar
+.PHONY: all run dist clean
 
-%.class: %.java
+all: $(TARGET)
+
+build/%.class: %.java
 	@echo -n "gcc";
-	javac -Xlint -sourcepath . -cp .:jdom.jar:swixml.jar $(<)
+	javac -Xlint -sourcepath . -d build -cp .:jdom.jar:swixml.jar $(<)
 
-build_dir:
-	mkdir -p build
+build/res:
+	mkdir -p $(@)
 
-gameground.jar: build_dir $(CLASS) res/gameground.xml res/*.xpm
+build/res/%: res/%
+	cp -au $(<) $(@)
+
+$(ENVIRON): jdom.jar swixml.jar
+	mkdir -p build ; \
 	cd build; \
 	/bin/rm -rf *; \
 	jar xf ../jdom.jar; \
 	jar xf ../swixml.jar; \
-	cp -a ../*.class ../res .; \
-	jar cf gameground.jar res org *.class;
+	touch META-INF/info.xml
 
-run: gameground.jar
+$(TARGET): $(ENVIRON) $(CLASS) $(RES_DEST)
+	cd build; \
+	jar cf ../$(TARGET) res org *.class;
+
+run: $(TARGET)
 	java -Djava.security.manager -Djava.security.policy=gameground.policy -cp build/gameground.jar GameGround
 
 dist:
