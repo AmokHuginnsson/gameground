@@ -1,4 +1,4 @@
-JAVA=$(shell find . -maxdepth 1 -name '*.java')
+JAVA=$(shell find . -maxdepth 1 -name '*.java'|sort)
 CLASS=$(patsubst ./%.java,./build/%.class,$(JAVA))
 RESOURCES=$(shell find res -maxdepth 1)
 RES_DEST=$(patsubst %,./build/%,$(RESOURCES))
