@@ -85,5 +85,10 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		}
 	}
 
+	public static void registerLogic( String $name, HAbstractLogic $logic ) {
+		_logics.put( $name, $logic );
+		return;
+	}
+
 }
 

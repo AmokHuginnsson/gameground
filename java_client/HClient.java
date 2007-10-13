@@ -18,9 +18,6 @@ class HClient extends Thread {
 	PrintWriter _out;
 	Socket _socket;
 //--------------------------------------------//
-	public static void registerLogic( HLogic $logic ) {
-		return;
-	}
 	public HClient() throws Exception {
 		_handlers = java.util.Collections.synchronizedSortedMap( new TreeMap<String,Method>() );
 		_handlers.put( "MSG", HClient.class.getDeclaredMethod( "handlerMessage", new Class[]{ String.class } ) );

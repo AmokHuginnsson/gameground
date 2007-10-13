@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="iso8859-2"?>
+<!DOCTYPE panel SYSTEM gameground.dtd>
+<panel id="_setup" layout="FlowLayout" preferredsize="&v_width;,&v_height;" focuscycleroot="true"><!--{{{-->
+	<vbox>
+		<glue preferredsize="&v_login_screen_width;,&v_pad;" border="&border;" />
+		<panel preferredsize="&v_login_screen_width;,&v_title_height;" border="&border;">
+			<label font="-BOLDITALIC-70" foreground="blue" layout="box" horizontalalignment="CENTER" preferredsize="&v_login_screen_width;,&v_title_height;" border="&border;">Game Ground</label>
+		</panel>
+		<glue preferredsize="0,&v_pad;" border="&border;" />
+		<panel bounds="0,100,&v_width;,60" layout="GridBagLayout">
+			<label labelfor="_name">
+				<gridbagconstraints gridx="0" gridy="0" ipadx="10" anchor="GridBagConstraints.WEST" />
+				Your name:
+			</label>
+			<textfield id="_name" columns="16" focusable="true" tooltiptext="Your preferred in game name.">
+				<gridbagconstraints gridx="1" gridy="0" anchor="GridBagConstraints.WEST" />
+			</textfield>
+			<label labelfor="_server">
+				<gridbagconstraints gridx="0" gridy="1" anchor="GridBagConstraints.WEST" />
+				Server:
+			</label>
+			<textfield id="_server" columns="24" focusable="true" tooltiptext="Address of the server that hosts the game.">
+				<gridbagconstraints gridx="1" gridy="1" anchor="GridBagConstraints.WEST" />
+			</textfield>
+			<label labelfor="_port">
+				<gridbagconstraints gridx="0" gridy="2" anchor="GridBagConstraints.WEST" />
+				Port:
+			</label>
+			<textfield id="_port" columns="5" text="&v_port;" focusable="true" tooltiptext="Port that game server is bound to.">
+				<gridbagconstraints gridx="1" gridy="2" anchor="GridBagConstraints.WEST" />
+			</textfield>
+		</panel>
+		<glue preferredsize="0,&v_pad;" border="&border;" />
+		<panel bounds="0,200,&v_width;,50">
+			<button id="_connect" text="Connect !" action="submit" tooltiptext="Click me to start the game." />
+		</panel>
+	</vbox>
+</panel><!--}}}-->
