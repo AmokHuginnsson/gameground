@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso8859-2"?>
-<!DOCTYPE panel SYSTEM gameground.dtd>
+<!DOCTYPE panel SYSTEM "res/gameground.dtd">
 <panel id="_setup" layout="FlowLayout" preferredsize="&v_width;,&v_height;" focuscycleroot="true"><!--{{{-->
 	<vbox>
 		<glue preferredsize="&v_login_screen_width;,&v_pad;" border="&border;" />

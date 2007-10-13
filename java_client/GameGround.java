@@ -6,6 +6,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.JApplet;
 import javax.swing.JFrame;
+import org.swixml.SwingEngine;
 
 class CallStack {
 	public static void print() {
@@ -27,6 +28,8 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 
 	public void init() {
 		try {
+
+			new SwingEngine( this ).render( AppletJDOMHelper.loadResource( "res/gameground.xml", this ) );
 			setFace( "login" );
 		} catch ( Exception e ) {
 			e.printStackTrace();

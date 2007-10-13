@@ -39,7 +39,7 @@ class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
 	public HLogin( GameGround $applet ) throws Exception {
 		super();
 		_gui = new HGUILocal();
-		_gui.insert( new InputStreamReader( getClass().getResourceAsStream( "res/gameground.xml" ) ), this );
+		_gui.insert( new InputStreamReader( getClass().getResourceAsStream( "res/login.xml" ) ), this );
 		String serverAddress = "";
 		try {
 			serverAddress = $applet.getCodeBase().getHost();
