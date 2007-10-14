@@ -6,9 +6,13 @@ import java.net.URL;
 class AppletJDOMHelper {
 	static private InputSource createInputSource( String $dtd, Object $for ) {
 		InputSource is = null;
-		try { 
-			is = new InputSource( $for.getClass().getResourceAsStream( new URL( $dtd ).getFile() ) );
+		String url = "";
+		try {
+			url = new URL( $dtd ).getFile();
+			url = url.substring( url.indexOf( "/res/" ) );
+			is = new InputSource( $for.getClass().getResourceAsStream( url ) );
 		} catch ( Exception e ) {
+			System.out.println( "URL(dtd): " + url );
 			e.printStackTrace();
 			System.exit( 1 );
 		}
@@ -27,6 +31,7 @@ class AppletJDOMHelper {
 		try {
 			xml = xmlBuilder.build( new InputSource( $for.getClass().getResourceAsStream( $resource ) ) );
 		} catch ( Exception e ) {
+			System.out.println( "URL: " + $resource );
 			e.printStackTrace();
 			System.exit( 1 );
 		}

@@ -40,7 +40,8 @@ class HGUIface extends SwingEngine {
 		_colors[ 13 ] = Color.gray;
 		_colors[ 14 ] = Color.darkGray;
 		_colors[ 15 ] = Color.white;
-		_log = ( DefaultStyledDocument )_logPad.getStyledDocument();
+		if ( _logPad != null )
+			_log = ( DefaultStyledDocument )_logPad.getStyledDocument();
 	}
 	void log( String $message, int $color ) {
 		try {

@@ -29,7 +29,8 @@ $(ENVIRON): jdom.jar swixml.jar
 
 $(TARGET): $(ENVIRON) $(CLASS) $(RES_DEST)
 	cd build; \
-	jar cf ../$(TARGET) res org *.class;
+	ls -1 *.class > class.list; \
+	jar cf ../$(TARGET) res org *.class class.list;
 
 run: $(TARGET)
 	java -Djava.security.manager -Djava.security.policy=gameground.policy -cp build/gameground.jar GameGround

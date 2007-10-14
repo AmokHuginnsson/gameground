@@ -33,13 +33,17 @@ class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
+	private static final boolean registered;
+	static {
+		registered = registerLogic();
+	}
 	HClient _client;
 	HGUILocal _gui;
 //--------------------------------------------//
 	public HLogin( GameGround $applet ) throws Exception {
 		super();
 		_gui = new HGUILocal();
-		_gui.insert( new InputStreamReader( getClass().getResourceAsStream( "res/login.xml" ) ), this );
+		_gui.insert( AppletJDOMHelper.loadResource( "/res/login.xml", this ), _main );
 		String serverAddress = "";
 		try {
 			serverAddress = $applet.getCodeBase().getHost();
@@ -100,6 +104,16 @@ class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
 		if ( source == _gui._connect ) {
 			onConnectClick();
 		}
+	}
+	static boolean registerLogic() {
+		try {
+			CallStack.print();
+			GameGround.registerLogic( "login", new HLogin( GameGround.getInstance() ) );
+		} catch ( Exception e ) {
+			e.printStackTrace();
+			System.exit( 1 );
+		}
+		return ( true );
 	}
 }
 
