@@ -7,24 +7,6 @@ import java.awt.event.WindowEvent;
 import javax.swing.JApplet;
 import javax.swing.JFrame;
 import org.swixml.SwingEngine;
-import java.io.File;
-import java.util.Arrays;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
-import java.lang.Class;
-import java.lang.reflect.Method;
-import java.lang.NoSuchMethodException;
-
-class CallStack {
-	public static void print() {
-		System.out.println("Call Stack:");
-		StackTraceElement[] ste = (new Throwable()).getStackTrace();
-		for (int i = 1; i < ste.length; ++ i ) {
-			System.out.println( "Frame[" + i + "]: " + ste[i].getClassName() + "." + ste[i].getMethodName() + ", at line: " + ste[i].getLineNumber() + ", in: " + ste[i].getFileName() );
-		}
-	}
-}
 
 public class /* Application or applet name: */ GameGround extends JApplet {
 	public static final long serialVersionUID = 13l;
@@ -36,17 +18,11 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		try {
 			new SwingEngine( this ).render( AppletJDOMHelper.loadResource( "/res/gameground.xml", this ) );
 			CallStack.print();
-
-			BufferedReader in = new BufferedReader( new InputStreamReader( getClass().getResourceAsStream( "/class.list" ) ) );
-			String line;
-			while ( ( line = in.readLine() ) != null ) {
-				if ( line.indexOf( "$" ) == -1 ) {
-					Class dynamic = Class.forName( line.substring( 0, line.indexOf( ".class" ) ) );
-				}
-			}
+			EagerStaticInitializer.touch( this );
 			setFace( "login" );
 		} catch ( Exception e ) {
 			e.printStackTrace();
+			System.exit( 1 );
 		}
 	}
 
