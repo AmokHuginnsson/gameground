@@ -4,22 +4,36 @@ import java.util.HashMap;
 import java.util.Collections;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.Container;
+import java.awt.Frame;
 import javax.swing.JApplet;
-import javax.swing.JFrame;
 import org.swixml.SwingEngine;
+import org.swixml.TagLibrary;
 
 public class /* Application or applet name: */ GameGround extends JApplet {
 	public static final long serialVersionUID = 13l;
-	private static JFrame _frame;
+	public Frame _frame;
 	private static SortedMap<String,HAbstractLogic> _logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String,HAbstractLogic>() );
 	private static GameGround _instance;
 
 	public void init() {
 		try {
-			new SwingEngine( this ).render( AppletJDOMHelper.loadResource( "/res/gameground.xml", this ) );
+			if ( _instance == null ) {
+				_instance = this;
+				SwingEngine se = new SwingEngine( this );
+				TagLibrary tl = se.getTaglib();
+				tl.unregisterTag( "frame" );
+				tl.registerTag( "frame", JApplet.class );
+				se.insert( AppletJDOMHelper.loadResource( "/res/gameground.xml", this ), this );
+				_frame = getParentFrame();
+			} else {
+				new SwingEngine( this ).render( AppletJDOMHelper.loadResource( "/res/gameground.xml", this ) ).setVisible( true );
+				_frame = SwingEngine.getAppFrame();
+			}
+			System.out.println( "frame: " + _frame );
 			CallStack.print();
-			EagerStaticInitializer.touch( this );
-			setFace( "login" );
+//			EagerStaticInitializer.touch( this );
+//			setFace( "login" );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );
@@ -46,26 +60,10 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	}
 
 	static public void main( String $argv[] ) {
-		_frame = new JFrame();
+		SwingEngine.DEBUG_MODE = true;
 		_instance = new GameGround();
-		_frame.add( _instance );
 		_instance.init();
 		_instance.start();
-		_frame.setSize( _instance.getPreferredSize().width, _instance.getPreferredSize().height );
-		class HAppTerminator extends WindowAdapter {
-			JApplet _applet;
-			public HAppTerminator( JApplet $applet ) {
-				_applet = $applet;
-			}
-		}
-		_frame.addWindowListener( new HAppTerminator( _instance ) { // Handle window close requests
-			public void windowClosing( WindowEvent e ) {
-				_applet.stop();
-				_applet.destroy();
-				System.exit( 0 );
-			}
-		} );
-		_frame.setVisible( true );
 	}
 
 	public void addGlobalKeyListener( java.awt.Component $component, java.awt.event.KeyListener $who ) {
@@ -82,6 +80,17 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		_logics.put( $name, $logic );
 		return;
 	}
+
+	private Frame getParentFrame() {
+		Container cont = this;
+		while ( ( cont != null ) && !( cont instanceof Frame ) ) {
+			System.out.println( "cont: " + cont.getClass().toString() );
+			cont = cont.getParent();
+		}
+		if ( cont != null )
+			return (Frame)cont;
+		return null;
+	} 
 
 }
 

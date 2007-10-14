@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="iso8859-2"?>
-<!DOCTYPE applet SYSTEM "res/gameground.dtd">
-<applet background="black">
-</applet>
+<!DOCTYPE frame SYSTEM "res/gameground.dtd">
+<frame id="_frame" size="&v_width;,&v_height;" background="black" defaultCloseOperation="JFrame.EXIT_ON_CLOSE">
+</frame>
