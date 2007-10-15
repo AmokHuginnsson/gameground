@@ -31,6 +31,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 				_frame = SwingEngine.getAppFrame();
 				((javax.swing.JFrame)_frame).setContentPane( this );
 			}
+			_frame.setVisible( true );
 			EagerStaticInitializer.touch( this );
 			setFace( "login" );
 		} catch ( Exception e ) {
@@ -46,9 +47,10 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	public void setFace( String $face ) {
 		HAbstractLogic logic = _logics.get( $face );
 		if ( logic != null ) {
-			setContentPane( logic.getGUI() );
-			setFocusable( true );
-			requestFocus();
+			HGUIface f = logic.getGUI();
+			setContentPane( f );
+			validate();
+			f.reinit();
 		} else {
 			java.util.Set<java.util.Map.Entry<String,HAbstractLogic>> entSet = _logics.entrySet();
 			java.util.Map.Entry<String,HAbstractLogic> ent = null;
@@ -66,7 +68,6 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		_instance = new GameGround();
 		_instance.init();
 		_instance.start();
-		_instance._frame.setVisible( true );
 	}
 
 	public void addGlobalKeyListener( java.awt.Component $component, java.awt.event.KeyListener $who ) {

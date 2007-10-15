@@ -46,6 +46,7 @@ class HGUIface extends JPanel {
 		_colors[ 15 ] = Color.white;
 	}
 	public void updateTagLib( SwingEngine $se ) { }
+	public void reinit() { }
 	public void init() {
 		try {
 			String res = "/res/" + _resource + ".xml";
@@ -98,7 +99,7 @@ public abstract class HAbstractLogic {
 	public SortedMap<String, Method> getHandlers() {
 		return ( _handlers );
 	}
-	public javax.swing.JPanel getGUI() {
+	public HGUIface getGUI() {
 		return ( _gui );
 	}
 	void handlerMessage( String $message ) {

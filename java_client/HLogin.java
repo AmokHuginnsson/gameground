@@ -33,6 +33,10 @@ class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
 		public HGUILocal( String $resource ) {
 			super( $resource );
 		}
+		public void reinit() {
+			_name.requestFocusInWindow();
+			System.out.println( "Uha!" );
+		}
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
