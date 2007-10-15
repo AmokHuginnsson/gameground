@@ -98,7 +98,7 @@ class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
 						"GameGround - error ...", JOptionPane.ERROR_MESSAGE );
 				return;
 			} */
-			GameGround.getInstance().setFace( "browser" );
+			GameGround.getInstance().setFace( "galaxy" );
 		}
 	}
 	public void actionPerformed( ActionEvent $event ) {
@@ -109,7 +109,6 @@ class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
 	}
 	static boolean registerLogic() {
 		try {
-			CallStack.print();
 			GameGround.registerLogic( LABEL, new HLogin( GameGround.getInstance() ) );
 		} catch ( Exception e ) {
 			e.printStackTrace();

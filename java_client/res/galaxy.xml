@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso8859-2"?>
 <!DOCTYPE panel SYSTEM "res/gameground.dtd">
-<panel id="_main" layout="BoxLayout" background="black" preferredsize="&v_width;,&v_height;" visible="false"><!--{{{-->
+<panel layout="BoxLayout" background="black" preferredsize="&v_width;,&v_height;"><!--{{{-->
 	<panel bounds="0,0,90,&v_bar_height;" layout="BorderLayout" constraints="BorderLayout.TOP" background="black">
 		<label font="-BOLDITALIC-22" foreground="blue">Galaxy</label>
 	</panel>

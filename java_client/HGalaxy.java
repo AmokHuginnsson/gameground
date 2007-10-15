@@ -121,7 +121,6 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		public JTextField _fleet;
 		public JTextField _messageInput;
 		public JButton _endRound;
-		public JPanel _main;
 		public JLabel _emperor;
 		public JLabel _systemInfo;
 		public JLabel _emperorInfo;
@@ -134,11 +133,17 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		public JTextPane _tips;
 		public HGUILocal( String $resource ) {
 			super( $resource );
-//			super.getTaglib().registerTag( "hboard", HBoard.class );
+		}
+		public void updateTagLib( SwingEngine $se ) {
+			$se.getTaglib().registerTag( "hboard", HBoard.class );
 		}
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
+	private static final boolean registered;
+	static {
+		registered = registerLogic();
+	}
 	private static final String LABEL = "galaxy";
 	private State _state;
 	int _round;
@@ -158,24 +163,21 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 	};
 	public HGUILocal _gui;
 //--------------------------------------------//
-	public HGalaxy( String $emperor ) throws Exception {
+	public HGalaxy( GameGround $applet ) throws Exception {
 		super();
 		_round = 0;
 		_systemCount = 0;
-		_emperor = $emperor;
+//		_emperor = $emperor; /* FIXME */
 		_handlers = java.util.Collections.synchronizedSortedMap( new TreeMap<String,Method>() );
 		_emperors = new HashMap<Integer,String>();
-		_handlers.put( "SETUP", HClient.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
-		_handlers.put( "PLAY", HClient.class.getDeclaredMethod( "handlerPlay", new Class[]{ String.class } ) );
-		_handlers.put( "MSG", HClient.class.getDeclaredMethod( "handlerMessage", new Class[]{ String.class } ) );
-		_out.println( "GLX:LOGIN:" + _emperor );
+		_handlers.put( "SETUP", HGalaxy.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
+		_handlers.put( "PLAY", HGalaxy.class.getDeclaredMethod( "handlerPlay", new Class[]{ String.class } ) );
+//		_handlers.put( "MSG", HClient.class.getDeclaredMethod( "handlerMessage", new Class[]{ String.class } ) );
 		if ( ( java.util.Calendar.getInstance().get( java.util.Calendar.HOUR_OF_DAY ) % 2 ) == 1 )
 			_systemNames = HSystemNames.getNames( HSystemNames.NORSE );
 		else
 			_systemNames = HSystemNames.getNames( HSystemNames.LATIN );
-	}
-	public HGalaxy( GameGround $applet ) throws Exception {
-		super();
+
 		init( _gui = new HGUILocal( LABEL ) );
 		HImages images = new HImages();
 		_gui._board.setImages( images );
@@ -189,9 +191,10 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		}
 		_gui._endRound.addActionListener( this );
 		$applet.addGlobalKeyListener( $applet, this );
-		$applet.addGlobalKeyListener( _gui._main, this );
+		$applet.addGlobalKeyListener( _gui, this );
 		_state = State.LOCKED;
 		_moves = java.util.Collections.<HMove>synchronizedList( new java.util.LinkedList<HMove>() );
+		//_out.println( "GLX:LOGIN:" + _emperor );
 	}
 	void handlerSetup( String $command ) {
 		int index = - 1, coordX = - 1, coordY = - 1;
@@ -393,7 +396,6 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 	public void keyReleased( KeyEvent $event ) {
 	}
 	void initBoard( String $emperor, String $server, int $port ) {
-		_gui._main.setVisible( true );
 		_gui._emperor.setText( $emperor );
 		_gui._board.setGui( this );
 //		log( "##", 0 );log( " ##", 1 );log( " ##", 2 );log( " ##", 3 );log( " ##", 4 );log( " ##\n", 5 );
@@ -430,6 +432,15 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		}
 		_out.println( "GLX:PLAY:end_round" );
 		$moves.clear();
+	}
+	static boolean registerLogic() {
+		try {
+			GameGround.registerLogic( LABEL, new HGalaxy( GameGround.getInstance() ) );
+		} catch ( Exception e ) {
+			e.printStackTrace();
+			System.exit( 1 );
+		}
+		return ( true );
 	}
 }
 

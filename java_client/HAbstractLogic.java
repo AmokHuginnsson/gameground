@@ -4,6 +4,7 @@ import java.util.TreeMap;
 import java.util.Collections;
 import javax.swing.JPanel;
 import org.swixml.SwingEngine;
+import org.swixml.TagLibrary;
 import javax.swing.JTextPane;
 import java.awt.Color;
 import javax.swing.text.SimpleAttributeSet; 
@@ -44,11 +45,13 @@ class HGUIface extends JPanel {
 		_colors[ 14 ] = Color.darkGray;
 		_colors[ 15 ] = Color.white;
 	}
+	public void updateTagLib( SwingEngine $se ) { }
 	public void init() {
 		try {
 			String res = "/res/" + _resource + ".xml";
 			System.out.println( "Loading resources: " + res );
 			SwingEngine se = new SwingEngine( this );
+			updateTagLib( se );
 			se.insert( AppletJDOMHelper.loadResource( res, this ), this );
 		} catch ( java.lang.Exception e ) {
 			e.printStackTrace();
@@ -87,6 +90,7 @@ class HGUIface extends JPanel {
 public abstract class HAbstractLogic {
 	public HGUIface _gui;
 	SortedMap<String,Method> _handlers;
+
 	public void init( HGUIface $ext ) {
 		_gui = $ext;
 		_gui.init();

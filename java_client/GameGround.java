@@ -13,7 +13,6 @@ import org.swixml.TagLibrary;
 public class /* Application or applet name: */ GameGround extends JApplet {
 	public static final long serialVersionUID = 13l;
 	public Frame _frame;
-	private javax.swing.JPanel _main = null;
 	private static SortedMap<String,HAbstractLogic> _logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String,HAbstractLogic>() );
 	private static GameGround _instance;
 
@@ -46,10 +45,8 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 
 	public void setFace( String $face ) {
 		HAbstractLogic logic = _logics.get( $face );
-		if ( _main != null )
-			remove( _main );
 		if ( logic != null ) {
-			add( _main = logic.getGUI() );
+			setContentPane( logic.getGUI() );
 			setFocusable( true );
 			requestFocus();
 		} else {
