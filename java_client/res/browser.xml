@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="iso8859-2"?>
+<!DOCTYPE panel SYSTEM "res/gameground.dtd">
+<panel layout="FlowLayout" preferredsize="&v_width;,&v_height;" focuscycleroot="true"><!--{{{-->
+	<textfield id="_msg" columns="16" focusable="true" tooltiptext="Send message to all people on the server that are currently not in the game." />
+</panel><!--}}}-->

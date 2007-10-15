@@ -21,10 +21,6 @@ class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
 	private static final String LABEL = "login";
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
-		/* This is one dirty hack.
-		 * To make it work you have to edit org/swixml/SwingEngine.java
-		 * and comment out all setAccessible() invocations.
-		 */
 		public JTextField _name;
 		public JTextField _server;
 		public JTextField _port;
@@ -35,7 +31,6 @@ class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
 		}
 		public void reinit() {
 			_name.requestFocusInWindow();
-			System.out.println( "Uha!" );
 		}
 	}
 //--------------------------------------------//
@@ -102,7 +97,7 @@ class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
 						"GameGround - error ...", JOptionPane.ERROR_MESSAGE );
 				return;
 			} */
-			GameGround.getInstance().setFace( "galaxy" );
+			GameGround.getInstance().setFace( HBrowser.LABEL );
 		}
 	}
 	public void actionPerformed( ActionEvent $event ) {
