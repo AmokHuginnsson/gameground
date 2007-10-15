@@ -18,7 +18,9 @@ import javax.swing.text.Style;
 import javax.swing.text.SimpleAttributeSet; 
 
 class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
+	private static final String LABEL = "login";
 	public class HGUILocal extends HGUIface {
+		public static final long serialVersionUID = 17l;
 		/* This is one dirty hack.
 		 * To make it work you have to edit org/swixml/SwingEngine.java
 		 * and comment out all setAccessible() invocations.
@@ -28,7 +30,8 @@ class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
 		public JTextField _port;
 		public JButton _connect;
 		public JPanel _login;
-		public HGUILocal() {
+		public HGUILocal( String $resource ) {
+			super( $resource );
 		}
 	}
 //--------------------------------------------//
@@ -42,8 +45,7 @@ class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
 //--------------------------------------------//
 	public HLogin( GameGround $applet ) throws Exception {
 		super();
-		_gui = new HGUILocal();
-//		_gui.insert( AppletJDOMHelper.loadResource( "/res/login.xml", this ), _main );
+		init( _gui = new HGUILocal( LABEL ) );
 		String serverAddress = "";
 		try {
 			serverAddress = $applet.getCodeBase().getHost();
@@ -55,7 +57,7 @@ class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
 		_gui._server.setText( serverAddress );
 		_gui._connect.addActionListener( this );
 		$applet.addGlobalKeyListener( $applet, this );
-		$applet.addGlobalKeyListener( this, this );
+		$applet.addGlobalKeyListener( _gui, this );
 	}
 	public void keyTyped( KeyEvent $event ) {
 	}
@@ -83,7 +85,7 @@ class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
 		if ( port <= 1024 )
 			errors += "invalid port number (must be over 1024)";
 		if( errors.compareTo( "" ) != 0 ) {
-			JOptionPane.showMessageDialog( this,
+			JOptionPane.showMessageDialog( _gui,
 					"Your setup contains following errors:\n" + errors,
 					"GameGround - error ...", JOptionPane.ERROR_MESSAGE );
 		} else {
@@ -108,7 +110,7 @@ class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
 	static boolean registerLogic() {
 		try {
 			CallStack.print();
-//			GameGround.registerLogic( "login", new HLogin( GameGround.getInstance() ) );
+			GameGround.registerLogic( LABEL, new HLogin( GameGround.getInstance() ) );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );

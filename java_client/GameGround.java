@@ -13,27 +13,27 @@ import org.swixml.TagLibrary;
 public class /* Application or applet name: */ GameGround extends JApplet {
 	public static final long serialVersionUID = 13l;
 	public Frame _frame;
+	private javax.swing.JPanel _main = null;
 	private static SortedMap<String,HAbstractLogic> _logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String,HAbstractLogic>() );
 	private static GameGround _instance;
 
 	public void init() {
 		try {
+			SwingEngine se = new SwingEngine( this );
 			if ( _instance == null ) {
 				_instance = this;
-				SwingEngine se = new SwingEngine( this );
 				TagLibrary tl = se.getTaglib();
 				tl.unregisterTag( "frame" );
 				tl.registerTag( "frame", JApplet.class );
 				se.insert( AppletJDOMHelper.loadResource( "/res/gameground.xml", this ), this );
 				_frame = getParentFrame();
 			} else {
-				new SwingEngine( this ).render( AppletJDOMHelper.loadResource( "/res/gameground.xml", this ) ).setVisible( true );
+				se.render( AppletJDOMHelper.loadResource( "/res/gameground.xml", this ) );
 				_frame = SwingEngine.getAppFrame();
+				((javax.swing.JFrame)_frame).setContentPane( this );
 			}
-			System.out.println( "frame: " + _frame );
-			CallStack.print();
-//			EagerStaticInitializer.touch( this );
-//			setFace( "login" );
+			EagerStaticInitializer.touch( this );
+			setFace( "login" );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );
@@ -45,13 +45,18 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	}
 
 	public void setFace( String $face ) {
-		removeAll();
 		HAbstractLogic logic = _logics.get( $face );
+		if ( _main != null )
+			remove( _main );
 		if ( logic != null ) {
-			add( logic.getGUI() );
+			add( _main = logic.getGUI() );
 			setFocusable( true );
 			requestFocus();
 		} else {
+			java.util.Set<java.util.Map.Entry<String,HAbstractLogic>> entSet = _logics.entrySet();
+			java.util.Map.Entry<String,HAbstractLogic> ent = null;
+			for ( java.util.Iterator<java.util.Map.Entry<String,HAbstractLogic>> it = entSet.iterator(); it.hasNext(); ent = it.next() )
+				System.out.println( "logic: " + ent.getKey() );
 			System.out.println( "No such logic: " + $face + "." );
 			CallStack.print();
 			System.exit( 1 );
@@ -64,6 +69,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		_instance = new GameGround();
 		_instance.init();
 		_instance.start();
+		_instance._frame.setVisible( true );
 	}
 
 	public void addGlobalKeyListener( java.awt.Component $component, java.awt.event.KeyListener $who ) {
@@ -84,7 +90,6 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	private Frame getParentFrame() {
 		Container cont = this;
 		while ( ( cont != null ) && !( cont instanceof Frame ) ) {
-			System.out.println( "cont: " + cont.getClass().toString() );
 			cont = cont.getParent();
 		}
 		if ( cont != null )

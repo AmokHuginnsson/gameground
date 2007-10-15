@@ -113,6 +113,7 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		LOCKED
 	}
 	public class HGUILocal extends HGUIface {
+		public static final long serialVersionUID = 17l;
 		/* This is one dirty hack.
 		 * To make it work you have to edit org/swixml/SwingEngine.java
 		 * and comment out all setAccessible() invocations.
@@ -131,13 +132,14 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		public HBoard _board;
 		public JTextPane _log;
 		public JTextPane _tips;
-		public HGUILocal() {
-			super();
-			super.getTaglib().registerTag( "hboard", HBoard.class );
+		public HGUILocal( String $resource ) {
+			super( $resource );
+//			super.getTaglib().registerTag( "hboard", HBoard.class );
 		}
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
+	private static final String LABEL = "galaxy";
 	private State _state;
 	int _round;
 	int _color;
@@ -157,6 +159,7 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 	public HGUILocal _gui;
 //--------------------------------------------//
 	public HGalaxy( String $emperor ) throws Exception {
+		super();
 		_round = 0;
 		_systemCount = 0;
 		_emperor = $emperor;
@@ -173,9 +176,8 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 	}
 	public HGalaxy( GameGround $applet ) throws Exception {
 		super();
-		_gui = new HGUILocal();
+		init( _gui = new HGUILocal( LABEL ) );
 		HImages images = new HImages();
-		_gui.insert( new InputStreamReader( getClass().getResourceAsStream( "res/gameground.xml" ) ), this );
 		_gui._board.setImages( images );
 		String serverAddress = "";
 		try {
@@ -187,7 +189,7 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		}
 		_gui._endRound.addActionListener( this );
 		$applet.addGlobalKeyListener( $applet, this );
-		$applet.addGlobalKeyListener( this, this );
+		$applet.addGlobalKeyListener( _gui._main, this );
 		_state = State.LOCKED;
 		_moves = java.util.Collections.<HMove>synchronizedList( new java.util.LinkedList<HMove>() );
 	}
@@ -391,7 +393,7 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 	public void keyReleased( KeyEvent $event ) {
 	}
 	void initBoard( String $emperor, String $server, int $port ) {
-		_main.setVisible( true );
+		_gui._main.setVisible( true );
 		_gui._emperor.setText( $emperor );
 		_gui._board.setGui( this );
 //		log( "##", 0 );log( " ##", 1 );log( " ##", 2 );log( " ##", 3 );log( " ##", 4 );log( " ##\n", 5 );

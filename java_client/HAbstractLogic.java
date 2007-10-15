@@ -10,17 +10,20 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.DefaultStyledDocument;
 
-class HGUIface extends SwingEngine {
-	public JTextPane _logPad;
+class HGUIface extends JPanel {
+	public static final long serialVersionUID = 17l;
 	DefaultStyledDocument _log;
+	public JTextPane _logPad;
 	public Color[] _colors;
 	public SimpleAttributeSet _attribute;
 	public int _color;
+	public String _resource;
 	public static class Colors {
 		public static int NORMAL = 12;
 		public static int WHITE = 15;
 	}
-	public HGUIface() {
+	public HGUIface( String $resource ) {
+		_resource = $resource;
 		_attribute = new SimpleAttributeSet();
 		_color = Colors.NORMAL;
 		_colors = new Color[ 16 ];
@@ -40,6 +43,17 @@ class HGUIface extends SwingEngine {
 		_colors[ 13 ] = Color.gray;
 		_colors[ 14 ] = Color.darkGray;
 		_colors[ 15 ] = Color.white;
+	}
+	public void init() {
+		try {
+			String res = "/res/" + _resource + ".xml";
+			System.out.println( "Loading resources: " + res );
+			SwingEngine se = new SwingEngine( this );
+			se.insert( AppletJDOMHelper.loadResource( res, this ), this );
+		} catch ( java.lang.Exception e ) {
+			e.printStackTrace();
+			System.exit( 1 );
+		}
 		if ( _logPad != null )
 			_log = ( DefaultStyledDocument )_logPad.getStyledDocument();
 	}
@@ -70,19 +84,18 @@ class HGUIface extends SwingEngine {
 	}
 }
 
-interface HLogic {
-	public SortedMap<String, Method> getHandlers();
-}
-
-public abstract class HAbstractLogic extends JPanel implements HLogic {
-	javax.swing.JPanel _main;
+public abstract class HAbstractLogic {
 	public HGUIface _gui;
 	SortedMap<String,Method> _handlers;
+	public void init( HGUIface $ext ) {
+		_gui = $ext;
+		_gui.init();
+	}
 	public SortedMap<String, Method> getHandlers() {
 		return ( _handlers );
 	}
 	public javax.swing.JPanel getGUI() {
-		return ( _main );
+		return ( _gui );
 	}
 	void handlerMessage( String $message ) {
 		int index = 0, offset = 0;
