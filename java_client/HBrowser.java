@@ -7,6 +7,7 @@ import java.awt.event.KeyListener;
 import java.awt.Container;
 import java.awt.Color;
 import javax.swing.JPanel;
+import javax.swing.JList;
 import javax.swing.JButton;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
@@ -23,6 +24,8 @@ class HBrowser extends HAbstractLogic implements ActionListener, KeyListener {
 		public static final long serialVersionUID = 17l;
 		public JTextField _msg;
 		public JTextPane _logPad;
+		public JList _games;
+		public JList _people;
 		public HGUILocal( String $resource ) {
 			super( $resource );
 		}
