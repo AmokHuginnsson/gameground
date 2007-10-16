@@ -6,7 +6,7 @@
 		<panel layout="BorderLayout" preferredsize="600,&v_height;" constraints="BorderLayout.CENTER" focuscycleroot="true" border="&X;red)"><!--{{{-->
 			<vbox border="&X;cyan)">
 				<scrollpane autoscrolls="true">
-					<textpane id="_log" caretcolor="white" editable="false" focusable="false" />
+					<textpane id="_logPad" caretcolor="white" editable="false" focusable="false" />
 				</scrollpane>
 				<textfield id="_msg" maximumsize="2000,20" columns="16" focusable="true" tooltiptext="Send message to all people on the server that are currently not in the game." />
 			</vbox>

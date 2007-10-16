@@ -120,6 +120,7 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		 */
 		public JTextField _fleet;
 		public JTextField _messageInput;
+		public JTextPane _logPad;
 		public JButton _endRound;
 		public JLabel _emperor;
 		public JLabel _systemInfo;
@@ -136,6 +137,10 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		}
 		public void updateTagLib( SwingEngine $se ) {
 			$se.getTaglib().registerTag( "hboard", HBoard.class );
+		}
+		public void reinit() { }
+		public JTextPane getLogPad() {
+			return ( _logPad );
 		}
 	}
 //--------------------------------------------//

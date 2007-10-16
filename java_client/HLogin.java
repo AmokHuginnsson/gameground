@@ -32,6 +32,8 @@ class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
 		public void reinit() {
 			_name.requestFocusInWindow();
 		}
+		public JTextPane getLogPad() { return ( null ); }
+		public void updateTagLib( org.swixml.SwingEngine $se ) {	}
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;

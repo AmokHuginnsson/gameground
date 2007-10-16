@@ -63,7 +63,7 @@
 	</panel>
 	<hboard id="_board" bounds="0,&v_bar_height;,640,640" border="MatteBorder(1,1,1,1,0000a0)" />
 	<scrollpane bounds="640,60,260,526" border="MatteBorder(1,0,1,1,0000a0)" autoscrolls="true">
-		<textpane id="_log" foreground="lightGray" background="black" caretcolor="black" editable="false" focusable="false" />
+		<textpane id="_logPad" foreground="lightGray" background="black" caretcolor="black" editable="false" focusable="false" />
 	</scrollpane>
 	<panel bounds="640,586,260,24" border="MatteBorder(0,0,1,1,0000a0)" background="black">
 		<textfield id="_messageInput" columns="23" foreground="lightGray" background="black" caretcolor="green" focusable="true" editable="true" tooltiptext="Enter message You want to send to other emperors." border="&empty;" />

@@ -11,7 +11,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.DefaultStyledDocument;
 
-class HGUIface extends JPanel {
+abstract class HGUIface extends JPanel {
 	public static final long serialVersionUID = 17l;
 	DefaultStyledDocument _log;
 	public JTextPane _logPad;
@@ -45,8 +45,9 @@ class HGUIface extends JPanel {
 		_colors[ 14 ] = Color.darkGray;
 		_colors[ 15 ] = Color.white;
 	}
-	public void updateTagLib( SwingEngine $se ) { }
-	public void reinit() { }
+	public abstract void updateTagLib( SwingEngine $se );
+	public abstract void reinit();
+	public abstract JTextPane getLogPad();
 	public void init() {
 		try {
 			String res = "/res/" + _resource + ".xml";
@@ -58,8 +59,11 @@ class HGUIface extends JPanel {
 			e.printStackTrace();
 			System.exit( 1 );
 		}
-		if ( _logPad != null )
+		if ( getLogPad() != null ) {
+			_logPad = getLogPad();
 			_log = ( DefaultStyledDocument )_logPad.getStyledDocument();
+		} else
+			System.out.println( "No logPad for this face." );
 	}
 	void log( String $message, int $color ) {
 		try {

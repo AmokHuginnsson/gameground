@@ -22,12 +22,18 @@ class HBrowser extends HAbstractLogic implements ActionListener, KeyListener {
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
 		public JTextField _msg;
+		public JTextPane _logPad;
 		public HGUILocal( String $resource ) {
 			super( $resource );
 		}
 		public void reinit() {
 			_msg.requestFocusInWindow();
+			log( "### Connectiong to server ...\n" );
 		}
+		public JTextPane getLogPad() {
+			return ( _logPad );
+		}
+		public void updateTagLib( org.swixml.SwingEngine $se ) {	}
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
