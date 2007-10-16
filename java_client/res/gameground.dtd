@@ -5,5 +5,6 @@
 <!ENTITY v_login_screen_width "600">
 <!ENTITY v_title_height "90">
 <!ENTITY v_pad "30">
-<!--ENTITY border "MatteBorder(2,2,2,2,red)"-->
-<!ENTITY border "EmptyBorder(2,2,2,2,red)">
+<!ENTITY empty "EmptyBorder(0,0,0,0)">
+<!--ENTITY X "MatteBorder(3,3,3,3,"-->
+<!ENTITY X "MatteBorder(0,0,0,0,">

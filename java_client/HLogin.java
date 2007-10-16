@@ -18,7 +18,7 @@ import javax.swing.text.Style;
 import javax.swing.text.SimpleAttributeSet; 
 
 class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
-	private static final String LABEL = "login";
+	public static final String LABEL = "login";
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
 		public JTextField _name;

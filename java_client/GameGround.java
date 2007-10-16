@@ -33,7 +33,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 			}
 			_frame.setVisible( true );
 			EagerStaticInitializer.touch( this );
-			setFace( "login" );
+			setFace( HLogin.LABEL );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );
