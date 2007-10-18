@@ -12,9 +12,10 @@ import org.swixml.TagLibrary;
 
 public class /* Application or applet name: */ GameGround extends JApplet {
 	public static final long serialVersionUID = 13l;
-	public Frame _frame;
 	private static SortedMap<String,HAbstractLogic> _logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String,HAbstractLogic>() );
 	private static GameGround _instance;
+	public Frame _frame;
+	private HClient _client;
 
 	public void init() {
 		try {
@@ -51,6 +52,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 			setContentPane( f );
 			validate();
 			f.reinit();
+			logic.reinit();
 		} else {
 			java.util.Set<java.util.Map.Entry<String,HAbstractLogic>> entSet = _logics.entrySet();
 			java.util.Map.Entry<String,HAbstractLogic> ent = null;
@@ -94,6 +96,17 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 			return (Frame)cont;
 		return null;
 	} 
+
+	public HClient getClient() {
+		return ( _client );
+	}
+	public void setClient( HClient $client ) {
+		_client = $client;
+	}
+
+	public HAbstractLogic getLogic( String $name ) {
+		return ( _logics.get( $name ) );
+	}
 
 }
 

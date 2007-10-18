@@ -35,17 +35,23 @@ class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
 		public JTextPane getLogPad() { return ( null ); }
 		public void updateTagLib( org.swixml.SwingEngine $se ) {	}
 	}
+	public class OConnectionConfig {
+		public String _name;
+		public String _host;
+		public int _port;
+	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
 	private static final boolean registered;
 	static {
 		registered = registerLogic();
 	}
-	HClient _client;
 	HGUILocal _gui;
+	OConnectionConfig _connectionConfig;
 //--------------------------------------------//
 	public HLogin( GameGround $applet ) throws Exception {
 		super();
+		_connectionConfig = new OConnectionConfig();
 		init( _gui = new HGUILocal( LABEL ) );
 		String serverAddress = "";
 		try {
@@ -90,15 +96,9 @@ class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
 					"Your setup contains following errors:\n" + errors,
 					"GameGround - error ...", JOptionPane.ERROR_MESSAGE );
 		} else {
-/* FIXME			try {
-				_client = new HClient( this, login, $server, $port );
-				_client.start();
-			} catch ( Exception e ) {
-				JOptionPane.showMessageDialog( this,
-						"GameGround client was unable to connect to server:\n" + e.getMessage(),
-						"GameGround - error ...", JOptionPane.ERROR_MESSAGE );
-				return;
-			} */
+			_connectionConfig._name = login;
+			_connectionConfig._host = server;
+			_connectionConfig._port = port;
 			GameGround.getInstance().setFace( HBrowser.LABEL );
 		}
 	}
@@ -116,6 +116,11 @@ class HLogin extends HAbstractLogic implements ActionListener, KeyListener {
 			System.exit( 1 );
 		}
 		return ( true );
+	}
+	public OConnectionConfig getConnectionConfig() {
+		return ( _connectionConfig );
+	}
+	public void reinit() {
 	}
 }
 

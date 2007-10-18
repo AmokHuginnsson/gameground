@@ -19,8 +19,8 @@
 			<vbox border="&X;blue)">
 				<hbox border="&X;magenta)">
 					<hbox border="TitledBorder(EmptyBorder,Games,TitledBorder.LEFT, TitledBorder.ABOVE_TOP)">
-						<scrollpane autoscrolls="true">
-							<list id="_games" />
+						<scrollpane minimumsize="204,1000" autoscrolls="true">
+							<tree id="_games" />
 						</scrollpane> 
 					</hbox>
 					<hbox border="TitledBorder(EmptyBorder,People,TitledBorder.LEFT, TitledBorder.ABOVE_TOP)">

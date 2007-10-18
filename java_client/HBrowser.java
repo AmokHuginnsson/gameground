@@ -8,6 +8,7 @@ import java.awt.Container;
 import java.awt.Color;
 import javax.swing.JPanel;
 import javax.swing.JList;
+import javax.swing.JTree;
 import javax.swing.JButton;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
@@ -24,14 +25,13 @@ class HBrowser extends HAbstractLogic implements ActionListener, KeyListener {
 		public static final long serialVersionUID = 17l;
 		public JTextField _msg;
 		public JTextPane _logPad;
-		public JList _games;
+		public JTree _games;
 		public JList _people;
 		public HGUILocal( String $resource ) {
 			super( $resource );
 		}
 		public void reinit() {
 			_msg.requestFocusInWindow();
-			log( "### Connectiong to server ...\n" );
 		}
 		public JTextPane getLogPad() {
 			return ( _logPad );
@@ -70,6 +70,27 @@ class HBrowser extends HAbstractLogic implements ActionListener, KeyListener {
 			System.exit( 1 );
 		}
 		return ( true );
+	}
+	public void reinit() {
+		GameGround gg = GameGround.getInstance();
+		if ( gg.getClient() == null ) {
+			HLogin l = (HLogin)gg.getLogic( HLogin.LABEL );
+			HLogin.OConnectionConfig cc = l.getConnectionConfig();
+			_gui.log( "### Connecting to server: " + cc._host + " to port " + cc._port + ".\n"  );
+			try {
+				_client = new HClient();
+				_client.connect( cc._host, cc._port );
+				_client.start();
+				// cc._name );
+				gg.setClient( _client );
+			} catch ( Exception e ) {
+				JOptionPane.showMessageDialog( _gui,
+						"GameGround client was unable to connect to server:\n" + e.getMessage(),
+						"GameGround - error ...", JOptionPane.ERROR_MESSAGE );
+				gg.setFace( HLogin.LABEL );
+				return;
+			}
+		}
 	}
 }
 

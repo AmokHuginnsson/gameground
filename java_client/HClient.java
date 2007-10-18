@@ -19,15 +19,17 @@ class HClient extends Thread {
 	Socket _socket;
 //--------------------------------------------//
 	public HClient() throws Exception {
-		_handlers = java.util.Collections.synchronizedSortedMap( new TreeMap<String,Method>() );
-		_handlers.put( "MSG", HClient.class.getDeclaredMethod( "handlerMessage", new Class[]{ String.class } ) );
+//		_handlers = java.util.Collections.synchronizedSortedMap( new TreeMap<String,Method>() );
+//		_handlers.put( "MSG", HClient.class.getDeclaredMethod( "handlerMessage", new Class[]{ String.class } ) );
 		_loop = true;
+		System.out.println( "HClient" );
 	}
 	void connect( String $server, int $port ) throws Exception {
 		_socket = new Socket( $server, $port );
 		_out = new PrintWriter( _socket.getOutputStream(), true );
 		_in = new BufferedReader( new InputStreamReader( _socket.getInputStream() ) );
 		_out.println( "name:" + _name );
+		System.out.println( "connect" );
 	}
 	void processCommand( String $command ) {
 		String[] tokens = new String[2];

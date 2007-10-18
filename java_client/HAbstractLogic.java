@@ -100,6 +100,7 @@ public abstract class HAbstractLogic {
 		_gui = $ext;
 		_gui.init();
 	}
+	public abstract void reinit();
 	public SortedMap<String, Method> getHandlers() {
 		return ( _handlers );
 	}

@@ -447,5 +447,7 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		}
 		return ( true );
 	}
+	public void reinit() {
+	}
 }
 
