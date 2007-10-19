@@ -83,15 +83,17 @@ void HServer::set_client_name( OClientInfo& a_roInfo, HString const& a_oName )
 	{
 	M_PROLOG
 	clients_t::HIterator it;
+	int const D_MINIMUM_NAME_LENGTH = 4;
 	for ( it = f_oClients.begin(); it != f_oClients.end(); ++ it )
-		{
 		if ( ( it->second.f_oName == a_oName ) && ( it->second.f_oSocket != a_roInfo.f_oSocket ) )
-			{
-			a_roInfo.f_oSocket->write_until_eos ( "err:Name taken.\n" );
 			break;
-			}
-		}
-	if ( it == f_oClients.end() )
+	if ( a_oName.find_other_than( "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_" ) >= 0 )
+		*a_roInfo.f_oSocket << "err:Name may only take form of `[a-zA-Z0-9]+'." << endl;
+	else if ( a_oName.get_length() < D_MINIMUM_NAME_LENGTH )
+		*a_roInfo.f_oSocket << "err:Your name is too short, it needs to be at least 4 character long." << endl;
+	else if ( it != f_oClients.end() )
+		*a_roInfo.f_oSocket << "err:Name taken." << endl;
+	else
 		a_roInfo.f_oName = a_oName;
 	return;
 	M_EPILOG
@@ -239,11 +241,7 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& a_oClient, char const* c
 	M_ASSERT( !! a_oClient );
 	int l_iFileDescriptor = a_oClient->get_file_descriptor();
 	if ( a_pcReason )
-		{
-		a_oClient->write_until_eos( "kck:" );
-		a_oClient->write_until_eos( a_pcReason );
-		a_oClient->write_until_eos( "\n" );
-		}
+		*a_oClient << "kck:" << a_pcReason << endl;
 	f_oSocket.shutdown_client( l_iFileDescriptor );
 	unregister_file_descriptor_handler( l_iFileDescriptor );
 	clients_t::HIterator clientIt = f_oClients.find( l_iFileDescriptor );
@@ -269,8 +267,7 @@ void HServer::send_logics_info( OClientInfo& a_roInfo )
 	for( HLogicFactory::creators_t::HIterator it = factory.begin();
 			it != factory.end(); ++ it )
 		{
-		a_roInfo.f_oSocket->write_until_eos( it->second.f_oInfo );
-		a_roInfo.f_oSocket->write_until_eos( "\n" );
+		*a_roInfo.f_oSocket << "logic:" << it->second.f_oInfo << endl;
 		}
 	return;
 	M_EPILOG
@@ -327,7 +324,7 @@ void HServer::send_players_info( OClientInfo& a_roInfo )
 			it != f_oClients.end(); ++ it )
 		{
 		if ( ! it->second.f_oName.is_empty() )
-			a_roInfo.f_oSocket->write_until_eos( it->second.f_oName + "," + ( !! it->second.f_oLogic ? it->second.f_oLogic->get_name() : HString() ) + "\n" );
+			*a_roInfo.f_oSocket << "player:" << it->second.f_oName << "," << ( !! it->second.f_oLogic ? static_cast<char const* const>( it->second.f_oLogic->get_name() ) : "" ) << endl;
 		}
 	return;
 	M_EPILOG
@@ -338,10 +335,7 @@ void HServer::send_games_info( OClientInfo& a_roInfo )
 	M_PROLOG
 	for( logics_t::HIterator it = f_oLogics.begin();
 			it != f_oLogics.end(); ++ it )
-		{
-		a_roInfo.f_oSocket->write_until_eos( it->second->get_info() );
-		a_roInfo.f_oSocket->write_until_eos( "\n" );
-		}
+		*a_roInfo.f_oSocket << "game:" << it->second->get_info() << endl;
 	return;
 	M_EPILOG
 	}

@@ -31,11 +31,14 @@
 				</hbox>
 				<hbox maximumsize="2000,80" border="&X;orange)">
 					<panel layout="GridBagLayout" border="&X;red)">
-						<button id="_join" text="Join !" action="submit" tooltiptext="Click me to start the game.">
-							<gridbagconstraints id="gbcJoin" gridx="0" gridy="0" ipadx="50" insets="8,8,0,8" fill="GridBagConstraints.BOTH" />
+						<button id="_join" text="Join !" action="submit" tooltiptext="Click me to join pre-existing game.">
+							<gridbagconstraints id="gbcJoin" gridx="0" gridy="0" ipadx="20" insets="8,8,0,8" fill="GridBagConstraints.BOTH" />
 						</button>
-						<button id="_create" text="Create !" action="submit" tooltiptext="Click me to start the game.">
+						<button id="_create" text="Create !" action="submit" tooltiptext="Click me to create a new game.">
 							<gridbagconstraints use="gbcJoin" gridy="1" />
+						</button>
+						<button id="_disconnect" text="Disconnect !" action="submit" tooltiptext="Click me to disconnect from GameGround server.">
+							<gridbagconstraints use="gbcJoin" gridy="2" />
 						</button>
 					</panel>
 				</hbox>

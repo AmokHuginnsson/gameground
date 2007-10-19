@@ -47,11 +47,18 @@ class HBrowser extends HAbstractLogic implements ActionListener, KeyListener {
 	HClient _client;
 	HGUILocal _gui;
 //--------------------------------------------//
-	public HBrowser( GameGround $applet ) throws Exception {
+	public HBrowser( GameGround $applet ) {
 		super();
 		init( _gui = new HGUILocal( LABEL ) );
 		$applet.addGlobalKeyListener( $applet, this );
 		$applet.addGlobalKeyListener( _gui, this );
+		try {
+			_handlers.put( "logic", HBrowser.class.getDeclaredMethod( "handleLogic", new Class[]{ String.class } ) );
+			_handlers.put( "player", HBrowser.class.getDeclaredMethod( "handlePlayer", new Class[]{ String.class } ) );
+		} catch ( java.lang.NoSuchMethodException e ) {
+			e.printStackTrace();
+			System.exit( 1 );
+		}
 	}
 	public void keyTyped( KeyEvent $event ) {
 	}
@@ -81,7 +88,13 @@ class HBrowser extends HAbstractLogic implements ActionListener, KeyListener {
 				_client = new HClient();
 				_client.connect( cc._host, cc._port );
 				_client.start();
-				// cc._name );
+				synchronized ( _client ) {
+					_client.wait();
+				}
+				_client.println( "name:" + cc._name );
+				_client.println( "get_logics" );
+				_client.println( "get_games" );
+				_client.println( "get_players" );
 				gg.setClient( _client );
 			} catch ( Exception e ) {
 				JOptionPane.showMessageDialog( _gui,
@@ -92,5 +105,12 @@ class HBrowser extends HAbstractLogic implements ActionListener, KeyListener {
 			}
 		}
 	}
+	public void handleLogic( String $message ) {
+		System.out.println( "GameGround serves [" + $message + "] logic." );
+	}
+	public void handlePlayer( String $message ) {
+		System.out.println( "Another player: [" + $message + "]." );
+	}
+
 }
 

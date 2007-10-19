@@ -99,15 +99,20 @@ public abstract class HAbstractLogic {
 	public void init( HGUIface $ext ) {
 		_gui = $ext;
 		_gui.init();
+		_handlers = java.util.Collections.synchronizedSortedMap( new TreeMap<String,Method>() );
+		try {
+			_handlers.put( "msg", HAbstractLogic.class.getDeclaredMethod( "handleMessage", new Class[]{ String.class } ) );
+			_handlers.put( "err", HAbstractLogic.class.getDeclaredMethod( "handleError", new Class[]{ String.class } ) );
+		} catch ( java.lang.NoSuchMethodException e ) {
+			e.printStackTrace();
+			System.exit( 1 );
+		}
 	}
 	public abstract void reinit();
-	public SortedMap<String, Method> getHandlers() {
-		return ( _handlers );
-	}
 	public HGUIface getGUI() {
 		return ( _gui );
 	}
-	void handlerMessage( String $message ) {
+	public void handleMessage( String $message ) {
 		int index = 0, offset = 0;
 		int length = $message.length();
 		String part;
@@ -131,5 +136,34 @@ public abstract class HAbstractLogic {
 		}
 		_gui.log( "\n" );
 		_gui.log( HGUIface.Colors.NORMAL );
+	}
+	public void handleError( String $message ) {
+		GameGround gg = GameGround.getInstance();
+		javax.swing.JOptionPane.showMessageDialog( _gui,
+				"The GameGround server reported error condition:\n" + $message,
+				"GameGround - error ...", javax.swing.JOptionPane.ERROR_MESSAGE );
+		gg.setFace( HLogin.LABEL );
+		gg.getClient().disconnect();
+	}
+	public void processMessage( String $message ) {
+		String tokens[] = new String[2];
+		tokens = $message.split( ":", 2 );
+		String mnemonic = tokens[0];
+		String argument = tokens[1];
+		Method handler = _handlers.get( mnemonic );
+		if ( handler != null ) {
+			try {
+				handler.invoke( this, argument );
+			} catch ( java.lang.IllegalAccessException e ) {
+				e.printStackTrace();
+				System.exit( 1 );
+			} catch ( java.lang.reflect.InvocationTargetException e ) {
+				e.printStackTrace();
+				System.exit( 1 );
+			}
+		} else {
+			System.out.println( "Unhandled mnemonic: [" + mnemonic + "], then processing message: " + $message );
+			System.exit( 0 );
+		}
 	}
 }
