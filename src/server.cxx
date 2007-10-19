@@ -54,17 +54,17 @@ int HServer::init_server( int a_iPort )
 	M_PROLOG
 	f_oSocket.listen ( "0.0.0.0", a_iPort );
 	register_file_descriptor_handler ( f_oSocket.get_file_descriptor(), &HServer::handler_connection );
+	f_oHandlers[ "shutdown" ] = &HServer::handler_shutdown;
+	f_oHandlers[ "quit" ] = &HServer::handler_quit;
 	f_oHandlers[ "msg" ] = &HServer::broadcast;
 	f_oHandlers[ "name" ] = &HServer::set_client_name;
-	f_oHandlers[ "cmd" ] = &HServer::pass_command;
+	f_oHandlers[ "get_logics" ] = &HServer::get_logics_info;
+	f_oHandlers[ "get_players" ] = &HServer::get_players_info;
+	f_oHandlers[ "get_games" ] = &HServer::get_games_info;
+	f_oHandlers[ "get_game_info" ] = &HServer::get_game_info;
 	f_oHandlers[ "create" ] = &HServer::create_game;
 	f_oHandlers[ "join" ] = &HServer::join_game;
-	f_oHandlers[ "logics" ] = &HServer::get_logics_info;
-	f_oHandlers[ "shutdown" ] = &HServer::handler_shutdown;
-	f_oHandlers[ "players" ] = &HServer::get_players_info;
-	f_oHandlers[ "games" ] = &HServer::get_games_info;
-	f_oHandlers[ "game" ] = &HServer::get_game_info;
-	f_oHandlers[ "quit" ] = &HServer::handler_quit;
+	f_oHandlers[ "cmd" ] = &HServer::pass_command;
 	HProcess::init ( 3600 );
 	return ( 0 );
 	M_EPILOG
