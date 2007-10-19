@@ -142,7 +142,6 @@ public abstract class HAbstractLogic {
 		javax.swing.JOptionPane.showMessageDialog( _gui,
 				"The GameGround server reported error condition:\n" + $message,
 				"GameGround - error ...", javax.swing.JOptionPane.ERROR_MESSAGE );
-		gg.setFace( HLogin.LABEL );
 		gg.getClient().disconnect();
 	}
 	public void processMessage( String $message ) {

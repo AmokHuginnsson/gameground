@@ -70,11 +70,11 @@ int HServer::init_server( int a_iPort )
 	M_EPILOG
 	}
 
-void HServer::broadcast( OClientInfo&, HString const& a_roMessage )
+void HServer::broadcast( OClientInfo& a_roInfo, HString const& a_roMessage )
 	{
 	M_PROLOG
 	for ( clients_t::HIterator it = f_oClients.begin(); it != f_oClients.end(); ++ it )
-		it->second.f_oSocket->write_until_eos ( a_roMessage );
+		*it->second.f_oSocket << "msg:" << a_roInfo.f_oName << ": " << a_roMessage << endl;
 	return;
 	M_EPILOG
 	}

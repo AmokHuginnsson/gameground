@@ -6,6 +6,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.Container;
 import java.awt.Color;
+import javax.swing.Action;
+import javax.swing.AbstractAction;
 import javax.swing.JPanel;
 import javax.swing.JList;
 import javax.swing.JTree;
@@ -19,7 +21,7 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.Style;
 import javax.swing.text.SimpleAttributeSet; 
 
-class HBrowser extends HAbstractLogic implements ActionListener, KeyListener {
+class HBrowser extends HAbstractLogic {
 	public static final String LABEL = "browser";
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
@@ -36,7 +38,20 @@ class HBrowser extends HAbstractLogic implements ActionListener, KeyListener {
 		public JTextPane getLogPad() {
 			return ( _logPad );
 		}
+		public void onDisconnect() {
+			_client.disconnect();
+		}
 		public void updateTagLib( org.swixml.SwingEngine $se ) {	}
+		public Action onMessage = new AbstractAction() {
+			public static final long serialVersionUID = 17l;
+			public void actionPerformed( ActionEvent $event ) {
+				String msg = _msg.getText();
+				if ( msg.length() > 0 ) {
+					_client.println( "msg:" + msg );
+					_msg.setText( "" );
+				}
+			}
+		};
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
@@ -50,8 +65,6 @@ class HBrowser extends HAbstractLogic implements ActionListener, KeyListener {
 	public HBrowser( GameGround $applet ) {
 		super();
 		init( _gui = new HGUILocal( LABEL ) );
-		$applet.addGlobalKeyListener( $applet, this );
-		$applet.addGlobalKeyListener( _gui, this );
 		try {
 			_handlers.put( "logic", HBrowser.class.getDeclaredMethod( "handleLogic", new Class[]{ String.class } ) );
 			_handlers.put( "player", HBrowser.class.getDeclaredMethod( "handlePlayer", new Class[]{ String.class } ) );
@@ -59,15 +72,6 @@ class HBrowser extends HAbstractLogic implements ActionListener, KeyListener {
 			e.printStackTrace();
 			System.exit( 1 );
 		}
-	}
-	public void keyTyped( KeyEvent $event ) {
-	}
-	public void keyPressed( KeyEvent $event ) {
-	}
-	public void keyReleased( KeyEvent $event ) {
-	}
-	public void actionPerformed( ActionEvent $event ) {
-		Object source = $event.getSource();
 	}
 	static boolean registerLogic() {
 		try {
@@ -111,6 +115,5 @@ class HBrowser extends HAbstractLogic implements ActionListener, KeyListener {
 	public void handlePlayer( String $message ) {
 		System.out.println( "Another player: [" + $message + "]." );
 	}
-
 }
 

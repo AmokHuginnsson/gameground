@@ -71,19 +71,28 @@ class HClient extends Thread {
 						"GameGround - read error ...", javax.swing.JOptionPane.ERROR_MESSAGE );
 				gg.setClient( null );
 				gg.setFace( HLogin.LABEL );
-			} else {
-				System.out.println( "Graceful disconnect." );
 			}
 		} catch ( java.io.IOException e ) {
-			System.out.println( "Connection error." );
-			e.printStackTrace();
-			System.exit( 0 );
+			if ( _loop ) {
+				System.out.println( "Connection error." );
+				e.printStackTrace();
+				System.exit( 0 );
+			}
 		}
+		if ( ! _loop )
+			System.out.println( "Graceful disconnect." );
+		return;
 	}
 
 	public void disconnect() {
 		_loop = false;
-		GameGround.getInstance().setClient( null );
+		GameGround gg = GameGround.getInstance();
+		gg.setClient( null );
+		gg.setFace( HLogin.LABEL );
+		try {
+			_socket.close();
+		} catch ( java.io.IOException e ) {
+		}
 	}
 
 	private static boolean relaxSSL() {

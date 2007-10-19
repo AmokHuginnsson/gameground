@@ -11,7 +11,7 @@
 					</scrollpane>
 				</hbox>
 				<hbox border="TitledBorder(EmptyBorder,Type your message,TitledBorder.LEFT, TitledBorder.ABOVE_TOP)">
-					<textfield id="_msg" maximumsize="2000,20" columns="16" focusable="true" tooltiptext="Send message to all people on the server that are currently not in the game." />
+					<textfield id="_msg" maximumsize="2000,20" columns="16" focusable="true" action="onMessage" tooltiptext="Send message to all people on the server that are currently not in the game." />
 				</hbox>
 			</vbox>
 		</panel>
@@ -31,13 +31,13 @@
 				</hbox>
 				<hbox maximumsize="2000,80" border="&X;orange)">
 					<panel layout="GridBagLayout" border="&X;red)">
-						<button id="_join" text="Join !" action="submit" tooltiptext="Click me to join pre-existing game.">
+						<button id="_join" text="Join !" action="onJoin" tooltiptext="Click me to join pre-existing game.">
 							<gridbagconstraints id="gbcJoin" gridx="0" gridy="0" ipadx="20" insets="8,8,0,8" fill="GridBagConstraints.BOTH" />
 						</button>
-						<button id="_create" text="Create !" action="submit" tooltiptext="Click me to create a new game.">
+						<button id="_create" text="Create !" action="onCreate" tooltiptext="Click me to create a new game.">
 							<gridbagconstraints use="gbcJoin" gridy="1" />
 						</button>
-						<button id="_disconnect" text="Disconnect !" action="submit" tooltiptext="Click me to disconnect from GameGround server.">
+						<button id="_disconnect" text="Disconnect !" action="onDisconnect" tooltiptext="Click me to disconnect from GameGround server.">
 							<gridbagconstraints use="gbcJoin" gridy="2" />
 						</button>
 					</panel>
