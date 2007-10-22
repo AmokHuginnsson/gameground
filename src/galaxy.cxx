@@ -292,9 +292,9 @@ public:
 	/*}*/
 protected:
 	/*{*/
-	int handler_enter ( int, void * );
-	int handler_esc ( int, void * );
-	int handler_space ( int, void * );
+	int handler_enter( int, void const* );
+	int handler_esc( int, void const* );
+	int handler_space( int, void const* );
 	virtual void on_show_system_info ( int );
 	virtual void make_move ( int, int );
 	virtual void msg ( int, char const * const );
@@ -780,7 +780,7 @@ void HGalaxyWindow::make_move ( int a_iSourceSystem, int a_iDestinationSystem )
 	M_EPILOG
 	}
 
-int HGalaxyWindow::handler_enter ( int a_iCode, void * )
+int HGalaxyWindow::handler_enter( int a_iCode, void const* )
 	{
 	M_PROLOG
 	int l_iFleet = 0;
@@ -832,7 +832,7 @@ int HGalaxyWindow::handler_enter ( int a_iCode, void * )
 	M_EPILOG
 	}
 
-int HGalaxyWindow::handler_esc ( int, void * )
+int HGalaxyWindow::handler_esc( int, void const* )
 	{
 	M_PROLOG
 	if ( f_reState == D_INPUT )
@@ -850,7 +850,7 @@ int HGalaxyWindow::handler_esc ( int, void * )
 	M_EPILOG
 	}
 
-int HGalaxyWindow::handler_space ( int, void * )
+int HGalaxyWindow::handler_space( int, void const* )
 	{
 	M_PROLOG
 	if ( f_reState == D_NORMAL )
