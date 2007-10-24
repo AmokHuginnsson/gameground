@@ -83,3 +83,9 @@ HLogicFactory::creators_t::HIterator HLogicFactory::end( void )
 	{
 	return ( f_oCreators.end() );
 	}
+
+int HLogicFactory::life_time( int a_iLifeTime )
+	{
+	return ( a_iLifeTime );
+	}
+

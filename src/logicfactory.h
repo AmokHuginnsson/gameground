@@ -52,6 +52,12 @@ public:
 	bool is_type_valid( yaal::hcore::HString const& );
 	creators_t::HIterator begin( void );
 	creators_t::HIterator end( void );
+private:
+	HLogicFactory( void ) : f_oCreators() {}
+	~HLogicFactory( void ) {}
+	static int life_time( int );
+	friend class yaal::hcore::HSingleton<HLogicFactory>;
+	friend class yaal::hcore::HDestructor<HLogicFactory>;
 	};
 
 typedef yaal::hcore::HSingleton<HLogicFactory> HLogicFactoryInstance;
