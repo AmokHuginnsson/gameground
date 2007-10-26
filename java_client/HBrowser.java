@@ -19,11 +19,16 @@ import javax.swing.JTextPane;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.Style;
-import javax.swing.text.SimpleAttributeSet; 
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.tree.TreeSelectionModel;
 
 class HBrowser extends HAbstractLogic {
 	public static final String LABEL = "browser";
-	public class HGUILocal extends HGUIface {
+	public class HGUILocal extends HGUIface implements TreeSelectionListener {
 		public static final long serialVersionUID = 17l;
 		public JTextField _msg;
 		public JTextPane _logPad;
@@ -34,6 +39,9 @@ class HBrowser extends HAbstractLogic {
 		}
 		public void reinit() {
 			_msg.requestFocusInWindow();
+			_games.setModel( new DefaultTreeModel( new DefaultMutableTreeNode( "GameGround" ) ) );
+			_games.getSelectionModel().setSelectionMode( TreeSelectionModel.SINGLE_TREE_SELECTION );
+			_games.addTreeSelectionListener( this );
 		}
 		public JTextPane getLogPad() {
 			return ( _logPad );
@@ -42,6 +50,14 @@ class HBrowser extends HAbstractLogic {
 			_client.println( "quit" );
 			_client.disconnect();
 		}
+		public void valueChanged(TreeSelectionEvent e) {
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode)_games.getLastSelectedPathComponent();
+			if (node == null)
+				return;
+			JOptionPane.showMessageDialog( this,
+					"Games\n" + node,
+					"GameGround - error ...", JOptionPane.ERROR_MESSAGE );
+		};
 		public void updateTagLib( org.swixml.SwingEngine $se ) {	}
 		public Action onMessage = new AbstractAction() {
 			public static final long serialVersionUID = 17l;
@@ -113,6 +129,14 @@ class HBrowser extends HAbstractLogic {
 	}
 	public void handleLogic( String $message ) {
 		System.out.println( "GameGround serves [" + $message + "] logic." );
+		String[] tokens = $message.split( ":", 2 );
+		HAbstractLogic l = GameGround.getInstance().getLogicBySymbol( tokens[ 0 ] );
+		if ( l != null ) {
+			l.setDefaults( tokens[ 1 ] );
+			HLogicInfo i = l.getInfo();
+			((DefaultMutableTreeNode)_gui._games.getModel().getRoot()).add( new DefaultMutableTreeNode( i._name ) );
+			((DefaultTreeModel)_gui._games.getModel()).reload();
+		}
 	}
 	public void handlePlayer( String $message ) {
 		System.out.println( "Another player: [" + $message + "]." );

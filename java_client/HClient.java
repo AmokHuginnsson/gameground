@@ -53,9 +53,6 @@ class HClient extends Thread {
 		try {
 			System.out.println( "Main client loop." );
 			String message = "";
-			String command;
-			String argument;
-			String[] tokens = new String[2];
 			while ( _loop && ( message = _in.readLine() ) != null ) {
 				if ( message.length() > 0 ) {
 					System.out.println( message );

@@ -67,6 +67,23 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		return;
 	}
 
+	public HAbstractLogic getLogicBySymbol( String $symbol ) {
+		java.util.Set<java.util.Map.Entry<String,HAbstractLogic>> entSet = _logics.entrySet();
+		java.util.Map.Entry<String,HAbstractLogic> ent = null;
+		for ( java.util.Iterator<java.util.Map.Entry<String,HAbstractLogic>> it = entSet.iterator(); it.hasNext(); ent = it.next() ) {
+			if ( ent != null ) {
+				HAbstractLogic al = ent.getValue();
+				HLogicInfo info = al.getInfo();
+				if ( ( info != null ) && ( info._symbol.compareTo( $symbol ) == 0 ) )
+					return ( al );
+				System.out.println( "L: " + ent.getKey() );
+			} else {
+				System.out.println( "WTF?" );
+			}
+		}
+		return ( null );
+	}
+
 	static public void main( String $argv[] ) {
 		SwingEngine.DEBUG_MODE = true;
 		_instance = new GameGround();

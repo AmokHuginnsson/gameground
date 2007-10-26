@@ -6,6 +6,7 @@ import java.util.Collections;
 public abstract class HAbstractLogic {
 	public HGUIface _gui;
 	SortedMap<String,Method> _handlers;
+	HLogicInfo _info;
 
 	public void init( HGUIface $ext ) {
 		_gui = $ext;
@@ -22,6 +23,12 @@ public abstract class HAbstractLogic {
 	public abstract void reinit();
 	public HGUIface getGUI() {
 		return ( _gui );
+	}
+	public HLogicInfo getInfo() {
+		return ( _info );
+	}
+	public void setDefaults( String $defaults ) {
+		_info._defaults = $defaults;
 	}
 	public void handleMessage( String $message ) {
 		int index = 0, offset = 0;

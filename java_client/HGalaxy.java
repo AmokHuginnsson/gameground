@@ -200,7 +200,7 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 			_systemNames = HSystemNames.getNames( HSystemNames.NORSE );
 		else
 			_systemNames = HSystemNames.getNames( HSystemNames.LATIN );
-
+		_info = new HLogicInfo( "glx", "Galaxy" );
 		init( _gui = new HGUILocal( LABEL ) );
 		HImages images = new HImages();
 		_gui._board.setImages( images );
