@@ -39,6 +39,7 @@ class HBrowser extends HAbstractLogic {
 			return ( _logPad );
 		}
 		public void onDisconnect() {
+			_client.println( "quit" );
 			_client.disconnect();
 		}
 		public void updateTagLib( org.swixml.SwingEngine $se ) {	}
@@ -87,7 +88,8 @@ class HBrowser extends HAbstractLogic {
 		if ( gg.getClient() == null ) {
 			HLogin l = (HLogin)gg.getLogic( HLogin.LABEL );
 			HLogin.OConnectionConfig cc = l.getConnectionConfig();
-			_gui.log( "### Connecting to server: " + cc._host + " to port " + cc._port + ".\n"  );
+			_gui.log( "###", HGUILocal.Colors.BLUE );
+			_gui.log( " Connecting to server: " + cc._host + " to port " + cc._port + ".\n"  );
 			try {
 				_client = new HClient();
 				_client.connect( cc._host, cc._port );

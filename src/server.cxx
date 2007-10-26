@@ -40,6 +40,20 @@ using namespace yaal::hconsole;
 using namespace yaal::tools;
 using namespace yaal::tools::util;
 
+namespace
+{
+
+HString const& mark( int a_iColor )
+	{
+	static HString buf;
+	buf = "$";
+	buf += a_iColor;
+	buf += ";###;$7;";
+	return ( buf );
+	}
+
+}
+
 HServer::HServer( int a_iConnections )
 	: HProcess( a_iConnections ), f_iMaxConnections( a_iConnections ),
 	f_oSocket( HSocket::TYPE::D_DEFAULT, a_iConnections ), f_oClients(), f_oLogics(), f_oHandlers()
@@ -56,7 +70,7 @@ int HServer::init_server( int a_iPort )
 	register_file_descriptor_handler ( f_oSocket.get_file_descriptor(), &HServer::handler_connection );
 	f_oHandlers[ "shutdown" ] = &HServer::handler_shutdown;
 	f_oHandlers[ "quit" ] = &HServer::handler_quit;
-	f_oHandlers[ "msg" ] = &HServer::broadcast;
+	f_oHandlers[ "msg" ] = &HServer::handle_chat;
 	f_oHandlers[ "name" ] = &HServer::set_client_name;
 	f_oHandlers[ "get_logics" ] = &HServer::get_logics_info;
 	f_oHandlers[ "get_players" ] = &HServer::get_players_info;
@@ -70,11 +84,19 @@ int HServer::init_server( int a_iPort )
 	M_EPILOG
 	}
 
-void HServer::broadcast( OClientInfo& a_roInfo, HString const& a_roMessage )
+void HServer::broadcast( HString const& a_roMessage )
 	{
 	M_PROLOG
 	for ( clients_t::HIterator it = f_oClients.begin(); it != f_oClients.end(); ++ it )
-		*it->second.f_oSocket << "msg:" << a_roInfo.f_oName << ": " << a_roMessage << endl;
+		*it->second.f_oSocket << a_roMessage << endl;
+	return;
+	M_EPILOG
+	}
+
+void HServer::handle_chat( OClientInfo& a_roInfo, HString const& a_roMessage )
+	{
+	M_PROLOG
+	broadcast( "msg:" + a_roInfo.f_oName + ": " + a_roMessage );
 	return;
 	M_EPILOG
 	}
@@ -94,7 +116,10 @@ void HServer::set_client_name( OClientInfo& a_roInfo, HString const& a_oName )
 	else if ( it != f_oClients.end() )
 		*a_roInfo.f_oSocket << "err:Name taken." << endl;
 	else
+		{
 		a_roInfo.f_oName = a_oName;
+		broadcast( "msg:" + mark( COLORS::D_FG_BLUE ) + " " + a_oName + " entered the GameGround." );
+		}
 	return;
 	M_EPILOG
 	}
@@ -240,14 +265,18 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& a_oClient, char const* c
 	M_PROLOG
 	M_ASSERT( !! a_oClient );
 	int l_iFileDescriptor = a_oClient->get_file_descriptor();
-	if ( a_pcReason )
+	if ( a_pcReason && a_pcReason[0] )
 		*a_oClient << "kck:" << a_pcReason << endl;
 	f_oSocket.shutdown_client( l_iFileDescriptor );
 	unregister_file_descriptor_handler( l_iFileDescriptor );
 	clients_t::HIterator clientIt = f_oClients.find( l_iFileDescriptor );
 	M_ASSERT( clientIt != f_oClients.end() );
-	cout << "client " <<  clientIt->second.f_oName
-		<< " was kicked because of: " << ( a_pcReason ? a_pcReason : "connection error" )<< endl;
+	cout << "client " <<  clientIt->second.f_oName;
+	if ( ! a_pcReason || a_pcReason[ 0 ] )
+		cout << " was kicked because of: " << ( a_pcReason ? a_pcReason : "connection error" );
+	else
+		cout << " disconnected from server.";
+	cout << endl;
 	if ( !! clientIt->second.f_oLogic )
 		{
 		HLogic::ptr_t l_oLogic = clientIt->second.f_oLogic;
@@ -266,9 +295,7 @@ void HServer::send_logics_info( OClientInfo& a_roInfo )
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 	for( HLogicFactory::creators_t::HIterator it = factory.begin();
 			it != factory.end(); ++ it )
-		{
 		*a_roInfo.f_oSocket << "logic:" << it->second.f_oInfo << endl;
-		}
 	return;
 	M_EPILOG
 	}
@@ -289,7 +316,10 @@ void HServer::handler_shutdown( OClientInfo&, HString const& )
 
 void HServer::handler_quit( OClientInfo& a_roInfo, HString const& )
 	{
-	kick_client( a_roInfo.f_oSocket, "bye" );
+	HString name = a_roInfo.f_oName;
+	kick_client( a_roInfo.f_oSocket, "" );
+	if ( ! name.is_empty() )
+		broadcast( "msg:" + mark( COLORS::D_FG_RED ) + " " + name + " has left the GameGround." );
 	return;
 	}
 

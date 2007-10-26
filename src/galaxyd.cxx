@@ -44,6 +44,26 @@ using namespace yaal::tools::util;
 namespace galaxy
 {
 
+int n_piColors [ ] =
+	{
+	( COLORS::D_FG_BRIGHTBLUE | COLORS::D_BG_BLACK ),
+	( COLORS::D_FG_BRIGHTGREEN | COLORS::D_BG_BLACK ),
+	( COLORS::D_FG_BRIGHTRED | COLORS::D_BG_BLACK ),
+	( COLORS::D_FG_BRIGHTCYAN | COLORS::D_BG_BLACK ),
+	( COLORS::D_FG_BRIGHTMAGENTA | COLORS::D_BG_BLACK ),
+	( COLORS::D_FG_YELLOW | COLORS::D_BG_BLACK ),
+	( COLORS::D_FG_BLUE | COLORS::D_BG_BLACK ),
+	( COLORS::D_FG_GREEN | COLORS::D_BG_BLACK ),
+	( COLORS::D_FG_RED | COLORS::D_BG_BLACK ),
+	( COLORS::D_FG_CYAN | COLORS::D_BG_BLACK ),
+	( COLORS::D_FG_MAGENTA | COLORS::D_BG_BLACK ),
+	( COLORS::D_FG_BROWN | COLORS::D_BG_BLACK ),
+	( COLORS::D_FG_LIGHTGRAY | COLORS::D_BG_BLACK ),
+	( COLORS::D_FG_LIGHTGRAY | COLORS::D_BG_BLACK ),
+	( COLORS::D_FG_LIGHTGRAY | COLORS::D_BG_BLACK ),
+	( COLORS::D_FG_LIGHTGRAY | COLORS::D_BG_BLACK )
+	};
+
 HSystem::HSystem ( void ) : f_iId ( - 1 ),
 														f_iCoordinateX ( - 1 ), f_iCoordinateY ( - 1 ),
 														f_iProduction ( - 1 ), f_iFleet ( - 1 ),
@@ -300,7 +320,7 @@ void HGalaxy::handler_message ( OClientInfo* a_poClientInfo, HString const& a_ro
 	M_PROLOG
 	HString l_oMessage;
 	l_oMessage = "GLX:MSG:$";
-	l_oMessage += get_emperor_info( a_poClientInfo )->f_iColor;
+	l_oMessage += n_piColors[ get_emperor_info( a_poClientInfo )->f_iColor ];
 	l_oMessage += ';';
 	l_oMessage += a_poClientInfo->f_oName;
 	l_oMessage += ";$12;: ";

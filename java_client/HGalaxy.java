@@ -132,8 +132,26 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		public HBoard _board;
 		public JTextPane _log;
 		public JTextPane _tips;
+		public int[] _colorMap;
 		public HGUILocal( String $resource ) {
 			super( $resource );
+			_colorMap = new int[ 20 ];
+			_colorMap[ 0 ] = Colors.BRIGHTBLUE;
+			_colorMap[ 1 ] = Colors.BRIGHTGREEN;
+			_colorMap[ 2 ] = Colors.BRIGHTRED;
+			_colorMap[ 3 ] = Colors.BRIGHTCYAN;
+			_colorMap[ 4 ] = Colors.BRIGHTMAGENTA;
+			_colorMap[ 5 ] = Colors.YELLOW;
+			_colorMap[ 6 ] = Colors.BLUE;
+			_colorMap[ 7 ] = Colors.GREEN;
+			_colorMap[ 8 ] = Colors.RED;
+			_colorMap[ 9 ] = Colors.CYAN;
+			_colorMap[ 10 ] = Colors.MAGENTA;
+			_colorMap[ 11 ] = Colors.BROWN;
+			_colorMap[ 12 ] = Colors.LIGHTGRAY;
+			_colorMap[ 13 ] = Colors.OTHERGRAY;
+			_colorMap[ 14 ] = Colors.DARKGRAY;
+			_colorMap[ 15 ] = Colors.WHITE;
 		}
 		public void updateTagLib( SwingEngine $se ) {
 			$se.getTaglib().registerTag( "hboard", HBoard.class );
@@ -236,7 +254,7 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 					_color = index;
 			} else if ( variable.compareTo( "ok" ) == 0 ) {
 				setState ( State.NORMAL );
-				_gui._emperor.setForeground( _gui._colors[ _color ] );
+				_gui._emperor.setForeground( _gui.color( _color ) );
 				_round = 0;
 			}
 		} catch ( NumberFormatException e ) {
