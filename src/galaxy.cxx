@@ -789,7 +789,7 @@ int HGalaxyWindow::handler_enter( int a_iCode, void const* )
 		{
 		if ( f_poMessageInput->get ( ).get < HString const & > ( ).find_other_than ( n_pcWhiteSpace ) >= 0 )
 			{
-			f_oVarTmpBuffer = "cmd:GLX:SAY:";
+			f_oVarTmpBuffer = "cmd:glx:say:";
 			f_oVarTmpBuffer += f_poMessageInput->get ( ).get < char const * const > ( );
 			f_oVarTmpBuffer += "\n";
 			f_poClient->send_message ( f_oVarTmpBuffer );
@@ -873,9 +873,9 @@ HClient::HClient ( char const * const a_pcProgramName )
 	f_oMoves ( )
 	{
 	M_PROLOG
-	f_oHandlers [ "SETUP" ] = &HClient::handler_setup;
-	f_oHandlers [ "PLAY" ] = &HClient::handler_play;
-	f_oHandlers [ "MSG" ] = &HClient::handler_msg;
+	f_oHandlers [ "setup" ] = &HClient::handler_setup;
+	f_oHandlers [ "play" ] = &HClient::handler_play;
+	f_oHandlers [ "msg" ] = &HClient::handler_msg;
 	f_oHandlers [ "err" ] = &HClient::handler_error;
 	f_oHandlers [ "kck" ] = &HClient::handler_error;
 	return;
@@ -921,7 +921,7 @@ int HClient::handler_message ( int )
 	HString l_oCommand;
 	if ( ( l_iMsgLength = f_oSocket.read_until ( l_oMessage ) ) > 0 )
 		{
-		while ( ( l_oCommand = l_oMessage.split( ":", 0 ) ) == "GLX" )
+		while ( ( l_oCommand = l_oMessage.split( ":", 0 ) ) == "glx" )
 			l_oMessage = l_oMessage.mid( l_oCommand.get_length() + 1 );
 		l_iMsgLength = l_oMessage.get_length();
 		if ( l_iMsgLength < 1 )
@@ -1144,7 +1144,7 @@ void HClient::end_round ( void )
 		for ( l_poMove = & f_oMoves.go ( 0 ); l_poMove;
 				l_poMove = f_oMoves.to_tail ( 1, moves_t::D_TREAT_AS_OPENED ) )
 			{
-			l_oMessage.format ( "cmd:GLX:PLAY:move=%d,%d,%d\n",
+			l_oMessage.format ( "cmd:glx:play:move=%d,%d,%d\n",
 					l_poMove->f_iSourceSystem,
 					l_poMove->f_iDestinationSystem,
 					l_poMove->f_iFleet );
@@ -1152,7 +1152,7 @@ void HClient::end_round ( void )
 			}
 		f_oMoves.flush ( );
 		}
-	f_oSocket.write_until_eos ( "cmd:GLX:PLAY:end_round\n" );
+	f_oSocket.write_until_eos ( "cmd:glx:play:end_round\n" );
 	return;
 	M_EPILOG
 	}
@@ -1173,6 +1173,7 @@ int main_client ( void )
 		n_ppcSystemNames = n_ppcSystemNamesNorse;
 	else
 		n_ppcSystemNames = n_ppcSystemNamesLatin;
+	M_ENSURE( setup.f_oGameType == "glx" );
 	HClient l_oClient ( setup.f_oLogin );
 	l_oClient.init_client ( setup.f_oHost, setup.f_iPort );
 	l_oClient.run ( );

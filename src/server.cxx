@@ -144,7 +144,7 @@ void HServer::create_game( OClientInfo& a_roInfo, HString const& a_oArg )
 		{
 		HString l_oType = a_oArg.split( ":", 0 );
 		HString l_oConfiguration = a_oArg.split( ":", 1 );
-		HString l_oName = l_oConfiguration.split( ":,", 0 );
+		HString l_oName = l_oConfiguration.split( ",", 0 );
 		HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 		logics_t::HIterator it = f_oLogics.find( l_oName );
 		if ( it != f_oLogics.end() )
@@ -163,6 +163,7 @@ void HServer::create_game( OClientInfo& a_roInfo, HString const& a_oArg )
 					{
 					f_oLogics[ l_oName ] = l_oLogic;
 					a_roInfo.f_oLogic = l_oLogic;
+					cout << l_oName << "," << l_oType << endl;
 					}
 				}
 			catch ( HLogicException& e )
@@ -354,7 +355,12 @@ void HServer::send_players_info( OClientInfo& a_roInfo )
 			it != f_oClients.end(); ++ it )
 		{
 		if ( ! it->second.f_oName.is_empty() )
-			*a_roInfo.f_oSocket << "player:" << it->second.f_oName << "," << ( !! it->second.f_oLogic ? static_cast<char const* const>( it->second.f_oLogic->get_name() ) : "" ) << endl;
+			{
+			*a_roInfo.f_oSocket << "player:" << it->second.f_oName;
+			if ( !! it->second.f_oLogic )
+				*a_roInfo.f_oSocket << "," << it->second.f_oLogic->get_info();
+			*a_roInfo.f_oSocket << endl;
+			}
 		}
 	return;
 	M_EPILOG

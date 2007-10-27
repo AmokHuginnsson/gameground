@@ -58,8 +58,11 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		} else {
 			java.util.Set<java.util.Map.Entry<String,HAbstractLogic>> entSet = _logics.entrySet();
 			java.util.Map.Entry<String,HAbstractLogic> ent = null;
-			for ( java.util.Iterator<java.util.Map.Entry<String,HAbstractLogic>> it = entSet.iterator(); it.hasNext(); ent = it.next() )
+			java.util.Iterator<java.util.Map.Entry<String,HAbstractLogic>> it = entSet.iterator();
+			while ( it.hasNext() ) {
+				ent = it.next();
 				System.out.println( "logic: " + ent.getKey() );
+			}
 			System.out.println( "No such logic: " + $face + "." );
 			CallStack.print();
 			System.exit( 1 );
@@ -70,15 +73,14 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	public HAbstractLogic getLogicBySymbol( String $symbol ) {
 		java.util.Set<java.util.Map.Entry<String,HAbstractLogic>> entSet = _logics.entrySet();
 		java.util.Map.Entry<String,HAbstractLogic> ent = null;
-		for ( java.util.Iterator<java.util.Map.Entry<String,HAbstractLogic>> it = entSet.iterator(); it.hasNext(); ent = it.next() ) {
+		java.util.Iterator<java.util.Map.Entry<String,HAbstractLogic>> it = entSet.iterator();
+		while ( it.hasNext() ) {
+			ent = it.next();
 			if ( ent != null ) {
 				HAbstractLogic al = ent.getValue();
 				HLogicInfo info = al.getInfo();
 				if ( ( info != null ) && ( info._symbol.compareTo( $symbol ) == 0 ) )
 					return ( al );
-				System.out.println( "L: " + ent.getKey() );
-			} else {
-				System.out.println( "WTF?" );
 			}
 		}
 		return ( null );

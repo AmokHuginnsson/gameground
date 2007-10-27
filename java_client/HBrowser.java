@@ -25,6 +25,38 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.TreeSelectionModel;
+import java.util.TreeSet;
+import java.util.SortedSet;
+import javax.swing.DefaultListModel;
+
+
+class HPlayerSet {
+	String _id;
+	String _name;
+	String _configuration;
+	SortedSet<String> _players = java.util.Collections.synchronizedSortedSet( new TreeSet<String>() );
+
+	public HPlayerSet( String $id, String $name ) {
+		this( $id, $name, null );
+	}
+	public HPlayerSet( String $id, String $name, String $configuration ) {
+		_id = $id;
+		_name = $name;
+		_configuration = $configuration;
+	}
+	public String toString() {
+		return ( _name );
+	}
+	public void addPlayer( String $player ) {
+		_players.add( $player );
+	}
+	public void removePlayer( String $player ) {
+		_players.remove( $player );
+	}
+	public java.util.Iterator<String> peopleIterator() {
+		return ( _players.iterator() );
+	}
+}
 
 class HBrowser extends HAbstractLogic {
 	public static final String LABEL = "browser";
@@ -39,7 +71,7 @@ class HBrowser extends HAbstractLogic {
 		}
 		public void reinit() {
 			_msg.requestFocusInWindow();
-			_games.setModel( new DefaultTreeModel( new DefaultMutableTreeNode( "GameGround" ) ) );
+			_games.setModel( new DefaultTreeModel( new DefaultMutableTreeNode( new HPlayerSet( "root", "GameGround" ) ) ) );
 			_games.getSelectionModel().setSelectionMode( TreeSelectionModel.SINGLE_TREE_SELECTION );
 			_games.addTreeSelectionListener( this );
 		}
@@ -52,11 +84,18 @@ class HBrowser extends HAbstractLogic {
 		}
 		public void valueChanged(TreeSelectionEvent e) {
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode)_games.getLastSelectedPathComponent();
+			DefaultListModel lm = new DefaultListModel();
+			_people.setModel( lm );
 			if (node == null)
 				return;
-			JOptionPane.showMessageDialog( this,
-					"Games\n" + node,
-					"GameGround - error ...", JOptionPane.ERROR_MESSAGE );
+			HPlayerSet ps = (HPlayerSet)node.getUserObject();
+			String ent = "";
+			java.util.Iterator<String> it = ps.peopleIterator();
+			while ( it.hasNext() ) {
+				ent = it.next();
+				lm.addElement( ent );
+			}
+			_people.setModel( lm );
 		};
 		public void updateTagLib( org.swixml.SwingEngine $se ) {	}
 		public Action onMessage = new AbstractAction() {
@@ -134,12 +173,19 @@ class HBrowser extends HAbstractLogic {
 		if ( l != null ) {
 			l.setDefaults( tokens[ 1 ] );
 			HLogicInfo i = l.getInfo();
-			((DefaultMutableTreeNode)_gui._games.getModel().getRoot()).add( new DefaultMutableTreeNode( i._name ) );
+			((DefaultMutableTreeNode)_gui._games.getModel().getRoot()).add( new DefaultMutableTreeNode( new HPlayerSet( tokens[ 0 ], i._name, tokens[ 1 ] ) ) );
 			((DefaultTreeModel)_gui._games.getModel()).reload();
 		}
 	}
 	public void handlePlayer( String $message ) {
-		System.out.println( "Another player: [" + $message + "]." );
+		String[] tokens = $message.split( ",", 3 );
+		if ( tokens.length == 1 ) {
+			/*
+			 * Player is not inside any game.
+			 */
+			((HPlayerSet)((DefaultMutableTreeNode)_gui._games.getModel().getRoot()).getUserObject()).addPlayer( tokens[ 0 ] );
+		}
+		System.out.println( "Another player: [" + tokens[ 0 ] + "]." );
 	}
 }
 
