@@ -84,11 +84,14 @@ class HBrowser extends HAbstractLogic {
 		}
 		public void valueChanged(TreeSelectionEvent e) {
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode)_games.getLastSelectedPathComponent();
+			updatePlayers( node );
+		};
+		public void updatePlayers( DefaultMutableTreeNode $node ) {
 			DefaultListModel lm = new DefaultListModel();
 			_people.setModel( lm );
-			if (node == null)
+			if ( $node == null )
 				return;
-			HPlayerSet ps = (HPlayerSet)node.getUserObject();
+			HPlayerSet ps = (HPlayerSet)$node.getUserObject();
 			String ent = "";
 			java.util.Iterator<String> it = ps.peopleIterator();
 			while ( it.hasNext() ) {
@@ -96,7 +99,7 @@ class HBrowser extends HAbstractLogic {
 				lm.addElement( ent );
 			}
 			_people.setModel( lm );
-		};
+		}
 		public void updateTagLib( org.swixml.SwingEngine $se ) {	}
 		public Action onMessage = new AbstractAction() {
 			public static final long serialVersionUID = 17l;
@@ -124,6 +127,7 @@ class HBrowser extends HAbstractLogic {
 		try {
 			_handlers.put( "logic", HBrowser.class.getDeclaredMethod( "handleLogic", new Class[]{ String.class } ) );
 			_handlers.put( "player", HBrowser.class.getDeclaredMethod( "handlePlayer", new Class[]{ String.class } ) );
+			_handlers.put( "player_quit", HBrowser.class.getDeclaredMethod( "handlePlayerQuit", new Class[]{ String.class } ) );
 		} catch ( java.lang.NoSuchMethodException e ) {
 			e.printStackTrace();
 			System.exit( 1 );
@@ -177,15 +181,45 @@ class HBrowser extends HAbstractLogic {
 			((DefaultTreeModel)_gui._games.getModel()).reload();
 		}
 	}
+	void addPlayer( DefaultMutableTreeNode $node, String $name ) {
+		((HPlayerSet)$node.getUserObject()).addPlayer( $name );
+		DefaultMutableTreeNode node = (DefaultMutableTreeNode)_gui._games.getLastSelectedPathComponent();
+		if ( node == $node )
+			_gui.updatePlayers( node );
+	}
 	public void handlePlayer( String $message ) {
+		DefaultMutableTreeNode node = null;
 		String[] tokens = $message.split( ",", 3 );
+		handlePlayerQuit( tokens[ 0 ] );
 		if ( tokens.length == 1 ) {
 			/*
 			 * Player is not inside any game.
 			 */
-			((HPlayerSet)((DefaultMutableTreeNode)_gui._games.getModel().getRoot()).getUserObject()).addPlayer( tokens[ 0 ] );
+			node = (DefaultMutableTreeNode)_gui._games.getModel().getRoot();
 		}
+		addPlayer( node, tokens[ 0 ] );
 		System.out.println( "Another player: [" + tokens[ 0 ] + "]." );
+	}
+	boolean removePlayer( DefaultMutableTreeNode $node, String $name ) {
+		HPlayerSet ps = (HPlayerSet)$node.getUserObject();
+		if ( ps._players.remove( $name ) ) {
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode)_gui._games.getLastSelectedPathComponent();
+			if ( node == $node )
+				_gui.updatePlayers( node );
+			if ( ps._players.isEmpty() && $node.isLeaf() )
+				((DefaultMutableTreeNode)$node.getParent()).remove( $node );
+			return ( false );
+		} else {
+			int childs = $node.getChildCount();
+			for ( int i = 0; i < childs; ++ i )
+				if ( ! removePlayer( (DefaultMutableTreeNode)$node.getChildAt( i ), $name ) )
+					return ( false );
+		}
+		return ( true );
+	}
+	public void handlePlayerQuit( String $message ) {
+		removePlayer((DefaultMutableTreeNode) _gui._games.getModel().getRoot(), $message );
+		System.out.println( "Player: [" + $message + "] removed." );
 	}
 }
 

@@ -3,7 +3,7 @@
 <panel layout="BorderLayout" focuscycleroot="true" border="&X;red)"><!--{{{-->
 	<vbox><glue maximumsize="1,10" preferredsize="1,10" />
 	<hbox border="&X;green)"><glue maximumsize="10,1" preferredsize="10,1" />
-		<panel layout="BorderLayout" preferredsize="600,&v_height;" constraints="BorderLayout.CENTER" focuscycleroot="true" border="&X;red)"><!--{{{-->
+		<panel layout="BorderLayout" preferredsize="600,&v_height;" constraints="BorderLayout.CENTER" border="&X;red)"><!--{{{-->
 			<vbox border="&X;cyan)">
 				<hbox border="TitledBorder(EmptyBorder,Server messages,TitledBorder.LEFT, TitledBorder.ABOVE_TOP)">
 					<scrollpane autoscrolls="true">
@@ -15,7 +15,7 @@
 				</hbox>
 			</vbox>
 		</panel>
-		<panel minimumsize="300,1" preferredsize="300,&v_height;" maximumsize="300,2000" layout="BorderLayout" constraints="BorderLayout.CENTER" focuscycleroot="true" border="&X;red)"><!--{{{-->
+		<panel minimumsize="300,1" preferredsize="300,&v_height;" maximumsize="300,2000" layout="BorderLayout" constraints="BorderLayout.CENTER" border="&X;red)"><!--{{{-->
 			<vbox border="&X;blue)">
 				<hbox border="&X;magenta)">
 					<hbox border="TitledBorder(EmptyBorder,Games,TitledBorder.LEFT, TitledBorder.ABOVE_TOP)">
@@ -25,19 +25,19 @@
 					</hbox>
 					<hbox border="TitledBorder(EmptyBorder,People,TitledBorder.LEFT, TitledBorder.ABOVE_TOP)">
 						<scrollpane autoscrolls="true">
-							<list id="_people" />
+							<list id="_people" focusable="false" />
 						</scrollpane>
 					</hbox>
 				</hbox>
 				<hbox maximumsize="2000,80" border="&X;orange)">
 					<panel layout="GridBagLayout" border="&X;red)">
-						<button id="_join" text="Join !" action="onJoin" tooltiptext="Click me to join pre-existing game.">
+						<button id="_join" text="Join !" action="onJoin" mnemonic="VK_J" enabled="false" tooltiptext="Click me to join pre-existing game.">
 							<gridbagconstraints id="gbcJoin" gridx="0" gridy="0" ipadx="20" insets="8,8,0,8" fill="GridBagConstraints.BOTH" />
 						</button>
-						<button id="_create" text="Create !" action="onCreate" tooltiptext="Click me to create a new game.">
+						<button id="_create" text="Create !" action="onCreate" mnemonic="VK_C" tooltiptext="Click me to create a new game.">
 							<gridbagconstraints use="gbcJoin" gridy="1" />
 						</button>
-						<button id="_disconnect" text="Disconnect !" action="onDisconnect" tooltiptext="Click me to disconnect from GameGround server.">
+						<button id="_disconnect" text="Disconnect !" action="onDisconnect" mnemonic="VK_D" tooltiptext="Click me to disconnect from GameGround server.">
 							<gridbagconstraints use="gbcJoin" gridy="2" />
 						</button>
 					</panel>

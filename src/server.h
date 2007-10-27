@@ -32,7 +32,7 @@ Copyright:
 #include "clientinfo.h"
 #include "logic.h"
 
-class HServer : public yaal::hcore::HProcess
+class HServer : public yaal::tools::HProcess
 	{
 protected:
 	/*{*/
@@ -49,8 +49,9 @@ protected:
 public:
 	/*{*/
 	HServer( int );
+	~HServer( void );
 	int init_server( int );
-	using yaal::hcore::HProcess::run;
+	using yaal::tools::HProcess::run;
 	/*}*/
 protected:
 	/*{*/

@@ -63,6 +63,11 @@ HServer::HServer( int a_iConnections )
 	M_EPILOG
 	}
 
+HServer::~HServer( void )
+	{
+	cout << brightred << "<<<GameGround>>>" << lightgray << " server finished." << endl;
+	}
+
 int HServer::init_server( int a_iPort )
 	{
 	M_PROLOG
@@ -80,6 +85,7 @@ int HServer::init_server( int a_iPort )
 	f_oHandlers[ "join" ] = &HServer::join_game;
 	f_oHandlers[ "cmd" ] = &HServer::pass_command;
 	HProcess::init ( 3600 );
+	cout << brightblue << "<<<GameGround>>>" << lightgray << " server started." << endl;
 	return ( 0 );
 	M_EPILOG
 	}
@@ -118,6 +124,7 @@ void HServer::set_client_name( OClientInfo& a_roInfo, HString const& a_oName )
 	else
 		{
 		a_roInfo.f_oName = a_oName;
+		broadcast( "player:" + a_oName );
 		broadcast( "msg:" + mark( COLORS::D_FG_BLUE ) + " " + a_oName + " entered the GameGround." );
 		}
 	return;
@@ -320,7 +327,10 @@ void HServer::handler_quit( OClientInfo& a_roInfo, HString const& )
 	HString name = a_roInfo.f_oName;
 	kick_client( a_roInfo.f_oSocket, "" );
 	if ( ! name.is_empty() )
+		{
+		broadcast( "player_quit:" + name );
 		broadcast( "msg:" + mark( COLORS::D_FG_RED ) + " " + name + " has left the GameGround." );
+		}
 	return;
 	}
 
