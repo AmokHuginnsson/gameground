@@ -16,6 +16,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	private static GameGround _instance;
 	public Frame _frame;
 	private HClient _client;
+	boolean _applet = false;
 
 	public void init() {
 		try {
@@ -27,6 +28,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 				tl.registerTag( "frame", JApplet.class );
 				se.insert( AppletJDOMHelper.loadResource( "/res/gameground.xml", this ), this );
 				_frame = getParentFrame();
+				_applet = true;
 			} else {
 				se.render( AppletJDOMHelper.loadResource( "/res/gameground.xml", this ) );
 				_frame = SwingEngine.getAppFrame();
@@ -128,6 +130,15 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	public HAbstractLogic getLogic( String $name ) {
 		return ( _logics.get( $name ) );
 	}
-
+	public void shutdown() {
+		if ( _applet ) {
+			_frame.setVisible( false );
+		} else {
+			System.exit( 0 );
+		}
+	}
+	public boolean isApplet() {
+		return ( _applet );
+	}
 }
 

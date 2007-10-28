@@ -31,12 +31,16 @@ class HLogin extends HAbstractLogic {
 		}
 		public void reinit() {
 			_name.requestFocusInWindow();
+			if ( GameGround.getInstance().isApplet() ) {
+				_server.setEditable( false );
+				_port.setEditable( false );
+			}
 		}
 		public void onConnectClick() {
 			HLogin.this.onConnectClick();
 		}
 		public void onExit() {
-			System.exit( 0 );
+			GameGround.getInstance().shutdown();
 		}
 		public Action onEnter = new AbstractAction() {
 			public static final long serialVersionUID = 17l;
