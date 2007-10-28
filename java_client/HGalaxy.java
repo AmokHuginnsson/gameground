@@ -167,7 +167,7 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 	static {
 		registered = registerLogic();
 	}
-	private static final String LABEL = "galaxy";
+	public static final String LABEL = "galaxy";
 	private State _state;
 	int _round;
 	int _color;

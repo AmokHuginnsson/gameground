@@ -3,30 +3,37 @@
 <panel layout="BorderLayout" background="black"><!--{{{-->
 	<hbox>
 		<vbox>
-			<panel maximumsize="2000,100" background="black">
-				<label font="-BOLDITALIC-22" foreground="blue">Galaxy</label>
-				<label foreground="lightGray" labelfor="_emperor">Emperor </label>
-				<label id="_emperor" foreground="lightGray"></label>
-				<label foreground="lightGray" labelfor="_fleet">Fleet size </label>
-				<textfield id="_fleet" columns="4" foreground="black" background="green" caretcolor="black" focusable="true" editable="false" layout="BorderLayout" constraints="BorderLayout.NORTH" tooltiptext="Enter number of ships You want to send in this fleet." />
-				<label foreground="lightGray" labelfor="_round" preferredsize="30,&v_bar_height;" verticalalignment="TOP">
-					Turn
-				</label>
-				<label id="_round" foreground="lightGray" preferredsize="18,&v_bar_height;" verticalalignment="TOP" horizontalalignment="RIGHT">
-					0
-				</label>
-				<label foreground="lightGray" labelfor="_arrival" preferredsize="40,&v_bar_height;" verticalalignment="TOP" horizontalalignment="RIGHT">
-					arrival
-				</label>
-				<label id="_arrival" foreground="lightGray" preferredsize="18,&v_bar_height;" verticalalignment="TOP" horizontalalignment="RIGHT">
-					0
-				</label>
-				<button id="_endRound" text="End round !" action="submit" tooltiptext="Click me to end this turn." focusable="false" />
-			</panel>
-			<hboard id="_board" bounds="0,&v_bar_height;,640,640" border="MatteBorder(1,1,1,1,0000a0)" />
+			<hbox maximumsize="2000,&v_bar_height;" background="black">
+				<label font="-BOLDITALIC-22" foreground="blue" preferredsize="80,&v_bar_height;">Galaxy</label>
+				<panel background="black"> 
+					<label foreground="lightGray" labelfor="_emperor" preferredsize="60,&v_bar_height;">Emperor </label>
+					<label id="_emperor" preferredsize="300,&v_bar_height;" foreground="lightGray"></label>
+				</panel>
+				<panel minimumsize="382,&v_bar_height;" preferredsize="382,&v_bar_height;" background="black">
+					<label foreground="lightGray" labelfor="_fleet">Fleet size </label>
+					<textfield id="_fleet" columns="4" foreground="black" background="green" caretcolor="black" focusable="true" editable="false" layout="BorderLayout" constraints="BorderLayout.NORTH" tooltiptext="Enter number of ships You want to send in this fleet." />
+					<glue preferredsize="10,1" />
+					<label foreground="lightGray" labelfor="_round">
+						Turn
+					</label>
+					<label id="_round" foreground="lightGray" preferredsize="18,&v_bar_height;" horizontalalignment="RIGHT">
+						0
+					</label>
+					<glue preferredsize="10,1" />
+					<label foreground="lightGray" labelfor="_arrival">
+						arrival
+					</label>
+					<label id="_arrival" foreground="lightGray" preferredsize="18,&v_bar_height;" horizontalalignment="RIGHT">
+						0
+					</label>
+					<button id="_endRound" text="End round !" action="submit" tooltiptext="Click me to end this turn." focusable="false" />
+				</panel>
+			</hbox>
+			<hboard id="_board" preferredsize="640,640" border="MatteBorder(1,1,1,1,0000a0)" />
 		</vbox>
-		<vbox minimumsize="300,1" preferredsize="300,&v_height;" maximumsize="300,2000">
-			<panel maximumsize="300,300" layout="GridBagLayout" background="black" foreground="lightGray" border="MatteBorder(1,1,0,1,0000a0)">
+		<vbox minimumsize="&v_sidebar_width_galaxy;,1" preferredsize="&v_sidebar_width_galaxy;,&v_height;" maximumsize="&v_sidebar_width_galaxy;,2000">
+			<glue maximumsize="1,4" preferredsize="1,4" />
+			<panel maximumsize="&v_sidebar_width_galaxy;,60" preferredsize="&v_sidebar_width_galaxy;,60" layout="GridBagLayout" background="black" foreground="lightGray" border="MatteBorder(1,1,0,1,0000a0)">
 				<label labelfor="_systemInfo" foreground="">
 					<gridbagconstraints id="gbc_1" insets="0,4,0,0" ipady="2" gridx="0" gridy="0" anchor="GridBagConstraints.WEST" />
 					System:
@@ -56,13 +63,13 @@
 					<gridbagconstraints insets="0,4,0,0" gridx="3" gridy="2" weightx="1" anchor="GridBagConstraints.WEST" />
 				</label>
 			</panel>
-			<scrollpane border="MatteBorder(1,0,1,1,0000a0)" autoscrolls="true">
+			<scrollpane border="MatteBorder(1,0,1,1,0000a0)" maximumsize="&v_sidebar_width_galaxy;,2000" autoscrolls="true">
 				<textpane id="_logPad" foreground="lightGray" background="black" caretcolor="black" editable="false" focusable="false" />
 			</scrollpane>
-			<panel maximumsize="300,40" border="MatteBorder(0,0,1,1,0000a0)" background="black">
+			<panel maximumsize="&v_sidebar_width_galaxy;,40" border="MatteBorder(0,0,1,1,0000a0)" background="black">
 				<textfield id="_messageInput" columns="23" foreground="lightGray" background="black" caretcolor="green" focusable="true" editable="true" tooltiptext="Enter message You want to send to other emperors." border="&empty;" />
 			</panel>
-			<scrollpane bounds="640,610,260,60" border="MatteBorder(0,0,1,1,0000a0)">
+			<scrollpane maximumsize="&v_sidebar_width_galaxy;,80" preferredsize="&v_sidebar_width_galaxy;,80" border="MatteBorder(0,0,1,1,0000a0)">
 				<textpane id="_tips" foreground="lightGray" background="black" caretcolor="black" editable="false" focusable="false">
 					Wait for match to begin ...
 				</textpane>

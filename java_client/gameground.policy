@@ -1,3 +1,4 @@
 grant {
 	permission java.net.SocketPermission "127.0.0.1:7777", "resolve,connect";
+  permission java.awt.AWTPermission "showWindowWithoutWarningBanner";
 };

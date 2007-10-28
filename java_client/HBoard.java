@@ -49,7 +49,8 @@ public class HBoard extends JPanel implements MouseInputListener {
 	public static final long serialVersionUID = 7l;
 	boolean _help;
 	int _size;
-	int _diameter;
+	double _diameterX;
+	double _diameterY;
 	int _cursorX;
 	int _cursorY;
 	int _sourceSystem;
@@ -63,12 +64,13 @@ public class HBoard extends JPanel implements MouseInputListener {
 		_size = -1;
 		_cursorX = -1;
 		_cursorY = -1;
-		_diameter = -1;
+		_diameterX = -1;
+		_diameterY = -1;
 		_sourceSystem = -1;
 	}
 	public void mouseMoved( MouseEvent $event ) {
-		int cursorX = $event.getX() / _diameter;
-		int cursorY = $event.getY() / _diameter;
+		int cursorX = (int)( $event.getX() / _diameterX );
+		int cursorY = (int)( $event.getY() / _diameterY );
 		if ( ( _cursorX != cursorX ) || ( _cursorY != cursorY ) ) {
 			_cursorX = cursorX;
 			_cursorY = cursorY;
@@ -97,7 +99,7 @@ public class HBoard extends JPanel implements MouseInputListener {
 	}
 	public void mouseClicked( MouseEvent $event ) {
 		if ( _systems != null ) {
-			int sysNo = getSysNo( $event.getX() / _diameter, $event.getY() / _diameter );
+			int sysNo = getSysNo( (int)( $event.getX() / _diameterX ), (int)( $event.getY() / _diameterY ) );
 			if ( sysNo >= 0 ) {
 				if ( _logic.getState() != HGalaxy.State.LOCKED ) {
 					if ( _logic.getState() == HGalaxy.State.NORMAL ) {
@@ -158,7 +160,6 @@ public class HBoard extends JPanel implements MouseInputListener {
 	}
 	void setSize( int $size ) {
 		_size = $size;
-		_diameter = 640 / $size;
 	}
 	void setSystems( HSystem[] $systems ) {
 		_systems = $systems;
@@ -168,8 +169,8 @@ public class HBoard extends JPanel implements MouseInputListener {
 	}
 	private void drawSystem( Graphics $gs, int $no, int $coordX, int $coordY, int $color ) {
 		$gs.drawImage( _images._systems[$no],
-				$coordX * _diameter + ( _diameter - 32 ) / 2,
-				$coordY * _diameter + ( _diameter - 32 ) / 2, this );
+				(int)( $coordX * _diameterX + ( _diameterX - 32 ) / 2 ),
+				(int)( $coordY * _diameterY + ( _diameterY - 32 ) / 2 ), this );
 		if ( ( $color >= 0 ) || ( ( $coordX == _cursorX ) && ( $coordY == _cursorY ) ) ) {
 			if ( ( $coordX == _cursorX ) && ( $coordY == _cursorY ) ) {
 				$gs.setColor ( _logic._gui._colors[ HGUIface.Colors.WHITE ] );
@@ -191,20 +192,25 @@ public class HBoard extends JPanel implements MouseInputListener {
 			}	else {
 				$gs.setColor ( _logic._gui._colors[ $color ] );
 			}
-			$gs.drawRect ( $coordX * _diameter + 1,
-					$coordY * _diameter + 1,
-					_diameter - 2, _diameter - 2 );
-			$gs.drawRect ( $coordX * _diameter + 2,
-					$coordY * _diameter + 2,
-					_diameter - 4, _diameter - 4 );
+			$gs.drawRect ( (int)( $coordX * _diameterX + 1 ),
+					(int)( $coordY * _diameterY + 1 ),
+					(int)( _diameterX - 2 ), (int)( _diameterY - 2 ) );
+			$gs.drawRect ( (int)( $coordX * _diameterX + 2 ),
+					(int)( $coordY * _diameterY + 2 ),
+					(int)( _diameterX - 4 ), (int)( _diameterY - 4 ) );
 		}
 		if ( _help ) {
 			$gs.setColor ( _logic._gui._colors[ HGUIface.Colors.WHITE ] );
-			$gs.drawString( _logic._systemNames[ $no ], $coordX * _diameter + 2, ( $coordY + 1 ) * _diameter - 2 );
+			$gs.drawString( _logic._systemNames[ $no ],
+					(int)( $coordX * _diameterX + 2 ),
+					(int)( ( $coordY + 1 ) * _diameterY - 2 ) );
 		}
 	}
 	protected void paintComponent( Graphics g ) {
-		g.drawImage( _images._background, 0, 0, this );
+		java.awt.Dimension d = getSize();
+		_diameterX = d.getWidth() / _size;
+		_diameterY = d.getHeight() / _size;
+		g.drawImage( _images._background, 0, 0, (int)d.getWidth(), (int)d.getHeight(), Color.black, this );
 		if ( _size > 0 ) {
 			if ( _systems != null ) {
 				int systemCount = _logic.getSystemCount();
@@ -224,9 +230,9 @@ public class HBoard extends JPanel implements MouseInputListener {
 			*/
 			g.setColor( Color.darkGray );
 			for ( int i = 0; i < _size; ++ i )
-				g.drawLine( 0, i * _diameter, 640, i * _diameter );
+				g.drawLine( 0, (int)( i * _diameterY ), (int)d.getWidth(), (int)( i * _diameterY ) );
 			for ( int i = 0; i < _size; ++ i )
-				g.drawLine( i * _diameter, 0, i * _diameter, 640 );
+				g.drawLine( (int)( i * _diameterX ), 0, (int)( i * _diameterX ), (int)d.getHeight() );
 		}
 	}
 }
