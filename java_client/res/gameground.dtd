@@ -3,8 +3,6 @@
 <!ENTITY v_port "7777">
 <!ENTITY v_bar_height "21">
 <!ENTITY v_login_screen_width "600">
-<!ENTITY v_title_height "90">
-<!ENTITY v_pad "30">
 <!ENTITY v_sidebar_width "300">
 <!ENTITY v_sidebar_width_galaxy "260">
 <!ENTITY empty "EmptyBorder(0,0,0,0)">

@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="iso8859-2"?>
 <!DOCTYPE panel SYSTEM "res/gameground.dtd">
-<panel layout="FlowLayout" focuscycleroot="true"><!--{{{-->
+<panel layout="GridBagLayout" focuscycleroot="true"><!--{{{-->
+	<gridbagconstraints fill="GridBagConstraints.CENTER" />
 	<vbox>
-		<glue preferredsize="&v_login_screen_width;,&v_pad;" border="&X;red)" />
-		<panel preferredsize="&v_login_screen_width;,&v_title_height;" border="&X;red)">
-			<label font="-BOLDITALIC-70" foreground="blue" layout="box" horizontalalignment="CENTER" preferredsize="&v_login_screen_width;,&v_title_height;">Game Ground</label>
-		</panel>
-		<glue preferredsize="0,&v_pad;" border="&X;red)" />
-		<panel bounds="0,100,&v_width;,60" layout="GridBagLayout">
+		<label font="Wargames-BOLD-72" foreground="blue">Game Ground</label>
+		<glue preferredsize="1,20"/>
+		<panel layout="GridBagLayout">
 			<label labelfor="_name">
 				<gridbagconstraints gridx="0" gridy="0" ipadx="10" anchor="GridBagConstraints.WEST" />
 				Your name:
@@ -30,8 +28,8 @@
 				<gridbagconstraints gridx="1" gridy="2" anchor="GridBagConstraints.WEST" />
 			</textfield>
 		</panel>
-		<glue preferredsize="0,&v_pad;" border="&X;red)" />
-		<panel bounds="0,200,&v_width;,50">
+		<glue preferredsize="1,20"/>
+		<panel>
 			<button text="Connect !" action="onConnectClick" tooltiptext="Click me to join the GameGround server." />
 			<button text="Exit !" action="onExit" mnemonic="VK_X" tooltiptext="Click me to exit this application." />
 		</panel>
