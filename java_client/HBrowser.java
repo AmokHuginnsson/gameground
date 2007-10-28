@@ -66,6 +66,7 @@ class HBrowser extends HAbstractLogic {
 		public JTextPane _logPad;
 		public JTree _games;
 		public JList _people;
+		public JButton _join;
 		public HGUILocal( String $resource ) {
 			super( $resource );
 		}
@@ -78,6 +79,15 @@ class HBrowser extends HAbstractLogic {
 		public JTextPane getLogPad() {
 			return ( _logPad );
 		}
+		public void onJoin() {
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode)_games.getLastSelectedPathComponent();
+			HPlayerSet ps = (HPlayerSet)node.getUserObject();
+			GameGround gg = GameGround.getInstance();
+			HAbstractLogic l = gg.getLogicBySymbol( ps._id );
+			HLogicInfo i = l.getInfo();
+			gg.setFace( i._face );
+			_client.println( "join:" + ps._name );
+		}
 		public void onDisconnect() {
 			_client.println( "quit" );
 			_client.disconnect();
@@ -85,6 +95,7 @@ class HBrowser extends HAbstractLogic {
 		public void valueChanged(TreeSelectionEvent e) {
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode)_games.getLastSelectedPathComponent();
 			updatePlayers( node );
+			_join.setEnabled( ( node != null ) && ( node.getLevel() == 2 ) );
 		};
 		public void updatePlayers( DefaultMutableTreeNode $node ) {
 			DefaultListModel lm = new DefaultListModel();
@@ -126,6 +137,7 @@ class HBrowser extends HAbstractLogic {
 		init( _gui = new HGUILocal( LABEL ) );
 		try {
 			_handlers.put( "logic", HBrowser.class.getDeclaredMethod( "handleLogic", new Class[]{ String.class } ) );
+			_handlers.put( "game", HBrowser.class.getDeclaredMethod( "handleGame", new Class[]{ String.class } ) );
 			_handlers.put( "player", HBrowser.class.getDeclaredMethod( "handlePlayer", new Class[]{ String.class } ) );
 			_handlers.put( "player_quit", HBrowser.class.getDeclaredMethod( "handlePlayerQuit", new Class[]{ String.class } ) );
 		} catch ( java.lang.NoSuchMethodException e ) {
@@ -147,6 +159,7 @@ class HBrowser extends HAbstractLogic {
 		if ( gg.getClient() == null ) {
 			HLogin l = (HLogin)gg.getLogic( HLogin.LABEL );
 			HLogin.OConnectionConfig cc = l.getConnectionConfig();
+			_gui.clearLog();
 			_gui.log( "###", HGUILocal.Colors.BLUE );
 			_gui.log( " Connecting to server: " + cc._host + " to port " + cc._port + ".\n"  );
 			try {
@@ -187,15 +200,49 @@ class HBrowser extends HAbstractLogic {
 		if ( node == $node )
 			_gui.updatePlayers( node );
 	}
+	public void handleGame( String $message ) {
+	}
 	public void handlePlayer( String $message ) {
 		DefaultMutableTreeNode node = null;
-		String[] tokens = $message.split( ",", 3 );
+		String[] tokens = $message.split( ",", 4 );
 		handlePlayerQuit( tokens[ 0 ] );
-		if ( tokens.length == 1 ) {
+		node = (DefaultMutableTreeNode)_gui._games.getModel().getRoot();
+		if ( tokens.length > 1 ) {
 			/*
-			 * Player is not inside any game.
+			 * Player is inside some game.
+			 * Lets find game type in the tree.
 			 */
-			node = (DefaultMutableTreeNode)_gui._games.getModel().getRoot();
+			int i = 0, childs = node.getChildCount();
+			for ( i = 0; i < childs; ++ i ) {
+				DefaultMutableTreeNode gameType = (DefaultMutableTreeNode)node.getChildAt( i );
+				HPlayerSet ps = (HPlayerSet)gameType.getUserObject();
+				if ( tokens[ 1 ].compareTo( ps._id ) == 0 ) {
+					node = gameType;
+					break;
+				}
+			}
+			if ( i >= childs ) {
+				System.out.println( "Internal logic implementation error." );
+				System.exit( 1 );
+			}
+			/*
+			 * Lets look for specyfic game.
+			 */
+			childs = node.getChildCount();
+			DefaultMutableTreeNode game = null;
+			for ( i = 0; i < childs; ++ i ) {
+				game = (DefaultMutableTreeNode)node.getChildAt( i );
+				HPlayerSet ps = (HPlayerSet)game.getUserObject();
+				if ( tokens[ 2 ].compareTo( ps._name ) == 0 )
+					break;
+			}
+			if ( game != null ) {
+				node = game;
+			} else {
+				DefaultMutableTreeNode newGame = null;
+				node.add( newGame = new DefaultMutableTreeNode( new HPlayerSet( tokens[ 1 ], tokens[ 2 ], tokens[ 3 ] ) ) );
+				node = newGame;
+			}
 		}
 		addPlayer( node, tokens[ 0 ] );
 		System.out.println( "Another player: [" + tokens[ 0 ] + "]." );

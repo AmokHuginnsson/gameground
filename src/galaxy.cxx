@@ -340,6 +340,7 @@ protected:
 	void handler_play ( HString & );
 	void handler_msg ( HString & );
 	void handler_error ( HString & );
+	void handler_dummy( HString& );
 	/*}*/
 private:
 	/*{*/
@@ -878,6 +879,8 @@ HClient::HClient ( char const * const a_pcProgramName )
 	f_oHandlers [ "msg" ] = &HClient::handler_msg;
 	f_oHandlers [ "err" ] = &HClient::handler_error;
 	f_oHandlers [ "kck" ] = &HClient::handler_error;
+	f_oHandlers [ "player" ] = &HClient::handler_dummy;
+	f_oHandlers [ "player_quit" ] = &HClient::handler_dummy;
 	return;
 	M_EPILOG
 	}
@@ -1163,6 +1166,10 @@ void HClient::send_message ( HString const & a_oMessage )
 	f_oSocket.write_until_eos ( a_oMessage );
 	return;
 	M_EPILOG
+	}
+
+void HClient::handler_dummy( HString& )
+	{
 	}
 
 }

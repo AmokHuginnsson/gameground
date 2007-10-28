@@ -63,8 +63,7 @@ public abstract class HAbstractLogic {
 		gg.getClient().disconnect();
 	}
 	public void processMessage( String $message ) {
-		String tokens[] = new String[2];
-		tokens = $message.split( ":", 2 );
+		String[] tokens = $message.split( ":", 2 );
 		String mnemonic = tokens[0];
 		String argument = tokens[1];
 		Method handler = _handlers.get( mnemonic );
@@ -79,8 +78,11 @@ public abstract class HAbstractLogic {
 				System.exit( 1 );
 			}
 		} else {
-			System.out.println( "Unhandled mnemonic: [" + mnemonic + "], then processing message: " + $message );
+			System.out.println( "Unhandled mnemonic: [" + mnemonic + "], in [" + getInfo()._face + "] while processing message: " + $message );
 			System.exit( 0 );
 		}
+	}
+	public void handlerDummy( String $msg ) {
+		System.out.println( "Message processed by dummy handler: " + $msg + " in [" + getInfo()._face + "]" );
 	}
 }

@@ -117,12 +117,21 @@ abstract class HGUIface extends JPanel {
 			_logPad.setCaretPosition( _log.getLength() );
 		} catch ( javax.swing.text.BadLocationException e ) {
 			e.printStackTrace();
+			System.exit( 1 );
 		}
 	}
 	void log( int $color ) {
 		if ( $color > 15 )
 			$color = 15;
 		_color = $color;
+	}
+	public void clearLog() {
+		try {
+			_log.remove( 0, _log.getLength() - 1 );
+		} catch ( javax.swing.text.BadLocationException e ) {
+			e.printStackTrace();
+			System.exit( 1 );
+		}
 	}
 }
 

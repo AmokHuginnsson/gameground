@@ -188,21 +188,21 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 //--------------------------------------------//
 	public HGalaxy( GameGround $applet ) throws Exception {
 		super();
+		init( _gui = new HGUILocal( LABEL ) );
 		_round = 0;
 		_systemCount = 0;
-//		_emperor = $emperor; /* FIXME */
-		_handlers = java.util.Collections.synchronizedSortedMap( new TreeMap<String,Method>() );
 		_emperors = new HashMap<Integer,String>();
-		_handlers.put( "SETUP", HGalaxy.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
-		_handlers.put( "PLAY", HGalaxy.class.getDeclaredMethod( "handlerPlay", new Class[]{ String.class } ) );
-//		_handlers.put( "MSG", HClient.class.getDeclaredMethod( "handlerMessage", new Class[]{ String.class } ) );
+		_handlers.put( "setup", HGalaxy.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
+		_handlers.put( "glx", HGalaxy.class.getDeclaredMethod( "handlerGalaxy", new Class[]{ String.class } ) );
+		_handlers.put( "play", HGalaxy.class.getDeclaredMethod( "handlerPlay", new Class[]{ String.class } ) );
+		_handlers.put( "player", HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
 		if ( ( java.util.Calendar.getInstance().get( java.util.Calendar.HOUR_OF_DAY ) % 2 ) == 1 )
 			_systemNames = HSystemNames.getNames( HSystemNames.NORSE );
 		else
 			_systemNames = HSystemNames.getNames( HSystemNames.LATIN );
-		_info = new HLogicInfo( "glx", "Galaxy" );
-		init( _gui = new HGUILocal( LABEL ) );
+		_info = new HLogicInfo( "glx", "galaxy", "Galaxy" );
 		HImages images = new HImages();
+		_gui._board.setGui( this );
 		_gui._board.setImages( images );
 		String serverAddress = "";
 		try {
@@ -218,6 +218,9 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		_state = State.LOCKED;
 		_moves = java.util.Collections.<HMove>synchronizedList( new java.util.LinkedList<HMove>() );
 		//_out.println( "GLX:LOGIN:" + _emperor );
+	}
+	void handlerGalaxy( String $command ) {
+		processMessage( $command );
 	}
 	void handlerSetup( String $command ) {
 		int index = - 1, coordX = - 1, coordY = - 1;
@@ -418,16 +421,6 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 	}
 	public void keyReleased( KeyEvent $event ) {
 	}
-	void initBoard( String $emperor, String $server, int $port ) {
-		_gui._emperor.setText( $emperor );
-		_gui._board.setGui( this );
-//		log( "##", 0 );log( " ##", 1 );log( " ##", 2 );log( " ##", 3 );log( " ##", 4 );log( " ##\n", 5 );
-//		log( "##", 6 );log( " ##", 7 );log( " ##", 8 );log( " ##", 9 );log( " ##", 10 );log( " ##\n", 11 );
-//		log( "##", 12 );log( " ##", 13 );log( " ##\n", 14 );
-		synchronized ( _client ) {
-			_client.notify();
-		}
-	}
 	void onEndRound() {
 		_gui._board.requestFocus();
 		if ( _state == State.INPUT )
@@ -450,10 +443,10 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		setState( State.LOCKED );
 		for ( java.util.ListIterator i = $moves.listIterator(); i.hasNext(); ) {
 			HMove move = (HMove)i.next();
-			String message = "GLX:PLAY:move=" + move._sourceSystem + "," + move._destinationSystem + "," + move._fleet;
+			String message = "GLX:play:move=" + move._sourceSystem + "," + move._destinationSystem + "," + move._fleet;
 			_out.println( message );
 		}
-		_out.println( "GLX:PLAY:end_round" );
+		_out.println( "GLX:play:end_round" );
 		$moves.clear();
 	}
 	static boolean registerLogic() {
@@ -466,6 +459,13 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		return ( true );
 	}
 	public void reinit() {
+		_emperor = ((HLogin)GameGround.getInstance().getLogic( "login" )).getConnectionConfig()._name; /* FIXME */
+		_gui._emperor.setText( _emperor );
+		_gui.log( "##", 0 );_gui.log( " ##", 1 );_gui.log( " ##", 2 );
+		_gui.log( " ##", 3 );_gui.log( " ##", 4 );_gui.log( " ##\n", 5 );
+		_gui.log( "##", 6 );_gui.log( " ##", 7 );_gui.log( " ##", 8 );
+		_gui.log( " ##", 9 );_gui.log( " ##", 10 );_gui.log( " ##\n", 11 );
+		_gui.log( "##", 12 );_gui.log( " ##", 13 );_gui.log( " ##\n", 14 );
 	}
 }
 
