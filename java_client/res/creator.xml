@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="iso8859-2"?>
+<!DOCTYPE dialog SYSTEM "res/gameground.dtd">
+<dialog title="Create a new game ..." modal="true" size="320,200" resizable="false" defaultCloseOperation="JDialog.DISPOSE_ON_CLOSE"><!--{{{-->
+	<hbox border="EmptyBorder(8,8,8,8)">
+		<vbox preferredsize="100,200" maximumsize="100,300">
+			<label minimumsize="1000,20">Game type ...</label>
+			<scrollpane>
+				<list id="_logics" selectionmode="ListSelectionModel.SINGLE_SELECTION" />
+			</scrollpane>
+		</vbox>
+		<vbox>
+			<panel id="_confHolder" border="TitledBorder(EtchedBorder,Configuration ...)">
+			</panel>
+			<panel maximumsize="250,30">
+				<button text="OK" action="onOk" />
+				<button text="Cancel" action="onCancel" />
+			</panel>
+		</vbox>
+	</hbox>
+</dialog><!--}}}-->

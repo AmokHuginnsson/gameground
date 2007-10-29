@@ -33,7 +33,7 @@ $(TARGET): $(ENVIRON) $(CLASS) $(RES_DEST)
 	jar cf ../$(TARGET) res org *.class class.list;
 
 run: $(TARGET)
-	java -Djava.security.manager -Djava.security.policy=gameground.policy -cp build/gameground.jar GameGround
+	java -Djava.security.manager -Djava.security.policy=gameground.policy -ea -cp build/gameground.jar GameGround
 
 dist:
 	$(MAKE)
@@ -44,3 +44,4 @@ dist:
 clean:
 	cln .
 	/bin/rm -rf build *.class
+

@@ -133,5 +133,8 @@ abstract class HGUIface extends JPanel {
 			System.exit( 1 );
 		}
 	}
+	public HAbstractConfigurator getConfigurator() {
+		return ( null );
+	}
 }
 

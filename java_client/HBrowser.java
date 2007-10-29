@@ -27,36 +27,8 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.TreeSelectionModel;
 import java.util.TreeSet;
 import java.util.SortedSet;
+import java.util.Vector;
 import javax.swing.DefaultListModel;
-
-
-class HPlayerSet {
-	String _id;
-	String _name;
-	String _configuration;
-	SortedSet<String> _players = java.util.Collections.synchronizedSortedSet( new TreeSet<String>() );
-
-	public HPlayerSet( String $id, String $name ) {
-		this( $id, $name, null );
-	}
-	public HPlayerSet( String $id, String $name, String $configuration ) {
-		_id = $id;
-		_name = $name;
-		_configuration = $configuration;
-	}
-	public String toString() {
-		return ( _name );
-	}
-	public void addPlayer( String $player ) {
-		_players.add( $player );
-	}
-	public void removePlayer( String $player ) {
-		_players.remove( $player );
-	}
-	public java.util.Iterator<String> peopleIterator() {
-		return ( _players.iterator() );
-	}
-}
 
 class HBrowser extends HAbstractLogic {
 	public static final String LABEL = "browser";
@@ -78,6 +50,19 @@ class HBrowser extends HAbstractLogic {
 		}
 		public JTextPane getLogPad() {
 			return ( _logPad );
+		}
+		public void onCreate() {
+			DefaultMutableTreeNode node = null;
+			node = (DefaultMutableTreeNode)_games.getModel().getRoot();
+			int i = 0, childs = node.getChildCount();
+			Vector<HPlayerSet> v = new Vector<HPlayerSet>();
+			for ( i = 0; i < childs; ++ i ) {
+				DefaultMutableTreeNode gameType = (DefaultMutableTreeNode)node.getChildAt( i );
+				HPlayerSet ps = (HPlayerSet)gameType.getUserObject();
+				v.add( ps );
+			}
+			if ( new GameCreator( v ).confirmed() )
+				System.out.println( "no i?" );
 		}
 		public void onJoin() {
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode)_games.getLastSelectedPathComponent();
@@ -164,6 +149,7 @@ class HBrowser extends HAbstractLogic {
 			_gui.log( " Connecting to server: " + cc._host + " to port " + cc._port + ".\n"  );
 			try {
 				_client = new HClient();
+				_client.setLogic( this );
 				_client.connect( cc._host, cc._port );
 				_client.start();
 				synchronized ( _client ) {

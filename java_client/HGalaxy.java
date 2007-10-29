@@ -114,10 +114,6 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 	}
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
-		/* This is one dirty hack.
-		 * To make it work you have to edit org/swixml/SwingEngine.java
-		 * and comment out all setAccessible() invocations.
-		 */
 		public JTextField _fleet;
 		public JTextField _messageInput;
 		public JTextPane _logPad;
@@ -132,6 +128,7 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		public HBoard _board;
 		public JTextPane _log;
 		public JTextPane _tips;
+		public HGalaxyConfigurator _conf;
 		public int[] _colorMap;
 		public HGUILocal( String $resource ) {
 			super( $resource );
@@ -155,10 +152,14 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		}
 		public void updateTagLib( SwingEngine $se ) {
 			$se.getTaglib().registerTag( "hboard", HBoard.class );
+			$se.getTaglib().registerTag( "panel", HGalaxyConfigurator.class );
 		}
 		public void reinit() { }
 		public JTextPane getLogPad() {
 			return ( _logPad );
+		}
+		public HAbstractConfigurator getConfigurator() {
+			return ( _conf );
 		}
 	}
 //--------------------------------------------//
