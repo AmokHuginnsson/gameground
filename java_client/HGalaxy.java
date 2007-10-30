@@ -3,6 +3,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.Action;
+import javax.swing.AbstractAction;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.Container;
@@ -130,6 +132,7 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		public JTextPane _tips;
 		public HGalaxyConfigurator _conf;
 		public int[] _colorMap;
+		public int COLOR_NORMAL = 12;
 		public HGUILocal( String $resource ) {
 			super( $resource );
 			_colorMap = new int[ 20 ];
@@ -166,6 +169,44 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 				return ( _colorMap[ $color ] );
 			return ( Colors.BLACK );
 		}
+		public Action onMessage = new AbstractAction() {
+			public static final long serialVersionUID = 17l;
+			public void actionPerformed( ActionEvent $event ) {
+				String msg = _messageInput.getText();
+				if ( msg.matches( ".*\\S+.*" ) ) {	
+					_client.println( "cmd:glx:say:" + msg );
+					_gui._messageInput.setText( "" );
+				}
+			}
+		};
+		public Action onSendFleet = new AbstractAction() {
+			public static final long serialVersionUID = 17l;
+			public void actionPerformed( ActionEvent $event ) {
+				if ( HGalaxy.this._state == State.INPUT ) {
+					int fleet = -1;
+					try {
+						fleet = new Integer( _fleet.getText() ).intValue();
+					} catch ( NumberFormatException e ) {
+					} finally {
+						if ( fleet < 1 ) {
+							_tips.setText( "Run! Run! Emperor is mad ..." );
+							return;
+						} else if ( fleet > HGalaxy.this._systems[ _board._sourceSystem ]._fleet ) {
+							_tips.setText( "Not enough resources!" );
+							return;
+						}
+					}
+					HMove move = new HMove();
+					move._sourceSystem = _board._sourceSystem;
+					move._destinationSystem = _board._destinationSystem;
+					move._fleet = fleet;
+					HGalaxy.this._systems[ _board._sourceSystem ]._fleet -= fleet;
+					HGalaxy.this._moves.add( move );
+					cleanEdit();
+					setState( State.NORMAL );
+				}
+			}
+		};
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
@@ -182,7 +223,6 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 	PrintWriter _out;
 	String _emperor;
 	HashMap<Integer,String> _emperors;
-	HClient _client;
 	java.util.List<HMove> _moves;
 	HSystem[] _systems;
  	char[] _symbols = {
@@ -191,6 +231,7 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'
 	};
 	public HGUILocal _gui;
+	private HClient _client;
 //--------------------------------------------//
 	public HGalaxy( GameGround $applet ) throws Exception {
 		super();
@@ -260,8 +301,9 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 				index = new Integer( tokens[0] ).intValue();
 				_emperors.put( index, tokens[1] );
 				if ( _emperors.get( index ).compareTo( _emperor ) == 0 ) {
-					_gui._emperor.setForeground( _gui.color( _gui.lcolor( _color ) ) );
 					_color = index;
+					_gui._emperor.setForeground( _gui.color( _gui.lcolor( _color ) ) );
+					System.out.println( "Emperor color: " + _color );
 				}
 			} else if ( variable.compareTo( "ok" ) == 0 ) {
 				setState ( State.NORMAL );
@@ -296,21 +338,21 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 					case ( 'c' ): /* conquered */
 					case ( 'd' ): { /* defeted */
 						_gui.log( value, color );
-						_gui.log( " conquered ", HGUIface.Colors.NORMAL );
+						_gui.log( " conquered ", _gui.COLOR_NORMAL );
 						int temp = _systems[ sysNo ]._color;
-						temp = ( temp >= 0 ) ? temp : HGUIface.Colors.NORMAL;
+						temp = ( temp >= 0 ) ? temp : _gui.COLOR_NORMAL;
 						_gui.log( _systemNames[ sysNo ], temp );
 						value = "(" + _symbols[ sysNo ] + ")";
 						_gui.log( value, temp );
-						_gui.log( ".\n", HGUIface.Colors.NORMAL );
+						_gui.log( ".\n", _gui.COLOR_NORMAL );
 						_systems[ sysNo ]._color = color;
 					} break;
 					case ( 'r' ): { /* reinforcements */
-						_gui.log( "Reinforcements for ", HGUIface.Colors.NORMAL );
+						_gui.log( "Reinforcements for ", _gui.COLOR_NORMAL );
 						_gui.log( _systemNames[ sysNo ], color );
 						value = "(" + _symbols[ sysNo ] + ")";
 						_gui.log( value, color );
-						_gui.log( " arrived.\n", HGUIface.Colors.NORMAL );
+						_gui.log( " arrived.\n", _gui.COLOR_NORMAL );
 					} break;
 					case ( 'f' ):
 					case ( 's' ): { /* resisted attack */
@@ -320,13 +362,13 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 							value = _emperors.get( color );
 						}
 						int temp = _systems[ sysNo ]._color;
-						temp = ( temp >= 0 ) ? temp : HGUIface.Colors.NORMAL;
+						temp = ( temp >= 0 ) ? temp : _gui.COLOR_NORMAL;
 						_gui.log( _systemNames[ sysNo ], temp );
 						variable = "(" + _symbols[ sysNo ] + ")";
 						_gui.log( variable, temp );
-						_gui.log( " resisted attack from ", HGUIface.Colors.NORMAL );
+						_gui.log( " resisted attack from ", _gui.COLOR_NORMAL );
 						_gui.log( value, color );
-						_gui.log( ".\n", HGUIface.Colors.NORMAL );
+						_gui.log( ".\n", _gui.COLOR_NORMAL );
 					} break;
 					case ( 'i' ): /* info */
 					default :
@@ -334,10 +376,10 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 				}
 			} else if ( variable.compareTo( "round" ) == 0 ) {
 				_gui.log( "----- ", HGUIface.Colors.WHITE );
-				_gui.log( " round: ", HGUIface.Colors.NORMAL );
+				_gui.log( " round: ", _gui.COLOR_NORMAL );
 				_round = new Integer( value ).intValue();
 				_gui.log( value + " -----\n", HGUIface.Colors.WHITE );
-				_gui.log( HGUIface.Colors.NORMAL );
+				_gui.log( _gui.COLOR_NORMAL );
 				setState ( State.NORMAL );
 				_gui._round.setText( value );
 				_gui._board.repaint();
@@ -375,39 +417,7 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 	}
 	public void keyTyped( KeyEvent $event ) {
 		if ( _gui._board._systems != null ) {
-			if ( $event.getKeyChar() == KeyEvent.VK_ENTER ) {
-				if ( _gui._messageInput.isFocusOwner() ) {
-					String message = _gui._messageInput.getText( );
-					if ( message.matches( ".*\\S+.*" ) ) {	
-						_client._out.println( "GLX:SAY:" + message );
-						_gui._messageInput.setText( "" );
-					}
-				} else {
-					if ( _state == State.INPUT ) {
-						int fleet = -1;
-						try {
-							fleet = new Integer( _gui._fleet.getText() ).intValue();
-						} catch ( NumberFormatException e ) {
-						} finally {
-							if ( fleet < 1 ) {
-								_gui._tips.setText( "Run! Run! Emperor is mad ..." );
-								return;
-							} else if ( fleet > _systems[ _gui._board._sourceSystem ]._fleet ) {
-								_gui._tips.setText( "Not enough resources!" );
-								return;
-							}
-						}
-						HMove move = new HMove();
-						move._sourceSystem = _gui._board._sourceSystem;
-						move._destinationSystem = _gui._board._destinationSystem;
-						move._fleet = fleet;
-						_systems[ _gui._board._sourceSystem ]._fleet -= fleet;
-						_moves.add( move );
-						cleanEdit();
-						setState( State.NORMAL );
-					}
-				}
-			} else if ( ( $event.getKeyChar() == KeyEvent.VK_SPACE )
+			if ( ( $event.getKeyChar() == KeyEvent.VK_SPACE )
 					&& ( ! _gui._messageInput.isFocusOwner() ) ) {
 				_gui._endRound.doClick();
 			} else if ( $event.getKeyChar() == KeyEvent.VK_ESCAPE ) {
@@ -466,7 +476,10 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		return ( true );
 	}
 	public void reinit() {
-		_emperor = ((HLogin)GameGround.getInstance().getLogic( "login" )).getConnectionConfig()._name;
+		GameGround gg = GameGround.getInstance();
+		_client = gg.getClient();
+		_emperor = ((HLogin)gg.getLogic( "login" )).getConnectionConfig()._name;
+		_gui.log( _gui.COLOR_NORMAL );
 		_gui._emperor.setText( _emperor );
 		_gui.log( "##", 0 );_gui.log( " ##", 1 );_gui.log( " ##", 2 );
 		_gui.log( " ##", 3 );_gui.log( " ##", 4 );_gui.log( " ##\n", 5 );

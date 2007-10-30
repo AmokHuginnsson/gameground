@@ -320,7 +320,7 @@ void HGalaxy::handler_message ( OClientInfo* a_poClientInfo, HString const& a_ro
 	M_PROLOG
 	HString l_oMessage;
 	l_oMessage = "glx:msg:$";
-	l_oMessage += n_piColors[ get_emperor_info( a_poClientInfo )->f_iColor ];
+	l_oMessage += get_emperor_info( a_poClientInfo )->f_iColor;
 	l_oMessage += ';';
 	l_oMessage += a_poClientInfo->f_oName;
 	l_oMessage += ";$12;: ";

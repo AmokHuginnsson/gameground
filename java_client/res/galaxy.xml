@@ -17,7 +17,7 @@
 				</panel>
 				<panel background="black">
 					<label foreground="lightGray" labelfor="_fleet">Fleet size </label>
-					<textfield id="_fleet" columns="4" foreground="black" background="green" caretcolor="black" focusable="true" editable="false" layout="BorderLayout" constraints="BorderLayout.NORTH" tooltiptext="Enter number of ships You want to send in this fleet." />
+					<textfield id="_fleet" columns="4" foreground="black" background="green" caretcolor="black" focusable="true" editable="false" action="onSendFleet" layout="BorderLayout" constraints="BorderLayout.NORTH" tooltiptext="Enter number of ships You want to send in this fleet." />
 					<glue preferredsize="10,1" />
 					<label foreground="lightGray" labelfor="_round">
 						Turn
@@ -39,41 +39,41 @@
 		</vbox>
 		<vbox minimumsize="&v_sidebar_width_galaxy;,1" preferredsize="&v_sidebar_width_galaxy;,&v_height;" maximumsize="&v_sidebar_width_galaxy;,2000">
 			<glue maximumsize="1,4" preferredsize="1,4" />
-			<panel maximumsize="&v_sidebar_width_galaxy;,60" preferredsize="&v_sidebar_width_galaxy;,60" layout="GridBagLayout" background="black" foreground="lightGray" border="MatteBorder(1,1,0,1,0000a0)">
+			<panel maximumsize="&v_sidebar_width_galaxy;,60" preferredsize="&v_sidebar_width_galaxy;,60" minimumsize="&v_sidebar_width_galaxy;,60" layout="GridBagLayout" background="black" foreground="lightGray" border="MatteBorder(1,1,0,1,0000a0)">
 				<label labelfor="_systemInfo" foreground="">
 					<gridbagconstraints id="gbc_1" insets="0,4,0,0" ipady="2" gridx="0" gridy="0" anchor="GridBagConstraints.WEST" />
 					System:
 				</label>
-				<label id="_systemInfo" foreground="">
-					<gridbagconstraints refid="gbc_1" gridx="1" gridwidth="3" />
+				<label id="_systemInfo" foreground="" layout="BorderLayout">
+					<gridbagconstraints refid="gbc_1" gridx="1" gridwidth="3" fill="GridBagConstraints.BOTH" />
 				</label>
 				<label labelfor="_emperorInfo" foreground="">
 					<gridbagconstraints refid="gbc_1" gridy="1" />
 					Emperor:
 				</label>
 				<label id="_emperorInfo" foreground="">
-					<gridbagconstraints refid="gbc_1" gridx="1" gridy="1" gridwidth="3" />
+					<gridbagconstraints refid="gbc_1" gridx="1" gridy="1" gridwidth="3" fill="GridBagConstraints.BOTH" />
 				</label>
 				<label labelfor="_productionInfo" foreground="">
 					<gridbagconstraints refid="gbc_1" gridy="2" />
 					Production:
 				</label>
 				<label id="_productionInfo" foreground="">
-					<gridbagconstraints insets="0,4,0,0" gridx="1" gridy="2" weightx="1" anchor="GridBagConstraints.WEST" />
+					<gridbagconstraints insets="0,4,0,0" gridx="1" gridy="2" weightx="1" anchor="GridBagConstraints.WEST" fill="GridBagConstraints.BOTH" />
 				</label>
 				<label labelfor="_fleetInfo" foreground="">
 					<gridbagconstraints gridx="2" gridy="2" anchor="GridBagConstraints.WEST" />
 					Fleet:
 				</label>
 				<label id="_fleetInfo" foreground="">
-					<gridbagconstraints insets="0,4,0,0" gridx="3" gridy="2" weightx="1" anchor="GridBagConstraints.WEST" />
+					<gridbagconstraints insets="0,4,0,0" gridx="3" gridy="2" weightx="1" anchor="GridBagConstraints.WEST" fill="GridBagConstraints.BOTH" />
 				</label>
 			</panel>
 			<scrollpane border="MatteBorder(1,0,1,1,0000a0)" maximumsize="&v_sidebar_width_galaxy;,2000" autoscrolls="true">
 				<textpane id="_logPad" foreground="lightGray" background="black" caretcolor="black" editable="false" focusable="false" />
 			</scrollpane>
 			<panel maximumsize="&v_sidebar_width_galaxy;,40" border="MatteBorder(0,0,1,1,0000a0)" background="black">
-				<textfield id="_messageInput" columns="23" foreground="lightGray" background="black" caretcolor="green" focusable="true" editable="true" tooltiptext="Enter message You want to send to other emperors." border="&empty;" />
+				<textfield id="_messageInput" columns="23" foreground="lightGray" background="black" caretcolor="green" focusable="true" editable="true" action="onMessage" tooltiptext="Enter message You want to send to other emperors." border="&empty;" />
 			</panel>
 			<scrollpane maximumsize="&v_sidebar_width_galaxy;,80" preferredsize="&v_sidebar_width_galaxy;,80" border="MatteBorder(0,0,1,1,0000a0)">
 				<textpane id="_tips" foreground="lightGray" background="black" caretcolor="black" editable="false" focusable="false">
