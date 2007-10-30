@@ -101,12 +101,10 @@ public class HBoard extends JPanel implements MouseInputListener {
 		if ( _systems != null ) {
 			int x = (int)( $event.getX() / _diameterX );
 			int y = (int)( $event.getY() / _diameterY );
-			System.out.println( "coords: (" + x + "," + y + ")" );
 			int sysNo = getSysNo( x, y );
 			if ( sysNo >= 0 ) {
 				if ( _logic.getState() != HGalaxy.State.LOCKED ) {
 					if ( _logic.getState() == HGalaxy.State.NORMAL ) {
-						System.out.println( "colors: " + _systems[ sysNo ]._color + ", " + _logic._color );
 						if ( ( _systems[ sysNo ]._color == _logic._color ) && ( _systems[ sysNo ]._fleet > 0 ) ) {
 							_logic.setState( HGalaxy.State.SELECT );
 							_sourceSystem = sysNo;
@@ -121,11 +119,7 @@ public class HBoard extends JPanel implements MouseInputListener {
 							_destinationSystem = sysNo;
 						}
 					}
-				} else {
-					System.out.println( "LOCKED" );
 				}
-			} else {
-				System.out.println( "No system." );
 			}
 		}
 	}

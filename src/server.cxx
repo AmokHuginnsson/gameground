@@ -99,10 +99,20 @@ void HServer::broadcast( HString const& a_roMessage )
 	M_EPILOG
 	}
 
+void HServer::broadcast_to_interested( HString const& a_roMessage )
+	{
+	M_PROLOG
+	for ( clients_t::HIterator it = f_oClients.begin(); it != f_oClients.end(); ++ it )
+		if ( ! it->second.f_oLogic )
+			*it->second.f_oSocket << a_roMessage << endl;
+	return;
+	M_EPILOG
+	}
+
 void HServer::handle_chat( OClientInfo& a_roInfo, HString const& a_roMessage )
 	{
 	M_PROLOG
-	broadcast( "msg:" + a_roInfo.f_oName + ": " + a_roMessage );
+	broadcast_to_interested( "msg:" + a_roInfo.f_oName + ": " + a_roMessage );
 	return;
 	M_EPILOG
 	}
@@ -124,8 +134,8 @@ void HServer::set_client_name( OClientInfo& a_roInfo, HString const& a_oName )
 	else
 		{
 		a_roInfo.f_oName = a_oName;
-		broadcast( "player:" + a_oName );
-		broadcast( "msg:" + mark( COLORS::D_FG_BLUE ) + " " + a_oName + " entered the GameGround." );
+		broadcast_to_interested( "player:" + a_oName );
+		broadcast_to_interested( "msg:" + mark( COLORS::D_FG_BLUE ) + " " + a_oName + " entered the GameGround." );
 		}
 	return;
 	M_EPILOG
@@ -171,7 +181,7 @@ void HServer::create_game( OClientInfo& a_roInfo, HString const& a_oArg )
 					f_oLogics[ l_oName ] = l_oLogic;
 					a_roInfo.f_oLogic = l_oLogic;
 					cout << l_oName << "," << l_oType << endl;
-					broadcast( "player:" + a_roInfo.f_oName + "," + l_oLogic->get_info() );
+					broadcast_to_interested( "player:" + a_roInfo.f_oName + "," + l_oLogic->get_info() );
 					}
 				}
 			catch ( HLogicException& e )
@@ -197,7 +207,7 @@ void HServer::join_game( OClientInfo& a_roInfo, HString const& a_oName )
 		else if ( ! it->second->accept_client( &a_roInfo ) )
 			{
 			a_roInfo.f_oLogic = it->second;
-			broadcast( "player:" + a_roInfo.f_oName + "," + a_roInfo.f_oLogic->get_info() );
+			broadcast_to_interested( "player:" + a_roInfo.f_oName + "," + a_roInfo.f_oLogic->get_info() );
 			}
 		else
 			a_roInfo.f_oSocket->write_until_eos( "err:Game is full.\n" );
@@ -293,7 +303,7 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& a_oClient, char const* c
 		HString reason = " was kicked because of: ";
 		reason += ( a_pcReason ? a_pcReason : "connection error" );
 		if ( ! clientIt->second.f_oName.is_empty() )
-			broadcast( "msg:" + mark( COLORS::D_FG_BRIGHTRED ) + " " + clientIt->second.f_oName + reason );
+			broadcast_to_interested( "msg:" + mark( COLORS::D_FG_BRIGHTRED ) + " " + clientIt->second.f_oName + reason );
 		cout << reason;
 		}
 	else
@@ -311,7 +321,7 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& a_oClient, char const* c
 		name = clientIt->second.f_oName;
 	f_oClients.remove( l_iFileDescriptor );
 	if ( ! name.is_empty() )
-		broadcast( "player_quit:" + name );
+		broadcast_to_interested( "player_quit:" + name );
 	return;
 	M_EPILOG
 	}
@@ -346,7 +356,7 @@ void HServer::handler_quit( OClientInfo& a_roInfo, HString const& )
 	HString name = a_roInfo.f_oName;
 	kick_client( a_roInfo.f_oSocket, "" );
 	if ( ! name.is_empty() )
-		broadcast( "msg:" + mark( COLORS::D_FG_BROWN ) + " " + name + " has left the GameGround." );
+		broadcast_to_interested( "msg:" + mark( COLORS::D_FG_BROWN ) + " " + name + " has left the GameGround." );
 	return;
 	}
 

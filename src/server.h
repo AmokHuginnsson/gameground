@@ -62,6 +62,7 @@ protected:
 	void handle_chat( OClientInfo&, yaal::hcore::HString const& );
 	void kick_client( yaal::hcore::HSocket::ptr_t&, char const* const = NULL );
 	void broadcast( yaal::hcore::HString const& );
+	void broadcast_to_interested( yaal::hcore::HString const& );
 	void set_client_name( OClientInfo&, yaal::hcore::HString const& );
 	void pass_command( OClientInfo&, yaal::hcore::HString const& );
 	void create_game( OClientInfo&, yaal::hcore::HString const& );

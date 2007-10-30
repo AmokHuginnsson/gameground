@@ -2,7 +2,6 @@ import java.lang.reflect.Method;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import javax.swing.Action;
 import javax.swing.AbstractAction;
 import java.awt.event.KeyEvent;
@@ -107,7 +106,7 @@ class HSystemNames {
 	}
 }
 
-class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
+class HGalaxy extends HAbstractLogic implements KeyListener {
 	enum State {
 		NORMAL,
 		SELECT,
@@ -207,6 +206,9 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 				}
 			}
 		};
+		public void onEndRound() {
+			HGalaxy.this.onEndRound();
+		}
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
@@ -220,7 +222,6 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 	int _color;
 	int _systemCount;
 	String[] _systemNames;
-	PrintWriter _out;
 	String _emperor;
 	HashMap<Integer,String> _emperors;
 	java.util.List<HMove> _moves;
@@ -260,7 +261,6 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 			if ( serverAddress.compareTo( "" ) == 0 )
 				serverAddress = "127.0.0.1";
 		}
-		_gui._endRound.addActionListener( this );
 		$applet.addGlobalKeyListener( $applet, this );
 		$applet.addGlobalKeyListener( _gui, this );
 		_state = State.LOCKED;
@@ -406,6 +406,7 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 				break;
 		}
 		_state = $state;
+		_gui._endRound.setEnabled( _state == State.NORMAL );
 	}
 	public State getState() {
 		return _state;
@@ -447,12 +448,6 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 			endRound( _moves );
 		}
 	}
-	public void actionPerformed( ActionEvent $event ) {
-		Object source = $event.getSource();
-		if ( source == _gui._endRound ) {
-			onEndRound();
-		}
-	}
 	int getSystemCount() {
 		return _systemCount;
 	}
@@ -460,10 +455,10 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		setState( State.LOCKED );
 		for ( java.util.ListIterator i = $moves.listIterator(); i.hasNext(); ) {
 			HMove move = (HMove)i.next();
-			String message = "GLX:play:move=" + move._sourceSystem + "," + move._destinationSystem + "," + move._fleet;
-			_out.println( message );
+			String message = "cmd:glx:play:move=" + move._sourceSystem + "," + move._destinationSystem + "," + move._fleet;
+			_client.println( message );
 		}
-		_out.println( "GLX:play:end_round" );
+		_client.println( "cmd:glx:play:end_round" );
 		$moves.clear();
 	}
 	static boolean registerLogic() {
