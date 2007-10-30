@@ -81,6 +81,9 @@ abstract class HGUIface extends JPanel {
 		}
 		return ( _colors[ $color ] );
 	}
+	public int lcolor( int $color ) {
+		return ( $color );
+	}
 	public void init() {
 		try {
 			String res = "/res/" + _resource + ".xml";
@@ -103,9 +106,7 @@ abstract class HGUIface extends JPanel {
 	}
 	void log( String $message, int $color ) {
 		try {
-			if ( $color > 15 )
-				$color = 15;
-			StyleConstants.setForeground( _attribute, color( $color ) );
+			StyleConstants.setForeground( _attribute, color( lcolor( $color ) ) );
 			_log.insertString( _log.getLength(), $message, _attribute );
 			_logPad.setCaretPosition( _log.getLength() );
 		} catch ( javax.swing.text.BadLocationException e ) {
@@ -114,7 +115,7 @@ abstract class HGUIface extends JPanel {
 	}
 	void log( String $message ) {
 		try {
-			StyleConstants.setForeground( _attribute, color( _color ) );
+			StyleConstants.setForeground( _attribute, color( lcolor( _color ) ) );
 			_log.insertString( _log.getLength(), $message, _attribute );
 			_logPad.setCaretPosition( _log.getLength() );
 		} catch ( javax.swing.text.BadLocationException e ) {

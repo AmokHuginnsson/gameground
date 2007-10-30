@@ -161,6 +161,11 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		public HAbstractConfigurator getConfigurator() {
 			return ( _conf );
 		}
+		public int lcolor( int $color ) {
+			if ( $color >= 0 )
+				return ( _colorMap[ $color ] );
+			return ( Colors.BLACK );
+		}
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
@@ -219,7 +224,6 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		$applet.addGlobalKeyListener( _gui, this );
 		_state = State.LOCKED;
 		_moves = java.util.Collections.<HMove>synchronizedList( new java.util.LinkedList<HMove>() );
-		//_out.println( "GLX:LOGIN:" + _emperor );
 	}
 	void handlerGalaxy( String $command ) {
 		processMessage( $command );
@@ -255,11 +259,12 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 				tokens = value.split( ",", 2 );
 				index = new Integer( tokens[0] ).intValue();
 				_emperors.put( index, tokens[1] );
-				if ( _emperors.get( index ).compareTo( _emperor ) == 0 )
+				if ( _emperors.get( index ).compareTo( _emperor ) == 0 ) {
+					_gui._emperor.setForeground( _gui.color( _gui.lcolor( _color ) ) );
 					_color = index;
+				}
 			} else if ( variable.compareTo( "ok" ) == 0 ) {
 				setState ( State.NORMAL );
-				_gui._emperor.setForeground( _gui.color( _color ) );
 				_round = 0;
 			}
 		} catch ( NumberFormatException e ) {
@@ -461,7 +466,7 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		return ( true );
 	}
 	public void reinit() {
-		_emperor = ((HLogin)GameGround.getInstance().getLogic( "login" )).getConnectionConfig()._name; /* FIXME */
+		_emperor = ((HLogin)GameGround.getInstance().getLogic( "login" )).getConnectionConfig()._name;
 		_gui._emperor.setText( _emperor );
 		_gui.log( "##", 0 );_gui.log( " ##", 1 );_gui.log( " ##", 2 );
 		_gui.log( " ##", 3 );_gui.log( " ##", 4 );_gui.log( " ##\n", 5 );

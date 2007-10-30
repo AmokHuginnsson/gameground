@@ -1,7 +1,7 @@
 <!ENTITY v_width "900">
 <!ENTITY v_height "700">
 <!ENTITY v_port "7777">
-<!ENTITY v_bar_height "21">
+<!ENTITY v_bar_height "50">
 <!ENTITY v_login_screen_width "600">
 <!ENTITY v_sidebar_width "300">
 <!ENTITY v_sidebar_width_galaxy "260">

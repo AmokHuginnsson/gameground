@@ -6,6 +6,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.Container;
 import java.awt.Frame;
+import java.awt.Dimension;
+import java.awt.Insets;
 import javax.swing.JApplet;
 import org.swixml.SwingEngine;
 import org.swixml.TagLibrary;
@@ -21,28 +23,37 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	public void init() {
 		try {
 			SwingEngine se = new SwingEngine( this );
+			org.jdom.Document res = AppletJDOMHelper.loadResource( "/res/gameground.xml", this );
 			if ( _instance == null ) {
 				_instance = this;
 				TagLibrary tl = se.getTaglib();
 				tl.unregisterTag( "frame" );
 				tl.registerTag( "frame", JApplet.class );
-				se.insert( AppletJDOMHelper.loadResource( "/res/gameground.xml", this ), this );
+				se.insert( res, this );
 				_frame = getParentFrame();
 				_applet = true;
 			} else {
-				se.render( AppletJDOMHelper.loadResource( "/res/gameground.xml", this ) );
+				se.render( res );
 				_frame = SwingEngine.getAppFrame();
 				((javax.swing.JFrame)_frame).setContentPane( this );
 			}
-			_frame.setVisible( true );
 			EagerStaticInitializer.touch( this );
+			setFace( HLogin.LABEL );
+			resize( res.getRootElement().getAttribute( "size" ).getValue().split( ",", 2 ) );
 			setFace( HLogin.LABEL );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );
 		}
 	}
-
+	void resize( String[] $req ) {
+		Dimension preferred = new Dimension( new Integer( $req[0] ).intValue(), new Integer( $req[1] ).intValue() );
+		_frame.setVisible( true );
+		Dimension real = getContentPane().getSize();
+		Dimension withJunk = _frame.getSize();
+		_frame.setSize( preferred.width + withJunk.width - real.width, preferred.height + withJunk.height - real.height );
+		_frame.validate();
+	}
 	public static GameGround getInstance() {
 		return ( _instance );
 	}

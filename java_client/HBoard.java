@@ -190,7 +190,7 @@ public class HBoard extends JPanel implements MouseInputListener {
 				if ( _logic.getState() == HGalaxy.State.SELECT )
 					_logic._gui._arrival.setText( String.valueOf( _logic._round + distance( _sourceSystem, $no ) ) );
 			}	else {
-				$gs.setColor ( _logic._gui._colors[ $color ] );
+				$gs.setColor ( _logic._gui._colors[ _logic._gui.lcolor( $color ) ] );
 			}
 			$gs.drawRect ( (int)( $coordX * _diameterX + 1 ),
 					(int)( $coordY * _diameterY + 1 ),

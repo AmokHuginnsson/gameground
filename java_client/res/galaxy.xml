@@ -9,12 +9,13 @@
 	<hbox>
 		<vbox>
 			<hbox maximumsize="2000,&v_bar_height;" background="black">
-				<label font="-BOLDITALIC-22" foreground="blue" preferredsize="80,&v_bar_height;">Galaxy</label>
-				<panel background="black"> 
-					<label foreground="lightGray" labelfor="_emperor" preferredsize="60,&v_bar_height;">Emperor </label>
-					<label id="_emperor" preferredsize="300,&v_bar_height;" foreground="lightGray"></label>
+				<label font="-BOLDITALIC-22" foreground="blue">Galaxy</label>
+				<glue maximumsize="8,1" preferredsize="8,1 " />
+				<panel background="black" layout="BorderLayout"> 
+					<label foreground="lightGray" labelfor="_emperor" constraints="BorderLayout.WEST">Emperor&#160;</label>
+					<label id="_emperor" foreground="lightGray" constraints="BorderLayout.CENTER">Amok</label>
 				</panel>
-				<panel minimumsize="382,&v_bar_height;" preferredsize="382,&v_bar_height;" background="black">
+				<panel background="black">
 					<label foreground="lightGray" labelfor="_fleet">Fleet size </label>
 					<textfield id="_fleet" columns="4" foreground="black" background="green" caretcolor="black" focusable="true" editable="false" layout="BorderLayout" constraints="BorderLayout.NORTH" tooltiptext="Enter number of ships You want to send in this fleet." />
 					<glue preferredsize="10,1" />
