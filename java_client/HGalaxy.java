@@ -150,9 +150,9 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 			_colorMap[ 14 ] = Colors.DARKGRAY;
 			_colorMap[ 15 ] = Colors.WHITE;
 		}
-		public void updateTagLib( SwingEngine $se ) {
-			$se.getTaglib().registerTag( "hboard", HBoard.class );
-			$se.getTaglib().registerTag( "panel", HGalaxyConfigurator.class );
+		public void updateTagLib( XUL $xul ) {
+			$xul.getTaglib().registerTag( "hboard", HBoard.class );
+			$xul.getTaglib().registerTag( "panel", HGalaxyConfigurator.class );
 		}
 		public void reinit() { }
 		public JTextPane getLogPad() {
@@ -197,6 +197,7 @@ class HGalaxy extends HAbstractLogic implements ActionListener, KeyListener {
 		_handlers.put( "glx", HGalaxy.class.getDeclaredMethod( "handlerGalaxy", new Class[]{ String.class } ) );
 		_handlers.put( "play", HGalaxy.class.getDeclaredMethod( "handlerPlay", new Class[]{ String.class } ) );
 		_handlers.put( "player", HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
+		_handlers.put( "player_quit", HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
 		if ( ( java.util.Calendar.getInstance().get( java.util.Calendar.HOUR_OF_DAY ) % 2 ) == 1 )
 			_systemNames = HSystemNames.getNames( HSystemNames.NORSE );
 		else

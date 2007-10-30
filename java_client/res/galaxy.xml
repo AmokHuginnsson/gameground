@@ -2,9 +2,9 @@
 <!DOCTYPE panel SYSTEM "res/gameground.dtd">
 <panel layout="BorderLayout" background="black"><!--{{{-->
 	<panel layout="GridLayout(3,2)" id="_conf" visible="false">
-		<label>Emperors:</label><spinner><textfield id="_emperors" horizontalalignment="RIGHT" /></spinner>
-		<label>Systems:</label><spinner><textfield id="_systems" horizontalalignment="RIGHT" /></spinner>
-		<label>Board size:</label><spinner><textfield id="_boardSize" horizontalalignment="RIGHT" /></spinner>
+		<label>Emperors:</label><spinner id="_emperors"><textfield horizontalalignment="RIGHT" /></spinner>
+		<label>Systems:</label><spinner id="_systems"><textfield horizontalalignment="RIGHT" /></spinner>
+		<label>Board size:</label><spinner id="_boardSize"><textfield horizontalalignment="RIGHT" /></spinner>
 	</panel>
 	<hbox>
 		<vbox>

@@ -1,5 +1,4 @@
 import javax.swing.JPanel;
-import org.swixml.SwingEngine;
 import org.swixml.TagLibrary;
 import javax.swing.JTextPane;
 import java.awt.Color;
@@ -60,7 +59,7 @@ abstract class HGUIface extends JPanel {
 		_colors[ Colors.WHITE ] = Color.white;
 		_colors[ Colors.OTHERGRAY ] = Color.gray;
 	}
-	public abstract void updateTagLib( SwingEngine $se );
+	public abstract void updateTagLib( XUL $se );
 	public abstract void reinit();
 	public abstract JTextPane getLogPad();
 	public Color color( int $color ) { return ( color( $color, null ) ); }
@@ -86,9 +85,12 @@ abstract class HGUIface extends JPanel {
 		try {
 			String res = "/res/" + _resource + ".xml";
 			System.out.println( "Loading resources: " + res );
-			SwingEngine se = new SwingEngine( this );
-			updateTagLib( se );
-			se.insert( AppletJDOMHelper.loadResource( res, this ), this );
+			XUL xul = new XUL( this );
+			updateTagLib( xul );
+			xul.insert( AppletJDOMHelper.loadResource( res, this ), this );
+			HAbstractConfigurator ac = getConfigurator();
+			if ( ac != null )
+				xul.mapMembers( ac );
 		} catch ( java.lang.Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );

@@ -61,8 +61,11 @@ class HBrowser extends HAbstractLogic {
 				HPlayerSet ps = (HPlayerSet)gameType.getUserObject();
 				v.add( ps );
 			}
-			if ( new GameCreator( v ).confirmed() )
-				System.out.println( "no i?" );
+			GameCreator gc = new GameCreator( v );
+			if ( gc.confirmed() ) {
+				GameGround.getInstance().setFace( gc.getFace() );
+				_client.println( "create:" + gc.getConfiguration() );
+			}
 		}
 		public void onJoin() {
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode)_games.getLastSelectedPathComponent();
@@ -96,7 +99,7 @@ class HBrowser extends HAbstractLogic {
 			}
 			_people.setModel( lm );
 		}
-		public void updateTagLib( org.swixml.SwingEngine $se ) {	}
+		public void updateTagLib( XUL $xul ) { }
 		public Action onMessage = new AbstractAction() {
 			public static final long serialVersionUID = 17l;
 			public void actionPerformed( ActionEvent $event ) {

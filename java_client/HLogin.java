@@ -49,7 +49,7 @@ class HLogin extends HAbstractLogic {
 			}
 		};
 		public JTextPane getLogPad() { return ( null ); }
-		public void updateTagLib( org.swixml.SwingEngine $se ) {	}
+		public void updateTagLib( XUL $xul ) {	}
 	}
 	public class OConnectionConfig {
 		public String _name;
