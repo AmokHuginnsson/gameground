@@ -32,6 +32,9 @@ class HLogin extends HAbstractLogic {
 		public void reinit() {
 			_name.requestFocusInWindow();
 			if ( GameGround.getInstance().isApplet() ) {
+				int port = Integer.parseInt( GameGround.getInstance().getParameter("port") );
+				if ( port >= 1024 )
+					_port.setText( "" + port );
 				_server.setEditable( false );
 				_port.setEditable( false );
 			}

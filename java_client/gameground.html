@@ -52,6 +52,17 @@
 		<div style='text-align: center;'>
 			<applet style="margin-left: auto;margin-right: auto;" code="GameGround.class" archive="gameground.jar" id="GameGround" width="900" height="700">
 				<param name="IMAGEDIR" value="." />
+				<script type="text/JavaScript">
+					if (location.search.length > 0) {
+						argv = location.search.substring( 1 );
+						var params = argv.split( '&' );
+						for ( i = 0; i < params.length; ++ i ) {
+							var keyval = params[i].split( '=' );
+							if ( keyval[0] == "port" )
+								document.write( "<param name=\"" + keyval[0] + "\" value=\"" + keyval[1] + "\" />\n" );
+						}
+					}
+				</script>
 			</applet>
 		</div>
 	</body>
