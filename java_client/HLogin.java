@@ -31,13 +31,15 @@ class HLogin extends HAbstractLogic {
 		}
 		public void reinit() {
 			_name.requestFocusInWindow();
+			GameGround gg = GameGround.getInstance();
+			try {
+				int port = Integer.parseInt( gg.getInstance().getParameter("port") );
+				if ( port >= 1024 )
+					_port.setText( "" + port );
+			} catch ( Exception e ) {
+			}
+			_name.setText( gg.getParameter( "login" ) );
 			if ( GameGround.getInstance().isApplet() ) {
-				try {
-					int port = Integer.parseInt( GameGround.getInstance().getParameter("port") );
-					if ( port >= 1024 )
-						_port.setText( "" + port );
-				} catch ( Exception e ) {
-				}
 				_server.setEditable( false );
 				_port.setEditable( false );
 			}

@@ -11,7 +11,7 @@ all: $(TARGET)
 
 build/%.class: %.java
 	@echo -n "gcc";
-	javac -Xlint -sourcepath . -d build -cp .:jdom.jar:swixml.jar $(<)
+	javac -Xlint -sourcepath . -d build -cp .:commons-cli-1.1.jar:jdom.jar:swixml.jar $(<)
 
 build/res:
 	mkdir -p $(@)
@@ -25,6 +25,7 @@ $(ENVIRON): jdom.jar swixml.jar
 	/bin/rm -rf *; \
 	jar xf ../jdom.jar; \
 	jar xf ../swixml.jar; \
+	jar xf ../commons-cli-1.1.jar; \
 	touch META-INF/info.xml
 
 $(TARGET): $(ENVIRON) $(CLASS) $(RES_DEST)

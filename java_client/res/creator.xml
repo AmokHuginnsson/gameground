@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="iso8859-2"?>
 <!DOCTYPE dialog SYSTEM "res/gameground.dtd">
-<dialog title="Create a new game ..." modal="true" size="320,240" resizable="false" defaultCloseOperation="JDialog.DISPOSE_ON_CLOSE"><!--{{{-->
+<dialog title="Create a new game ..." modal="true" size="320,240" resizable="false" focuscycleroot="true" defaultCloseOperation="JDialog.DISPOSE_ON_CLOSE"><!--{{{-->
 	<hbox border="EmptyBorder(8,8,8,8)">
 		<vbox preferredsize="100,240" maximumsize="100,300">
 			<label minimumsize="1000,20">Game type ...</label>
 			<scrollpane>
-				<list id="_logics" selectionmode="ListSelectionModel.SINGLE_SELECTION" />
+				<list id="_logics" selectionmode="ListSelectionModel.SINGLE_SELECTION" focusable="true" />
 			</scrollpane>
 		</vbox>
 		<vbox>
 			<panel maximumsize="220,30">
 				<label>Name:</label>
-				<textfield id="_name" columns="13" action="onEditChange" />
+				<textfield id="_name" columns="13" action="onEditChange" focusable="true" requestFocusEnabled="true" />
 			</panel>
 			<panel id="_confHolder" border="TitledBorder(EtchedBorder,Configuration ...)">
 			</panel>
 			<panel maximumsize="250,30">
-				<button id="_ok" text="OK" action="onOk" enabled="false" />
+				<button id="_ok" text="OK" action="onOk" enabled="false" focusable="true" />
 				<button text="Cancel" action="onCancel" />
 			</panel>
 		</vbox>

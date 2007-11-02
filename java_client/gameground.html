@@ -58,7 +58,7 @@
 						var params = argv.split( '&' );
 						for ( i = 0; i < params.length; ++ i ) {
 							var keyval = params[i].split( '=' );
-							if ( keyval[0] == "port" )
+							if ( ( keyval[0] == "port" ) || ( keyval[0] == "login" ) )
 								document.write( "<param name=\"" + keyval[0] + "\" value=\"" + keyval[1] + "\" />\n" );
 						}
 					}

@@ -1,3 +1,4 @@
+import org.apache.commons.cli.*;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.HashMap;
@@ -16,9 +17,16 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	public static final long serialVersionUID = 13l;
 	private static SortedMap<String,HAbstractLogic> _logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String,HAbstractLogic>() );
 	private static GameGround _instance;
+
 	public Frame _frame;
 	private HClient _client;
 	boolean _applet = false;
+	CommandLine _cmd;
+
+	public GameGround() { this( null ); }
+	GameGround( String[] $argv ) {
+		handleArguments( $argv );
+	}
 
 	public void init() {
 		try {
@@ -101,7 +109,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 
 	static public void main( String $argv[] ) {
 		SwingEngine.DEBUG_MODE = true;
-		_instance = new GameGround();
+		_instance = new GameGround( $argv );
 		_instance.init();
 		_instance.start();
 	}
@@ -150,6 +158,33 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	}
 	public boolean isApplet() {
 		return ( _applet );
+	}
+	public String getParameter( String $name ) {
+		if ( isApplet() )
+			return ( super.getParameter( $name ) );
+		else {
+			return ( _cmd.getOptionValue( $name ) );
+		}
+	}
+	void handleArguments( String[] $argv ) {
+		if ( $argv != null ) {
+			Options opts = new Options();
+			opts.addOption( OptionBuilder.withLongOpt( "help" ).withDescription( "provide this help message and exit" ).create( 'h' ) );
+			opts.addOption( OptionBuilder.withLongOpt( "login" ).withArgName( "name" ).hasArg().withDescription( "your preferred nick name" ).create( 'L' ) );
+			opts.addOption( OptionBuilder.withLongOpt( "port" ).withArgName( "number" ).hasArg().withDescription( "port number where GameGround is running" ).create( 'P' ) );
+			Parser p = new PosixParser();
+			try {
+				_cmd = p.parse( opts, $argv );
+			} catch ( ParseException e ) {
+				System.out.println( "Application failed to start. Reaseon: " + e.getMessage() );
+				System.exit( 1 );
+			}
+			if ( _cmd.hasOption( "help" ) ) {
+				HelpFormatter formatter = new HelpFormatter();
+				formatter.printHelp( "GameGround", opts );
+				System.exit( 0 );
+			}
+		}
 	}
 }
 
