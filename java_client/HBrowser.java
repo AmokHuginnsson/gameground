@@ -123,6 +123,7 @@ class HBrowser extends HAbstractLogic {
 	public HBrowser( GameGround $applet ) {
 		super();
 		init( _gui = new HGUILocal( LABEL ) );
+		_info = new HLogicInfo( "", "browser", "" );
 		try {
 			_handlers.put( "logic", HBrowser.class.getDeclaredMethod( "handleLogic", new Class[]{ String.class } ) );
 			_handlers.put( "game", HBrowser.class.getDeclaredMethod( "handleGame", new Class[]{ String.class } ) );
@@ -159,9 +160,6 @@ class HBrowser extends HAbstractLogic {
 					_client.wait();
 				}
 				_client.println( "name:" + cc._name );
-				_client.println( "get_logics" );
-				_client.println( "get_games" );
-				_client.println( "get_players" );
 				gg.setClient( _client );
 			} catch ( Exception e ) {
 				JOptionPane.showMessageDialog( _gui,
@@ -171,6 +169,9 @@ class HBrowser extends HAbstractLogic {
 				return;
 			}
 		}
+		_client.println( "get_logics" );
+		_client.println( "get_games" );
+		_client.println( "get_players" );
 	}
 	public void handleLogic( String $message ) {
 		System.out.println( "GameGround serves [" + $message + "] logic." );

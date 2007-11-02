@@ -59,7 +59,8 @@ protected:
 	int handler_message( int );
 	void handler_shutdown( OClientInfo&, yaal::hcore::HString const& );
 	void handler_quit( OClientInfo&, yaal::hcore::HString const& );
-	void handle_chat( OClientInfo&, yaal::hcore::HString const& );
+	void handler_abandon( OClientInfo&, yaal::hcore::HString const& );
+	void handler_chat( OClientInfo&, yaal::hcore::HString const& );
 	void kick_client( yaal::hcore::HSocket::ptr_t&, char const* const = NULL );
 	void broadcast( yaal::hcore::HString const& );
 	void broadcast_to_interested( yaal::hcore::HString const& );
@@ -75,6 +76,7 @@ protected:
 	void send_players_info( OClientInfo& );
 	void send_games_info( OClientInfo& );
 	void send_game_info( OClientInfo&, yaal::hcore::HString const& );
+	void remove_client_from_logic( OClientInfo& );
 	/*}*/
 	};
 

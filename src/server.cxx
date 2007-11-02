@@ -75,7 +75,7 @@ int HServer::init_server( int a_iPort )
 	register_file_descriptor_handler ( f_oSocket.get_file_descriptor(), &HServer::handler_connection );
 	f_oHandlers[ "shutdown" ] = &HServer::handler_shutdown;
 	f_oHandlers[ "quit" ] = &HServer::handler_quit;
-	f_oHandlers[ "msg" ] = &HServer::handle_chat;
+	f_oHandlers[ "msg" ] = &HServer::handler_chat;
 	f_oHandlers[ "name" ] = &HServer::set_client_name;
 	f_oHandlers[ "get_logics" ] = &HServer::get_logics_info;
 	f_oHandlers[ "get_players" ] = &HServer::get_players_info;
@@ -83,6 +83,7 @@ int HServer::init_server( int a_iPort )
 	f_oHandlers[ "get_game_info" ] = &HServer::get_game_info;
 	f_oHandlers[ "create" ] = &HServer::create_game;
 	f_oHandlers[ "join" ] = &HServer::join_game;
+	f_oHandlers[ "abandon" ] = &HServer::handler_abandon;
 	f_oHandlers[ "cmd" ] = &HServer::pass_command;
 	HProcess::init ( 3600 );
 	cout << brightblue << "<<<GameGround>>>" << lightgray << " server started." << endl;
@@ -109,7 +110,7 @@ void HServer::broadcast_to_interested( HString const& a_roMessage )
 	M_EPILOG
 	}
 
-void HServer::handle_chat( OClientInfo& a_roInfo, HString const& a_roMessage )
+void HServer::handler_chat( OClientInfo& a_roInfo, HString const& a_roMessage )
 	{
 	M_PROLOG
 	broadcast_to_interested( "msg:" + a_roInfo.f_oName + ": " + a_roMessage );
@@ -309,13 +310,7 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& a_oClient, char const* c
 	else
 		cout << " disconnected from server.";
 	cout << endl;
-	if ( !! clientIt->second.f_oLogic )
-		{
-		HLogic::ptr_t l_oLogic = clientIt->second.f_oLogic;
-		l_oLogic->kick_client( &clientIt->second );
-		if ( ! l_oLogic->active_clients() )
-			f_oLogics.remove( l_oLogic->get_name() );
-		}
+	remove_client_from_logic( clientIt->second );
 	HString name;
 	if ( ! clientIt->second.f_oName.is_empty() )
 		name = clientIt->second.f_oName;
@@ -353,11 +348,37 @@ void HServer::handler_shutdown( OClientInfo&, HString const& )
 
 void HServer::handler_quit( OClientInfo& a_roInfo, HString const& )
 	{
+	M_PROLOG
 	HString name = a_roInfo.f_oName;
 	kick_client( a_roInfo.f_oSocket, "" );
 	if ( ! name.is_empty() )
 		broadcast_to_interested( "msg:" + mark( COLORS::D_FG_BROWN ) + " " + name + " has left the GameGround." );
 	return;
+	M_EPILOG
+	}
+
+void HServer::handler_abandon( OClientInfo& a_roInfo, HString const& )
+	{
+	M_PROLOG
+	remove_client_from_logic( a_roInfo );
+	broadcast_to_interested( "player:" + a_roInfo.f_oName );
+	return;
+	M_EPILOG
+	}
+
+void HServer::remove_client_from_logic( OClientInfo& a_roInfo )
+	{
+	M_PROLOG
+	if ( !! a_roInfo.f_oLogic )
+		{
+		HLogic::ptr_t l_oLogic = a_roInfo.f_oLogic;
+		l_oLogic->kick_client( &a_roInfo );
+		a_roInfo.f_oLogic = HLogic::ptr_t();
+		if ( ! l_oLogic->active_clients() )
+			f_oLogics.remove( l_oLogic->get_name() );
+		}
+	return;
+	M_EPILOG
 	}
 
 void HServer::get_players_info( OClientInfo& a_roInfo, HString const& )

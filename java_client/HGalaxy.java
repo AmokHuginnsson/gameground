@@ -209,6 +209,10 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		public void onEndRound() {
 			HGalaxy.this.onEndRound();
 		}
+		public void onExit() {
+			_client.println( "abandon" );
+			GameGround.getInstance().setFace( HBrowser.LABEL );
+		}
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
