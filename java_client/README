@@ -1,0 +1,11 @@
+To compile this one you need:
+
+(Except the obvious jdk-1.6)
+
+commons-cli-1.1.jar from http://commons.apache.org/cli/, version (surprize, surprize) 1.1.
+swixml.jar from http://www.swixml.org/, version 1.6.
+jdom.jar from http://www.jdom.org/, version 1.0, you can also use version supplied with swixml.
+
+Just put those files in the same directory as all *.java files.
+
+Good luck!
