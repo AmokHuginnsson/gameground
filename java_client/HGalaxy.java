@@ -156,7 +156,15 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 			$xul.getTaglib().registerTag( "hboard", HBoard.class );
 			$xul.getTaglib().registerTag( "panel", HGalaxyConfigurator.class );
 		}
-		public void reinit() { }
+		public void reinit() {
+			clearLog();
+			log( COLOR_NORMAL );
+			log( "##", 0 );log( " ##", 1 );log( " ##", 2 );
+			log( " ##", 3 );log( " ##", 4 );log( " ##\n", 5 );
+			log( "##", 6 );log( " ##", 7 );log( " ##", 8 );
+			log( " ##", 9 );log( " ##", 10 );log( " ##\n", 11 );
+			log( "##", 12 );log( " ##", 13 );log( " ##\n", 14 );
+		}
 		public JTextPane getLogPad() {
 			return ( _logPad );
 		}
@@ -478,13 +486,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		GameGround gg = GameGround.getInstance();
 		_client = gg.getClient();
 		_emperor = ((HLogin)gg.getLogic( "login" )).getConnectionConfig()._name;
-		_gui.log( _gui.COLOR_NORMAL );
 		_gui._emperor.setText( _emperor );
-		_gui.log( "##", 0 );_gui.log( " ##", 1 );_gui.log( " ##", 2 );
-		_gui.log( " ##", 3 );_gui.log( " ##", 4 );_gui.log( " ##\n", 5 );
-		_gui.log( "##", 6 );_gui.log( " ##", 7 );_gui.log( " ##", 8 );
-		_gui.log( " ##", 9 );_gui.log( " ##", 10 );_gui.log( " ##\n", 11 );
-		_gui.log( "##", 12 );_gui.log( " ##", 13 );_gui.log( " ##\n", 14 );
 	}
 }
 

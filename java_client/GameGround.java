@@ -73,9 +73,9 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 			setContentPane( f );
 			validate();
 			f.reinit();
-			logic.reinit();
 			if ( _client != null )
 				_client.setLogic( logic );
+			logic.reinit();
 		} else {
 			java.util.Set<java.util.Map.Entry<String,HAbstractLogic>> entSet = _logics.entrySet();
 			java.util.Map.Entry<String,HAbstractLogic> ent = null;
