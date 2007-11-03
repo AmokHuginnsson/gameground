@@ -1180,7 +1180,7 @@ int main_client ( void )
 		n_ppcSystemNames = n_ppcSystemNamesNorse;
 	else
 		n_ppcSystemNames = n_ppcSystemNamesLatin;
-	M_ENSURE( setup.f_oGameType == "glx" );
+	M_ENSURE( setup.f_oGameType.is_empty() || ( setup.f_oGameType == "glx" ) );
 	HClient l_oClient ( setup.f_oLogin );
 	l_oClient.init_client ( setup.f_oHost, setup.f_iPort );
 	l_oClient.run ( );

@@ -123,6 +123,7 @@ protected:
 	virtual void do_kick( OClientInfo* );
 	void handler_message( OClientInfo*, yaal::hcore::HString const& );
 	void handler_play( OClientInfo*, yaal::hcore::HString const& );
+	void end_round( void );
 	/*}*/
 private:
 	/*{*/
