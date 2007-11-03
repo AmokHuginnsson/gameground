@@ -56,6 +56,12 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 	public void valueChanged( ListSelectionEvent e ) {
 		if ( ! e.getValueIsAdjusting() ) {
 			int idx = _logics.getSelectedIndex();
+			if ( _conf != null ) {
+				_conf.setVisible( false );
+				_conf = null;
+				_playerSet = null;
+				_face = "";
+			}
 			_confHolder.removeAll();
 			if ( idx >= 0 ) {
 				_playerSet = (HPlayerSet)_logics.getModel().getElementAt( idx );
@@ -67,11 +73,6 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 				_confHolder.add( _conf );
 				_conf.setVisible( true );
 				_conf.setup( this, _playerSet._configuration );
-			} else {
-				_conf.setVisible( false );
-				_conf = null;
-				_playerSet = null;
-				_face = "";
 			}
 		setEnabledOk();
 		}

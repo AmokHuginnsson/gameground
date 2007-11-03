@@ -227,16 +227,10 @@ HLogic::ptr_t create_logic_boggle( HString const& a_oArgv )
 	HString l_oName = a_oArgv.split( ",", 0 );
 	HString l_oPlayers = a_oArgv.split( ",", 0 );
 	HString l_oRoundTime = a_oArgv.split( ",", 1 );
-	HString l_oEmperors = a_oArgv.split( ",", 2 );
+	HString l_oMaxRounds = a_oArgv.split( ",", 2 );
 	int l_iPlayers = strtol( l_oPlayers, NULL, 10 );
 	int l_iRoundTime = strtol( l_oRoundTime, NULL, 10 );
-	int l_iMaxRounds = strtol( l_oEmperors, NULL, 10 );
-	char* l_pcMessage = NULL;
-	if ( OSetup::test_glx_emperors( l_iMaxRounds, l_pcMessage )
-			|| OSetup::test_glx_emperors_systems( l_iMaxRounds, l_iRoundTime, l_pcMessage )
-			|| OSetup::test_glx_systems( l_iRoundTime, l_pcMessage )
-			|| OSetup::test_glx_board_size( l_iPlayers, l_pcMessage ) )
-		throw HLogicException( l_pcMessage );
+	int l_iMaxRounds = strtol( l_oMaxRounds, NULL, 10 );
 	return ( HLogic::ptr_t( new boggle::HBoggle( l_oName,
 					l_iPlayers,
 					l_iRoundTime,

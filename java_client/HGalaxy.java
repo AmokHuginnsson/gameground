@@ -127,7 +127,6 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		public JLabel _round;
 		public JLabel _arrival;
 		public HBoard _board;
-		public JTextPane _log;
 		public JTextPane _tips;
 		public HGalaxyConfigurator _conf;
 		public int[] _colorMap;
@@ -265,14 +264,6 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		HImages images = new HImages();
 		_gui._board.setGui( this );
 		_gui._board.setImages( images );
-		String serverAddress = "";
-		try {
-			serverAddress = $applet.getCodeBase().getHost();
-		} catch ( java.lang.NullPointerException e ) {
-		} finally {
-			if ( serverAddress.compareTo( "" ) == 0 )
-				serverAddress = "127.0.0.1";
-		}
 		$applet.addGlobalKeyListener( $applet, this );
 		$applet.addGlobalKeyListener( _gui, this );
 		_state = State.LOCKED;

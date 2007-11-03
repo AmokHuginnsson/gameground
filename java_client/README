@@ -2,9 +2,27 @@ To compile this one you need:
 
 (Except the obvious jdk-1.6)
 
-commons-cli-1.1.jar from http://commons.apache.org/cli/, version (surprize, surprize) 1.1.
-swixml.jar from http://www.swixml.org/, version 1.6.
-jdom.jar from http://www.jdom.org/, version 1.0, you can also use version supplied with swixml.
+commons-cli-1.1.jar:
+  from: http://commons.apache.org/cli/
+  version: (surprise, surprise) 1.1
+
+
+swixml.jar:
+  from: http://www.swixml.org/
+  version: 1.6
+
+
+jdom.jar:
+  from: http://www.jdom.org/
+  version 1.0:
+  notes: you can also use version supplied with swixml.
+
+
+forms-1.1.0.jar:
+  from: http://www.jgoodies.com/
+  version (surprise, surprise) 1.1.0
+  notes: version supplied with swixml will suffice
+
 
 Just put those files in the same directory as all *.java files.
 

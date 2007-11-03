@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="iso8859-2"?>
 <!DOCTYPE panel SYSTEM "res/gameground.dtd">
 <panel layout="BorderLayout" background="black"><!--{{{-->
-	<panel layout="GridLayout(3,2)" id="_conf" visible="false">
-		<label>Emperors:</label><spinner id="_emperors"><textfield horizontalalignment="RIGHT" /></spinner>
-		<label>Systems:</label><spinner id="_systems"><textfield horizontalalignment="RIGHT" /></spinner>
-		<label>Board size:</label><spinner id="_boardSize"><textfield horizontalalignment="RIGHT" /></spinner>
+	<panel id="_conf" visible="false">
+		<layout type="FormLayout" columns="p,p" rows="p,p,p" />
+		<label constraints="1,1">Emperors:</label><spinner id="_emperors" constraints="2,1"><textfield horizontalalignment="RIGHT" /></spinner>
+		<label constraints="1,2">Systems:</label><spinner id="_systems" constraints="2,2"><textfield horizontalalignment="RIGHT" /></spinner>
+		<label constraints="1,3">Board size:</label><spinner id="_boardSize" constraints="2,3"><textfield horizontalalignment="RIGHT" /></spinner>
 	</panel>
 	<hbox>
 		<vbox>

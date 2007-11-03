@@ -23,15 +23,16 @@ $(ENVIRON): jdom.jar swixml.jar
 	mkdir -p build ; \
 	cd build; \
 	/bin/rm -rf *; \
-	jar xf ../jdom.jar; \
-	jar xf ../swixml.jar; \
 	jar xf ../commons-cli-1.1.jar; \
+	jar xf ../jdom.jar; \
+	jar xf ../forms-1.1.0.jar; \
+	jar xf ../swixml.jar; \
 	touch META-INF/info.xml
 
 $(TARGET): $(ENVIRON) $(CLASS) $(RES_DEST)
 	cd build; \
 	ls -1 *.class > class.list; \
-	jar cf ../$(TARGET) res org *.class class.list;
+	jar cf ../$(TARGET) res org com *.class class.list;
 
 run: $(TARGET)
 	java -Djava.security.manager -Djava.security.policy=gameground.policy -ea -cp build/gameground.jar GameGround
