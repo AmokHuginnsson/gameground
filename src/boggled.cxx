@@ -168,16 +168,19 @@ HBoggle::OPlayerInfo* HBoggle::get_player_info( OClientInfo* a_poClientInfo )
 	M_EPILOG
 	}
 
-bool HBoggle::do_accept( OClientInfo* )
+bool HBoggle::do_accept( OClientInfo* a_poClientInfo )
 	{
 	M_PROLOG
 	bool rejected = false;
-//	int l_iCtr = 0, l_iColor = -1, l_iSysNo = -1;
+	out << "new candidate " << a_poClientInfo->f_oName << endl;
 //	HString l_oMessage;
-	if ( f_oPlayers.size() < static_cast<size_t>( f_iPlayers - 1 ) )
+	if ( f_oPlayers.size() < static_cast<size_t>( f_iPlayers ) )
 		{
+		OPlayerInfo info;
+		f_oPlayers[ a_poClientInfo ] = info;
 		broadcast( NULL, "bgl:msg:join!\n" );
 		rejected = false;
+		out << "player [" << a_poClientInfo->f_oName << "] accepted" << endl;
 		}
 	else
 		rejected = true;

@@ -38,6 +38,7 @@ Copyright:
 #define D_PLAYERS 									4
 #define D_ROUND_TIME								180
 #define D_MAX_ROUNDS								5
+#define out ( cout << __FILE__ + OSetup::PATH_OFFSET << ":" << __LINE__ << ": " )
 
 struct OSetup
 	{
@@ -64,6 +65,7 @@ struct OSetup
 	char * f_pcProgramName;
 	yaal::hcore::HString f_oLogPath;
 	/* self-sufficient */
+	static int const PATH_OFFSET = sizeof ( __FILE__ ) - sizeof ( "setup.h" );
 	OSetup ( void ) : f_bQuiet( false ), f_bHelp( false ),
 										f_iVerbose( 0 ), f_bServer( false ),
 										f_bClient( false ), f_iMaxConnections( D_DEFAULT_MAX_CONNECTIONS ),

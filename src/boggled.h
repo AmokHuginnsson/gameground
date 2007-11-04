@@ -39,9 +39,11 @@ class HBoggle : public HLogic
 	struct OPlayerInfo
 		{
 		typedef yaal::hcore::HSet<yaal::hcore::HString> word_set_t;
+		typedef yaal::hcore::HPointer<word_set_t, yaal::hcore::HPointerScalar, yaal::hcore::HPointerRelaxed> word_set_ptr_t;
 		int f_iScore;
 		int f_iLast;
-		word_set_t f_oWords;
+		word_set_ptr_t f_oWords;
+		OPlayerInfo( void ) : f_iScore( 0 ), f_iLast( 0 ), f_oWords() {}
 		};
 	typedef void ( HBoggle::*handler_t ) ( OClientInfo*, yaal::hcore::HString const& );
 	typedef yaal::hcore::HHashMap<yaal::hcore::HString, handler_t> handlers_t;
