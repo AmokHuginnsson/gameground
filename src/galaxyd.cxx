@@ -152,7 +152,7 @@ void HSystem::do_round( HGalaxy& a_roGalaxy )
 	}
 
 HGalaxy::HGalaxy( HString const& a_oName, int a_iBoardSize, int a_iSystems, int a_iEmperors )
-	: HLogic( a_oName ), f_iBoardSize( a_iBoardSize ), f_iSystems( a_iSystems ),
+	: HLogic( "glx", a_oName ), f_iBoardSize( a_iBoardSize ), f_iSystems( a_iSystems ),
 	f_iEmperors( a_iEmperors ), f_iRound( -1 ), f_iReady( 0 ),
 	f_oSystems( a_iSystems + a_iEmperors ),
 	f_oHandlers( 16 ), f_oEmperors()
@@ -194,25 +194,6 @@ HGalaxy::HGalaxy( HString const& a_oName, int a_iBoardSize, int a_iSystems, int 
 HGalaxy::~HGalaxy ( void )
 	{
 	M_PROLOG
-	return;
-	M_EPILOG
-	}
-
-void HGalaxy::process_command( OClientInfo* a_poClientInfo, HString const& a_roCommand )
-	{
-	M_PROLOG
-	HString l_oMnemonic;
-	HString l_oArgument;
-	handler_t HANDLER;
-	l_oArgument = a_roCommand;
-	while ( ( l_oMnemonic = l_oArgument.split( ":", 0 ) ) == "glx" )
-		l_oArgument = l_oArgument.mid( l_oMnemonic.get_length() + 1 );
-	l_oMnemonic = l_oArgument.split ( ":", 0 );
-	l_oArgument = l_oArgument.mid ( l_oMnemonic.get_length ( ) + 1 );
-	if ( f_oHandlers.get ( l_oMnemonic, HANDLER ) )
-		( this->*HANDLER ) ( a_poClientInfo, l_oArgument );
-	else
-		kick_client( a_poClientInfo );
 	return;
 	M_EPILOG
 	}

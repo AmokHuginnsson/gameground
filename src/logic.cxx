@@ -38,8 +38,9 @@ using namespace yaal::hconsole;
 using namespace yaal::tools;
 using namespace yaal::tools::util;
 
-HLogic::HLogic( HString const& a_oName )
-	: f_oHandlers( setup.f_iMaxConnections ), f_oClients(), f_oName( a_oName )
+HLogic::HLogic( HString const& a_oSymbol, HString const& a_oName )
+	: f_oSymbol( a_oSymbol ), f_oHandlers( setup.f_iMaxConnections ),
+	f_oClients(), f_oName( a_oName )
 	{
 	}
 
@@ -89,5 +90,24 @@ int HLogic::active_clients( void ) const
 HString const& HLogic::get_name( void ) const
 	{
 	return ( f_oName );
+	}
+
+void HLogic::process_command( OClientInfo* a_poClientInfo, HString const& a_roCommand )
+	{
+	M_PROLOG
+	HString l_oMnemonic;
+	HString l_oArgument;
+	handler_t HANDLER;
+	l_oArgument = a_roCommand;
+	while ( ( l_oMnemonic = l_oArgument.split( ":", 0 ) ) == f_oSymbol )
+		l_oArgument = l_oArgument.mid( l_oMnemonic.get_length() + 1 );
+	l_oMnemonic = l_oArgument.split( ":", 0 );
+	l_oArgument = l_oArgument.mid( l_oMnemonic.get_length() + 1 );
+	if ( f_oHandlers.get( l_oMnemonic, HANDLER ) )
+		( this->*HANDLER )( a_poClientInfo, l_oArgument );
+	else
+		kick_client( a_poClientInfo );
+	return;
+	M_EPILOG
 	}
 

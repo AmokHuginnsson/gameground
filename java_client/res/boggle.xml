@@ -3,19 +3,24 @@
 <panel layout="BorderLayout"><!--{{{-->
 	<panel id="_conf" visible="false">
 		<layout type="FormLayout" columns="p,p" rows="p,p,p" />
-		<label constraints="1,1">Players:</label><spinner id="_players" constraints="2,1"><textfield horizontalalignment="RIGHT" /></spinner>
+		<label constraints="1,1">Players:</label><spinner id="_playerCount" constraints="2,1"><textfield horizontalalignment="RIGHT" /></spinner>
 		<label constraints="1,2">Round time:</label><spinner id="_roundTime" constraints="2,2"><textfield horizontalalignment="RIGHT" /></spinner>
 		<label constraints="1,3">Number of rounds:</label><spinner id="_maxRounds" constraints="2,3"><textfield horizontalalignment="RIGHT" /></spinner>
 	</panel>
 	<hbox>
 		<vbox>
+			<panel>
+			</panel>
 		</vbox>
 		<vbox minimumsize="&v_sidebar_width_galaxy;,1" preferredsize="&v_sidebar_width_galaxy;,&v_height;" maximumsize="&v_sidebar_width_galaxy;,2000">
+			<scrollpane maximumsize="&v_sidebar_width_galaxy;,2000" autoscrolls="true">
+				<table id="_players" />
+			</scrollpane>
 			<scrollpane maximumsize="&v_sidebar_width_galaxy;,2000" autoscrolls="true">
 				<textpane id="_logPad" editable="false" focusable="false" />
 			</scrollpane>
 			<panel maximumsize="&v_sidebar_width_galaxy;,40">
-				<textfield id="_messageInput" columns="23" focusable="true" editable="true" action="onMessage" tooltiptext="Enter message You want to send to other players." />
+				<textfield id="_messageInput" columns="20" focusable="true" editable="true" action="onMessage" tooltiptext="Enter message You want to send to other players." />
 			</panel>
 			<hbox>
 				<glue maximumsize="1000,1"/>

@@ -5,21 +5,21 @@ import javax.swing.event.ChangeEvent;
 
 public class BoggleConfigurator extends HAbstractConfigurator implements ChangeListener {
 	public static final long serialVersionUID = 17l;
-	public JSpinner _players;
+	public JSpinner _playerCount;
 	public JSpinner _roundTime;
 	public JSpinner _maxRounds;
 	String getConfigurationString() {
-		return ( _players.getValue() + "," + _maxRounds.getValue() + "," + _roundTime.getValue() );
+		return ( _playerCount.getValue() + "," + _maxRounds.getValue() + "," + _roundTime.getValue() );
 	}
 	void setDefaults( String $defaults ) {
 		String[] tokens = $defaults.split( ",", 3 );
 		try {
-			_players.addChangeListener( this );
+			_playerCount.addChangeListener( this );
 			_roundTime.addChangeListener( this );
-			SpinnerNumberModel m = (SpinnerNumberModel)_players.getModel();
+			SpinnerNumberModel m = (SpinnerNumberModel)_playerCount.getModel();
 			m.setMinimum( 2 );
 			m.setMaximum( 36 );
-			_players.setValue( new Integer( tokens[0] ).intValue() );
+			_playerCount.setValue( new Integer( tokens[0] ).intValue() );
 			m = (SpinnerNumberModel)_maxRounds.getModel();
 			m.setMinimum( 6 );
 			m.setMaximum( 20 );
@@ -35,7 +35,7 @@ public class BoggleConfigurator extends HAbstractConfigurator implements ChangeL
 	}
 	public void stateChanged( ChangeEvent e ) {
 		JSpinner i = (JSpinner)e.getSource();
-		JSpinner o = ( i == _players ) ? _roundTime : _players;
+		JSpinner o = ( i == _playerCount ) ? _roundTime : _playerCount;
 		int iv = new Integer( i.getValue().toString() ).intValue();
 		int ov = new Integer( o.getValue().toString() ).intValue();
 		if ( ( iv + ov ) > 36 )

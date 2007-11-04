@@ -80,14 +80,14 @@ namespace boggle
 {
 
 HBoggle::HBoggle( HString const& a_oName, int a_iPlayers, int a_iRoundTime, int a_iMaxRounds )
-	: HLogic( a_oName ), f_iPlayers( a_iPlayers ), f_iRoundTime( a_iRoundTime ),
+	: HLogic( "bgl", a_oName ), f_iPlayers( a_iPlayers ), f_iRoundTime( a_iRoundTime ),
 	f_iMaxRounds( a_iMaxRounds ), f_iRound( 0 ), f_oHandlers( 16 ), f_oPlayers()
 	{
 	M_PROLOG
 	HRandomizer l_oRandom;
 	l_oRandom.set( time ( NULL ) );
-	f_oHandlers [ "PLAY" ] = & HBoggle::handler_play;
-	f_oHandlers [ "SAY" ] = & HBoggle::handler_message;
+	f_oHandlers [ "play" ] = & HBoggle::handler_play;
+	f_oHandlers [ "say" ] = & HBoggle::handler_message;
 	return;
 	M_EPILOG
 	}
@@ -131,22 +131,6 @@ void HBoggle::send_map( void )
 	return;
 	}
 
-void HBoggle::process_command( OClientInfo* a_poClientInfo, HString const& a_roCommand )
-	{
-	M_PROLOG
-	HString l_oMnemonic;
-	HString l_oArgument;
-	handler_t HANDLER;
-	l_oMnemonic = a_roCommand.split ( ":", 0 );
-	l_oArgument = a_roCommand.mid ( l_oMnemonic.get_length ( ) + 1 );
-	if ( f_oHandlers.get ( l_oMnemonic, HANDLER ) )
-		( this->*HANDLER ) ( a_poClientInfo, l_oArgument );
-	else
-		kick_client( a_poClientInfo );
-	return;
-	M_EPILOG
-	}
-
 void HBoggle::broadcast( OClientInfo*, HString const& a_roMessage )
 	{
 	M_PROLOG
@@ -160,11 +144,9 @@ void HBoggle::handler_message ( OClientInfo* a_poClientInfo, HString const& a_ro
 	{
 	M_PROLOG
 	HString l_oMessage;
-	l_oMessage = "GLX:MSG:$";
-	l_oMessage += get_player_info( a_poClientInfo )->f_iColor;
-	l_oMessage += ';';
+	l_oMessage = "bgl:msg:";
 	l_oMessage += a_poClientInfo->f_oName;
-	l_oMessage += ";$12;: ";
+	l_oMessage += ": ";
 	l_oMessage += a_roMessage;
 	l_oMessage += '\n';
 	broadcast( NULL, l_oMessage );
@@ -194,6 +176,7 @@ bool HBoggle::do_accept( OClientInfo* )
 //	HString l_oMessage;
 	if ( f_oPlayers.size() < static_cast<size_t>( f_iPlayers - 1 ) )
 		{
+		broadcast( NULL, "bgl:msg:join!\n" );
 		rejected = false;
 		}
 	else

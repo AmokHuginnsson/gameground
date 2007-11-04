@@ -41,15 +41,16 @@ private:
 	typedef yaal::hcore::HHashMap<yaal::hcore::HString, handler_t> handlers_t;
 protected:
 	/*{*/
+	yaal::hcore::HString f_oSymbol;
 	handlers_t f_oHandlers;
 	clients_t f_oClients;
 	yaal::hcore::HString f_oName;
 	/*}*/
 public:
 	/*{*/
-	HLogic( yaal::hcore::HString const& );
+	HLogic( yaal::hcore::HString const&, yaal::hcore::HString const& );
 	virtual ~HLogic( void );
-	virtual void process_command( OClientInfo*, yaal::hcore::HString const& ) = 0;
+	void process_command( OClientInfo*, yaal::hcore::HString const& );
 	bool accept_client( OClientInfo* );
 	int active_clients( void ) const;
 	yaal::hcore::HString const& get_name() const;

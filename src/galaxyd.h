@@ -109,7 +109,6 @@ public:
 	/*{*/
 	HGalaxy( yaal::hcore::HString const&, int, int, int );
 	virtual ~HGalaxy( void );
-	void process_command( OClientInfo*, yaal::hcore::HString const& );
 	int get_color( OClientInfo* );
 	void mark_alive( OClientInfo* );
 	virtual yaal::hcore::HString get_info() const;

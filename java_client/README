@@ -14,8 +14,8 @@ swixml.jar:
 
 jdom.jar:
   from: http://www.jdom.org/
-  version 1.0:
-  notes: you can also use version supplied with swixml.
+  version: 1.0
+  notes: you can also use version supplied with swixml
 
 
 forms-1.1.0.jar:

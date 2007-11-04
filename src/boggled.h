@@ -38,7 +38,10 @@ class HBoggle : public HLogic
 	{
 	struct OPlayerInfo
 		{
-		int f_iColor;
+		typedef yaal::hcore::HSet<yaal::hcore::HString> word_set_t;
+		int f_iScore;
+		int f_iLast;
+		word_set_t f_oWords;
 		};
 	typedef void ( HBoggle::*handler_t ) ( OClientInfo*, yaal::hcore::HString const& );
 	typedef yaal::hcore::HHashMap<yaal::hcore::HString, handler_t> handlers_t;
@@ -57,7 +60,6 @@ public:
 	/*{*/
 	HBoggle( yaal::hcore::HString const&, int, int, int );
 	virtual ~HBoggle( void );
-	void process_command( OClientInfo*, yaal::hcore::HString const& );
 	int get_color( OClientInfo* );
 	void generate_game( void );
 	virtual yaal::hcore::HString get_info() const;
