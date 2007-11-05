@@ -106,7 +106,6 @@ class Boggle extends HAbstractLogic {
 			}
 		};
 		public void onExit() {
-			_client.println( "abandon" );
 			GameGround.getInstance().setFace( HBrowser.LABEL );
 		}
 	}

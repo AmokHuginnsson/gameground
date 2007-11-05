@@ -36,8 +36,8 @@ class HLogic
 public:
 	typedef yaal::hcore::HPointer<HLogic, yaal::hcore::HPointerScalar, yaal::hcore::HPointerRelaxed> ptr_t;
 	typedef yaal::hcore::HSet<OClientInfo*> clients_t;
-private:
 	typedef void ( HLogic::*handler_t ) ( OClientInfo*, yaal::hcore::HString const& );
+private:
 	typedef yaal::hcore::HHashMap<yaal::hcore::HString, handler_t> handlers_t;
 protected:
 	/*{*/
@@ -50,7 +50,7 @@ public:
 	/*{*/
 	HLogic( yaal::hcore::HString const&, yaal::hcore::HString const& );
 	virtual ~HLogic( void );
-	void process_command( OClientInfo*, yaal::hcore::HString const& );
+	bool process_command( OClientInfo*, yaal::hcore::HString const& );
 	bool accept_client( OClientInfo* );
 	int active_clients( void ) const;
 	yaal::hcore::HString const& get_name() const;
@@ -61,7 +61,7 @@ protected:
 	/*{*/
 	virtual bool do_accept( OClientInfo* );
 	virtual void do_kick( OClientInfo* );
-	void broadcast( OClientInfo*, yaal::hcore::HString const& );
+	void broadcast( yaal::hcore::HString const& );
 	void handler_message( OClientInfo*, yaal::hcore::HString const& );
 	void handler_play( OClientInfo*, yaal::hcore::HString const& );
 	/*}*/

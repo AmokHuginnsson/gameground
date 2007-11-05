@@ -24,6 +24,8 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
+#include <iostream>
+
 #include <yaal/yaal.h>
 M_VCSID ( "$Id$" )
 #include "logic.h"
@@ -51,9 +53,9 @@ HLogic::~HLogic( void )
 void HLogic::kick_client( OClientInfo* a_poClientInfo )
 	{
 	M_PROLOG
-	do_kick( a_poClientInfo );
 	a_poClientInfo->f_oLogic = HLogic::ptr_t();
 	f_oClients.remove( a_poClientInfo );
+	do_kick( a_poClientInfo );
 	return;
 	M_EPILOG
 	}
@@ -92,21 +94,34 @@ HString const& HLogic::get_name( void ) const
 	return ( f_oName );
 	}
 
-void HLogic::process_command( OClientInfo* a_poClientInfo, HString const& a_roCommand )
+bool HLogic::process_command( OClientInfo* a_poClientInfo, HString const& a_roCommand )
 	{
 	M_PROLOG
 	HString l_oMnemonic;
 	HString l_oArgument;
-	handler_t HANDLER;
 	l_oArgument = a_roCommand;
 	while ( ( l_oMnemonic = l_oArgument.split( ":", 0 ) ) == f_oSymbol )
 		l_oArgument = l_oArgument.mid( l_oMnemonic.get_length() + 1 );
 	l_oMnemonic = l_oArgument.split( ":", 0 );
 	l_oArgument = l_oArgument.mid( l_oMnemonic.get_length() + 1 );
+	bool failure = false;
+	handler_t HANDLER;
 	if ( f_oHandlers.get( l_oMnemonic, HANDLER ) )
 		( this->*HANDLER )( a_poClientInfo, l_oArgument );
 	else
-		kick_client( a_poClientInfo );
+		{
+		failure = true, kick_client( a_poClientInfo );
+		out << "mnemo: " << l_oMnemonic << ", arg: " << l_oArgument << ", cmd: " << a_roCommand << endl;
+		}
+	return ( failure );
+	M_EPILOG
+	}
+
+void HLogic::broadcast( HString const& a_roMessage )
+	{
+	M_PROLOG
+	for ( clients_t::HIterator it = f_oClients.begin(); it != f_oClients.end(); ++ it )
+		(*it)->f_oSocket->write_until_eos ( a_roMessage );
 	return;
 	M_EPILOG
 	}

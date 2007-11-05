@@ -91,8 +91,6 @@ class HGalaxy : public HLogic
 		int f_iColor;
 		int f_iSystems;
 		};
-	typedef void ( HGalaxy::*handler_t ) ( OClientInfo*, yaal::hcore::HString const& );
-	typedef yaal::hcore::HHashMap<yaal::hcore::HString, handler_t> handlers_t;
 	typedef yaal::hcore::HMap<OClientInfo*, OEmperorInfo> emperors_t;
 protected:
 	/*{*/
@@ -102,7 +100,6 @@ protected:
 	int f_iRound;
 	int f_iReady;
 	yaal::hcore::HArray<HSystem> f_oSystems;
-	handlers_t f_oHandlers;
 	emperors_t f_oEmperors;
 	/*}*/
 public:
@@ -117,7 +114,6 @@ protected:
 	/*{*/
 	OEmperorInfo* get_emperor_info( OClientInfo* );
 	int assign_system( OClientInfo* );
-	void broadcast( OClientInfo*, yaal::hcore::HString const& );
 	virtual bool do_accept( OClientInfo* );
 	virtual void do_kick( OClientInfo* );
 	void handler_message( OClientInfo*, yaal::hcore::HString const& );

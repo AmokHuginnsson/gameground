@@ -45,8 +45,6 @@ class HBoggle : public HLogic
 		word_set_ptr_t f_oWords;
 		OPlayerInfo( void ) : f_iScore( 0 ), f_iLast( 0 ), f_oWords() {}
 		};
-	typedef void ( HBoggle::*handler_t ) ( OClientInfo*, yaal::hcore::HString const& );
-	typedef yaal::hcore::HHashMap<yaal::hcore::HString, handler_t> handlers_t;
 	typedef yaal::hcore::HMap<OClientInfo*, OPlayerInfo> players_t;
 protected:
 	/*{*/
@@ -54,7 +52,6 @@ protected:
 	int f_iRoundTime;
 	int f_iMaxRounds;
 	int f_iRound;
-	handlers_t f_oHandlers;
 	players_t f_oPlayers;
 	int f_ppiGame[16][2];
 	/*}*/
@@ -69,7 +66,6 @@ public:
 protected:
 	/*{*/
 	OPlayerInfo* get_player_info( OClientInfo* );
-	void broadcast( OClientInfo*, yaal::hcore::HString const& );
 	virtual bool do_accept( OClientInfo* );
 	virtual void do_kick( OClientInfo* );
 	void handler_message( OClientInfo*, yaal::hcore::HString const& );

@@ -168,6 +168,8 @@ class HBrowser extends HAbstractLogic {
 				gg.setFace( HLogin.LABEL );
 				return;
 			}
+		} else {
+			_client.println( "abandon" );
 		}
 		_client.println( "get_logics" );
 		_client.println( "get_games" );

@@ -81,13 +81,13 @@ namespace boggle
 
 HBoggle::HBoggle( HString const& a_oName, int a_iPlayers, int a_iRoundTime, int a_iMaxRounds )
 	: HLogic( "bgl", a_oName ), f_iPlayers( a_iPlayers ), f_iRoundTime( a_iRoundTime ),
-	f_iMaxRounds( a_iMaxRounds ), f_iRound( 0 ), f_oHandlers( 16 ), f_oPlayers()
+	f_iMaxRounds( a_iMaxRounds ), f_iRound( 0 ), f_oPlayers()
 	{
 	M_PROLOG
 	HRandomizer l_oRandom;
 	l_oRandom.set( time ( NULL ) );
-	f_oHandlers [ "play" ] = & HBoggle::handler_play;
-	f_oHandlers [ "say" ] = & HBoggle::handler_message;
+	f_oHandlers[ "play" ] = static_cast<handler_t>( &HBoggle::handler_play );
+	f_oHandlers[ "say" ] = static_cast<handler_t>( &HBoggle::handler_message );
 	return;
 	M_EPILOG
 	}
@@ -131,15 +131,6 @@ void HBoggle::send_map( void )
 	return;
 	}
 
-void HBoggle::broadcast( OClientInfo*, HString const& a_roMessage )
-	{
-	M_PROLOG
-	for ( clients_t::HIterator it = f_oClients.begin(); it != f_oClients.end(); ++ it )
-		(*it)->f_oSocket->write_until_eos ( a_roMessage );
-	return;
-	M_EPILOG
-	}
-
 void HBoggle::handler_message ( OClientInfo* a_poClientInfo, HString const& a_roMessage )
 	{
 	M_PROLOG
@@ -149,7 +140,7 @@ void HBoggle::handler_message ( OClientInfo* a_poClientInfo, HString const& a_ro
 	l_oMessage += ": ";
 	l_oMessage += a_roMessage;
 	l_oMessage += '\n';
-	broadcast( NULL, l_oMessage );
+	broadcast( l_oMessage );
 	return;
 	M_EPILOG
 	}
@@ -173,17 +164,35 @@ bool HBoggle::do_accept( OClientInfo* a_poClientInfo )
 	M_PROLOG
 	bool rejected = false;
 	out << "new candidate " << a_poClientInfo->f_oName << endl;
-//	HString l_oMessage;
+	HString l_oMessage;
+	out << "conditions: f_oPlayers.size() = " << f_oPlayers.size() << ", f_iPlayers = " << f_iPlayers << endl;
 	if ( f_oPlayers.size() < static_cast<size_t>( f_iPlayers ) )
 		{
 		OPlayerInfo info;
 		f_oPlayers[ a_poClientInfo ] = info;
-		broadcast( NULL, "bgl:msg:join!\n" );
-		rejected = false;
+		l_oMessage = "player:";
+		l_oMessage += a_poClientInfo->f_oName + ",0,0\n";
+		broadcast( l_oMessage );
+		for ( players_t::HIterator it = f_oPlayers.begin(); it != f_oPlayers.end(); ++ it )
+			{
+			l_oMessage = "player:";
+			l_oMessage += it->first->f_oName + "," + it->second.f_iScore + "," + it->second.f_iLast + "\n";
+			a_poClientInfo->f_oSocket->write_until_eos( l_oMessage );
+			l_oMessage = "bgl:msg:";
+			l_oMessage += it->first->f_oName + " joined the mind contest.\n";
+			a_poClientInfo->f_oSocket->write_until_eos( l_oMessage );
+			}
+		l_oMessage = "bgl:msg:";
+		l_oMessage += a_poClientInfo->f_oName + " joined the mind contest.\n";
+		broadcast( l_oMessage );
 		out << "player [" << a_poClientInfo->f_oName << "] accepted" << endl;
+		rejected = false;
 		}
 	else
+		{
+		out << "player [" << a_poClientInfo->f_oName << "] rejected" << endl;
 		rejected = true;
+		}
 	return ( rejected );
 	M_EPILOG
 	}
@@ -210,10 +219,11 @@ namespace logic_factory
 HLogic::ptr_t create_logic_boggle( HString const& a_oArgv )
 	{
 	M_PROLOG
+	out << "creating logic: " << a_oArgv << endl;
 	HString l_oName = a_oArgv.split( ",", 0 );
-	HString l_oPlayers = a_oArgv.split( ",", 0 );
-	HString l_oRoundTime = a_oArgv.split( ",", 1 );
-	HString l_oMaxRounds = a_oArgv.split( ",", 2 );
+	HString l_oPlayers = a_oArgv.split( ",", 1 );
+	HString l_oRoundTime = a_oArgv.split( ",", 2 );
+	HString l_oMaxRounds = a_oArgv.split( ",", 3 );
 	int l_iPlayers = strtol( l_oPlayers, NULL, 10 );
 	int l_iRoundTime = strtol( l_oRoundTime, NULL, 10 );
 	int l_iMaxRounds = strtol( l_oMaxRounds, NULL, 10 );

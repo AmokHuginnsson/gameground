@@ -217,7 +217,6 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 			HGalaxy.this.onEndRound();
 		}
 		public void onExit() {
-			_client.println( "abandon" );
 			GameGround.getInstance().setFace( HBrowser.LABEL );
 		}
 	}

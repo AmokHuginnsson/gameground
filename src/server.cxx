@@ -65,7 +65,7 @@ HServer::HServer( int a_iConnections )
 
 HServer::~HServer( void )
 	{
-	cout << brightred << "<<<GameGround>>>" << lightgray << " server finished." << endl;
+	out << brightred << "<<<GameGround>>>" << lightgray << " server finished." << endl;
 	}
 
 int HServer::init_server( int a_iPort )
@@ -86,7 +86,7 @@ int HServer::init_server( int a_iPort )
 	f_oHandlers[ "abandon" ] = &HServer::handler_abandon;
 	f_oHandlers[ "cmd" ] = &HServer::pass_command;
 	HProcess::init ( 3600 );
-	cout << brightblue << "<<<GameGround>>>" << lightgray << " server started." << endl;
+	out << brightblue << "<<<GameGround>>>" << lightgray << " server started." << endl;
 	return ( 0 );
 	M_EPILOG
 	}
@@ -147,8 +147,8 @@ void HServer::pass_command( OClientInfo& a_roInfo, HString const& a_oCommand )
 	M_PROLOG
 	if ( ! a_roInfo.f_oLogic )
 		a_roInfo.f_oSocket->write_until_eos( "err:Connect to some game first.\n" );
-	else
-		a_roInfo.f_oLogic->process_command( &a_roInfo, a_oCommand );
+	else if ( a_roInfo.f_oLogic->process_command( &a_roInfo, a_oCommand ) )
+		*a_roInfo.f_oSocket << "err:Server could not comprehend your message: " << a_oCommand << endl;
 	return;
 	M_EPILOG
 	}
@@ -181,9 +181,11 @@ void HServer::create_game( OClientInfo& a_roInfo, HString const& a_oArg )
 					{
 					f_oLogics[ l_oName ] = l_oLogic;
 					a_roInfo.f_oLogic = l_oLogic;
-					cout << l_oName << "," << l_oType << endl;
+					out << l_oName << "," << l_oType << endl;
 					broadcast_to_interested( "player:" + a_roInfo.f_oName + "," + l_oLogic->get_info() );
 					}
+				else
+					a_roInfo.f_oSocket->write_until_eos( "err:Specified configuration is inconsistent.\n" );
 				}
 			catch ( HLogicException& e )
 				{
@@ -230,7 +232,7 @@ int HServer::handler_connection( int )
 		}
 	else
 		f_oClients[ l_oClient->get_file_descriptor() ].f_oSocket = l_oClient;
-	cout << static_cast<char const* const>( l_oClient->get_host_name() ) << endl;
+	out << static_cast<char const* const>( l_oClient->get_host_name() ) << endl;
 	return ( 0 );
 	M_EPILOG
 	}
@@ -254,7 +256,7 @@ int HServer::handler_message( int a_iFileDescriptor )
 			kick_client( l_oClient, _( "Read failure." ) );
 		else if ( l_iMsgLength > 0 )
 			{
-			cout << "<-" << static_cast<char const* const>( l_oMessage ) << endl;
+			out << "<-" << static_cast<char const* const>( l_oMessage ) << endl;
 			l_oCommand = l_oMessage.split( ":", 0 );
 			l_oArgument = l_oMessage.mid( l_oCommand.get_length() + 1 );
 			l_iMsgLength = l_oCommand.get_length();
@@ -294,7 +296,7 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& a_oClient, char const* c
 	unregister_file_descriptor_handler( l_iFileDescriptor );
 	clients_t::HIterator clientIt = f_oClients.find( l_iFileDescriptor );
 	M_ASSERT( clientIt != f_oClients.end() );
-	cout << "client ";
+	out << "client ";
 	if ( clientIt->second.f_oName.is_empty() )
 		cout << "`unnamed'";
 	else

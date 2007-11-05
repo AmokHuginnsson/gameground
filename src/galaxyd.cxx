@@ -154,8 +154,7 @@ void HSystem::do_round( HGalaxy& a_roGalaxy )
 HGalaxy::HGalaxy( HString const& a_oName, int a_iBoardSize, int a_iSystems, int a_iEmperors )
 	: HLogic( "glx", a_oName ), f_iBoardSize( a_iBoardSize ), f_iSystems( a_iSystems ),
 	f_iEmperors( a_iEmperors ), f_iRound( -1 ), f_iReady( 0 ),
-	f_oSystems( a_iSystems + a_iEmperors ),
-	f_oHandlers( 16 ), f_oEmperors()
+	f_oSystems( a_iSystems + a_iEmperors ), f_oEmperors()
 	{
 	M_PROLOG
 	int l_iCtr = 0, l_iCtrLoc = 0;
@@ -185,8 +184,8 @@ HGalaxy::HGalaxy( HString const& a_oName, int a_iBoardSize, int a_iSystems, int 
 		}
 	for ( l_iCtr = 0; l_iCtr < ( a_iEmperors + a_iSystems ); l_iCtr ++ )
 		f_oSystems [ l_iCtr ].f_iProduction = f_oSystems [ l_iCtr ].f_iFleet = l_oRandom.rnd ( 16 );
-	f_oHandlers [ "play" ] = & HGalaxy::handler_play;
-	f_oHandlers [ "say" ] = & HGalaxy::handler_message;
+	f_oHandlers[ "play" ] = static_cast<handler_t>( &HGalaxy::handler_play );
+	f_oHandlers[ "say" ] = static_cast<handler_t>( &HGalaxy::handler_message );
 	return;
 	M_EPILOG
 	}
@@ -210,14 +209,16 @@ bool HGalaxy::do_accept( OClientInfo* a_poClientInfo )
 		l_oMessage.format ( "glx:msg:$12;Emperor ;$%d;", l_iColor = get_color( a_poClientInfo ) );
 		l_oMessage += a_poClientInfo->f_oName;
 		l_oMessage += ";$12; invaded the galaxy.\n";
-		broadcast( NULL, l_oMessage ); /* inform every emperor about new rival */
+		broadcast( l_oMessage ); /* inform every emperor about new rival */
+		a_poClientInfo->f_oSocket->write_until_eos( l_oMessage );
 		l_oMessage.format ( "glx:setup:board_size=%d\n", f_iBoardSize );
 		a_poClientInfo->f_oSocket->write_until_eos( l_oMessage ); /* send setup info to new emperor */
 		l_oMessage.format ( "glx:setup:systems=%d\n", f_iEmperors + f_iSystems );
 		a_poClientInfo->f_oSocket->write_until_eos( l_oMessage );
 		l_oMessage.format ( "glx:setup:emperor=%d,%s\n",
 				l_iColor, static_cast<char const* const>( a_poClientInfo->f_oName ) );
-		broadcast( NULL, l_oMessage ); /* send setup information about new rival to all emperors */
+		broadcast( l_oMessage ); /* send setup information about new rival to all emperors */
+		a_poClientInfo->f_oSocket->write_until_eos( l_oMessage );
 		for ( emperors_t::HIterator it = f_oEmperors.begin(); it != f_oEmperors.end(); ++ it )
 			{
 			if ( it->first != a_poClientInfo )
@@ -250,7 +251,9 @@ bool HGalaxy::do_accept( OClientInfo* a_poClientInfo )
 		if ( f_iReady >= f_iEmperors )
 			{
 			f_iRound = 0;
-			broadcast ( NULL, "glx:setup:ok\n" );
+			l_oMessage = "glx:setup:ok\n";
+			broadcast ( l_oMessage );
+			a_poClientInfo->f_oSocket->write_until_eos( l_oMessage );
 			f_iReady = 0;
 			}
 		rejected = false;
@@ -292,15 +295,6 @@ int HGalaxy::assign_system( OClientInfo* a_poClientInfo )
 	M_EPILOG
 	}
 
-void HGalaxy::broadcast( OClientInfo*, HString const& a_roMessage )
-	{
-	M_PROLOG
-	for ( emperors_t::HIterator it = f_oEmperors.begin(); it != f_oEmperors.end(); ++ it )
-		it->first->f_oSocket->write_until_eos ( a_roMessage );
-	return;
-	M_EPILOG
-	}
-
 void HGalaxy::handler_message ( OClientInfo* a_poClientInfo, HString const& a_roMessage )
 	{
 	M_PROLOG
@@ -312,7 +306,7 @@ void HGalaxy::handler_message ( OClientInfo* a_poClientInfo, HString const& a_ro
 	l_oMessage += ";$12;: ";
 	l_oMessage += a_roMessage;
 	l_oMessage += '\n';
-	broadcast( NULL, l_oMessage );
+	broadcast( l_oMessage );
 	return;
 	M_EPILOG
 	}
@@ -382,7 +376,7 @@ void HGalaxy::end_round( void )
 			it->second.f_iSystems = -1;
 			l_oMessage.format( "glx:msg:$12;Once mighty empire of ;$%d;%s;$12; fall in ruins.\n",
 					it->second.f_iColor, static_cast<char const* const>( it->first->f_oName ) );
-			broadcast( NULL, l_oMessage );
+			broadcast( l_oMessage );
 			}
 		if ( it->second.f_iSystems >= 0 )
 			f_iReady ++;
@@ -397,13 +391,13 @@ void HGalaxy::end_round( void )
 				{
 				l_oMessage.format( "glx:msg:$12;The invincible ;$%d;%s;$12; crushed the galaxy.\n",
 						it->second.f_iColor, static_cast<char const* const>( it->first->f_oName ) );
-				broadcast( NULL, l_oMessage );
+				broadcast( l_oMessage );
 				}
 			}
 		}
 	f_iRound ++;
 	l_oMessage.format ( "glx:play:round=%d\n", f_iRound );
-	broadcast( NULL, l_oMessage );
+	broadcast( l_oMessage );
 	f_iReady = l_iDead;
 	return;
 	M_EPILOG
@@ -458,7 +452,7 @@ void HGalaxy::do_kick( OClientInfo* a_poClientInfo )
 		-- f_iReady;
 	else
 		-- f_iEmperors;
-	broadcast( NULL, HString( "glx:msg:$12;Emperor ;$" ) + color + ";" + a_poClientInfo->f_oName + ";$12; fleed from the galaxy.\n" );
+	broadcast( HString( "glx:msg:$12;Emperor ;$" ) + color + ";" + a_poClientInfo->f_oName + ";$12; fleed from the galaxy.\n" );
 	cout << "galaxy: dumping player: " << a_poClientInfo->f_oName << endl;
 	if ( f_iReady >= f_iEmperors )
 		end_round();
