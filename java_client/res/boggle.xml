@@ -2,25 +2,67 @@
 <!DOCTYPE panel SYSTEM "res/gameground.dtd">
 <panel layout="BorderLayout"><!--{{{-->
 	<panel id="_conf" visible="false">
-		<layout type="FormLayout" columns="p,p" rows="p,p,p" />
-		<label constraints="1,1">Players:</label><spinner id="_playerCount" constraints="2,1"><textfield horizontalalignment="RIGHT" /></spinner>
-		<label constraints="1,2">Round time:</label><spinner id="_roundTime" constraints="2,2"><textfield horizontalalignment="RIGHT" /></spinner>
-		<label constraints="1,3">Number of rounds:</label><spinner id="_maxRounds" constraints="2,3"><textfield horizontalalignment="RIGHT" /></spinner>
+		<layout type="FormLayout" columns="p,p" rows="p,p,p,p" />
+		<label constraints="1,1">Players:</label><spinner id="_playerCount" constraints="2,1" tooltiptext="Minimum number of players to start the match."><textfield horizontalalignment="RIGHT" /></spinner>
+		<label constraints="1,2">Round time:</label><spinner id="_roundTime" constraints="2,2" tooltiptext="Length of one round expressed in seconds."><textfield horizontalalignment="RIGHT" /></spinner>
+		<label constraints="1,3">Number of rounds:</label><spinner id="_maxRounds" constraints="2,3" tooltiptext="You guessed right, number of rounds for whole match."><textfield horizontalalignment="RIGHT" /></spinner>
+		<label constraints="1,4">Inter round delay:</label><spinner id="_interRoundDelay" constraints="2,4" tooltiptext="Interval between rounds expressed in seconds."><textfield horizontalalignment="RIGHT" /></spinner>
 	</panel>
 	<hbox>
 		<vbox>
-			<panel>
+			<panel layout="GridBagLayout">
+				<gridbagconstraints fill="GridBagConstraints.BOTH" />
+				<panel layout="GridLayout(4,4,4,4)" opaque="true" background="orange" preferredsize="320,320" border="MatteBorder(8,8,8,8,orange)" tooltiptext="Find as many words on this board as you can." >
+					<label id="_letter00" font="-BOLD-36" background="white" opaque="true" border="RaisedBevelBorder" horizontalalignment="CENTER" horizontaltextposition="CENTER" text="A" />
+					<label id="_letter01" use="_letter00" text="B" />
+					<label id="_letter02" use="_letter00" text="C" />
+					<label id="_letter03" use="_letter00" text="D" />
+					<label id="_letter10" use="_letter00" text="E" />
+					<label id="_letter11" use="_letter00" text="F" />
+					<label id="_letter12" use="_letter00" text="G" />
+					<label id="_letter13" use="_letter00" text="H" />
+					<label id="_letter20" use="_letter00" text="I" />
+					<label id="_letter21" use="_letter00" text="J" />
+					<label id="_letter22" use="_letter00" text="K" />
+					<label id="_letter23" use="_letter00" text="L" />
+					<label id="_letter30" use="_letter00" text="M" />
+					<label id="_letter31" use="_letter00" text="N" />
+					<label id="_letter32" use="_letter00" text="O" />
+					<label id="_letter33" use="_letter00" text="P" />
+				</panel>
+			</panel>
+			<hbox preferredsize="-1,240">
+				<vbox border="TitledBorder(EmptyBorder,Words sent ...,TitledBorder.LEFT, TitledBorder.ABOVE_TOP)">
+					<scrollpane autoscrolls="true">
+						<textpane id="_wordsSent" tooltiptext="The word that you send to GameGround server." use="_logPad" />
+					</scrollpane>
+				</vbox>
+				<vbox border="TitledBorder(EmptyBorder,Words that scored ...,TitledBorder.LEFT, TitledBorder.ABOVE_TOP)">
+					<scrollpane autoscrolls="true">
+						<textpane id="_wordsScored" tooltiptext="Your words that both valid and unique." use="_logPad" />
+					</scrollpane>
+				</vbox>
+				<vbox border="TitledBorder(EmptyBorder,Longest words ...,TitledBorder.LEFT, TitledBorder.ABOVE_TOP)">
+					<scrollpane autoscrolls="true">
+						<textpane id="_wordsLongest" tooltiptext="Longest words found by all players in last round." use="_logPad" />
+					</scrollpane>
+				</vbox>
+			</hbox>
+			<panel maximumsize="2000,40" layout="BorderLayout" border="TitledBorder(EmptyBorder,Enter your words here ...,TitledBorder.LEFT, TitledBorder.ABOVE_TOP)">
+				<textfield id="_wordInput" action="onWord" constraints="BorderLayout.NORTH" tooltiptext="Here you shall enter words that you have found." />
 			</panel>
 		</vbox>
 		<vbox minimumsize="&v_sidebar_width_galaxy;,1" preferredsize="&v_sidebar_width_galaxy;,&v_height;" maximumsize="&v_sidebar_width_galaxy;,2000">
-			<scrollpane maximumsize="&v_sidebar_width_galaxy;,2000" autoscrolls="true">
-				<table id="_players" />
-			</scrollpane>
-			<scrollpane maximumsize="&v_sidebar_width_galaxy;,2000" autoscrolls="true">
-				<textpane id="_logPad" editable="false" focusable="false" />
-			</scrollpane>
-			<panel maximumsize="&v_sidebar_width_galaxy;,40">
-				<textfield id="_messageInput" columns="20" focusable="true" editable="true" action="onMessage" tooltiptext="Enter message You want to send to other players." />
+			<panel layout="GridLayout(2,1)">
+				<scrollpane autoscrolls="true" tooltiptext="Current highscores.">
+					<table id="_players" />
+				</scrollpane>
+				<scrollpane autoscrolls="true">
+					<textpane id="_logPad" editable="false" focusable="false" />
+				</scrollpane>
+			</panel>
+			<panel maximumsize="&v_sidebar_width_galaxy;,40" layout="BorderLayout">
+				<textfield id="_messageInput" focusable="true" editable="true" action="onMessage" constraints="BorderLayout.NORTH" tooltiptext="Enter message You want to send to other players." />
 			</panel>
 			<hbox>
 				<glue maximumsize="1000,1"/>

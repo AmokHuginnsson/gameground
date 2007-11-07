@@ -5,13 +5,13 @@
 		<vbox preferredsize="100,240" maximumsize="100,300">
 			<label minimumsize="1000,20">Game type ...</label>
 			<scrollpane>
-				<list id="_logics" selectionmode="ListSelectionModel.SINGLE_SELECTION" focusable="true" />
+				<list id="_logics" selectionmode="ListSelectionModel.SINGLE_SELECTION" focusable="true" tooltiptext="Available game types." />
 			</scrollpane>
 		</vbox>
 		<vbox>
 			<panel maximumsize="220,30">
 				<label>Name:</label>
-				<textfield id="_name" columns="13" action="onEditChange" focusable="true" requestFocusEnabled="true" />
+				<textfield id="_name" columns="13" action="onEditChange" focusable="true" requestFocusEnabled="true" tooltiptext="Name for newly created game." />
 			</panel>
 			<panel id="_confHolder" border="TitledBorder(EtchedBorder,Configuration ...)">
 			</panel>

@@ -44,24 +44,27 @@ using namespace yaal::tools::util;
 namespace boggle_data
 {
 
+static int const D_MINIMUM_WORD_LENGTH = 3;
+static int const D_MAXIMUM_WORD_LENGTH = 16;
+
 static char const n_ppcDices[ 16 ][ 6 ] =
 	{
-		{ 'A', 'A', 'D', 'E', '£', 'Y' },
-		{ 'A', 'A', 'I', 'K', 'M', 'Y' },
-		{ 'A', 'C', 'I', 'N', 'N', 'P' },
-		{ 'A', 'E', 'I', 'O', 'U', 'Y' },
-		{ 'A', 'E', 'O', 'Y', 'Z', 'Z' },
-		{ 'A', 'G', 'L', 'O', 'R', 'S' },
-		{ '¡', 'C', 'G', 'M', 'Ñ', 'T' },
-		{ 'B', 'E', 'E', 'P', 'Z', '¬' },
-		{ 'B', 'I', 'I', 'N', 'R', 'W' },
-		{ 'C', 'M', 'O', 'S', 'T', '¯' },
-		{ 'Æ', 'J', 'M', 'T', 'V', 'Z' },
-		{ 'D', 'E', 'K', 'N', 'O', 'R' },
-		{ 'D', 'H', 'Ó', 'N', 'W', 'Z' },
-		{ 'E', 'I', 'L', 'S', '¦', 'W' },
-		{ 'Ê', 'F', 'H', 'J', 'L', 'S' },
-		{ 'I', 'K', '£', 'O', 'P', 'R' }
+		{ 'a', 'a', 'd', 'e', '³', 'y' },
+		{ 'a', 'a', 'i', 'k', 'm', 'y' },
+		{ 'a', 'c', 'i', 'n', 'n', 'p' },
+		{ 'a', 'e', 'i', 'o', 'u', 'y' },
+		{ 'a', 'e', 'o', 'y', 'z', 'z' },
+		{ 'a', 'g', 'l', 'o', 'r', 's' },
+		{ '±', 'c', 'g', 'm', 'ñ', 't' },
+		{ 'b', 'e', 'e', 'p', 'z', '¼' },
+		{ 'b', 'i', 'i', 'n', 'r', 'w' },
+		{ 'c', 'm', 'o', 's', 't', '¿' },
+		{ 'æ', 'j', 'm', 't', 'v', 'z' },
+		{ 'd', 'e', 'k', 'n', 'o', 'r' },
+		{ 'd', 'h', 'ó', 'n', 'w', 'z' },
+		{ 'e', 'i', 'l', 's', '¶', 'w' },
+		{ 'ê', 'f', 'h', 'j', 'l', 's' },
+		{ 'i', 'k', '³', 'o', 'p', 'r' }
 	};
 
 struct BOGGLE
@@ -79,9 +82,10 @@ struct BOGGLE
 namespace boggle
 {
 
-HBoggle::HBoggle( HString const& a_oName, int a_iPlayers, int a_iRoundTime, int a_iMaxRounds )
-	: HLogic( "bgl", a_oName ), f_iPlayers( a_iPlayers ), f_iRoundTime( a_iRoundTime ),
-	f_iMaxRounds( a_iMaxRounds ), f_iRound( 0 ), f_oPlayers()
+HBoggle::HBoggle( HString const& a_oName, int a_iPlayers, int a_iRoundTime, int a_iMaxRounds, int a_iInterRoundDelay )
+	: HLogic( "bgl", a_oName ), f_eState( STATE::D_LOCKED ), f_iPlayers( a_iPlayers ),
+	f_iRoundTime( a_iRoundTime ), f_iMaxRounds( a_iMaxRounds ),
+	f_iInterRoundDelay( a_iInterRoundDelay ), f_iRound( 0 ), f_oPlayers()
 	{
 	M_PROLOG
 	HRandomizer l_oRandom;
@@ -101,6 +105,7 @@ HBoggle::~HBoggle ( void )
 
 void HBoggle::generate_game( void )
 	{
+	M_PROLOG
 	HRandomizer rnd;
 	randomizer_helper::init_randomizer_from_time( rnd );
 	for ( int i = 0; i < boggle_data::BOGGLE::DICE_COUNT; ++ i )
@@ -117,18 +122,17 @@ void HBoggle::generate_game( void )
 		f_ppiGame[ k ][ 1 ] = rnd.rnd( boggle_data::BOGGLE::SIDES );
 		}
 	return;
+	M_EPILOG
 	}
 
-void HBoggle::send_map( void )
+HString HBoggle::make_deck( void )
 	{
+	M_PROLOG
+	HString l_oDeck;
 	for ( int i = 0; i < boggle_data::BOGGLE::DICE_COUNT; ++ i )
-		{
-		if ( i && ! ( i % 4 ) )
-			cout << endl;
-		cout << boggle_data::n_ppcDices[ f_ppiGame[ i ][ 0 ] ][ f_ppiGame[ i ][ 1 ] ];
-		}
-	cout << endl;
-	return;
+		l_oDeck += boggle_data::n_ppcDices[ f_ppiGame[ i ][ 0 ] ][ f_ppiGame[ i ][ 1 ] ];
+	return ( l_oDeck );
+	M_EPILOG
 	}
 
 void HBoggle::handler_message ( OClientInfo* a_poClientInfo, HString const& a_roMessage )
@@ -145,9 +149,19 @@ void HBoggle::handler_message ( OClientInfo* a_poClientInfo, HString const& a_ro
 	M_EPILOG
 	}
 
-void HBoggle::handler_play ( OClientInfo*, HString const& )
+void HBoggle::handler_play ( OClientInfo* a_poClientInfo, HString const& a_oWord )
 	{
+	M_PROLOG
+	int l_iLength = a_oWord.get_length();
+	if ( ( f_eState == STATE::D_ACCEPTING )
+			&& ( l_iLength >= boggle_data::D_MINIMUM_WORD_LENGTH )
+			&& ( l_iLength <= boggle_data::D_MAXIMUM_WORD_LENGTH ) )
+		{
+		OPlayerInfo* info = get_player_info( a_poClientInfo );
+		info->f_oWords->insert( a_oWord );
+		}
 	return;
+	M_EPILOG
 	}
 
 HBoggle::OPlayerInfo* HBoggle::get_player_info( OClientInfo* a_poClientInfo )
@@ -166,7 +180,7 @@ bool HBoggle::do_accept( OClientInfo* a_poClientInfo )
 	out << "new candidate " << a_poClientInfo->f_oName << endl;
 	HString l_oMessage;
 	out << "conditions: f_oPlayers.size() = " << f_oPlayers.size() << ", f_iPlayers = " << f_iPlayers << endl;
-	if ( f_oPlayers.size() < static_cast<size_t>( f_iPlayers ) )
+	if ( f_oPlayers.size() < f_iPlayers )
 		{
 		OPlayerInfo info;
 		f_oPlayers[ a_poClientInfo ] = info;
@@ -186,6 +200,16 @@ bool HBoggle::do_accept( OClientInfo* a_poClientInfo )
 		l_oMessage += a_poClientInfo->f_oName + " joined the mind contest.\n";
 		broadcast( l_oMessage );
 		out << "player [" << a_poClientInfo->f_oName << "] accepted" << endl;
+		if ( f_oPlayers.size() >= f_iPlayers )
+			{
+			l_oMessage = "bgl:deck:";
+			generate_game();
+			l_oMessage += make_deck();
+			l_oMessage += "\n";
+			f_eState = STATE::D_ACCEPTING;
+			broadcast( l_oMessage );
+			a_poClientInfo->f_oSocket->write_until_eos( l_oMessage );
+			}
 		rejected = false;
 		}
 	else
@@ -224,13 +248,16 @@ HLogic::ptr_t create_logic_boggle( HString const& a_oArgv )
 	HString l_oPlayers = a_oArgv.split( ",", 1 );
 	HString l_oRoundTime = a_oArgv.split( ",", 2 );
 	HString l_oMaxRounds = a_oArgv.split( ",", 3 );
+	HString l_oInterRoundDelay = a_oArgv.split( ",", 4 );
 	int l_iPlayers = strtol( l_oPlayers, NULL, 10 );
 	int l_iRoundTime = strtol( l_oRoundTime, NULL, 10 );
 	int l_iMaxRounds = strtol( l_oMaxRounds, NULL, 10 );
+	int l_iInterRoundDelay = strtol( l_oInterRoundDelay, NULL, 10 );
 	return ( HLogic::ptr_t( new boggle::HBoggle( l_oName,
 					l_iPlayers,
 					l_iRoundTime,
-					l_iMaxRounds ) ) );
+					l_iMaxRounds,
+					l_iInterRoundDelay ) ) );
 	M_EPILOG
 	}
 
@@ -243,7 +270,7 @@ bool registrar( void )
 	bool volatile failed = false;
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 	HString l_oSetup;
-	l_oSetup.format( "%s:%d,%d,%d", "bgl", setup.f_iPlayers, setup.f_iRoundTime, setup.f_iMaxRounds );
+	l_oSetup.format( "%s:%d,%d,%d,%d", "bgl", setup.f_iPlayers, setup.f_iRoundTime, setup.f_iMaxRounds, setup.f_iInterRoundDelay );
 	factory.register_logic_creator( l_oSetup, create_logic_boggle );
 	return ( failed );
 	M_EPILOG

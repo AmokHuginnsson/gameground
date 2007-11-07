@@ -175,16 +175,13 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 				return ( _colorMap[ $color ] );
 			return ( Colors.BLACK );
 		}
-		public Action onMessage = new AbstractAction() {
-			public static final long serialVersionUID = 17l;
-			public void actionPerformed( ActionEvent $event ) {
-				String msg = _messageInput.getText();
-				if ( msg.matches( ".*\\S+.*" ) ) {	
-					_client.println( "cmd:glx:say:" + msg );
-					_gui._messageInput.setText( "" );
-				}
+		public void onMessage() {
+			String msg = _messageInput.getText();
+			if ( msg.matches( ".*\\S+.*" ) ) {	
+				_client.println( "cmd:glx:say:" + msg );
+				_messageInput.setText( "" );
 			}
-		};
+		}
 		public Action onSendFleet = new AbstractAction() {
 			public static final long serialVersionUID = 17l;
 			public void actionPerformed( ActionEvent $event ) {

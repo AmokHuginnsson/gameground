@@ -105,23 +105,12 @@ abstract class HGUIface extends JPanel {
 			System.out.println( "No logPad for this face." );
 	}
 	void log( String $message, int $color ) {
-		try {
-			StyleConstants.setForeground( _attribute, color( lcolor( $color ) ) );
-			_log.insertString( _log.getLength(), $message, _attribute );
-			_logPad.setCaretPosition( _log.getLength() );
-		} catch ( javax.swing.text.BadLocationException e ) {
-			e.printStackTrace();
-		}
+		StyleConstants.setForeground( _attribute, color( lcolor( $color ) ) );
+		add( _logPad, $message, _attribute );
 	}
 	void log( String $message ) {
-		try {
-			StyleConstants.setForeground( _attribute, color( lcolor( _color ) ) );
-			_log.insertString( _log.getLength(), $message, _attribute );
-			_logPad.setCaretPosition( _log.getLength() );
-		} catch ( javax.swing.text.BadLocationException e ) {
-			e.printStackTrace();
-			System.exit( 1 );
-		}
+		StyleConstants.setForeground( _attribute, color( lcolor( _color ) ) );
+		add( _logPad, $message, _attribute );
 	}
 	void log( int $color ) {
 		if ( $color > 15 )
@@ -129,8 +118,12 @@ abstract class HGUIface extends JPanel {
 		_color = $color;
 	}
 	public void clearLog() {
+		clear( _logPad );
+	}
+	public void clear( JTextPane $what ) {
 		try {
-			_log.remove( 0, _log.getLength() - 1 );
+			DefaultStyledDocument txt = (DefaultStyledDocument)$what.getStyledDocument();
+			txt.remove( 0, txt.getLength() - 1 );
 		} catch ( javax.swing.text.BadLocationException e ) {
 			e.printStackTrace();
 			System.exit( 1 );
@@ -138,6 +131,19 @@ abstract class HGUIface extends JPanel {
 	}
 	public HAbstractConfigurator getConfigurator() {
 		return ( null );
+	}
+	void add( JTextPane $to, String $what, SimpleAttributeSet $looks ) {
+		DefaultStyledDocument txt = (DefaultStyledDocument)$to.getStyledDocument();
+		try {
+			txt.insertString( txt.getLength(), $what, null );
+			$to.setCaretPosition( txt.getLength() );
+		} catch ( javax.swing.text.BadLocationException e ) {
+			e.printStackTrace();
+			System.exit( 1 );
+		}
+	}
+	void add( JTextPane $to, String $what ) {
+		add( $to, $what, null );
 	}
 }
 

@@ -21,6 +21,7 @@ import java.util.TreeMap;
 import java.util.HashMap;
 import java.util.Vector;
 import java.io.PrintWriter;
+import javax.swing.text.DefaultStyledDocument;
 import javax.swing.table.AbstractTableModel;
 
 class BogglePlayer {
@@ -61,8 +62,29 @@ class Boggle extends HAbstractLogic {
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
 		public JTextField _messageInput;
+		public JTextField _wordInput;
+		public JTextPane _wordsSent;
+		public JTextPane _wordsScored;
+		public JTextPane _wordsLongest;
 		public JTextPane _logPad;
 		public JTable _players;
+		public JLabel _letter00;
+		public JLabel _letter01;
+		public JLabel _letter02;
+		public JLabel _letter03;
+		public JLabel _letter10;
+		public JLabel _letter11;
+		public JLabel _letter12;
+		public JLabel _letter13;
+		public JLabel _letter20;
+		public JLabel _letter21;
+		public JLabel _letter22;
+		public JLabel _letter23;
+		public JLabel _letter30;
+		public JLabel _letter31;
+		public JLabel _letter32;
+		public JLabel _letter33;
+		public JLabel[] _letters = new JLabel[16];
 		public BoggleConfigurator _conf;
 		final String[] _header = { "Player", "Score", "Last" };
 		public HGUILocal( String $resource ) {
@@ -72,7 +94,26 @@ class Boggle extends HAbstractLogic {
 			$xul.getTaglib().registerTag( "panel", BoggleConfigurator.class );
 		}
 		public void reinit() {
+			_letters[ 0 ] = _letter00;
+			_letters[ 1 ] = _letter01;
+			_letters[ 2 ] = _letter02;
+			_letters[ 3 ] = _letter03;
+			_letters[ 4 ] = _letter10;
+			_letters[ 5 ] = _letter11;
+			_letters[ 6 ] = _letter12;
+			_letters[ 7 ] = _letter13;
+			_letters[ 8 ] = _letter20;
+			_letters[ 9 ] = _letter21;
+			_letters[ 10 ] = _letter22;
+			_letters[ 11 ] = _letter23;
+			_letters[ 12 ] = _letter30;
+			_letters[ 13 ] = _letter31;
+			_letters[ 14 ] = _letter32;
+			_letters[ 15 ] = _letter33;
 			clearLog();
+			clear( _wordsSent );
+			clear( _wordsScored );
+			clear( _wordsLongest );
 			_players.setModel( new AbstractTableModel() {
 				public static final long serialVersionUID = 17l;
 				public String getColumnName(int col) {
@@ -95,16 +136,21 @@ class Boggle extends HAbstractLogic {
 		public HAbstractConfigurator getConfigurator() {
 			return ( _conf );
 		}
-		public Action onMessage = new AbstractAction() {
-			public static final long serialVersionUID = 17l;
-			public void actionPerformed( ActionEvent $event ) {
-				String msg = _messageInput.getText();
-				if ( msg.matches( ".*\\S+.*" ) ) {	
-					_client.println( "cmd:bgl:say:" + msg );
-					_gui._messageInput.setText( "" );
-				}
+		public void onMessage() {
+			String msg = _messageInput.getText();
+			if ( msg.matches( ".*\\S+.*" ) ) {	
+				_client.println( "cmd:bgl:say:" + msg );
+				_messageInput.setText( "" );
 			}
-		};
+		}
+		public void onWord() {
+			String msg = _wordInput.getText();
+			if ( msg.matches( ".*\\S+.*" ) ) {	
+				_client.println( "cmd:bgl:play:" + msg );
+				_wordInput.setText( "" );
+				add( _wordsSent, msg + "\n" );
+			}
+		}
 		public void onExit() {
 			GameGround.getInstance().setFace( HBrowser.LABEL );
 		}
@@ -128,6 +174,7 @@ class Boggle extends HAbstractLogic {
 		_handlers.put( "play", Boggle.class.getDeclaredMethod( "handlerPlay", new Class[]{ String.class } ) );
 		_handlers.put( "player", Boggle.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
 		_handlers.put( "player_quit", Boggle.class.getDeclaredMethod( "handlerPlayerQuit", new Class[]{ String.class } ) );
+		_handlers.put( "deck", Boggle.class.getDeclaredMethod( "handlerDeck", new Class[]{ String.class } ) );
 		_info = new HLogicInfo( "bgl", "boggle", "Boggle" );
 	}
 	void handlerBoggle( String $command ) {
@@ -162,6 +209,17 @@ class Boggle extends HAbstractLogic {
 		}
 		if ( idx >= 0 )
 			_players.remove( idx );
+	}
+	void handlerDeck( String $command ) {
+		if ( $command.length() < 16 ) {
+			System.out.println( "Bad deck configuration: " + $command );
+			CallStack.print();
+			System.exit( 1 );
+		}
+		for ( int i = 0; i < 16; ++ i ) {
+			System.out.println( "Deck letter[" + i + "]: " + $command.substring( i, i + 1 ) );
+			_gui._letters[ i ].setText( $command.substring( i, i + 1 ).toUpperCase() );
+		}
 	}
 	static boolean registerLogic() {
 		try {

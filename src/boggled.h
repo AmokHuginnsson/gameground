@@ -46,18 +46,28 @@ class HBoggle : public HLogic
 		OPlayerInfo( void ) : f_iScore( 0 ), f_iLast( 0 ), f_oWords() {}
 		};
 	typedef yaal::hcore::HMap<OClientInfo*, OPlayerInfo> players_t;
+	struct STATE
+		{
+		typedef enum
+			{
+			D_LOCKED,
+			D_ACCEPTING
+			} state_t;
+		};
 protected:
 	/*{*/
-	int f_iPlayers;
+	STATE::state_t f_eState;
+	size_t f_iPlayers;
 	int f_iRoundTime;
 	int f_iMaxRounds;
+	int f_iInterRoundDelay;
 	int f_iRound;
 	players_t f_oPlayers;
 	int f_ppiGame[16][2];
 	/*}*/
 public:
 	/*{*/
-	HBoggle( yaal::hcore::HString const&, int, int, int );
+	HBoggle( yaal::hcore::HString const&, int, int, int, int );
 	virtual ~HBoggle( void );
 	int get_color( OClientInfo* );
 	void generate_game( void );
@@ -70,7 +80,7 @@ protected:
 	virtual void do_kick( OClientInfo* );
 	void handler_message( OClientInfo*, yaal::hcore::HString const& );
 	void handler_play( OClientInfo*, yaal::hcore::HString const& );
-	void send_map( void );
+	yaal::hcore::HString make_deck( void );
 	/*}*/
 private:
 	/*{*/

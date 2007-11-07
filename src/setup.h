@@ -37,6 +37,7 @@ Copyright:
 #define D_MAX_SYSTEM_COUNT					36
 #define D_PLAYERS 									4
 #define D_ROUND_TIME								180
+#define D_INTER_ROUND_DELAY					15
 #define D_MAX_ROUNDS								5
 #define out ( cout << __FILE__ + OSetup::PATH_OFFSET << ":" << __LINE__ << ": " )
 
@@ -49,7 +50,7 @@ struct OSetup
 	bool f_bServer;
 	bool f_bClient;
 	int	f_iMaxConnections;
-	/* galaxy specific integers */
+	/* galaxy/boggle specific integers */
 	int f_iEmperors;
 	int f_iPort;
 	int f_iSystems;
@@ -57,6 +58,7 @@ struct OSetup
 	int f_iPlayers;
 	int f_iRoundTime;
 	int f_iMaxRounds;
+	int f_iInterRoundDelay;
 	/* galaxy specific strings */
 	yaal::hcore::HString f_oLogin;
 	yaal::hcore::HString f_oHost;
@@ -73,7 +75,7 @@ struct OSetup
 										f_iPort( 7777 ),
 										f_iSystems( D_DEFAULT_PLAYERS * D_NEUTRAL_SYSTEM_PER_PLAYER ),
 										f_iBoardSize( D_BOARD_SIZE ), f_iPlayers( D_PLAYERS ),
-										f_iRoundTime( D_ROUND_TIME ), f_iMaxRounds( D_MAX_ROUNDS ),
+										f_iRoundTime( D_ROUND_TIME ), f_iMaxRounds( D_MAX_ROUNDS ), f_iInterRoundDelay( D_INTER_ROUND_DELAY ),
 										f_oLogin(), f_oHost(), f_oGameType(), f_oGame(), f_pcProgramName( NULL ),
 										f_oLogPath() {}
 	void test_setup( void );
