@@ -43,7 +43,7 @@ class HBoggle : public HLogic
 		int f_iScore;
 		int f_iLast;
 		word_set_ptr_t f_oWords;
-		OPlayerInfo( void ) : f_iScore( 0 ), f_iLast( 0 ), f_oWords() {}
+		OPlayerInfo( void ) : f_iScore( 0 ), f_iLast( 0 ), f_oWords( new word_set_t() ) {}
 		};
 	typedef yaal::hcore::HMap<OClientInfo*, OPlayerInfo> players_t;
 	struct STATE

@@ -36,25 +36,25 @@ M_VCSID ( "$Id$" )
 using namespace yaal;
 using namespace yaal::hcore;
 
-bool set_variables ( HString & a_roOption, HString & a_roValue )
+bool set_variables( HString& a_roOption, HString& a_roValue )
 	{
-	fprintf ( stdout, "option: [%s], value: [%s]\n",
-			static_cast < char const * const > ( a_roOption ),
-			static_cast < char const * const > ( a_roValue ) );
+	::fprintf( stdout, "option: [%s], value: [%s]\n",
+			static_cast<char const* const>( a_roOption ),
+			static_cast<char const* const>( a_roValue ) );
 	return ( false );
 	}
 
 int process_galaxyrc_file ( void )
 	{
-	OVariable l_psVars [ ] =
+	OOption l_psVars[] =
 		{
-			{ D_HSTRING,	"log_path",	& setup.f_oLogPath },
-			{ D_INT,			"port", 		& setup.f_iPort },
-			{ D_INT,			"emperors",	& setup.f_iEmperors },
-			{ D_HSTRING,	"login", 		& setup.f_oLogin },
-			{ D_INT,			"systems", 	& setup.f_iSystems },
-			{ D_INT,			"board",		& setup.f_iBoardSize },
-			{ D_VOID, NULL, NULL }
+			{ "port", D_INT, &setup.f_iPort, NULL, OOption::D_REQUIRED, "num", "set port number", NULL },
+			{ "emperors", D_INT, &setup.f_iEmperors, NULL, OOption::D_REQUIRED, "count", "set number of players", NULL },
+			{ "login", D_HSTRING, &setup.f_oLogin, NULL, OOption::D_REQUIRED, "nane", "set your player name", NULL },
+			{ "systems", D_INT, &setup.f_iSystems, NULL, OOption::D_REQUIRED, "count", "set number of neutral systems", NULL },
+			{ "board", D_INT, &setup.f_iBoardSize, NULL, OOption::D_REQUIRED, "size", "size of the galaxy board", NULL },
+			{ "log_path", D_HSTRING, &setup.f_oLogPath, NULL, OOption::D_REQUIRED, "path", "path pointing to file for application logs", NULL },
+			{ NULL, D_VOID, NULL, NULL, OOption::D_NONE, NULL, NULL, NULL }
 		};
 	rc_file::process_rc_file ( "gameground", NULL, l_psVars, NULL );
 	if ( ! setup.f_oLogPath )

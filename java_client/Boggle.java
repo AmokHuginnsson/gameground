@@ -1,28 +1,28 @@
-import java.lang.reflect.Method;
-import java.io.InputStreamReader;
-import java.net.URL;
+import java.awt.Container;
 import java.awt.event.ActionEvent;
-import javax.swing.Action;
-import javax.swing.AbstractAction;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.Container;
-import org.swixml.SwingEngine;
-import javax.swing.JPanel;
-import javax.swing.JButton;
-import javax.swing.JTextField;
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.JOptionPane;
-import javax.swing.JTextPane;
-import javax.swing.text.Style;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.HashMap;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.HashMap;
 import java.util.Vector;
-import java.io.PrintWriter;
-import javax.swing.text.DefaultStyledDocument;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.Style;
+import org.swixml.SwingEngine;
 
 class BogglePlayer {
 	String _name;
@@ -129,6 +129,8 @@ class Boggle extends HAbstractLogic {
 				public void setValueAt(Object value, int row, int col) {
 				}
 			} );
+			_players.setShowGrid( false );
+			_players.setAutoCreateRowSorter( true );
 		}
 		public JTextPane getLogPad() {
 			return ( _logPad );
@@ -169,9 +171,7 @@ class Boggle extends HAbstractLogic {
 	public Boggle( GameGround $applet ) throws Exception {
 		super();
 		init( _gui = new HGUILocal( LABEL ) );
-		_handlers.put( "setup", Boggle.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
 		_handlers.put( "bgl", Boggle.class.getDeclaredMethod( "handlerBoggle", new Class[]{ String.class } ) );
-		_handlers.put( "play", Boggle.class.getDeclaredMethod( "handlerPlay", new Class[]{ String.class } ) );
 		_handlers.put( "player", Boggle.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
 		_handlers.put( "player_quit", Boggle.class.getDeclaredMethod( "handlerPlayerQuit", new Class[]{ String.class } ) );
 		_handlers.put( "deck", Boggle.class.getDeclaredMethod( "handlerDeck", new Class[]{ String.class } ) );
@@ -179,10 +179,6 @@ class Boggle extends HAbstractLogic {
 	}
 	void handlerBoggle( String $command ) {
 		processMessage( $command );
-	}
-	void handlerSetup( String $command ) {
-	}
-	void handlerPlay( String $command ) {
 	}
 	void handlerPlayer( String $command ) {
 		String[] tokens = $command.split( ",", 3 );
@@ -198,6 +194,7 @@ class Boggle extends HAbstractLogic {
 			_players.add( p );
 		}
 		p.set( Integer.parseInt( tokens[ 1 ] ), Integer.parseInt( tokens[ 2 ] ) );
+		((AbstractTableModel)_gui._players.getModel()).fireTableDataChanged();
 	}
 	void handlerPlayerQuit( String $command ) {
 		int idx = -1;
@@ -207,8 +204,10 @@ class Boggle extends HAbstractLogic {
 				break;
 			}
 		}
-		if ( idx >= 0 )
+		if ( idx >= 0 ) {
 			_players.remove( idx );
+			((AbstractTableModel)_gui._players.getModel()).fireTableDataChanged();
+		}
 	}
 	void handlerDeck( String $command ) {
 		if ( $command.length() < 16 ) {
@@ -216,10 +215,8 @@ class Boggle extends HAbstractLogic {
 			CallStack.print();
 			System.exit( 1 );
 		}
-		for ( int i = 0; i < 16; ++ i ) {
-			System.out.println( "Deck letter[" + i + "]: " + $command.substring( i, i + 1 ) );
+		for ( int i = 0; i < 16; ++ i )
 			_gui._letters[ i ].setText( $command.substring( i, i + 1 ).toUpperCase() );
-		}
 	}
 	static boolean registerLogic() {
 		try {

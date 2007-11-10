@@ -22,6 +22,7 @@ import javax.swing.text.Style;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.TreeSelectionModel;
@@ -189,8 +190,14 @@ class HBrowser extends HAbstractLogic {
 	void addPlayer( DefaultMutableTreeNode $node, String $name ) {
 		((HPlayerSet)$node.getUserObject()).addPlayer( $name );
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode)_gui._games.getLastSelectedPathComponent();
+		TreePath path = null;
+		if ( node != null )
+			path = new TreePath( node.getPath() );
 		if ( node == $node )
 			_gui.updatePlayers( node );
+		((DefaultTreeModel)_gui._games.getModel()).reload();
+		if ( path != null )
+			_gui._games.setSelectionPath( path );
 	}
 	public void handleGame( String $message ) {
 	}
@@ -243,10 +250,16 @@ class HBrowser extends HAbstractLogic {
 		HPlayerSet ps = (HPlayerSet)$node.getUserObject();
 		if ( ps._players.remove( $name ) ) {
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode)_gui._games.getLastSelectedPathComponent();
+			TreePath path = null;
+			if ( node != null )
+				path = new TreePath( node.getPath() );
 			if ( node == $node )
 				_gui.updatePlayers( node );
 			if ( ps._players.isEmpty() && $node.isLeaf() )
 				((DefaultMutableTreeNode)$node.getParent()).remove( $node );
+			((DefaultTreeModel)_gui._games.getModel()).reload();
+			if ( path != null )
+				_gui._games.setSelectionPath( path );
 			return ( false );
 		} else {
 			int childs = $node.getChildCount();

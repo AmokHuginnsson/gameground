@@ -13,22 +13,22 @@
 			<panel layout="GridBagLayout">
 				<gridbagconstraints fill="GridBagConstraints.BOTH" />
 				<panel layout="GridLayout(4,4,4,4)" opaque="true" background="orange" preferredsize="320,320" border="MatteBorder(8,8,8,8,orange)" tooltiptext="Find as many words on this board as you can." >
-					<label id="_letter00" font="-BOLD-36" background="white" opaque="true" border="RaisedBevelBorder" horizontalalignment="CENTER" horizontaltextposition="CENTER" text="A" />
-					<label id="_letter01" use="_letter00" text="B" />
-					<label id="_letter02" use="_letter00" text="C" />
-					<label id="_letter03" use="_letter00" text="D" />
-					<label id="_letter10" use="_letter00" text="E" />
-					<label id="_letter11" use="_letter00" text="F" />
-					<label id="_letter12" use="_letter00" text="G" />
-					<label id="_letter13" use="_letter00" text="H" />
-					<label id="_letter20" use="_letter00" text="I" />
-					<label id="_letter21" use="_letter00" text="J" />
-					<label id="_letter22" use="_letter00" text="K" />
-					<label id="_letter23" use="_letter00" text="L" />
-					<label id="_letter30" use="_letter00" text="M" />
-					<label id="_letter31" use="_letter00" text="N" />
-					<label id="_letter32" use="_letter00" text="O" />
-					<label id="_letter33" use="_letter00" text="P" />
+					<label id="_letter00" font="-BOLD-36" background="white" opaque="true" border="RaisedBevelBorder" horizontalalignment="CENTER" horizontaltextposition="CENTER" text="G" />
+					<label id="_letter01" use="_letter00" text="A" />
+					<label id="_letter02" use="_letter00" text="M" />
+					<label id="_letter03" use="_letter00" text="E" />
+					<label id="_letter10" use="_letter00" text="G" />
+					<label id="_letter11" use="_letter00" text="R" />
+					<label id="_letter12" use="_letter00" text="O" />
+					<label id="_letter13" use="_letter00" text="U" />
+					<label id="_letter20" use="_letter00" text="N" />
+					<label id="_letter21" use="_letter00" text="D" />
+					<label id="_letter22" use="_letter00" text="B" />
+					<label id="_letter23" use="_letter00" text="O" />
+					<label id="_letter30" use="_letter00" text="G" />
+					<label id="_letter31" use="_letter00" text="G" />
+					<label id="_letter32" use="_letter00" text="L" />
+					<label id="_letter33" use="_letter00" text="E" />
 				</panel>
 			</panel>
 			<hbox preferredsize="-1,240">
