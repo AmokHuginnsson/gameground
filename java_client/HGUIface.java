@@ -130,7 +130,7 @@ abstract class HGUIface extends JPanel {
 	void add( JTextPane $to, String $what, SimpleAttributeSet $looks ) {
 		DefaultStyledDocument txt = (DefaultStyledDocument)$to.getStyledDocument();
 		try {
-			txt.insertString( txt.getLength(), $what, null );
+			txt.insertString( txt.getLength(), $what, $looks );
 			$to.setCaretPosition( txt.getLength() );
 		} catch ( javax.swing.text.BadLocationException e ) {
 			e.printStackTrace();
