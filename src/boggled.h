@@ -38,14 +38,10 @@ class HBoggle : public HLogic
 	{
 	struct OPlayerInfo
 		{
-		typedef yaal::hcore::HSet<yaal::hcore::HString> word_set_t;
-		typedef yaal::hcore::HPointer<word_set_t, yaal::hcore::HPointerScalar, yaal::hcore::HPointerRelaxed> word_set_ptr_t;
 		int f_iScore;
 		int f_iLast;
-		word_set_ptr_t f_oWords;
-		OPlayerInfo( void ) : f_iScore( 0 ), f_iLast( 0 ), f_oWords( new word_set_t() ) {}
+		OPlayerInfo( void ) : f_iScore( 0 ), f_iLast( 0 ) {}
 		};
-	typedef yaal::hcore::HMap<OClientInfo*, OPlayerInfo> players_t;
 	struct STATE
 		{
 		typedef enum
@@ -54,8 +50,20 @@ class HBoggle : public HLogic
 			D_ACCEPTING
 			} state_t;
 		};
+	struct EVENT
+		{
+		typedef enum
+			{
+			D_BEGIN_ROUND,
+			D_END_ROUND
+			} event_t;
+		};
 protected:
 	/*{*/
+	typedef yaal::hcore::HSet<OClientInfo*> client_set_t;
+	typedef yaal::hcore::HPointer<client_set_t, yaal::hcore::HPointerScalar, yaal::hcore::HPointerRelaxed> client_set_ptr_t;
+	typedef yaal::hcore::HMap<yaal::hcore::HString, client_set_ptr_t> words_t;
+	typedef yaal::hcore::HMap<OClientInfo*, OPlayerInfo> players_t;
 	STATE::state_t f_eState;
 	size_t f_iPlayers;
 	int f_iRoundTime;
@@ -63,7 +71,10 @@ protected:
 	int f_iInterRoundDelay;
 	int f_iRound;
 	players_t f_oPlayers;
-	int f_ppiGame[16][2];
+	char f_ppcGame[16][2];
+	words_t f_oWords;
+	yaal::hcore::HString f_oVarTmpBuffer;
+	mutable yaal::hcore::HMutex f_oMutex;
 	/*}*/
 public:
 	/*{*/
@@ -80,6 +91,12 @@ protected:
 	virtual void do_kick( OClientInfo* );
 	void handler_message( OClientInfo*, yaal::hcore::HString const& );
 	void handler_play( OClientInfo*, yaal::hcore::HString const& );
+	void on_begin_round( void );
+	void on_end_round( void );
+	void schedule( EVENT::event_t );
+	void schedule_end_round( void );
+	bool word_is_good( yaal::hcore::HString const&, int );
+	bool is_good( int, char const*, int );
 	yaal::hcore::HString make_deck( void );
 	/*}*/
 private:

@@ -124,7 +124,7 @@ void HServer::set_client_name( OClientInfo& a_roInfo, HString const& a_oName )
 	clients_t::HIterator it;
 	int const D_MINIMUM_NAME_LENGTH = 4;
 	for ( it = f_oClients.begin(); it != f_oClients.end(); ++ it )
-		if ( ( it->second.f_oName == a_oName ) && ( it->second.f_oSocket != a_roInfo.f_oSocket ) )
+		if ( ( ! ::strcasecmp( it->second.f_oName, a_oName ) ) && ( it->second.f_oSocket != a_roInfo.f_oSocket ) )
 			break;
 	if ( a_oName.find_other_than( "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_" ) >= 0 )
 		*a_roInfo.f_oSocket << "err:Name may only take form of `[a-zA-Z0-9]+'." << endl;

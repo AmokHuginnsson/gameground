@@ -119,15 +119,10 @@ abstract class HGUIface extends JPanel {
 	}
 	public void clearLog() {
 		clear( _logPad );
+		_log = ( DefaultStyledDocument )_logPad.getStyledDocument();
 	}
 	public void clear( JTextPane $what ) {
-		try {
-			DefaultStyledDocument txt = (DefaultStyledDocument)$what.getStyledDocument();
-			txt.remove( 0, txt.getLength() - 1 );
-		} catch ( javax.swing.text.BadLocationException e ) {
-			e.printStackTrace();
-			System.exit( 1 );
-		}
+		$what.setStyledDocument( new DefaultStyledDocument() );
 	}
 	public HAbstractConfigurator getConfigurator() {
 		return ( null );

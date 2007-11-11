@@ -59,11 +59,13 @@ struct OSetup
 	int f_iRoundTime;
 	int f_iMaxRounds;
 	int f_iInterRoundDelay;
-	/* galaxy specific strings */
+	/* galaxy/boggle specific strings */
 	yaal::hcore::HString f_oLogin;
 	yaal::hcore::HString f_oHost;
 	yaal::hcore::HString f_oGameType;
 	yaal::hcore::HString f_oGame;
+	yaal::hcore::HString f_oConsoleCharset;
+	yaal::hcore::HString f_oAspellLang;
 	char * f_pcProgramName;
 	yaal::hcore::HString f_oLogPath;
 	/* self-sufficient */
@@ -76,7 +78,8 @@ struct OSetup
 										f_iSystems( D_DEFAULT_PLAYERS * D_NEUTRAL_SYSTEM_PER_PLAYER ),
 										f_iBoardSize( D_BOARD_SIZE ), f_iPlayers( D_PLAYERS ),
 										f_iRoundTime( D_ROUND_TIME ), f_iMaxRounds( D_MAX_ROUNDS ), f_iInterRoundDelay( D_INTER_ROUND_DELAY ),
-										f_oLogin(), f_oHost(), f_oGameType(), f_oGame(), f_pcProgramName( NULL ),
+										f_oLogin(), f_oHost(), f_oGameType(), f_oGame(),
+										f_oConsoleCharset(), f_oAspellLang(), f_pcProgramName( NULL ),
 										f_oLogPath() {}
 	void test_setup( void );
 	static bool test_glx_emperors( int, char*& );

@@ -22,7 +22,10 @@ import javax.swing.JTextPane;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.Style;
+import java.util.Comparator;
 import org.swixml.SwingEngine;
+import javax.swing.table.TableRowSorter;
+import javax.swing.RowSorter;
 
 class BogglePlayer {
 	String _name;
@@ -34,7 +37,8 @@ class BogglePlayer {
 		_score = $score;
 		_last = $last;
 	}
-	void set( int $score, int $last ) {
+	void set( String $name, int $score, int $last ) {
+		_name = $name;
 		_score = $score;
 		_last = $last;
 	}
@@ -111,10 +115,8 @@ class Boggle extends HAbstractLogic {
 			_letters[ 14 ] = _letter32;
 			_letters[ 15 ] = _letter33;
 			clearLog();
-			clear( _wordsSent );
-			clear( _wordsScored );
-			clear( _wordsLongest );
-			_players.setModel( new AbstractTableModel() {
+			Boggle.this.handlerRound( "" );
+			AbstractTableModel model = new AbstractTableModel() {
 				public static final long serialVersionUID = 17l;
 				public String getColumnName(int col) {
 					return ( _header[ col ] );
@@ -128,7 +130,18 @@ class Boggle extends HAbstractLogic {
 					{ return false; }
 				public void setValueAt(Object value, int row, int col) {
 				}
-			} );
+			};
+			Comparator<String> comparator = new Comparator<String>() {
+				public int compare( String s1, String s2 ) {
+					return ( Integer.parseInt( s2 ) - Integer.parseInt( s1 ) );
+				}
+			};
+			TableRowSorter<AbstractTableModel> rs = new TableRowSorter<AbstractTableModel>();
+			_players.setModel( model );
+			rs.setModel( model );
+			rs.setComparator( 1, comparator );
+			rs.setComparator( 2, comparator );
+			_players.setRowSorter( rs );
 			_players.setShowGrid( false );
 			_players.setAutoCreateRowSorter( true );
 		}
@@ -173,8 +186,11 @@ class Boggle extends HAbstractLogic {
 		init( _gui = new HGUILocal( LABEL ) );
 		_handlers.put( "bgl", Boggle.class.getDeclaredMethod( "handlerBoggle", new Class[]{ String.class } ) );
 		_handlers.put( "player", Boggle.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
-		_handlers.put( "player_quit", Boggle.class.getDeclaredMethod( "handlerPlayerQuit", new Class[]{ String.class } ) );
+		_handlers.put( "player_quit", HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
 		_handlers.put( "deck", Boggle.class.getDeclaredMethod( "handlerDeck", new Class[]{ String.class } ) );
+		_handlers.put( "scored", Boggle.class.getDeclaredMethod( "handlerScored", new Class[]{ String.class } ) );
+		_handlers.put( "longest", Boggle.class.getDeclaredMethod( "handlerLongest", new Class[]{ String.class } ) );
+		_handlers.put( "round", Boggle.class.getDeclaredMethod( "handlerRound", new Class[]{ String.class } ) );
 		_info = new HLogicInfo( "bgl", "boggle", "Boggle" );
 	}
 	void handlerBoggle( String $command ) {
@@ -184,7 +200,7 @@ class Boggle extends HAbstractLogic {
 		String[] tokens = $command.split( ",", 3 );
 		BogglePlayer p = null;
 		for ( int i = 0; i < _players.size(); ++ i ) {
-			if ( _players.get( i ).get( 0 ) == tokens[ 0 ] ) {
+			if ( _players.get( i ).get( 0 ).compareToIgnoreCase( tokens[ 0 ] ) == 0 ) {
 				p = _players.get( i );
 				break;
 			}
@@ -193,21 +209,19 @@ class Boggle extends HAbstractLogic {
 			p = new BogglePlayer( tokens[ 0 ] );
 			_players.add( p );
 		}
-		p.set( Integer.parseInt( tokens[ 1 ] ), Integer.parseInt( tokens[ 2 ] ) );
+		p.set( tokens[0], Integer.parseInt( tokens[ 1 ] ), Integer.parseInt( tokens[ 2 ] ) );
 		((AbstractTableModel)_gui._players.getModel()).fireTableDataChanged();
 	}
-	void handlerPlayerQuit( String $command ) {
-		int idx = -1;
-		for ( int i = 0; i < _players.size(); ++ i ) {
-			if ( _players.get( i ).get( 0 ) == $command ) {
-				idx = i;
-				break;
-			}
-		}
-		if ( idx >= 0 ) {
-			_players.remove( idx );
-			((AbstractTableModel)_gui._players.getModel()).fireTableDataChanged();
-		}
+	void handlerScored( String $command ) {
+		_gui.add( _gui._wordsScored, $command + "\n" );
+	}
+	void handlerRound( String $command ) {
+		_gui.clear( _gui._wordsSent );
+		_gui.clear( _gui._wordsScored );
+		_gui.clear( _gui._wordsLongest );
+	}
+	void handlerLongest( String $command ) {
+		_gui.add( _gui._wordsLongest, $command + "\n" );
 	}
 	void handlerDeck( String $command ) {
 		if ( $command.length() < 16 ) {

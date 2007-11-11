@@ -54,6 +54,8 @@ int process_galaxyrc_file ( void )
 			{ "systems", D_INT, &setup.f_iSystems, NULL, OOption::D_REQUIRED, "count", "set number of neutral systems", NULL },
 			{ "board", D_INT, &setup.f_iBoardSize, NULL, OOption::D_REQUIRED, "size", "size of the galaxy board", NULL },
 			{ "log_path", D_HSTRING, &setup.f_oLogPath, NULL, OOption::D_REQUIRED, "path", "path pointing to file for application logs", NULL },
+			{ "console_charset", D_HSTRING, &setup.f_oConsoleCharset, NULL, OOption::D_REQUIRED, "charset", "charset encoding for current terminal", NULL },
+			{ "aspell_lang", D_HSTRING, &setup.f_oAspellLang, NULL, OOption::D_REQUIRED, "language", "language used for spell checking", NULL },
 			{ NULL, D_VOID, NULL, NULL, OOption::D_NONE, NULL, NULL, NULL }
 		};
 	rc_file::process_rc_file ( "gameground", NULL, l_psVars, NULL );

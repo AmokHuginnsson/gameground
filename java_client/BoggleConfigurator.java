@@ -18,11 +18,11 @@ public class BoggleConfigurator extends HAbstractConfigurator {
 			SpinnerNumberModel m = (SpinnerNumberModel)_playerCount.getModel();
 			m.setMinimum( 2 );
 			_playerCount.setValue( new Integer( tokens[0] ).intValue() );
-			m = (SpinnerNumberModel)_maxRounds.getModel();
+			m = (SpinnerNumberModel)_roundTime.getModel();
 			m.setMinimum( 60 );
 			m.setMaximum( 300 );
 			_roundTime.setValue( new Integer( tokens[1] ).intValue() );
-			m = (SpinnerNumberModel)_roundTime.getModel();
+			m = (SpinnerNumberModel)_maxRounds.getModel();
 			m.setMinimum( 1 );
 			m.setMaximum( 99 );
 			_maxRounds.setValue( new Integer( tokens[2] ).intValue() );

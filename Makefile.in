@@ -30,7 +30,7 @@ VERSION				= 0
 SUBVERSION		= 0
 EXTRAVERSION	= 0
 include $(DIR_ROOT)/aux/common-paths.mk
-LIBS					= pthread hcore hconsole hdata dbwrapper tools
+LIBS					= pthread aspell hcore hconsole hdata dbwrapper tools
 TARGET				= 1exec
 ifdef NODEBUG
 	TARGET = $(PRJNAME)

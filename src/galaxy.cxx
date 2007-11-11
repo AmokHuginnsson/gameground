@@ -1153,7 +1153,7 @@ void HClient::end_round ( void )
 					l_poMove->f_iFleet );
 			f_oSocket.write_until_eos ( l_oMessage );
 			}
-		f_oMoves.flush ( );
+		f_oMoves.clear();
 		}
 	f_oSocket.write_until_eos ( "cmd:glx:play:end_round\n" );
 	return;
