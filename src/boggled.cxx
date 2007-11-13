@@ -251,6 +251,7 @@ void HBoggle::do_kick( OClientInfo* a_poClientInfo )
 		if ( *(it->second->begin()) == a_poClientInfo )
 			it = f_oWords.erase( it );
 		}
+	broadcast( HString( "bgl:msg:Player" ) + a_poClientInfo->f_oName + " left this match.\n" );
 	return;
 	M_EPILOG
 	}
