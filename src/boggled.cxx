@@ -220,7 +220,7 @@ bool HBoggle::do_accept( OClientInfo* a_poClientInfo )
 		l_oMessage += a_poClientInfo->f_oName + " joined the mind contest.\n";
 		broadcast( l_oMessage );
 		out << "player [" << a_poClientInfo->f_oName << "] accepted" << endl;
-		if ( f_oPlayers.size() >= f_iPlayers )
+		if ( ! f_iRound && ( f_oPlayers.size() >= f_iPlayers ) )
 			{
 			schedule_end_round();
 			a_poClientInfo->f_oSocket->write_until_eos( f_oVarTmpBuffer );
