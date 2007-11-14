@@ -278,6 +278,7 @@ void HBoggle::schedule( EVENT::event_t a_eEvent )
 void HBoggle::schedule_end_round( void )
 	{
 	M_PROLOG
+	++ f_iRound;
 	HScheduledAsyncCallerService::get_instance().register_call( time( NULL ) + f_iRoundTime,
 			HCallInterface::ptr_t( new HCall<HBoggle&, typeof( &HBoggle::on_end_round )>( *this, &HBoggle::on_end_round ) ) );
 	f_oVarTmpBuffer = "bgl:deck:";
@@ -297,7 +298,6 @@ void HBoggle::on_begin_round( void )
 	out << "<<begin>>" << endl;
 	HAsyncCallerService::get_instance().register_call( 0,
 			HCallInterface::ptr_t( new HCall<HBoggle&, typeof( &HBoggle::schedule ), EVENT::event_t>( *this, &HBoggle::schedule, EVENT::D_END_ROUND ) ) );
-	++ f_iRound;
 	HString l_oMessage = "bgl:msg:New round started, you have got ";
 	l_oMessage += f_iRoundTime;
 	l_oMessage += " seconds, ";
