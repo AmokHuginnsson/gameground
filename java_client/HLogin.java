@@ -39,6 +39,9 @@ class HLogin extends HAbstractLogic {
 			} catch ( Exception e ) {
 			}
 			_name.setText( gg.getParameter( "login" ) );
+			String host = gg.getParameter( "host" );
+			if ( host != null )
+				_server.setText( host );
 			if ( GameGround.getInstance().isApplet() ) {
 				_server.setEditable( false );
 				_port.setEditable( false );

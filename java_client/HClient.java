@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Collections;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
-import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.net.Socket;
 import javax.net.SocketFactory;
 import javax.net.ssl.TrustManager;
@@ -18,13 +18,14 @@ class HClient extends Thread {
 /*--------------------------------------------*/
 	private static SSLContext _sslContext;
 	private static final boolean registered;
+	private static final String D_ENCODING = "iso8859-2";
 	static {
 		registered = relaxSSL();
 	}
 	boolean _loop;
 	HAbstractLogic _logic;
 	BufferedReader _in;
-	PrintWriter _out;
+	PrintStream _out;
 	Socket _socket;
 /*--------------------------------------------*/
 	public HClient() throws Exception {
@@ -34,8 +35,8 @@ class HClient extends Thread {
 	void connect( String $server, int $port ) throws Exception {
 		SocketFactory sf = _sslContext.getSocketFactory();
 		_socket = sf.createSocket( $server, $port );
-		_out = new PrintWriter( _socket.getOutputStream(), true );
-		_in = new BufferedReader( new InputStreamReader( _socket.getInputStream() ) );
+		_out = new PrintStream( _socket.getOutputStream(), true, D_ENCODING );
+		_in = new BufferedReader( new InputStreamReader( _socket.getInputStream(), D_ENCODING ) );
 		System.out.println( "connect" );
 	}
 	void setLogic( HAbstractLogic $logic ) {
