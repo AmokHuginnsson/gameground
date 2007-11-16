@@ -1,7 +1,7 @@
 /*
 ---           `gameground' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski            ---
 
-	boggled.h - this file is integral part of `gameground' project.
+	god.h - this file is integral part of `gameground' project.
 
 	i.  You may not make any changes in Copyright information.
 	ii. You must attach Copyright information to any part of every copy
@@ -24,63 +24,54 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#ifndef __BOGGLED_H
-#define __BOGGLED_H
+#ifndef __GOD_H
+#define __GOD_H
 
 #include <yaal/yaal.h>
 
 #include "logic.h"
 
-namespace boggle
+namespace go
 {
 
-class HBoggle : public HLogic
+class HGo : public HLogic
 	{
 	struct OPlayerInfo
 		{
-		int f_iScore;
-		int f_iLast;
-		OPlayerInfo( void ) : f_iScore( 0 ), f_iLast( 0 ) {}
+		int long f_iTimeLeft;
+		int f_iByoYomiPeriodsLeft;
+		int f_iByoYomiTimeLeft;
+		int f_iStonesCaptured;
+		OPlayerInfo( void ) : f_iTimeLeft( 0 ), f_iByoYomiPeriodsLeft( 0 ), f_iByoYomiTimeLeft( 0 ), f_iStonesCaptured( 0 ) {}
 		};
-	struct STATE
+	struct MOVE
 		{
 		typedef enum
 			{
-			D_LOCKED,
-			D_ACCEPTING
-			} state_t;
-		};
-	struct EVENT
-		{
-		typedef enum
-			{
-			D_BEGIN_ROUND,
-			D_END_ROUND
-			} event_t;
+			D_BLACK,
+			D_WHITE
+			} move_t;
 		};
 protected:
 	/*{*/
-	typedef yaal::hcore::HSet<OClientInfo*> client_set_t;
-	typedef yaal::hcore::HPointer<client_set_t, yaal::hcore::HPointerScalar, yaal::hcore::HPointerRelaxed> client_set_ptr_t;
-	typedef yaal::hcore::HMap<yaal::hcore::HString, client_set_ptr_t> words_t;
 	typedef yaal::hcore::HMap<OClientInfo*, OPlayerInfo> players_t;
-	STATE::state_t f_eState;
-	size_t f_iPlayers;
-	int f_iRoundTime;
-	int f_iMaxRounds;
-	int f_iInterRoundDelay;
-	int f_iRound;
+	MOVE::move_t f_eMove;
+	int f_iGobanSize;
+	int f_iKomi;
+	int f_iHandicaps;
+	int long f_iMainTime;
+	int f_iByoYomiPeriods;
+	int f_iByoYomiTime;
+	int f_iMove;
+	char** f_ppcGame;
 	players_t f_oPlayers;
-	char f_ppcGame[16][2];
-	words_t f_oWords;
 	yaal::hcore::HString f_oVarTmpBuffer;
 	mutable yaal::hcore::HMutex f_oMutex;
 	/*}*/
 public:
 	/*{*/
-	HBoggle( yaal::hcore::HString const&, int, int, int, int );
-	virtual ~HBoggle( void );
-	void generate_game( void );
+	HGo( yaal::hcore::HString const&, int, int, int, int, int, int );
+	virtual ~HGo( void );
 	virtual yaal::hcore::HString get_info() const;
 	/*}*/
 protected:
@@ -90,23 +81,19 @@ protected:
 	virtual void do_kick( OClientInfo* );
 	void handler_message( OClientInfo*, yaal::hcore::HString const& );
 	void handler_play( OClientInfo*, yaal::hcore::HString const& );
-	void on_begin_round( void );
-	void on_end_round( void );
-	void schedule( EVENT::event_t );
-	void schedule_end_round( void );
-	bool word_is_good( yaal::hcore::HString const&, int );
-	bool is_good( int, char const*, int );
-	yaal::hcore::HString make_deck( void );
+	void on_timeout( void );
+	void schedule( void );
+	void schedule_timeout( void );
 	/*}*/
 private:
 	/*{*/
-	HBoggle( HBoggle const& );
-	HBoggle& operator = ( HBoggle const& );
+	HGo( HGo const& );
+	HGo& operator = ( HGo const& );
 	/*}*/
 	friend class HServer;
 	};
 
 }
 
-#endif /* not __BOGGLED_H */
+#endif /* not __GOD_H */
 
