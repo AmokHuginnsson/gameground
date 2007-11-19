@@ -31,18 +31,17 @@ class HLogin extends HAbstractLogic {
 		}
 		public void reinit() {
 			_name.requestFocusInWindow();
-			GameGround gg = GameGround.getInstance();
 			try {
-				int port = Integer.parseInt( gg.getInstance().getParameter("port") );
+				int port = Integer.parseInt( _app.getParameter("port") );
 				if ( port >= 1024 )
 					_port.setText( "" + port );
 			} catch ( Exception e ) {
 			}
-			_name.setText( gg.getParameter( "login" ) );
-			String host = gg.getParameter( "host" );
+			_name.setText( _app.getParameter( "login" ) );
+			String host = _app.getParameter( "host" );
 			if ( host != null )
 				_server.setText( host );
-			if ( GameGround.getInstance().isApplet() ) {
+			if ( _app.isApplet() ) {
 				_server.setEditable( false );
 				_port.setEditable( false );
 			}
@@ -51,7 +50,7 @@ class HLogin extends HAbstractLogic {
 			HLogin.this.onConnectClick();
 		}
 		public void onExit() {
-			GameGround.getInstance().shutdown();
+			_app.shutdown();
 		}
 		public Action onEnter = new AbstractAction() {
 			public static final long serialVersionUID = 17l;
@@ -69,15 +68,11 @@ class HLogin extends HAbstractLogic {
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
-	private static final boolean registered;
-	static {
-		registered = registerLogic();
-	}
 	HGUILocal _gui;
 	OConnectionConfig _connectionConfig;
 //--------------------------------------------//
 	public HLogin( GameGround $applet ) throws Exception {
-		super();
+		super( $applet );
 		_connectionConfig = new OConnectionConfig();
 		init( _gui = new HGUILocal( LABEL ) );
 		String serverAddress = "";
@@ -117,22 +112,22 @@ class HLogin extends HAbstractLogic {
 			_connectionConfig._name = login;
 			_connectionConfig._host = server;
 			_connectionConfig._port = port;
-			GameGround.getInstance().setFace( HBrowser.LABEL );
+			_app.setFace( HBrowser.LABEL );
 		}
-	}
-	static boolean registerLogic() {
-		try {
-			GameGround.registerLogic( LABEL, new HLogin( GameGround.getInstance() ) );
-		} catch ( Exception e ) {
-			e.printStackTrace();
-			System.exit( 1 );
-		}
-		return ( true );
 	}
 	public OConnectionConfig getConnectionConfig() {
 		return ( _connectionConfig );
 	}
 	public void reinit() {
+	}
+	static boolean registerLogic( GameGround $app ) {
+		try {
+			$app.registerLogic( LABEL, new HLogin( $app ) );
+		} catch ( Exception e ) {
+			e.printStackTrace();
+			System.exit( 1 );
+		}
+		return ( true );
 	}
 }
 

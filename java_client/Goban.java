@@ -33,7 +33,6 @@ public class Goban extends JPanel implements MouseInputListener {
 		if ( ( _cursorX != cursorX ) || ( _cursorY != cursorY ) ) {
 			_cursorX = cursorX;
 			_cursorY = cursorY;
-			System.out.println( "x:" + _cursorX + ",y:" + _cursorY );
 			repaint();
 		}
 	}

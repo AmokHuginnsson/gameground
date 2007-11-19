@@ -1,4 +1,5 @@
 import org.apache.commons.cli.*;
+import javax.swing.JOptionPane;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.HashMap;
@@ -15,9 +16,7 @@ import org.swixml.TagLibrary;
 
 public class /* Application or applet name: */ GameGround extends JApplet {
 	public static final long serialVersionUID = 13l;
-	private static SortedMap<String,HAbstractLogic> _logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String,HAbstractLogic>() );
-	private static GameGround _instance;
-
+	private SortedMap<String,HAbstractLogic> _logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String,HAbstractLogic>() );
 	public Frame _frame;
 	private HClient _client;
 	boolean _applet = false;
@@ -25,6 +24,8 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 
 	public GameGround() { this( null ); }
 	GameGround( String[] $argv ) {
+		if ( $argv == null )
+			_applet = true;
 		handleArguments( $argv );
 	}
 
@@ -32,27 +33,29 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		try {
 			SwingEngine se = new SwingEngine( this );
 			org.jdom.Document res = AppletJDOMHelper.loadResource( "/res/gameground.xml", this );
-			if ( _instance == null ) {
-				_instance = this;
+			if ( _applet == true ) {
 				TagLibrary tl = se.getTaglib();
 				tl.unregisterTag( "frame" );
 				tl.registerTag( "frame", JApplet.class );
 				se.insert( res, this );
 				_frame = getParentFrame();
-				_applet = true;
 			} else {
 				se.render( res );
 				_frame = SwingEngine.getAppFrame();
 				((javax.swing.JFrame)_frame).setContentPane( this );
 			}
-			EagerStaticInitializer.touch( this );
-			setFace( Go.LABEL );
+			EagerStaticInitializer.touch( this, "registerLogic" );
+			setFace( HLogin.LABEL );
 			resize( res.getRootElement().getAttribute( "size" ).getValue().split( ",", 2 ) );
-			setFace( Go.LABEL );
+			setFace( HLogin.LABEL );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );
 		}
+	}
+	public void destroy() {
+		if ( _client != null )
+			_client.disconnect();
 	}
 	void resize( String[] $req ) {
 		Dimension preferred = new Dimension( new Integer( $req[0] ).intValue(), new Integer( $req[1] ).intValue() );
@@ -61,9 +64,6 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		Dimension withJunk = _frame.getSize();
 		_frame.setSize( preferred.width + withJunk.width - real.width, preferred.height + withJunk.height - real.height );
 		_frame.validate();
-	}
-	public static GameGround getInstance() {
-		return ( _instance );
 	}
 
 	public void setFace( String $face ) {
@@ -109,9 +109,9 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 
 	static public void main( String $argv[] ) {
 		SwingEngine.DEBUG_MODE = true;
-		_instance = new GameGround( $argv );
-		_instance.init();
-		_instance.start();
+		GameGround app = new GameGround( $argv );
+		app.init();
+		app.start();
 	}
 
 	public void addGlobalKeyListener( java.awt.Component $component, java.awt.event.KeyListener $who ) {
@@ -124,7 +124,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		}
 	}
 
-	public static void registerLogic( String $name, HAbstractLogic $logic ) {
+	public void registerLogic( String $name, HAbstractLogic $logic ) {
 		_logics.put( $name, $logic );
 		return;
 	}

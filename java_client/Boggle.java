@@ -167,22 +167,18 @@ class Boggle extends HAbstractLogic {
 			}
 		}
 		public void onExit() {
-			GameGround.getInstance().setFace( HBrowser.LABEL );
+			_app.setFace( HBrowser.LABEL );
 		}
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
-	private static final boolean registered;
-	static {
-		registered = registerLogic();
-	}
 	public static final String LABEL = "boggle";
 	public HGUILocal _gui;
 	private HClient _client;
 	private Vector<BogglePlayer> _players = new Vector<BogglePlayer>();
 //--------------------------------------------//
 	public Boggle( GameGround $applet ) throws Exception {
-		super();
+		super( $applet );
 		init( _gui = new HGUILocal( LABEL ) );
 		_handlers.put( "bgl", Boggle.class.getDeclaredMethod( "handlerBoggle", new Class[]{ String.class } ) );
 		_handlers.put( "player", Boggle.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
@@ -232,18 +228,17 @@ class Boggle extends HAbstractLogic {
 		for ( int i = 0; i < 16; ++ i )
 			_gui._letters[ i ].setText( $command.substring( i, i + 1 ).toUpperCase() );
 	}
-	static boolean registerLogic() {
+	public void reinit() {
+		_client = _app.getClient();
+	}
+	static boolean registerLogic( GameGround $app ) {
 		try {
-			GameGround.registerLogic( LABEL, new Boggle( GameGround.getInstance() ) );
+			$app.registerLogic( LABEL, new Boggle( $app ) );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );
 		}
 		return ( true );
-	}
-	public void reinit() {
-		GameGround gg = GameGround.getInstance();
-		_client = gg.getClient();
 	}
 }
 

@@ -10,7 +10,7 @@ class GoImages {
 		public double stripeMul, zMul;
 	}
 //--------------------------------------------//
-	static int D_WHITE_LOOKS = 16;
+	static final int D_WHITE_LOOKS = 16;
 	public Image _background;
 	public Image _black;
 	public Image _blackAlpha;

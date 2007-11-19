@@ -5,9 +5,12 @@ import java.util.Collections;
 
 public abstract class HAbstractLogic {
 	public HGUIface _gui;
+	GameGround _app = null;
 	SortedMap<String,Method> _handlers;
 	HLogicInfo _info;
-
+	public HAbstractLogic( GameGround $app ) {
+		_app = $app;
+	}
 	public void init( HGUIface $ext ) {
 		_gui = $ext;
 		_gui.init();
@@ -56,14 +59,13 @@ public abstract class HAbstractLogic {
 		_gui.log( HGUIface.Colors.NORMAL );
 	}
 	public void handleError( String $message ) {
-		GameGround gg = GameGround.getInstance();
 		javax.swing.JOptionPane.showMessageDialog( _gui,
 				"The GameGround server reported error condition:\n" + $message,
 				"GameGround - error ...", javax.swing.JOptionPane.ERROR_MESSAGE );
 		if ( HBrowser.LABEL.equals( getInfo()._face ) )
-			gg.getClient().disconnect();
+			_app.getClient().disconnect();
 		else
-			gg.setFace( HBrowser.LABEL );
+			_app.setFace( HBrowser.LABEL );
 	}
 	public void processMessage( String $message ) {
 		String[] tokens = $message.split( ":", 2 );

@@ -62,19 +62,18 @@ class HBrowser extends HAbstractLogic {
 				HPlayerSet ps = (HPlayerSet)gameType.getUserObject();
 				v.add( ps );
 			}
-			GameCreator gc = new GameCreator( v );
+			GameCreator gc = new GameCreator( _app, v );
 			if ( gc.confirmed() ) {
-				GameGround.getInstance().setFace( gc.getFace() );
+				_app.setFace( gc.getFace() );
 				_client.println( "create:" + gc.getConfiguration() );
 			}
 		}
 		public void onJoin() {
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode)_games.getLastSelectedPathComponent();
 			HPlayerSet ps = (HPlayerSet)node.getUserObject();
-			GameGround gg = GameGround.getInstance();
-			HAbstractLogic l = gg.getLogicBySymbol( ps._id );
+			HAbstractLogic l = _app.getLogicBySymbol( ps._id );
 			HLogicInfo i = l.getInfo();
-			gg.setFace( i._face );
+			_app.setFace( i._face );
 			_client.println( "join:" + ps._name );
 		}
 		public void onDisconnect() {
@@ -114,15 +113,11 @@ class HBrowser extends HAbstractLogic {
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
-	private static final boolean registered;
-	static {
-		registered = registerLogic();
-	}
 	HClient _client;
 	HGUILocal _gui;
 //--------------------------------------------//
 	public HBrowser( GameGround $applet ) {
-		super();
+		super( $applet );
 		init( _gui = new HGUILocal( LABEL ) );
 		_info = new HLogicInfo( "", "browser", "" );
 		try {
@@ -135,25 +130,15 @@ class HBrowser extends HAbstractLogic {
 			System.exit( 1 );
 		}
 	}
-	static boolean registerLogic() {
-		try {
-			GameGround.registerLogic( LABEL, new HBrowser( GameGround.getInstance() ) );
-		} catch ( Exception e ) {
-			e.printStackTrace();
-			System.exit( 1 );
-		}
-		return ( true );
-	}
 	public void reinit() {
-		GameGround gg = GameGround.getInstance();
-		if ( gg.getClient() == null ) {
-			HLogin l = (HLogin)gg.getLogic( HLogin.LABEL );
+		if ( _app.getClient() == null ) {
+			HLogin l = (HLogin)_app.getLogic( HLogin.LABEL );
 			HLogin.OConnectionConfig cc = l.getConnectionConfig();
 			_gui.clearLog();
 			_gui.log( "###", HGUILocal.Colors.BLUE );
 			_gui.log( " Connecting to server: " + cc._host + " to port " + cc._port + ".\n"  );
 			try {
-				_client = new HClient();
+				_client = new HClient( _app );
 				_client.setLogic( this );
 				_client.connect( cc._host, cc._port );
 				_client.start();
@@ -161,12 +146,12 @@ class HBrowser extends HAbstractLogic {
 					_client.wait();
 				}
 				_client.println( "name:" + cc._name );
-				gg.setClient( _client );
+				_app.setClient( _client );
 			} catch ( Exception e ) {
 				JOptionPane.showMessageDialog( _gui,
 						"GameGround client was unable to connect to server:\n" + e.getMessage(),
 						"GameGround - error ...", JOptionPane.ERROR_MESSAGE );
-				gg.setFace( HLogin.LABEL );
+				_app.setFace( HLogin.LABEL );
 				return;
 			}
 		} else {
@@ -179,7 +164,7 @@ class HBrowser extends HAbstractLogic {
 	public void handleLogic( String $message ) {
 		System.out.println( "GameGround serves [" + $message + "] logic." );
 		String[] tokens = $message.split( ":", 2 );
-		HAbstractLogic l = GameGround.getInstance().getLogicBySymbol( tokens[ 0 ] );
+		HAbstractLogic l = _app.getLogicBySymbol( tokens[ 0 ] );
 		if ( l != null ) {
 			l.setDefaults( tokens[ 1 ] );
 			HLogicInfo i = l.getInfo();
@@ -272,6 +257,15 @@ class HBrowser extends HAbstractLogic {
 	public void handlePlayerQuit( String $message ) {
 		removePlayer((DefaultMutableTreeNode) _gui._games.getModel().getRoot(), $message );
 		System.out.println( "Player: [" + $message + "] removed." );
+	}
+	static boolean registerLogic( GameGround $app ) {
+		try {
+			$app.registerLogic( LABEL, new HBrowser( $app ) );
+		} catch ( Exception e ) {
+			e.printStackTrace();
+			System.exit( 1 );
+		}
+		return ( true );
 	}
 }
 

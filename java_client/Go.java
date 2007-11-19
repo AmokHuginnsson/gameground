@@ -88,21 +88,17 @@ class Go extends HAbstractLogic {
 			}
 		}
 		public void onExit() {
-			GameGround.getInstance().setFace( HBrowser.LABEL );
+			_app.setFace( HBrowser.LABEL );
 		}
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
-	private static final boolean registered;
-	static {
-		registered = registerLogic();
-	}
 	public static final String LABEL = "go";
 	public HGUILocal _gui;
 	private HClient _client;
 //--------------------------------------------//
 	public Go( GameGround $applet ) throws Exception {
-		super();
+		super( $applet );
 		init( _gui = new HGUILocal( LABEL ) );
 		_handlers.put( "go", Go.class.getDeclaredMethod( "handlerGo", new Class[]{ String.class } ) );
 		_handlers.put( "player", Go.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
@@ -117,18 +113,17 @@ class Go extends HAbstractLogic {
 	}
 	void handlerPlayer( String $command ) {
 	}
-	static boolean registerLogic() {
+	public void reinit() {
+		_client = _app.getClient();
+	}
+	static boolean registerLogic( GameGround $app ) {
 		try {
-			GameGround.registerLogic( LABEL, new Go( GameGround.getInstance() ) );
+			$app.registerLogic( LABEL, new Go( $app ) );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );
 		}
 		return ( true );
-	}
-	public void reinit() {
-		GameGround gg = GameGround.getInstance();
-		_client = gg.getClient();
 	}
 }
 

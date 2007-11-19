@@ -22,13 +22,15 @@ class HClient extends Thread {
 	static {
 		registered = relaxSSL();
 	}
+	GameGround _app = null;
 	boolean _loop;
 	HAbstractLogic _logic;
 	BufferedReader _in;
 	PrintStream _out;
 	Socket _socket;
 /*--------------------------------------------*/
-	public HClient() throws Exception {
+	public HClient( GameGround $app ) throws Exception {
+		_app = $app;
 		_loop = true;
 		System.out.println( "HClient" );
 	}
@@ -63,12 +65,11 @@ class HClient extends Thread {
 				}
 			}
 			if ( _loop ) {
-				GameGround gg = GameGround.getInstance();
-				javax.swing.JOptionPane.showMessageDialog( gg._frame,
+				javax.swing.JOptionPane.showMessageDialog( _app._frame,
 						"The connection was closed by the GameGround server.",
 						"GameGround - read error ...", javax.swing.JOptionPane.ERROR_MESSAGE );
-				gg.setClient( null );
-				gg.setFace( HLogin.LABEL );
+				_app.setClient( null );
+				_app.setFace( HLogin.LABEL );
 			}
 		} catch ( java.io.IOException e ) {
 			if ( _loop ) {
@@ -84,9 +85,8 @@ class HClient extends Thread {
 
 	public void disconnect() {
 		_loop = false;
-		GameGround gg = GameGround.getInstance();
-		gg.setClient( null );
-		gg.setFace( HLogin.LABEL );
+		_app.setClient( null );
+		_app.setFace( HLogin.LABEL );
 		try {
 			_socket.close();
 		} catch ( java.io.IOException e ) {

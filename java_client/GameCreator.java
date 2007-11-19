@@ -15,6 +15,7 @@ import org.swixml.SwingEngine;
 
 public class GameCreator extends XDialog implements ListSelectionListener, DocumentListener {
 	public static final long serialVersionUID = 17l;
+	GameGround _app = null;
 	boolean _confirmed = false;
 	String _configuration;
 	String _face;
@@ -24,7 +25,8 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 	public JList _logics;
 	public JTextField _name;
 	public JButton _ok;
-	public GameCreator( Vector<HPlayerSet> $logics ) {
+	public GameCreator( GameGround $app, Vector<HPlayerSet> $logics ) {
+		_app = $app;
 		try {
 			new SwingEngine( this ).insert( AppletJDOMHelper.loadResource( "/res/creator.xml", this ), this );
 			System.out.println( "dialogInit: " + $logics );
@@ -65,7 +67,7 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 			_confHolder.removeAll();
 			if ( idx >= 0 ) {
 				_playerSet = (HPlayerSet)_logics.getModel().getElementAt( idx );
-				HAbstractLogic l = GameGround.getInstance().getLogicBySymbol( _playerSet._id );
+				HAbstractLogic l = _app.getLogicBySymbol( _playerSet._id );
 				_conf = l._gui.getConfigurator();
 				_face = l.getInfo()._face;
 				assert _conf != null : _conf;

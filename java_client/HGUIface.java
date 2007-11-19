@@ -14,26 +14,26 @@ abstract class HGUIface extends JPanel {
 	public SimpleAttributeSet _attribute;
 	public int _color;
 	public String _resource;
-	public static class Colors {
-		public static int BLACK = 0;
-		public static int RED = 1;
-		public static int GREEN = 2;
-		public static int BROWN = 3;
-		public static int BLUE = 4;
-		public static int MAGENTA = 5;
-		public static int CYAN = 6;
-		public static int LIGHTGRAY = 7;
-		public static int DARKGRAY = 8;
-		public static int BRIGHTRED = 9;
-		public static int BRIGHTGREEN = 10;
-		public static int YELLOW = 11;
-		public static int BRIGHTBLUE = 12;
-		public static int BRIGHTMAGENTA = 13;
-		public static int BRIGHTCYAN = 14;
-		public static int WHITE = 15;
-		public static int OTHERGRAY = 16;
-		public static int NORMAL = 7;
-		public static int PALLETE_SIZE = 20;
+	public static final class Colors {
+		public static final int BLACK = 0;
+		public static final int RED = 1;
+		public static final int GREEN = 2;
+		public static final int BROWN = 3;
+		public static final int BLUE = 4;
+		public static final int MAGENTA = 5;
+		public static final int CYAN = 6;
+		public static final int LIGHTGRAY = 7;
+		public static final int DARKGRAY = 8;
+		public static final int BRIGHTRED = 9;
+		public static final int BRIGHTGREEN = 10;
+		public static final int YELLOW = 11;
+		public static final int BRIGHTBLUE = 12;
+		public static final int BRIGHTMAGENTA = 13;
+		public static final int BRIGHTCYAN = 14;
+		public static final int WHITE = 15;
+		public static final int OTHERGRAY = 16;
+		public static final int NORMAL = 7;
+		public static final int PALLETE_SIZE = 20;
 	}
 	public HGUIface( String $resource ) {
 		_resource = $resource;

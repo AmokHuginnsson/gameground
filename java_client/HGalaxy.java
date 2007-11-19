@@ -214,15 +214,11 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 			HGalaxy.this.onEndRound();
 		}
 		public void onExit() {
-			GameGround.getInstance().setFace( HBrowser.LABEL );
+			_app.setFace( HBrowser.LABEL );
 		}
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
-	private static final boolean registered;
-	static {
-		registered = registerLogic();
-	}
 	public static final String LABEL = "galaxy";
 	private State _state;
 	int _round;
@@ -242,7 +238,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 	private HClient _client;
 //--------------------------------------------//
 	public HGalaxy( GameGround $applet ) throws Exception {
-		super();
+		super( $applet );
 		init( _gui = new HGUILocal( LABEL ) );
 		_round = 0;
 		_systemCount = 0;
@@ -460,20 +456,19 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		_client.println( "cmd:glx:play:end_round" );
 		$moves.clear();
 	}
-	static boolean registerLogic() {
+	public void reinit() {
+		_client = _app.getClient();
+		_emperor = ((HLogin)_app.getLogic( "login" )).getConnectionConfig()._name;
+		_gui._emperor.setText( _emperor );
+	}
+	static boolean registerLogic( GameGround $app ) {
 		try {
-			GameGround.registerLogic( LABEL, new HGalaxy( GameGround.getInstance() ) );
+			$app.registerLogic( LABEL, new HGalaxy( $app ) );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );
 		}
 		return ( true );
-	}
-	public void reinit() {
-		GameGround gg = GameGround.getInstance();
-		_client = gg.getClient();
-		_emperor = ((HLogin)gg.getLogic( "login" )).getConnectionConfig()._name;
-		_gui._emperor.setText( _emperor );
 	}
 }
 

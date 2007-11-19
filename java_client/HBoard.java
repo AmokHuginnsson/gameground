@@ -12,7 +12,7 @@ import javax.swing.event.MouseInputListener;
 
 class HImages {
 //--------------------------------------------//
-	static int PLANETS_ICON_COUNT = 36;
+	static final int PLANETS_ICON_COUNT = 36;
 	public Image _background;
 	public Image[] _systems;
 //--------------------------------------------//
