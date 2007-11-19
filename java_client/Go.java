@@ -62,11 +62,13 @@ class Go extends HAbstractLogic {
 		public JTextField _messageInput;
 		public JTextField _wordInput;
 		public JTextPane _logPad;
+		public Goban _board;
 		public GoConfigurator _conf;
 		public HGUILocal( String $resource ) {
 			super( $resource );
 		}
 		public void updateTagLib( XUL $xul ) {
+			$xul.getTaglib().registerTag( "goban", Goban.class );
 			$xul.getTaglib().registerTag( "panel", GoConfigurator.class );
 		}
 		public void reinit() {
@@ -106,6 +108,9 @@ class Go extends HAbstractLogic {
 		_handlers.put( "player", Go.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
 		_handlers.put( "player_quit", HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
 		_info = new HLogicInfo( "go", "go", "Go" );
+		GoImages images = new GoImages();
+		_gui._board.setGui( this );
+		_gui._board.setImages( images );
 	}
 	void handlerGo( String $command ) {
 		processMessage( $command );

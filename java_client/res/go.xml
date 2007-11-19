@@ -11,8 +11,10 @@
 		<label constraints="1,6">Byo yomi time:</label><spinner id="_confByoYomiTime" constraints="2,6" tooltiptext="Time for single byo yomi period."><textfield horizontalalignment="RIGHT" /></spinner>
 	</panel>
 	<hbox>
-		<vbox>
-		</vbox>
+		<panel layout="GridBagLayout">
+			<gridbagconstraints fill="GridBagConstraints.BOTH" />
+			<goban id="_board" />
+		</panel>
 		<vbox minimumsize="&v_sidebar_width_galaxy;,1" preferredsize="&v_sidebar_width_galaxy;,&v_height;" maximumsize="&v_sidebar_width_galaxy;,2000">
 			<scrollpane autoscrolls="true">
 				<textpane id="_logPad" editable="false" focusable="false" />
