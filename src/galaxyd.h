@@ -90,6 +90,7 @@ class HGalaxy : public HLogic
 		{
 		int f_iColor;
 		int f_iSystems;
+		OEmperorInfo( void ) : f_iColor( -1 ), f_iSystems( -1 ) {}
 		};
 	typedef yaal::hcore::HMap<OClientInfo*, OEmperorInfo> emperors_t;
 protected:
