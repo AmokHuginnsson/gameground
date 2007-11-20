@@ -221,9 +221,9 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 	public static final long serialVersionUID = 17l;
 	public static final String LABEL = "galaxy";
 	private State _state;
-	int _round;
+	int _round = 0;
 	int _color;
-	int _systemCount;
+	int _systemCount = 0;
 	String[] _systemNames;
 	String _emperor;
 	HashMap<Integer,String> _emperors;
@@ -240,8 +240,6 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 	public HGalaxy( GameGround $applet ) throws Exception {
 		super( $applet );
 		init( _gui = new HGUILocal( LABEL ) );
-		_round = 0;
-		_systemCount = 0;
 		_emperors = new HashMap<Integer,String>();
 		_handlers.put( "setup", HGalaxy.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
 		_handlers.put( "glx", HGalaxy.class.getDeclaredMethod( "handlerGalaxy", new Class[]{ String.class } ) );
@@ -365,7 +363,9 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 						_gui.log( value, color );
 						_gui.log( ".\n", _gui.COLOR_NORMAL );
 					} break;
-					case ( 'i' ): /* info */
+					case ( 'i' ): /* info */ {
+						_systems[ sysNo ]._color = color;
+					} break;
 					default :
 						break;
 				}
@@ -460,6 +460,9 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		_client = _app.getClient();
 		_emperor = ((HLogin)_app.getLogic( "login" )).getConnectionConfig()._name;
 		_gui._emperor.setText( _emperor );
+		_systems = null;
+		_systemCount = 0;
+		_emperors.clear();
 	}
 	static boolean registerLogic( GameGround $app ) {
 		try {

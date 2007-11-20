@@ -219,7 +219,7 @@ bool HGalaxy::do_accept( OClientInfo* a_poClientInfo )
 		if ( ( f_iRound >= 0 ) && ( f_oSystems[ l_iCtr ].f_poEmperor ) )
 			{
 			l_oMessage.format ( "glx:play:system_info=%c,%d,%d,%d,%d\n",
-					'c', l_iCtr, f_oSystems[ l_iCtr ].f_iProduction, get_color( f_oSystems[ l_iCtr ].f_poEmperor ),
+					'i', l_iCtr, f_oSystems[ l_iCtr ].f_iProduction, get_color( f_oSystems[ l_iCtr ].f_poEmperor ),
 					f_oSystems[ l_iCtr ].f_iFleet );
 			a_poClientInfo->f_oSocket->write_until_eos ( l_oMessage );
 			}
@@ -407,10 +407,13 @@ void HGalaxy::end_round( void )
 					it->second.f_iColor, static_cast<char const* const>( it->first->f_oName ) );
 			broadcast( l_oMessage );
 			}
-		if ( it->second.f_iSystems >= 0 )
-			f_iReady ++;
-		else
-			l_iDead ++;
+		if ( it->second.f_iColor >= 0 ) /* not spectator */
+			{
+			if ( it->second.f_iSystems >= 0 )
+				f_iReady ++;
+			else
+				l_iDead ++;
+			}
 		}
 	if ( f_iReady == 1 )
 		{
@@ -431,7 +434,7 @@ void HGalaxy::end_round( void )
 				f_oSystems[ l_iCtr ].f_iFleet );
 		for ( emperors_t::HIterator it = f_oEmperors.begin(); it != f_oEmperors.end(); ++ it )
 			{
-			if ( it->second.f_iColor >= 0 )
+			if ( it->second.f_iColor < 0 )
 				it->first->f_oSocket->write_until_eos ( l_oMessage );
 			}
 		}
