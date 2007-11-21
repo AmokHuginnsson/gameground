@@ -101,6 +101,7 @@ class Go extends HAbstractLogic {
 		super( $applet );
 		init( _gui = new HGUILocal( LABEL ) );
 		_handlers.put( "go", Go.class.getDeclaredMethod( "handlerGo", new Class[]{ String.class } ) );
+		_handlers.put( "setup", Go.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
 		_handlers.put( "player", Go.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
 		_handlers.put( "player_quit", HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
 		_info = new HLogicInfo( "go", "go", "Go" );
@@ -110,6 +111,8 @@ class Go extends HAbstractLogic {
 	}
 	void handlerGo( String $command ) {
 		processMessage( $command );
+	}
+	void handlerSetup( String $command ) {
 	}
 	void handlerPlayer( String $command ) {
 	}

@@ -54,7 +54,8 @@ class HGo : public HLogic
 		};
 protected:
 	/*{*/
-	typedef yaal::hcore::HMap<OClientInfo*, OPlayerInfo> players_t;
+	typedef yaal::hcore::HPair<OClientInfo*, OPlayerInfo> player_t;
+	typedef yaal::hcore::HList<player_t> players_t;
 	MOVE::move_t f_eMove;
 	int f_iGobanSize;
 	int f_iKomi;
@@ -70,13 +71,14 @@ protected:
 	/*}*/
 public:
 	/*{*/
-	HGo( yaal::hcore::HString const&, int, int, int, int, int, int );
+	HGo( yaal::hcore::HString const& );
 	virtual ~HGo( void );
 	virtual yaal::hcore::HString get_info() const;
 	/*}*/
 protected:
 	/*{*/
 	OPlayerInfo* get_player_info( OClientInfo* );
+	players_t::iterator find_player( OClientInfo* );
 	virtual bool do_accept( OClientInfo* );
 	virtual void do_kick( OClientInfo* );
 	void handler_message( OClientInfo*, yaal::hcore::HString const& );
