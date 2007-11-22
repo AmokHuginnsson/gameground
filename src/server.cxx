@@ -54,9 +54,30 @@ HString const& mark( int a_iColor )
 
 }
 
+char const* const HServer::PROTOCOL::ABANDON = "abandon";
+char const* const HServer::PROTOCOL::CMD = "cmd";
+char const* const HServer::PROTOCOL::CREATE = "create";
+char const* const HServer::PROTOCOL::ERR = "err";
+char const* const HServer::PROTOCOL::GAME = "game";
+char const* const HServer::PROTOCOL::GET_GAMES = "get_games";
+char const* const HServer::PROTOCOL::GET_GAME_INFO = "get_game_info";
+char const* const HServer::PROTOCOL::GET_LOGISTICS = "get_logics";
+char const* const HServer::PROTOCOL::GET_PLAYERS = "get_players";
+char const* const HServer::PROTOCOL::JOIN = "join";
+char const* const HServer::PROTOCOL::KCK = "kck";
+char const* const HServer::PROTOCOL::LOGIC = "logic";
+char const* const HServer::PROTOCOL::MSG = "msg";
+char const* const HServer::PROTOCOL::NAME = "name";
+char const* const HServer::PROTOCOL::PLAYER = "player";
+char const* const HServer::PROTOCOL::PLAYER_QUIT = "player_quit";
+char const* const HServer::PROTOCOL::QUIT = "quit";
+char const* const HServer::PROTOCOL::SEP = ":";
+char const* const HServer::PROTOCOL::SEPP = ",";
+char const* const HServer::PROTOCOL::SHUTDOWN = "shutdown";
+
 HServer::HServer( int a_iConnections )
 	: HProcess( a_iConnections ), f_iMaxConnections( a_iConnections ),
-	f_oSocket( HSocket::TYPE::D_DEFAULT, a_iConnections ), f_oClients(), f_oLogics(), f_oHandlers()
+	f_oSocket( HSocket::TYPE::D_DEFAULT, a_iConnections ), f_oClients(), f_oLogics(), f_oHandlers(), _out()
 	{
 	M_PROLOG
 	return;
@@ -73,18 +94,18 @@ int HServer::init_server( int a_iPort )
 	M_PROLOG
 	f_oSocket.listen ( "0.0.0.0", a_iPort );
 	register_file_descriptor_handler ( f_oSocket.get_file_descriptor(), &HServer::handler_connection );
-	f_oHandlers[ "shutdown" ] = &HServer::handler_shutdown;
-	f_oHandlers[ "quit" ] = &HServer::handler_quit;
-	f_oHandlers[ "msg" ] = &HServer::handler_chat;
-	f_oHandlers[ "name" ] = &HServer::set_client_name;
-	f_oHandlers[ "get_logics" ] = &HServer::get_logics_info;
-	f_oHandlers[ "get_players" ] = &HServer::get_players_info;
-	f_oHandlers[ "get_games" ] = &HServer::get_games_info;
-	f_oHandlers[ "get_game_info" ] = &HServer::get_game_info;
-	f_oHandlers[ "create" ] = &HServer::create_game;
-	f_oHandlers[ "join" ] = &HServer::join_game;
-	f_oHandlers[ "abandon" ] = &HServer::handler_abandon;
-	f_oHandlers[ "cmd" ] = &HServer::pass_command;
+	f_oHandlers[ PROTOCOL::SHUTDOWN ] = &HServer::handler_shutdown;
+	f_oHandlers[ PROTOCOL::QUIT ] = &HServer::handler_quit;
+	f_oHandlers[ PROTOCOL::MSG ] = &HServer::handler_chat;
+	f_oHandlers[ PROTOCOL::NAME ] = &HServer::set_client_name;
+	f_oHandlers[ PROTOCOL::GET_LOGISTICS ] = &HServer::get_logics_info;
+	f_oHandlers[ PROTOCOL::GET_PLAYERS ] = &HServer::get_players_info;
+	f_oHandlers[ PROTOCOL::GET_GAMES ] = &HServer::get_games_info;
+	f_oHandlers[ PROTOCOL::GET_GAME_INFO ] = &HServer::get_game_info;
+	f_oHandlers[ PROTOCOL::CREATE ] = &HServer::create_game;
+	f_oHandlers[ PROTOCOL::JOIN ] = &HServer::join_game;
+	f_oHandlers[ PROTOCOL::ABANDON ] = &HServer::handler_abandon;
+	f_oHandlers[ PROTOCOL::CMD ] = &HServer::pass_command;
 	HProcess::init ( 3600 );
 	out << brightblue << "<<<GameGround>>>" << lightgray << " server started." << endl;
 	return ( 0 );
@@ -113,7 +134,7 @@ void HServer::broadcast_to_interested( HString const& a_roMessage )
 void HServer::handler_chat( OClientInfo& a_roInfo, HString const& a_roMessage )
 	{
 	M_PROLOG
-	broadcast_to_interested( "msg:" + a_roInfo.f_oName + ": " + a_roMessage );
+	broadcast_to_interested( _out << PROTOCOL::MSG << PROTOCOL::SEP << a_roInfo.f_oName << ": " << a_roMessage << _out );
 	return;
 	M_EPILOG
 	}
@@ -135,8 +156,9 @@ void HServer::set_client_name( OClientInfo& a_roInfo, HString const& a_oName )
 	else
 		{
 		a_roInfo.f_oName = a_oName;
-		broadcast_to_interested( "player:" + a_oName );
-		broadcast_to_interested( "msg:" + mark( COLORS::D_FG_BLUE ) + " " + a_oName + " entered the GameGround." );
+		broadcast_to_interested( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << a_oName << _out );
+		broadcast_to_interested( _out << PROTOCOL::MSG << PROTOCOL::SEP
+				<< mark( COLORS::D_FG_BLUE ) << " " << a_oName << " entered the GameGround." << _out );
 		}
 	return;
 	M_EPILOG
@@ -182,7 +204,8 @@ void HServer::create_game( OClientInfo& a_roInfo, HString const& a_oArg )
 					f_oLogics[ l_oName ] = l_oLogic;
 					a_roInfo.f_oLogic = l_oLogic;
 					out << l_oName << "," << l_oType << endl;
-					broadcast_to_interested( "player:" + a_roInfo.f_oName + "," + l_oLogic->get_info() );
+					broadcast_to_interested( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
+							<< a_roInfo.f_oName << PROTOCOL::SEPP << l_oLogic->get_info() << _out );
 					}
 				else
 					a_roInfo.f_oSocket->write_until_eos( "err:Specified configuration is inconsistent.\n" );
@@ -210,7 +233,8 @@ void HServer::join_game( OClientInfo& a_roInfo, HString const& a_oName )
 		else if ( ! it->second->accept_client( &a_roInfo ) )
 			{
 			a_roInfo.f_oLogic = it->second;
-			broadcast_to_interested( "player:" + a_roInfo.f_oName + "," + a_roInfo.f_oLogic->get_info() );
+			broadcast_to_interested( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
+					<< a_roInfo.f_oName << PROTOCOL::SEPP << a_roInfo.f_oLogic->get_info() << _out );
 			}
 		else
 			a_roInfo.f_oSocket->write_until_eos( "err:Game is full.\n" );
@@ -291,7 +315,7 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& a_oClient, char const* c
 	M_ASSERT( !! a_oClient );
 	int l_iFileDescriptor = a_oClient->get_file_descriptor();
 	if ( a_pcReason && a_pcReason[0] )
-		*a_oClient << "kck:" << a_pcReason << endl;
+		*a_oClient << PROTOCOL::KCK << PROTOCOL::SEP << a_pcReason << endl;
 	f_oSocket.shutdown_client( l_iFileDescriptor );
 	unregister_file_descriptor_handler( l_iFileDescriptor );
 	clients_t::HIterator clientIt = f_oClients.find( l_iFileDescriptor );
@@ -306,7 +330,8 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& a_oClient, char const* c
 		HString reason = " was kicked because of: ";
 		reason += ( a_pcReason ? a_pcReason : "connection error" );
 		if ( ! clientIt->second.f_oName.is_empty() )
-			broadcast_to_interested( "msg:" + mark( COLORS::D_FG_BRIGHTRED ) + " " + clientIt->second.f_oName + reason );
+			broadcast_to_interested( _out << PROTOCOL::MSG << PROTOCOL::SEP
+					<< mark( COLORS::D_FG_BRIGHTRED ) << " " << clientIt->second.f_oName << reason << _out );
 		cout << reason;
 		}
 	else
@@ -318,7 +343,7 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& a_oClient, char const* c
 		name = clientIt->second.f_oName;
 	f_oClients.remove( l_iFileDescriptor );
 	if ( ! name.is_empty() )
-		broadcast_to_interested( "player_quit:" + name );
+		broadcast_to_interested( _out << PROTOCOL::PLAYER_QUIT << PROTOCOL::SEP << name << _out );
 	return;
 	M_EPILOG
 	}
@@ -329,7 +354,7 @@ void HServer::send_logics_info( OClientInfo& a_roInfo )
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 	for( HLogicFactory::creators_t::HIterator it = factory.begin();
 			it != factory.end(); ++ it )
-		*a_roInfo.f_oSocket << "logic:" << it->second.f_oInfo << endl;
+		*a_roInfo.f_oSocket << PROTOCOL::LOGIC << PROTOCOL::SEP << it->second.f_oInfo << endl;
 	return;
 	M_EPILOG
 	}
@@ -354,7 +379,8 @@ void HServer::handler_quit( OClientInfo& a_roInfo, HString const& )
 	HString name = a_roInfo.f_oName;
 	kick_client( a_roInfo.f_oSocket, "" );
 	if ( ! name.is_empty() )
-		broadcast_to_interested( "msg:" + mark( COLORS::D_FG_BROWN ) + " " + name + " has left the GameGround." );
+		broadcast_to_interested( _out << PROTOCOL::MSG << PROTOCOL::SEP
+				<< mark( COLORS::D_FG_BROWN ) << " " << name << " has left the GameGround." << _out );
 	return;
 	M_EPILOG
 	}
@@ -363,7 +389,7 @@ void HServer::handler_abandon( OClientInfo& a_roInfo, HString const& )
 	{
 	M_PROLOG
 	remove_client_from_logic( a_roInfo );
-	broadcast_to_interested( "player:" + a_roInfo.f_oName );
+	broadcast_to_interested( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << a_roInfo.f_oName << _out );
 	return;
 	M_EPILOG
 	}
@@ -415,9 +441,9 @@ void HServer::send_players_info( OClientInfo& a_roInfo )
 		{
 		if ( ! it->second.f_oName.is_empty() )
 			{
-			*a_roInfo.f_oSocket << "player:" << it->second.f_oName;
+			*a_roInfo.f_oSocket << PROTOCOL::PLAYER << PROTOCOL::SEP << it->second.f_oName;
 			if ( !! it->second.f_oLogic )
-				*a_roInfo.f_oSocket << "," << it->second.f_oLogic->get_info();
+				*a_roInfo.f_oSocket << PROTOCOL::SEPP << it->second.f_oLogic->get_info();
 			*a_roInfo.f_oSocket << endl;
 			}
 		}
@@ -430,7 +456,7 @@ void HServer::send_games_info( OClientInfo& a_roInfo )
 	M_PROLOG
 	for( logics_t::HIterator it = f_oLogics.begin();
 			it != f_oLogics.end(); ++ it )
-		*a_roInfo.f_oSocket << "game:" << it->second->get_info() << endl;
+		*a_roInfo.f_oSocket << PROTOCOL::GAME << PROTOCOL::SEP << it->second->get_info() << endl;
 	return;
 	M_EPILOG
 	}

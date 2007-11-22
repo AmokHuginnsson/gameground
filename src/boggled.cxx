@@ -83,17 +83,29 @@ struct BOGGLE
 namespace boggle
 {
 
+char const* const HBoggle::PROTOCOL::SEP = ":";
+char const* const HBoggle::PROTOCOL::SEPP = ",";
+char const* const HBoggle::PROTOCOL::NAME = "bgl";
+char const* const HBoggle::PROTOCOL::PLAY = "play";
+char const* const HBoggle::PROTOCOL::SAY = "say";
+char const* const HBoggle::PROTOCOL::MSG = "msg";
+char const* const HBoggle::PROTOCOL::PLAYER = "player";
+char const* const HBoggle::PROTOCOL::DECK = "deck";
+char const* const HBoggle::PROTOCOL::ROUND = "round";
+char const* const HBoggle::PROTOCOL::SCORED = "scored";
+char const* const HBoggle::PROTOCOL::LONGEST = "longest";
+
 HBoggle::HBoggle( HString const& a_oName, int a_iPlayers, int a_iRoundTime, int a_iMaxRounds, int a_iInterRoundDelay )
-	: HLogic( "bgl", a_oName ), f_eState( STATE::D_LOCKED ), f_iPlayers( a_iPlayers ),
+	: HLogic( PROTOCOL::NAME, a_oName ), f_eState( STATE::D_LOCKED ), f_iPlayers( a_iPlayers ),
 	f_iRoundTime( a_iRoundTime ), f_iMaxRounds( a_iMaxRounds ),
 	f_iInterRoundDelay( a_iInterRoundDelay ), f_iRound( 0 ), f_oPlayers(),
-	f_oWords(), f_oVarTmpBuffer(), f_oMutex()
+	f_oWords(), f_oMutex()
 	{
 	M_PROLOG
 	HRandomizer l_oRandom;
 	l_oRandom.set( time ( NULL ) );
-	f_oHandlers[ "play" ] = static_cast<handler_t>( &HBoggle::handler_play );
-	f_oHandlers[ "say" ] = static_cast<handler_t>( &HBoggle::handler_message );
+	f_oHandlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HBoggle::handler_play );
+	f_oHandlers[ PROTOCOL::SAY ] = static_cast<handler_t>( &HBoggle::handler_message );
 	return;
 	M_EPILOG
 	}
@@ -142,13 +154,9 @@ void HBoggle::handler_message ( OClientInfo* a_poClientInfo, HString const& a_ro
 	{
 	M_PROLOG
 	HLock l( f_oMutex );
-	HString l_oMessage;
-	l_oMessage = "bgl:msg:";
-	l_oMessage += a_poClientInfo->f_oName;
-	l_oMessage += ": ";
-	l_oMessage += a_roMessage;
-	l_oMessage += '\n';
-	broadcast( l_oMessage );
+	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
+			<< PROTOCOL::MSG << PROTOCOL::SEP
+			<< a_poClientInfo->f_oName << ": " << a_roMessage << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -187,54 +195,52 @@ bool HBoggle::do_accept( OClientInfo* a_poClientInfo )
 	HLock l( f_oMutex );
 	bool rejected = false;
 	out << "new candidate " << a_poClientInfo->f_oName << endl;
-	HString l_oMessage;
 	out << "conditions: f_oPlayers.size() = " << f_oPlayers.size() << ", f_iPlayers = " << f_iPlayers << endl;
-	if ( f_oPlayers.size() < f_iPlayers )
+	OPlayerInfo info;
+	f_oPlayers[ a_poClientInfo ] = info;
+	/*
+	 * Send proto info about new contestant to all players.
+	 */
+	broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
+			<< a_poClientInfo->f_oName << PROTOCOL::SEPP << 0 << PROTOCOL::SEPP << 0 << endl << _out );
+	*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+		<< "Welcome, this match settings are:" << endl
+		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+		<< "   round time - " << f_iRoundTime << " seconds" << endl
+		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+		<< "   number of rounds - " << f_iMaxRounds << endl
+		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+		<< "   round interval - " << f_iInterRoundDelay << endl
+		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+		<< "This match requires " << f_iPlayers << " players to start the game." << endl;
+	for ( players_t::HIterator it = f_oPlayers.begin(); it != f_oPlayers.end(); ++ it )
 		{
-		OPlayerInfo info;
-		f_oPlayers[ a_poClientInfo ] = info;
-		l_oMessage = "player:";
-		l_oMessage += a_poClientInfo->f_oName + ",0,0\n";
-		broadcast( l_oMessage );
-		l_oMessage += "bgl:msg:Welcome, this match settings are:\nbgl:msg:   round time - ";
-		l_oMessage += f_iRoundTime;
-		l_oMessage += " seconds\nbgl:msg:   number of rounds - ";
-		l_oMessage += f_iMaxRounds;
-		l_oMessage += "\nbgl:msg:   round interval - ";
-		l_oMessage += f_iInterRoundDelay;
-		l_oMessage += "\nbgl:msg:This match requires ";
-		l_oMessage += f_iPlayers;
-		l_oMessage += " players to start the game.\n";
-		broadcast( l_oMessage );
-		a_poClientInfo->f_oSocket->write_until_eos( l_oMessage );
-		for ( players_t::HIterator it = f_oPlayers.begin(); it != f_oPlayers.end(); ++ it )
-			{
-			l_oMessage = "bgl:player:";
-			l_oMessage += it->first->f_oName + "," + it->second.f_iScore + "," + it->second.f_iLast + "\n";
-			a_poClientInfo->f_oSocket->write_until_eos( l_oMessage );
-			l_oMessage = "bgl:msg:";
-			l_oMessage += it->first->f_oName + " joined the mind contest.\n";
-			a_poClientInfo->f_oSocket->write_until_eos( l_oMessage );
-			}
-		l_oMessage = "bgl:msg:";
-		l_oMessage += a_poClientInfo->f_oName + " joined the mind contest.\n";
-		broadcast( l_oMessage );
-		out << "player [" << a_poClientInfo->f_oName << "] accepted" << endl;
-		if ( ! f_iRound && ( f_oPlayers.size() >= f_iPlayers ) )
-			{
-			schedule_end_round();
-			a_poClientInfo->f_oSocket->write_until_eos( f_oVarTmpBuffer );
-			l_oMessage = "bgl:msg:The match has begun, good luck!\n";
-			broadcast( l_oMessage );
-			a_poClientInfo->f_oSocket->write_until_eos( l_oMessage );
-			}
-		rejected = false;
+		*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
+			<< PROTOCOL::PLAYER << PROTOCOL::SEP << it->first->f_oName
+			<< PROTOCOL::SEPP << it->second.f_iScore << PROTOCOL::SEPP
+			<< it->second.f_iLast << endl;
+		*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
+			<< PROTOCOL::MSG << PROTOCOL::SEP << it->first->f_oName << " joined the mind contest." << endl;
 		}
-	else
+	broadcast(
+			_out << PROTOCOL::NAME << PROTOCOL::SEP
+			<< PROTOCOL::MSG << PROTOCOL::SEP
+			<< a_poClientInfo->f_oName
+			<< " joined the mind contest." << endl << _out );
+	out << "player [" << a_poClientInfo->f_oName << "] accepted" << endl;
+	if ( ! f_iRound && ( f_oPlayers.size() >= f_iPlayers ) )
 		{
-		out << "player [" << a_poClientInfo->f_oName << "] rejected" << endl;
-		rejected = true;
+		schedule_end_round();
+		out << _out.raw() << flush;
+		a_poClientInfo->f_oSocket->write_until_eos( _out << _out );
+		_out << PROTOCOL::NAME << PROTOCOL::SEP
+			<< PROTOCOL::MSG << PROTOCOL::SEP << "The match has begun, good luck!" << endl;
+		broadcast( _out.raw() );
+		a_poClientInfo->f_oSocket->write_until_eos( _out << _out );
 		}
+	else if ( f_iRound > 0 )
+		*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::DECK << PROTOCOL::SEP << make_deck() << endl;
+	rejected = false;
 	return ( rejected );
 	M_EPILOG
 	}
@@ -251,7 +257,9 @@ void HBoggle::do_kick( OClientInfo* a_poClientInfo )
 		if ( *(it->second->begin()) == a_poClientInfo )
 			it = f_oWords.erase( it );
 		}
-	broadcast( HString( "bgl:msg:Player " ) + a_poClientInfo->f_oName + " left this match.\n" );
+	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
+			<< PROTOCOL::MSG << PROTOCOL::SEP
+			<< "Player " << a_poClientInfo->f_oName << " left this match." << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -271,6 +279,7 @@ void HBoggle::schedule( EVENT::event_t a_eEvent )
 				HCallInterface::ptr_t( new HCall<HBoggle&, typeof( &HBoggle::on_begin_round )>( *this, &HBoggle::on_begin_round ) ) );
 	else
 		schedule_end_round();
+	_out.use();
 	return;
 	M_EPILOG
 	}
@@ -281,12 +290,10 @@ void HBoggle::schedule_end_round( void )
 	++ f_iRound;
 	HScheduledAsyncCallerService::get_instance().register_call( time( NULL ) + f_iRoundTime,
 			HCallInterface::ptr_t( new HCall<HBoggle&, typeof( &HBoggle::on_end_round )>( *this, &HBoggle::on_end_round ) ) );
-	f_oVarTmpBuffer = "bgl:deck:";
 	generate_game();
-	f_oVarTmpBuffer += make_deck();
-	f_oVarTmpBuffer += "\n";
 	f_eState = STATE::D_ACCEPTING;
-	broadcast( f_oVarTmpBuffer );
+	_out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::DECK << PROTOCOL::SEP << make_deck() << endl;
+	broadcast( _out.raw() );
 	return;
 	M_EPILOG
 	}
@@ -298,16 +305,13 @@ void HBoggle::on_begin_round( void )
 	out << "<<begin>>" << endl;
 	HAsyncCallerService::get_instance().register_call( 0,
 			HCallInterface::ptr_t( new HCall<HBoggle&, typeof( &HBoggle::schedule ), EVENT::event_t>( *this, &HBoggle::schedule, EVENT::D_END_ROUND ) ) );
-	HString l_oMessage = "bgl:msg:New round started, you have got ";
-	l_oMessage += f_iRoundTime;
-	l_oMessage += " seconds, ";
-	l_oMessage += f_iMaxRounds - f_iRound;
-	l_oMessage += " rounds left!\n";
-	broadcast( l_oMessage );
-	l_oMessage = "bgl:round:";
-	l_oMessage += f_iRound;
-	l_oMessage += "\n";
-	broadcast( l_oMessage );
+	broadcast(
+			_out << PROTOCOL::NAME << PROTOCOL::SEP
+			<< PROTOCOL::MSG << PROTOCOL::SEP
+			<< "New round started, you have got " << f_iRoundTime
+			<< " seconds, " << f_iMaxRounds - f_iRound
+			<< " rounds left!" << endl << _out );
+	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::ROUND << PROTOCOL::SEP << f_iRound << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -318,18 +322,16 @@ void HBoggle::on_end_round( void )
 	HLock l( f_oMutex );
 	out << "<<end>>" << endl;
 	f_eState = STATE::D_LOCKED;
-	HString l_oMsg;
 	if ( f_iRound < f_iMaxRounds )
 		{
 		HAsyncCallerService::get_instance().register_call( 0,
 				HCallInterface::ptr_t( new HCall<HBoggle&, typeof( &HBoggle::schedule ), EVENT::event_t>( *this, &HBoggle::schedule, EVENT::D_BEGIN_ROUND ) ) );
-		l_oMsg = "bgl:msg:This round has ended, next round in ";
-		l_oMsg += f_iInterRoundDelay;
-		l_oMsg += " seconds!\n";
+		_out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+			<< "This round has ended, next round in " << f_iInterRoundDelay << " seconds!" << endl;
 		}
 	else
-		l_oMsg = "bgl:msg:Game Over!\n";
-	broadcast( l_oMsg );
+		_out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP << "Game Over!" << endl;
+	broadcast( _out << _out );
 	int scores[ 16 ] = { 0, 0, 1, 1, 2, 3, 5, 7, 11, 11, 11, 12, 13, 14, 15, 16  };
 	typedef HList<words_t::HIterator> longest_t;
 	longest_t longest;
@@ -350,27 +352,22 @@ void HBoggle::on_end_round( void )
 				longest.push_back( it );
 			OClientInfo* clInfo = *it->second->begin();
 			OPlayerInfo& info = *get_player_info( clInfo );
-			*(clInfo->f_oSocket) << "bgl:scored:" << it->first << "[" << scores[ l_iLength - 1 ] << "]" << endl;
+			*(clInfo->f_oSocket) << PROTOCOL::NAME << PROTOCOL::SEP
+				<< PROTOCOL::SCORED << PROTOCOL::SEP << it->first << "[" << scores[ l_iLength - 1 ] << "]" << endl;
 			info.f_iLast += scores[ l_iLength - 1 ];
 			}
 		}
 	for ( players_t::HIterator it = f_oPlayers.begin(); it != f_oPlayers.end(); ++ it )
 		{
-		l_oMsg = "bgl:player:";
 		it->second.f_iScore += it->second.f_iLast;
-		l_oMsg += it->first->f_oName + "," + it->second.f_iScore + "," + it->second.f_iLast + "\n";
-		broadcast( l_oMsg );
+		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::PLAYER << PROTOCOL::SEP
+				<< it->first->f_oName << PROTOCOL::SEPP << it->second.f_iScore
+				<< PROTOCOL::SEPP << it->second.f_iLast << endl << _out );
 		it->second.f_iLast = 0;
 		}
 	for ( longest_t::iterator it = longest.begin(); it != longest.end(); ++ it )
-		{
-		l_oMsg = "bgl:longest:";
-		l_oMsg += (*it)->first;
-		l_oMsg += " [";
-		l_oMsg += (*(*it)->second->begin())->f_oName;
-		l_oMsg += "]\n";
-		broadcast( l_oMsg );
-		}
+		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::LONGEST << PROTOCOL::SEP
+				<< (*it)->first << " [" << (*(*it)->second->begin())->f_oName << "]" << endl << _out );
 	f_oWords.clear(); 
 	return;
 	M_EPILOG

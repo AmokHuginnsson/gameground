@@ -45,7 +45,31 @@ protected:
 	clients_t f_oClients;
 	logics_t f_oLogics;
 	handlers_t f_oHandlers;
+	yaal::tools::HStringStream _out;
 	/*}*/
+	struct PROTOCOL
+		{
+		static char const* const ABANDON;
+		static char const* const CMD;
+		static char const* const CREATE;
+		static char const* const ERR;
+		static char const* const GAME;
+		static char const* const GET_GAMES;
+		static char const* const GET_GAME_INFO;
+		static char const* const GET_LOGISTICS;
+		static char const* const GET_PLAYERS;
+		static char const* const JOIN;
+		static char const* const KCK;
+		static char const* const LOGIC;
+		static char const* const MSG;
+		static char const* const NAME;
+		static char const* const PLAYER;
+		static char const* const PLAYER_QUIT;
+		static char const* const QUIT;
+		static char const* const SEP;
+		static char const* const SEPP;
+		static char const* const SHUTDOWN;
+		};
 public:
 	/*{*/
 	HServer( int );

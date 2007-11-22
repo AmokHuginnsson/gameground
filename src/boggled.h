@@ -73,9 +73,22 @@ protected:
 	players_t f_oPlayers;
 	char f_ppcGame[16][2];
 	words_t f_oWords;
-	yaal::hcore::HString f_oVarTmpBuffer;
 	mutable yaal::hcore::HMutex f_oMutex;
 	/*}*/
+	struct PROTOCOL
+		{
+		static char const* const SEP;
+		static char const* const SEPP;
+		static char const* const NAME;
+		static char const* const SAY;
+		static char const* const MSG;
+		static char const* const PLAY;
+		static char const* const PLAYER;
+		static char const* const DECK;
+		static char const* const ROUND;
+		static char const* const SCORED;
+		static char const* const LONGEST;
+		};
 public:
 	/*{*/
 	HBoggle( yaal::hcore::HString const&, int, int, int, int );

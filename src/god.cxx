@@ -89,13 +89,8 @@ void HGo::handler_message ( OClientInfo* a_poClientInfo, HString const& a_roMess
 	{
 	M_PROLOG
 	HLock l( f_oMutex );
-	HString l_oMessage;
-	l_oMessage = "go:msg:";
-	l_oMessage += a_poClientInfo->f_oName;
-	l_oMessage += ": ";
-	l_oMessage += a_roMessage;
-	l_oMessage += '\n';
-	broadcast( l_oMessage );
+	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
+			<< PROTOCOL::MSG << PROTOCOL::SEP << a_poClientInfo->f_oName << ": " << a_roMessage << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -104,7 +99,7 @@ void HGo::handler_setup( OClientInfo*, HString const& a_roMessage )
 	{
 	M_PROLOG
 	HLock l( f_oMutex );
-	broadcast( HString( "go:setup:" ) + a_roMessage + "\n" );
+	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << a_roMessage << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -144,14 +139,21 @@ bool HGo::do_accept( OClientInfo* a_poClientInfo )
 	bool rejected = false;
 	out << "new candidate " << a_poClientInfo->f_oName << endl;
 	if ( f_oPlayers.size() == 0 )
-		*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::ADMIN << endl;
+		*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
+			<< PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::ADMIN << endl;
 	*a_poClientInfo->f_oSocket
-		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::GOBAN << PROTOCOL::SEPP << f_iGobanSize << endl
-		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::KOMI << PROTOCOL::SEPP << f_iKomi << endl
-		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::HANDICAPS << PROTOCOL::SEPP << f_iHandicaps << endl
-		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::MAINTIME << PROTOCOL::SEPP << f_iMainTime << endl
-		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::BYOYOMIPERIODS << PROTOCOL::SEPP << f_iByoYomiPeriods << endl
-		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::BYOYOMITIME << PROTOCOL::SEPP << f_iByoYomiTime << endl;
+		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP
+		<< PROTOCOL::GOBAN << PROTOCOL::SEPP << f_iGobanSize << endl
+		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP
+		<< PROTOCOL::KOMI << PROTOCOL::SEPP << f_iKomi << endl
+		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP
+		<< PROTOCOL::HANDICAPS << PROTOCOL::SEPP << f_iHandicaps << endl
+		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP
+		<< PROTOCOL::MAINTIME << PROTOCOL::SEPP << f_iMainTime << endl
+		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP
+		<< PROTOCOL::BYOYOMIPERIODS << PROTOCOL::SEPP << f_iByoYomiPeriods << endl
+		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP
+		<< PROTOCOL::BYOYOMITIME << PROTOCOL::SEPP << f_iByoYomiTime << endl;
 	player_t info;
 	info.first = a_poClientInfo;
 	f_oPlayers.push_back( info );
@@ -172,7 +174,8 @@ void HGo::do_kick( OClientInfo* a_poClientInfo )
 		{
 		it = f_oPlayers.begin();
 		if ( it != f_oPlayers.end() )
-			*it->first->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::ADMIN << endl;
+			*it->first->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
+				<< PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::ADMIN << endl;
 		}
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::MSG << PROTOCOL::SEP
