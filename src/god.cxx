@@ -54,6 +54,7 @@ HGo::HGo( HString const& a_oName )
 	M_PROLOG
 	HRandomizer l_oRandom;
 	l_oRandom.set( time ( NULL ) );
+	f_oHandlers[ "setup" ] = static_cast<handler_t>( &HGo::handler_setup );
 	f_oHandlers[ "play" ] = static_cast<handler_t>( &HGo::handler_play );
 	f_oHandlers[ "say" ] = static_cast<handler_t>( &HGo::handler_message );
 	return;
@@ -80,6 +81,15 @@ void HGo::handler_message ( OClientInfo* a_poClientInfo, HString const& a_roMess
 	l_oMessage += a_roMessage;
 	l_oMessage += '\n';
 	broadcast( l_oMessage );
+	return;
+	M_EPILOG
+	}
+
+void HGo::handler_setup( OClientInfo*, HString const& a_roMessage )
+	{
+	M_PROLOG
+	HLock l( f_oMutex );
+	broadcast( HString( "go:setup:" ) + a_roMessage + "\n" );
 	return;
 	M_EPILOG
 	}

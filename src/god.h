@@ -83,6 +83,7 @@ protected:
 	virtual void do_kick( OClientInfo* );
 	void handler_message( OClientInfo*, yaal::hcore::HString const& );
 	void handler_play( OClientInfo*, yaal::hcore::HString const& );
+	void handler_setup( OClientInfo*, yaal::hcore::HString const& );
 	void on_timeout( void );
 	void schedule( void );
 	void schedule_timeout( void );

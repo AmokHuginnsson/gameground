@@ -12,29 +12,29 @@
 			<panel maximumsize="2000,240" border="EmptyBorder(4,4,4,4)">
 				<layout type="FormLayout" columns="p,8px,50px,20px,p,8px,40px" rows="p,4px,p" />
 				<label constraints="1,1">Goban:</label>
-				<combobox id="_confGoban" constraints="3,1" tooltiptext="Goban size." enabled="false" />
+				<combobox id="_confGoban" action="onGobanSize" constraints="3,1" tooltiptext="Goban size." enabled="false" />
 				<label constraints="5,1">Main time:</label>
 				<spinner id="_confMainTime" constraints="7,1" tooltiptext="Time for main game." enabled="false">
-					<textfield horizontalalignment="RIGHT" />
+					<textfield action="onMainTime" horizontalalignment="RIGHT" />
 				</spinner>
 				<label constraints="1,3">Komi:</label>
 				<spinner id="_confKomi" constraints="3,3" tooltiptext="Komi." enabled="false">
-					<textfield horizontalalignment="RIGHT" />
+					<textfield action="onKomi" horizontalalignment="RIGHT" />
 				</spinner>
 				<label constraints="5,3">Handicaps:</label>
 				<spinner id="_confHandicaps" constraints="7,3" tooltiptext="Handicaps." enabled="false">
-					<textfield horizontalalignment="RIGHT" />
+					<textfield action="onHandicaps" horizontalalignment="RIGHT" />
 				</spinner>
 			</panel>
 			<panel maximumsize="2000,240" border="EmptyBorder(0,4,4,4)">
 				<layout type="FormLayout" columns="p,8px,40px,4px:grow,p" rows="p,4px,p" />
 				<label constraints="1,1">Byo yomi periods:</label>
 				<spinner id="_confByoYomiPeriods" constraints="3,1" tooltiptext="Number of byo yomi periods." enabled="false">
-					<textfield horizontalalignment="RIGHT" />
+					<textfield action="onByoyomiPeriods" horizontalalignment="RIGHT" />
 				</spinner>
 				<label constraints="1,3">Byo yomi time:</label>
 				<spinner id="_confByoYomiTime" constraints="3,3" tooltiptext="Time for single byo yomi period." enabled="false">
-					<textfield horizontalalignment="RIGHT" />
+					<textfield action="onByoyomiTime" horizontalalignment="RIGHT" />
 				</spinner>
 				<button id="_pass" action="onPass" text="Pass !" constraints="5,3" enabled="false" />
 			</panel>
@@ -75,7 +75,7 @@
 			</panel>
 			<hbox>
 				<glue maximumsize="1000,1"/>
-				<button id="_exit" text="Exit !" action="onExit" tooltiptext="Abandon this match." />
+				<button text="Exit !" action="onExit" tooltiptext="Abandon this match." />
 			</hbox>
 		</vbox>
 	</hbox>

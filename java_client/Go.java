@@ -73,6 +73,7 @@ class Go extends HAbstractLogic {
 		}
 		public void reinit() {
 			clearLog();
+			_conf.setOwner( this );
 		}
 		public JTextPane getLogPad() {
 			return ( _logPad );
@@ -89,6 +90,24 @@ class Go extends HAbstractLogic {
 		}
 		public void onExit() {
 			_app.setFace( HBrowser.LABEL );
+		}
+		public void onGobanSize() {
+			_client.println( "cmd:setup:goban," + (String)_conf._confGoban.getSelectedItem() );
+		}
+		public void onKomi() {
+			_client.println( "cmd:setup:komi," + _conf._confKomi.getValue() );
+		}
+		public void onHandicaps() {
+			_client.println( "cmd:setup:handicaps," + _conf._confHandicaps.getValue() );
+		}
+		public void onMainTime() {
+			_client.println( "cmd:setup:maintime," + _conf._confMainTime.getValue() );
+		}
+		public void onByoyomiPeriods() {
+			_client.println( "cmd:setup:byoyomiperiods," + _conf._confByoYomiPeriods.getValue() );
+		}
+		public void onByoyomiTime() {
+			_client.println( "cmd:setup:byoyomitime," + _conf._confByoYomiTime.getValue() );
 		}
 	}
 //--------------------------------------------//
@@ -113,6 +132,22 @@ class Go extends HAbstractLogic {
 		processMessage( $command );
 	}
 	void handlerSetup( String $command ) {
+		String[] tokens = $command.split( ",", 2 );
+		if ( "admin".equals( $command ) ) {
+			_gui._conf.setEnabled( true );
+		} else if ( "goban".equals( tokens[ 0 ] ) ) {
+			_gui._board.setSize( Integer.parseInt( tokens[ 1 ] ) );
+		} else if ( "komi".equals( tokens[ 0 ] ) ) {
+			_gui._conf._confKomi.setValue( Integer.parseInt( tokens[ 1 ] ) );
+		} else if ( "handicaps".equals( tokens[ 0 ] ) ) {
+			_gui._conf._confHandicaps.setValue( Integer.parseInt( tokens[ 1 ] ) );
+		} else if ( "maintime".equals( tokens[ 0 ] ) ) {
+			_gui._conf._confMainTime.setValue( Integer.parseInt( tokens[ 1 ] ) );
+		} else if ( "byoyomiperiods".equals( tokens[ 0 ] ) ) {
+			_gui._conf._confByoYomiPeriods.setValue( Integer.parseInt( tokens[ 1 ] ) );
+		} else if ( "byoyomitime".equals( tokens[ 0 ] ) ) {
+			_gui._conf._confByoYomiTime.setValue( Integer.parseInt( tokens[ 1 ] ) );
+		}
 	}
 	void handlerPlayer( String $command ) {
 	}

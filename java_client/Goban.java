@@ -65,6 +65,9 @@ public class Goban extends JPanel implements MouseInputListener {
 	}
 	void setSize( int $size ) {
 		_size = $size;
+		_virtSize = 0;
+		getPreferredSize();
+		repaint();
 	}
 	private void drawStone( Graphics $gs, int $no, int $coordX, int $coordY, int $color ) {
 	}
