@@ -45,6 +45,21 @@ using namespace yaal::tools::util;
 namespace go
 {
 
+char const* const HGo::PROTOCOL::SEP = ":";
+char const* const HGo::PROTOCOL::SEPP = ",";
+char const* const HGo::PROTOCOL::NAME = "go";
+char const* const HGo::PROTOCOL::SETUP = "setp";
+char const* const HGo::PROTOCOL::ADMIN = "admin";
+char const* const HGo::PROTOCOL::PLAY = "play";
+char const* const HGo::PROTOCOL::SAY = "say";
+char const* const HGo::PROTOCOL::MSG = "msg";
+char const* const HGo::PROTOCOL::GOBAN = "goban";
+char const* const HGo::PROTOCOL::KOMI = "komi";
+char const* const HGo::PROTOCOL::HANDICAPS = "handicaps";
+char const* const HGo::PROTOCOL::MAINTIME = "maintime";
+char const* const HGo::PROTOCOL::BYOYOMIPERIODS = "byoyomipediods";
+char const* const HGo::PROTOCOL::BYOYOMITIME = "byoyomitime";
+
 HGo::HGo( HString const& a_oName )
 	: HLogic( "go", a_oName ), f_eMove( MOVE::D_BLACK ), f_iGobanSize( setup.f_iGobanSize ),
 	f_iKomi( setup.f_iKomi ), f_iHandicaps( setup.f_iHandicaps ), f_iMainTime( setup.f_iMainTime ),
@@ -54,9 +69,9 @@ HGo::HGo( HString const& a_oName )
 	M_PROLOG
 	HRandomizer l_oRandom;
 	l_oRandom.set( time ( NULL ) );
-	f_oHandlers[ "setup" ] = static_cast<handler_t>( &HGo::handler_setup );
-	f_oHandlers[ "play" ] = static_cast<handler_t>( &HGo::handler_play );
-	f_oHandlers[ "say" ] = static_cast<handler_t>( &HGo::handler_message );
+	f_oHandlers[ PROTOCOL::SETUP ] = static_cast<handler_t>( &HGo::handler_setup );
+	f_oHandlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HGo::handler_play );
+	f_oHandlers[ PROTOCOL::SAY ] = static_cast<handler_t>( &HGo::handler_message );
 	return;
 	M_EPILOG
 	}
@@ -129,14 +144,14 @@ bool HGo::do_accept( OClientInfo* a_poClientInfo )
 	bool rejected = false;
 	out << "new candidate " << a_poClientInfo->f_oName << endl;
 	if ( f_oPlayers.size() == 0 )
-		*a_poClientInfo->f_oSocket << "go:setup:admin" << endl;
+		*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::ADMIN << endl;
 	*a_poClientInfo->f_oSocket
-		<< "go:setup:goban," << f_iGobanSize << endl
-		<< "go:setup:komi," << f_iKomi << endl
-		<< "go:setup:handicap," << f_iHandicaps << endl
-		<< "go:setup:maintime," << f_iMainTime << endl
-		<< "go:setup:byoyomipediods," << f_iByoYomiPeriods << endl
-		<< "go:setup:byoyomitime," << f_iByoYomiTime << endl;
+		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::GOBAN << PROTOCOL::SEPP << f_iGobanSize << endl
+		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::KOMI << PROTOCOL::SEPP << f_iKomi << endl
+		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::HANDICAPS << PROTOCOL::SEPP << f_iHandicaps << endl
+		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::MAINTIME << PROTOCOL::SEPP << f_iMainTime << endl
+		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::BYOYOMIPERIODS << PROTOCOL::SEPP << f_iByoYomiPeriods << endl
+		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::BYOYOMITIME << PROTOCOL::SEPP << f_iByoYomiTime << endl;
 	player_t info;
 	info.first = a_poClientInfo;
 	f_oPlayers.push_back( info );
@@ -157,7 +172,7 @@ void HGo::do_kick( OClientInfo* a_poClientInfo )
 		{
 		it = f_oPlayers.begin();
 		if ( it != f_oPlayers.end() )
-			*it->first->f_oSocket << "go:setup:admin" << endl;
+			*it->first->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::ADMIN << endl;
 		}
 	broadcast( HString( "go:msg:Player " ) + a_poClientInfo->f_oName + " left this match.\n" );
 	return;

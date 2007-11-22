@@ -52,6 +52,23 @@ class HGo : public HLogic
 			D_WHITE
 			} move_t;
 		};
+	struct PROTOCOL
+		{
+		static char const* const SEP;
+		static char const* const SEPP;
+		static char const* const NAME;
+		static char const* const SETUP;
+		static char const* const ADMIN;
+		static char const* const SAY;
+		static char const* const MSG;
+		static char const* const PLAY;
+		static char const* const GOBAN;
+		static char const* const KOMI;
+		static char const* const HANDICAPS;
+		static char const* const MAINTIME;
+		static char const* const BYOYOMIPERIODS;
+		static char const* const BYOYOMITIME;
+		};
 protected:
 	/*{*/
 	typedef yaal::hcore::HPair<OClientInfo*, OPlayerInfo> player_t;
