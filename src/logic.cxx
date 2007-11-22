@@ -42,7 +42,7 @@ using namespace yaal::tools::util;
 
 HLogic::HLogic( HString const& a_oSymbol, HString const& a_oName )
 	: f_oSymbol( a_oSymbol ), f_oHandlers( setup.f_iMaxConnections ),
-	f_oClients(), f_oName( a_oName )
+	f_oClients(), f_oName( a_oName ), _out()
 	{
 	}
 

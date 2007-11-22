@@ -174,7 +174,9 @@ void HGo::do_kick( OClientInfo* a_poClientInfo )
 		if ( it != f_oPlayers.end() )
 			*it->first->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::ADMIN << endl;
 		}
-	broadcast( HString( "go:msg:Player " ) + a_poClientInfo->f_oName + " left this match.\n" );
+	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
+			<< PROTOCOL::MSG << PROTOCOL::SEP
+			<< "Player " << a_poClientInfo->f_oName << " left this match." << endl << _out );
 	return;
 	M_EPILOG
 	}

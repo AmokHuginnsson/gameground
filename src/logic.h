@@ -45,6 +45,7 @@ protected:
 	handlers_t f_oHandlers;
 	clients_t f_oClients;
 	yaal::hcore::HString f_oName;
+	yaal::tools::HStringStream _out;
 	/*}*/
 public:
 	/*{*/
