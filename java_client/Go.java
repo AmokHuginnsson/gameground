@@ -74,6 +74,7 @@ class Go extends HAbstractLogic {
 		public void reinit() {
 			clearLog();
 			_conf.setOwner( this );
+			_conf.gobanModel();
 		}
 		public JTextPane getLogPad() {
 			return ( _logPad );
@@ -135,18 +136,21 @@ class Go extends HAbstractLogic {
 		String[] tokens = $command.split( ",", 2 );
 		if ( "admin".equals( $command ) ) {
 			_gui._conf.setEnabled( true );
-		} else if ( "goban".equals( tokens[ 0 ] ) ) {
-			_gui._board.setSize( Integer.parseInt( tokens[ 1 ] ) );
-		} else if ( "komi".equals( tokens[ 0 ] ) ) {
-			_gui._conf._confKomi.setValue( Integer.parseInt( tokens[ 1 ] ) );
-		} else if ( "handicaps".equals( tokens[ 0 ] ) ) {
-			_gui._conf._confHandicaps.setValue( Integer.parseInt( tokens[ 1 ] ) );
-		} else if ( "maintime".equals( tokens[ 0 ] ) ) {
-			_gui._conf._confMainTime.setValue( Integer.parseInt( tokens[ 1 ] ) );
-		} else if ( "byoyomiperiods".equals( tokens[ 0 ] ) ) {
-			_gui._conf._confByoYomiPeriods.setValue( Integer.parseInt( tokens[ 1 ] ) );
-		} else if ( "byoyomitime".equals( tokens[ 0 ] ) ) {
-			_gui._conf._confByoYomiTime.setValue( Integer.parseInt( tokens[ 1 ] ) );
+		} else {
+			int value = Integer.parseInt( tokens[ 1 ] );
+			if ( "goban".equals( tokens[ 0 ] ) ) {
+				_gui._board.setSize( value );
+			} else if ( "komi".equals( tokens[ 0 ] ) ) {
+				_gui._conf.setValue( _gui._conf._confKomi, Integer.parseInt( tokens[ 1 ] ) );
+			} else if ( "handicaps".equals( tokens[ 0 ] ) ) {
+				_gui._conf.setValue( _gui._conf._confHandicaps, Integer.parseInt( tokens[ 1 ] ) );
+			} else if ( "maintime".equals( tokens[ 0 ] ) ) {
+				_gui._conf.setValue( _gui._conf._confMainTime, Integer.parseInt( tokens[ 1 ] ) );
+			} else if ( "byoyomiperiods".equals( tokens[ 0 ] ) ) {
+				_gui._conf.setValue( _gui._conf._confByoYomiPeriods, Integer.parseInt( tokens[ 1 ] ) );
+			} else if ( "byoyomitime".equals( tokens[ 0 ] ) ) {
+				_gui._conf.setValue( _gui._conf._confByoYomiTime, Integer.parseInt( tokens[ 1 ] ) );
+			}
 		}
 	}
 	void handlerPlayer( String $command ) {

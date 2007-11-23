@@ -6,7 +6,7 @@
 	<hbox>
 		<panel layout="GridBagLayout">
 			<gridbagconstraints fill="GridBagConstraints.BOTH" />
-			<goban id="_board" />
+			<goban id="_board" opaque="true" />
 		</panel>
 		<vbox minimumsize="&v_sidebar_width_galaxy;,1" preferredsize="&v_sidebar_width_galaxy;,&v_height;" maximumsize="&v_sidebar_width_galaxy;,2000">
 			<panel maximumsize="2000,240" border="EmptyBorder(4,4,4,4)">

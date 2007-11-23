@@ -48,7 +48,7 @@ namespace go
 char const* const HGo::PROTOCOL::SEP = ":";
 char const* const HGo::PROTOCOL::SEPP = ",";
 char const* const HGo::PROTOCOL::NAME = "go";
-char const* const HGo::PROTOCOL::SETUP = "setp";
+char const* const HGo::PROTOCOL::SETUP = "setup";
 char const* const HGo::PROTOCOL::ADMIN = "admin";
 char const* const HGo::PROTOCOL::PLAY = "play";
 char const* const HGo::PROTOCOL::SAY = "say";
@@ -99,7 +99,21 @@ void HGo::handler_setup( OClientInfo*, HString const& a_roMessage )
 	{
 	M_PROLOG
 	HLock l( f_oMutex );
-	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << a_roMessage << endl << _out );
+	HString item = a_roMessage.split( ",", 0 );
+	int value = lexical_cast<int>( a_roMessage.split( ",", 1 ) );
+	if ( item == PROTOCOL::GOBAN )
+		f_iGobanSize = value;
+	else if ( item == PROTOCOL::KOMI )
+		f_iKomi = value;
+	else if ( item == PROTOCOL::HANDICAPS )
+		f_iHandicaps = value;
+	else if ( item == PROTOCOL::MAINTIME )
+		f_iMainTime = value;
+	else if ( item == PROTOCOL::BYOYOMIPERIODS )
+		f_iByoYomiPeriods = value;
+	else if ( item == PROTOCOL::BYOYOMITIME )
+		f_iByoYomiTime = value;
+	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP << a_roMessage << endl << _out );
 	return;
 	M_EPILOG
 	}

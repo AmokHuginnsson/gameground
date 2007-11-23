@@ -15,7 +15,7 @@ public class Goban extends JPanel implements MouseInputListener {
 //--------------------------------------------//
 	public static final long serialVersionUID = 7l;
 	public static final int D_MARGIN = 20;
-	int _size = 9;
+	int _size = 19;
 	double _diameter = -1;
 	int _cursorX = -1;
 	int _cursorY = -1;
@@ -28,8 +28,9 @@ public class Goban extends JPanel implements MouseInputListener {
 		addMouseListener( this );
 	}
 	public void mouseMoved( MouseEvent $event ) {
-		int cursorX = (int)( ( $event.getX() - D_MARGIN ) / _diameter );
-		int cursorY = (int)( ( $event.getY() - D_MARGIN ) / _diameter );
+		int margin = _virtSize / ( _size + 4 );
+		int cursorX = (int)( ( $event.getX() - ( D_MARGIN + margin - _diameter / 2 + _size / 4 ) ) / _diameter );
+		int cursorY = (int)( ( $event.getY() - ( D_MARGIN + margin - _diameter / 2 + _size / 4 ) ) / _diameter );
 		if ( ( _cursorX != cursorX ) || ( _cursorY != cursorY ) ) {
 			_cursorX = cursorX;
 			_cursorY = cursorY;
@@ -69,23 +70,22 @@ public class Goban extends JPanel implements MouseInputListener {
 		getPreferredSize();
 		repaint();
 	}
-	private void drawStone( Graphics $gs, int $no, int $coordX, int $coordY, int $color ) {
-	}
 	public Dimension getPreferredSize() {
 		java.awt.Dimension pd = getParent().getSize();
 		int size = pd.getWidth() < pd.getHeight() ? (int)pd.getWidth() : (int)pd.getHeight();;
 		if ( ( _virtSize != size ) && ( _images != null ) && ( size > 0 ) ) {
 			_virtSize = size - 2 * D_MARGIN;
-			int margin = _virtSize / 22;
+			int margin = _virtSize / ( _size + 4 );
 			int inside = _virtSize - 2 * margin;
-			_images.regenerate( _virtSize, ( inside / _size ) - 1 );
+			_diameter = inside / ( _size - 1 );
+			_images.regenerate( _virtSize, (int)_diameter );
 		}
 		return ( new Dimension( size, size ) );
 	}
 	protected void paintComponent( Graphics g ) {
-		int margin = _virtSize / 22;
+		super.paintComponent( g );
+		int margin = _virtSize / ( _size + 4 );
 		int inside = _virtSize - 2 * margin;
-		_diameter = inside / ( _size - 1 );
 		g.drawImage( _images._background, D_MARGIN, D_MARGIN, _virtSize, _virtSize, Color.black, this );
 		g.setColor( Color.black );
 		for ( int i = 0; i < _size; ++ i ) {
@@ -128,12 +128,8 @@ public class Goban extends JPanel implements MouseInputListener {
 		}
 		drawStone( 5, 5, 'b', false, g );
 		drawStone( 6, 6, 'w', false, g );
-		if ( _cursorX >= 0 )
-			if ( _cursorY >= 0 )
-				if ( _cursorX < 9 )
-					if ( _cursorY < 9 )
-		drawStone( _cursorX, _cursorY, 'w', true, g );
-		System.out.println( "x:" + _cursorX + ",y:" + _cursorY );
+		if ( ( _cursorX >= 0 ) && ( _cursorY >= 0 ) && ( _cursorX < _size ) && ( _cursorY < _size ) )
+			drawStone( _cursorX, _cursorY, 'w', true, g );
 	}
 	private void drawStone( int $xx, int $yy, int $color, boolean $alpha, Graphics $gc ) {
 		Image img = null;
@@ -148,10 +144,10 @@ public class Goban extends JPanel implements MouseInputListener {
 			else
 				img = _images._black;
 		}
-		int margin = _virtSize / 22;
+		int margin = _virtSize / ( _size + 4 );
 		int inside = _virtSize - 2 * margin;
-		$gc.drawImage( img, D_MARGIN + margin + ( inside * $xx ) / ( _size - 1 ) - (int)( _diameter / 2 ) + 1,
-				D_MARGIN + margin + ( inside * $yy ) / ( _size - 1 ) - (int)( _diameter / 2 ) + 1, this );
+		$gc.drawImage( img, D_MARGIN + margin + ( inside * $xx ) / ( _size - 1 ) - (int)( _diameter / 2 ),
+				D_MARGIN + margin + ( inside * $yy ) / ( _size - 1 ) - (int)( _diameter / 2 ), this );
 	}
 }
 

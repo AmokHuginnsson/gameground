@@ -7,6 +7,7 @@ import javax.swing.event.ChangeEvent;
 
 public class GoConfigurator extends HAbstractConfigurator implements ChangeListener {
 	public static final long serialVersionUID = 17l;
+	private boolean _ignoreEvents = false;
 	public JComboBox _confGoban;
 	public JSpinner _confKomi;
 	public JSpinner _confHandicaps;
@@ -19,11 +20,7 @@ public class GoConfigurator extends HAbstractConfigurator implements ChangeListe
 	}
 	void setDefaults( String $defaults ) {
 		String[] tokens = $defaults.split( ",", 6 );
-		DefaultComboBoxModel model = new DefaultComboBoxModel();
-		model.addElement( "19" );
-		model.addElement( "13" );
-		model.addElement( "9" );
-		_confGoban.setModel( model );
+		gobanModel();
 		selectGobanSize( tokens[ 0 ] );
 
 		SpinnerNumberModel m = (SpinnerNumberModel)_confKomi.getModel();
@@ -56,6 +53,13 @@ public class GoConfigurator extends HAbstractConfigurator implements ChangeListe
 		_confByoYomiPeriods.addChangeListener( this );
 		_confByoYomiTime.addChangeListener( this );
 	}
+	public void gobanModel() {
+		DefaultComboBoxModel model = new DefaultComboBoxModel();
+		model.addElement( "19" );
+		model.addElement( "13" );
+		model.addElement( "9" );
+		_confGoban.setModel( model );
+	}
 	public void setEnabled( boolean $enabled ) {
 		_confGoban.setEnabled( $enabled );
 		_confKomi.setEnabled( $enabled );
@@ -68,6 +72,8 @@ public class GoConfigurator extends HAbstractConfigurator implements ChangeListe
 		_confGoban.getModel().setSelectedItem( $size );
 	}
 	public void stateChanged( ChangeEvent e ) {
+		if ( _ignoreEvents )
+			return;
 		JSpinner s = (JSpinner)e.getSource();
 		if ( s == _confKomi )
 			_owner.onKomi();
@@ -82,5 +88,10 @@ public class GoConfigurator extends HAbstractConfigurator implements ChangeListe
 	}
 	public void setOwner( Go.HGUILocal $owner ) {
 		_owner = $owner;
+	}
+	void setValue( JSpinner $spinner, int $value ) {
+		_ignoreEvents = true;
+		$spinner.setValue( $value );
+		_ignoreEvents = false;
 	}
 }
