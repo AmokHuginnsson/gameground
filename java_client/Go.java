@@ -57,6 +57,13 @@ class GoPlayer {
 }
 
 class Go extends HAbstractLogic {
+	public static final class PROTOCOL {
+		public static final String SEP = ":";
+		public static final String SEPP = ",";
+		public static final String CMD = "cmd";
+		public static final String PLAY = "play";
+		public static final String PUTSTONE = "put_stone";
+	}
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
 		public JTextField _messageInput;
@@ -115,13 +122,15 @@ class Go extends HAbstractLogic {
 	public static final long serialVersionUID = 17l;
 	public static final String LABEL = "go";
 	public HGUILocal _gui;
-	private HClient _client;
+	public HClient _client;
+	private String _stones;
 //--------------------------------------------//
 	public Go( GameGround $applet ) throws Exception {
 		super( $applet );
 		init( _gui = new HGUILocal( LABEL ) );
 		_handlers.put( "go", Go.class.getDeclaredMethod( "handlerGo", new Class[]{ String.class } ) );
 		_handlers.put( "setup", Go.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
+		_handlers.put( "stones", Go.class.getDeclaredMethod( "handlerStones", new Class[]{ String.class } ) );
 		_handlers.put( "player", Go.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
 		_handlers.put( "player_quit", HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
 		_info = new HLogicInfo( "go", "go", "Go" );
@@ -153,6 +162,10 @@ class Go extends HAbstractLogic {
 			}
 		}
 	}
+	void handlerStones( String $command ) {
+		_stones = $command;
+		_gui._board.repaint();
+	}
 	void handlerPlayer( String $command ) {
 	}
 	public void reinit() {
@@ -166,6 +179,9 @@ class Go extends HAbstractLogic {
 			System.exit( 1 );
 		}
 		return ( true );
+	}
+	public String getStones() {
+		return ( _stones );
 	}
 }
 

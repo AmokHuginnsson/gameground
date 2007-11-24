@@ -29,8 +29,9 @@ public class Goban extends JPanel implements MouseInputListener {
 	}
 	public void mouseMoved( MouseEvent $event ) {
 		int margin = _virtSize / ( _size + 4 );
-		int cursorX = (int)( ( $event.getX() - ( D_MARGIN + margin - _diameter / 2 + _size / 4 ) ) / _diameter );
-		int cursorY = (int)( ( $event.getY() - ( D_MARGIN + margin - _diameter / 2 + _size / 4 ) ) / _diameter );
+		int inside = _virtSize - 2 * margin;
+		int cursorX = (int)( ( $event.getX() + ( _diameter / 2 ) - ( D_MARGIN + margin ) ) * ( _size - 1 ) ) / inside;
+		int cursorY = (int)( ( $event.getY() + ( _diameter / 2 ) - ( D_MARGIN + margin ) ) * ( _size - 1 ) ) / inside;
 		if ( ( _cursorX != cursorX ) || ( _cursorY != cursorY ) ) {
 			_cursorX = cursorX;
 			_cursorY = cursorY;
@@ -42,16 +43,14 @@ public class Goban extends JPanel implements MouseInputListener {
 	public void mouseEntered( MouseEvent $event ) {
 	}
 	public void mouseReleased( MouseEvent $event ) {
-		if ( $event.getButton() == MouseEvent.BUTTON3 ) {
-		}
 	}
 	public void mousePressed( MouseEvent $event ) {
-		if ( $event.getButton() == MouseEvent.BUTTON3 ) {
-		}
 	}
 	public void mouseClicked( MouseEvent $event ) {
-		int x = (int)( $event.getX() / _diameter );
-		int y = (int)( $event.getY() / _diameter );
+		if ( isPlaceValid( _cursorX, _cursorY ) )
+			_logic._client.println( Go.PROTOCOL.CMD + Go.PROTOCOL.SEP
+					+ Go.PROTOCOL.PLAY + Go.PROTOCOL.SEP
+					+ Go.PROTOCOL.PUTSTONE + Go.PROTOCOL.SEPP + _cursorX + Go.PROTOCOL.SEPP + _cursorY );
 	}
 	public void mouseExited( MouseEvent $event ) {
 		_cursorX = -1;
@@ -128,7 +127,8 @@ public class Goban extends JPanel implements MouseInputListener {
 		}
 		drawStone( 5, 5, 'b', false, g );
 		drawStone( 6, 6, 'w', false, g );
-		if ( ( _cursorX >= 0 ) && ( _cursorY >= 0 ) && ( _cursorX < _size ) && ( _cursorY < _size ) )
+		drawStones( g );
+		if ( isPlaceValid( _cursorX, _cursorY ) )
 			drawStone( _cursorX, _cursorY, 'w', true, g );
 	}
 	private void drawStone( int $xx, int $yy, int $color, boolean $alpha, Graphics $gc ) {
@@ -148,6 +148,28 @@ public class Goban extends JPanel implements MouseInputListener {
 		int inside = _virtSize - 2 * margin;
 		$gc.drawImage( img, D_MARGIN + margin + ( inside * $xx ) / ( _size - 1 ) - (int)( _diameter / 2 ),
 				D_MARGIN + margin + ( inside * $yy ) / ( _size - 1 ) - (int)( _diameter / 2 ), this );
+	}
+	private void drawStones( Graphics g ) {
+		String stones = _logic.getStones();
+		if ( stones != null ) {
+			for ( int i = 0; i < stones.length(); ++ i ) {
+				char stone = stones.charAt( i );
+				if ( stone != ' ' )
+					drawStone( i % _size, i / _size, stone, false, g );
+			}
+		}
+	}
+	boolean isEmpty( int $col, int $row ) {
+		boolean empty = true;
+		String stones = _logic.getStones();
+		if ( stones != null )
+			empty = ( stones.charAt( $row * _size + $col ) == ' ' );
+		return ( empty );
+	}
+	boolean isPlaceValid( int $col, int $row ) {
+		return ( ( ( _cursorX >= 0 ) && ( _cursorY >= 0 )
+					&& ( _cursorX < _size ) && ( _cursorY < _size )
+					&& isEmpty( _cursorX, _cursorY ) ) );
 	}
 }
 

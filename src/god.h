@@ -44,13 +44,20 @@ class HGo : public HLogic
 		int f_iStonesCaptured;
 		OPlayerInfo( void ) : f_iTimeLeft( 0 ), f_iByoYomiPeriodsLeft( 0 ), f_iByoYomiTimeLeft( 0 ), f_iStonesCaptured( 0 ) {}
 		};
-	struct MOVE
+	struct STONE
 		{
 		typedef enum
 			{
-			D_BLACK,
-			D_WHITE
-			} move_t;
+			D_BLACK = 'b',
+			D_WHITE = 'w',
+			D_NONE = ' '
+			} stone_t;
+		};
+	struct GOBAN_SIZE
+		{
+		static int const D_NORMAL = 19;
+		static int const D_SMALL = 13;
+		static int const D_TINY = 9;
 		};
 	struct PROTOCOL
 		{
@@ -68,12 +75,18 @@ class HGo : public HLogic
 		static char const* const MAINTIME;
 		static char const* const BYOYOMIPERIODS;
 		static char const* const BYOYOMITIME;
+		static char const* const STONES;
+		static char const* const PUTSTONE;
+		static char const* const PASS;
+		static char const* const SIT;
+		static char const* const GETUP;
 		};
 protected:
 	/*{*/
 	typedef yaal::hcore::HPair<OClientInfo*, OPlayerInfo> player_t;
 	typedef yaal::hcore::HList<player_t> players_t;
-	MOVE::move_t f_eMove;
+	OClientInfo* f_oContestants[ 2 ];
+	STONE::stone_t f_eState;
 	int f_iGobanSize;
 	int f_iKomi;
 	int f_iHandicaps;
@@ -81,7 +94,8 @@ protected:
 	int f_iByoYomiPeriods;
 	int f_iByoYomiTime;
 	int f_iMove;
-	char** f_ppcGame;
+	int f_iPass;
+	yaal::hcore::HPool<char> f_oGame;
 	players_t f_oPlayers;
 	yaal::hcore::HString f_oVarTmpBuffer;
 	mutable yaal::hcore::HMutex f_oMutex;
@@ -104,6 +118,21 @@ protected:
 	void on_timeout( void );
 	void schedule( void );
 	void schedule_timeout( void );
+	void set_handicaps( int );
+	void set_handi( int );
+	void put_stone( int, int, STONE::stone_t );
+	void send_goban( void );
+	bool have_liberties( int, int, STONE::stone_t );
+	char& goban( int, int );
+	OClientInfo*& contestant( STONE::stone_t );
+	OClientInfo*& contestant( char );
+	void clear_goban( bool );
+	bool have_killed( int, int, STONE::stone_t );
+	HGo::STONE::stone_t oponent( STONE::stone_t );
+	bool is_suicide( int, int, STONE::stone_t );
+	bool is_ko( int, int, STONE::stone_t );
+	void make_move( int, int, STONE::stone_t );
+	void contestant_gotup( OClientInfo* );
 	/*}*/
 private:
 	/*{*/

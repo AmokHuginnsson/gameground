@@ -169,8 +169,21 @@ void HServer::pass_command( OClientInfo& a_roInfo, HString const& a_oCommand )
 	M_PROLOG
 	if ( ! a_roInfo.f_oLogic )
 		a_roInfo.f_oSocket->write_until_eos( "err:Connect to some game first.\n" );
-	else if ( a_roInfo.f_oLogic->process_command( &a_roInfo, a_oCommand ) )
-		*a_roInfo.f_oSocket << "err:Server could not comprehend your message: " << a_oCommand << endl;
+	else
+		{
+		HString msg;
+		try
+			{
+			if ( a_roInfo.f_oLogic->process_command( &a_roInfo, a_oCommand ) )
+				msg = "Game logic could not comprehend your message: ";
+			}
+		catch ( HLogicException& e )
+			{
+			msg = e.what();
+			}
+		if ( ! msg.is_empty() )
+			remove_client_from_logic( a_roInfo, msg );
+		}
 	return;
 	M_EPILOG
 	}
@@ -394,13 +407,13 @@ void HServer::handler_abandon( OClientInfo& a_roInfo, HString const& )
 	M_EPILOG
 	}
 
-void HServer::remove_client_from_logic( OClientInfo& a_roInfo )
+void HServer::remove_client_from_logic( OClientInfo& a_roInfo, char const* const a_pcReason )
 	{
 	M_PROLOG
 	if ( !! a_roInfo.f_oLogic )
 		{
 		HLogic::ptr_t l_oLogic = a_roInfo.f_oLogic;
-		l_oLogic->kick_client( &a_roInfo );
+		l_oLogic->kick_client( &a_roInfo, a_pcReason );
 		a_roInfo.f_oLogic = HLogic::ptr_t();
 		if ( ! l_oLogic->active_clients() )
 			f_oLogics.remove( l_oLogic->get_name() );

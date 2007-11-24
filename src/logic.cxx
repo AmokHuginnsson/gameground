@@ -50,11 +50,13 @@ HLogic::~HLogic( void )
 	{
 	}
 
-void HLogic::kick_client( OClientInfo* a_poClientInfo )
+void HLogic::kick_client( OClientInfo* a_poClientInfo, char const* const a_pcReason )
 	{
 	M_PROLOG
 	a_poClientInfo->f_oLogic = HLogic::ptr_t();
 	f_oClients.remove( a_poClientInfo );
+	if ( a_pcReason )
+		*a_poClientInfo->f_oSocket << "err:" << a_pcReason << endl;
 	do_kick( a_poClientInfo );
 	return;
 	M_EPILOG

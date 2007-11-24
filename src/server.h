@@ -100,7 +100,7 @@ protected:
 	void send_players_info( OClientInfo& );
 	void send_games_info( OClientInfo& );
 	void send_game_info( OClientInfo&, yaal::hcore::HString const& );
-	void remove_client_from_logic( OClientInfo& );
+	void remove_client_from_logic( OClientInfo&, char const* const = NULL );
 	/*}*/
 	};
 
