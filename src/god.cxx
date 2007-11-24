@@ -51,6 +51,7 @@ char const* const HGo::PROTOCOL::NAME = "go";
 char const* const HGo::PROTOCOL::SETUP = "setup";
 char const* const HGo::PROTOCOL::ADMIN = "admin";
 char const* const HGo::PROTOCOL::PLAY = "play";
+char const* const HGo::PROTOCOL::PLAYER = "player";
 char const* const HGo::PROTOCOL::SAY = "say";
 char const* const HGo::PROTOCOL::MSG = "msg";
 char const* const HGo::PROTOCOL::GOBAN = "goban";
@@ -153,9 +154,8 @@ void HGo::handler_play ( OClientInfo* a_poClientInfo, HString const& a_roMessage
 				if ( f_iPass == 3 )
 					f_eState = STONE::D_NONE;
 				}
-			else
-				{
-				}
+			else if ( item != PROTOCOL::SIT )
+				throw HLogicException( "you cannot do it now" );
 			}
 		}
 	else
@@ -189,8 +189,7 @@ void HGo::handler_play ( OClientInfo* a_poClientInfo, HString const& a_roMessage
 				contestant_gotup( a_poClientInfo );
 			}
 		else
-			{
-			}
+			throw HLogicException( "you cannot do it now" );
 		}
 	return;
 	M_EPILOG
@@ -241,6 +240,10 @@ bool HGo::do_accept( OClientInfo* a_poClientInfo )
 	player_t info;
 	info.first = a_poClientInfo;
 	f_oPlayers.push_back( info );
+	_out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::PLAYER << PROTOCOL::SEP << a_poClientInfo->f_oName << endl;
+	broadcast( _out.raw() );
+	*a_poClientInfo->f_oSocket << _out.raw();
+	_out.clear();
 	return ( rejected );
 	M_EPILOG
 	}

@@ -16,7 +16,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTable;
+import javax.swing.JList;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.table.AbstractTableModel;
@@ -26,6 +26,7 @@ import java.util.Comparator;
 import org.swixml.SwingEngine;
 import javax.swing.table.TableRowSorter;
 import javax.swing.RowSorter;
+import javax.swing.DefaultListModel;
 
 class GoPlayer {
 	String _name;
@@ -61,14 +62,35 @@ class Go extends HAbstractLogic {
 		public static final String SEP = ":";
 		public static final String SEPP = ",";
 		public static final String CMD = "cmd";
+		public static final String SAY = "say";
+		public static final String NAME = "go";
 		public static final String PLAY = "play";
+		public static final String SETUP = "setup";
+		public static final String ADMIN = "admin";
+		public static final String KOMI = "komi";
+		public static final String HANDICAPS = "handicaps";
+		public static final String MAINTIME = "maintime";
+		public static final String GOBAN = "goban";
+		public static final String SIT = "sit";
+		public static final String GETUP = "getup";
+		public static final String BYOYOMITIME = "byoyomitime";
+		public static final String BYOYOMIPERIODS = "byoyomiperiods";
 		public static final String PUTSTONE = "put_stone";
+		public static final String STONES = "stones";
+		public static final String PLAYER = "player";
+		public static final String PLAYERQUIT = "player_quit";
+		public static final String PREFIX = PROTOCOL.CMD + PROTOCOL.SEP + PROTOCOL.NAME + PROTOCOL.SEP;
+	}
+	public static final class STONE {
+		public static final char BLACK = 'b';
+		public static final char WHITE = 'w';
 	}
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
 		public JTextField _messageInput;
 		public JTextField _wordInput;
 		public JTextPane _logPad;
+		public JList _visitors;
 		public Goban _board;
 		public GoConfigurator _conf;
 		public HGUILocal( String $resource ) {
@@ -82,6 +104,7 @@ class Go extends HAbstractLogic {
 			clearLog();
 			_conf.setOwner( this );
 			_conf.gobanModel();
+			((DefaultListModel)_visitors.getModel()).clear();
 		}
 		public JTextPane getLogPad() {
 			return ( _logPad );
@@ -92,7 +115,7 @@ class Go extends HAbstractLogic {
 		public void onMessage() {
 			String msg = _messageInput.getText();
 			if ( msg.matches( ".*\\S+.*" ) ) {	
-				_client.println( "cmd:go:say:" + msg );
+				_client.println( PROTOCOL.PREFIX + PROTOCOL.SAY + PROTOCOL.SEP + msg );
 				_messageInput.setText( "" );
 			}
 		}
@@ -100,22 +123,50 @@ class Go extends HAbstractLogic {
 			_app.setFace( HBrowser.LABEL );
 		}
 		public void onGobanSize() {
-			_client.println( "cmd:setup:goban," + (String)_conf._confGoban.getSelectedItem() );
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
+					+ PROTOCOL.SETUP + PROTOCOL.SEP
+					+ PROTOCOL.GOBAN + PROTOCOL.SEPP
+					+ (String)_conf._confGoban.getSelectedItem() );
 		}
 		public void onKomi() {
-			_client.println( "cmd:setup:komi," + _conf._confKomi.getValue() );
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
+					+ PROTOCOL.SETUP + PROTOCOL.SEP
+					+ PROTOCOL.KOMI + PROTOCOL.SEPP
+					+ _conf._confKomi.getValue() );
 		}
 		public void onHandicaps() {
-			_client.println( "cmd:setup:handicaps," + _conf._confHandicaps.getValue() );
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
+					+ PROTOCOL.SETUP + PROTOCOL.SEP
+					+ PROTOCOL.HANDICAPS + PROTOCOL.SEPP
+					+ _conf._confHandicaps.getValue() );
 		}
 		public void onMainTime() {
-			_client.println( "cmd:setup:maintime," + _conf._confMainTime.getValue() );
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
+					+ PROTOCOL.SETUP + PROTOCOL.SEP
+					+ PROTOCOL.MAINTIME + PROTOCOL.SEPP
+					+ _conf._confMainTime.getValue() );
 		}
 		public void onByoyomiPeriods() {
-			_client.println( "cmd:setup:byoyomiperiods," + _conf._confByoYomiPeriods.getValue() );
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
+					+ PROTOCOL.SETUP + PROTOCOL.SEP
+					+ PROTOCOL.BYOYOMIPERIODS + PROTOCOL.SEPP
+					+ _conf._confByoYomiPeriods.getValue() );
 		}
 		public void onByoyomiTime() {
-			_client.println( "cmd:setup:byoyomitime," + _conf._confByoYomiTime.getValue() );
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
+					+ PROTOCOL.SETUP + PROTOCOL.SEP
+					+ PROTOCOL.BYOYOMITIME + PROTOCOL.SEPP
+					+ _conf._confByoYomiTime.getValue() );
+		}
+		public void onBlack() {
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
+					+ PROTOCOL.PLAY + PROTOCOL.SEP
+					+ PROTOCOL.SIT + PROTOCOL.SEPP + STONE.BLACK );
+		}
+		public void onWhite() {
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
+					+ PROTOCOL.PLAY + PROTOCOL.SEP
+					+ PROTOCOL.SIT + PROTOCOL.SEPP + STONE.BLACK );
 		}
 	}
 //--------------------------------------------//
@@ -128,11 +179,11 @@ class Go extends HAbstractLogic {
 	public Go( GameGround $applet ) throws Exception {
 		super( $applet );
 		init( _gui = new HGUILocal( LABEL ) );
-		_handlers.put( "go", Go.class.getDeclaredMethod( "handlerGo", new Class[]{ String.class } ) );
-		_handlers.put( "setup", Go.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
-		_handlers.put( "stones", Go.class.getDeclaredMethod( "handlerStones", new Class[]{ String.class } ) );
-		_handlers.put( "player", Go.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
-		_handlers.put( "player_quit", HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
+		_handlers.put( PROTOCOL.NAME, Go.class.getDeclaredMethod( "handlerGo", new Class[]{ String.class } ) );
+		_handlers.put( PROTOCOL.SETUP, Go.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
+		_handlers.put( PROTOCOL.STONES, Go.class.getDeclaredMethod( "handlerStones", new Class[]{ String.class } ) );
+		_handlers.put( PROTOCOL.PLAYER, Go.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
+		_handlers.put( PROTOCOL.PLAYERQUIT, Go.class.getDeclaredMethod( "handlerPlayerQuit", new Class[]{ String.class } ) );
 		_info = new HLogicInfo( "go", "go", "Go" );
 		GoImages images = new GoImages();
 		_gui._board.setGui( this );
@@ -143,21 +194,21 @@ class Go extends HAbstractLogic {
 	}
 	void handlerSetup( String $command ) {
 		String[] tokens = $command.split( ",", 2 );
-		if ( "admin".equals( $command ) ) {
+		if ( PROTOCOL.ADMIN.equals( $command ) ) {
 			_gui._conf.setEnabled( true );
 		} else {
 			int value = Integer.parseInt( tokens[ 1 ] );
-			if ( "goban".equals( tokens[ 0 ] ) ) {
+			if ( PROTOCOL.GOBAN.equals( tokens[ 0 ] ) ) {
 				_gui._board.setSize( value );
-			} else if ( "komi".equals( tokens[ 0 ] ) ) {
+			} else if ( PROTOCOL.KOMI.equals( tokens[ 0 ] ) ) {
 				_gui._conf.setValue( _gui._conf._confKomi, Integer.parseInt( tokens[ 1 ] ) );
-			} else if ( "handicaps".equals( tokens[ 0 ] ) ) {
+			} else if ( PROTOCOL.HANDICAPS.equals( tokens[ 0 ] ) ) {
 				_gui._conf.setValue( _gui._conf._confHandicaps, Integer.parseInt( tokens[ 1 ] ) );
-			} else if ( "maintime".equals( tokens[ 0 ] ) ) {
+			} else if ( PROTOCOL.MAINTIME.equals( tokens[ 0 ] ) ) {
 				_gui._conf.setValue( _gui._conf._confMainTime, Integer.parseInt( tokens[ 1 ] ) );
-			} else if ( "byoyomiperiods".equals( tokens[ 0 ] ) ) {
+			} else if ( PROTOCOL.BYOYOMIPERIODS.equals( tokens[ 0 ] ) ) {
 				_gui._conf.setValue( _gui._conf._confByoYomiPeriods, Integer.parseInt( tokens[ 1 ] ) );
-			} else if ( "byoyomitime".equals( tokens[ 0 ] ) ) {
+			} else if ( PROTOCOL.BYOYOMITIME.equals( tokens[ 0 ] ) ) {
 				_gui._conf.setValue( _gui._conf._confByoYomiTime, Integer.parseInt( tokens[ 1 ] ) );
 			}
 		}
@@ -167,6 +218,12 @@ class Go extends HAbstractLogic {
 		_gui._board.repaint();
 	}
 	void handlerPlayer( String $command ) {
+		DefaultListModel m = (DefaultListModel)_gui._visitors.getModel();
+		m.addElement( $command );
+	}
+	void handlerPlayerQuit( String $command ) {
+		DefaultListModel m = (DefaultListModel)_gui._visitors.getModel();
+		m.removeElement( $command );
 	}
 	public void reinit() {
 		_client = _app.getClient();

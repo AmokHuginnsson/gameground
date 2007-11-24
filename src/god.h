@@ -69,6 +69,7 @@ class HGo : public HLogic
 		static char const* const SAY;
 		static char const* const MSG;
 		static char const* const PLAY;
+		static char const* const PLAYER;
 		static char const* const GOBAN;
 		static char const* const KOMI;
 		static char const* const HANDICAPS;
