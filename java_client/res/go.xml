@@ -41,7 +41,7 @@
 			<vbox maximumsize="2000,240">
 				<panel border="EtchedBorder" layout="BorderLayout">
 					<panel border="EmptyBorder(4,4,4,4)">
-						<layout type="FormLayout" columns="p,10px,p:grow,10px,p,10px,70px" rows="p,4px,p,4px,p,4px,p" />
+						<layout type="FormLayout" columns="p,10px,40px:grow,10px,p,10px,40px" rows="p,4px,p,4px,p,4px,p" />
 						<label text="Player Black:" constraints="1,1" />
 						<label id="_blackName" text="Name Huge Enormously" constraints="3,1,5,1" />
 						<label text="Score:" constraints="1,3" />
@@ -49,7 +49,7 @@
 						<label text="Captures:" constraints="5,3" />
 						<label id="_blackCaptures" text="0" constraints="7,3" />
 						<label text="Time left:" constraints= "1,5" />
-						<label id="_blackBlackTimeLeft" text="00:00" constraints="3,5" />
+						<label id="_blackTimeLeft" text="00:00" constraints="3,5" />
 						<label text="Byo yomi:" constraints= "5,5" />
 						<label id="_blackByoYomiLeft" text="0" constraints="7,5" />
 						<button id="_blackSit" text="Sit !" action="onBlack" constraints="1,7" />
@@ -57,7 +57,7 @@
 				</panel>
 				<panel border="EtchedBorder" layout="BorderLayout">
 					<panel border="EmptyBorder(4,4,4,4)">
-						<layout type="FormLayout" columns="p,10px,p:grow,10px,p,10px,70px" rows="p,4px,p,4px,p,4px,p" />
+						<layout type="FormLayout" columns="p,10px,40px:grow,10px,p,10px,40px" rows="p,4px,p,4px,p,4px,p" />
 						<label text="Player White:" constraints="1,1" />
 						<label id="_whiteName" text="Name Huge Enormously" constraints="3,1,5,1" />
 						<label text="Score:" constraints="1,3" />
@@ -65,10 +65,10 @@
 						<label text="Captures:" constraints="5,3" />
 						<label id="_whiteCaptures" text="0" constraints="7,3" />
 						<label text="Time left:" constraints= "1,5" />
-						<label id="_whiteBlackTimeLeft" text="00:00" constraints="3,5" />
+						<label id="_whiteTimeLeft" text="00:00" constraints="3,5" />
 						<label text="Byo yomi:" constraints= "5,5" />
 						<label id="_whiteByoYomiLeft" text="0" constraints="7,5" />
-						<button id="_whiteSit" text="Sit !" action="onBlack" constraints="1,7" />
+						<button id="_whiteSit" text="Sit !" action="onWhite" constraints="1,7" />
 					</panel>
 				</panel>
 			</vbox>

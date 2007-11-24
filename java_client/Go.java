@@ -27,33 +27,21 @@ import org.swixml.SwingEngine;
 import javax.swing.table.TableRowSorter;
 import javax.swing.RowSorter;
 import javax.swing.DefaultListModel;
+import java.util.Collections;
+import java.util.Map;
 
 class GoPlayer {
-	String _name;
-	int _captures = 0;
-	GoPlayer( String $name ) { this( $name, 0 ); }
-	GoPlayer( String $name, int $captures ) {
-		_name = $name;
-		_captures = $captures;
-	}
-	void set( String $name, int $captures ) {
-		_name = $name;
-		_captures = $captures;
-	}
-	String getName() {
-		return ( _name );
-	}
-	String get( int $field ) {
-		String field = "";
-		switch ( $field ) {
-			case ( 0 ):
-				field = _name;
-			break;
-			case ( 1 ):
-				field += _captures;
-			break;
-		}
-		return ( field );
+	public JLabel _name;
+	public JLabel _score;
+	public JLabel _captures;
+	public JLabel _timeleft;
+	public JLabel _byoyomi;
+	public void clear() {
+		_name.setText( "" );
+		_score.setText( "" );
+		_captures.setText( "" );
+		_timeleft.setText( "" );
+		_byoyomi.setText( "" );
 	}
 }
 
@@ -69,6 +57,7 @@ class Go extends HAbstractLogic {
 		public static final String ADMIN = "admin";
 		public static final String KOMI = "komi";
 		public static final String HANDICAPS = "handicaps";
+		public static final String CONTESTANT = "contestant";
 		public static final String MAINTIME = "maintime";
 		public static final String GOBAN = "goban";
 		public static final String SIT = "sit";
@@ -90,6 +79,17 @@ class Go extends HAbstractLogic {
 		public JTextField _messageInput;
 		public JTextField _wordInput;
 		public JTextPane _logPad;
+		public JLabel _blackName;
+		public JLabel _blackScore;
+		public JLabel _blackCaptures;
+		public JLabel _blackTimeLeft;
+		public JLabel _blackByoYomiLeft;
+		public JLabel _whiteName;
+		public JLabel _whiteScore;
+		public JLabel _whiteCaptures;
+		public JLabel _whiteTimeLeft;
+		public JLabel _whiteByoYomiLeft;
+
 		public JList _visitors;
 		public Goban _board;
 		public GoConfigurator _conf;
@@ -166,7 +166,7 @@ class Go extends HAbstractLogic {
 		public void onWhite() {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
-					+ PROTOCOL.SIT + PROTOCOL.SEPP + STONE.BLACK );
+					+ PROTOCOL.SIT + PROTOCOL.SEPP + STONE.WHITE );
 		}
 	}
 //--------------------------------------------//
@@ -174,6 +174,7 @@ class Go extends HAbstractLogic {
 	public static final String LABEL = "go";
 	public HGUILocal _gui;
 	public HClient _client;
+	private SortedMap<Character,GoPlayer> _contestants = java.util.Collections.synchronizedSortedMap( new TreeMap<Character,GoPlayer>() );
 	private String _stones;
 //--------------------------------------------//
 	public Go( GameGround $applet ) throws Exception {
@@ -183,11 +184,26 @@ class Go extends HAbstractLogic {
 		_handlers.put( PROTOCOL.SETUP, Go.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.STONES, Go.class.getDeclaredMethod( "handlerStones", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYER, Go.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
+		_handlers.put( PROTOCOL.CONTESTANT, Go.class.getDeclaredMethod( "handlerContestant", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYERQUIT, Go.class.getDeclaredMethod( "handlerPlayerQuit", new Class[]{ String.class } ) );
 		_info = new HLogicInfo( "go", "go", "Go" );
 		GoImages images = new GoImages();
 		_gui._board.setGui( this );
 		_gui._board.setImages( images );
+		GoPlayer black = new GoPlayer();
+		black._name = _gui._blackName;
+		black._captures = _gui._blackCaptures;
+		black._score = _gui._blackScore;
+		black._timeleft = _gui._blackTimeLeft;
+		black._byoyomi = _gui._blackByoYomiLeft;
+		_contestants.put( new Character( STONE.BLACK ), black );
+		GoPlayer white = new GoPlayer();
+		white._name = _gui._whiteName;
+		white._captures = _gui._whiteCaptures;
+		white._score = _gui._whiteScore;
+		white._timeleft = _gui._whiteTimeLeft;
+		white._byoyomi = _gui._whiteByoYomiLeft;
+		_contestants.put( new Character( STONE.WHITE ), white );
 	}
 	void handlerGo( String $command ) {
 		processMessage( $command );
@@ -217,6 +233,14 @@ class Go extends HAbstractLogic {
 		_stones = $command;
 		_gui._board.repaint();
 	}
+	void handlerContestant( String $command ) {
+		String[] tokens = $command.split( ",", 6 );
+		GoPlayer contestant = _contestants.get( new Character( tokens[ 0 ].charAt( 0 ) ) );
+		contestant._name.setText( tokens[ 1 ] );
+		contestant._captures.setText( tokens[ 2 ] );
+		contestant._timeleft.setText( tokens[ 3 ] );
+		contestant._byoyomi.setText( tokens[ 4 ] );
+	}
 	void handlerPlayer( String $command ) {
 		DefaultListModel m = (DefaultListModel)_gui._visitors.getModel();
 		m.addElement( $command );
@@ -227,6 +251,8 @@ class Go extends HAbstractLogic {
 	}
 	public void reinit() {
 		_client = _app.getClient();
+		_contestants.get( new Character( STONE.BLACK ) ).clear();
+		_contestants.get( new Character( STONE.WHITE ) ).clear();
 	}
 	static boolean registerLogic( GameGround $app ) {
 		try {

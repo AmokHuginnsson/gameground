@@ -19,6 +19,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.HashMap;
 import java.io.PrintWriter;
+import java.util.Collections;
+import java.util.Map;
 
 class HSystemNames {
 	static private String[] _systemNamesLatin = {
@@ -226,7 +228,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 	int _systemCount = 0;
 	String[] _systemNames;
 	String _emperor;
-	HashMap<Integer,String> _emperors;
+	Map<Integer,String> _emperors;
 	java.util.List<HMove> _moves;
 	HSystem[] _systems;
  	char[] _symbols = {
@@ -240,7 +242,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 	public HGalaxy( GameGround $applet ) throws Exception {
 		super( $applet );
 		init( _gui = new HGUILocal( LABEL ) );
-		_emperors = new HashMap<Integer,String>();
+		_emperors = Collections.synchronizedMap( new HashMap<Integer,String>() );
 		_handlers.put( "setup", HGalaxy.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
 		_handlers.put( "glx", HGalaxy.class.getDeclaredMethod( "handlerGalaxy", new Class[]{ String.class } ) );
 		_handlers.put( "play", HGalaxy.class.getDeclaredMethod( "handlerPlay", new Class[]{ String.class } ) );

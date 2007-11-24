@@ -51,6 +51,7 @@ char const* const HGo::PROTOCOL::NAME = "go";
 char const* const HGo::PROTOCOL::SETUP = "setup";
 char const* const HGo::PROTOCOL::ADMIN = "admin";
 char const* const HGo::PROTOCOL::PLAY = "play";
+char const* const HGo::PROTOCOL::CONTESTANT = "contestant";
 char const* const HGo::PROTOCOL::PLAYER = "player";
 char const* const HGo::PROTOCOL::SAY = "say";
 char const* const HGo::PROTOCOL::MSG = "msg";
@@ -170,6 +171,9 @@ void HGo::handler_play ( OClientInfo* a_poClientInfo, HString const& a_roMessage
 				char stone = place[ 0 ];
 				if ( ( stone != STONE::D_BLACK ) && ( stone != STONE::D_WHITE ) )
 					throw HLogicException( "malformed packet" );
+				else if ( ( contestant( STONE::D_BLACK ) == a_poClientInfo )
+						|| ( contestant( STONE::D_WHITE ) == a_poClientInfo ) )
+					throw HLogicException( "you were already sitting" );
 				else if ( contestant( stone ) != NULL )
 					*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
 						<< PROTOCOL::MSG << PROTOCOL::SEP << "Some one was faster." << endl;
@@ -191,6 +195,7 @@ void HGo::handler_play ( OClientInfo* a_poClientInfo, HString const& a_roMessage
 		else
 			throw HLogicException( "you cannot do it now" );
 		}
+	send_contestants();
 	return;
 	M_EPILOG
 	}
@@ -263,6 +268,13 @@ void HGo::do_kick( OClientInfo* a_poClientInfo )
 		if ( it != f_oPlayers.end() )
 			*it->first->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
 				<< PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::ADMIN << endl;
+		}
+	if ( ( contestant( STONE::D_BLACK ) == a_poClientInfo )
+			|| ( contestant( STONE::D_WHITE ) == a_poClientInfo ) )
+		{
+		STONE::stone_t stone = ( contestant( STONE::D_BLACK ) == a_poClientInfo ? STONE::D_BLACK : STONE::D_WHITE );
+		contestant_gotup( contestant( stone ) );
+		send_contestants();
 		}
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::MSG << PROTOCOL::SEP
@@ -504,8 +516,43 @@ void HGo::contestant_gotup( OClientInfo* a_poClientInfo )
 	{
 	STONE::stone_t stone = ( contestant( STONE::D_BLACK ) == a_poClientInfo ? STONE::D_BLACK : STONE::D_WHITE );
 	contestant( stone ) = NULL;
-	broadcast( _out << _out );
 	return;
+	}
+
+void HGo::send_contestants( void )
+	{
+	M_PROLOG
+	send_contestant( STONE::D_BLACK );
+	send_contestant( STONE::D_WHITE );
+	return;
+	M_EPILOG
+	}
+
+void HGo::send_contestant( char stone )
+	{
+	M_PROLOG
+	OClientInfo* cinfo = contestant( stone );
+	char const* name = "";
+	int captured = 0;
+	int time = 0;
+	int byoyomi = 0;
+	if ( cinfo )
+		{
+		OPlayerInfo& info = *get_player_info( cinfo );
+		name = cinfo->f_oName;
+		captured = info.f_iStonesCaptured;
+		time = info.f_iTimeLeft;
+		byoyomi = info.f_iByoYomiPeriods;
+		}
+	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
+			<< PROTOCOL::CONTESTANT << PROTOCOL::SEP
+			<< stone << PROTOCOL::SEPP
+			<< name << PROTOCOL::SEPP
+			<< captured << PROTOCOL::SEPP
+			<< time << PROTOCOL::SEPP
+			<< byoyomi << endl << _out );
+	return;
+	M_EPILOG
 	}
 
 }

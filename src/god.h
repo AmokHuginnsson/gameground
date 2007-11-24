@@ -39,10 +39,9 @@ class HGo : public HLogic
 	struct OPlayerInfo
 		{
 		int long f_iTimeLeft;
-		int f_iByoYomiPeriodsLeft;
-		int f_iByoYomiTimeLeft;
+		int f_iByoYomiPeriods;
 		int f_iStonesCaptured;
-		OPlayerInfo( void ) : f_iTimeLeft( 0 ), f_iByoYomiPeriodsLeft( 0 ), f_iByoYomiTimeLeft( 0 ), f_iStonesCaptured( 0 ) {}
+		OPlayerInfo( void ) : f_iTimeLeft( 0 ), f_iByoYomiPeriods( 0 ), f_iStonesCaptured( 0 ) {}
 		};
 	struct STONE
 		{
@@ -69,6 +68,7 @@ class HGo : public HLogic
 		static char const* const SAY;
 		static char const* const MSG;
 		static char const* const PLAY;
+		static char const* const CONTESTANT;
 		static char const* const PLAYER;
 		static char const* const GOBAN;
 		static char const* const KOMI;
@@ -134,6 +134,8 @@ protected:
 	bool is_ko( int, int, STONE::stone_t );
 	void make_move( int, int, STONE::stone_t );
 	void contestant_gotup( OClientInfo* );
+	void send_contestants( void );
+	void send_contestant( char );
 	/*}*/
 private:
 	/*{*/
