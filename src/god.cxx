@@ -253,6 +253,10 @@ bool HGo::do_accept( OClientInfo* a_poClientInfo )
 	M_EPILOG
 	}
 
+void HGo::do_post_accept( OClientInfo* )
+	{
+	}
+
 void HGo::do_kick( OClientInfo* a_poClientInfo )
 	{
 	M_PROLOG

@@ -285,6 +285,10 @@ bool HGalaxy::do_accept( OClientInfo* a_poClientInfo )
 	M_EPILOG
 	}
 
+void HGalaxy::do_post_accept( OClientInfo* )
+	{
+	}
+
 int HGalaxy::assign_system( OClientInfo* a_poClientInfo )
 	{
 	M_PROLOG

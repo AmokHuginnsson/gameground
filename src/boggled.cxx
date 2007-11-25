@@ -245,6 +245,10 @@ bool HBoggle::do_accept( OClientInfo* a_poClientInfo )
 	M_EPILOG
 	}
 
+void HBoggle::do_post_accept( OClientInfo* )
+	{
+	}
+
 void HBoggle::do_kick( OClientInfo* a_poClientInfo )
 	{
 	M_PROLOG

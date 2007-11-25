@@ -112,6 +112,7 @@ protected:
 	OPlayerInfo* get_player_info( OClientInfo* );
 	players_t::iterator find_player( OClientInfo* );
 	virtual bool do_accept( OClientInfo* );
+	virtual void do_post_accept( OClientInfo* );
 	virtual void do_kick( OClientInfo* );
 	void handler_message( OClientInfo*, yaal::hcore::HString const& );
 	void handler_play( OClientInfo*, yaal::hcore::HString const& );
