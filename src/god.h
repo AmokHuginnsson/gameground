@@ -128,6 +128,7 @@ protected:
 	char& goban( int, int );
 	OClientInfo*& contestant( STONE::stone_t );
 	OClientInfo*& contestant( char );
+	void clear_goban( void );
 	void clear_goban( bool );
 	bool have_killed( int, int, STONE::stone_t );
 	HGo::STONE::stone_t oponent( STONE::stone_t );

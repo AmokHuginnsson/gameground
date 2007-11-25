@@ -82,6 +82,7 @@ HGo::HGo( HString const& a_oName )
 	f_oHandlers[ PROTOCOL::SETUP ] = static_cast<handler_t>( &HGo::handler_setup );
 	f_oHandlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HGo::handler_play );
 	f_oHandlers[ PROTOCOL::SAY ] = static_cast<handler_t>( &HGo::handler_message );
+	clear_goban();
 	return;
 	M_EPILOG
 	}
@@ -222,10 +223,14 @@ HGo::OPlayerInfo* HGo::get_player_info( OClientInfo* a_poClientInfo )
 
 bool HGo::do_accept( OClientInfo* a_poClientInfo )
 	{
+	out << "new candidate " << a_poClientInfo->f_oName << endl;
+	return ( false );
+	}
+
+void HGo::do_post_accept( OClientInfo* a_poClientInfo )
+	{
 	M_PROLOG
 	HLock l( f_oMutex );
-	bool rejected = false;
-	out << "new candidate " << a_poClientInfo->f_oName << endl;
 	if ( f_oPlayers.size() == 0 )
 		*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::ADMIN << endl;
@@ -245,16 +250,13 @@ bool HGo::do_accept( OClientInfo* a_poClientInfo )
 	player_t info;
 	info.first = a_poClientInfo;
 	f_oPlayers.push_back( info );
-	_out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::PLAYER << PROTOCOL::SEP << a_poClientInfo->f_oName << endl;
-	broadcast( _out.raw() );
-	*a_poClientInfo->f_oSocket << _out.raw();
-	_out.clear();
-	return ( rejected );
+	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
+			<< PROTOCOL::PLAYER << PROTOCOL::SEP
+			<< a_poClientInfo->f_oName << endl << _out );
+	send_contestants();
+	send_goban();
+	return;
 	M_EPILOG
-	}
-
-void HGo::do_post_accept( OClientInfo* )
-	{
 	}
 
 void HGo::do_kick( OClientInfo* a_poClientInfo )
@@ -322,14 +324,20 @@ void HGo::on_timeout( void )
 	M_EPILOG
 	}
 
+void HGo::clear_goban( void )
+	{
+	::memset( f_oGame.raw(), ' ', f_iGobanSize * f_iGobanSize );
+	f_oGame[ f_iGobanSize * f_iGobanSize ] = 0;
+	return;
+	}
+
 void HGo::set_handicaps( int a_iHandicaps )
 	{
 	M_PROLOG
 	if ( ( a_iHandicaps > 9 ) || ( a_iHandicaps < 0 ) )
 		throw HLogicException( _out << "bad handicap value: " << a_iHandicaps << _out );
+	clear_goban();
 	f_iHandicaps = a_iHandicaps;
-	::memset( f_oGame.raw(), ' ', f_iGobanSize * f_iGobanSize );
-	f_oGame[ f_iGobanSize * f_iGobanSize ] = 0;
 	if ( f_iHandicaps > 0 )
 		f_iKomi = 0;
 	else

@@ -191,10 +191,14 @@ HBoggle::OPlayerInfo* HBoggle::get_player_info( OClientInfo* a_poClientInfo )
 
 bool HBoggle::do_accept( OClientInfo* a_poClientInfo )
 	{
+	out << "new candidate " << a_poClientInfo->f_oName << endl;
+	return ( false );
+	}
+
+void HBoggle::do_post_accept( OClientInfo* a_poClientInfo )
+	{
 	M_PROLOG
 	HLock l( f_oMutex );
-	bool rejected = false;
-	out << "new candidate " << a_poClientInfo->f_oName << endl;
 	out << "conditions: f_oPlayers.size() = " << f_oPlayers.size() << ", f_iPlayers = " << f_iPlayers << endl;
 	OPlayerInfo info;
 	f_oPlayers[ a_poClientInfo ] = info;
@@ -215,12 +219,15 @@ bool HBoggle::do_accept( OClientInfo* a_poClientInfo )
 		<< "This match requires " << f_iPlayers << " players to start the game." << endl;
 	for ( players_t::HIterator it = f_oPlayers.begin(); it != f_oPlayers.end(); ++ it )
 		{
-		*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
-			<< PROTOCOL::PLAYER << PROTOCOL::SEP << it->first->f_oName
-			<< PROTOCOL::SEPP << it->second.f_iScore << PROTOCOL::SEPP
-			<< it->second.f_iLast << endl;
-		*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
-			<< PROTOCOL::MSG << PROTOCOL::SEP << it->first->f_oName << " joined the mind contest." << endl;
+		if ( it->first != a_poClientInfo )
+			{
+			*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
+				<< PROTOCOL::PLAYER << PROTOCOL::SEP << it->first->f_oName
+				<< PROTOCOL::SEPP << it->second.f_iScore << PROTOCOL::SEPP
+				<< it->second.f_iLast << endl;
+			*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
+				<< PROTOCOL::MSG << PROTOCOL::SEP << it->first->f_oName << " joined the mind contest." << endl;
+			}
 		}
 	broadcast(
 			_out << PROTOCOL::NAME << PROTOCOL::SEP
@@ -231,22 +238,14 @@ bool HBoggle::do_accept( OClientInfo* a_poClientInfo )
 	if ( ! f_iRound && ( f_oPlayers.size() >= f_iPlayers ) )
 		{
 		schedule_end_round();
-		out << _out.raw() << flush;
-		a_poClientInfo->f_oSocket->write_until_eos( _out << _out );
-		_out << PROTOCOL::NAME << PROTOCOL::SEP
-			<< PROTOCOL::MSG << PROTOCOL::SEP << "The match has begun, good luck!" << endl;
-		broadcast( _out.raw() );
-		a_poClientInfo->f_oSocket->write_until_eos( _out << _out );
+		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
+				<< PROTOCOL::MSG << PROTOCOL::SEP
+				<< "The match has begun, good luck!" << endl << _out );
 		}
 	else if ( f_iRound > 0 )
 		*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::DECK << PROTOCOL::SEP << make_deck() << endl;
-	rejected = false;
-	return ( rejected );
+	return;
 	M_EPILOG
-	}
-
-void HBoggle::do_post_accept( OClientInfo* )
-	{
 	}
 
 void HBoggle::do_kick( OClientInfo* a_poClientInfo )
@@ -283,7 +282,6 @@ void HBoggle::schedule( EVENT::event_t a_eEvent )
 				HCallInterface::ptr_t( new HCall<HBoggle&, typeof( &HBoggle::on_begin_round )>( *this, &HBoggle::on_begin_round ) ) );
 	else
 		schedule_end_round();
-	_out.use();
 	return;
 	M_EPILOG
 	}
@@ -296,8 +294,7 @@ void HBoggle::schedule_end_round( void )
 			HCallInterface::ptr_t( new HCall<HBoggle&, typeof( &HBoggle::on_end_round )>( *this, &HBoggle::on_end_round ) ) );
 	generate_game();
 	f_eState = STATE::D_ACCEPTING;
-	_out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::DECK << PROTOCOL::SEP << make_deck() << endl;
-	broadcast( _out.raw() );
+	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::DECK << PROTOCOL::SEP << make_deck() << endl << _out );
 	return;
 	M_EPILOG
 	}
