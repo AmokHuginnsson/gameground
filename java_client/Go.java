@@ -36,12 +36,14 @@ class GoPlayer {
 	public JLabel _captures;
 	public JLabel _timeleft;
 	public JLabel _byoyomi;
+	public JButton _sit;
 	public void clear() {
 		_name.setText( "" );
 		_score.setText( "" );
 		_captures.setText( "" );
 		_timeleft.setText( "" );
 		_byoyomi.setText( "" );
+		_sit.setText( Go.HGUILocal.SIT );
 	}
 }
 
@@ -61,11 +63,13 @@ class Go extends HAbstractLogic {
 		public static final String MAINTIME = "maintime";
 		public static final String GOBAN = "goban";
 		public static final String SIT = "sit";
-		public static final String GETUP = "getup";
+		public static final String GETUP = "get_up";
 		public static final String BYOYOMITIME = "byoyomitime";
 		public static final String BYOYOMIPERIODS = "byoyomiperiods";
 		public static final String PUTSTONE = "put_stone";
 		public static final String STONES = "stones";
+		public static final String STONE = "stone";
+		public static final String TOMOVE = "to_move";
 		public static final String PLAYER = "player";
 		public static final String PLAYERQUIT = "player_quit";
 		public static final String PREFIX = PROTOCOL.CMD + PROTOCOL.SEP + PROTOCOL.NAME + PROTOCOL.SEP;
@@ -73,9 +77,12 @@ class Go extends HAbstractLogic {
 	public static final class STONE {
 		public static final char BLACK = 'b';
 		public static final char WHITE = 'w';
+		public static final char NONE	= ' ';
 	}
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
+		public static final String SIT = "Sit !";
+		public static final String GETUP = "Get up !";
 		public JTextField _messageInput;
 		public JTextField _wordInput;
 		public JTextPane _logPad;
@@ -84,11 +91,13 @@ class Go extends HAbstractLogic {
 		public JLabel _blackCaptures;
 		public JLabel _blackTimeLeft;
 		public JLabel _blackByoYomiLeft;
+		public JButton _blackSit;
 		public JLabel _whiteName;
 		public JLabel _whiteScore;
 		public JLabel _whiteCaptures;
 		public JLabel _whiteTimeLeft;
 		public JLabel _whiteByoYomiLeft;
+		public JButton _whiteSit;
 
 		public JList _visitors;
 		public Goban _board;
@@ -161,12 +170,12 @@ class Go extends HAbstractLogic {
 		public void onBlack() {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
-					+ PROTOCOL.SIT + PROTOCOL.SEPP + STONE.BLACK );
+					+ ( ( _stone == ' ' ) ? PROTOCOL.SIT + PROTOCOL.SEPP + STONE.BLACK : PROTOCOL.GETUP ) );
 		}
 		public void onWhite() {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
-					+ PROTOCOL.SIT + PROTOCOL.SEPP + STONE.WHITE );
+					+ ( ( _stone == ' ' ) ? PROTOCOL.SIT + PROTOCOL.SEPP + STONE.WHITE : PROTOCOL.GETUP ) );
 		}
 	}
 //--------------------------------------------//
@@ -174,6 +183,8 @@ class Go extends HAbstractLogic {
 	public static final String LABEL = "go";
 	public HGUILocal _gui;
 	public HClient _client;
+	private char _stone = ' ';
+	private char _toMove = ' ';
 	private SortedMap<Character,GoPlayer> _contestants = java.util.Collections.synchronizedSortedMap( new TreeMap<Character,GoPlayer>() );
 	private String _stones;
 //--------------------------------------------//
@@ -184,6 +195,8 @@ class Go extends HAbstractLogic {
 		_handlers.put( PROTOCOL.SETUP, Go.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.STONES, Go.class.getDeclaredMethod( "handlerStones", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYER, Go.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
+		_handlers.put( PROTOCOL.TOMOVE, Go.class.getDeclaredMethod( "handlerToMove", new Class[]{ String.class } ) );
+		_handlers.put( PROTOCOL.STONE, Go.class.getDeclaredMethod( "handlerStone", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.CONTESTANT, Go.class.getDeclaredMethod( "handlerContestant", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYERQUIT, Go.class.getDeclaredMethod( "handlerPlayerQuit", new Class[]{ String.class } ) );
 		_info = new HLogicInfo( "go", "go", "Go" );
@@ -196,6 +209,7 @@ class Go extends HAbstractLogic {
 		black._score = _gui._blackScore;
 		black._timeleft = _gui._blackTimeLeft;
 		black._byoyomi = _gui._blackByoYomiLeft;
+		black._sit = _gui._blackSit;
 		_contestants.put( new Character( STONE.BLACK ), black );
 		GoPlayer white = new GoPlayer();
 		white._name = _gui._whiteName;
@@ -203,6 +217,7 @@ class Go extends HAbstractLogic {
 		white._score = _gui._whiteScore;
 		white._timeleft = _gui._whiteTimeLeft;
 		white._byoyomi = _gui._whiteByoYomiLeft;
+		white._sit = _gui._whiteSit;
 		_contestants.put( new Character( STONE.WHITE ), white );
 	}
 	void handlerGo( String $command ) {
@@ -235,11 +250,24 @@ class Go extends HAbstractLogic {
 	}
 	void handlerContestant( String $command ) {
 		String[] tokens = $command.split( ",", 6 );
-		GoPlayer contestant = _contestants.get( new Character( tokens[ 0 ].charAt( 0 ) ) );
+		char stone = STONE.NONE;
+		GoPlayer contestant = _contestants.get( new Character( stone = tokens[ 0 ].charAt( 0 ) ) );
 		contestant._name.setText( tokens[ 1 ] );
 		contestant._captures.setText( tokens[ 2 ] );
 		contestant._timeleft.setText( tokens[ 3 ] );
 		contestant._byoyomi.setText( tokens[ 4 ] );
+		if ( tokens[ 1 ].equals( _app.getName() ) ) {
+			_stone = stone;
+			contestant._sit.setText( HGUILocal.GETUP );
+		} else if ( stone == _stone ) {
+			contestant._sit.setText( HGUILocal.SIT );
+			_stone = STONE.NONE;
+		}
+	}
+	void handlerStone( String $command ) {
+	}
+	void handlerToMove( String $command ) {
+		_toMove = $command.charAt( 0 );
 	}
 	void handlerPlayer( String $command ) {
 		DefaultListModel m = (DefaultListModel)_gui._visitors.getModel();
@@ -248,6 +276,15 @@ class Go extends HAbstractLogic {
 	void handlerPlayerQuit( String $command ) {
 		DefaultListModel m = (DefaultListModel)_gui._visitors.getModel();
 		m.removeElement( $command );
+	}
+	public String getStones() {
+		return ( _stones );
+	}
+	public boolean isMyMove() {
+		return ( ( _stone != STONE.NONE ) && ( _stone == _toMove ) );
+	}
+	public char stone() {
+		return ( _stone );
 	}
 	public void reinit() {
 		_client = _app.getClient();
@@ -262,9 +299,6 @@ class Go extends HAbstractLogic {
 			System.exit( 1 );
 		}
 		return ( true );
-	}
-	public String getStones() {
-		return ( _stones );
 	}
 }
 

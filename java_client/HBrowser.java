@@ -48,6 +48,16 @@ class HBrowser extends HAbstractLogic {
 			_games.setModel( new DefaultTreeModel( new DefaultMutableTreeNode( new HPlayerSet( "root", "GameGround" ) ) ) );
 			_games.getSelectionModel().setSelectionMode( TreeSelectionModel.SINGLE_TREE_SELECTION );
 			_games.addTreeSelectionListener( this );
+			java.awt.event.MouseListener ml = new java.awt.event.MouseAdapter() {
+				public void mousePressed( java.awt.event.MouseEvent e ) {
+					if ( e.getClickCount() == 2 ) {
+						DefaultMutableTreeNode node = (DefaultMutableTreeNode)_games.getLastSelectedPathComponent();
+						if ( ( node != null ) && ( node.getLevel() == 2 ) )
+							onJoin();
+					}
+				}
+			};
+			_games.addMouseListener( ml );
 		}
 		public JTextPane getLogPad() {
 			return ( _logPad );
@@ -146,6 +156,7 @@ class HBrowser extends HAbstractLogic {
 					_client.wait();
 				}
 				_client.println( "name:" + cc._name );
+				_app.setName( cc._name );
 				_app.setClient( _client );
 			} catch ( Exception e ) {
 				JOptionPane.showMessageDialog( _gui,

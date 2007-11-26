@@ -19,6 +19,8 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	private SortedMap<String,HAbstractLogic> _logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String,HAbstractLogic>() );
 	public Frame _frame;
 	private HClient _client;
+	private String _frameName;
+	private String _name;
 	boolean _applet = false;
 	CommandLine _cmd;
 
@@ -48,6 +50,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 			setFace( HLogin.LABEL );
 			resize( res.getRootElement().getAttribute( "size" ).getValue().split( ",", 2 ) );
 			setFace( HLogin.LABEL );
+			_frameName = _frame.getTitle();
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );
@@ -144,6 +147,10 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	}
 	public void setClient( HClient $client ) {
 		_client = $client;
+		if ( _client != null )
+			_frame.setTitle( _frameName + " [" + _name + "]" );
+		else
+			_frame.setTitle( _frameName );
 	}
 
 	public HAbstractLogic getLogic( String $name ) {
@@ -186,6 +193,12 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 				System.exit( 0 );
 			}
 		}
+	}
+	public String getName() {
+		return ( _name );
+	}
+	public void setName( String $name ) {
+		_name = $name;
 	}
 }
 

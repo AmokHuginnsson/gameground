@@ -45,16 +45,11 @@ using namespace yaal::tools::util;
 namespace go
 {
 
-char const* const HGo::PROTOCOL::SEP = ":";
-char const* const HGo::PROTOCOL::SEPP = ",";
 char const* const HGo::PROTOCOL::NAME = "go";
 char const* const HGo::PROTOCOL::SETUP = "setup";
 char const* const HGo::PROTOCOL::ADMIN = "admin";
 char const* const HGo::PROTOCOL::PLAY = "play";
 char const* const HGo::PROTOCOL::CONTESTANT = "contestant";
-char const* const HGo::PROTOCOL::PLAYER = "player";
-char const* const HGo::PROTOCOL::SAY = "say";
-char const* const HGo::PROTOCOL::MSG = "msg";
 char const* const HGo::PROTOCOL::GOBAN = "goban";
 char const* const HGo::PROTOCOL::KOMI = "komi";
 char const* const HGo::PROTOCOL::HANDICAPS = "handicaps";
@@ -62,10 +57,13 @@ char const* const HGo::PROTOCOL::MAINTIME = "maintime";
 char const* const HGo::PROTOCOL::BYOYOMIPERIODS = "byoyomipediods";
 char const* const HGo::PROTOCOL::BYOYOMITIME = "byoyomitime";
 char const* const HGo::PROTOCOL::STONES = "stones";
+char const* const HGo::PROTOCOL::STONE = "stone";
+char const* const HGo::PROTOCOL::TOMOVE = "to_move";
 char const* const HGo::PROTOCOL::PUTSTONE = "put_stone";
 char const* const HGo::PROTOCOL::PASS = "pass";
 char const* const HGo::PROTOCOL::SIT = "sit";
 char const* const HGo::PROTOCOL::GETUP = "get_up";
+static int const D_SECONDS_IN_MINUTE = 60;
 
 HGo::HGo( HString const& a_oName )
 	: HLogic( "go", a_oName ),
@@ -82,7 +80,7 @@ HGo::HGo( HString const& a_oName )
 	f_oHandlers[ PROTOCOL::SETUP ] = static_cast<handler_t>( &HGo::handler_setup );
 	f_oHandlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HGo::handler_play );
 	f_oHandlers[ PROTOCOL::SAY ] = static_cast<handler_t>( &HGo::handler_message );
-	clear_goban();
+	set_handicaps( f_iHandicaps );
 	return;
 	M_EPILOG
 	}
@@ -158,7 +156,12 @@ void HGo::handler_play ( OClientInfo* a_poClientInfo, HString const& a_roMessage
 				}
 			else if ( item != PROTOCOL::SIT )
 				throw HLogicException( "you cannot do it now" );
+			broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
+					<< PROTOCOL::TOMOVE << PROTOCOL::SEP
+					<< static_cast<char>( f_eState ) << endl << _out );
 			}
+		else
+			throw HLogicException( "not your turn" );
 		}
 	else
 		{
@@ -181,7 +184,15 @@ void HGo::handler_play ( OClientInfo* a_poClientInfo, HString const& a_roMessage
 				else
 					{
 					contestant( stone ) = a_poClientInfo;
-					broadcast( _out << _out );
+					OPlayerInfo& info = *get_player_info( a_poClientInfo );
+					info.f_iTimeLeft = f_iMainTime * D_SECONDS_IN_MINUTE;
+					info.f_iByoYomiPeriods = f_iByoYomiPeriods;
+					if ( ! ( contestant( STONE::D_BLACK ) && contestant( STONE::D_WHITE ) ) )
+						set_handicaps( f_iHandicaps );
+					else
+						broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
+								<< PROTOCOL::TOMOVE << PROTOCOL::SEP
+								<< static_cast<char>( f_eState = ( f_iHandicaps > 1 ? STONE::D_WHITE : STONE::D_BLACK ) ) << endl << _out );
 					}
 				}
 			}
@@ -250,9 +261,24 @@ void HGo::do_post_accept( OClientInfo* a_poClientInfo )
 	player_t info;
 	info.first = a_poClientInfo;
 	f_oPlayers.push_back( info );
+	for ( clients_t::HIterator it = f_oClients.begin(); it != f_oClients.end(); ++ it )
+		{
+		if ( *it != a_poClientInfo )
+			{
+			*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
+					<< PROTOCOL::PLAYER << PROTOCOL::SEP
+					<< (*it)->f_oName << endl;
+			*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
+					<< PROTOCOL::MSG << PROTOCOL::SEP
+					<< "Player " << (*it)->f_oName << " approched this table." << endl;
+			}
+		}
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::PLAYER << PROTOCOL::SEP
 			<< a_poClientInfo->f_oName << endl << _out );
+	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
+			<< PROTOCOL::MSG << PROTOCOL::SEP
+			<< "Player " << a_poClientInfo->f_oName << " approched this table." << endl << _out );
 	send_contestants();
 	send_goban();
 	return;
@@ -324,19 +350,13 @@ void HGo::on_timeout( void )
 	M_EPILOG
 	}
 
-void HGo::clear_goban( void )
-	{
-	::memset( f_oGame.raw(), ' ', f_iGobanSize * f_iGobanSize );
-	f_oGame[ f_iGobanSize * f_iGobanSize ] = 0;
-	return;
-	}
-
 void HGo::set_handicaps( int a_iHandicaps )
 	{
 	M_PROLOG
 	if ( ( a_iHandicaps > 9 ) || ( a_iHandicaps < 0 ) )
 		throw HLogicException( _out << "bad handicap value: " << a_iHandicaps << _out );
-	clear_goban();
+	::memset( f_oGame.raw(), ' ', f_iGobanSize * f_iGobanSize );
+	f_oGame[ f_iGobanSize * f_iGobanSize ] = 0;
 	f_iHandicaps = a_iHandicaps;
 	if ( f_iHandicaps > 0 )
 		f_iKomi = 0;

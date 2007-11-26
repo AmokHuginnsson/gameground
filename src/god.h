@@ -58,29 +58,26 @@ class HGo : public HLogic
 		static int const D_SMALL = 13;
 		static int const D_TINY = 9;
 		};
-	struct PROTOCOL
+	struct PROTOCOL : public HLogic::PROTOCOL
 		{
-		static char const* const SEP;
-		static char const* const SEPP;
-		static char const* const NAME;
-		static char const* const SETUP;
 		static char const* const ADMIN;
-		static char const* const SAY;
-		static char const* const MSG;
-		static char const* const PLAY;
-		static char const* const CONTESTANT;
-		static char const* const PLAYER;
-		static char const* const GOBAN;
-		static char const* const KOMI;
-		static char const* const HANDICAPS;
-		static char const* const MAINTIME;
 		static char const* const BYOYOMIPERIODS;
 		static char const* const BYOYOMITIME;
-		static char const* const STONES;
-		static char const* const PUTSTONE;
-		static char const* const PASS;
-		static char const* const SIT;
+		static char const* const CONTESTANT;
 		static char const* const GETUP;
+		static char const* const GOBAN;
+		static char const* const HANDICAPS;
+		static char const* const KOMI;
+		static char const* const MAINTIME;
+		static char const* const NAME;
+		static char const* const PASS;
+		static char const* const PLAY;
+		static char const* const PUTSTONE;
+		static char const* const SETUP;
+		static char const* const SIT;
+		static char const* const STONE;
+		static char const* const STONES;
+		static char const* const TOMOVE;
 		};
 protected:
 	/*{*/
@@ -128,7 +125,6 @@ protected:
 	char& goban( int, int );
 	OClientInfo*& contestant( STONE::stone_t );
 	OClientInfo*& contestant( char );
-	void clear_goban( void );
 	void clear_goban( bool );
 	bool have_killed( int, int, STONE::stone_t );
 	HGo::STONE::stone_t oponent( STONE::stone_t );

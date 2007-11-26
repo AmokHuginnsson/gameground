@@ -47,6 +47,16 @@ protected:
 	yaal::hcore::HString f_oName;
 	yaal::tools::HStringStream _out;
 	/*}*/
+	struct PROTOCOL
+		{
+		static char const* const SEP;
+		static char const* const SEPP;
+		static char const* const SAY;
+		static char const* const MSG;
+		static char const* const PLAYER;
+		static char const* const PLAYER_QUIT;
+		virtual ~PROTOCOL(){}
+		};
 public:
 	/*{*/
 	HLogic( yaal::hcore::HString const&, yaal::hcore::HString const& );

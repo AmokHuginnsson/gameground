@@ -21,7 +21,7 @@ public class Goban extends JPanel implements MouseInputListener {
 	int _cursorY = -1;
 	int _virtSize = 0;
 	GoImages _images = null;
-	Go _logic;
+	Go _logic = null;
 //--------------------------------------------//
 	public Goban() {
 		addMouseMotionListener( this );
@@ -47,7 +47,7 @@ public class Goban extends JPanel implements MouseInputListener {
 	public void mousePressed( MouseEvent $event ) {
 	}
 	public void mouseClicked( MouseEvent $event ) {
-		if ( isPlaceValid( _cursorX, _cursorY ) )
+		if ( _logic.isMyMove() && isPlaceValid( _cursorX, _cursorY ) )
 			_logic._client.println( Go.PROTOCOL.CMD + Go.PROTOCOL.SEP
 					+ Go.PROTOCOL.PLAY + Go.PROTOCOL.SEP
 					+ Go.PROTOCOL.PUTSTONE + Go.PROTOCOL.SEPP + _cursorX + Go.PROTOCOL.SEPP + _cursorY );
@@ -125,15 +125,13 @@ public class Goban extends JPanel implements MouseInputListener {
 			g.drawChars( label, 0, 2, D_MARGIN - 18, D_MARGIN + margin + ( inside * ( _size - 1 - i ) ) / ( _size - 1 ) + 5 );
 			g.drawChars( label, 0, 2, D_MARGIN + _virtSize + 2, D_MARGIN + margin + ( inside * ( _size - 1 - i ) ) / ( _size - 1 ) + 5 );
 		}
-		drawStone( 5, 5, 'b', false, g );
-		drawStone( 6, 6, 'w', false, g );
 		drawStones( g );
-		if ( isPlaceValid( _cursorX, _cursorY ) )
-			drawStone( _cursorX, _cursorY, 'w', true, g );
+		if ( ( _logic != null ) && _logic.isMyMove() && isPlaceValid( _cursorX, _cursorY ) )
+			drawStone( _cursorX, _cursorY, _logic.stone(), true, g );
 	}
 	private void drawStone( int $xx, int $yy, int $color, boolean $alpha, Graphics $gc ) {
 		Image img = null;
-		if ( $color == 'w' ) {
+		if ( $color == Go.STONE.WHITE ) {
 			if ( $alpha )
 				img = _images._whitesAlpha[ ( $yy * _size + $xx ) % GoImages.D_WHITE_LOOKS ];
 			else

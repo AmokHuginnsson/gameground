@@ -192,7 +192,7 @@ void HServer::create_game( OClientInfo& a_roInfo, HString const& a_oArg )
 	{
 	M_PROLOG
 	if ( a_roInfo.f_oName.is_empty() )
-		a_roInfo.f_oSocket->write_until_eos( "err:Set your name first.\n" );
+		kick_client( a_roInfo.f_oSocket, _( "Set your name first." ) );
 	else
 		{
 		HString l_oType = a_oArg.split( ":", 0 );
@@ -237,12 +237,14 @@ void HServer::join_game( OClientInfo& a_roInfo, HString const& a_oName )
 	{
 	M_PROLOG
 	if ( a_roInfo.f_oName.is_empty() )
-		a_roInfo.f_oSocket->write_until_eos( "err:Set your name first.\n" );
+		kick_client( a_roInfo.f_oSocket, "Set your name first." );
 	else
 		{
 		logics_t::HIterator it = f_oLogics.find( a_oName );
 		if ( it == f_oLogics.end() )
 			a_roInfo.f_oSocket->write_until_eos( "err:Game does not exists.\n" );
+		else if ( !! a_roInfo.f_oLogic )
+			kick_client( a_roInfo.f_oSocket, _( "You were already in some game." ) );
 		else if ( ! it->second->accept_client( &a_roInfo ) )
 			{
 			a_roInfo.f_oLogic = it->second;
@@ -413,6 +415,7 @@ void HServer::remove_client_from_logic( OClientInfo& a_roInfo, char const* const
 	if ( !! a_roInfo.f_oLogic )
 		{
 		HLogic::ptr_t l_oLogic = a_roInfo.f_oLogic;
+		out << "separating logic info from client info for: " << a_roInfo.f_oName << endl;
 		l_oLogic->kick_client( &a_roInfo, a_pcReason );
 		a_roInfo.f_oLogic = HLogic::ptr_t();
 		if ( ! l_oLogic->active_clients() )
