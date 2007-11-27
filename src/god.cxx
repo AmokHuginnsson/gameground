@@ -70,7 +70,10 @@ HGo::HGo( HString const& a_oName )
 	f_eState( STONE::D_NONE ), f_iGobanSize( setup.f_iGobanSize ),
 	f_iKomi( setup.f_iKomi ), f_iHandicaps( setup.f_iHandicaps ), f_iMainTime( setup.f_iMainTime ),
 	f_iByoYomiPeriods( setup.f_iByoYomiPeriods ), f_iByoYomiTime( setup.f_iByoYomiTime ),
-	f_iMove( 0 ), f_iPass( 0 ), f_oGame( GOBAN_SIZE::D_NORMAL * GOBAN_SIZE::D_NORMAL + sizeof ( '\0' ) ),
+	f_iMove( 0 ), f_iPass( 0 ),
+	f_oGame( GOBAN_SIZE::D_NORMAL * GOBAN_SIZE::D_NORMAL + sizeof ( '\0' ) ),
+	f_oKoGame( GOBAN_SIZE::D_NORMAL * GOBAN_SIZE::D_NORMAL + sizeof ( '\0' ) ),
+	f_oOldGame( GOBAN_SIZE::D_NORMAL * GOBAN_SIZE::D_NORMAL + sizeof ( '\0' ) ),
 	f_oPlayers(), f_oVarTmpBuffer(), f_oMutex()
 	{
 	M_PROLOG
@@ -141,10 +144,14 @@ void HGo::handler_play ( OClientInfo* a_poClientInfo, HString const& a_roMessage
 			{
 			if ( item == PROTOCOL::PUTSTONE )
 				{
+				f_iPass = 0;
 				int col = lexical_cast<int>( a_roMessage.split( ",", 1 ) );
 				int row = lexical_cast<int>( a_roMessage.split( ",", 2 ) );
+				int before = count_stones( oponent( f_eState ) );
 				make_move( col, row, f_eState );
-				f_iPass = 0;
+				int after = count_stones( oponent( f_eState ) );
+				get_player_info( contestant( f_eState ) )->f_iStonesCaptured += ( before - after );
+				f_eState = oponent( f_eState );
 				send_goban();
 				}
 			else if ( item == PROTOCOL::PASS )
@@ -355,7 +362,7 @@ void HGo::set_handicaps( int a_iHandicaps )
 	M_PROLOG
 	if ( ( a_iHandicaps > 9 ) || ( a_iHandicaps < 0 ) )
 		throw HLogicException( _out << "bad handicap value: " << a_iHandicaps << _out );
-	::memset( f_oGame.raw(), ' ', f_iGobanSize * f_iGobanSize );
+	::memset( f_oGame.raw(), STONE::D_NONE, f_iGobanSize * f_iGobanSize );
 	f_oGame[ f_iGobanSize * f_iGobanSize ] = 0;
 	f_iHandicaps = a_iHandicaps;
 	if ( f_iHandicaps > 0 )
@@ -427,7 +434,7 @@ void HGo::send_goban( void )
 
 char& HGo::goban( int a_iCol, int a_iRow )
 	{
-	return ( f_oGame[ a_iRow * f_iGobanSize + a_iCol ] );
+	return ( f_oKoGame[ a_iRow * f_iGobanSize + a_iCol ] );
 	}
 
 bool HGo::have_liberties( int a_iCol, int a_iRow, STONE::stone_t stone )
@@ -435,7 +442,7 @@ bool HGo::have_liberties( int a_iCol, int a_iRow, STONE::stone_t stone )
 	if ( ( a_iCol < 0 ) || ( a_iCol > ( f_iGobanSize - 1 ) )
 			|| ( a_iRow < 0 ) || ( a_iRow > ( f_iGobanSize - 1 ) ) )
 		return ( false );
-	if ( goban( a_iCol, a_iRow ) == ' ' )
+	if ( goban( a_iCol, a_iRow ) == STONE::D_NONE )
 		return ( true );
 	if ( goban( a_iCol, a_iRow ) == stone )
 		{
@@ -454,10 +461,10 @@ void HGo::clear_goban( bool removeDead )
 		{
 		for ( int j = 0; j < f_iGobanSize; j++ )
 			{
-			if ( goban( i, j ) != ' ' )
+			if ( goban( i, j ) != STONE::D_NONE )
 				{
 				if ( removeDead && isupper( goban( i, j ) ) )
-					goban( i, j ) = ' ';
+					goban( i, j ) = STONE::D_NONE;
 				else
 					goban( i, j ) = tolower( goban( i, j ) );
 				}
@@ -491,13 +498,13 @@ bool HGo::have_killed( int x, int y, STONE::stone_t stone )
 		clear_goban( killed = true );
 	else
 		clear_goban( false );
-	goban( x, y ) = ' ';
+	goban( x, y ) = STONE::D_NONE;
 	return ( killed );
 	}
 
-bool HGo::is_ko( int, int, STONE::stone_t )
+bool HGo::is_ko( void )
 	{
-	return ( false );
+	return ( ::memcmp( f_oKoGame.raw(), f_oOldGame.raw(), f_iGobanSize * f_iGobanSize ) == 0 );
 	}
 
 bool HGo::is_suicide( int x, int y, STONE::stone_t stone )
@@ -506,7 +513,8 @@ bool HGo::is_suicide( int x, int y, STONE::stone_t stone )
 	goban( x, y ) = stone;
 	if ( ! have_liberties( x, y, stone ) )
 		suicide = true;
-	goban( x, y ) = ' ';
+	clear_goban( false );
+	goban( x, y ) = STONE::D_NONE;
 	return ( suicide );
 	}	
 
@@ -515,10 +523,9 @@ void HGo::make_move( int x, int y, STONE::stone_t stone )
 	if ( ( x < 0 ) || ( x > ( f_iGobanSize - 1 ) )
 			|| ( y < 0 ) || ( y > ( f_iGobanSize - 1 ) ) )
 		throw HLogicException( "move outside goban" );
-	if ( goban( x, y ) != ' ' )
+	::memcpy( f_oKoGame.raw(), f_oGame.raw(), f_iGobanSize * f_iGobanSize );
+	if ( goban( x, y ) != STONE::D_NONE )
 		throw HLogicException( "position already occupied" );
-	if ( is_ko( x, y, stone ) )
-		throw HLogicException( "forbidden by ko rule" );
 	if ( ! have_killed( x, y, stone ) )
 		{
 		if ( is_suicide( x, y, stone ) )
@@ -528,7 +535,10 @@ void HGo::make_move( int x, int y, STONE::stone_t stone )
 			}
 		}	
 	goban( x, y ) = stone;
-	f_eState = oponent( stone );
+	if ( is_ko() )
+		throw HLogicException( "forbidden by ko rule" );
+	::memcpy( f_oOldGame.raw(), f_oGame.raw(), f_iGobanSize * f_iGobanSize );
+	::memcpy( f_oGame.raw(), f_oKoGame.raw(), f_iGobanSize * f_iGobanSize );
 	return;
 	}
 
@@ -585,6 +595,17 @@ void HGo::send_contestant( char stone )
 			<< byoyomi << endl << _out );
 	return;
 	M_EPILOG
+	}
+
+int HGo::count_stones( STONE::stone_t stone )
+	{
+	int count = 0;
+	int const size = f_iGobanSize * f_iGobanSize;
+	char const* ptr = f_oGame.raw();
+	for ( int i = 0; i < size; ++ i )
+		if ( ptr[ i ] == stone )
+			++ count;
+	return ( count );
 	}
 
 }

@@ -94,6 +94,8 @@ protected:
 	int f_iMove;
 	int f_iPass;
 	yaal::hcore::HPool<char> f_oGame;
+	yaal::hcore::HPool<char> f_oKoGame;
+	yaal::hcore::HPool<char> f_oOldGame;
 	players_t f_oPlayers;
 	yaal::hcore::HString f_oVarTmpBuffer;
 	mutable yaal::hcore::HMutex f_oMutex;
@@ -129,11 +131,12 @@ protected:
 	bool have_killed( int, int, STONE::stone_t );
 	HGo::STONE::stone_t oponent( STONE::stone_t );
 	bool is_suicide( int, int, STONE::stone_t );
-	bool is_ko( int, int, STONE::stone_t );
+	bool is_ko( void );
 	void make_move( int, int, STONE::stone_t );
 	void contestant_gotup( OClientInfo* );
 	void send_contestants( void );
 	void send_contestant( char );
+	int count_stones( STONE::stone_t );
 	/*}*/
 private:
 	/*{*/

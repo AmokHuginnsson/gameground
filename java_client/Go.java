@@ -74,6 +74,9 @@ class Go extends HAbstractLogic {
 		public static final String PLAYERQUIT = "player_quit";
 		public static final String PREFIX = PROTOCOL.CMD + PROTOCOL.SEP + PROTOCOL.NAME + PROTOCOL.SEP;
 	}
+	public static final class GOBAN_SIZE {
+		public static final int NORMAL = 19;
+	}
 	public static final class STONE {
 		public static final char BLACK = 'b';
 		public static final char WHITE = 'w';
@@ -114,6 +117,7 @@ class Go extends HAbstractLogic {
 			_conf.setOwner( this );
 			_conf.gobanModel();
 			((DefaultListModel)_visitors.getModel()).clear();
+			_conf.setEnabled( false );
 		}
 		public JTextPane getLogPad() {
 			return ( _logPad );
@@ -170,12 +174,12 @@ class Go extends HAbstractLogic {
 		public void onBlack() {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
-					+ ( ( _stone == ' ' ) ? PROTOCOL.SIT + PROTOCOL.SEPP + STONE.BLACK : PROTOCOL.GETUP ) );
+					+ ( ( _stone == Go.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + STONE.BLACK : PROTOCOL.GETUP ) );
 		}
 		public void onWhite() {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
-					+ ( ( _stone == ' ' ) ? PROTOCOL.SIT + PROTOCOL.SEPP + STONE.WHITE : PROTOCOL.GETUP ) );
+					+ ( ( _stone == Go.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + STONE.WHITE : PROTOCOL.GETUP ) );
 		}
 	}
 //--------------------------------------------//
@@ -183,10 +187,9 @@ class Go extends HAbstractLogic {
 	public static final String LABEL = "go";
 	public HGUILocal _gui;
 	public HClient _client;
-	private char _stone = ' ';
-	private char _toMove = ' ';
+	private char _stone = STONE.NONE;
+	private char _toMove = STONE.NONE;
 	private SortedMap<Character,GoPlayer> _contestants = java.util.Collections.synchronizedSortedMap( new TreeMap<Character,GoPlayer>() );
-	private String _stones;
 //--------------------------------------------//
 	public Go( GameGround $applet ) throws Exception {
 		super( $applet );
@@ -245,7 +248,7 @@ class Go extends HAbstractLogic {
 		}
 	}
 	void handlerStones( String $command ) {
-		_stones = $command;
+		_gui._board.setStones( $command.getBytes() );
 		_gui._board.repaint();
 	}
 	void handlerContestant( String $command ) {
@@ -257,11 +260,11 @@ class Go extends HAbstractLogic {
 		contestant._timeleft.setText( tokens[ 3 ] );
 		contestant._byoyomi.setText( tokens[ 4 ] );
 		if ( tokens[ 1 ].equals( _app.getName() ) ) {
-			_stone = stone;
+			_gui._board.setStone( _stone = stone );
 			contestant._sit.setText( HGUILocal.GETUP );
 		} else if ( stone == _stone ) {
 			contestant._sit.setText( HGUILocal.SIT );
-			_stone = STONE.NONE;
+			_gui._board.setStone( _stone = STONE.NONE );
 		}
 	}
 	void handlerStone( String $command ) {
@@ -277,9 +280,6 @@ class Go extends HAbstractLogic {
 		DefaultListModel m = (DefaultListModel)_gui._visitors.getModel();
 		m.removeElement( $command );
 	}
-	public String getStones() {
-		return ( _stones );
-	}
 	public boolean isMyMove() {
 		return ( ( _stone != STONE.NONE ) && ( _stone == _toMove ) );
 	}
@@ -290,6 +290,7 @@ class Go extends HAbstractLogic {
 		_client = _app.getClient();
 		_contestants.get( new Character( STONE.BLACK ) ).clear();
 		_contestants.get( new Character( STONE.WHITE ) ).clear();
+		_stone = STONE.NONE;
 	}
 	static boolean registerLogic( GameGround $app ) {
 		try {
