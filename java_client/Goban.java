@@ -160,6 +160,9 @@ public class Goban extends JPanel implements MouseInputListener {
 		}
 		int margin = _virtSize / ( _size + 4 );
 		int inside = _virtSize - 2 * margin;
+		if ( ! $alpha )
+			$gc.drawImage( _images._shadow, D_MARGIN + margin + ( inside * $xx ) / ( _size - 1 ) - (int)( ( _diameter / 2 ) + ( _diameter / 10 ) ),
+					D_MARGIN + margin + ( inside * $yy ) / ( _size - 1 ) + (int)( _diameter / 10 ) - (int)( _diameter / 2 ), this );
 		$gc.drawImage( img, D_MARGIN + margin + ( inside * $xx ) / ( _size - 1 ) - (int)( _diameter / 2 ),
 				D_MARGIN + margin + ( inside * $yy ) / ( _size - 1 ) - (int)( _diameter / 2 ), this );
 	}

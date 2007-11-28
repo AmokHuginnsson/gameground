@@ -12,6 +12,7 @@ class GoImages {
 //--------------------------------------------//
 	static final int D_WHITE_LOOKS = 16;
 	public Image _background;
+	public Image _shadow;
 	public Image _black;
 	public Image _blackAlpha;
 	public Image[] _whites;
@@ -25,6 +26,7 @@ class GoImages {
 		_background = background( $gobanSize );
 		_black = black( $stoneSize, false );
 		_blackAlpha = black( $stoneSize, true );
+		_shadow = shadow( $stoneSize );
 		for ( int i = 0; i < D_WHITE_LOOKS; ++ i ) {
 			_whites[ i ] = white( $stoneSize, false );
 			_whitesAlpha[ i ] = white( $stoneSize, true );
@@ -264,6 +266,36 @@ class GoImages {
 			}
 
 		img.setRGB( 0, 0, $size, $size, pb, 0, $size );
+		return ( img );
+	}
+	Image shadow( int $size ) {
+		final int D_WIDTH = $size;
+		final int D_HEIGHT = $size;
+		BufferedImage img = new BufferedImage( D_WIDTH, D_HEIGHT, BufferedImage.TYPE_INT_ARGB );
+		//const double pixel=0.8,shadow=0.99;
+
+		// these are the images
+		int[] pw=new int[$size*$size];
+		int i, j,  k;
+		double di, dj, d2=(double)$size/2.0-5e-1, r=d2-2e-1;
+		double hh;
+		k=0;
+		for (i=0; i<$size; i++) {
+			for (j=0; j<$size; j++) {
+				di=i-d2; dj=j-d2;
+				hh=r-Math.sqrt(di*di+dj*dj);
+				if (hh>=0) {
+					hh=2*hh/r ;
+					if (hh> 1)  hh=1;
+
+					pw[k]=((int)(255*hh)<<24)|(1<<16)|(1<<8)|(1);
+				}
+				else pw[k]=0;
+				k++;
+			}
+		}	
+		// now copy the result in QImages
+		img.setRGB( 0, 0, $size, $size, pw, 0, $size );
 		return ( img );
 	}
 }
