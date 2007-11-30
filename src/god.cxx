@@ -117,10 +117,14 @@ void HGo::handler_message ( OClientInfo* a_poClientInfo, HString const& a_roMess
 	M_EPILOG
 	}
 
-void HGo::handler_setup( OClientInfo*, HString const& a_roMessage )
+void HGo::handler_setup( OClientInfo* a_poClientInfo, HString const& a_roMessage )
 	{
 	M_PROLOG
 	HLock l( f_oMutex );
+	if ( *f_oClients.begin() != a_poClientInfo )
+		throw HLogicException( "you are not admin" );
+	if ( f_eState != STONE::D_NONE )
+		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
 	HString item = a_roMessage.split( ",", 0 );
 	int value = lexical_cast<int>( a_roMessage.split( ",", 1 ) );
 	if ( item == PROTOCOL::GOBAN )
@@ -198,6 +202,7 @@ void HGo::handler_getup( OClientInfo* a_poClientInfo, HString const& /*a_roMessa
 					<< PROTOCOL::MSG << PROTOCOL::SEP
 					<< a_poClientInfo->f_oName << " resigned - therefore " << foe->f_oName << " wins." << endl << _out );
 			}
+		f_eState = STONE::D_NONE;
 		}
 	return;
 	M_EPILOG
@@ -219,9 +224,6 @@ void HGo::handler_put_stone( OClientInfo* a_poClientInfo, HString const& a_roMes
 	get_player_info( contestant( f_eState ) )->f_iStonesCaptured += ( before - after );
 	f_eState = oponent( f_eState );
 	send_goban();
-	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
-			<< PROTOCOL::TOMOVE << PROTOCOL::SEP
-			<< static_cast<char>( f_eState ) << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -237,9 +239,6 @@ void HGo::handler_pass( OClientInfo* a_poClientInfo, HString const& /*a_roMessag
 	++ f_iPass;
 	if ( f_iPass == 3 )
 		f_eState = STONE::D_NONE;
-	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
-			<< PROTOCOL::TOMOVE << PROTOCOL::SEP
-			<< static_cast<char>( f_eState ) << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -259,6 +258,9 @@ void HGo::handler_play ( OClientInfo* a_poClientInfo, HString const& a_roMessage
 		handler_getup( a_poClientInfo, a_roMessage );
 	else
 		throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
+	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
+			<< PROTOCOL::TOMOVE << PROTOCOL::SEP
+			<< static_cast<char>( f_eState ) << endl << _out );
 	send_contestants();
 	return;
 	M_EPILOG

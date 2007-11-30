@@ -193,6 +193,7 @@ class Go extends HAbstractLogic {
 	public HClient _client;
 	private char _stone = STONE.NONE;
 	private char _toMove = STONE.NONE;
+	private boolean _admin = false;
 	private SortedMap<Character,GoPlayer> _contestants = java.util.Collections.synchronizedSortedMap( new TreeMap<Character,GoPlayer>() );
 //--------------------------------------------//
 	public Go( GameGround $applet ) throws Exception {
@@ -233,7 +234,7 @@ class Go extends HAbstractLogic {
 	void handlerSetup( String $command ) {
 		String[] tokens = $command.split( ",", 2 );
 		if ( PROTOCOL.ADMIN.equals( $command ) ) {
-			_gui._conf.setEnabled( true );
+			_gui._conf.setEnabled( _admin = true );
 		} else {
 			int value = Integer.parseInt( tokens[ 1 ] );
 			if ( PROTOCOL.GOBAN.equals( tokens[ 0 ] ) ) {
@@ -281,6 +282,7 @@ class Go extends HAbstractLogic {
 	void handlerToMove( String $command ) {
 		_toMove = $command.charAt( 0 );
 		_gui._pass.setEnabled( _toMove == _stone );
+		_gui._conf.setEnabled( _admin && ( _toMove == STONE.NONE ) );
 	}
 	void handlerPlayer( String $command ) {
 		DefaultListModel m = (DefaultListModel)_gui._visitors.getModel();
@@ -301,6 +303,8 @@ class Go extends HAbstractLogic {
 		_contestants.get( new Character( STONE.BLACK ) ).clear();
 		_contestants.get( new Character( STONE.WHITE ) ).clear();
 		_stone = STONE.NONE;
+		_toMove = STONE.NONE;
+		_admin = false;
 	}
 	static boolean registerLogic( GameGround $app ) {
 		try {
