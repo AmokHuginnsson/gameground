@@ -137,6 +137,10 @@ protected:
 	void send_contestants( void );
 	void send_contestant( char );
 	int count_stones( STONE::stone_t );
+	void handler_sit( OClientInfo*, yaal::hcore::HString const& );
+	void handler_getup( OClientInfo*, yaal::hcore::HString const& );
+	void handler_put_stone( OClientInfo*, yaal::hcore::HString const& );
+	void handler_pass( OClientInfo*, yaal::hcore::HString const& );
 	/*}*/
 private:
 	/*{*/

@@ -65,6 +65,16 @@ char const* const HGo::PROTOCOL::SIT = "sit";
 char const* const HGo::PROTOCOL::GETUP = "get_up";
 static int const D_SECONDS_IN_MINUTE = 60;
 
+int const GO_MSG_NOT_YOUR_TURN = 0;
+int const GO_MSG_YOU_CANT_DO_IT_NOW = 1;
+int const GO_MSG_MALFORMED = 2;
+char const* const GO_MSG[] =
+	{
+	_( "not your turn" ),
+	_( "you cannot do it now" ),
+	_( "malformed packet" )
+	};
+
 HGo::HGo( HString const& a_oName )
 	: HLogic( "go", a_oName ),
 	f_eState( STONE::D_NONE ), f_iGobanSize( setup.f_iGobanSize ),
@@ -133,87 +143,122 @@ void HGo::handler_setup( OClientInfo*, HString const& a_roMessage )
 	M_EPILOG
 	}
 
+void HGo::handler_sit( OClientInfo* a_poClientInfo, HString const& a_roMessage )
+	{
+	M_PROLOG
+	HString place = a_roMessage.split( ",", 1 );
+	if ( place.get_length() < 1 )
+		throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
+	else
+		{
+		char stone = place[ 0 ];
+		if ( ( stone != STONE::D_BLACK ) && ( stone != STONE::D_WHITE ) )
+			throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
+		else if ( ( contestant( STONE::D_BLACK ) == a_poClientInfo )
+				|| ( contestant( STONE::D_WHITE ) == a_poClientInfo ) )
+			throw HLogicException( "you were already sitting" );
+		else if ( contestant( stone ) != NULL )
+			*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
+				<< PROTOCOL::MSG << PROTOCOL::SEP << "Some one was faster." << endl;
+		else
+			{
+			contestant( stone ) = a_poClientInfo;
+			OPlayerInfo& info = *get_player_info( a_poClientInfo );
+			info.f_iTimeLeft = f_iMainTime * D_SECONDS_IN_MINUTE;
+			info.f_iByoYomiPeriods = f_iByoYomiPeriods;
+			if ( ! ( contestant( STONE::D_BLACK ) && contestant( STONE::D_WHITE ) ) )
+				set_handicaps( f_iHandicaps );
+			else
+				{
+				broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
+						<< PROTOCOL::TOMOVE << PROTOCOL::SEP
+						<< static_cast<char>( f_eState = ( f_iHandicaps > 1 ? STONE::D_WHITE : STONE::D_BLACK ) ) << endl << _out );
+				broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
+						<< PROTOCOL::MSG << PROTOCOL::SEP << "The Go match started." << endl << _out );
+				}
+			}
+		}
+	return;
+	M_EPILOG
+	}
+
+void HGo::handler_getup( OClientInfo* a_poClientInfo, HString const& /*a_roMessage*/ )
+	{
+	M_PROLOG
+	if ( ( contestant( STONE::D_BLACK ) != a_poClientInfo )
+			&& ( contestant( STONE::D_WHITE ) != a_poClientInfo ) )
+		throw HLogicException( "you are not sitting" );
+	else
+		{
+		contestant_gotup( a_poClientInfo );
+		OClientInfo* foe = NULL;
+		if ( ( foe = contestant( STONE::D_BLACK ) ) || ( foe = contestant( STONE::D_WHITE ) ) )
+			{
+			broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
+					<< PROTOCOL::MSG << PROTOCOL::SEP
+					<< a_poClientInfo->f_oName << " resigned - therefore " << foe->f_oName << " wins." << endl << _out );
+			}
+		}
+	return;
+	M_EPILOG
+	}
+
+void HGo::handler_put_stone( OClientInfo* a_poClientInfo, HString const& a_roMessage )
+	{
+	M_PROLOG
+	if ( f_eState == STONE::D_NONE )
+		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
+	if ( contestant( f_eState ) != a_poClientInfo )
+		throw HLogicException( GO_MSG[ GO_MSG_NOT_YOUR_TURN ] );
+	f_iPass = 0;
+	int col = lexical_cast<int>( a_roMessage.split( ",", 1 ) );
+	int row = lexical_cast<int>( a_roMessage.split( ",", 2 ) );
+	int before = count_stones( oponent( f_eState ) );
+	make_move( col, row, f_eState );
+	int after = count_stones( oponent( f_eState ) );
+	get_player_info( contestant( f_eState ) )->f_iStonesCaptured += ( before - after );
+	f_eState = oponent( f_eState );
+	send_goban();
+	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
+			<< PROTOCOL::TOMOVE << PROTOCOL::SEP
+			<< static_cast<char>( f_eState ) << endl << _out );
+	return;
+	M_EPILOG
+	}
+
+void HGo::handler_pass( OClientInfo* a_poClientInfo, HString const& /*a_roMessage*/ )
+	{
+	M_PROLOG
+	if ( f_eState == STONE::D_NONE )
+		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
+	if ( contestant( f_eState ) != a_poClientInfo )
+		throw HLogicException( GO_MSG[ GO_MSG_NOT_YOUR_TURN ] );
+	f_eState = oponent( f_eState );
+	++ f_iPass;
+	if ( f_iPass == 3 )
+		f_eState = STONE::D_NONE;
+	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
+			<< PROTOCOL::TOMOVE << PROTOCOL::SEP
+			<< static_cast<char>( f_eState ) << endl << _out );
+	return;
+	M_EPILOG
+	}
+
 void HGo::handler_play ( OClientInfo* a_poClientInfo, HString const& a_roMessage )
 	{
 	M_PROLOG
 	HLock l( f_oMutex );
 	HString item = a_roMessage.split( ",", 0 );
-	if ( f_eState != STONE::D_NONE )
-		{
-		if ( contestant( f_eState ) == a_poClientInfo )
-			{
-			if ( item == PROTOCOL::PUTSTONE )
-				{
-				f_iPass = 0;
-				int col = lexical_cast<int>( a_roMessage.split( ",", 1 ) );
-				int row = lexical_cast<int>( a_roMessage.split( ",", 2 ) );
-				int before = count_stones( oponent( f_eState ) );
-				make_move( col, row, f_eState );
-				int after = count_stones( oponent( f_eState ) );
-				get_player_info( contestant( f_eState ) )->f_iStonesCaptured += ( before - after );
-				f_eState = oponent( f_eState );
-				send_goban();
-				}
-			else if ( item == PROTOCOL::PASS )
-				{
-				f_eState = oponent( f_eState );
-				++ f_iPass;
-				if ( f_iPass == 3 )
-					f_eState = STONE::D_NONE;
-				}
-			else if ( item != PROTOCOL::SIT )
-				throw HLogicException( "you cannot do it now" );
-			broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
-					<< PROTOCOL::TOMOVE << PROTOCOL::SEP
-					<< static_cast<char>( f_eState ) << endl << _out );
-			}
-		else
-			throw HLogicException( "not your turn" );
-		}
+	if ( item == PROTOCOL::PUTSTONE )
+		handler_put_stone( a_poClientInfo, a_roMessage );
+	else if ( item == PROTOCOL::PASS )
+		handler_pass( a_poClientInfo, a_roMessage );
+	else if ( item == PROTOCOL::SIT )
+		handler_sit( a_poClientInfo, a_roMessage );
+	else if ( item == PROTOCOL::GETUP )
+		handler_getup( a_poClientInfo, a_roMessage );
 	else
-		{
-		if ( item == PROTOCOL::SIT )
-			{
-			HString place = a_roMessage.split( ",", 1 );
-			if ( place.get_length() < 1 )
-				throw HLogicException( "malformed packet" );
-			else
-				{
-				char stone = place[ 0 ];
-				if ( ( stone != STONE::D_BLACK ) && ( stone != STONE::D_WHITE ) )
-					throw HLogicException( "malformed packet" );
-				else if ( ( contestant( STONE::D_BLACK ) == a_poClientInfo )
-						|| ( contestant( STONE::D_WHITE ) == a_poClientInfo ) )
-					throw HLogicException( "you were already sitting" );
-				else if ( contestant( stone ) != NULL )
-					*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
-						<< PROTOCOL::MSG << PROTOCOL::SEP << "Some one was faster." << endl;
-				else
-					{
-					contestant( stone ) = a_poClientInfo;
-					OPlayerInfo& info = *get_player_info( a_poClientInfo );
-					info.f_iTimeLeft = f_iMainTime * D_SECONDS_IN_MINUTE;
-					info.f_iByoYomiPeriods = f_iByoYomiPeriods;
-					if ( ! ( contestant( STONE::D_BLACK ) && contestant( STONE::D_WHITE ) ) )
-						set_handicaps( f_iHandicaps );
-					else
-						broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
-								<< PROTOCOL::TOMOVE << PROTOCOL::SEP
-								<< static_cast<char>( f_eState = ( f_iHandicaps > 1 ? STONE::D_WHITE : STONE::D_BLACK ) ) << endl << _out );
-					}
-				}
-			}
-		else if ( item == PROTOCOL::GETUP )
-			{
-			if ( ( contestant( STONE::D_BLACK ) != a_poClientInfo )
-					&& ( contestant( STONE::D_WHITE ) != a_poClientInfo ) )
-				throw HLogicException( "you are not sitting" );
-			else
-				contestant_gotup( a_poClientInfo );
-			}
-		else
-			throw HLogicException( "you cannot do it now" );
-		}
+		throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
 	send_contestants();
 	return;
 	M_EPILOG

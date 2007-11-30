@@ -101,7 +101,7 @@ class Go extends HAbstractLogic {
 		public JLabel _whiteTimeLeft;
 		public JLabel _whiteByoYomiLeft;
 		public JButton _whiteSit;
-
+		public JButton _pass;
 		public JList _visitors;
 		public Goban _board;
 		public GoConfigurator _conf;
@@ -175,11 +175,15 @@ class Go extends HAbstractLogic {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
 					+ ( ( _stone == Go.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + STONE.BLACK : PROTOCOL.GETUP ) );
+			_blackSit.setEnabled( _stone != Go.STONE.NONE );
+			_whiteSit.setEnabled( _stone != Go.STONE.NONE );
 		}
 		public void onWhite() {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
 					+ ( ( _stone == Go.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + STONE.WHITE : PROTOCOL.GETUP ) );
+			_blackSit.setEnabled( _stone != Go.STONE.NONE );
+			_whiteSit.setEnabled( _stone != Go.STONE.NONE );
 		}
 	}
 //--------------------------------------------//
@@ -233,6 +237,7 @@ class Go extends HAbstractLogic {
 		} else {
 			int value = Integer.parseInt( tokens[ 1 ] );
 			if ( PROTOCOL.GOBAN.equals( tokens[ 0 ] ) ) {
+				_gui._conf.selectGobanSize( tokens[ 1 ] );
 				_gui._board.setSize( value );
 			} else if ( PROTOCOL.KOMI.equals( tokens[ 0 ] ) ) {
 				_gui._conf.setValue( _gui._conf._confKomi, Integer.parseInt( tokens[ 1 ] ) );
@@ -262,15 +267,20 @@ class Go extends HAbstractLogic {
 		if ( tokens[ 1 ].equals( _app.getName() ) ) {
 			_gui._board.setStone( _stone = stone );
 			contestant._sit.setText( HGUILocal.GETUP );
-		} else if ( stone == _stone ) {
-			contestant._sit.setText( HGUILocal.SIT );
-			_gui._board.setStone( _stone = STONE.NONE );
+			contestant._sit.setEnabled( true );
+		} else {
+			if ( stone == _stone ) {
+				contestant._sit.setText( HGUILocal.SIT );
+				_gui._board.setStone( _stone = STONE.NONE );
+			}
+			contestant._sit.setEnabled( "".equals( tokens[ 1 ] ) && ( _stone == STONE.NONE ) );
 		}
 	}
 	void handlerStone( String $command ) {
 	}
 	void handlerToMove( String $command ) {
 		_toMove = $command.charAt( 0 );
+		_gui._pass.setEnabled( _toMove == _stone );
 	}
 	void handlerPlayer( String $command ) {
 		DefaultListModel m = (DefaultListModel)_gui._visitors.getModel();
