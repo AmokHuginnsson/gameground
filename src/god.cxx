@@ -54,7 +54,7 @@ char const* const HGo::PROTOCOL::GOBAN = "goban";
 char const* const HGo::PROTOCOL::KOMI = "komi";
 char const* const HGo::PROTOCOL::HANDICAPS = "handicaps";
 char const* const HGo::PROTOCOL::MAINTIME = "maintime";
-char const* const HGo::PROTOCOL::BYOYOMIPERIODS = "byoyomipediods";
+char const* const HGo::PROTOCOL::BYOYOMIPERIODS = "byoyomiperiods";
 char const* const HGo::PROTOCOL::BYOYOMITIME = "byoyomitime";
 char const* const HGo::PROTOCOL::STONES = "stones";
 char const* const HGo::PROTOCOL::STONE = "stone";
@@ -142,6 +142,8 @@ void HGo::handler_setup( OClientInfo* a_poClientInfo, HString const& a_roMessage
 		f_iByoYomiPeriods = value;
 	else if ( item == PROTOCOL::BYOYOMITIME )
 		f_iByoYomiTime = value;
+	else
+		throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP << a_roMessage << endl << _out );
 	return;
 	M_EPILOG
@@ -411,11 +413,14 @@ void HGo::set_handicaps( int a_iHandicaps )
 		throw HLogicException( _out << "bad handicap value: " << a_iHandicaps << _out );
 	::memset( f_oGame.raw(), STONE::D_NONE, f_iGobanSize * f_iGobanSize );
 	f_oGame[ f_iGobanSize * f_iGobanSize ] = 0;
+	if ( a_iHandicaps != f_iHandicaps )
+		{
+		if ( a_iHandicaps > 0 )
+			f_iKomi = 0;
+		else
+			f_iKomi = setup.f_iKomi;
+		}
 	f_iHandicaps = a_iHandicaps;
-	if ( f_iHandicaps > 0 )
-		f_iKomi = 0;
-	else
-		f_iKomi = setup.f_iKomi;
 	if ( f_iHandicaps > 1 )
 		set_handi( f_iHandicaps );
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP

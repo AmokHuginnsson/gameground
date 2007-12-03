@@ -29,6 +29,9 @@ import javax.swing.RowSorter;
 import javax.swing.DefaultListModel;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 class GoPlayer {
 	public JLabel _name;
@@ -55,6 +58,7 @@ class Go extends HAbstractLogic {
 		public static final String SAY = "say";
 		public static final String NAME = "go";
 		public static final String PLAY = "play";
+		public static final String PASS = "pass";
 		public static final String SETUP = "setup";
 		public static final String ADMIN = "admin";
 		public static final String KOMI = "komi";
@@ -136,6 +140,8 @@ class Go extends HAbstractLogic {
 			_app.setFace( HBrowser.LABEL );
 		}
 		public void onGobanSize() {
+			if ( _conf.eventsIgnored() )
+				return;
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
 					+ PROTOCOL.SETUP + PROTOCOL.SEP
 					+ PROTOCOL.GOBAN + PROTOCOL.SEPP
@@ -184,6 +190,9 @@ class Go extends HAbstractLogic {
 					+ ( ( _stone == Go.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + STONE.WHITE : PROTOCOL.GETUP ) );
 			_blackSit.setEnabled( _stone != Go.STONE.NONE );
 			_whiteSit.setEnabled( _stone != Go.STONE.NONE );
+		}
+		public void onPass() {
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + PROTOCOL.PLAY + PROTOCOL.SEP + PROTOCOL.PASS );
 		}
 	}
 //--------------------------------------------//
@@ -263,15 +272,22 @@ class Go extends HAbstractLogic {
 		GoPlayer contestant = _contestants.get( new Character( stone = tokens[ 0 ].charAt( 0 ) ) );
 		contestant._name.setText( tokens[ 1 ] );
 		contestant._captures.setText( tokens[ 2 ] );
-		contestant._timeleft.setText( tokens[ 3 ] );
+		int seconds = Integer.parseInt( tokens[ 3 ] );
+		Date d = new Date( seconds * 1000 );
+		
+		contestant._timeleft.setText( new SimpleDateFormat( "mm:ss" ).format( d ) );
 		contestant._byoyomi.setText( tokens[ 4 ] );
 		if ( tokens[ 1 ].equals( _app.getName() ) ) {
 			_gui._board.setStone( _stone = stone );
 			contestant._sit.setText( HGUILocal.GETUP );
 			contestant._sit.setEnabled( true );
+			GoPlayer foe = _contestants.get( _gui._board.oponent( _stone ) );
+			foe._sit.setEnabled( false );
 		} else {
-			if ( stone == _stone ) {
+			if ( ( stone == _stone ) && ( _stone != STONE.NONE ) ) {
 				contestant._sit.setText( HGUILocal.SIT );
+				GoPlayer foe = _contestants.get( _gui._board.oponent( _stone ) );
+				foe._sit.setEnabled( true );
 				_gui._board.setStone( _stone = STONE.NONE );
 			}
 			contestant._sit.setEnabled( "".equals( tokens[ 1 ] ) && ( _stone == STONE.NONE ) );
@@ -281,7 +297,7 @@ class Go extends HAbstractLogic {
 	}
 	void handlerToMove( String $command ) {
 		_toMove = $command.charAt( 0 );
-		_gui._pass.setEnabled( _toMove == _stone );
+		_gui._pass.setEnabled( ( _toMove == _stone ) && ( _stone != STONE.NONE ) );
 		_gui._conf.setEnabled( _admin && ( _toMove == STONE.NONE ) );
 	}
 	void handlerPlayer( String $command ) {

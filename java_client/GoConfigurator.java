@@ -69,7 +69,9 @@ public class GoConfigurator extends HAbstractConfigurator implements ChangeListe
 		_confByoYomiTime.setEnabled( $enabled );
 	}
 	public void selectGobanSize( String $size ) {
+		_ignoreEvents = true;
 		_confGoban.getModel().setSelectedItem( $size );
+		_ignoreEvents = false;
 	}
 	public void stateChanged( ChangeEvent e ) {
 		if ( _ignoreEvents )
@@ -93,5 +95,8 @@ public class GoConfigurator extends HAbstractConfigurator implements ChangeListe
 		_ignoreEvents = true;
 		$spinner.setValue( $value );
 		_ignoreEvents = false;
+	}
+	public boolean eventsIgnored() {
+		return ( _ignoreEvents );
 	}
 }
