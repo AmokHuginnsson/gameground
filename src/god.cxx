@@ -240,7 +240,10 @@ void HGo::handler_pass( OClientInfo* a_poClientInfo, HString const& /*a_roMessag
 	f_eState = oponent( f_eState );
 	++ f_iPass;
 	if ( f_iPass == 3 )
+		{
 		f_eState = STONE::D_NONE;
+		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP << "The match has ended, select dead stones." << endl << _out );
+		}
 	return;
 	M_EPILOG
 	}
