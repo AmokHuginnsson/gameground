@@ -85,6 +85,9 @@ class Go extends HAbstractLogic {
 		public static final char BLACK = 'b';
 		public static final char WHITE = 'w';
 		public static final char NONE	= ' ';
+		public static final String NONE_NAME = "None";
+		public static final String BLACK_NAME = "Black";
+		public static final String WHITE_NAME = "White";
 	}
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
@@ -109,6 +112,8 @@ class Go extends HAbstractLogic {
 		public JList _visitors;
 		public Goban _board;
 		public GoConfigurator _conf;
+		public JLabel _toMove;
+		public JLabel _move;
 		public HGUILocal( String $resource ) {
 			super( $resource );
 		}
@@ -203,6 +208,7 @@ class Go extends HAbstractLogic {
 	private char _stone = STONE.NONE;
 	private char _toMove = STONE.NONE;
 	private boolean _admin = false;
+	private int _move = 0;
 	private SortedMap<Character,GoPlayer> _contestants = java.util.Collections.synchronizedSortedMap( new TreeMap<Character,GoPlayer>() );
 //--------------------------------------------//
 	public Go( GameGround $applet ) throws Exception {
@@ -299,6 +305,16 @@ class Go extends HAbstractLogic {
 		_toMove = $command.charAt( 0 );
 		_gui._pass.setEnabled( ( _toMove == _stone ) && ( _stone != STONE.NONE ) );
 		_gui._conf.setEnabled( _admin && ( _toMove == STONE.NONE ) );
+		++ _move;
+		String toMove = STONE.NONE_NAME;
+		if ( _toMove == STONE.BLACK )
+			toMove = STONE.BLACK_NAME;
+		else if ( _toMove == STONE.WHITE )
+			toMove = STONE.WHITE_NAME;
+		else
+			_move = 0;
+		_gui._move.setText( "" + _move );
+		_gui._toMove.setText( toMove );
 	}
 	void handlerPlayer( String $command ) {
 		DefaultListModel m = (DefaultListModel)_gui._visitors.getModel();
@@ -321,6 +337,7 @@ class Go extends HAbstractLogic {
 		_stone = STONE.NONE;
 		_toMove = STONE.NONE;
 		_admin = false;
+		_move = 0;
 	}
 	static boolean registerLogic( GameGround $app ) {
 		try {

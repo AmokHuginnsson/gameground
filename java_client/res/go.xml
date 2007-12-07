@@ -38,6 +38,12 @@
 				</spinner>
 				<button id="_pass" action="onPass" text="Pass !" constraints="5,3" enabled="false" />
 			</panel>
+			<panel maximumsize="2000,40" border="EmptyBorder(0,4,4,4)">
+				<layout type="FormLayout" columns="36px,8px,p,8px,p" rows="p" />
+				<label id="_toMove" constraints="1,1">None</label>
+				<label constraints="3,1">to move, move </label>
+				<label id="_move" constraints="5,1">0</label>
+			</panel>
 			<vbox maximumsize="2000,240">
 				<panel border="EtchedBorder" layout="BorderLayout">
 					<panel border="EmptyBorder(4,4,4,4)">

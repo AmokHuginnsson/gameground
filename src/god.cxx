@@ -176,9 +176,7 @@ void HGo::handler_sit( OClientInfo* a_poClientInfo, HString const& a_roMessage )
 				set_handicaps( f_iHandicaps );
 			else
 				{
-				broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
-						<< PROTOCOL::TOMOVE << PROTOCOL::SEP
-						<< static_cast<char>( f_eState = ( f_iHandicaps > 1 ? STONE::D_WHITE : STONE::D_BLACK ) ) << endl << _out );
+				f_eState = ( f_iHandicaps > 1 ? STONE::D_WHITE : STONE::D_BLACK );
 				broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 						<< PROTOCOL::MSG << PROTOCOL::SEP << "The Go match started." << endl << _out );
 				}
