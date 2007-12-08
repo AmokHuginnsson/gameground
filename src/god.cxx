@@ -63,6 +63,9 @@ char const* const HGo::PROTOCOL::PUTSTONE = "put_stone";
 char const* const HGo::PROTOCOL::PASS = "pass";
 char const* const HGo::PROTOCOL::SIT = "sit";
 char const* const HGo::PROTOCOL::GETUP = "get_up";
+char const* const HGo::PROTOCOL::MARK = "mark";
+char const* const HGo::PROTOCOL::DEAD = "dead";
+char const* const HGo::PROTOCOL::DONE = "done";
 static int const D_SECONDS_IN_MINUTE = 60;
 
 int const GO_MSG_NOT_YOUR_TURN = 0;
@@ -87,7 +90,7 @@ HGo::HGo( HString const& a_oName )
 	f_oPlayers(), f_oVarTmpBuffer(), f_oMutex()
 	{
 	M_PROLOG
-	f_oContestants[ 0 ] = f_oContestants[ 1 ] = NULL;
+	f_poContestants[ 0 ] = f_poContestants[ 1 ] = NULL;
 	HRandomizer l_oRandom;
 	l_oRandom.set( time ( NULL ) );
 	f_oHandlers[ PROTOCOL::SETUP ] = static_cast<handler_t>( &HGo::handler_setup );
@@ -113,6 +116,16 @@ void HGo::handler_message ( OClientInfo* a_poClientInfo, HString const& a_roMess
 	HLock l( f_oMutex );
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::MSG << PROTOCOL::SEP << a_poClientInfo->f_oName << ": " << a_roMessage << endl << _out );
+	return;
+	M_EPILOG
+	}
+
+void HGo::broadcast_contestants( yaal::hcore::HString const& a_oMessage )
+	{
+	M_PROLOG
+	M_ASSERT( f_poContestants[ 0 ] && f_poContestants[ 1 ] );
+	f_poContestants[ 0 ]->f_oSocket->write_until_eos( a_oMessage );
+	f_poContestants[ 1 ]->f_oSocket->write_until_eos( a_oMessage );
 	return;
 	M_EPILOG
 	}
@@ -240,7 +253,9 @@ void HGo::handler_pass( OClientInfo* a_poClientInfo, HString const& /*a_roMessag
 	if ( f_iPass == 3 )
 		{
 		f_eState = STONE::D_NONE;
-		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP << "The match has ended, select dead stones." << endl << _out );
+		broadcast_contestants( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MARK << endl << _out );
+		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP << "The match has ended." << endl << _out );
+		broadcast_contestants( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP << "Select your dead stones." << endl << _out );
 		}
 	return;
 	M_EPILOG
@@ -598,13 +613,13 @@ void HGo::make_move( int x, int y, STONE::stone_t stone )
 OClientInfo*& HGo::contestant( STONE::stone_t stone )
 	{
 	M_ASSERT( stone != STONE::D_NONE );
-	return ( stone == STONE::D_BLACK ? f_oContestants[ 0 ] : f_oContestants[ 1 ] );
+	return ( stone == STONE::D_BLACK ? f_poContestants[ 0 ] : f_poContestants[ 1 ] );
 	}
 
 OClientInfo*& HGo::contestant( char stone )
 	{
 	M_ASSERT( stone != STONE::D_NONE );
-	return ( stone == STONE::D_BLACK ? f_oContestants[ 0 ] : f_oContestants[ 1 ] );
+	return ( stone == STONE::D_BLACK ? f_poContestants[ 0 ] : f_poContestants[ 1 ] );
 	}
 
 void HGo::contestant_gotup( OClientInfo* a_poClientInfo )

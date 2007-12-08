@@ -78,12 +78,15 @@ class HGo : public HLogic
 		static char const* const STONE;
 		static char const* const STONES;
 		static char const* const TOMOVE;
+		static char const* const MARK;
+		static char const* const DEAD;
+		static char const* const DONE;
 		};
 protected:
 	/*{*/
 	typedef yaal::hcore::HPair<OClientInfo*, OPlayerInfo> player_t;
 	typedef yaal::hcore::HList<player_t> players_t;
-	OClientInfo* f_oContestants[ 2 ];
+	OClientInfo* f_poContestants[ 2 ];
 	STONE::stone_t f_eState;
 	int f_iGobanSize;
 	int f_iKomi;
@@ -141,6 +144,7 @@ protected:
 	void handler_getup( OClientInfo*, yaal::hcore::HString const& );
 	void handler_put_stone( OClientInfo*, yaal::hcore::HString const& );
 	void handler_pass( OClientInfo*, yaal::hcore::HString const& );
+	void broadcast_contestants( yaal::hcore::HString const& );
 	/*}*/
 private:
 	/*{*/
