@@ -209,7 +209,9 @@ class Go extends HAbstractLogic {
 			_whiteSit.setEnabled( _stone != Go.STONE.NONE );
 		}
 		public void onPass() {
-			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + PROTOCOL.PLAY + PROTOCOL.SEP + PROTOCOL.PASS );
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
+					+ PROTOCOL.PLAY + PROTOCOL.SEP
+					+ ( Go.this._toMove != STONE.MARK ? PROTOCOL.PASS : PROTOCOL.ACCEPT ) );
 		}
 	}
 //--------------------------------------------//
