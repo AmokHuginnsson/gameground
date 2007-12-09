@@ -57,13 +57,36 @@ public class Goban extends JPanel implements MouseInputListener {
 					+ Go.PROTOCOL.PLAY + Go.PROTOCOL.SEP
 					+ Go.PROTOCOL.PUTSTONE + Go.PROTOCOL.SEPP + _cursorX + Go.PROTOCOL.SEPP + _cursorY );
 		else if ( validCoords( _cursorX, _cursorY ) && ( _logic.toMove() == Go.STONE.MARK ) ) {
-			if ( _logic.stone() == getStone( _cursorX, _cursorY ) ) {
+			char stone = getStone( _cursorX, _cursorY );
+			if ( ( _logic.stone() == stone ) || ( _logic.stoneDead() == stone ) ) {
 				System.out.println( "dead mark" );
 				_logic._client.println( Go.PROTOCOL.CMD + Go.PROTOCOL.SEP
 						+ Go.PROTOCOL.PLAY + Go.PROTOCOL.SEP
-						+ Go.PROTOCOL.DEAD + Go.PROTOCOL.SEPP + _cursorX + Go.PROTOCOL.SEPP + _cursorY );
+						+ Go.PROTOCOL.DEAD + stoneGroup( _cursorX, _cursorY ) );
 			}
 		}
+	}
+	String stoneGroup( int x, int y ) {
+		char stone = _logic.stone();
+		char stoneDead = _logic.stoneDead();
+		String group = "";
+		setStone( x, y, Go.STONE.NONE );
+		char testStone;
+		testStone = getStone( x - 1, y );
+		if ( ( testStone == stone ) || ( testStone == stoneDead ) )
+			group += stoneGroup( x - 1, y );
+		testStone = getStone( x + 1, y );
+		if ( ( testStone == stone ) || ( testStone == stoneDead ) )
+			group += stoneGroup( x + 1, y );
+		testStone = getStone( x, y - 1 );
+		if ( ( testStone == stone ) || ( testStone == stoneDead ) )
+			group += stoneGroup( x, y - 1 );
+		testStone = getStone( x, y + 1 );
+		if ( ( testStone == stone ) || ( testStone == stoneDead ) )
+			group += stoneGroup( x, y + 1 );
+		group += ( "," + x + Go.PROTOCOL.SEPP + y );
+		setStone( x, y, stone );
+		return ( group );
 	}
 	public void mouseExited( MouseEvent $event ) {
 		_cursorX = -1;
@@ -202,7 +225,10 @@ public class Goban extends JPanel implements MouseInputListener {
 		_koStones[ $row * _size + $col ] = $stone;
 	}
 	char getStone( int $col, int $row ) {
-		return ( _koStones[ $row * _size + $col ] );
+		char stone = Go.STONE.INVALID;
+		if ( validCoords( $col, $row ) )
+			stone = _koStones[ $row * _size + $col ];
+		return ( stone );
 	}
 	boolean haveLiberties( int a_iCol, int a_iRow, char stone ) {
 		if ( ( a_iCol < 0 ) || ( a_iCol > ( _size - 1 ) )

@@ -269,18 +269,23 @@ void HGo::handler_pass( OClientInfo* a_poClientInfo, HString const& /*a_roMessag
 void HGo::handler_dead( OClientInfo* a_poClientInfo, HString const& a_roMessage )
 	{
 	M_PROLOG
-	int col = lexical_cast<int>( a_roMessage.split( ",", 1 ) );
-	int row = lexical_cast<int>( a_roMessage.split( ",", 2 ) );
 	if ( f_eState != STONE::D_MARK )
 		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
-	ensure_coordinates_validity( col, row );
-	STONE::stone_t stone = goban( col, row );
-	if( ! ( ( stone == STONE::D_BLACK ) || ( stone == STONE::D_WHITE )
-				|| ( stone == STONE::D_DEAD_BLACK ) || ( stone == STONE::D_DEAD_WHITE ) ) )
-		throw HLogicException( "no stone here" );
-	if ( contestant( goban( col, row ) ) != a_poClientInfo )
-		throw HLogicException( "not your stone" );
-	mark_stone_dead( col, row );
+	HString str;
+	for ( int i = 1; ! ( str = a_roMessage.split( ",", i ) ).is_empty() ; i += 2 )
+		{
+		int col = lexical_cast<int>( str );
+		int row = lexical_cast<int>( a_roMessage.split( ",", i + 1 ) );
+		out << "dead: " << col << "," << row << endl;
+		ensure_coordinates_validity( col, row );
+		STONE::stone_t stone = goban( col, row );
+		if( ! ( ( stone == STONE::D_BLACK ) || ( stone == STONE::D_WHITE )
+					|| ( stone == STONE::D_DEAD_BLACK ) || ( stone == STONE::D_DEAD_WHITE ) ) )
+			throw HLogicException( "no stone here" );
+		if ( contestant( goban( col, row ) ) != a_poClientInfo )
+			throw HLogicException( "not your stone" );
+		mark_stone_dead( col, row );
+		}
 	send_goban();
 	return;
 	M_EPILOG

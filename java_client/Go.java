@@ -90,6 +90,7 @@ class Go extends HAbstractLogic {
 		public static final char MARK = 'm';
 		public static final char DEAD_BLACK = 's';
 		public static final char DEAD_WHITE = 't';
+		public static final char INVALID = 'N';
 		public static final String NONE_NAME = "None";
 		public static final String BLACK_NAME = "Black";
 		public static final String WHITE_NAME = "White";
@@ -359,6 +360,9 @@ class Go extends HAbstractLogic {
 	}
 	public char stone() {
 		return ( _stone );
+	}
+	public char stoneDead() {
+		return ( _stone == STONE.BLACK ? STONE.DEAD_BLACK : STONE.DEAD_WHITE );
 	}
 	public char toMove() {
 		return ( _toMove );
