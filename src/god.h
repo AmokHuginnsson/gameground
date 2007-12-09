@@ -45,12 +45,13 @@ class HGo : public HLogic
 		};
 	struct STONE
 		{
-		typedef enum
-			{
-			D_BLACK = 'b',
-			D_WHITE = 'w',
-			D_NONE = ' '
-			} stone_t;
+		typedef char stone_t;
+		static stone_t const D_BLACK;
+		static stone_t const D_WHITE;
+		static stone_t const D_NONE;
+		static stone_t const D_MARK;
+		static stone_t const D_DEAD_WHITE;
+		static stone_t const D_DEAD_BLACK;
 		};
 	struct GOBAN_SIZE
 		{
@@ -78,9 +79,8 @@ class HGo : public HLogic
 		static char const* const STONE;
 		static char const* const STONES;
 		static char const* const TOMOVE;
-		static char const* const MARK;
 		static char const* const DEAD;
-		static char const* const DONE;
+		static char const* const ACCEPT;
 		};
 protected:
 	/*{*/
@@ -129,7 +129,6 @@ protected:
 	bool have_liberties( int, int, STONE::stone_t );
 	char& goban( int, int );
 	OClientInfo*& contestant( STONE::stone_t );
-	OClientInfo*& contestant( char );
 	void clear_goban( bool );
 	bool have_killed( int, int, STONE::stone_t );
 	HGo::STONE::stone_t oponent( STONE::stone_t );
@@ -144,7 +143,12 @@ protected:
 	void handler_getup( OClientInfo*, yaal::hcore::HString const& );
 	void handler_put_stone( OClientInfo*, yaal::hcore::HString const& );
 	void handler_pass( OClientInfo*, yaal::hcore::HString const& );
+	void handler_dead( OClientInfo*, yaal::hcore::HString const& );
+	void handler_accept( OClientInfo* );
 	void broadcast_contestants( yaal::hcore::HString const& );
+	void ensure_coordinates_validity( int, int );
+	void mark_stone_dead( int, int );
+	void commit( void );
 	/*}*/
 private:
 	/*{*/

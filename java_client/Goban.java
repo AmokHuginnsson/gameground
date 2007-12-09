@@ -56,6 +56,14 @@ public class Goban extends JPanel implements MouseInputListener {
 			_logic._client.println( Go.PROTOCOL.CMD + Go.PROTOCOL.SEP
 					+ Go.PROTOCOL.PLAY + Go.PROTOCOL.SEP
 					+ Go.PROTOCOL.PUTSTONE + Go.PROTOCOL.SEPP + _cursorX + Go.PROTOCOL.SEPP + _cursorY );
+		else if ( validCoords( _cursorX, _cursorY ) && ( _logic.toMove() == Go.STONE.MARK ) ) {
+			if ( _logic.stone() == getStone( _cursorX, _cursorY ) ) {
+				System.out.println( "dead mark" );
+				_logic._client.println( Go.PROTOCOL.CMD + Go.PROTOCOL.SEP
+						+ Go.PROTOCOL.PLAY + Go.PROTOCOL.SEP
+						+ Go.PROTOCOL.DEAD + Go.PROTOCOL.SEPP + _cursorX + Go.PROTOCOL.SEPP + _cursorY );
+			}
+		}
 	}
 	public void mouseExited( MouseEvent $event ) {
 		_cursorX = -1;
@@ -69,12 +77,17 @@ public class Goban extends JPanel implements MouseInputListener {
 		_stone = $stone;
 	}
 	public void setStones( byte[] $stones ) {
+		setStones( $stones, false );
+	}
+	public void setStones( byte[] $stones, boolean $commit ) {
 		if ( _stones != null )
 			_oldStones = Arrays.copyOf( _stones, _size * _size );
 		else
 			_stones = new char[Go.GOBAN_SIZE.NORMAL * Go.GOBAN_SIZE.NORMAL]; 
 		for ( int i = 0; i < $stones.length; ++ i )
 			_stones[ i ] = (char)$stones[ i ];
+		if ( $commit )
+			_koStones = Arrays.copyOf( _stones, _size * _size );
 	}
 	public void setImages( GoImages $images ) {
 		_images = $images;
@@ -147,14 +160,22 @@ public class Goban extends JPanel implements MouseInputListener {
 	}
 	private void drawStone( int $xx, int $yy, int $color, boolean $alpha, Graphics $gc ) {
 		Image img = null;
-		if ( $color == Go.STONE.WHITE ) {
-			if ( $alpha )
+		if ( $color == Go.STONE.DEAD_BLACK ) {
+			$alpha = true;
+			$color = Go.STONE.BLACK;
+		}
+		if ( $color == Go.STONE.DEAD_WHITE ) {
+			$alpha = true;
+			$color = Go.STONE.WHITE;
+		}
+		if ( $alpha ) {
+			if ( $color == Go.STONE.WHITE )
 				img = _images._whitesAlpha[ ( $yy * _size + $xx ) % GoImages.D_WHITE_LOOKS ];
 			else
-				img = _images._whites[ ( $yy * _size + $xx ) % GoImages.D_WHITE_LOOKS ];
-		} else {
-			if ( $alpha )
 				img = _images._blackAlpha;
+		} else {
+			if ( $color == Go.STONE.WHITE )
+				img = _images._whites[ ( $yy * _size + $xx ) % GoImages.D_WHITE_LOOKS ];
 			else
 				img = _images._black;
 		}
@@ -251,12 +272,13 @@ public class Goban extends JPanel implements MouseInputListener {
 		setStone( x, y, Go.STONE.NONE );
 		return ( suicide );
 	}	
+	boolean validCoords( int x, int y ) {
+		return ( ( x >= 0 ) && ( x < _size )
+				&& ( y >= 0 ) && ( y < _size ) );
+	}
 	boolean breakTheRules( int x, int y, char stone ) {
-		boolean invalid = false;
-		if ( ( x < 0 ) || ( x > ( _size - 1 ) )
-				|| ( y < 0 ) || ( y > ( _size - 1 ) ) )
-			invalid = true;
-		else {
+		boolean invalid = ! validCoords( x, y );
+		if ( ! invalid ) {
 			_koStones = Arrays.copyOf( _stones, _size * _size );
 			if ( getStone( x, y ) != Go.STONE.NONE )
 				invalid = true;

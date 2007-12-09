@@ -76,6 +76,8 @@ class Go extends HAbstractLogic {
 		public static final String TOMOVE = "to_move";
 		public static final String PLAYER = "player";
 		public static final String PLAYERQUIT = "player_quit";
+		public static final String DEAD = "dead";
+		public static final String ACCEPT = "accept";
 		public static final String PREFIX = PROTOCOL.CMD + PROTOCOL.SEP + PROTOCOL.NAME + PROTOCOL.SEP;
 	}
 	public static final class GOBAN_SIZE {
@@ -85,6 +87,9 @@ class Go extends HAbstractLogic {
 		public static final char BLACK = 'b';
 		public static final char WHITE = 'w';
 		public static final char NONE	= ' ';
+		public static final char MARK = 'm';
+		public static final char DEAD_BLACK = 's';
+		public static final char DEAD_WHITE = 't';
 		public static final String NONE_NAME = "None";
 		public static final String BLACK_NAME = "Black";
 		public static final String WHITE_NAME = "White";
@@ -114,12 +119,19 @@ class Go extends HAbstractLogic {
 		public GoConfigurator _conf;
 		public JLabel _toMove;
 		public JLabel _move;
+		public String _toolTip;
+		public String _passText;
 		public HGUILocal( String $resource ) {
 			super( $resource );
 		}
 		public void updateTagLib( XUL $xul ) {
 			$xul.getTaglib().registerTag( "goban", Goban.class );
 			$xul.getTaglib().registerTag( "panel", GoConfigurator.class );
+		}
+		public void init() {
+			super.init();
+			_toolTip = _pass.getToolTipText();
+			_passText = _pass.getText();
 		}
 		public void reinit() {
 			clearLog();
@@ -209,6 +221,7 @@ class Go extends HAbstractLogic {
 	private char _toMove = STONE.NONE;
 	private boolean _admin = false;
 	private int _move = 0;
+	private String _stones = null;
 	private SortedMap<Character,GoPlayer> _contestants = java.util.Collections.synchronizedSortedMap( new TreeMap<Character,GoPlayer>() );
 //--------------------------------------------//
 	public Go( GameGround $applet ) throws Exception {
@@ -269,7 +282,7 @@ class Go extends HAbstractLogic {
 		}
 	}
 	void handlerStones( String $command ) {
-		_gui._board.setStones( $command.getBytes() );
+		_gui._board.setStones( ( _stones = $command ).getBytes() );
 		_gui._board.repaint();
 	}
 	void handlerContestant( String $command ) {
@@ -295,6 +308,10 @@ class Go extends HAbstractLogic {
 				GoPlayer foe = _contestants.get( _gui._board.oponent( _stone ) );
 				foe._sit.setEnabled( true );
 				_gui._board.setStone( _stone = STONE.NONE );
+				if ( _gui._toolTip != null ) {
+					_gui._pass.setText( _gui._passText );
+					_gui._pass.setToolTipText( _gui._toolTip );
+				}
 			}
 			contestant._sit.setEnabled( "".equals( tokens[ 1 ] ) && ( _stone == STONE.NONE ) );
 		}
@@ -303,18 +320,29 @@ class Go extends HAbstractLogic {
 	}
 	void handlerToMove( String $command ) {
 		_toMove = $command.charAt( 0 );
-		_gui._pass.setEnabled( ( _toMove == _stone ) && ( _stone != STONE.NONE ) );
-		_gui._conf.setEnabled( _admin && ( _toMove == STONE.NONE ) );
-		++ _move;
-		String toMove = STONE.NONE_NAME;
-		if ( _toMove == STONE.BLACK )
-			toMove = STONE.BLACK_NAME;
-		else if ( _toMove == STONE.WHITE )
-			toMove = STONE.WHITE_NAME;
-		else
-			_move = 0;
-		_gui._move.setText( "" + _move );
-		_gui._toMove.setText( toMove );
+		if ( _toMove == STONE.MARK )
+			handlerMark();
+		else {
+			_gui._pass.setEnabled( ( _toMove == _stone ) && ( _stone != STONE.NONE ) );
+			_gui._conf.setEnabled( _admin && ( _toMove == STONE.NONE ) );
+			++ _move;
+			String toMove = STONE.NONE_NAME;
+			if ( _toMove == STONE.BLACK )
+				toMove = STONE.BLACK_NAME;
+			else if ( _toMove == STONE.WHITE )
+				toMove = STONE.WHITE_NAME;
+			else
+				_move = 0;
+			_gui._move.setText( "" + _move );
+			_gui._toMove.setText( toMove );
+		}
+	}
+	void handlerMark() {
+		_gui._board.setStones( _stones.getBytes(), true );
+		_gui._toMove.setText( STONE.NONE_NAME );
+		_gui._pass.setText( "Accept" );
+		_gui._pass.setEnabled( true );
+		_gui.setToolTipText( "You are accepting opponents markings, not your own." );
 	}
 	void handlerPlayer( String $command ) {
 		DefaultListModel m = (DefaultListModel)_gui._visitors.getModel();
@@ -329,6 +357,9 @@ class Go extends HAbstractLogic {
 	}
 	public char stone() {
 		return ( _stone );
+	}
+	public char toMove() {
+		return ( _toMove );
 	}
 	public void reinit() {
 		_client = _app.getClient();

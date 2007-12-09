@@ -45,6 +45,13 @@ using namespace yaal::tools::util;
 namespace go
 {
 
+HGo::STONE::stone_t const HGo::STONE::D_BLACK = 'b';
+HGo::STONE::stone_t const HGo::STONE::D_WHITE = 'w';
+HGo::STONE::stone_t const HGo::STONE::D_NONE = ' ';
+HGo::STONE::stone_t const HGo::STONE::D_MARK = 'm';
+HGo::STONE::stone_t const HGo::STONE::D_DEAD_BLACK = 's';
+HGo::STONE::stone_t const HGo::STONE::D_DEAD_WHITE = 't';
+
 char const* const HGo::PROTOCOL::NAME = "go";
 char const* const HGo::PROTOCOL::SETUP = "setup";
 char const* const HGo::PROTOCOL::ADMIN = "admin";
@@ -63,9 +70,8 @@ char const* const HGo::PROTOCOL::PUTSTONE = "put_stone";
 char const* const HGo::PROTOCOL::PASS = "pass";
 char const* const HGo::PROTOCOL::SIT = "sit";
 char const* const HGo::PROTOCOL::GETUP = "get_up";
-char const* const HGo::PROTOCOL::MARK = "mark";
 char const* const HGo::PROTOCOL::DEAD = "dead";
-char const* const HGo::PROTOCOL::DONE = "done";
+char const* const HGo::PROTOCOL::ACCEPT = "accept";
 static int const D_SECONDS_IN_MINUTE = 60;
 
 int const GO_MSG_NOT_YOUR_TURN = 0;
@@ -244,7 +250,7 @@ void HGo::handler_put_stone( OClientInfo* a_poClientInfo, HString const& a_roMes
 void HGo::handler_pass( OClientInfo* a_poClientInfo, HString const& /*a_roMessage*/ )
 	{
 	M_PROLOG
-	if ( f_eState == STONE::D_NONE )
+	if ( ( f_eState != STONE::D_BLACK ) && ( f_eState != STONE::D_WHITE ) )
 		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
 	if ( contestant( f_eState ) != a_poClientInfo )
 		throw HLogicException( GO_MSG[ GO_MSG_NOT_YOUR_TURN ] );
@@ -252,8 +258,7 @@ void HGo::handler_pass( OClientInfo* a_poClientInfo, HString const& /*a_roMessag
 	++ f_iPass;
 	if ( f_iPass == 3 )
 		{
-		f_eState = STONE::D_NONE;
-		broadcast_contestants( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MARK << endl << _out );
+		f_eState = STONE::D_MARK;
 		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP << "The match has ended." << endl << _out );
 		broadcast_contestants( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP << "Select your dead stones." << endl << _out );
 		}
@@ -261,7 +266,34 @@ void HGo::handler_pass( OClientInfo* a_poClientInfo, HString const& /*a_roMessag
 	M_EPILOG
 	}
 
-void HGo::handler_play ( OClientInfo* a_poClientInfo, HString const& a_roMessage )
+void HGo::handler_dead( OClientInfo* a_poClientInfo, HString const& a_roMessage )
+	{
+	M_PROLOG
+	int col = lexical_cast<int>( a_roMessage.split( ",", 1 ) );
+	int row = lexical_cast<int>( a_roMessage.split( ",", 2 ) );
+	if ( f_eState != STONE::D_MARK )
+		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
+	ensure_coordinates_validity( col, row );
+	STONE::stone_t stone = goban( col, row );
+	if( ! ( ( stone == STONE::D_BLACK ) || ( stone == STONE::D_WHITE )
+				|| ( stone == STONE::D_DEAD_BLACK ) || ( stone == STONE::D_DEAD_WHITE ) ) )
+		throw HLogicException( "no stone here" );
+	if ( contestant( goban( col, row ) ) != a_poClientInfo )
+		throw HLogicException( "not your stone" );
+	mark_stone_dead( col, row );
+	send_goban();
+	return;
+	M_EPILOG
+	}
+
+void HGo::handler_accept( OClientInfo* )
+	{
+	M_PROLOG
+	return;
+	M_EPILOG
+	}
+
+void HGo::handler_play( OClientInfo* a_poClientInfo, HString const& a_roMessage )
 	{
 	M_PROLOG
 	HLock l( f_oMutex );
@@ -274,6 +306,10 @@ void HGo::handler_play ( OClientInfo* a_poClientInfo, HString const& a_roMessage
 		handler_sit( a_poClientInfo, a_roMessage );
 	else if ( item == PROTOCOL::GETUP )
 		handler_getup( a_poClientInfo, a_roMessage );
+	else if ( item == PROTOCOL::DEAD )
+		handler_dead( a_poClientInfo, a_roMessage );
+	else if ( item == PROTOCOL::ACCEPT )
+		handler_accept( a_poClientInfo );
 	else
 		throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
@@ -586,11 +622,17 @@ bool HGo::is_suicide( int x, int y, STONE::stone_t stone )
 	return ( suicide );
 	}	
 
-void HGo::make_move( int x, int y, STONE::stone_t stone )
+void HGo::ensure_coordinates_validity( int x, int y )
 	{
 	if ( ( x < 0 ) || ( x > ( f_iGobanSize - 1 ) )
 			|| ( y < 0 ) || ( y > ( f_iGobanSize - 1 ) ) )
 		throw HLogicException( "move outside goban" );
+	}
+
+void HGo::make_move( int x, int y, STONE::stone_t stone )
+	{
+	M_PROLOG
+	ensure_coordinates_validity( x, y );
 	::memcpy( f_oKoGame.raw(), f_oGame.raw(), f_iGobanSize * f_iGobanSize );
 	if ( goban( x, y ) != STONE::D_NONE )
 		throw HLogicException( "position already occupied" );
@@ -606,20 +648,43 @@ void HGo::make_move( int x, int y, STONE::stone_t stone )
 	if ( is_ko() )
 		throw HLogicException( "forbidden by ko rule" );
 	::memcpy( f_oOldGame.raw(), f_oGame.raw(), f_iGobanSize * f_iGobanSize );
+	commit();
+	return;
+	M_EPILOG
+	}
+
+void HGo::commit( void )
+	{
+	M_PROLOG
 	::memcpy( f_oGame.raw(), f_oKoGame.raw(), f_iGobanSize * f_iGobanSize );
 	return;
+	M_EPILOG
+	}
+
+void HGo::mark_stone_dead( int col, int row )
+	{
+	M_PROLOG
+	STONE::stone_t stone = goban( col, row );
+	switch ( stone )
+		{
+		case ( STONE::D_BLACK ) : stone = STONE::D_DEAD_BLACK; break;
+		case ( STONE::D_WHITE ) : stone = STONE::D_DEAD_WHITE; break;
+		case ( STONE::D_DEAD_BLACK ) : stone = STONE::D_BLACK; break;
+		case ( STONE::D_DEAD_WHITE ) : stone = STONE::D_WHITE; break;
+		default:
+			M_ASSERT( ! "predicate error for switch( stone )" );
+		}
+	goban( col, row ) = stone;
+	commit();
+	return;
+	M_EPILOG
 	}
 
 OClientInfo*& HGo::contestant( STONE::stone_t stone )
 	{
-	M_ASSERT( stone != STONE::D_NONE );
-	return ( stone == STONE::D_BLACK ? f_poContestants[ 0 ] : f_poContestants[ 1 ] );
-	}
-
-OClientInfo*& HGo::contestant( char stone )
-	{
-	M_ASSERT( stone != STONE::D_NONE );
-	return ( stone == STONE::D_BLACK ? f_poContestants[ 0 ] : f_poContestants[ 1 ] );
+	M_ASSERT( ( stone == STONE::D_BLACK ) || ( stone == STONE::D_WHITE )
+			|| ( stone == STONE::D_DEAD_BLACK ) || ( stone == STONE::D_DEAD_WHITE ) );
+	return ( ( stone == STONE::D_BLACK ) || ( stone == STONE::D_DEAD_BLACK ) ? f_poContestants[ 0 ] : f_poContestants[ 1 ] );
 	}
 
 void HGo::contestant_gotup( OClientInfo* a_poClientInfo )
