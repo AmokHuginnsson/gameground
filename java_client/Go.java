@@ -213,6 +213,8 @@ class Go extends HAbstractLogic {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
 					+ ( Go.this._toMove != STONE.MARK ? PROTOCOL.PASS : PROTOCOL.ACCEPT ) );
+			if ( Go.this._toMove == STONE.MARK )
+				_pass.setEnabled( false );
 		}
 	}
 //--------------------------------------------//

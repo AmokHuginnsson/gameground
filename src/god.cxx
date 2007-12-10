@@ -73,6 +73,7 @@ char const* const HGo::PROTOCOL::GETUP = "get_up";
 char const* const HGo::PROTOCOL::DEAD = "dead";
 char const* const HGo::PROTOCOL::ACCEPT = "accept";
 static int const D_SECONDS_IN_MINUTE = 60;
+static int const D_ACCEPTED = -7;
 
 int const GO_MSG_NOT_YOUR_TURN = 0;
 int const GO_MSG_YOU_CANT_DO_IT_NOW = 1;
@@ -208,21 +209,15 @@ void HGo::handler_sit( OClientInfo* a_poClientInfo, HString const& a_roMessage )
 void HGo::handler_getup( OClientInfo* a_poClientInfo, HString const& /*a_roMessage*/ )
 	{
 	M_PROLOG
-	if ( ( contestant( STONE::D_BLACK ) != a_poClientInfo )
-			&& ( contestant( STONE::D_WHITE ) != a_poClientInfo ) )
-		throw HLogicException( "you are not sitting" );
-	else
+	contestant_gotup( a_poClientInfo );
+	OClientInfo* foe = NULL;
+	if ( ( foe = contestant( STONE::D_BLACK ) ) || ( foe = contestant( STONE::D_WHITE ) ) )
 		{
-		contestant_gotup( a_poClientInfo );
-		OClientInfo* foe = NULL;
-		if ( ( foe = contestant( STONE::D_BLACK ) ) || ( foe = contestant( STONE::D_WHITE ) ) )
-			{
-			broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
-					<< PROTOCOL::MSG << PROTOCOL::SEP
-					<< a_poClientInfo->f_oName << " resigned - therefore " << foe->f_oName << " wins." << endl << _out );
-			}
-		f_eState = STONE::D_NONE;
+		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
+				<< PROTOCOL::MSG << PROTOCOL::SEP
+				<< a_poClientInfo->f_oName << " resigned - therefore " << foe->f_oName << " wins." << endl << _out );
 		}
+	f_eState = STONE::D_NONE;
 	return;
 	M_EPILOG
 	}
@@ -230,7 +225,7 @@ void HGo::handler_getup( OClientInfo* a_poClientInfo, HString const& /*a_roMessa
 void HGo::handler_put_stone( OClientInfo* a_poClientInfo, HString const& a_roMessage )
 	{
 	M_PROLOG
-	if ( f_eState == STONE::D_NONE )
+	if ( ( f_eState != STONE::D_BLACK ) && ( f_eState != STONE::D_WHITE ) )
 		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
 	if ( contestant( f_eState ) != a_poClientInfo )
 		throw HLogicException( GO_MSG[ GO_MSG_NOT_YOUR_TURN ] );
@@ -291,9 +286,21 @@ void HGo::handler_dead( OClientInfo* a_poClientInfo, HString const& a_roMessage 
 	M_EPILOG
 	}
 
-void HGo::handler_accept( OClientInfo* )
+void HGo::handler_accept( OClientInfo* a_poClientInfo )
 	{
 	M_PROLOG
+	if ( f_eState != STONE::D_MARK )
+		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
+	OPlayerInfo& info = *get_player_info( a_poClientInfo );
+	if ( info.f_iByoYomiPeriods == D_ACCEPTED )
+		throw HLogicException( "you already accepted stones" );
+	info.f_iByoYomiPeriods = D_ACCEPTED;
+	if ( ( get_player_info( f_poContestants[ 0 ] )->f_iByoYomiPeriods == D_ACCEPTED )
+			&& ( get_player_info( f_poContestants[ 1 ] )->f_iByoYomiPeriods == D_ACCEPTED ) )
+		{
+		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+				<< "The game results are:" << endl << _out );
+		}
 	return;
 	M_EPILOG
 	}
@@ -303,6 +310,10 @@ void HGo::handler_play( OClientInfo* a_poClientInfo, HString const& a_roMessage 
 	M_PROLOG
 	HLock l( f_oMutex );
 	HString item = a_roMessage.split( ",", 0 );
+	if ( ( item != PROTOCOL::SIT )
+			&& ( contestant( STONE::D_BLACK ) != a_poClientInfo )
+			&& ( contestant( STONE::D_WHITE ) != a_poClientInfo ) )
+		throw HLogicException( "you are not plaing" );
 	if ( item == PROTOCOL::PUTSTONE )
 		handler_put_stone( a_poClientInfo, a_roMessage );
 	else if ( item == PROTOCOL::PASS )
@@ -696,6 +707,7 @@ void HGo::contestant_gotup( OClientInfo* a_poClientInfo )
 	{
 	STONE::stone_t stone = ( contestant( STONE::D_BLACK ) == a_poClientInfo ? STONE::D_BLACK : STONE::D_WHITE );
 	contestant( stone ) = NULL;
+	f_eState = STONE::D_NONE;
 	return;
 	}
 
