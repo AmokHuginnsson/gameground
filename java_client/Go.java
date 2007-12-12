@@ -90,6 +90,9 @@ class Go extends HAbstractLogic {
 		public static final char MARK = 'm';
 		public static final char DEAD_BLACK = 's';
 		public static final char DEAD_WHITE = 't';
+		public static final char TERITORY_BLACK = 'p';
+		public static final char TERITORY_WHITE = 'q';
+		public static final char DAME = 'x';
 		public static final char INVALID = 'N';
 		public static final String NONE_NAME = "None";
 		public static final String BLACK_NAME = "Black";
@@ -140,6 +143,8 @@ class Go extends HAbstractLogic {
 			_conf.gobanModel();
 			((DefaultListModel)_visitors.getModel()).clear();
 			_conf.setEnabled( false );
+			_pass.setText( _passText );
+			_pass.setToolTipText( _toolTip );
 		}
 		public JTextPane getLogPad() {
 			return ( _logPad );
@@ -213,8 +218,7 @@ class Go extends HAbstractLogic {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
 					+ ( Go.this._toMove != STONE.MARK ? PROTOCOL.PASS : PROTOCOL.ACCEPT ) );
-			if ( Go.this._toMove == STONE.MARK )
-				_pass.setEnabled( false );
+			_pass.setEnabled( false );
 		}
 	}
 //--------------------------------------------//
@@ -296,11 +300,13 @@ class Go extends HAbstractLogic {
 		GoPlayer contestant = _contestants.get( new Character( stone = tokens[ 0 ].charAt( 0 ) ) );
 		contestant._name.setText( tokens[ 1 ] );
 		contestant._captures.setText( tokens[ 2 ] );
-		int seconds = Integer.parseInt( tokens[ 3 ] );
+		contestant._score.setText( tokens[ 3 ] );
+		int seconds = Integer.parseInt( tokens[ 4 ] );
 		Date d = new Date( seconds * 1000 );
 		
 		contestant._timeleft.setText( new SimpleDateFormat( "mm:ss" ).format( d ) );
-		contestant._byoyomi.setText( tokens[ 4 ] );
+		if ( Integer.parseInt( tokens[ 5 ] ) >= 0 )
+			contestant._byoyomi.setText( tokens[ 5 ] );
 		if ( tokens[ 1 ].equals( _app.getName() ) ) {
 			_gui._board.setStone( _stone = stone );
 			contestant._sit.setText( HGUILocal.GETUP );

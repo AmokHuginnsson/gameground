@@ -66,7 +66,7 @@ public class Goban extends JPanel implements MouseInputListener {
 			}
 		}
 	}
-	String stoneGroup( int x, int y ) {
+	private String stoneGroup( int x, int y ) {
 		char stone = _logic.stone();
 		char stoneDead = _logic.stoneDead();
 		String group = "";
@@ -183,6 +183,15 @@ public class Goban extends JPanel implements MouseInputListener {
 	}
 	private void drawStone( int $xx, int $yy, int $color, boolean $alpha, Graphics $gc ) {
 		Image img = null;
+		boolean teritory = false;
+		if ( $color == Go.STONE.TERITORY_BLACK ) {
+			$color = Go.STONE.BLACK;
+			teritory = true;
+		}
+		if ( $color == Go.STONE.TERITORY_WHITE ) {
+			$color = Go.STONE.WHITE;
+			teritory = true;
+		}
 		if ( $color == Go.STONE.DEAD_BLACK ) {
 			$alpha = true;
 			$color = Go.STONE.BLACK;
@@ -204,11 +213,17 @@ public class Goban extends JPanel implements MouseInputListener {
 		}
 		int margin = _virtSize / ( _size + 4 );
 		int inside = _virtSize - 2 * margin;
-		if ( ! $alpha )
-			$gc.drawImage( _images._shadow, D_MARGIN + margin + ( inside * $xx ) / ( _size - 1 ) - (int)( ( _diameter / 2 ) + ( _diameter / 10 ) ),
+		if ( ! ( $alpha || teritory ) )
+			$gc.drawImage( _images._shadow,
+					D_MARGIN + margin + ( inside * $xx ) / ( _size - 1 ) - (int)( ( _diameter / 2 ) + ( _diameter / 10 ) ),
 					D_MARGIN + margin + ( inside * $yy ) / ( _size - 1 ) + (int)( _diameter / 10 ) - (int)( _diameter / 2 ), this );
-		$gc.drawImage( img, D_MARGIN + margin + ( inside * $xx ) / ( _size - 1 ) - (int)( _diameter / 2 ),
-				D_MARGIN + margin + ( inside * $yy ) / ( _size - 1 ) - (int)( _diameter / 2 ), this );
+		if ( ! teritory )
+			$gc.drawImage( img, D_MARGIN + margin + ( inside * $xx ) / ( _size - 1 ) - (int)( _diameter / 2 ),
+					D_MARGIN + margin + ( inside * $yy ) / ( _size - 1 ) - (int)( _diameter / 2 ), this );
+		else
+			$gc.drawImage( img, D_MARGIN + margin + ( inside * $xx ) / ( _size - 1 ) - (int)( _diameter / 4 ),
+					D_MARGIN + margin + ( inside * $yy ) / ( _size - 1 ) - (int)( _diameter / 4 ),
+					(int)( _diameter / 2 ), (int)( _diameter / 2 ), this );
 	}
 	private void drawStones( Graphics g ) {
 		if ( _stones != null ) {
@@ -216,7 +231,7 @@ public class Goban extends JPanel implements MouseInputListener {
 			size = ( size < _stones.length ? size : _stones.length );
 			for ( int i = 0; i < size; ++ i ) {
 				char stone = _stones[ i ];
-				if ( stone != Go.STONE.NONE )
+				if ( ( stone != Go.STONE.NONE ) && ( stone != Go.STONE.DAME ) )
 					drawStone( i % _size, i / _size, stone, false, g );
 			}
 		}

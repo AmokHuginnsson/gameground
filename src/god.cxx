@@ -51,6 +51,9 @@ HGo::STONE::stone_t const HGo::STONE::D_NONE = ' ';
 HGo::STONE::stone_t const HGo::STONE::D_MARK = 'm';
 HGo::STONE::stone_t const HGo::STONE::D_DEAD_BLACK = 's';
 HGo::STONE::stone_t const HGo::STONE::D_DEAD_WHITE = 't';
+HGo::STONE::stone_t const HGo::STONE::D_TERITORY_BLACK = 'p';
+HGo::STONE::stone_t const HGo::STONE::D_TERITORY_WHITE = 'q';
+HGo::STONE::stone_t const HGo::STONE::D_TERITORY_NONE = 'x';
 
 char const* const HGo::PROTOCOL::NAME = "go";
 char const* const HGo::PROTOCOL::SETUP = "setup";
@@ -97,7 +100,7 @@ HGo::HGo( HString const& a_oName )
 	f_oPlayers(), f_oVarTmpBuffer(), f_oMutex()
 	{
 	M_PROLOG
-	f_poContestants[ 0 ] = f_poContestants[ 1 ] = NULL;
+	f_ppoContestants[ 0 ] = f_ppoContestants[ 1 ] = NULL;
 	HRandomizer l_oRandom;
 	l_oRandom.set( time ( NULL ) );
 	f_oHandlers[ PROTOCOL::SETUP ] = static_cast<handler_t>( &HGo::handler_setup );
@@ -130,9 +133,9 @@ void HGo::handler_message ( OClientInfo* a_poClientInfo, HString const& a_roMess
 void HGo::broadcast_contestants( yaal::hcore::HString const& a_oMessage )
 	{
 	M_PROLOG
-	M_ASSERT( f_poContestants[ 0 ] && f_poContestants[ 1 ] );
-	f_poContestants[ 0 ]->f_oSocket->write_until_eos( a_oMessage );
-	f_poContestants[ 1 ]->f_oSocket->write_until_eos( a_oMessage );
+	M_ASSERT( f_ppoContestants[ 0 ] && f_ppoContestants[ 1 ] );
+	f_ppoContestants[ 0 ]->f_oSocket->write_until_eos( a_oMessage );
+	f_ppoContestants[ 1 ]->f_oSocket->write_until_eos( a_oMessage );
 	return;
 	M_EPILOG
 	}
@@ -192,6 +195,8 @@ void HGo::handler_sit( OClientInfo* a_poClientInfo, HString const& a_roMessage )
 			OPlayerInfo& info = *get_player_info( a_poClientInfo );
 			info.f_iTimeLeft = f_iMainTime * D_SECONDS_IN_MINUTE;
 			info.f_iByoYomiPeriods = f_iByoYomiPeriods;
+			info.f_iStonesCaptured = 0;
+			info.f_iScore = ( stone == STONE::D_WHITE ? f_iKomi : 0 );
 			if ( ! ( contestant( STONE::D_BLACK ) && contestant( STONE::D_WHITE ) ) )
 				set_handicaps( f_iHandicaps );
 			else
@@ -295,14 +300,117 @@ void HGo::handler_accept( OClientInfo* a_poClientInfo )
 	if ( info.f_iByoYomiPeriods == D_ACCEPTED )
 		throw HLogicException( "you already accepted stones" );
 	info.f_iByoYomiPeriods = D_ACCEPTED;
-	if ( ( get_player_info( f_poContestants[ 0 ] )->f_iByoYomiPeriods == D_ACCEPTED )
-			&& ( get_player_info( f_poContestants[ 1 ] )->f_iByoYomiPeriods == D_ACCEPTED ) )
-		{
-		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
-				<< "The game results are:" << endl << _out );
-		}
+	if ( ( get_player_info( f_ppoContestants[ 0 ] )->f_iByoYomiPeriods == D_ACCEPTED )
+			&& ( get_player_info( f_ppoContestants[ 1 ] )->f_iByoYomiPeriods == D_ACCEPTED ) )
+		count_score();
 	return;
 	M_EPILOG
+	}
+
+void HGo::count_score( void )
+	{
+	M_PROLOG
+	for ( int i = 0; i < ( f_iGobanSize * f_iGobanSize ); ++ i )
+		{
+		int x = i / f_iGobanSize;
+		int y = i % f_iGobanSize;
+		if ( goban( x, y ) == STONE::D_NONE )
+			{
+			STONE::stone_t teritory = mark_teritory( x, y );
+			STONE::stone_t mark = STONE::D_TERITORY_NONE;
+			switch ( teritory )
+				{
+				case ( STONE::D_BLACK ): mark = STONE::D_TERITORY_BLACK; break;
+				case ( STONE::D_WHITE ): mark = STONE::D_TERITORY_WHITE; break;
+				case ( STONE::D_TERITORY_NONE ): mark = STONE::D_TERITORY_NONE; break;
+				default:
+					out << "teritory: '" << teritory << "'" << endl;
+					M_ASSERT( ! "bug in count_score switch" );
+				}
+			replace_stones( toupper( STONE::D_TERITORY_NONE ), mark );
+			}
+		}
+	replace_stones( toupper( STONE::D_DEAD_BLACK ), STONE::D_DEAD_BLACK );
+	replace_stones( toupper( STONE::D_DEAD_WHITE ), STONE::D_DEAD_WHITE );
+	commit();
+	int l_iBlackTeritory = count_stones( STONE::D_TERITORY_BLACK );
+	int l_iWhiteTeritory = count_stones( STONE::D_TERITORY_WHITE );
+	int l_iBlackCaptures = count_stones( STONE::D_DEAD_BLACK );
+	int l_iWhiteCaptures = count_stones( STONE::D_DEAD_WHITE );
+	l_iBlackTeritory += l_iWhiteCaptures;
+	l_iWhiteTeritory += l_iBlackCaptures;
+	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+			<< "The game results are: " << endl << _out );
+	OPlayerInfo& b = *get_player_info( f_ppoContestants[ 0 ] );
+	OPlayerInfo& w = *get_player_info( f_ppoContestants[ 1 ] );
+	b.f_iStonesCaptured += l_iWhiteCaptures;
+	w.f_iStonesCaptured += l_iBlackCaptures;
+	b.f_iScore = b.f_iStonesCaptured + l_iBlackTeritory;
+	w.f_iScore += ( w.f_iStonesCaptured + l_iWhiteTeritory );
+	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+			<< "Black teritory: " << l_iBlackTeritory
+			<< ", captutes: " << b.f_iStonesCaptured << "." << endl << _out );
+	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+			<< "White teritory: " << l_iWhiteTeritory
+			<< ", captutes: " << w.f_iStonesCaptured
+			<< ", and " << f_iKomi << " of komi." << endl << _out );
+	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+			<< ( b.f_iScore > w.f_iScore ? "Black" : "White" )
+			<< " wins by " << ( b.f_iScore > w.f_iScore ? b.f_iScore - w.f_iScore : w.f_iScore - b.f_iScore ) + .5
+			<< endl << _out );
+	send_goban();
+	return;
+	M_EPILOG
+	}
+
+HGo::STONE::stone_t HGo::mark_teritory( int x, int y )
+	{
+	STONE::stone_t teritory = toupper( STONE::D_TERITORY_NONE );
+	STONE::stone_t stone = goban( x, y );
+	if ( ( stone == STONE::D_NONE ) || ( stone == STONE::D_DEAD_BLACK ) || ( stone == STONE::D_DEAD_WHITE ) )
+		{
+		if ( stone == STONE::D_NONE )
+			goban( x, y ) = teritory;
+		else
+			goban( x, y ) = toupper( stone );
+		int l_iBlackNeighbour = 0;
+		int l_iWhiteNeighbour = 0;
+		int l_iBothNeighbour = 0;
+		int directs[][2] = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
+		for ( int i = 0; i < 4; ++ i )
+			{
+			int nx = x + directs[ i ][ 0 ];
+			int ny = y + directs[ i ][ 1 ];
+			if ( ( nx >= 0 ) && ( nx < f_iGobanSize )
+				&& ( ny >= 0 ) && ( ny < f_iGobanSize ) )
+				{
+				STONE::stone_t neighbour = goban( nx, ny );
+				if ( ( neighbour != teritory )
+						&& ( neighbour != toupper( STONE::D_DEAD_BLACK ) )
+						&& ( neighbour != toupper( STONE::D_DEAD_WHITE ) ) )
+					{
+					STONE::stone_t NewTeritory = mark_teritory( nx, ny );
+					if ( NewTeritory == STONE::D_BLACK )
+						++ l_iBlackNeighbour;
+					else  if ( NewTeritory == STONE::D_WHITE )
+						++ l_iWhiteNeighbour;
+					else
+						++ l_iBothNeighbour;
+					}
+				}
+			}
+		if ( l_iBothNeighbour || ( l_iBlackNeighbour && l_iWhiteNeighbour ) )
+			teritory = STONE::D_TERITORY_NONE;
+		else if ( l_iBlackNeighbour )
+			teritory = STONE::D_BLACK;
+		else
+			teritory = STONE::D_WHITE;
+		}
+	else if ( ( stone == STONE::D_BLACK ) || ( stone == STONE::D_WHITE ) || ( stone == toupper ( STONE::D_TERITORY_NONE ) ) )
+		teritory = stone;
+	else
+		M_ASSERT( ( stone == toupper( STONE::D_DEAD_BLACK ) ) || ( stone == toupper( STONE::D_DEAD_WHITE ) ) );
+	return ( teritory );
 	}
 
 void HGo::handler_play( OClientInfo* a_poClientInfo, HString const& a_roMessage )
@@ -700,7 +808,7 @@ OClientInfo*& HGo::contestant( STONE::stone_t stone )
 	{
 	M_ASSERT( ( stone == STONE::D_BLACK ) || ( stone == STONE::D_WHITE )
 			|| ( stone == STONE::D_DEAD_BLACK ) || ( stone == STONE::D_DEAD_WHITE ) );
-	return ( ( stone == STONE::D_BLACK ) || ( stone == STONE::D_DEAD_BLACK ) ? f_poContestants[ 0 ] : f_poContestants[ 1 ] );
+	return ( ( stone == STONE::D_BLACK ) || ( stone == STONE::D_DEAD_BLACK ) ? f_ppoContestants[ 0 ] : f_ppoContestants[ 1 ] );
 	}
 
 void HGo::contestant_gotup( OClientInfo* a_poClientInfo )
@@ -728,6 +836,7 @@ void HGo::send_contestant( char stone )
 	int captured = 0;
 	int time = 0;
 	int byoyomi = 0;
+	int score = 0;
 	if ( cinfo )
 		{
 		OPlayerInfo& info = *get_player_info( cinfo );
@@ -735,12 +844,14 @@ void HGo::send_contestant( char stone )
 		captured = info.f_iStonesCaptured;
 		time = info.f_iTimeLeft;
 		byoyomi = info.f_iByoYomiPeriods;
+		score = info.f_iScore;
 		}
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::CONTESTANT << PROTOCOL::SEP
 			<< stone << PROTOCOL::SEPP
 			<< name << PROTOCOL::SEPP
 			<< captured << PROTOCOL::SEPP
+			<< score << PROTOCOL::SEPP
 			<< time << PROTOCOL::SEPP
 			<< byoyomi << endl << _out );
 	return;
@@ -756,6 +867,16 @@ int HGo::count_stones( STONE::stone_t stone )
 		if ( ptr[ i ] == stone )
 			++ count;
 	return ( count );
+	}
+
+void HGo::replace_stones( STONE::stone_t which, STONE::stone_t with )
+	{
+	int const size = f_iGobanSize * f_iGobanSize;
+	char* ptr = f_oKoGame.raw();
+	for ( int i = 0; i < size; ++ i )
+		if ( ptr[ i ] == which )
+			ptr[ i ] = with;
+	return;
 	}
 
 }

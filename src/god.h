@@ -41,7 +41,8 @@ class HGo : public HLogic
 		int long f_iTimeLeft;
 		int f_iByoYomiPeriods;
 		int f_iStonesCaptured;
-		OPlayerInfo( void ) : f_iTimeLeft( 0 ), f_iByoYomiPeriods( 0 ), f_iStonesCaptured( 0 ) {}
+		int f_iScore;
+		OPlayerInfo( void ) : f_iTimeLeft( 0 ), f_iByoYomiPeriods( 0 ), f_iStonesCaptured( 0 ), f_iScore( 0 ) {}
 		};
 	struct STONE
 		{
@@ -52,6 +53,9 @@ class HGo : public HLogic
 		static stone_t const D_MARK;
 		static stone_t const D_DEAD_WHITE;
 		static stone_t const D_DEAD_BLACK;
+		static stone_t const D_TERITORY_BLACK;
+		static stone_t const D_TERITORY_WHITE;
+		static stone_t const D_TERITORY_NONE;
 		};
 	struct GOBAN_SIZE
 		{
@@ -86,7 +90,7 @@ protected:
 	/*{*/
 	typedef yaal::hcore::HPair<OClientInfo*, OPlayerInfo> player_t;
 	typedef yaal::hcore::HList<player_t> players_t;
-	OClientInfo* f_poContestants[ 2 ];
+	OClientInfo* f_ppoContestants[ 2 ];
 	STONE::stone_t f_eState;
 	int f_iGobanSize;
 	int f_iKomi;
@@ -149,6 +153,9 @@ protected:
 	void ensure_coordinates_validity( int, int );
 	void mark_stone_dead( int, int );
 	void commit( void );
+	void count_score( void );
+	STONE::stone_t mark_teritory( int, int );
+	void replace_stones( STONE::stone_t, STONE::stone_t );
 	/*}*/
 private:
 	/*{*/
