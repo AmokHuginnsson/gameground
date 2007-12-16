@@ -36,7 +36,7 @@
 				<spinner id="_confByoYomiTime" constraints="3,3" tooltiptext="Time for single byo yomi period." enabled="false">
 					<textfield action="onByoyomiTime" horizontalalignment="RIGHT" />
 				</spinner>
-				<button id="_pass" action="onPass" text="Pass !" constraints="5,3" enabled="false" />
+				<button id="_pass" action="onPass" text="Pass !" tooltiptext="Refrain from putting a stone." constraints="5,3" enabled="false" />
 			</panel>
 			<panel maximumsize="2000,40" border="EmptyBorder(0,4,4,4)">
 				<layout type="FormLayout" columns="36px,8px,p,8px,p" rows="p" />

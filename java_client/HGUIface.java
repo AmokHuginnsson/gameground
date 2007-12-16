@@ -140,5 +140,13 @@ abstract class HGUIface extends JPanel {
 	void add( JTextPane $to, String $what ) {
 		add( $to, $what, null );
 	}
+	protected void discardPendingEvents() {
+		java.awt.EventQueue q = java.awt.Toolkit.getDefaultToolkit().getSystemEventQueue();
+		while ( q.peekEvent() != null ) {
+			try {
+				q.getNextEvent();
+			} catch (InterruptedException e) {
+			}
+		} 
+	}
 }
-

@@ -50,7 +50,7 @@ class GoPlayer {
 	}
 }
 
-class Go extends HAbstractLogic {
+class Go extends HAbstractLogic implements Runnable {
 	public static final class PROTOCOL {
 		public static final String SEP = ":";
 		public static final String SEPP = ",";
@@ -94,6 +94,7 @@ class Go extends HAbstractLogic {
 		public static final char TERITORY_WHITE = 'q';
 		public static final char DAME = 'x';
 		public static final char INVALID = 'N';
+		public static final char WAIT = 'Z';
 		public static final String NONE_NAME = "None";
 		public static final String BLACK_NAME = "Black";
 		public static final String WHITE_NAME = "White";
@@ -317,7 +318,7 @@ class Go extends HAbstractLogic {
 			if ( ( stone == _stone ) && ( _stone != STONE.NONE ) ) {
 				contestant._sit.setText( HGUILocal.SIT );
 				GoPlayer foe = _contestants.get( _gui._board.oponent( _stone ) );
-				foe._sit.setEnabled( true );
+				foe._sit.setEnabled( "".equals( foe._name.getText() ) );
 				_gui._board.setStone( _stone = STONE.NONE );
 				if ( _gui._toolTip != null ) {
 					_gui._pass.setText( _gui._passText );
@@ -331,9 +332,9 @@ class Go extends HAbstractLogic {
 	}
 	void handlerToMove( String $command ) {
 		_toMove = $command.charAt( 0 );
-		if ( _toMove == STONE.MARK )
+		if ( ( _toMove == STONE.MARK ) && ( _gui._passText.equals( _gui._pass.getText() ) ) )
 			handlerMark();
-		else {
+		else if ( _toMove != STONE.MARK ) {
 			_gui._pass.setEnabled( ( _toMove == _stone ) && ( _stone != STONE.NONE ) );
 			_gui._conf.setEnabled( _admin && ( _toMove == STONE.NONE ) );
 			++ _move;
@@ -375,6 +376,9 @@ class Go extends HAbstractLogic {
 	public char toMove() {
 		return ( _toMove );
 	}
+	public void waitToMove() {
+		_toMove = STONE.WAIT;
+	}
 	public void reinit() {
 		_client = _app.getClient();
 		_contestants.get( new Character( STONE.BLACK ) ).clear();
@@ -383,6 +387,8 @@ class Go extends HAbstractLogic {
 		_toMove = STONE.NONE;
 		_admin = false;
 		_move = 0;
+	}
+	public void run() {
 	}
 	static boolean registerLogic( GameGround $app ) {
 		try {

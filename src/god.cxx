@@ -202,6 +202,7 @@ void HGo::handler_sit( OClientInfo* a_poClientInfo, HString const& a_roMessage )
 			else
 				{
 				f_eState = ( f_iHandicaps > 1 ? STONE::D_WHITE : STONE::D_BLACK );
+				f_iPass = 0;
 				broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 						<< PROTOCOL::MSG << PROTOCOL::SEP << "The Go match started." << endl << _out );
 				}
@@ -214,14 +215,13 @@ void HGo::handler_sit( OClientInfo* a_poClientInfo, HString const& a_roMessage )
 void HGo::handler_getup( OClientInfo* a_poClientInfo, HString const& /*a_roMessage*/ )
 	{
 	M_PROLOG
-	contestant_gotup( a_poClientInfo );
 	OClientInfo* foe = NULL;
-	if ( ( foe = contestant( STONE::D_BLACK ) ) || ( foe = contestant( STONE::D_WHITE ) ) )
-		{
+	if ( ( f_eState != STONE::D_NONE )
+			&& ( ( foe = contestant( STONE::D_BLACK ) ) || ( foe = contestant( STONE::D_WHITE ) ) ) )
 		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 				<< PROTOCOL::MSG << PROTOCOL::SEP
 				<< a_poClientInfo->f_oName << " resigned - therefore " << foe->f_oName << " wins." << endl << _out );
-		}
+	contestant_gotup( a_poClientInfo );
 	f_eState = STONE::D_NONE;
 	return;
 	M_EPILOG
@@ -302,7 +302,10 @@ void HGo::handler_accept( OClientInfo* a_poClientInfo )
 	info.f_iByoYomiPeriods = D_ACCEPTED;
 	if ( ( get_player_info( f_ppoContestants[ 0 ] )->f_iByoYomiPeriods == D_ACCEPTED )
 			&& ( get_player_info( f_ppoContestants[ 1 ] )->f_iByoYomiPeriods == D_ACCEPTED ) )
+		{
 		count_score();
+		f_eState = STONE::D_NONE;
+		}
 	return;
 	M_EPILOG
 	}
@@ -589,6 +592,8 @@ void HGo::set_handicaps( int a_iHandicaps )
 		throw HLogicException( _out << "bad handicap value: " << a_iHandicaps << _out );
 	::memset( f_oGame.raw(), STONE::D_NONE, f_iGobanSize * f_iGobanSize );
 	f_oGame[ f_iGobanSize * f_iGobanSize ] = 0;
+	::memset( f_oKoGame.raw(), STONE::D_NONE, f_iGobanSize * f_iGobanSize );
+	f_oKoGame[ f_iGobanSize * f_iGobanSize ] = 0;
 	if ( a_iHandicaps != f_iHandicaps )
 		{
 		if ( a_iHandicaps > 0 )

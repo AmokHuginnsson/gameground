@@ -13,11 +13,18 @@ import java.awt.Insets;
 import javax.swing.JApplet;
 import org.swixml.SwingEngine;
 import org.swixml.TagLibrary;
+import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class /* Application or applet name: */ GameGround extends JApplet {
 	public static final long serialVersionUID = 13l;
 	private SortedMap<String,HAbstractLogic> _logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String,HAbstractLogic>() );
 	public Frame _frame;
+	private final ScheduledExecutorService _scheduler = Executors.newScheduledThreadPool( 1 );
+	private Map<Object, ScheduledFuture<?>> _tasks = Collections.synchronizedMap( new HashMap<Object, ScheduledFuture<?>>() );
 	private HClient _client;
 	private String _frameName;
 	private String _name;
@@ -199,6 +206,14 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	}
 	public void setName( String $name ) {
 		_name = $name;
+	}
+	public void registerTask( Runnable $task, long $delay ) {
+		_tasks.put( $task, _scheduler.scheduleAtFixedRate( $task, 0, $delay, TimeUnit.SECONDS ) );
+	}
+	void flush( Runnable $task ) {
+		ScheduledFuture<?> task = _tasks.get( $task );
+		_tasks.remove( $task );
+		task.cancel( false );
 	}
 }
 

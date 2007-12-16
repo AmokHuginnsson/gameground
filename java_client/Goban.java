@@ -52,11 +52,12 @@ public class Goban extends JPanel implements MouseInputListener {
 	public void mousePressed( MouseEvent $event ) {
 	}
 	public void mouseClicked( MouseEvent $event ) {
-		if ( _logic.isMyMove() && ! breakTheRules( _cursorX, _cursorY, _stone ) )
+		if ( _logic.isMyMove() && ! breakTheRules( _cursorX, _cursorY, _stone ) ) {
 			_logic._client.println( Go.PROTOCOL.CMD + Go.PROTOCOL.SEP
 					+ Go.PROTOCOL.PLAY + Go.PROTOCOL.SEP
 					+ Go.PROTOCOL.PUTSTONE + Go.PROTOCOL.SEPP + _cursorX + Go.PROTOCOL.SEPP + _cursorY );
-		else if ( validCoords( _cursorX, _cursorY ) && ( _logic.toMove() == Go.STONE.MARK ) ) {
+			_logic.waitToMove();
+		} else if ( validCoords( _cursorX, _cursorY ) && ( _logic.toMove() == Go.STONE.MARK ) ) {
 			char stone = getStone( _cursorX, _cursorY );
 			if ( ( _logic.stone() == stone ) || ( _logic.stoneDead() == stone ) ) {
 				System.out.println( "dead mark" );

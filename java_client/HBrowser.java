@@ -43,9 +43,8 @@ class HBrowser extends HAbstractLogic {
 		public HGUILocal( String $resource ) {
 			super( $resource );
 		}
-		public void reinit() {
-			_msg.requestFocusInWindow();
-			_games.setModel( new DefaultTreeModel( new DefaultMutableTreeNode( new HPlayerSet( "root", "GameGround" ) ) ) );
+		public void init() {
+			super.init();
 			_games.getSelectionModel().setSelectionMode( TreeSelectionModel.SINGLE_TREE_SELECTION );
 			_games.addTreeSelectionListener( this );
 			java.awt.event.MouseListener ml = new java.awt.event.MouseAdapter() {
@@ -58,6 +57,10 @@ class HBrowser extends HAbstractLogic {
 				}
 			};
 			_games.addMouseListener( ml );
+		}
+		public void reinit() {
+			_msg.requestFocusInWindow();
+			_games.setModel( new DefaultTreeModel( new DefaultMutableTreeNode( new HPlayerSet( "root", "GameGround" ) ) ) );
 		}
 		public JTextPane getLogPad() {
 			return ( _logPad );
