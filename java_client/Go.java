@@ -328,6 +328,7 @@ class Go extends HAbstractLogic implements Runnable {
 			}
 			contestant._sit.setEnabled( "".equals( tokens[ 1 ] ) && ( _stone == STONE.NONE ) );
 		}
+		_start = new Date().getTime();
 	}
 	void handlerStone( String $command ) {
 	}

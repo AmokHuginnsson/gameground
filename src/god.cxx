@@ -197,9 +197,16 @@ void HGo::handler_sit( OClientInfo* a_poClientInfo, HString const& a_roMessage )
 			info.f_iStonesCaptured = 0;
 			info.f_iScore = ( stone == STONE::D_WHITE ? f_iKomi : 0 );
 			if ( ! ( contestant( STONE::D_BLACK ) && contestant( STONE::D_WHITE ) ) )
+				{
+				f_iStart = 0;
+				f_iMove = 0;
 				set_handicaps( f_iHandicaps );
+				}
 			else
 				{
+				OPlayerInfo& foe = *get_player_info( contestant( oponent( stone ) ) );
+				foe.f_iTimeLeft = info.f_iTimeLeft;
+				foe.f_iByoYomiPeriods = info.f_iByoYomiPeriods;
 				f_eState = ( f_iHandicaps > 1 ? STONE::D_WHITE : STONE::D_BLACK );
 				f_iPass = 0;
 				broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
@@ -214,12 +221,6 @@ void HGo::handler_sit( OClientInfo* a_poClientInfo, HString const& a_roMessage )
 void HGo::handler_getup( OClientInfo* a_poClientInfo, HString const& /*a_roMessage*/ )
 	{
 	M_PROLOG
-	OClientInfo* foe = NULL;
-	if ( ( f_eState != STONE::D_NONE )
-			&& ( ( foe = contestant( STONE::D_BLACK ) ) || ( foe = contestant( STONE::D_WHITE ) ) ) )
-		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
-				<< PROTOCOL::MSG << PROTOCOL::SEP
-				<< a_poClientInfo->f_oName << " resigned - therefore " << foe->f_oName << " wins." << endl << _out );
 	contestant_gotup( a_poClientInfo );
 	f_eState = STONE::D_NONE;
 	return;
@@ -571,6 +572,8 @@ void HGo::schedule_timeout( void )
 	M_PROLOG
 	++ f_iMove;
 	OPlayerInfo& p = *get_player_info( contestant( f_eState ) );
+	if ( p.f_iByoYomiPeriods < f_iByoYomiPeriods )
+		p.f_iTimeLeft = f_iByoYomiTime * D_SECONDS_IN_MINUTE;
 	HScheduledAsyncCallerService::get_instance().register_call( time( NULL ) + p.f_iTimeLeft,
 			HCallInterface::ptr_t( new HCall<HGo&, typeof( &HGo::on_timeout )>( *this, &HGo::on_timeout ) ) );
 	return;
@@ -586,12 +589,16 @@ void HGo::on_timeout( void )
 	if ( p.f_iByoYomiPeriods < 0 )
 		{
 		f_eState = STONE::D_NONE;
+		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
+				<< PROTOCOL::TOMOVE << PROTOCOL::SEP
+				<< static_cast<char>( f_eState ) << endl << _out );
 		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP << "End of time." << endl << _out );
 		}
 	else
 		{
-		p.f_iTimeLeft = f_iByoYomiTime;
+		p.f_iTimeLeft = f_iByoYomiTime * D_SECONDS_IN_MINUTE;
 		reschedule_timeout();
+		send_contestants();
 		}
 	return;
 	M_EPILOG
@@ -831,6 +838,12 @@ OClientInfo*& HGo::contestant( STONE::stone_t stone )
 void HGo::contestant_gotup( OClientInfo* a_poClientInfo )
 	{
 	STONE::stone_t stone = ( contestant( STONE::D_BLACK ) == a_poClientInfo ? STONE::D_BLACK : STONE::D_WHITE );
+	OClientInfo* foe = NULL;
+	if ( ( f_eState != STONE::D_NONE )
+			&& ( ( foe = contestant( STONE::D_BLACK ) ) || ( foe = contestant( STONE::D_WHITE ) ) ) )
+		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
+				<< PROTOCOL::MSG << PROTOCOL::SEP
+				<< a_poClientInfo->f_oName << " resigned - therefore " << foe->f_oName << " wins." << endl << _out );
 	contestant( stone ) = NULL;
 	f_eState = STONE::D_NONE;
 	return;
@@ -902,7 +915,8 @@ void HGo::update_clocks( void )
 	revoke_scheduled_tasks();
 	int long l_iNow = time( NULL );
 	OPlayerInfo& p = *get_player_info( contestant( oponent( f_eState ) ) );
-	p.f_iTimeLeft -= ( l_iNow - f_iStart );
+	if ( f_iStart )
+		p.f_iTimeLeft -= ( l_iNow - f_iStart );
 	schedule_timeout();
 	f_iStart = l_iNow;
 	return;
