@@ -231,6 +231,7 @@ class Boggle extends HAbstractLogic {
 	public void reinit() {
 		_client = _app.getClient();
 	}
+	public void cleanup() {}
 	static boolean registerLogic( GameGround $app ) {
 		try {
 			$app.registerLogic( LABEL, new Boggle( $app ) );

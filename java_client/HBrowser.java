@@ -272,6 +272,7 @@ class HBrowser extends HAbstractLogic {
 		removePlayer((DefaultMutableTreeNode) _gui._games.getModel().getRoot(), $message );
 		System.out.println( "Player: [" + $message + "] removed." );
 	}
+	public void cleanup() {}
 	static boolean registerLogic( GameGround $app ) {
 		try {
 			$app.registerLogic( LABEL, new HBrowser( $app ) );

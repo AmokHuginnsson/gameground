@@ -120,6 +120,7 @@ class HLogin extends HAbstractLogic {
 	}
 	public void reinit() {
 	}
+	public void cleanup() {}
 	static boolean registerLogic( GameGround $app ) {
 		try {
 			$app.registerLogic( LABEL, new HLogin( $app ) );

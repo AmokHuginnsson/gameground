@@ -28,6 +28,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	private HClient _client;
 	private String _frameName;
 	private String _name;
+	private HAbstractLogic _current = null;
 	boolean _applet = false;
 	CommandLine _cmd;
 
@@ -79,12 +80,15 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	public void setFace( String $face ) {
 		HAbstractLogic logic = _logics.get( $face );
 		if ( logic != null ) {
-			HGUIface f = logic.getGUI();
+			if ( _current != null )
+				_current.cleanup();
+			_current = logic;
+			HGUIface f = _current.getGUI();
 			setContentPane( f );
 			validate();
 			f.reinit();
 			if ( _client != null )
-				_client.setLogic( logic );
+				_client.setLogic( _current );
 			logic.reinit();
 		} else {
 			java.util.Set<java.util.Map.Entry<String,HAbstractLogic>> entSet = _logics.entrySet();

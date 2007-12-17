@@ -466,6 +466,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		_systemCount = 0;
 		_emperors.clear();
 	}
+	public void cleanup() {}
 	static boolean registerLogic( GameGround $app ) {
 		try {
 			$app.registerLogic( LABEL, new HGalaxy( $app ) );

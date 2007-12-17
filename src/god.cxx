@@ -93,7 +93,7 @@ HGo::HGo( HString const& a_oName )
 	f_eState( STONE::D_NONE ), f_iGobanSize( setup.f_iGobanSize ),
 	f_iKomi( setup.f_iKomi ), f_iHandicaps( setup.f_iHandicaps ), f_iMainTime( setup.f_iMainTime ),
 	f_iByoYomiPeriods( setup.f_iByoYomiPeriods ), f_iByoYomiTime( setup.f_iByoYomiTime ),
-	f_iMove( 0 ), f_iPass( 0 ),
+	f_iMove( 0 ), f_iPass( 0 ), f_iStart( 0 ),
 	f_oGame( GOBAN_SIZE::D_NORMAL * GOBAN_SIZE::D_NORMAL + sizeof ( '\0' ) ),
 	f_oKoGame( GOBAN_SIZE::D_NORMAL * GOBAN_SIZE::D_NORMAL + sizeof ( '\0' ) ),
 	f_oOldGame( GOBAN_SIZE::D_NORMAL * GOBAN_SIZE::D_NORMAL + sizeof ( '\0' ) ),
@@ -114,8 +114,7 @@ HGo::HGo( HString const& a_oName )
 HGo::~HGo ( void )
 	{
 	M_PROLOG
-	HAsyncCallerService::get_instance().flush( this );
-	HScheduledAsyncCallerService::get_instance().flush( this );
+	revoke_scheduled_tasks();
 	return;
 	M_EPILOG
 	}
@@ -424,7 +423,7 @@ void HGo::handler_play( OClientInfo* a_poClientInfo, HString const& a_roMessage 
 	if ( ( item != PROTOCOL::SIT )
 			&& ( contestant( STONE::D_BLACK ) != a_poClientInfo )
 			&& ( contestant( STONE::D_WHITE ) != a_poClientInfo ) )
-		throw HLogicException( "you are not plaing" );
+		throw HLogicException( "you are not playing" );
 	if ( item == PROTOCOL::PUTSTONE )
 		handler_put_stone( a_poClientInfo, a_roMessage );
 	else if ( item == PROTOCOL::PASS )
@@ -442,6 +441,8 @@ void HGo::handler_play( OClientInfo* a_poClientInfo, HString const& a_roMessage 
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::TOMOVE << PROTOCOL::SEP
 			<< static_cast<char>( f_eState ) << endl << _out );
+	if ( ( f_eState == STONE::D_BLACK ) || ( f_eState == STONE::D_WHITE ) )
+		update_clocks();
 	send_contestants();
 	return;
 	M_EPILOG
@@ -556,11 +557,11 @@ yaal::hcore::HString HGo::get_info() const
 	return ( HString( "go," ) + f_oName + "," + f_oPlayers.size() + "," + f_iGobanSize + "," + f_iKomi + "," + f_iHandicaps + "," + f_iMainTime + "," + f_iByoYomiPeriods + "," + f_iByoYomiTime );
 	}
 
-void HGo::schedule( void )
+void HGo::reschedule_timeout( void )
 	{
 	M_PROLOG
-	HLock l( f_oMutex );
-	schedule_timeout();
+	HAsyncCallerService::get_instance().register_call( 0,
+			HCallInterface::ptr_t( new HCall<HGo&, typeof( &HGo::schedule_timeout )>( *this, &HGo::schedule_timeout ) ) );
 	return;
 	M_EPILOG
 	}
@@ -569,10 +570,9 @@ void HGo::schedule_timeout( void )
 	{
 	M_PROLOG
 	++ f_iMove;
-/*
-	HScheduledAsyncCallerService::get_instance().register_call( time( NULL ) + f_iRoundTime,
+	OPlayerInfo& p = *get_player_info( contestant( f_eState ) );
+	HScheduledAsyncCallerService::get_instance().register_call( time( NULL ) + p.f_iTimeLeft,
 			HCallInterface::ptr_t( new HCall<HGo&, typeof( &HGo::on_timeout )>( *this, &HGo::on_timeout ) ) );
-*/
 	return;
 	M_EPILOG
 	}
@@ -581,6 +581,18 @@ void HGo::on_timeout( void )
 	{
 	M_PROLOG
 	HLock l( f_oMutex );
+	OPlayerInfo& p = *get_player_info( contestant( f_eState ) );
+	-- p.f_iByoYomiPeriods;
+	if ( p.f_iByoYomiPeriods < 0 )
+		{
+		f_eState = STONE::D_NONE;
+		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP << "End of time." << endl << _out );
+		}
+	else
+		{
+		p.f_iTimeLeft = f_iByoYomiTime;
+		reschedule_timeout();
+		}
 	return;
 	M_EPILOG
 	}
@@ -882,6 +894,28 @@ void HGo::replace_stones( STONE::stone_t which, STONE::stone_t with )
 		if ( ptr[ i ] == which )
 			ptr[ i ] = with;
 	return;
+	}
+
+void HGo::update_clocks( void )
+	{
+	M_PROLOG
+	revoke_scheduled_tasks();
+	int long l_iNow = time( NULL );
+	OPlayerInfo& p = *get_player_info( contestant( oponent( f_eState ) ) );
+	p.f_iTimeLeft -= ( l_iNow - f_iStart );
+	schedule_timeout();
+	f_iStart = l_iNow;
+	return;
+	M_EPILOG
+	}
+
+void HGo::revoke_scheduled_tasks( void )
+	{
+	M_PROLOG
+	HAsyncCallerService::get_instance().flush( this );
+	HScheduledAsyncCallerService::get_instance().flush( this );
+	return;
+	M_EPILOG
 	}
 
 }

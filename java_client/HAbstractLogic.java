@@ -24,6 +24,7 @@ public abstract class HAbstractLogic {
 		}
 	}
 	public abstract void reinit();
+	public abstract void cleanup();
 	public HGUIface getGUI() {
 		return ( _gui );
 	}

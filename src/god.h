@@ -100,6 +100,7 @@ protected:
 	int f_iByoYomiTime;
 	int f_iMove;
 	int f_iPass;
+	int long f_iStart;
 	yaal::hcore::HPool<char> f_oGame;
 	yaal::hcore::HPool<char> f_oKoGame;
 	yaal::hcore::HPool<char> f_oOldGame;
@@ -124,8 +125,8 @@ protected:
 	void handler_play( OClientInfo*, yaal::hcore::HString const& );
 	void handler_setup( OClientInfo*, yaal::hcore::HString const& );
 	void on_timeout( void );
-	void schedule( void );
 	void schedule_timeout( void );
+	void reschedule_timeout( void );
 	void set_handicaps( int );
 	void set_handi( int );
 	void put_stone( int, int, STONE::stone_t );
@@ -156,6 +157,8 @@ protected:
 	void count_score( void );
 	STONE::stone_t mark_teritory( int, int );
 	void replace_stones( STONE::stone_t, STONE::stone_t );
+	void update_clocks( void );
+	void revoke_scheduled_tasks( void );
 	/*}*/
 private:
 	/*{*/

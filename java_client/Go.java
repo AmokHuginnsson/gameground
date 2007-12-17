@@ -37,14 +37,15 @@ class GoPlayer {
 	public JLabel _name;
 	public JLabel _score;
 	public JLabel _captures;
-	public JLabel _timeleft;
+	public JLabel _timeLeftLabel;
 	public JLabel _byoyomi;
 	public JButton _sit;
+	public int _timeLeft = 0;
 	public void clear() {
 		_name.setText( "" );
 		_score.setText( "" );
 		_captures.setText( "" );
-		_timeleft.setText( "" );
+		_timeLeftLabel.setText( "" );
 		_byoyomi.setText( "" );
 		_sit.setText( Go.HGUILocal.SIT );
 	}
@@ -229,6 +230,7 @@ class Go extends HAbstractLogic implements Runnable {
 	public HClient _client;
 	private char _stone = STONE.NONE;
 	private char _toMove = STONE.NONE;
+	private long _start = 0;
 	private boolean _admin = false;
 	private int _move = 0;
 	private String _stones = null;
@@ -253,7 +255,7 @@ class Go extends HAbstractLogic implements Runnable {
 		black._name = _gui._blackName;
 		black._captures = _gui._blackCaptures;
 		black._score = _gui._blackScore;
-		black._timeleft = _gui._blackTimeLeft;
+		black._timeLeftLabel = _gui._blackTimeLeft;
 		black._byoyomi = _gui._blackByoYomiLeft;
 		black._sit = _gui._blackSit;
 		_contestants.put( new Character( STONE.BLACK ), black );
@@ -261,7 +263,7 @@ class Go extends HAbstractLogic implements Runnable {
 		white._name = _gui._whiteName;
 		white._captures = _gui._whiteCaptures;
 		white._score = _gui._whiteScore;
-		white._timeleft = _gui._whiteTimeLeft;
+		white._timeLeftLabel = _gui._whiteTimeLeft;
 		white._byoyomi = _gui._whiteByoYomiLeft;
 		white._sit = _gui._whiteSit;
 		_contestants.put( new Character( STONE.WHITE ), white );
@@ -302,10 +304,9 @@ class Go extends HAbstractLogic implements Runnable {
 		contestant._name.setText( tokens[ 1 ] );
 		contestant._captures.setText( tokens[ 2 ] );
 		contestant._score.setText( tokens[ 3 ] );
-		int seconds = Integer.parseInt( tokens[ 4 ] );
-		Date d = new Date( seconds * 1000 );
-		
-		contestant._timeleft.setText( new SimpleDateFormat( "mm:ss" ).format( d ) );
+		contestant._timeLeft = Integer.parseInt( tokens[ 4 ] );
+		Date d = new Date( contestant._timeLeft * 1000 );
+		contestant._timeLeftLabel.setText( new SimpleDateFormat( "mm:ss" ).format( d ) );
 		if ( Integer.parseInt( tokens[ 5 ] ) >= 0 )
 			contestant._byoyomi.setText( tokens[ 5 ] );
 		if ( tokens[ 1 ].equals( _app.getName() ) ) {
@@ -347,6 +348,7 @@ class Go extends HAbstractLogic implements Runnable {
 				_move = 0;
 			_gui._move.setText( "" + _move );
 			_gui._toMove.setText( toMove );
+			_start = new Date().getTime();
 		}
 	}
 	void handlerMark() {
@@ -387,8 +389,18 @@ class Go extends HAbstractLogic implements Runnable {
 		_toMove = STONE.NONE;
 		_admin = false;
 		_move = 0;
+		_app.registerTask( this, 1 );
+	}
+	public void cleanup() {
+		_app.flush( this );
 	}
 	public void run() {
+		if ( ( _toMove == STONE.BLACK ) || ( _toMove == STONE.WHITE ) ) {
+			long now = new Date().getTime();
+			GoPlayer p = _contestants.get( _toMove );
+			Date d = new Date( p._timeLeft * 1000 + _start - now );
+			p._timeLeftLabel.setText( new SimpleDateFormat( "mm:ss" ).format( d ) );
+		}
 	}
 	static boolean registerLogic( GameGround $app ) {
 		try {
