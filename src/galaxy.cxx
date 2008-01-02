@@ -1139,18 +1139,16 @@ void HClient::handler_msg( HString& a_roMessage )
 void HClient::end_round ( void )
 	{
 	M_PROLOG
-	HMove * l_poMove = NULL;
 	HString l_oMessage;
 	f_oWindow->set_state ( D_LOCKED );
 	if ( f_oMoves.size ( ) )
 		{
-		for ( l_poMove = & f_oMoves.go ( 0 ); l_poMove;
-				l_poMove = f_oMoves.to_tail ( 1, moves_t::D_TREAT_AS_OPENED ) )
+		for ( moves_t::iterator it = f_oMoves.begin(); it != f_oMoves.end(); ++ it )
 			{
 			l_oMessage.format ( "cmd:glx:play:move=%d,%d,%d\n",
-					l_poMove->f_iSourceSystem,
-					l_poMove->f_iDestinationSystem,
-					l_poMove->f_iFleet );
+					it->f_iSourceSystem,
+					it->f_iDestinationSystem,
+					it->f_iFleet );
 			f_oSocket.write_until_eos ( l_oMessage );
 			}
 		f_oMoves.clear();
