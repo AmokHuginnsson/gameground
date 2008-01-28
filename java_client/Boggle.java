@@ -26,6 +26,9 @@ import java.util.Comparator;
 import org.swixml.SwingEngine;
 import javax.swing.table.TableRowSorter;
 import javax.swing.RowSorter;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 class BogglePlayer {
 	String _name;
@@ -62,7 +65,7 @@ class BogglePlayer {
 	}
 }
 
-class Boggle extends HAbstractLogic {
+class Boggle extends HAbstractLogic implements Runnable {
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
 		public JTextField _messageInput;
@@ -72,6 +75,7 @@ class Boggle extends HAbstractLogic {
 		public JTextPane _wordsLongest;
 		public JTextPane _logPad;
 		public JTable _players;
+		public JLabel _timeLeftLabel;
 		public JLabel _letter00;
 		public JLabel _letter01;
 		public JLabel _letter02;
@@ -170,11 +174,17 @@ class Boggle extends HAbstractLogic {
 			_app.setFace( HBrowser.LABEL );
 		}
 	}
+	enum State { INIT, PLAY, WAIT }
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
 	public static final String LABEL = "boggle";
 	public HGUILocal _gui;
 	private HClient _client;
+	private long _start = 0;
+	private long _timeLeft = 0;
+	private long _roundTime = 0;
+	private long _pauseTime = 0;
+	private State _state = State.INIT;
 	private Vector<BogglePlayer> _players = new Vector<BogglePlayer>();
 //--------------------------------------------//
 	public Boggle( GameGround $applet ) throws Exception {
@@ -187,6 +197,8 @@ class Boggle extends HAbstractLogic {
 		_handlers.put( "scored", Boggle.class.getDeclaredMethod( "handlerScored", new Class[]{ String.class } ) );
 		_handlers.put( "longest", Boggle.class.getDeclaredMethod( "handlerLongest", new Class[]{ String.class } ) );
 		_handlers.put( "round", Boggle.class.getDeclaredMethod( "handlerRound", new Class[]{ String.class } ) );
+		_handlers.put( "end_round", Boggle.class.getDeclaredMethod( "handlerEndRound", new Class[]{ String.class } ) );
+		_handlers.put( "setup", Boggle.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
 		_info = new HLogicInfo( "bgl", "boggle", "Boggle" );
 	}
 	void handlerBoggle( String $command ) {
@@ -211,6 +223,11 @@ class Boggle extends HAbstractLogic {
 	void handlerScored( String $command ) {
 		_gui.add( _gui._wordsScored, $command + "\n" );
 	}
+	void handlerEndRound( String $command ) {
+		_start = new Date().getTime();
+		_timeLeft = _pauseTime;
+		_state = State.WAIT;
+	}
 	void handlerRound( String $command ) {
 		_gui.clear( _gui._wordsSent );
 		_gui.clear( _gui._wordsScored );
@@ -227,11 +244,33 @@ class Boggle extends HAbstractLogic {
 		}
 		for ( int i = 0; i < 16; ++ i )
 			_gui._letters[ i ].setText( $command.substring( i, i + 1 ).toUpperCase() );
+		_start = new Date().getTime();
+		_timeLeft = _roundTime;
+		_state = State.PLAY;
+	}
+	void handlerSetup( String $command ) {
+		String[] tokens = $command.split( ",", 2 );
+		 _roundTime = Integer.parseInt( tokens[ 0 ] );
+		 _pauseTime = Integer.parseInt( tokens[ 1 ] );
+	}
+	public void cleanup() {
+		_app.flush( this );
+	}
+	public void run() {
+		if ( ( _state == State.PLAY ) || ( _state == State.WAIT ) ) {
+			long now = new Date().getTime();
+			long left = _timeLeft * 1000 + _start - now;
+			if ( left >= 0 ) {
+				Date d = new Date( left );
+				_gui._timeLeftLabel.setText( new SimpleDateFormat( "mm:ss" ).format( d ) );
+			}
+		}
 	}
 	public void reinit() {
 		_client = _app.getClient();
+		_state = State.INIT;
+		_app.registerTask( this, 1 );
 	}
-	public void cleanup() {}
 	static boolean registerLogic( GameGround $app ) {
 		try {
 			$app.registerLogic( LABEL, new Boggle( $app ) );

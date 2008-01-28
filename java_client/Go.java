@@ -399,8 +399,11 @@ class Go extends HAbstractLogic implements Runnable {
 		if ( ( _toMove == STONE.BLACK ) || ( _toMove == STONE.WHITE ) ) {
 			long now = new Date().getTime();
 			GoPlayer p = _contestants.get( _toMove );
-			Date d = new Date( p._timeLeft * 1000 + _start - now );
-			p._timeLeftLabel.setText( new SimpleDateFormat( "mm:ss" ).format( d ) );
+			long left = p._timeLeft * 1000 + _start - now;
+			if ( left >= 0 ) {
+				Date d = new Date( left );
+				p._timeLeftLabel.setText( new SimpleDateFormat( "mm:ss" ).format( d ) );
+			}
 		}
 	}
 	static boolean registerLogic( GameGround $app ) {

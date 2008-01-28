@@ -71,7 +71,7 @@ public abstract class HAbstractLogic {
 	public void processMessage( String $message ) {
 		String[] tokens = $message.split( ":", 2 );
 		String mnemonic = tokens[0];
-		String argument = tokens[1];
+		String argument = tokens.length > 1 ? tokens[1] : null;
 		Method handler = _handlers.get( mnemonic );
 		if ( handler != null ) {
 			try {

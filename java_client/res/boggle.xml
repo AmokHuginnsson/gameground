@@ -48,9 +48,12 @@
 					</scrollpane>
 				</vbox>
 			</hbox>
-			<panel maximumsize="2000,40" layout="BorderLayout" border="TitledBorder(EmptyBorder,Enter your words here ...,TitledBorder.LEFT, TitledBorder.ABOVE_TOP)">
-				<textfield id="_wordInput" action="onWord" constraints="BorderLayout.NORTH" tooltiptext="Here you shall enter words that you have found." />
-			</panel>
+			<hbox>
+				<label id="_timeLeftLabel" text="00:00" border="EmptyBorder(0,10,0,10)" />
+				<panel maximumsize="2000,40" layout="BorderLayout" border="TitledBorder(EmptyBorder,Enter your words here ...,TitledBorder.LEFT, TitledBorder.ABOVE_TOP)">
+						<textfield id="_wordInput" action="onWord" tooltiptext="Here you shall enter words that you have found." />
+				</panel>
+			</hbox>
 		</vbox>
 		<vbox minimumsize="&v_sidebar_width_galaxy;,1" preferredsize="&v_sidebar_width_galaxy;,&v_height;" maximumsize="&v_sidebar_width_galaxy;,2000">
 			<panel layout="GridLayout(2,1)">

@@ -91,6 +91,8 @@ char const* const HBoggle::PROTOCOL::SAY = "say";
 char const* const HBoggle::PROTOCOL::MSG = "msg";
 char const* const HBoggle::PROTOCOL::PLAYER = "player";
 char const* const HBoggle::PROTOCOL::DECK = "deck";
+char const* const HBoggle::PROTOCOL::SETUP = "setup";
+char const* const HBoggle::PROTOCOL::END_ROUND = "end_round";
 char const* const HBoggle::PROTOCOL::ROUND = "round";
 char const* const HBoggle::PROTOCOL::SCORED = "scored";
 char const* const HBoggle::PROTOCOL::LONGEST = "longest";
@@ -217,6 +219,9 @@ void HBoggle::do_post_accept( OClientInfo* a_poClientInfo )
 		<< "   round interval - " << f_iInterRoundDelay << endl
 		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
 		<< "This match requires " << f_iPlayers << " players to start the game." << endl;
+	*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
+		<< PROTOCOL::SETUP << PROTOCOL::SEP << f_iRoundTime
+		<< PROTOCOL::SEPP << f_iInterRoundDelay << endl;
 	for ( players_t::HIterator it = f_oPlayers.begin(); it != f_oPlayers.end(); ++ it )
 		{
 		if ( it->first != a_poClientInfo )
@@ -370,6 +375,8 @@ void HBoggle::on_end_round( void )
 		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::LONGEST << PROTOCOL::SEP
 				<< (*it)->first << " [" << (*(*it)->second->begin())->f_oName << "]" << endl << _out );
 	f_oWords.clear(); 
+	if ( f_iRound < f_iMaxRounds )
+		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::END_ROUND << endl << _out );
 	return;
 	M_EPILOG
 	}
