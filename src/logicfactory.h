@@ -50,8 +50,8 @@ public:
 	void register_logic_creator( yaal::hcore::HString const&, creator_t );
 	HLogic::ptr_t create_logic( yaal::hcore::HString const&, yaal::hcore::HString const& );
 	bool is_type_valid( yaal::hcore::HString const& );
-	creators_t::HIterator begin( void );
-	creators_t::HIterator end( void );
+	creators_t::iterator begin( void );
+	creators_t::iterator end( void );
 private:
 	HLogicFactory( void ) : f_oCreators() {}
 	~HLogicFactory( void ) {}

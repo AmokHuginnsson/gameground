@@ -172,7 +172,7 @@ void HBoggle::handler_play ( OClientInfo* a_poClientInfo, HString const& a_oWord
 			&& ( l_iLength >= boggle_data::D_MINIMUM_WORD_LENGTH )
 			&& ( l_iLength <= boggle_data::D_MAXIMUM_WORD_LENGTH ) )
 		{
-		words_t::HIterator it = f_oWords.find( a_oWord );
+		words_t::iterator it = f_oWords.find( a_oWord );
 		if ( it == f_oWords.end() )
 			it = f_oWords.insert( a_oWord, client_set_ptr_t( new client_set_t() ) );
 		it->second->insert( a_poClientInfo );
@@ -185,7 +185,7 @@ void HBoggle::handler_play ( OClientInfo* a_poClientInfo, HString const& a_oWord
 HBoggle::OPlayerInfo* HBoggle::get_player_info( OClientInfo* a_poClientInfo )
 	{
 	M_PROLOG
-	players_t::HIterator it = f_oPlayers.find( a_poClientInfo );
+	players_t::iterator it = f_oPlayers.find( a_poClientInfo );
 	M_ASSERT( it != f_oPlayers.end() );
 	return ( &it->second );
 	M_EPILOG
@@ -222,7 +222,7 @@ void HBoggle::do_post_accept( OClientInfo* a_poClientInfo )
 	*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
 		<< PROTOCOL::SETUP << PROTOCOL::SEP << f_iRoundTime
 		<< PROTOCOL::SEPP << f_iInterRoundDelay << endl;
-	for ( players_t::HIterator it = f_oPlayers.begin(); it != f_oPlayers.end(); ++ it )
+	for ( players_t::iterator it = f_oPlayers.begin(); it != f_oPlayers.end(); ++ it )
 		{
 		if ( it->first != a_poClientInfo )
 			{
@@ -258,7 +258,7 @@ void HBoggle::do_kick( OClientInfo* a_poClientInfo )
 	M_PROLOG
 	HLock l( f_oMutex );
 	f_oPlayers.remove( a_poClientInfo );
-	for ( words_t::HIterator it = f_oWords.begin(); it != f_oWords.end(); ++ it )
+	for ( words_t::iterator it = f_oWords.begin(); it != f_oWords.end(); ++ it )
 		{
 		if ( it->second->size() > 1 )
 			continue;
@@ -339,10 +339,10 @@ void HBoggle::on_end_round( void )
 		_out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP << "Game Over!" << endl;
 	broadcast( _out << _out );
 	int scores[ 16 ] = { 0, 0, 1, 1, 2, 3, 5, 7, 11, 11, 11, 12, 13, 14, 15, 16  };
-	typedef HList<words_t::HIterator> longest_t;
+	typedef HList<words_t::iterator> longest_t;
 	longest_t longest;
 	int l_iLongestLength = 0;
-	for ( words_t::HIterator it = f_oWords.begin(); it != f_oWords.end(); ++ it )
+	for ( words_t::iterator it = f_oWords.begin(); it != f_oWords.end(); ++ it )
 		{
 		if ( it->second->size() > 1 )
 			continue;
@@ -363,7 +363,7 @@ void HBoggle::on_end_round( void )
 			info.f_iLast += scores[ l_iLength - 1 ];
 			}
 		}
-	for ( players_t::HIterator it = f_oPlayers.begin(); it != f_oPlayers.end(); ++ it )
+	for ( players_t::iterator it = f_oPlayers.begin(); it != f_oPlayers.end(); ++ it )
 		{
 		it->second.f_iScore += it->second.f_iLast;
 		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::PLAYER << PROTOCOL::SEP

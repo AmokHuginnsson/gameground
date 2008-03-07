@@ -115,7 +115,7 @@ int HServer::init_server( int a_iPort )
 void HServer::broadcast( HString const& a_roMessage )
 	{
 	M_PROLOG
-	for ( clients_t::HIterator it = f_oClients.begin(); it != f_oClients.end(); ++ it )
+	for ( clients_t::iterator it = f_oClients.begin(); it != f_oClients.end(); ++ it )
 		*it->second.f_oSocket << a_roMessage << endl;
 	return;
 	M_EPILOG
@@ -124,7 +124,7 @@ void HServer::broadcast( HString const& a_roMessage )
 void HServer::broadcast_to_interested( HString const& a_roMessage )
 	{
 	M_PROLOG
-	for ( clients_t::HIterator it = f_oClients.begin(); it != f_oClients.end(); ++ it )
+	for ( clients_t::iterator it = f_oClients.begin(); it != f_oClients.end(); ++ it )
 		if ( ! it->second.f_oLogic )
 			*it->second.f_oSocket << a_roMessage << endl;
 	return;
@@ -142,7 +142,7 @@ void HServer::handler_chat( OClientInfo& a_roInfo, HString const& a_roMessage )
 void HServer::set_client_name( OClientInfo& a_roInfo, HString const& a_oName )
 	{
 	M_PROLOG
-	clients_t::HIterator it;
+	clients_t::iterator it;
 	int const D_MINIMUM_NAME_LENGTH = 4;
 	for ( it = f_oClients.begin(); it != f_oClients.end(); ++ it )
 		if ( ( ! ::strcasecmp( it->second.f_oName, a_oName ) ) && ( it->second.f_oSocket != a_roInfo.f_oSocket ) )
@@ -199,7 +199,7 @@ void HServer::create_game( OClientInfo& a_roInfo, HString const& a_oArg )
 		HString l_oConfiguration = a_oArg.split( ":", 1 );
 		HString l_oName = l_oConfiguration.split( ",", 0 );
 		HLogicFactory& factory = HLogicFactoryInstance::get_instance();
-		logics_t::HIterator it = f_oLogics.find( l_oName );
+		logics_t::iterator it = f_oLogics.find( l_oName );
 		if ( it != f_oLogics.end() )
 			a_roInfo.f_oSocket->write_until_eos( "err:Game already exists.\n" );
 		else if ( ! factory.is_type_valid( l_oType ) )
@@ -240,7 +240,7 @@ void HServer::join_game( OClientInfo& a_roInfo, HString const& a_oName )
 		kick_client( a_roInfo.f_oSocket, "Set your name first." );
 	else
 		{
-		logics_t::HIterator it = f_oLogics.find( a_oName );
+		logics_t::iterator it = f_oLogics.find( a_oName );
 		if ( it == f_oLogics.end() )
 			a_roInfo.f_oSocket->write_until_eos( "err:Game does not exists.\n" );
 		else if ( !! a_roInfo.f_oLogic )
@@ -283,7 +283,7 @@ int HServer::handler_message( int a_iFileDescriptor )
 	HString l_oMessage;
 	HString l_oArgument;
 	HString l_oCommand;
-	clients_t::HIterator clientIt;
+	clients_t::iterator clientIt;
 	HSocket::ptr_t l_oClient = f_oSocket.get_client( a_iFileDescriptor );
 	try
 		{
@@ -303,7 +303,7 @@ int HServer::handler_message( int a_iFileDescriptor )
 				kick_client( l_oClient, _( "Malformed data." ) );
 			else
 				{
-				handlers_t::HIterator it = f_oHandlers.find( l_oCommand );
+				handlers_t::iterator it = f_oHandlers.find( l_oCommand );
 				if ( it != f_oHandlers.end() )
 					{
 					HLogic::ptr_t l_oLogic = clientIt->second.f_oLogic;
@@ -333,7 +333,7 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& a_oClient, char const* c
 		*a_oClient << PROTOCOL::KCK << PROTOCOL::SEP << a_pcReason << endl;
 	f_oSocket.shutdown_client( l_iFileDescriptor );
 	unregister_file_descriptor_handler( l_iFileDescriptor );
-	clients_t::HIterator clientIt = f_oClients.find( l_iFileDescriptor );
+	clients_t::iterator clientIt = f_oClients.find( l_iFileDescriptor );
 	M_ASSERT( clientIt != f_oClients.end() );
 	out << "client ";
 	if ( clientIt->second.f_oName.is_empty() )
@@ -367,7 +367,7 @@ void HServer::send_logics_info( OClientInfo& a_roInfo )
 	{
 	M_PROLOG
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
-	for( HLogicFactory::creators_t::HIterator it = factory.begin();
+	for( HLogicFactory::creators_t::iterator it = factory.begin();
 			it != factory.end(); ++ it )
 		*a_roInfo.f_oSocket << PROTOCOL::LOGIC << PROTOCOL::SEP << it->second.f_oInfo << endl;
 	return;
@@ -452,7 +452,7 @@ void HServer::get_game_info( OClientInfo& a_roInfo, HString const& a_oName )
 void HServer::send_players_info( OClientInfo& a_roInfo )
 	{
 	M_PROLOG
-	for( clients_t::HIterator it = f_oClients.begin();
+	for( clients_t::iterator it = f_oClients.begin();
 			it != f_oClients.end(); ++ it )
 		{
 		if ( ! it->second.f_oName.is_empty() )
@@ -470,7 +470,7 @@ void HServer::send_players_info( OClientInfo& a_roInfo )
 void HServer::send_games_info( OClientInfo& a_roInfo )
 	{
 	M_PROLOG
-	for( logics_t::HIterator it = f_oLogics.begin();
+	for( logics_t::iterator it = f_oLogics.begin();
 			it != f_oLogics.end(); ++ it )
 		*a_roInfo.f_oSocket << PROTOCOL::GAME << PROTOCOL::SEP << it->second->get_info() << endl;
 	return;

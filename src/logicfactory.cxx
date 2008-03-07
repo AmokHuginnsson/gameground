@@ -41,7 +41,7 @@ void HLogicFactory::register_logic_creator( HString const& a_oInfo, creator_t CR
 	{
 	M_PROLOG
 	HString l_oName = a_oInfo.split( ":", 0 );
-	creators_t::HIterator it = f_oCreators.find( l_oName );
+	creators_t::iterator it = f_oCreators.find( l_oName );
 	if ( it != f_oCreators.end() )
 		M_THROW( _( "Logic already registered" ), errno );
 	OCreator l_oCreator;
@@ -56,7 +56,7 @@ HLogic::ptr_t HLogicFactory::create_logic( HString const& a_oType, HString const
 	{
 	M_PROLOG
 	HLogic::ptr_t l_oLogic;
-	creators_t::HIterator it = f_oCreators.find( a_oType );
+	creators_t::iterator it = f_oCreators.find( a_oType );
 	if ( it != f_oCreators.end() )
 		l_oLogic = ( it->second.CREATOR )( a_oArgv );
 	return ( l_oLogic );
@@ -67,19 +67,19 @@ bool HLogicFactory::is_type_valid( yaal::hcore::HString const& a_oType )
 	{
 	M_PROLOG
 	bool valid = false;
-	creators_t::HIterator it = f_oCreators.find( a_oType );
+	creators_t::iterator it = f_oCreators.find( a_oType );
 	if ( it != f_oCreators.end() )
 		valid = true;
 	return ( valid );
 	M_EPILOG
 	}
 
-HLogicFactory::creators_t::HIterator HLogicFactory::begin( void )
+HLogicFactory::creators_t::iterator HLogicFactory::begin( void )
 	{
 	return ( f_oCreators.begin() );
 	}
 
-HLogicFactory::creators_t::HIterator HLogicFactory::end( void )
+HLogicFactory::creators_t::iterator HLogicFactory::end( void )
 	{
 	return ( f_oCreators.end() );
 	}

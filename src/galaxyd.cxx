@@ -255,7 +255,7 @@ void HGalaxy::do_post_accept( OClientInfo* a_poClientInfo )
 		l_oMessage = "glx:msg:$12;Spectator " + a_poClientInfo->f_oName + " is visiting this galaxy.\n";
 		}
 	broadcast( l_oMessage ); /* inform every emperor about new rival */
-	for ( emperors_t::HIterator it = f_oEmperors.begin(); it != f_oEmperors.end(); ++ it )
+	for ( emperors_t::iterator it = f_oEmperors.begin(); it != f_oEmperors.end(); ++ it )
 		{
 		if ( it->first != a_poClientInfo )
 			{
@@ -291,7 +291,7 @@ int HGalaxy::assign_system( OClientInfo* a_poClientInfo )
 	OEmperorInfo info;
 	typedef HSet<int> integer_set_t;
 	integer_set_t l_oUsed;
-	for ( emperors_t::HIterator it = f_oEmperors.begin(); it != f_oEmperors.end(); ++ it )
+	for ( emperors_t::iterator it = f_oEmperors.begin(); it != f_oEmperors.end(); ++ it )
 		l_oUsed.insert( it->second.f_iColor );
 	int l_iCtr = 0;
 	for ( integer_set_t::HIterator it = l_oUsed.begin(); it != l_oUsed.end(); ++it, ++ l_iCtr )
@@ -392,13 +392,13 @@ void HGalaxy::end_round( void )
 	M_PROLOG
 	size_t l_iCtr = 0, l_iDead = 0;
 	f_iReady = 0;
-	for ( emperors_t::HIterator it = f_oEmperors.begin(); it != f_oEmperors.end(); ++ it )
+	for ( emperors_t::iterator it = f_oEmperors.begin(); it != f_oEmperors.end(); ++ it )
 		if ( it->second.f_iSystems > 0 )
 			it->second.f_iSystems = 0;
 	for ( l_iCtr = 0; l_iCtr < ( f_iSystems + f_iEmperors ); l_iCtr ++ )
 		f_oSystems [ l_iCtr ].do_round( *this );
 	HString l_oMessage;
-	for ( emperors_t::HIterator it = f_oEmperors.begin(); it != f_oEmperors.end(); ++ it )
+	for ( emperors_t::iterator it = f_oEmperors.begin(); it != f_oEmperors.end(); ++ it )
 		{
 		if ( ! it->second.f_iSystems )
 			{
@@ -417,7 +417,7 @@ void HGalaxy::end_round( void )
 		}
 	if ( f_iReady == 1 )
 		{
-		for ( emperors_t::HIterator it = f_oEmperors.begin(); it != f_oEmperors.end(); ++ it )
+		for ( emperors_t::iterator it = f_oEmperors.begin(); it != f_oEmperors.end(); ++ it )
 			{
 			if ( it->second.f_iSystems > 0 )
 				{
@@ -432,7 +432,7 @@ void HGalaxy::end_round( void )
 		l_oMessage.format ( "glx:play:system_info=%c,%d,%d,%d,%d\n",
 				'i', l_iCtr, f_oSystems[ l_iCtr ].f_iProduction, get_color( f_oSystems[ l_iCtr ].f_poEmperor ),
 				f_oSystems[ l_iCtr ].f_iFleet );
-		for ( emperors_t::HIterator it = f_oEmperors.begin(); it != f_oEmperors.end(); ++ it )
+		for ( emperors_t::iterator it = f_oEmperors.begin(); it != f_oEmperors.end(); ++ it )
 			{
 			if ( it->second.f_iColor < 0 )
 				it->first->f_oSocket->write_until_eos ( l_oMessage );
@@ -446,7 +446,7 @@ void HGalaxy::end_round( void )
 	M_EPILOG
 	}
 
-int HGalaxy::get_color ( OClientInfo* a_poClientInfo )
+int HGalaxy::get_color( OClientInfo* a_poClientInfo )
 	{
 	M_PROLOG
 	OEmperorInfo* info = get_emperor_info( a_poClientInfo );
@@ -454,7 +454,7 @@ int HGalaxy::get_color ( OClientInfo* a_poClientInfo )
 	M_EPILOG
 	}
 
-void HGalaxy::mark_alive ( OClientInfo* a_poClientInfo )
+void HGalaxy::mark_alive( OClientInfo* a_poClientInfo )
 	{
 	M_PROLOG
 	get_emperor_info( a_poClientInfo )->f_iSystems ++;
@@ -468,7 +468,7 @@ HGalaxy::OEmperorInfo* HGalaxy::get_emperor_info( OClientInfo* a_poClientInfo )
 	OEmperorInfo* info = NULL;
 	if ( a_poClientInfo )
 		{
-		emperors_t::HIterator it = f_oEmperors.find( a_poClientInfo );
+		emperors_t::iterator it = f_oEmperors.find( a_poClientInfo );
 		M_ASSERT( it != f_oEmperors.end() );
 		info = &it->second;
 		}
