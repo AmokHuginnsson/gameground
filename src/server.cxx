@@ -263,14 +263,13 @@ int HServer::handler_connection( int )
 	M_PROLOG
 	HSocket::ptr_t l_oClient = f_oSocket.accept();
 	M_ASSERT( !! l_oClient );
-	register_file_descriptor_handler( l_oClient->get_file_descriptor(), &HServer::handler_message );
 	if ( f_oSocket.get_client_count() >= f_iMaxConnections )
-		{
-		unregister_file_descriptor_handler( f_oSocket.get_file_descriptor() );
-		f_oSocket.close();
-		}
+		l_oClient->close();
 	else
+		{
+		register_file_descriptor_handler( l_oClient->get_file_descriptor(), &HServer::handler_message );
 		f_oClients[ l_oClient->get_file_descriptor() ].f_oSocket = l_oClient;
+		}
 	out << static_cast<char const* const>( l_oClient->get_host_name() ) << endl;
 	return ( 0 );
 	M_EPILOG
