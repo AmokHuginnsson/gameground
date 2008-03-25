@@ -31,6 +31,9 @@
 using namespace yaal;
 using namespace yaal::hcore;
 
+namespace gameground
+{
+
 /*! \brief Simple constructor.
  * 
  * it inializes dictionary
@@ -99,4 +102,6 @@ void HSpellChecker::cleanup( void )
 	f_pxSpellConfig = NULL;
 	return;
 	}
+
+}
 

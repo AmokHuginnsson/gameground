@@ -31,6 +31,9 @@ Copyright:
 
 #include "logic.h"
 
+namespace gameground
+{
+
 namespace go
 {
 
@@ -167,6 +170,8 @@ private:
 	/*}*/
 	friend class HServer;
 	};
+
+}
 
 }
 

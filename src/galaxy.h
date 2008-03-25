@@ -27,7 +27,12 @@ Copyright:
 #ifndef __GALAXY_H
 #define __GALAXY_H
 
+namespace gameground
+{
+
 int main_client ( void );
+
+}
 
 #endif /* not __GALAXY_H */
 

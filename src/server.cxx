@@ -40,6 +40,9 @@ using namespace yaal::hconsole;
 using namespace yaal::tools;
 using namespace yaal::tools::util;
 
+namespace gameground
+{
+
 namespace
 {
 
@@ -482,4 +485,7 @@ void HServer::send_game_info( OClientInfo& /*a_roInfo*/, HString const& )
 	return;
 	M_EPILOG
 	}
+
+
+}
 

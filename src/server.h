@@ -32,6 +32,9 @@ Copyright:
 #include "clientinfo.h"
 #include "logic.h"
 
+namespace gameground
+{
+
 class HServer : public yaal::tools::HProcess
 	{
 protected:
@@ -105,6 +108,8 @@ protected:
 	};
 
 int main_server( void );
+
+}
 
 #endif /* not __SERVER_H */
 

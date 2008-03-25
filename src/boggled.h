@@ -31,6 +31,9 @@ Copyright:
 
 #include "logic.h"
 
+namespace gameground
+{
+
 namespace boggle
 {
 
@@ -121,6 +124,8 @@ private:
 	/*}*/
 	friend class HServer;
 	};
+
+}
 
 }
 

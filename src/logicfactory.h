@@ -33,6 +33,9 @@ Copyright:
 
 #include "logic.h"
 
+namespace gameground
+{
+
 class HLogicFactory
 	{
 	typedef HLogic::ptr_t ( *creator_t )( yaal::hcore::HString const& );
@@ -61,6 +64,8 @@ private:
 	};
 
 typedef yaal::hcore::HSingleton<HLogicFactory> HLogicFactoryInstance;
+
+}
 
 #endif /* not __LOGICFACTORY_H */
 

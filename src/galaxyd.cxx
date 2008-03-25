@@ -41,6 +41,9 @@ using namespace yaal::hconsole;
 using namespace yaal::tools;
 using namespace yaal::tools::util;
 
+namespace gameground
+{
+
 namespace galaxy
 {
 
@@ -562,6 +565,8 @@ bool registrar( void )
 	}
 
 bool volatile registered = registrar();
+
+}
 
 }
 

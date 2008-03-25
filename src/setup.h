@@ -29,6 +29,9 @@ Copyright:
 
 #include <libintl.h>
 
+namespace gameground
+{
+
 #define D_GALAXY_BOARD_SIZE 								16
 #define D_DEFAULT_MAX_CONNECTIONS		64
 #define D_GALAXY_EMPERORS						4
@@ -108,5 +111,7 @@ private:
 	};
 
 extern OSetup setup;
+
+}
 
 #endif /* __SETUP_H */

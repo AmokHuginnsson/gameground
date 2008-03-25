@@ -29,6 +29,9 @@ Copyright:
 
 #include <yaal/yaal.h>
 
+namespace gameground
+{
+
 struct OClientInfo;
 
 class HLogic
@@ -86,6 +89,8 @@ private:
 	};
 
 typedef yaal::hcore::HExceptionT<HLogic> HLogicException;
+
+}
 
 #endif /* not __LOGIC_H */
 

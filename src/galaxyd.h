@@ -31,6 +31,9 @@ Copyright:
 
 #include "logic.h"
 
+namespace gameground
+{
+
 namespace galaxy
 {
 
@@ -129,6 +132,8 @@ private:
 	/*}*/
 	friend class HServer;
 	};
+
+}
 
 }
 

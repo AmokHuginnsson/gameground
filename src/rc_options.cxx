@@ -36,6 +36,9 @@ M_VCSID ( "$Id$" )
 using namespace yaal;
 using namespace yaal::hcore;
 
+namespace gameground
+{
+
 bool set_variables( HString& a_roOption, HString& a_roValue )
 	{
 	::fprintf( stdout, "option: [%s], value: [%s]\n",
@@ -63,4 +66,6 @@ int process_galaxyrc_file ( void )
 		setup.f_oLogPath = "gameground.log";
 	return ( 0 );
 	}
+
+}
 

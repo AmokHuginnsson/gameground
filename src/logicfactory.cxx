@@ -37,6 +37,9 @@ using namespace yaal::hconsole;
 using namespace yaal::tools;
 using namespace yaal::tools::util;
 
+namespace gameground
+{
+
 void HLogicFactory::register_logic_creator( HString const& a_oInfo, creator_t CREATOR )
 	{
 	M_PROLOG
@@ -88,4 +91,6 @@ int HLogicFactory::life_time( int a_iLifeTime )
 	{
 	return ( a_iLifeTime );
 	}
+
+}
 

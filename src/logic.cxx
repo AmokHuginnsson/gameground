@@ -40,6 +40,9 @@ using namespace yaal::hconsole;
 using namespace yaal::tools;
 using namespace yaal::tools::util;
 
+namespace gameground
+{
+
 char const* const HLogic::PROTOCOL::SEP = ":";
 char const* const HLogic::PROTOCOL::SEPP = ",";
 char const* const HLogic::PROTOCOL::SAY = "say";
@@ -138,4 +141,6 @@ void HLogic::broadcast( HString const& a_roMessage )
 	return;
 	M_EPILOG
 	}
+
+}
 

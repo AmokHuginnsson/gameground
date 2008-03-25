@@ -41,7 +41,11 @@ using namespace yaal::hcore;
 using namespace yaal::hconsole;
 using namespace yaal::tools;
 using namespace yaal::tools::util;
-using namespace galaxy;
+using namespace gameground::galaxy;
+using namespace gameground;
+
+namespace gameground
+{
 
 OSetup setup;
 
@@ -52,6 +56,8 @@ int main_server( void )
 	l_oServer.run();
 	return ( 0 );
 	}
+
+}
 
 int main ( int a_iArgc, char * a_ppcArgv [ ] )
 	{

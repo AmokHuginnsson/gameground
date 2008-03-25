@@ -29,12 +29,17 @@ Copyright:
 
 #include "logic.h"
 
+namespace gameground
+{
+
 struct OClientInfo
 	{
 	yaal::hcore::HString f_oName;
 	yaal::hcore::HSocket::ptr_t f_oSocket;
 	HLogic::ptr_t f_oLogic;
 	};
+
+}
 
 #endif /* not __CLIENTINFO_H */
 

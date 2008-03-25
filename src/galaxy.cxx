@@ -44,6 +44,9 @@ using namespace yaal::hconsole;
 using namespace yaal::tools;
 using namespace yaal::tools::util;
 
+namespace gameground
+{
+
 namespace
 {
 
@@ -1184,4 +1187,6 @@ int main_client ( void )
 	l_oClient.run ( );
 	return ( 0 );
 	}
+
+}
 

@@ -30,6 +30,9 @@ M_VCSID ( "$Id$" )
 
 using namespace yaal::hcore;
 
+namespace gameground
+{
+
 void OSetup::test_setup( void )
 	{
 	M_PROLOG
@@ -100,4 +103,6 @@ bool OSetup::test_glx_board_size( int a_iBoardSize, char*& a_rpcMessage )
 	return ( ( ( a_iBoardSize < 6 ) || ( a_iBoardSize > D_MAX_BOARD_SIZE ) )
 			&& ( a_rpcMessage = _( "bad board size specified\n" ) ) );
 	}
+
+}
 
