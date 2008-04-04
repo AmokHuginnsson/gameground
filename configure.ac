@@ -1,7 +1,7 @@
 dnl configure.ac is integral part of gameground project.
 
 dnl Initialization data.
-AC_INIT([[gameground]],[[0.0.0]],[[amok@frihet.ath.cx]])
+AC_INIT([[gameground]],[[0.0.0]],[[amok@codestation.org]])
 
 AC_MSG_RESULT([--- Welcome to gameground configurator ---               [[0%]]])
 AC_MSG_RESULT([--- Initialization ... ---                               [[6%]]])
