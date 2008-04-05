@@ -37,6 +37,7 @@ struct OClientInfo
 	yaal::hcore::HString f_oName;
 	yaal::hcore::HSocket::ptr_t f_oSocket;
 	HLogic::ptr_t f_oLogic;
+	OClientInfo( void ) : f_oName(), f_oSocket(), f_oLogic() {}
 	};
 
 }
