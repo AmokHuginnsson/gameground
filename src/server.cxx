@@ -297,7 +297,11 @@ int HServer::handler_message( int a_iFileDescriptor )
 			kick_client( l_oClient, _( "Read failure." ) );
 		else if ( l_iMsgLength > 0 )
 			{
-			out << "<-" << static_cast<char const* const>( l_oMessage ) << endl;
+			if ( clientIt->second.f_oName.is_empty() )
+				out << "`unnamed'";
+			else
+				out << clientIt->second.f_oName; 
+			cout << "->" << static_cast<char const* const>( l_oMessage ) << endl;
 			l_oCommand = l_oMessage.split( ":", 0 );
 			l_oArgument = l_oMessage.mid( l_oCommand.get_length() + 1 );
 			l_iMsgLength = l_oCommand.get_length();
