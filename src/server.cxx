@@ -282,7 +282,6 @@ int HServer::handler_connection( int )
 int HServer::handler_message( int a_iFileDescriptor )
 	{
 	M_PROLOG
-	int l_iMsgLength = 0;
 	HString l_oMessage;
 	HString l_oArgument;
 	HString l_oCommand;
@@ -290,9 +289,10 @@ int HServer::handler_message( int a_iFileDescriptor )
 	HSocket::ptr_t l_oClient = f_oSocket.get_client( a_iFileDescriptor );
 	try
 		{
+		HSocket::HStreamInterface::STATUS const* status = NULL;
 		if ( ( clientIt = f_oClients.find( a_iFileDescriptor ) ) == f_oClients.end() )
 			kick_client( l_oClient );
-		else if ( ( l_iMsgLength = l_oClient->read_until( l_oMessage ) ) > 0 )
+		else if ( ( status = &l_oClient->read_until( l_oMessage ) )->code == HSocket::HStreamInterface::STATUS::D_OK )
 			{
 			if ( clientIt->second.f_oName.is_empty() )
 				out << "`unnamed'";
@@ -301,7 +301,7 @@ int HServer::handler_message( int a_iFileDescriptor )
 			cout << "->" << static_cast<char const* const>( l_oMessage ) << endl;
 			l_oCommand = l_oMessage.split( ":", 0 );
 			l_oArgument = l_oMessage.mid( l_oCommand.get_length() + 1 );
-			l_iMsgLength = l_oCommand.get_length();
+			int l_iMsgLength = l_oCommand.get_length();
 			if ( l_iMsgLength < 1 )
 				kick_client( l_oClient, _( "Malformed data." ) );
 			else
@@ -318,8 +318,9 @@ int HServer::handler_message( int a_iFileDescriptor )
 					kick_client( l_oClient, _( "Unknown command." ) );
 				}
 			}
-		else if ( l_iMsgLength == HSocket::HStreamInterface::D_ERROR )
+		else if ( status->code == HSocket::HStreamInterface::STATUS::D_ERROR )
 			kick_client( l_oClient, "" );
+		/* else status->code == HSocket::HStreamInterface::STATUS::D_REPEAT */
 		}
 	catch ( HOpenSSLException& )
 		{
