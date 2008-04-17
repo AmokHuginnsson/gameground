@@ -80,7 +80,8 @@ char const* const HServer::PROTOCOL::SHUTDOWN = "shutdown";
 
 HServer::HServer( int a_iConnections )
 	: HProcess( a_iConnections ), f_iMaxConnections( a_iConnections ),
-	f_oSocket( HSocket::TYPE::D_DEFAULT, a_iConnections ), f_oClients(), f_oLogics(), f_oHandlers(), _out()
+	f_oSocket( HSocket::TYPE::D_DEFAULT | HSocket::TYPE::D_NONBLOCKING | HSocket::TYPE::D_SSL_SERVER, a_iConnections ),
+	f_oClients(), f_oLogics(), f_oHandlers(), _out()
 	{
 	M_PROLOG
 	return;
@@ -289,13 +290,9 @@ int HServer::handler_message( int a_iFileDescriptor )
 	HSocket::ptr_t l_oClient = f_oSocket.get_client( a_iFileDescriptor );
 	try
 		{
-		if ( ! l_oClient )
+		if ( ( clientIt = f_oClients.find( a_iFileDescriptor ) ) == f_oClients.end() )
 			kick_client( l_oClient );
-		else if ( ( clientIt = f_oClients.find( a_iFileDescriptor ) ) == f_oClients.end() )
-			kick_client( l_oClient );
-		else if ( ( l_iMsgLength = l_oClient->read_until( l_oMessage ) ) < 0 )
-			kick_client( l_oClient, _( "Read failure." ) );
-		else if ( l_iMsgLength > 0 )
+		else if ( ( l_iMsgLength = l_oClient->read_until( l_oMessage ) ) > 0 )
 			{
 			if ( clientIt->second.f_oName.is_empty() )
 				out << "`unnamed'";
@@ -321,6 +318,8 @@ int HServer::handler_message( int a_iFileDescriptor )
 					kick_client( l_oClient, _( "Unknown command." ) );
 				}
 			}
+		else if ( l_iMsgLength == HSocket::HStreamInterface::D_ERROR )
+			kick_client( l_oClient, "" );
 		}
 	catch ( HOpenSSLException& )
 		{
