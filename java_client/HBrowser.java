@@ -154,14 +154,15 @@ class HBrowser extends HAbstractLogic {
 				_client = new HClient( _app );
 				_client.setLogic( this );
 				_client.connect( cc._host, cc._port );
+				System.out.println( "Starting connection thread ..." );
 				_client.start();
-				synchronized ( _client ) {
-					_client.wait();
-				}
+				_client.waitUntilRunning();
+				System.out.println( "Connection thread started." );
 				_client.println( "name:" + cc._name );
 				_app.setName( cc._name );
 				_app.setClient( _client );
 			} catch ( Exception e ) {
+				e.printStackTrace();
 				JOptionPane.showMessageDialog( _gui,
 						"GameGround client was unable to connect to server:\n" + e.getMessage(),
 						"GameGround - error ...", JOptionPane.ERROR_MESSAGE );

@@ -4,6 +4,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.HashMap;
 import java.util.Collections;
+import java.util.concurrent.Semaphore;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.PrintStream;
@@ -28,6 +29,7 @@ class HClient extends Thread {
 	BufferedReader _in;
 	PrintStream _out;
 	Socket _socket;
+	Semaphore _running = new Semaphore( 0 );
 /*--------------------------------------------*/
 	public HClient( GameGround $app ) throws Exception {
 		_app = $app;
@@ -48,11 +50,13 @@ class HClient extends Thread {
 		_out.println( $line );
 	}
 
+	public void waitUntilRunning() throws java.lang.InterruptedException {
+		_running.acquire();
+	}
+
 	public void run() {
 		System.out.println( "Awaiting for finish of the initialization." );
-		synchronized( this ) {
-			notify();
-		}
+		_running.release();
 		try {
 			System.out.println( "Main client loop." );
 			String message = "";

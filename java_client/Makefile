@@ -35,7 +35,7 @@ $(TARGET): $(ENVIRON) $(CLASS) $(RES_DEST)
 	jar cf ../$(TARGET) res org com *.class class.list;
 
 run: $(TARGET)
-	java -Djava.security.manager -Djava.security.policy=gameground.policy -ea -cp build/gameground.jar GameGround
+	java -Djava.security.manager -Djava.security.policy=gameground.policy -ea -cp build/gameground.jar GameGround --host codestation.org --login Amok
 
 dist:
 	$(MAKE)
