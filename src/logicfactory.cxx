@@ -40,7 +40,7 @@ using namespace yaal::tools::util;
 namespace gameground
 {
 
-void HLogicFactory::register_logic_creator( HString const& a_oInfo, creator_t CREATOR )
+void HLogicFactory::register_logic_creator( HString const& a_oInfo, HLogicCreatorInterface* a_poInstatiator )
 	{
 	M_PROLOG
 	HString l_oName = a_oInfo.split( ":", 0 );
@@ -48,8 +48,8 @@ void HLogicFactory::register_logic_creator( HString const& a_oInfo, creator_t CR
 	if ( it != f_oCreators.end() )
 		M_THROW( _( "Logic already registered" ), errno );
 	OCreator l_oCreator;
+	l_oCreator.f_poInstatiator = a_poInstatiator;
 	l_oCreator.f_oInfo = a_oInfo;
-	l_oCreator.CREATOR = CREATOR;
 	f_oCreators[ l_oName ] = l_oCreator;
 	return;
 	M_EPILOG
@@ -61,7 +61,7 @@ HLogic::ptr_t HLogicFactory::create_logic( HString const& a_oType, HString const
 	HLogic::ptr_t l_oLogic;
 	creators_t::iterator it = f_oCreators.find( a_oType );
 	if ( it != f_oCreators.end() )
-		l_oLogic = ( it->second.CREATOR )( a_oArgv );
+		l_oLogic = it->second.f_poInstatiator->new_instance( a_oArgv );
 	return ( l_oLogic );
 	M_EPILOG
 	}
@@ -90,6 +90,15 @@ HLogicFactory::creators_t::iterator HLogicFactory::end( void )
 int HLogicFactory::life_time( int a_iLifeTime )
 	{
 	return ( a_iLifeTime );
+	}
+
+void HLogicFactory::initialize_globals( void )
+	{
+	M_PROLOG
+	for ( creators_t::iterator it = f_oCreators.begin(); it != f_oCreators.end(); ++ it )
+		it->second.f_poInstatiator->initialize_globals();
+	return;
+	M_EPILOG
 	}
 
 }

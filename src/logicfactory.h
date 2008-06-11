@@ -38,23 +38,25 @@ namespace gameground
 
 class HLogicFactory
 	{
-	typedef HLogic::ptr_t ( *creator_t )( yaal::hcore::HString const& );
 public:
 	struct OCreator
 		{
-		OCreator( void ) : f_oInfo(), CREATOR( NULL ) {}
+		OCreator( void ) : f_oInfo(), f_poInstatiator( NULL ) {}
+		OCreator( OCreator const& c ) : f_oInfo( c.f_oInfo ), f_poInstatiator( c.f_poInstatiator ) {}
+		OCreator& operator = ( OCreator const& c ) { f_oInfo = c.f_oInfo; f_poInstatiator = c.f_poInstatiator; return ( *this ); }
 		yaal::hcore::HString f_oInfo;
-		creator_t CREATOR;
+		HLogicCreatorInterface* f_poInstatiator;
 		};
 	typedef yaal::hcore::HMap<yaal::hcore::HString, OCreator> creators_t;
 private:
 	creators_t f_oCreators;
 public:
-	void register_logic_creator( yaal::hcore::HString const&, creator_t );
+	void register_logic_creator( yaal::hcore::HString const&, HLogicCreatorInterface* );
 	HLogic::ptr_t create_logic( yaal::hcore::HString const&, yaal::hcore::HString const& );
 	bool is_type_valid( yaal::hcore::HString const& );
 	creators_t::iterator begin( void );
 	creators_t::iterator end( void );
+	void initialize_globals( void );
 private:
 	HLogicFactory( void ) : f_oCreators() {}
 	~HLogicFactory( void ) {}

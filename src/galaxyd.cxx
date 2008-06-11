@@ -524,7 +524,14 @@ yaal::hcore::HString HGalaxy::get_info() const
 namespace logic_factory
 {
 
-HLogic::ptr_t create_logic_galaxy( HString const& a_oArgv )
+class HGalaxyCreator : public HLogicCreatorInterface
+	{
+protected:
+	virtual HLogic::ptr_t do_new_instance( HString const& );
+public:
+	} galaxyCreator;
+
+HLogic::ptr_t HGalaxyCreator::do_new_instance( HString const& a_oArgv )
 	{
 	M_PROLOG
 	HString l_oName = a_oArgv.split( ",", 0 );
@@ -559,7 +566,7 @@ bool registrar( void )
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 	HString l_oSetup;
 	l_oSetup.format( "%s:%d,%d,%d", "glx", setup.f_iEmperors, setup.f_iBoardSize, setup.f_iSystems );
-	factory.register_logic_creator( l_oSetup, create_logic_galaxy );
+	factory.register_logic_creator( l_oSetup, &galaxyCreator );
 	return ( failed );
 	M_EPILOG
 	}

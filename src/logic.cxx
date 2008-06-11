@@ -142,5 +142,15 @@ void HLogic::broadcast( HString const& a_roMessage )
 	M_EPILOG
 	}
 
+void HLogicCreatorInterface::initialize_globals( void )
+	{
+	do_initialize_globals();
+	}
+
+HLogic::ptr_t HLogicCreatorInterface::new_instance( HString const& a_oArgv )
+	{
+	return ( do_new_instance( a_oArgv ) );
+	}
+
 }
 

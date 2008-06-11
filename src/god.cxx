@@ -940,7 +940,13 @@ void HGo::revoke_scheduled_tasks( void )
 namespace logic_factory
 {
 
-HLogic::ptr_t create_logic_go( HString const& a_oArgv )
+class HGoCreator : public HLogicCreatorInterface
+	{
+protected:
+	virtual HLogic::ptr_t do_new_instance( HString const& );
+	} goCreator;
+
+HLogic::ptr_t HGoCreator::do_new_instance( HString const& a_oArgv )
 	{
 	M_PROLOG
 	out << "creating logic: " << a_oArgv << endl;
@@ -960,7 +966,7 @@ bool registrar( void )
 	HString l_oSetup;
 	l_oSetup.format( "go:%d,%d,%d,%d,%d,%d", setup.f_iGobanSize, setup.f_iKomi, setup.f_iHandicaps,
 			setup.f_iMainTime, setup.f_iByoYomiPeriods, setup.f_iByoYomiTime );
-	factory.register_logic_creator( l_oSetup, create_logic_go );
+	factory.register_logic_creator( l_oSetup, &goCreator );
 	return ( failed );
 	M_EPILOG
 	}

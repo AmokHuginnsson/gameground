@@ -37,7 +37,7 @@ struct OClientInfo;
 class HLogic
 	{
 public:
-	typedef yaal::hcore::HPointer<HLogic, yaal::hcore::HPointerScalar, yaal::hcore::HPointerRelaxed> ptr_t;
+	typedef yaal::hcore::HPointer<HLogic> ptr_t;
 	typedef yaal::hcore::HSet<OClientInfo*> clients_t;
 	typedef void ( HLogic::*handler_t ) ( OClientInfo*, yaal::hcore::HString const& );
 private:
@@ -89,6 +89,17 @@ private:
 	};
 
 typedef yaal::hcore::HExceptionT<HLogic> HLogicException;
+
+class HLogicCreatorInterface
+	{
+protected:
+	virtual void do_initialize_globals( void ){};
+	virtual HLogic::ptr_t do_new_instance( yaal::hcore::HString const& ) = 0;
+public:
+	virtual ~HLogicCreatorInterface( void ){}
+	void initialize_globals( void );
+	HLogic::ptr_t new_instance( yaal::hcore::HString const& );
+	};
 
 }
 

@@ -286,7 +286,7 @@ protected:
 	/*}*/
 public:
 	/*{*/
-	typedef HPointer<HGalaxyWindow,HPointerScalar,HPointerRelaxed> ptr_t;
+	typedef HPointer<HGalaxyWindow> ptr_t;
 	HGalaxyWindow ( char const * const, HClient *, int &, int &, client_state_t & );
 	virtual ~HGalaxyWindow ( void );
 	virtual int init ( void );
@@ -791,10 +791,10 @@ int HGalaxyWindow::handler_enter( int a_iCode, void const* )
 	HMove * l_poMove = NULL;
 	if ( (*f_oFocusedChild) == f_poMessageInput )
 		{
-		if ( f_poMessageInput->get ( ).get < HString const & > ( ).find_other_than ( n_pcWhiteSpace ) >= 0 )
+		if ( f_poMessageInput->get().get<HString const&>().find_other_than( n_pcWhiteSpace ) >= 0 )
 			{
 			f_oVarTmpBuffer = "cmd:glx:say:";
-			f_oVarTmpBuffer += f_poMessageInput->get ( ).get < char const * const > ( );
+			f_oVarTmpBuffer += f_poMessageInput->get ( ).get<char const*>();
 			f_oVarTmpBuffer += "\n";
 			f_poClient->send_message ( f_oVarTmpBuffer );
 			f_poMessageInput->set ( "" );
@@ -805,7 +805,7 @@ int HGalaxyWindow::handler_enter( int a_iCode, void const* )
 		{
 		if ( (*f_oFocusedChild) == f_poFleet )
 			{
-			l_iFleet = strtol ( f_poFleet->get ( ).get < char const * const > ( ), NULL, 10 );
+			l_iFleet = strtol( f_poFleet->get().get<char const*>(), NULL, 10 );
 			if ( ( l_iFleet > 0 )
 					&& ( l_iFleet <= ( * f_poSystems ) [ f_poBoard->f_iSourceSystem ].f_iFleet ) )
 				{
@@ -925,7 +925,7 @@ int HClient::handler_message ( int )
 	int l_iMsgLength = 0;
 	HString l_oMessage;
 	HString l_oCommand;
-	if ( ( l_iMsgLength = f_oSocket.read_until ( l_oMessage ) ) > 0 )
+	if ( ( l_iMsgLength = f_oSocket.read_until( l_oMessage ).octets ) > 0 )
 		{
 		while ( ( l_oCommand = l_oMessage.split( ":", 0 ) ) == "glx" )
 			l_oMessage = l_oMessage.mid( l_oCommand.get_length() + 1 );

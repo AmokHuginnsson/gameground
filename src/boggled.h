@@ -64,7 +64,7 @@ class HBoggle : public HLogic
 protected:
 	/*{*/
 	typedef yaal::hcore::HSet<OClientInfo*> client_set_t;
-	typedef yaal::hcore::HPointer<client_set_t, yaal::hcore::HPointerScalar, yaal::hcore::HPointerRelaxed> client_set_ptr_t;
+	typedef yaal::hcore::HPointer<client_set_t> client_set_ptr_t;
 	typedef yaal::hcore::HMap<yaal::hcore::HString, client_set_ptr_t> words_t;
 	typedef yaal::hcore::HMap<OClientInfo*, OPlayerInfo> players_t;
 	STATE::state_t f_eState;

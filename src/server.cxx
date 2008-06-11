@@ -96,6 +96,8 @@ HServer::~HServer( void )
 int HServer::init_server( int a_iPort )
 	{
 	M_PROLOG
+	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
+	factory.initialize_globals();
 	f_oSocket.listen ( "0.0.0.0", a_iPort );
 	register_file_descriptor_handler ( f_oSocket.get_file_descriptor(), &HServer::handler_connection );
 	f_oHandlers[ PROTOCOL::SHUTDOWN ] = &HServer::handler_shutdown;

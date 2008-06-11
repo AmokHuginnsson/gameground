@@ -447,7 +447,14 @@ bool HBoggle::word_is_good( HString const& a_oWord, int a_iLength )
 namespace logic_factory
 {
 
-HLogic::ptr_t create_logic_boggle( HString const& a_oArgv )
+class HBoggleCreator : public HLogicCreatorInterface
+	{
+protected:
+	virtual HLogic::ptr_t do_new_instance( HString const& );
+	virtual void do_initialize_globals( void );
+	} boggleCreator;
+
+HLogic::ptr_t HBoggleCreator::do_new_instance( HString const& a_oArgv )
 	{
 	M_PROLOG
 	out << "creating logic: " << a_oArgv << endl;
@@ -468,6 +475,15 @@ HLogic::ptr_t create_logic_boggle( HString const& a_oArgv )
 	M_EPILOG
 	}
 
+void HBoggleCreator::do_initialize_globals( void )
+	{
+	M_PROLOG
+	static char const* const D_MAGIC_WORD = "mama";
+	HSpellCheckerService::get_instance().spell_check( D_MAGIC_WORD );
+	return;
+	M_EPILOG
+	}
+
 namespace
 {
 
@@ -478,7 +494,7 @@ bool registrar( void )
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 	HString l_oSetup;
 	l_oSetup.format( "%s:%d,%d,%d,%d", "bgl", setup.f_iPlayers, setup.f_iRoundTime, setup.f_iMaxRounds, setup.f_iInterRoundDelay );
-	factory.register_logic_creator( l_oSetup, create_logic_boggle );
+	factory.register_logic_creator( l_oSetup, &boggleCreator );
 	return ( failed );
 	M_EPILOG
 	}
