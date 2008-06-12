@@ -333,11 +333,11 @@ void HGo::count_score( void )
 					out << "teritory: '" << teritory << "'" << endl;
 					M_ASSERT( ! "bug in count_score switch" );
 				}
-			replace_stones( toupper( STONE::D_TERITORY_NONE ), mark );
+			replace_stones( static_cast<char>( toupper( STONE::D_TERITORY_NONE ) ), mark );
 			}
 		}
-	replace_stones( toupper( STONE::D_DEAD_BLACK ), STONE::D_DEAD_BLACK );
-	replace_stones( toupper( STONE::D_DEAD_WHITE ), STONE::D_DEAD_WHITE );
+	replace_stones( static_cast<char>( toupper( STONE::D_DEAD_BLACK ) ), STONE::D_DEAD_BLACK );
+	replace_stones( static_cast<char>( toupper( STONE::D_DEAD_WHITE ) ), STONE::D_DEAD_WHITE );
 	commit();
 	int l_iBlackTeritory = count_stones( STONE::D_TERITORY_BLACK );
 	int l_iWhiteTeritory = count_stones( STONE::D_TERITORY_WHITE );
@@ -371,14 +371,14 @@ void HGo::count_score( void )
 
 HGo::STONE::stone_t HGo::mark_teritory( int x, int y )
 	{
-	STONE::stone_t teritory = toupper( STONE::D_TERITORY_NONE );
+	STONE::stone_t teritory = static_cast<char>( toupper( STONE::D_TERITORY_NONE ) );
 	STONE::stone_t stone = goban( x, y );
 	if ( ( stone == STONE::D_NONE ) || ( stone == STONE::D_DEAD_BLACK ) || ( stone == STONE::D_DEAD_WHITE ) )
 		{
 		if ( stone == STONE::D_NONE )
 			goban( x, y ) = teritory;
 		else
-			goban( x, y ) = toupper( stone );
+			goban( x, y ) = static_cast<char>( toupper( stone ) );
 		int l_iBlackNeighbour = 0;
 		int l_iWhiteNeighbour = 0;
 		int l_iBothNeighbour = 0;
@@ -701,7 +701,7 @@ bool HGo::have_liberties( int a_iCol, int a_iRow, STONE::stone_t stone )
 		return ( true );
 	if ( goban( a_iCol, a_iRow ) == stone )
 		{
-		goban( a_iCol, a_iRow ) = toupper( stone );	
+		goban( a_iCol, a_iRow ) = static_cast<char>( toupper( stone ) );
 		return ( have_liberties( a_iCol, a_iRow - 1, stone )
 				|| have_liberties( a_iCol, a_iRow + 1, stone )
 				|| have_liberties( a_iCol - 1, a_iRow, stone )
@@ -721,7 +721,7 @@ void HGo::clear_goban( bool removeDead )
 				if ( removeDead && isupper( goban( i, j ) ) )
 					goban( i, j ) = STONE::D_NONE;
 				else
-					goban( i, j ) = tolower( goban( i, j ) );
+					goban( i, j ) = static_cast<char>( tolower( goban( i, j ) ) );
 				}
 			}
 		}
