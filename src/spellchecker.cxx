@@ -53,8 +53,8 @@ HSpellChecker::HSpellChecker( void ) : f_pxSpellChecker( NULL ), f_pxSpellConfig
 	hcore::log( LOG_TYPE::D_INFO ) << "aspell_init - ";
 
 	f_pxSpellConfig = new_aspell_config();
-	aspell_config_replace( static_cast<AspellConfig*>( f_pxSpellConfig ), "encoding", setup.f_oConsoleCharset );
-	aspell_config_replace( static_cast<AspellConfig*>( f_pxSpellConfig ), "lang", setup.f_oAspellLang );
+	::aspell_config_replace( static_cast<AspellConfig*>( f_pxSpellConfig ), "encoding", setup.f_oConsoleCharset.raw() );
+	::aspell_config_replace( static_cast<AspellConfig*>( f_pxSpellConfig ), "lang", setup.f_oAspellLang.raw() );
 	possible_err = new_aspell_speller( static_cast<AspellConfig*>( f_pxSpellConfig ) );
 
 	int err = 0;
@@ -84,11 +84,11 @@ HSpellChecker::~HSpellChecker( void )
  *
  * it checks if the given word is correct
  */
-bool HSpellChecker::spell_check( char const* const what )
+bool HSpellChecker::spell_check( HString const& what )
 	{
 	M_PROLOG
-	M_ASSERT( what != NULL );
-	return ( aspell_speller_check( static_cast<AspellSpeller*>( f_pxSpellChecker ), what, ::strlen( what ) ) == 0 );
+	M_ASSERT( !! what );
+	return ( aspell_speller_check( static_cast<AspellSpeller*>( f_pxSpellChecker ), what.raw(), what.length() ) == 0 );
 	M_EPILOG
 	}
 

@@ -37,7 +37,7 @@ class HSpellChecker : public yaal::hcore::HSingletonInterface
 	void* f_pxSpellChecker; /* AspellSpeller */
 	void* f_pxSpellConfig; /* AspellConfig */
 public:
-	bool spell_check( char const* const );
+	bool spell_check( yaal::hcore::HString const& );
 private:
 	HSpellChecker( void );
 	~HSpellChecker( void );

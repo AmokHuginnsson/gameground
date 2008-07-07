@@ -475,18 +475,18 @@ void HBoard::do_refresh ( void )
 		for ( l_iCtr = 0; l_iCtr < f_iBoardSize; l_iCtr ++ )
 			l_oPen += "-+-";
 		l_oPen += '.';
-		cons.c_cmvprintf ( f_iRowRaw, f_iColumnRaw, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, l_oPen );
+		cons.c_cmvprintf( f_iRowRaw, f_iColumnRaw, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, l_oPen.raw() );
 		l_oPen = '}';
 		for ( l_iCtr = 0; l_iCtr < f_iBoardSize; l_iCtr ++ )
 			l_oPen += " - ";
 		l_oPen += '{';
 		for ( l_iCtr = 0; l_iCtr < f_iBoardSize; l_iCtr ++ )
-			cons.c_cmvprintf ( f_iRowRaw + l_iCtr + 1, f_iColumnRaw, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, l_oPen );
+			cons.c_cmvprintf ( f_iRowRaw + l_iCtr + 1, f_iColumnRaw, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, l_oPen.raw() );
 		l_oPen = '`';
 		for ( l_iCtr = 0; l_iCtr < f_iBoardSize; l_iCtr ++ )
 			l_oPen += "-+-";
 		l_oPen += '\'';
-		cons.c_cmvprintf ( f_iRowRaw + f_iBoardSize + 1, f_iColumnRaw, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, l_oPen );
+		cons.c_cmvprintf ( f_iRowRaw + f_iBoardSize + 1, f_iColumnRaw, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, l_oPen.raw() );
 		if ( ( l_iSystems = f_poSystems->get_size ( ) ) )
 			{
 			for ( l_iCtr = 0; l_iCtr < l_iSystems; l_iCtr ++ )
@@ -805,7 +805,7 @@ int HGalaxyWindow::handler_enter( int a_iCode, void const* )
 		{
 		if ( (*f_oFocusedChild) == f_poFleet )
 			{
-			l_iFleet = strtol( f_poFleet->get().get<char const*>(), NULL, 10 );
+			l_iFleet = lexical_cast<int>( f_poFleet->get().get<char const*>() );
 			if ( ( l_iFleet > 0 )
 					&& ( l_iFleet <= ( * f_poSystems ) [ f_poBoard->f_iSourceSystem ].f_iFleet ) )
 				{
@@ -909,11 +909,10 @@ void HClient::init_client ( HString & a_roHost, int a_iPort )
 	f_poBoard = f_oWindow->get_board();
 	if ( ! setup.f_oGameType.is_empty() )
 		l_oMessage.format( "create:glx:%s,%d,%d,%d\n",
-				static_cast<char const* const>( setup.f_oGame ),
+				setup.f_oGame.raw(),
 				setup.f_iEmperors, setup.f_iBoardSize, setup.f_iSystems );
 	else
-		l_oMessage.format( "join:%s\n",
-				static_cast<char const* const>( setup.f_oGame ) );
+		l_oMessage.format( "join:%s\n", setup.f_oGame.raw() );
 	f_oSocket.write_until_eos( l_oMessage );
 	return;
 	M_EPILOG
@@ -975,25 +974,25 @@ void HClient::handler_setup ( HString & a_roCommand )
 	l_oVariable = a_roCommand.split ( "=", 0 );
 	l_oValue = a_roCommand.split ( "=", 1 );
 	if ( l_oVariable == "board_size" )
-		f_oWindow->f_poBoard->f_iBoardSize = strtol ( l_oValue, NULL, 10 );
+		f_oWindow->f_poBoard->f_iBoardSize = lexical_cast<int>( l_oValue );
 	else if ( l_oVariable == "systems" )
 		{
 		if ( f_oSystems.get_size ( ) )
 			f_bLoop = false;
 		else
-			f_oSystems = HArray < HSystem > ( setup.f_iSystems = strtol ( l_oValue, NULL, 10 ) );
+			f_oSystems = HArray < HSystem > ( setup.f_iSystems = lexical_cast<int>( l_oValue ) );
 		}
 	else if ( l_oVariable == "system_coordinates" )
 		{
-		l_iIndex = strtol ( l_oValue.split ( ",", 0 ), NULL, 10 );
-		l_iCoordX = strtol ( l_oValue.split ( ",", 1 ), NULL, 10 );
-		l_iCoordY = strtol ( l_oValue.split ( ",", 2 ), NULL, 10 );
+		l_iIndex = lexical_cast<int>( l_oValue.split ( ",", 0 ) );
+		l_iCoordX = lexical_cast<int>( l_oValue.split ( ",", 1 ) );
+		l_iCoordY = lexical_cast<int>( l_oValue.split ( ",", 2 ) );
 		f_oSystems [ l_iIndex ].f_iCoordinateX = l_iCoordX;
 		f_oSystems [ l_iIndex ].f_iCoordinateY = l_iCoordY;
 		}
 	else if ( l_oVariable == "emperor" )
 		{
-		l_iIndex = strtol ( l_oValue.split ( ",", 0 ), NULL, 10 );
+		l_iIndex = lexical_cast<int>( l_oValue.split ( ",", 0 ) );
 		f_oEmperors [ l_iIndex ] = l_oValue.split ( ",", 1 );
 		if ( f_oEmperors [ l_iIndex ] == setup.f_oLogin )
 			f_iColor = l_iIndex;
@@ -1020,41 +1019,41 @@ void HClient::handler_play ( HString& a_roCommand )
 	if ( l_oVariable == "system_info" )
 		{
 		l_cEvent = l_oValue [ 0 ];
-		l_iSysNo = strtol ( l_oValue.split ( ",", 1 ), NULL, 10 );
-		l_iProduction = strtol ( l_oValue.split ( ",", 2 ), NULL, 10 );
+		l_iSysNo = lexical_cast<int>( l_oValue.split( ",", 1 ) );
+		l_iProduction = lexical_cast<int>( l_oValue.split( ",", 2 ) );
 		if ( l_iProduction >= 0 )
 			f_oSystems [ l_iSysNo ].f_iProduction = l_iProduction;
-		f_oSystems [ l_iSysNo ].f_iFleet = strtol ( l_oValue.split ( ",", 4 ), NULL, 10 );
-		l_iColor = strtol ( l_oValue.split ( ",", 3 ), NULL, 10 );
-		f_oEmperors.get ( l_iColor, l_oValue );
+		f_oSystems [ l_iSysNo ].f_iFleet = lexical_cast<int>( l_oValue.split( ",", 4 ) );
+		l_iColor = lexical_cast<int>( l_oValue.split( ",", 3 ) );
+		f_oEmperors.get( l_iColor, l_oValue );
 		switch ( l_cEvent )
 			{
 			case ( 'c' ): /* conquered */
 			case ( 'd' ): /* defeted */
 				{
-				f_oWindow->f_poLogPad->add ( n_piColors [ l_iColor ] );
-				f_oWindow->f_poLogPad->add ( l_oValue );
-				f_oWindow->f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
-				f_oWindow->f_poLogPad->add ( " conquered " );
+				f_oWindow->f_poLogPad->add( n_piColors [ l_iColor ] );
+				f_oWindow->f_poLogPad->add( l_oValue );
+				f_oWindow->f_poLogPad->add( COLORS::D_ATTR_NORMAL );
+				f_oWindow->f_poLogPad->add( " conquered " );
 				int l_iTemp = f_oSystems [ l_iSysNo ].f_iColor;
-				f_oWindow->f_poLogPad->add ( ( l_iTemp >= 0 ) ? n_piColors [ l_iTemp ] : COLORS::D_ATTR_NORMAL );
-				f_oWindow->f_poLogPad->add ( n_ppcSystemNames [ l_iSysNo ] );
+				f_oWindow->f_poLogPad->add( ( l_iTemp >= 0 ) ? n_piColors [ l_iTemp ] : COLORS::D_ATTR_NORMAL );
+				f_oWindow->f_poLogPad->add( n_ppcSystemNames [ l_iSysNo ] );
 				l_oValue.format ( "(%c)", n_pcSymbols [ l_iSysNo ] );
-				f_oWindow->f_poLogPad->add ( l_oValue );
-				f_oWindow->f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
-				f_oWindow->f_poLogPad->add ( ".\n" );
+				f_oWindow->f_poLogPad->add( l_oValue );
+				f_oWindow->f_poLogPad->add( COLORS::D_ATTR_NORMAL );
+				f_oWindow->f_poLogPad->add( ".\n" );
 				f_oSystems [ l_iSysNo ].f_iColor = l_iColor;
 				break;
 				}
 			case ( 'r' ): /* reinforcements */
 				{
-				f_oWindow->f_poLogPad->add ( "Reinforcements for " );
-				f_oWindow->f_poLogPad->add ( n_piColors [ l_iColor ] );
-				f_oWindow->f_poLogPad->add ( n_ppcSystemNames [ l_iSysNo ] );
-				l_oValue.format ( "(%c)", n_pcSymbols [ l_iSysNo ] );
-				f_oWindow->f_poLogPad->add ( l_oValue );
-				f_oWindow->f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
-				f_oWindow->f_poLogPad->add ( " arrived.\n" );
+				f_oWindow->f_poLogPad->add( "Reinforcements for " );
+				f_oWindow->f_poLogPad->add( n_piColors[ l_iColor ] );
+				f_oWindow->f_poLogPad->add( n_ppcSystemNames[ l_iSysNo ] );
+				l_oValue.format( "(%c)", n_pcSymbols[ l_iSysNo ] );
+				f_oWindow->f_poLogPad->add( l_oValue );
+				f_oWindow->f_poLogPad->add( COLORS::D_ATTR_NORMAL );
+				f_oWindow->f_poLogPad->add( " arrived.\n" );
 				break;
 				}
 			case ( 'f' ): /* failed to conquer */
@@ -1087,18 +1086,18 @@ void HClient::handler_play ( HString& a_roCommand )
 		}
 	else if ( l_oVariable == "round" )
 		{
-		f_oWindow->f_poLogPad->add ( D_ATTR_CURSOR );
-		f_oWindow->f_poLogPad->add ( "----- " );
-		f_oWindow->f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
-		f_oWindow->f_poLogPad->add ( " round: " );
-		f_iRound = strtol ( l_oValue, NULL, 10 );
+		f_oWindow->f_poLogPad->add( D_ATTR_CURSOR );
+		f_oWindow->f_poLogPad->add( "----- " );
+		f_oWindow->f_poLogPad->add( COLORS::D_ATTR_NORMAL );
+		f_oWindow->f_poLogPad->add( " round: " );
+		f_iRound = lexical_cast<int>( l_oValue );
 		l_oValue.format ( "%d", f_iRound );
-		f_oWindow->f_poLogPad->add ( D_ATTR_CURSOR );
-		f_oWindow->f_poLogPad->add ( l_oValue );
-		f_oWindow->f_poLogPad->add ( " -----\n" );
-		f_oWindow->f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
-		f_oWindow->set_state ( D_NORMAL );
-		f_oWindow->schedule_refresh ( );
+		f_oWindow->f_poLogPad->add( D_ATTR_CURSOR );
+		f_oWindow->f_poLogPad->add( l_oValue );
+		f_oWindow->f_poLogPad->add( " -----\n" );
+		f_oWindow->f_poLogPad->add( COLORS::D_ATTR_NORMAL );
+		f_oWindow->set_state( D_NORMAL );
+		f_oWindow->schedule_refresh();
 		}
 	return;
 	M_EPILOG
@@ -1128,9 +1127,9 @@ void HClient::handler_msg( HString& a_roMessage )
 		if ( l_oPart.is_empty ( ) )
 			break;
 		if ( l_oPart [ 0 ] == '$' ) /* color */
-			f_oWindow->f_poLogPad->add ( n_piColors [ strtol ( l_oPart.mid ( 1 ), NULL, 10 ) ] );
+			f_oWindow->f_poLogPad->add( n_piColors[ lexical_cast<int> ( l_oPart.mid ( 1 ) ) ] );
 		else /* text */
-			f_oWindow->f_poLogPad->add ( l_oPart );
+			f_oWindow->f_poLogPad->add( l_oPart );
 		l_iIndex = l_iOffset + 1;
 		}
 	f_oWindow->f_poLogPad->add ( "\n" );
@@ -1182,8 +1181,8 @@ int main_client ( void )
 	else
 		n_ppcSystemNames = n_ppcSystemNamesLatin;
 	M_ENSURE( setup.f_oGameType.is_empty() || ( setup.f_oGameType == "glx" ) );
-	HClient l_oClient ( setup.f_oLogin );
-	l_oClient.init_client ( setup.f_oHost, setup.f_iPort );
+	HClient l_oClient( setup.f_oLogin.raw() );
+	l_oClient.init_client( setup.f_oHost, setup.f_iPort );
 	l_oClient.run ( );
 	return ( 0 );
 	}

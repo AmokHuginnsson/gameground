@@ -28,6 +28,7 @@ Copyright:
 #define __SETUP_H
 
 #include <libintl.h>
+#include <iostream>
 
 namespace gameground
 {
@@ -49,6 +50,9 @@ namespace gameground
 #define D_GO_BYOYOMI_PERIODS 5
 #define D_GO_BYOYOMI_TIME 1
 #define out ( cout << __FILE__ + OSetup::PATH_OFFSET << ":" << __LINE__ << ": " )
+
+inline std::ostream& operator << ( std::ostream& o, yaal::hcore::HString const& s )
+	{ return ( o << s.raw() ); }
 
 struct OSetup
 	{

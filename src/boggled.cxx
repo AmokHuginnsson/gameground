@@ -425,7 +425,7 @@ bool HBoggle::word_is_good( HString const& a_oWord, int a_iLength )
 	{
 	M_PROLOG
 	bool good = false;
-	char const* ptr = a_oWord;
+	char const* ptr = a_oWord.raw();
 	for ( int f = 0; f < boggle_data::D_MAXIMUM_WORD_LENGTH; ++ f )
 		f_ppcGame[ f ][ 1 ] = 0;
 	for ( int f = 0; f < boggle_data::D_MAXIMUM_WORD_LENGTH; ++ f )
@@ -463,10 +463,10 @@ HLogic::ptr_t HBoggleCreator::do_new_instance( HString const& a_oArgv )
 	HString l_oRoundTime = a_oArgv.split( ",", 2 );
 	HString l_oMaxRounds = a_oArgv.split( ",", 3 );
 	HString l_oInterRoundDelay = a_oArgv.split( ",", 4 );
-	int l_iPlayers = strtol( l_oPlayers, NULL, 10 );
-	int l_iRoundTime = strtol( l_oRoundTime, NULL, 10 );
-	int l_iMaxRounds = strtol( l_oMaxRounds, NULL, 10 );
-	int l_iInterRoundDelay = strtol( l_oInterRoundDelay, NULL, 10 );
+	int l_iPlayers = lexical_cast<int>( l_oPlayers );
+	int l_iRoundTime = lexical_cast<int>( l_oRoundTime );
+	int l_iMaxRounds = lexical_cast<int>( l_oMaxRounds );
+	int l_iInterRoundDelay = lexical_cast<int>( l_oInterRoundDelay );
 	return ( HLogic::ptr_t( new boggle::HBoggle( l_oName,
 					l_iPlayers,
 					l_iRoundTime,

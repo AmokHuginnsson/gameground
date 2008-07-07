@@ -873,7 +873,7 @@ void HGo::send_contestant( char stone )
 	if ( cinfo )
 		{
 		OPlayerInfo& info = *get_player_info( cinfo );
-		name = cinfo->f_oName;
+		name = cinfo->f_oName.raw();
 		captured = info.f_iStonesCaptured;
 		time = info.f_iTimeLeft;
 		byoyomi = info.f_iByoYomiPeriods;

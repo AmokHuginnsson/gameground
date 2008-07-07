@@ -151,7 +151,7 @@ void HServer::set_client_name( OClientInfo& a_roInfo, HString const& a_oName )
 	clients_t::iterator it;
 	int const D_MINIMUM_NAME_LENGTH = 4;
 	for ( it = f_oClients.begin(); it != f_oClients.end(); ++ it )
-		if ( ( ! ::strcasecmp( it->second.f_oName, a_oName ) ) && ( it->second.f_oSocket != a_roInfo.f_oSocket ) )
+		if ( ( ! strcasecmp( it->second.f_oName, a_oName ) ) && ( it->second.f_oSocket != a_roInfo.f_oSocket ) )
 			break;
 	if ( a_oName.find_other_than( "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_" ) >= 0 )
 		*a_roInfo.f_oSocket << "err:Name may only take form of `[a-zA-Z0-9]+'." << endl;
@@ -188,7 +188,7 @@ void HServer::pass_command( OClientInfo& a_roInfo, HString const& a_oCommand )
 			msg = e.what();
 			}
 		if ( ! msg.is_empty() )
-			remove_client_from_logic( a_roInfo, msg );
+			remove_client_from_logic( a_roInfo, msg.raw() );
 		}
 	return;
 	M_EPILOG
@@ -276,7 +276,7 @@ int HServer::handler_connection( int )
 		register_file_descriptor_handler( l_oClient->get_file_descriptor(), &HServer::handler_message );
 		f_oClients[ l_oClient->get_file_descriptor() ].f_oSocket = l_oClient;
 		}
-	out << static_cast<char const* const>( l_oClient->get_host_name() ) << endl;
+	out << l_oClient->get_host_name() << endl;
 	return ( 0 );
 	M_EPILOG
 	}
@@ -300,7 +300,7 @@ int HServer::handler_message( int a_iFileDescriptor )
 				out << "`unnamed'";
 			else
 				out << clientIt->second.f_oName; 
-			cout << "->" << static_cast<char const* const>( l_oMessage ) << endl;
+			cout << "->" << l_oMessage << endl;
 			l_oCommand = l_oMessage.split( ":", 0 );
 			l_oArgument = l_oMessage.mid( l_oCommand.get_length() + 1 );
 			int l_iMsgLength = l_oCommand.get_length();
