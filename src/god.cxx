@@ -27,7 +27,7 @@ Copyright:
 #include <iostream>
 
 #include <yaal/yaal.h>
-M_VCSID ( "$Id$" )
+M_VCSID( "$Id: "__ID__" $" )
 #include "god.h"
 
 #include "setup.h"
@@ -875,7 +875,7 @@ void HGo::send_contestant( char stone )
 		OPlayerInfo& info = *get_player_info( cinfo );
 		name = cinfo->f_oName.raw();
 		captured = info.f_iStonesCaptured;
-		time = info.f_iTimeLeft;
+		time = static_cast<int>( info.f_iTimeLeft );
 		byoyomi = info.f_iByoYomiPeriods;
 		score = info.f_iScore;
 		}

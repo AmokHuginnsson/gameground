@@ -27,7 +27,7 @@ Copyright:
 #include <iostream>
 
 #include <yaal/yaal.h>
-M_VCSID ( "$Id$" )
+M_VCSID( "$Id: "__ID__" $" )
 
 #include "galaxy.h"
 
@@ -928,7 +928,7 @@ int HClient::handler_message ( int )
 		{
 		while ( ( l_oCommand = l_oMessage.split( ":", 0 ) ) == "glx" )
 			l_oMessage = l_oMessage.mid( l_oCommand.get_length() + 1 );
-		l_iMsgLength = l_oMessage.get_length();
+		l_iMsgLength = static_cast<int>( l_oMessage.get_length() );
 		if ( l_iMsgLength < 1 )
 			{
 			hcore::log << "got empty message from server" << endl;
@@ -1116,14 +1116,14 @@ void HClient::handler_msg( HString& a_roMessage )
 	{
 	M_PROLOG
 	int l_iIndex = 0, l_iOffset = 0;
-	int l_iLength = a_roMessage.get_length ( );
+	int l_iLength = static_cast<int>( a_roMessage.get_length() );
 	HString l_oPart;
 	while ( l_iIndex < l_iLength )
 		{
-		l_iOffset = a_roMessage.find ( ';', l_iIndex );
+		l_iOffset = static_cast<int>( a_roMessage.find( ';', l_iIndex ) );
 		if ( l_iOffset < 0 )
 			l_iOffset = l_iLength;
-		l_oPart = a_roMessage.mid ( l_iIndex, l_iOffset - l_iIndex );
+		l_oPart = a_roMessage.mid( l_iIndex, l_iOffset - l_iIndex );
 		if ( l_oPart.is_empty ( ) )
 			break;
 		if ( l_oPart [ 0 ] == '$' ) /* color */

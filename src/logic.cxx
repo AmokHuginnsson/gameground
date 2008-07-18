@@ -27,7 +27,7 @@ Copyright:
 #include <iostream>
 
 #include <yaal/yaal.h>
-M_VCSID ( "$Id$" )
+M_VCSID( "$Id: "__ID__" $" )
 #include "logic.h"
 
 #include "setup.h"
@@ -101,7 +101,7 @@ bool HLogic::accept_client( OClientInfo* a_poClientInfo )
 int HLogic::active_clients( void ) const
 	{
 	M_PROLOG
-	return ( f_oClients.size() );
+	return ( static_cast<int>( f_oClients.size() ) );
 	M_EPILOG
 	}
 

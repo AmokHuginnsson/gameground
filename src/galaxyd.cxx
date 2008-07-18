@@ -27,7 +27,7 @@ Copyright:
 #include <iostream>
 
 #include <yaal/yaal.h>
-M_VCSID ( "$Id$" )
+M_VCSID( "$Id: "__ID__" $" )
 #include "galaxyd.h"
 
 #include "setup.h"
@@ -166,10 +166,10 @@ HGalaxy::HGalaxy( HString const& a_oName, int a_iBoardSize, int a_iSystems, int 
 	l_oRandom.set ( time ( NULL ) );
 	for ( l_iCtr = 0; l_iCtr < ( a_iEmperors + a_iSystems ); l_iCtr ++ )
 		{
-		l_poSystem = & f_oSystems [ l_iCtr ];
+		l_poSystem = &f_oSystems[ l_iCtr ];
 		l_poSystem->f_iId = l_iCtr;
-		l_poSystem->f_iCoordinateX = l_oRandom.rnd ( f_iBoardSize );
-		l_poSystem->f_iCoordinateY = l_oRandom.rnd ( f_iBoardSize );
+		l_poSystem->f_iCoordinateX = l_oRandom.rnd( f_iBoardSize );
+		l_poSystem->f_iCoordinateY = l_oRandom.rnd( f_iBoardSize );
 		if ( l_iCtr )
 			{
 			for ( l_iCtrLoc = 0; l_iCtrLoc < l_iCtr; l_iCtrLoc ++ )
@@ -217,11 +217,11 @@ void HGalaxy::do_post_accept( OClientInfo* a_poClientInfo )
 	a_poClientInfo->f_oSocket->write_until_eos( l_oMessage ); /* send setup info to new emperor */
 	l_oMessage.format ( "glx:setup:systems=%d\n", f_iEmperors + f_iSystems );
 	a_poClientInfo->f_oSocket->write_until_eos( l_oMessage );
-	for ( size_t l_iCtr = 0; l_iCtr < ( f_iEmperors + f_iSystems ); l_iCtr ++ )
+	for ( int l_iCtr = 0; l_iCtr < ( f_iEmperors + f_iSystems ); ++ l_iCtr )
 		{
-		l_oMessage.format ( "glx:setup:system_coordinates=%d,%d,%d\n",
-				l_iCtr, f_oSystems [ l_iCtr ].f_iCoordinateX,
-				f_oSystems [ l_iCtr ].f_iCoordinateY );
+		l_oMessage.format( "glx:setup:system_coordinates=%d,%d,%d\n",
+				l_iCtr, f_oSystems[ l_iCtr ].f_iCoordinateX,
+				f_oSystems[ l_iCtr ].f_iCoordinateY );
 		a_poClientInfo->f_oSocket->write_until_eos ( l_oMessage );
 		if ( ( f_iRound >= 0 ) && ( f_oSystems[ l_iCtr ].f_poEmperor ) )
 			{
@@ -302,7 +302,7 @@ int HGalaxy::assign_system( OClientInfo* a_poClientInfo )
 			break;
 	info.f_iColor = l_iCtr;
 	info.f_iSystems = 1;
-	int l_iRivals = f_oEmperors.size();
+	int l_iRivals = static_cast<int>( f_oEmperors.size() );
 	HRandomizer l_oRnd;
 	randomizer_helper::init_randomizer_from_time( l_oRnd );
 	int l_iMotherSystem = l_oRnd.rnd( f_iEmperors + f_iSystems - l_iRivals );
@@ -393,7 +393,7 @@ void HGalaxy::handler_play ( OClientInfo* a_poClientInfo, HString const& a_roCom
 void HGalaxy::end_round( void )
 	{
 	M_PROLOG
-	size_t l_iCtr = 0, l_iDead = 0;
+	int l_iCtr = 0, l_iDead = 0;
 	f_iReady = 0;
 	for ( emperors_t::iterator it = f_oEmperors.begin(); it != f_oEmperors.end(); ++ it )
 		if ( it->second.f_iSystems > 0 )
@@ -482,7 +482,7 @@ HGalaxy::OEmperorInfo* HGalaxy::get_emperor_info( OClientInfo* a_poClientInfo )
 void HGalaxy::do_kick( OClientInfo* a_poClientInfo )
 	{
 	M_PROLOG
-	for ( size_t l_iCtr = 0; l_iCtr < ( f_iSystems + f_iEmperors ); ++ l_iCtr )
+	for ( int l_iCtr = 0; l_iCtr < ( f_iSystems + f_iEmperors ); ++ l_iCtr )
 		{
 		HSystem::attackers_t& l_oAttackers = f_oSystems[ l_iCtr ].f_oAttackers;
 		for ( HSystem::attackers_t::iterator it = l_oAttackers.begin();

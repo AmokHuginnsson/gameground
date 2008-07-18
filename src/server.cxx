@@ -27,7 +27,7 @@ Copyright:
 #include <iostream>
 
 #include <yaal/yaal.h>
-M_VCSID ( "$Id$" )
+M_VCSID( "$Id: "__ID__" $" )
 #include "server.h"
 
 #include "setup.h"
@@ -303,7 +303,7 @@ int HServer::handler_message( int a_iFileDescriptor )
 			cout << "->" << l_oMessage << endl;
 			l_oCommand = l_oMessage.split( ":", 0 );
 			l_oArgument = l_oMessage.mid( l_oCommand.get_length() + 1 );
-			int l_iMsgLength = l_oCommand.get_length();
+			int l_iMsgLength = static_cast<int>( l_oCommand.get_length() );
 			if ( l_iMsgLength < 1 )
 				kick_client( l_oClient, _( "Malformed data." ) );
 			else

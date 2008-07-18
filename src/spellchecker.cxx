@@ -23,6 +23,7 @@
 #include <aspell.h>
 
 #include <yaal/yaal.h>
+M_VCSID( "$Id: "__ID__" $" )
 
 #include "spellchecker.h"
 
@@ -88,7 +89,7 @@ bool HSpellChecker::spell_check( HString const& what )
 	{
 	M_PROLOG
 	M_ASSERT( !! what );
-	return ( aspell_speller_check( static_cast<AspellSpeller*>( f_pxSpellChecker ), what.raw(), what.length() ) == 0 );
+	return ( aspell_speller_check( static_cast<AspellSpeller*>( f_pxSpellChecker ), what.raw(), static_cast<int>( what.length() ) ) == 0 );
 	M_EPILOG
 	}
 

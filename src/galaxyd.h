@@ -100,9 +100,9 @@ protected:
 	/*{*/
 	int f_iBoardSize;
 	int f_iSystems;
-	size_t f_iEmperors;
+	int f_iEmperors;
 	int f_iRound;
-	size_t f_iReady;
+	int f_iReady;
 	yaal::hcore::HArray<HSystem> f_oSystems;
 	emperors_t f_oEmperors;
 	/*}*/

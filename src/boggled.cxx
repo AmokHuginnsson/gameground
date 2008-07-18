@@ -27,7 +27,7 @@ Copyright:
 #include <iostream>
 
 #include <yaal/yaal.h>
-M_VCSID ( "$Id$" )
+M_VCSID( "$Id: "__ID__" $" )
 #include "boggled.h"
 
 #include "setup.h"
@@ -170,7 +170,7 @@ void HBoggle::handler_play ( OClientInfo* a_poClientInfo, HString const& a_oWord
 	{
 	M_PROLOG
 	HLock l( f_oMutex );
-	int l_iLength = a_oWord.get_length();
+	int l_iLength = static_cast<int>( a_oWord.get_length() );
 	if ( ( f_eState == STATE::D_ACCEPTING )
 			&& ( l_iLength >= boggle_data::D_MINIMUM_WORD_LENGTH )
 			&& ( l_iLength <= boggle_data::D_MAXIMUM_WORD_LENGTH ) )
@@ -349,7 +349,7 @@ void HBoggle::on_end_round( void )
 		{
 		if ( it->second->size() > 1 )
 			continue;
-		int l_iLength = it->first.get_length();
+		int l_iLength = static_cast<int>( it->first.get_length() );
 		if ( word_is_good( it->first, l_iLength ) )
 			{
 			if ( l_iLength > l_iLongestLength )
