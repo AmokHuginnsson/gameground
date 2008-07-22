@@ -68,7 +68,7 @@ protected:
 	typedef yaal::hcore::HMap<yaal::hcore::HString, client_set_ptr_t> words_t;
 	typedef yaal::hcore::HMap<OClientInfo*, OPlayerInfo> players_t;
 	STATE::state_t f_eState;
-	size_t f_iPlayers;
+	int f_iPlayers;
 	int f_iRoundTime;
 	int f_iMaxRounds;
 	int f_iInterRoundDelay;
