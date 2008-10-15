@@ -487,7 +487,7 @@ void HBoard::do_refresh ( void )
 			l_oPen += "-+-";
 		l_oPen += '\'';
 		cons.c_cmvprintf ( f_iRowRaw + f_iBoardSize + 1, f_iColumnRaw, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, l_oPen.raw() );
-		if ( ( l_iSystems = f_poSystems->get_size ( ) ) )
+		if ( ( l_iSystems = static_cast<int>( f_poSystems->get_size() ) ) )
 			{
 			for ( l_iCtr = 0; l_iCtr < l_iSystems; l_iCtr ++ )
 				{
@@ -655,7 +655,7 @@ void HBoard::set_systems ( systems_t * a_poSystems )
 int HBoard::get_sys_no ( int a_iCoordX, int a_iCoordY )
 	{
 	M_PROLOG
-	int l_iCtr = 0, l_iSystems = f_poSystems->get_size ( );
+	int l_iCtr = 0, l_iSystems = static_cast<int>( f_poSystems->get_size() );
 	for ( l_iCtr = 0; l_iCtr < l_iSystems; l_iCtr ++ )
 		if ( ( ( * f_poSystems ) [ l_iCtr ].f_iCoordinateX == a_iCoordX )
 				&& ( ( * f_poSystems ) [ l_iCtr ].f_iCoordinateY == a_iCoordY ) )
