@@ -67,14 +67,47 @@ int n_piColors [ ] =
 	( COLORS::D_FG_LIGHTGRAY | COLORS::D_BG_BLACK )
 	};
 
-HSystem::HSystem ( void ) : f_iId ( - 1 ),
-														f_iCoordinateX ( - 1 ), f_iCoordinateY ( - 1 ),
-														f_iProduction ( - 1 ), f_iFleet ( - 1 ),
-														f_poEmperor ( NULL ), f_oAttackers ( )
+HSystem::HSystem ( void )
+	: f_iId( -1 ), f_iCoordinateX( -1 ), f_iCoordinateY( -1 ),
+	f_iProduction( -1 ), f_iFleet( -1 ), f_poEmperor( NULL ), f_oAttackers()
 	{
 	M_PROLOG
 	return;
 	M_EPILOG
+	}
+
+HSystem::HSystem( HSystem const& s )
+	: f_iId( s.f_iId ), f_iCoordinateX( s.f_iCoordinateX ), f_iCoordinateY( s.f_iCoordinateY ),
+	f_iProduction( s.f_iProduction ), f_iFleet( s.f_iFleet ), f_poEmperor( s.f_poEmperor ), f_oAttackers( s.f_oAttackers )
+	{
+	M_ASSERT( ! "wrong execution path" );
+	}
+
+HSystem& HSystem::operator = ( HSystem const& s )
+	{
+	if ( &s != this )
+		{
+		HSystem tmp( s );
+		swap( tmp );
+		}
+	return ( *this );
+	}
+
+void HSystem::swap( HSystem& other )
+	{
+	if ( &other != this )
+		{
+		using yaal::swap;
+		swap( f_iId, other.f_iId );
+		swap( f_iCoordinateX, other.f_iCoordinateX );
+		swap( f_iCoordinateY, other.f_iCoordinateY );
+		swap( f_iProduction, other.f_iProduction );
+		swap( f_iFleet, other.f_iFleet );
+		swap( f_poEmperor, other.f_poEmperor );
+		swap( f_oAttackers, other.f_oAttackers );
+		M_ASSERT( ! "wrong execution path" );
+		}
+	return;
 	}
 
 void HSystem::do_round( HGalaxy& a_roGalaxy )

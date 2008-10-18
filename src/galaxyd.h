@@ -74,18 +74,17 @@ protected:
 public:
 	/*{*/
 	HSystem ( void );
+	HSystem( HSystem const& ) __attribute__(( __noreturn__ ));
+	HSystem& operator = ( HSystem const& );
 	void do_round( HGalaxy & );
+	void swap( HSystem& );
 	/*}*/
 protected:
-	/*{*/
-	/*}*/
-private:
-	/*{*/
-	HSystem( HSystem const& );
-	HSystem* operator = ( HSystem const& );
-	/*}*/
 	friend class HGalaxy;
 	};
+
+inline void swap( HSystem& a, HSystem& b )
+	{ a.swap( b ); }
 
 class HGalaxy : public HLogic
 	{
