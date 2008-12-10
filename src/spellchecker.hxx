@@ -1,7 +1,7 @@
 /*
----      `gameground' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski         ---
+---             `gameground' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski              ---
 
-	options.h - this file is integral part of `gameground' project.
+	spellchecker.hxx - this file is integral part of `gameground' project.
 
 	i.  You may not make any changes in Copyright information.
 	ii. You must attach Copyright information to any part of every copy
@@ -24,16 +24,32 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#ifndef __OPTIONS_H
-#define __OPTIONS_H
+#ifndef SPELLCHECKER_HXX_INCLUDED
+#define SPELLCHECKER_HXX_INCLUDED
+
+#include <yaal/yaal.hxx>
 
 namespace gameground
 {
 
-int process_galaxyrc_file( void );
-int decode_switches( int, char** );
+class HSpellChecker : public yaal::hcore::HSingletonInterface
+	{
+	void* f_pxSpellChecker; /* AspellSpeller */
+	void* f_pxSpellConfig; /* AspellConfig */
+public:
+	bool spell_check( yaal::hcore::HString const& );
+private:
+	HSpellChecker( void );
+	~HSpellChecker( void );
+	void cleanup( void );
+	HSpellChecker( HSpellChecker const& );
+	HSpellChecker& operator = ( HSpellChecker const& );
+	friend class yaal::hcore::HSingleton<HSpellChecker>;
+	friend class yaal::hcore::HDestructor<HSpellChecker>;
+	};
+
+typedef yaal::hcore::HSingleton<HSpellChecker> HSpellCheckerService;
 
 }
 
-#endif /* __OPTIONS_H */
-
+#endif /* SPELLCHECKER_HXX_INCLUDED */

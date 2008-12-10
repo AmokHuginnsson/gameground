@@ -1,7 +1,7 @@
 /*
 ---           `gameground' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski            ---
 
-	clientinfo.h - this file is integral part of `gameground' project.
+	gameground.hxx - this file is integral part of `galaxy' project.
 
 	i.  You may not make any changes in Copyright information.
 	ii. You must attach Copyright information to any part of every copy
@@ -24,23 +24,15 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#ifndef __CLIENTINFO_H
-#define __CLIENTINFO_H
-
-#include "logic.h"
+#ifndef GALAXY_HXX_INCLUDED
+#define GALAXY_HXX_INCLUDED
 
 namespace gameground
 {
 
-struct OClientInfo
-	{
-	yaal::hcore::HString f_oName;
-	yaal::hcore::HSocket::ptr_t f_oSocket;
-	HLogic::ptr_t f_oLogic;
-	OClientInfo( void ) : f_oName(), f_oSocket(), f_oLogic() {}
-	};
+int main_client ( void );
 
 }
 
-#endif /* not __CLIENTINFO_H */
+#endif /* not GALAXY_HXX_INCLUDED */
 

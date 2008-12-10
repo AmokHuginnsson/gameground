@@ -1,7 +1,7 @@
 /*
 ---           `gameground' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski            ---
 
-	logicfactory.h - this file is integral part of `gameground' project.
+	logicfactory.hxx - this file is integral part of `gameground' project.
 
 	i.  You may not make any changes in Copyright information.
 	ii. You must attach Copyright information to any part of every copy
@@ -24,14 +24,14 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#ifndef __LOGICFACTORY_H
-#define __LOGICFACTORY_H
+#ifndef LOGICFACTORY_HXX_INCLUDED
+#define LOGICFACTORY_HXX_INCLUDED
 
-#include <yaal/hcore/hmap.h>
-#include <yaal/hcore/hpointer.h>
-#include <yaal/hcore/hsingleton.h>
+#include <yaal/hcore/hmap.hxx>
+#include <yaal/hcore/hpointer.hxx>
+#include <yaal/hcore/hsingleton.hxx>
 
-#include "logic.h"
+#include "logic.hxx"
 
 namespace gameground
 {
@@ -69,5 +69,5 @@ typedef yaal::hcore::HSingleton<HLogicFactory> HLogicFactoryInstance;
 
 }
 
-#endif /* not __LOGICFACTORY_H */
+#endif /* not LOGICFACTORY_HXX_INCLUDED */
 

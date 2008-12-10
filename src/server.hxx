@@ -1,7 +1,7 @@
 /*
 ---           `gameground' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski            ---
 
-	server.h - this file is integral part of `gameground' project.
+	server.hxx - this file is integral part of `gameground' project.
 
 	i.  You may not make any changes in Copyright information.
 	ii. You must attach Copyright information to any part of every copy
@@ -24,13 +24,13 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#ifndef __SERVER_H
-#define __SERVER_H
+#ifndef SERVER_HXX_INCLUDED
+#define SERVER_HXX_INCLUDED
 
-#include <yaal/yaal.h>
+#include <yaal/yaal.hxx>
 
-#include "clientinfo.h"
-#include "logic.h"
+#include "clientinfo.hxx"
+#include "logic.hxx"
 
 namespace gameground
 {
@@ -111,5 +111,5 @@ int main_server( void );
 
 }
 
-#endif /* not __SERVER_H */
+#endif /* not SERVER_HXX_INCLUDED */
 

@@ -24,15 +24,15 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#include <yaal/yaal.h> /* all hAPI headers */
+#include <yaal/yaal.hxx> /* all hAPI headers */
 M_VCSID( "$Id: "__ID__" $" )
 
-#include "version.h"
-#include "setup.h"
-#include "options.h"
-#include "galaxyd.h"
-#include "server.h"
-#include "galaxy.h"
+#include "version.hxx"
+#include "setup.hxx"
+#include "options.hxx"
+#include "galaxyd.hxx"
+#include "server.hxx"
+#include "galaxy.hxx"
 
 using namespace std;
 using namespace yaal;

@@ -22,12 +22,12 @@
 #include <string.h>
 #include <aspell.h>
 
-#include <yaal/yaal.h>
+#include <yaal/yaal.hxx>
 M_VCSID( "$Id: "__ID__" $" )
 
-#include "spellchecker.h"
+#include "spellchecker.hxx"
 
-#include "setup.h"
+#include "setup.hxx"
 
 using namespace yaal;
 using namespace yaal::hcore;

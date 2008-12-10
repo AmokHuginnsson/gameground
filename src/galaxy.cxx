@@ -26,12 +26,12 @@ Copyright:
 
 #include <iostream>
 
-#include <yaal/yaal.h>
+#include <yaal/yaal.hxx>
 M_VCSID( "$Id: "__ID__" $" )
 
-#include "galaxy.h"
+#include "galaxy.hxx"
 
-#include "setup.h"
+#include "setup.hxx"
 
 #define D_ATTR_BOARD	 				( COLORS::D_FG_CYAN | COLORS::D_BG_BLACK )
 #define D_ATTR_NEUTRAL_SYSTEM	( COLORS::D_FG_LIGHTGRAY | COLORS::D_BG_BLACK )

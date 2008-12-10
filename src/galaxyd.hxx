@@ -1,7 +1,7 @@
 /*
 ---           `gameground' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski            ---
 
-	gamegroundd.h - this file is integral part of `galaxy' project.
+	gamegroundd.hxx - this file is integral part of `galaxy' project.
 
 	i.  You may not make any changes in Copyright information.
 	ii. You must attach Copyright information to any part of every copy
@@ -24,12 +24,12 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#ifndef __GALAXYD_H
-#define __GALAXYD_H
+#ifndef GALAXYD_HXX_INCLUDED
+#define GALAXYD_HXX_INCLUDED
 
-#include <yaal/yaal.h>
+#include <yaal/yaal.hxx>
 
-#include "logic.h"
+#include "logic.hxx"
 
 namespace gameground
 {
@@ -136,5 +136,5 @@ private:
 
 }
 
-#endif /* not __GALAXYD_H */
+#endif /* not GALAXYD_HXX_INCLUDED */
 

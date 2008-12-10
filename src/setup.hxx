@@ -1,7 +1,7 @@
 /*
 ---            `gameground' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski             ---
 
-	setup.h - this file is integral part of `gameground' project.
+	setup.hxx - this file is integral part of `gameground' project.
 
 	i.  You may not make any changes in Copyright information.
 	ii. You must attach Copyright information to any part of every copy
@@ -24,8 +24,8 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#ifndef __SETUP_H
-#define __SETUP_H
+#ifndef SETUP_HXX_INCLUDED
+#define SETUP_HXX_INCLUDED
 
 #include <libintl.h>
 #include <iostream>
@@ -88,7 +88,7 @@ struct OSetup
 	char * f_pcProgramName;
 	yaal::hcore::HString f_oLogPath;
 	/* self-sufficient */
-	static int const PATH_OFFSET = sizeof ( __FILE__ ) - sizeof ( "setup.h" );
+	static int const PATH_OFFSET = sizeof ( __FILE__ ) - sizeof ( "setup.hxx" );
 	OSetup ( void ) : f_bQuiet( false ), f_bHelp( false ),
 										f_iVerbose( 0 ), f_bServer( false ),
 										f_bClient( false ), f_iMaxConnections( D_DEFAULT_MAX_CONNECTIONS ),
@@ -118,4 +118,4 @@ extern OSetup setup;
 
 }
 
-#endif /* __SETUP_H */
+#endif /* SETUP_HXX_INCLUDED */

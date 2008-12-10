@@ -1,7 +1,7 @@
 /*
 ---           `gameground' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski            ---
 
-	logic.h - this file is integral part of `gameground' project.
+	logic.hxx - this file is integral part of `gameground' project.
 
 	i.  You may not make any changes in Copyright information.
 	ii. You must attach Copyright information to any part of every copy
@@ -24,10 +24,10 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#ifndef __LOGIC_H
-#define __LOGIC_H
+#ifndef GAMEGROUND_LOGIC_HXX_INCLUDED
+#define GAMEGROUND_LOGIC_HXX_INCLUDED
 
-#include <yaal/yaal.h>
+#include <yaal/yaal.hxx>
 
 namespace gameground
 {
@@ -103,5 +103,5 @@ public:
 
 }
 
-#endif /* not __LOGIC_H */
+#endif /* not GAMEGROUND_LOGIC_HXX_INCLUDED */
 

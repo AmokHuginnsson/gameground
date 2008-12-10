@@ -1,7 +1,7 @@
 /*
 ---           `gameground' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski            ---
 
-	god.h - this file is integral part of `gameground' project.
+	god.hxx - this file is integral part of `gameground' project.
 
 	i.  You may not make any changes in Copyright information.
 	ii. You must attach Copyright information to any part of every copy
@@ -24,12 +24,12 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#ifndef __GOD_H
-#define __GOD_H
+#ifndef GOD_HXX_INCLUDED
+#define GOD_HXX_INCLUDED
 
-#include <yaal/yaal.h>
+#include <yaal/yaal.hxx>
 
-#include "logic.h"
+#include "logic.hxx"
 
 namespace gameground
 {
@@ -175,5 +175,5 @@ private:
 
 }
 
-#endif /* not __GOD_H */
+#endif /* not GOD_HXX_INCLUDED */
 

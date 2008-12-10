@@ -26,10 +26,10 @@ Copyright:
 
 #include <libintl.h>
 
-#include <yaal/yaal.h>
+#include <yaal/yaal.hxx>
 
 M_VCSID( "$Id: "__ID__" $" )
-#include "logicfactory.h"
+#include "logicfactory.hxx"
 
 using namespace yaal;
 using namespace yaal::hcore;
