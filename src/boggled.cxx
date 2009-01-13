@@ -177,7 +177,7 @@ void HBoggle::handler_play ( OClientInfo* a_poClientInfo, HString const& a_oWord
 		{
 		words_t::iterator it = f_oWords.find( a_oWord );
 		if ( it == f_oWords.end() )
-			it = f_oWords.insert( a_oWord, client_set_ptr_t( new client_set_t() ) );
+			it = f_oWords.insert( hcore::make_pair( a_oWord, client_set_ptr_t( new client_set_t() ) ) ).first;
 		it->second->insert( a_poClientInfo );
 		out << "word: " << a_oWord << "< inserted, proof: " << f_oWords.size() << "," << it->second->size() << endl;
 		}
