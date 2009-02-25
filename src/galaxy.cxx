@@ -198,9 +198,9 @@ protected:
 	friend class HGalaxyWindow;
 	};
 
-typedef HArray < HSystem > systems_t;
-typedef HHashMap < int, HString > emperors_t;
-typedef HList < HMove > moves_t;
+typedef HArray<HSystem> systems_t;
+typedef HHashMap<int, HString> emperors_t;
+typedef HList<HMove> moves_t;
 typedef enum
 	{
 	D_NORMAL,
@@ -760,8 +760,8 @@ void HGalaxyWindow::on_show_system_info ( int a_iSystem )
 		if ( ( * f_poSystems ) [ a_iSystem ].f_iFleet >= 0 )
 			f_poFleet->set ( HString ( ( * f_poSystems ) [ a_iSystem ].f_iFleet ) );
 		l_iColor = ( * f_poSystems ) [ a_iSystem ].f_iColor;
-		if ( ( l_iColor >= 0 ) && f_poEmperors->get ( l_iColor, l_oName ) )
-			f_poEmperorName->set ( l_oName );
+		if ( ( l_iColor >= 0 ) && ! f_poEmperors->get( l_iColor, l_oName ) )
+			f_poEmperorName->set( l_oName );
 		}
 	return;
 	M_EPILOG
@@ -794,10 +794,10 @@ int HGalaxyWindow::handler_enter( int a_iCode, void const* )
 		if ( f_poMessageInput->get().get<HString const&>().find_other_than( n_pcWhiteSpace ) >= 0 )
 			{
 			f_oVarTmpBuffer = "cmd:glx:say:";
-			f_oVarTmpBuffer += f_poMessageInput->get ( ).get<char const*>();
+			f_oVarTmpBuffer += f_poMessageInput->get().get<char const*>();
 			f_oVarTmpBuffer += "\n";
-			f_poClient->send_message ( f_oVarTmpBuffer );
-			f_poMessageInput->set ( "" );
+			f_poClient->send_message( f_oVarTmpBuffer );
+			f_poMessageInput->set( "" );
 			}
 		a_iCode = 0;
 		}
@@ -954,7 +954,7 @@ void HClient::process_command( HString& a_roCommand )
 		hcore::log << "msg: " << a_roCommand << endl;
 	l_oMnemonic = a_roCommand.split ( ":", 0 );
 	l_oArgument = a_roCommand.mid( l_oMnemonic.get_length() + 1 );
-	if ( f_oHandlers.get( l_oMnemonic, HANDLER ) )
+	if ( ! f_oHandlers.get( l_oMnemonic, HANDLER ) )
 		( this->*HANDLER )( l_oArgument );
 	else
 		{

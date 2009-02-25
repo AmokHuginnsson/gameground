@@ -119,7 +119,7 @@ bool HLogic::process_command( OClientInfo* a_poClientInfo, HString const& a_roCo
 	l_oArgument = l_oArgument.mid( l_oMnemonic.get_length() + 1 );
 	bool failure = false;
 	handler_t HANDLER;
-	if ( f_oHandlers.get( l_oMnemonic, HANDLER ) )
+	if ( ! f_oHandlers.get( l_oMnemonic, HANDLER ) )
 		( this->*HANDLER )( a_poClientInfo, l_oArgument );
 	else
 		{
