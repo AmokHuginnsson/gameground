@@ -121,7 +121,16 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		return ( null );
 	}
 
-	static public void main( String $argv[] ) {
+	static public void main( final String $argv[] ) {
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				eventDispatchThreadMain( $argv );
+			}
+		});
+
+	}
+
+	static void eventDispatchThreadMain( String $argv[] ) {
 		SwingEngine.DEBUG_MODE = true;
 		GameGround app = new GameGround( $argv );
 		app.init();
