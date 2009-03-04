@@ -47,7 +47,7 @@ class HClient extends Thread {
 		_logic = $logic;
 	}
 	void println( String $line ) {
-		_out.println( $line );
+		_out.print( $line + "\n" );
 	}
 
 	public void waitUntilRunning() throws java.lang.InterruptedException {

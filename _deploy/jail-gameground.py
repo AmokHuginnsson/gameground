@@ -1,5 +1,8 @@
 doNotCopy=["/home"]
-forceCopy=["/usr/bin/env",
+forceCopy=["/dev/urandom",
+		"/dev/zero",
+		"/dev/null",
+		"/usr/bin/env",
 		"/lib/ld-linux.so.2",
 		"/lib/ld-linux-x86-64.so.2",
 		"/lib/ld-2.8.90.so",
