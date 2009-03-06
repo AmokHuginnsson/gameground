@@ -33,6 +33,20 @@ using namespace yaal::hcore;
 namespace gameground
 {
 
+now_t now;
+
+HStreamInterface& operator << ( HStreamInterface& stream, now_t const& )
+	{
+	static int const D_TIMESTAMP_SIZE = 16;
+	time_t l_xCurrentTime = ::time( NULL );
+	tm* l_psBrokenTime = ::localtime( &l_xCurrentTime );
+	char l_pcBuffer[ D_TIMESTAMP_SIZE ];
+	::memset( l_pcBuffer, 0, D_TIMESTAMP_SIZE );
+	::strftime( l_pcBuffer, D_TIMESTAMP_SIZE, "%b %d %H:%M:%S", l_psBrokenTime );
+	stream << l_pcBuffer;
+	return ( stream );
+	}
+
 void OSetup::test_setup( void )
 	{
 	M_PROLOG
