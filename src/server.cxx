@@ -77,7 +77,7 @@ char const* const HServer::PROTOCOL::SHUTDOWN = "shutdown";
 
 HServer::HServer( int a_iConnections )
 	: HProcess( a_iConnections ), f_iMaxConnections( a_iConnections ),
-	f_oSocket( HSocket::TYPE::D_DEFAULT | HSocket::TYPE::D_NONBLOCKING | HSocket::TYPE::D_SSL_SERVER, a_iConnections ),
+	f_oSocket( HSocket::socket_type_t( HSocket::TYPE::D_DEFAULT ) | HSocket::TYPE::D_NONBLOCKING | HSocket::TYPE::D_SSL_SERVER, a_iConnections ),
 	f_oClients(), f_oLogics(), f_oHandlers(), _out()
 	{
 	M_PROLOG
