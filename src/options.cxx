@@ -84,26 +84,26 @@ simple_callback_t dump( usage, NULL );
 simple_callback_t version_call( version, NULL );
 OOption n_psOptions[] =
 	{
-		{ "log_path", D_HSTRING, &setup.f_oLogPath, NULL, OOption::D_REQUIRED, "path", "path pointing to file for application logs", NULL },
-		{ "aspell_lang", D_HSTRING, &setup.f_oAspellLang, NULL, OOption::D_REQUIRED, "language", "language used for spell checking", NULL },
-		{ "board", D_INT, &setup.f_iBoardSize, "B", OOption::D_REQUIRED, "size", "size of the galaxy board", NULL },
-		{ "client", D_BOOL, &setup.f_bClient, "C", OOption::D_NONE, NULL, "connect to server", NULL },
-		{ "console_charset", D_HSTRING, &setup.f_oConsoleCharset, NULL, OOption::D_REQUIRED, "charset", "charset encoding for current terminal", NULL },
-		{ "emperors", D_INT, &setup.f_iEmperors, "E", OOption::D_REQUIRED, "count", "set number of players", NULL },
-		{ "host", D_HSTRING, &setup.f_oHost, "H", OOption::D_REQUIRED, "addr", "select host to connect", NULL },
-		{ "join", D_HSTRING, &setup.f_oGame, "J", OOption::D_REQUIRED, "name", "join to game named {name}", NULL },
-		{ "login", D_HSTRING, &setup.f_oLogin, "L", OOption::D_REQUIRED, "nane", "set your player name", NULL },
-		{ "new", D_HSTRING, &setup.f_oGameType, "N", OOption::D_REQUIRED, "type,name", "create game of type {type} and named {name}", NULL },
-		{ "port", D_INT, &setup.f_iPort, "P", OOption::D_REQUIRED, "num", "set port number", NULL },
-		{ "server", D_BOOL, &setup.f_bServer, "G", OOption::D_NONE, NULL, "setup a game server", NULL },
-		{ "systems", D_INT, &setup.f_iSystems, "S", OOption::D_REQUIRED, "count", "set number of neutral systems", NULL },
-		{ "quiet", D_BOOL, &setup.f_bQuiet, "q", OOption::D_NONE, NULL, "inhibit usual output", NULL },
-		{ "silent", D_BOOL, &setup.f_bQuiet, "q", OOption::D_NONE, NULL, "inhibit usual output", NULL },
-		{ "verbose", D_VOID, &setup.f_iVerbose, "v", OOption::D_NONE, NULL, "print more information", &v },
-		{ "help", D_BOOL, &setup.f_bHelp, "h", OOption::D_NONE, NULL, "display this help and exit", &help },
-		{ "dump-configuration", D_VOID, NULL, "W", OOption::D_NONE, NULL, "dump current configuration", &dump },
-		{ "version", D_VOID, NULL, "V", OOption::D_NONE, NULL, "output version information and exit", &version_call },
-		{ NULL, D_VOID, NULL, NULL, OOption::D_NONE, NULL, NULL, NULL }
+		{ "log_path", TYPE::D_HSTRING, &setup.f_oLogPath, NULL, OOption::D_REQUIRED, "path", "path pointing to file for application logs", NULL },
+		{ "aspell_lang", TYPE::D_HSTRING, &setup.f_oAspellLang, NULL, OOption::D_REQUIRED, "language", "language used for spell checking", NULL },
+		{ "board", TYPE::D_INT, &setup.f_iBoardSize, "B", OOption::D_REQUIRED, "size", "size of the galaxy board", NULL },
+		{ "client", TYPE::D_BOOL, &setup.f_bClient, "C", OOption::D_NONE, NULL, "connect to server", NULL },
+		{ "console_charset", TYPE::D_HSTRING, &setup.f_oConsoleCharset, NULL, OOption::D_REQUIRED, "charset", "charset encoding for current terminal", NULL },
+		{ "emperors", TYPE::D_INT, &setup.f_iEmperors, "E", OOption::D_REQUIRED, "count", "set number of players", NULL },
+		{ "host", TYPE::D_HSTRING, &setup.f_oHost, "H", OOption::D_REQUIRED, "addr", "select host to connect", NULL },
+		{ "join", TYPE::D_HSTRING, &setup.f_oGame, "J", OOption::D_REQUIRED, "name", "join to game named {name}", NULL },
+		{ "login", TYPE::D_HSTRING, &setup.f_oLogin, "L", OOption::D_REQUIRED, "nane", "set your player name", NULL },
+		{ "new", TYPE::D_HSTRING, &setup.f_oGameType, "N", OOption::D_REQUIRED, "type,name", "create game of type {type} and named {name}", NULL },
+		{ "port", TYPE::D_INT, &setup.f_iPort, "P", OOption::D_REQUIRED, "num", "set port number", NULL },
+		{ "server", TYPE::D_BOOL, &setup.f_bServer, "G", OOption::D_NONE, NULL, "setup a game server", NULL },
+		{ "systems", TYPE::D_INT, &setup.f_iSystems, "S", OOption::D_REQUIRED, "count", "set number of neutral systems", NULL },
+		{ "quiet", TYPE::D_BOOL, &setup.f_bQuiet, "q", OOption::D_NONE, NULL, "inhibit usual output", NULL },
+		{ "silent", TYPE::D_BOOL, &setup.f_bQuiet, "q", OOption::D_NONE, NULL, "inhibit usual output", NULL },
+		{ "verbose", TYPE::D_VOID, &setup.f_iVerbose, "v", OOption::D_NONE, NULL, "print more information", &v },
+		{ "help", TYPE::D_BOOL, &setup.f_bHelp, "h", OOption::D_NONE, NULL, "display this help and exit", &help },
+		{ "dump-configuration", TYPE::D_VOID, NULL, "W", OOption::D_NONE, NULL, "dump current configuration", &dump },
+		{ "version", TYPE::D_VOID, NULL, "V", OOption::D_NONE, NULL, "output version information and exit", &version_call },
+		{ NULL, TYPE::D_VOID, NULL, NULL, OOption::D_NONE, NULL, NULL, NULL }
 	};
 
 }

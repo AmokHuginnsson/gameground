@@ -49,7 +49,11 @@ namespace gameground
 #define D_GO_MAINTIME 30
 #define D_GO_BYOYOMI_PERIODS 5
 #define D_GO_BYOYOMI_TIME 1
-#define out ( cout << __FILE__ + OSetup::PATH_OFFSET << ":" << __LINE__ << ": " )
+#define out ( cout << now << " " << __FILE__ + OSetup::PATH_OFFSET << ":" << __LINE__ << ": " )
+
+typedef double long ( *now_t )( bool, double, char, int, bool, double, void*, void*, double, char );
+extern now_t now;
+yaal::hcore::HStreamInterface& operator << ( yaal::hcore::HStreamInterface&, now_t const& );
 
 inline std::ostream& operator << ( std::ostream& o, yaal::hcore::HString const& s )
 	{ return ( o << s.raw() ); }
