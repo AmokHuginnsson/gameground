@@ -54,6 +54,11 @@ HString const& mark( int a_iColor )
 
 }
 
+static int const D_MAX_GAME_NAME_LENGTH = 20;
+#define D_LEGEAL_CHARACTER_SET_BASE "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
+static int const D_CONSTR_CHAR_SET_LOGIN_NAME = 0;
+static int const D_CONSTR_CHAR_SET_GAME_NAME = 1;
+char const* const D_LEGEAL_CHARACTER_SET[] = { D_LEGEAL_CHARACTER_SET_BASE, " "D_LEGEAL_CHARACTER_SET_BASE };
 char const* const HServer::PROTOCOL::ABANDON = "abandon";
 char const* const HServer::PROTOCOL::CMD = "cmd";
 char const* const HServer::PROTOCOL::CREATE = "create";
@@ -95,8 +100,8 @@ int HServer::init_server( int a_iPort )
 	M_PROLOG
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 	factory.initialize_globals();
-	f_oSocket.listen ( "0.0.0.0", a_iPort );
-	register_file_descriptor_handler ( f_oSocket.get_file_descriptor(), &HServer::handler_connection );
+	f_oSocket.listen( "0.0.0.0", a_iPort );
+	register_file_descriptor_handler( f_oSocket.get_file_descriptor(), &HServer::handler_connection );
 	f_oHandlers[ PROTOCOL::SHUTDOWN ] = &HServer::handler_shutdown;
 	f_oHandlers[ PROTOCOL::QUIT ] = &HServer::handler_quit;
 	f_oHandlers[ PROTOCOL::MSG ] = &HServer::handler_chat;
@@ -109,7 +114,7 @@ int HServer::init_server( int a_iPort )
 	f_oHandlers[ PROTOCOL::JOIN ] = &HServer::join_game;
 	f_oHandlers[ PROTOCOL::ABANDON ] = &HServer::handler_abandon;
 	f_oHandlers[ PROTOCOL::CMD ] = &HServer::pass_command;
-	HProcess::init ( 3600 );
+	HProcess::init( 3600 );
 	out << brightblue << "<<<GameGround>>>" << lightgray << " server started." << endl;
 	return ( 0 );
 	M_EPILOG
@@ -150,7 +155,7 @@ void HServer::set_client_name( OClientInfo& a_roInfo, HString const& a_oName )
 	for ( it = f_oClients.begin(); it != f_oClients.end(); ++ it )
 		if ( ( ! strcasecmp( it->second.f_oName, a_oName ) ) && ( it->second.f_oSocket != a_roInfo.f_oSocket ) )
 			break;
-	if ( a_oName.find_other_than( "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_" ) >= 0 )
+	if ( a_oName.find_other_than( D_LEGEAL_CHARACTER_SET[ D_CONSTR_CHAR_SET_LOGIN_NAME ] ) >= 0 )
 		*a_roInfo.f_oSocket << "err:Name may only take form of `[a-zA-Z0-9]+'." << endl;
 	else if ( a_oName.get_length() < D_MINIMUM_NAME_LENGTH )
 		*a_roInfo.f_oSocket << "err:Your name is too short, it needs to be at least 4 character long." << endl;
@@ -205,6 +210,12 @@ void HServer::create_game( OClientInfo& a_roInfo, HString const& a_oArg )
 		logics_t::iterator it = f_oLogics.find( l_oName );
 		if ( it != f_oLogics.end() )
 			a_roInfo.f_oSocket->write_until_eos( "err:Game already exists.\n" );
+		else if ( l_oName.find_other_than( D_LEGEAL_CHARACTER_SET[ D_CONSTR_CHAR_SET_GAME_NAME ] ) >= 0 )
+			*a_roInfo.f_oSocket << "err:Game name may only take form of `[a-zA-Z0-9_-]+'." << endl;
+		else if ( l_oName.get_length() > D_MAX_GAME_NAME_LENGTH )
+			*a_roInfo.f_oSocket << "err:Game name cannot be longer than " << D_MAX_GAME_NAME_LENGTH << " characters." << endl;
+		else if ( l_oName[0] == ' ' )
+			*a_roInfo.f_oSocket << "err:Game name cannot start with whitespace." << endl;
 		else if ( ! factory.is_type_valid( l_oType ) )
 			kick_client( a_roInfo.f_oSocket, _( "No such game type." ) );
 		else if ( l_oName.is_empty() )
