@@ -33,22 +33,22 @@ Copyright:
 namespace gameground
 {
 
-#define D_GALAXY_BOARD_SIZE 								16
-#define D_DEFAULT_MAX_CONNECTIONS		64
-#define D_GALAXY_EMPERORS						4
-#define D_NEUTRAL_SYSTEM_PER_PLAYER	4
-#define D_MAX_BOARD_SIZE						20
-#define D_MAX_SYSTEM_COUNT					36
-#define D_BOGGLE_PLAYERS 									4
-#define D_BOGGLE_ROUND_TIME								180
-#define D_BOGGLE_INTER_ROUND_DELAY					15
-#define D_BOGGLE_MAX_ROUNDS								5
-#define D_GO_GOBAN_SIZE 19
-#define D_GO_KOMI 5
-#define D_GO_HANDICAPS 0
-#define D_GO_MAINTIME 30
-#define D_GO_BYOYOMI_PERIODS 5
-#define D_GO_BYOYOMI_TIME 1
+#define D_GALAXY_BOARD_SIZE         16
+#define D_DEFAULT_MAX_CONNECTIONS   64
+#define D_GALAXY_EMPERORS            4
+#define D_NEUTRAL_SYSTEM_PER_PLAYER  4
+#define D_MAX_BOARD_SIZE            20
+#define D_MAX_SYSTEM_COUNT          36
+#define D_BOGGLE_PLAYERS             2
+#define D_BOGGLE_ROUND_TIME        180
+#define D_BOGGLE_INTER_ROUND_DELAY  15
+#define D_BOGGLE_MAX_ROUNDS          5
+#define D_GO_GOBAN_SIZE             19
+#define D_GO_KOMI                    5
+#define D_GO_HANDICAPS               0
+#define D_GO_MAINTIME               30
+#define D_GO_BYOYOMI_PERIODS         5
+#define D_GO_BYOYOMI_TIME            1
 #define out ( cout << now << " " << __FILE__ + OSetup::PATH_OFFSET << ":" << __LINE__ << ": " )
 
 typedef double long ( *now_t )( bool, double, char, int, bool, double, void*, void*, double, char );

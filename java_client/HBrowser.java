@@ -235,7 +235,7 @@ class HBrowser extends HAbstractLogic {
 				if ( tokens[ 2 ].compareTo( ps._name ) == 0 )
 					break;
 			}
-			if ( game != null ) {
+			if ( i < childs ) {
 				node = game;
 			} else {
 				DefaultMutableTreeNode newGame = null;

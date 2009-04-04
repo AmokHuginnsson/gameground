@@ -148,6 +148,7 @@ class Boggle extends HAbstractLogic implements Runnable {
 			_players.setRowSorter( rs );
 			_players.setShowGrid( false );
 			_players.setAutoCreateRowSorter( true );
+			Boggle.this._players.clear();
 		}
 		public JTextPane getLogPad() {
 			return ( _logPad );
