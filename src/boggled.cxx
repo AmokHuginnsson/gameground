@@ -152,7 +152,7 @@ HString HBoggle::make_deck( void )
 	M_EPILOG
 	}
 
-void HBoggle::handler_message ( OClientInfo* a_poClientInfo, HString const& a_roMessage )
+void HBoggle::handler_message( OClientInfo* a_poClientInfo, HString const& a_roMessage )
 	{
 	M_PROLOG
 	HLock l( f_oMutex );
@@ -163,7 +163,7 @@ void HBoggle::handler_message ( OClientInfo* a_poClientInfo, HString const& a_ro
 	M_EPILOG
 	}
 
-void HBoggle::handler_play ( OClientInfo* a_poClientInfo, HString const& a_oWord )
+void HBoggle::handler_play( OClientInfo* a_poClientInfo, HString const& a_oWord )
 	{
 	M_PROLOG
 	HLock l( f_oMutex );
@@ -396,6 +396,7 @@ bool HBoggle::is_good( int f, char const* ptr, int length )
 			{ 0, 1 }, /* bottom */
 			{ 1, 1 } /* bottom right */
 		};
+	char saved = f_ppcGame[ f ][ 1 ];
 	if ( ! f_ppcGame[ f ][ 1 ] && ( *ptr == f_ppcGame[ f ][ 0 ] ) )
 		{
 		if ( length == 1 )
@@ -414,7 +415,7 @@ bool HBoggle::is_good( int f, char const* ptr, int length )
 				}
 			}
 		}
-	f_ppcGame[ f ][ 1 ] = 0;
+	f_ppcGame[ f ][ 1 ] = saved;
 	return ( good );
 	}
 
