@@ -118,6 +118,8 @@ class Boggle extends HAbstractLogic implements Runnable {
 			_letters[ 13 ] = _letter31;
 			_letters[ 14 ] = _letter32;
 			_letters[ 15 ] = _letter33;
+			for ( int i = 0; i < 16; ++ i )
+				_letters[ i ].setText( "GAMEGROUNDBOGGLE".substring( i, i + 1 ).toUpperCase() );
 			clearLog();
 			Boggle.this.handlerRound( "" );
 			AbstractTableModel model = new AbstractTableModel() {

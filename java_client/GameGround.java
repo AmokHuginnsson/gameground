@@ -55,9 +55,11 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 				((javax.swing.JFrame)_frame).setContentPane( this );
 			}
 			EagerStaticInitializer.touch( this, "registerLogic" );
-			setFace( HLogin.LABEL );
+			setFace( Gomoku.LABEL );
+			//setFace( HLogin.LABEL );
 			resize( res.getRootElement().getAttribute( "size" ).getValue().split( ",", 2 ) );
-			setFace( HLogin.LABEL );
+			setFace( Gomoku.LABEL );
+			//setFace( HLogin.LABEL );
 			_frameName = _frame.getTitle();
 		} catch ( Exception e ) {
 			e.printStackTrace();

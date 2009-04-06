@@ -148,6 +148,11 @@ HString HBoggle::make_deck( void )
 	HString l_oDeck;
 	for ( int i = 0; i < boggle_data::BOGGLE::DICE_COUNT; ++ i )
 		l_oDeck += f_ppcGame[ i ][ 0 ];
+	out << "new deck: " << endl;
+	cout << l_oDeck.left( 4 ) << endl;
+	cout << l_oDeck.mid( 4, 4 ) << endl;
+	cout << l_oDeck.mid( 8, 4 ) << endl;
+	cout << l_oDeck.mid( 12, 4 ) << endl;
 	return ( l_oDeck );
 	M_EPILOG
 	}
@@ -338,14 +343,18 @@ void HBoggle::on_end_round( void )
 	else
 		_out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP << "Game Over!" << endl;
 	broadcast( _out << _out );
-	int scores[ 16 ] = { 0, 0, 1, 1, 2, 3, 5, 7, 11, 11, 11, 12, 13, 14, 15, 16  };
+	int scores[ 16 ] = { 0, 0, 1, 1, 2, 3, 5, 7, 11, 15, 23, 31, 47, 63, 95, 159 };
 	typedef HList<words_t::iterator> longest_t;
 	longest_t longest;
 	int l_iLongestLength = 0;
 	for ( words_t::iterator it = f_oWords.begin(); it != f_oWords.end(); ++ it )
 		{
-		if ( it->second->size() > 1 )
+		int appearance = static_cast<int>( it->second->size() );
+		if ( appearance > 1 )
+			{
+			out << appearance << " people found: " << it->first << endl;
 			continue;
+			}
 		int l_iLength = static_cast<int>( it->first.get_length() );
 		if ( word_is_good( it->first, l_iLength ) )
 			{
@@ -361,6 +370,7 @@ void HBoggle::on_end_round( void )
 			*(clInfo->f_oSocket) << PROTOCOL::NAME << PROTOCOL::SEP
 				<< PROTOCOL::SCORED << PROTOCOL::SEP << it->first << "[" << scores[ l_iLength - 1 ] << "]" << endl;
 			info.f_iLast += scores[ l_iLength - 1 ];
+			out << clInfo->f_oName << " scored: " << scores[ l_iLength - 1 ] << " for word: " << it->first << "." << endl;
 			}
 		}
 	for ( players_t::iterator it = f_oPlayers.begin(); it != f_oPlayers.end(); ++ it )
