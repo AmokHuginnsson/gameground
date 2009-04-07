@@ -8,6 +8,9 @@
 			<goban id="_board" opaque="true" />
 		</panel>
 		<vbox minimumsize="&v_sidebar_width_galaxy;,1" preferredsize="&v_sidebar_width_galaxy;,&v_height;" maximumsize="&v_sidebar_width_galaxy;,2000">
+			<scrollpane maximumsize="2000,300" autoscrolls="true" tooltiptext="Current highscores.">
+				<table id="_champions" />
+			</scrollpane>
 			<panel maximumsize="2000,40" border="EmptyBorder(0,4,4,4)">
 				<layout type="FormLayout" columns="36px,8px,p,8px,p" rows="p" />
 				<label id="_toMove" constraints="1,1">None</label>
@@ -17,29 +20,29 @@
 			<vbox maximumsize="2000,240">
 				<panel border="EtchedBorder" layout="BorderLayout">
 					<panel border="EmptyBorder(4,4,4,4)">
-						<layout type="FormLayout" columns="p,10px,40px:grow,10px,p,10px,40px" rows="p,4px,p,4px,p,4px,p" />
-						<label text="Player Black:" constraints="1,1" />
-						<label id="_blackName" text="Name Huge Enormously" constraints="3,1,5,1" />
+						<layout type="FormLayout" columns="50px,10px,40px:grow,10px,80px" rows="p,4px,p" />
+						<label text="Black:" constraints="1,1" />
+						<label id="_blackName" text="Name Huge Enormously" constraints="3,1" />
 						<label text="Score:" constraints="1,3" />
 						<label id="_blackScore" text="0" constraints="3,3" />
-						<button id="_blackSit" text="Sit !" action="onBlack" constraints="1,7" />
+						<button id="_blackSit" text="Sit !" action="onBlack" constraints="5,1" />
 					</panel>
 				</panel>
 				<panel border="EtchedBorder" layout="BorderLayout">
 					<panel border="EmptyBorder(4,4,4,4)">
-						<layout type="FormLayout" columns="p,10px,40px:grow,10px,p,10px,40px" rows="p,4px,p,4px,p,4px,p" />
-						<label text="Player White:" constraints="1,1" />
-						<label id="_whiteName" text="Name Huge Enormously" constraints="3,1,5,1" />
+						<layout type="FormLayout" columns="50px,10px,40px:grow,10px,80px" rows="p,4px,p" />
+						<label text="White:" constraints="1,1" />
+						<label id="_whiteName" text="Name Huge Enormously" constraints="3,1" />
 						<label text="Score:" constraints="1,3" />
 						<label id="_whiteScore" text="0" constraints="3,3" />
-						<button id="_whiteSit" text="Sit !" action="onWhite" constraints="1,7" />
+						<button id="_whiteSit" text="Sit !" action="onWhite" constraints="5,1" />
 					</panel>
 				</panel>
 			</vbox>
-			<scrollpane autoscrolls="true" maximumsize="2000,120">
+			<scrollpane autoscrolls="true" maximumsize="2000,300">
 				<list id="_visitors" initclass="javax.swing.DefaultListModel" focusable="false" tooltiptext="People that are visiting this table." />
 			</scrollpane>
-			<scrollpane autoscrolls="true">
+			<scrollpane autoscrolls="true" maximumsize="2000,400" minimumsize="1,400">
 				<textpane id="_logPad" editable="false" focusable="false" />
 			</scrollpane>
 			<panel maximumsize="&v_sidebar_width_galaxy;,40" layout="BorderLayout">

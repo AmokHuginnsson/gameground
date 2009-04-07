@@ -17,6 +17,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JList;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.table.AbstractTableModel;
@@ -98,6 +99,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		public JLabel _whiteName;
 		public JLabel _whiteScore;
 		public JButton _whiteSit;
+		public JTable _champions;
 		public JList _visitors;
 		public Goban _board;
 		public DummyConfigurator _conf;
