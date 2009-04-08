@@ -121,7 +121,7 @@ class Go extends HAbstractLogic implements Runnable {
 		public JButton _whiteSit;
 		public JButton _pass;
 		public JList _visitors;
-		public Goban _board;
+		public GoGoban _board;
 		public GoConfigurator _conf;
 		public JLabel _toMove;
 		public JLabel _move;
@@ -131,7 +131,7 @@ class Go extends HAbstractLogic implements Runnable {
 			super( $resource );
 		}
 		public void updateTagLib( XUL $xul ) {
-			$xul.getTaglib().registerTag( "goban", Goban.class );
+			$xul.getTaglib().registerTag( "goban", GoGoban.class );
 			$xul.getTaglib().registerTag( "panel", GoConfigurator.class );
 		}
 		public void init() {

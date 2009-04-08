@@ -101,7 +101,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		public JButton _whiteSit;
 		public JTable _champions;
 		public JList _visitors;
-		public Goban _board;
+		public GomokuGoban _board;
 		public DummyConfigurator _conf;
 		public JLabel _toMove;
 		public JLabel _move;
@@ -111,7 +111,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 			super( $resource );
 		}
 		public void updateTagLib( XUL $xul ) {
-			$xul.getTaglib().registerTag( "goban", Goban.class );
+			$xul.getTaglib().registerTag( "goban", GomokuGoban.class );
 			$xul.getTaglib().registerTag( "setup", DummyConfigurator.class );
 		}
 		public void init() {
