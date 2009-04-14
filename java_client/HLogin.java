@@ -23,6 +23,7 @@ class HLogin extends HAbstractLogic {
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
 		public JTextField _name;
+		public JTextField _password;
 		public JTextField _server;
 		public JTextField _port;
 		public JPanel _login;
@@ -63,6 +64,7 @@ class HLogin extends HAbstractLogic {
 	}
 	public class OConnectionConfig {
 		public String _name;
+		public String _password;
 		public String _host;
 		public int _port;
 	}
