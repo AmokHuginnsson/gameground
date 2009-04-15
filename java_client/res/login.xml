@@ -6,11 +6,11 @@
 		<label font="Wargames-BOLD-72" foreground="blue">Game Ground</label>
 		<glue preferredsize="1,20"/>
 		<panel layout="GridBagLayout">
-			<label labelfor="_name">
+			<label labelfor="_login">
 				<gridbagconstraints gridx="0" gridy="0" ipadx="10" anchor="GridBagConstraints.WEST" />
 				Your name:
 			</label>
-			<textfield id="_name" columns="16" focusable="true" action="onEnter" tooltiptext="Your GameGround world name.">
+			<textfield id="_login" columns="16" focusable="true" action="onEnter" tooltiptext="Your GameGround world name.">
 				<gridbagconstraints gridx="1" gridy="0" anchor="GridBagConstraints.WEST" />
 			</textfield>
 			<label labelfor="_password">

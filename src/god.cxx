@@ -124,7 +124,7 @@ void HGo::handler_message ( OClientInfo* a_poClientInfo, HString const& a_roMess
 	M_PROLOG
 	HLock l( f_oMutex );
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
-			<< PROTOCOL::MSG << PROTOCOL::SEP << a_poClientInfo->f_oName << ": " << a_roMessage << endl << _out );
+			<< PROTOCOL::MSG << PROTOCOL::SEP << a_poClientInfo->f_oLogin << ": " << a_roMessage << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -471,7 +471,7 @@ HGo::OPlayerInfo* HGo::get_player_info( OClientInfo* a_poClientInfo )
 
 bool HGo::do_accept( OClientInfo* a_poClientInfo )
 	{
-	out << "new candidate " << a_poClientInfo->f_oName << endl;
+	out << "new candidate " << a_poClientInfo->f_oLogin << endl;
 	return ( false );
 	}
 
@@ -504,18 +504,18 @@ void HGo::do_post_accept( OClientInfo* a_poClientInfo )
 			{
 			*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
 					<< PROTOCOL::PLAYER << PROTOCOL::SEP
-					<< (*it)->f_oName << endl;
+					<< (*it)->f_oLogin << endl;
 			*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
 					<< PROTOCOL::MSG << PROTOCOL::SEP
-					<< "Player " << (*it)->f_oName << " approched this table." << endl;
+					<< "Player " << (*it)->f_oLogin << " approched this table." << endl;
 			}
 		}
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::PLAYER << PROTOCOL::SEP
-			<< a_poClientInfo->f_oName << endl << _out );
+			<< a_poClientInfo->f_oLogin << endl << _out );
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::MSG << PROTOCOL::SEP
-			<< "Player " << a_poClientInfo->f_oName << " approched this table." << endl << _out );
+			<< "Player " << a_poClientInfo->f_oLogin << " approched this table." << endl << _out );
 	send_contestants();
 	send_goban();
 	return;
@@ -547,7 +547,7 @@ void HGo::do_kick( OClientInfo* a_poClientInfo )
 		}
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::MSG << PROTOCOL::SEP
-			<< "Player " << a_poClientInfo->f_oName << " left this match." << endl << _out );
+			<< "Player " << a_poClientInfo->f_oLogin << " left this match." << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -843,7 +843,7 @@ void HGo::contestant_gotup( OClientInfo* a_poClientInfo )
 			&& ( ( foe = contestant( STONE::D_BLACK ) ) || ( foe = contestant( STONE::D_WHITE ) ) ) )
 		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 				<< PROTOCOL::MSG << PROTOCOL::SEP
-				<< a_poClientInfo->f_oName << " resigned - therefore " << foe->f_oName << " wins." << endl << _out );
+				<< a_poClientInfo->f_oLogin << " resigned - therefore " << foe->f_oLogin << " wins." << endl << _out );
 	contestant( stone ) = NULL;
 	f_eState = STONE::D_NONE;
 	return;
@@ -870,7 +870,7 @@ void HGo::send_contestant( char stone )
 	if ( cinfo )
 		{
 		OPlayerInfo& info = *get_player_info( cinfo );
-		name = cinfo->f_oName.raw();
+		name = cinfo->f_oLogin.raw();
 		captured = info.f_iStonesCaptured;
 		time = static_cast<int>( info.f_iTimeLeft );
 		byoyomi = info.f_iByoYomiPeriods;

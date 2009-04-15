@@ -266,7 +266,7 @@ void HGalaxy::do_post_accept( OClientInfo* a_poClientInfo )
 		l_iSysNo = assign_system( a_poClientInfo ); /* assign mother system for new emperor */
 		l_iColor = get_color( a_poClientInfo );
 		l_oMessage.format ( "glx:setup:emperor=%d,%s\n",
-				l_iColor, a_poClientInfo->f_oName.raw() );
+				l_iColor, a_poClientInfo->f_oLogin.raw() );
 		broadcast( l_oMessage ); /* send setup information about new rival to all emperors */
 		f_oSystems[ l_iSysNo ].f_iProduction = 10;
 		f_oSystems[ l_iSysNo ].f_iFleet = 10;
@@ -275,7 +275,7 @@ void HGalaxy::do_post_accept( OClientInfo* a_poClientInfo )
 				f_oSystems [ l_iSysNo ].f_iFleet );
 		a_poClientInfo->f_oSocket->write_until_eos ( l_oMessage );
 		l_oMessage.format ( "glx:msg:$12;Emperor ;$%d;", l_iColor );
-		l_oMessage += a_poClientInfo->f_oName;
+		l_oMessage += a_poClientInfo->f_oLogin;
 		l_oMessage += ";$12; invaded the galaxy.\n";
 		f_iReady ++;
 		}
@@ -283,9 +283,9 @@ void HGalaxy::do_post_accept( OClientInfo* a_poClientInfo )
 		{
 		f_oEmperors[ a_poClientInfo ] = OEmperorInfo();
 		l_oMessage.format ( "glx:setup:emperor=%d,%s\n",
-				-1, a_poClientInfo->f_oName.raw() );
+				-1, a_poClientInfo->f_oLogin.raw() );
 		a_poClientInfo->f_oSocket->write_until_eos( l_oMessage );
-		l_oMessage = "glx:msg:$12;Spectator " + a_poClientInfo->f_oName + " is visiting this galaxy.\n";
+		l_oMessage = "glx:msg:$12;Spectator " + a_poClientInfo->f_oLogin + " is visiting this galaxy.\n";
 		}
 	broadcast( l_oMessage ); /* inform every emperor about new rival */
 	for ( emperors_t::iterator it = f_oEmperors.begin(); it != f_oEmperors.end(); ++ it )
@@ -296,14 +296,14 @@ void HGalaxy::do_post_accept( OClientInfo* a_poClientInfo )
 			if ( l_iClr >= 0 )
 				{
 				l_oMessage.format ( "glx:setup:emperor=%d,%s\n",
-						l_iClr, it->first->f_oName.raw() );
+						l_iClr, it->first->f_oLogin.raw() );
 				a_poClientInfo->f_oSocket->write_until_eos ( l_oMessage );
 				l_oMessage.format ( "glx:msg:$12;Emperor ;$%d;", l_iClr );
-				l_oMessage += it->first->f_oName;
+				l_oMessage += it->first->f_oLogin;
 				l_oMessage += ";$12; invaded the galaxy.\n";
 				}
 			else
-				l_oMessage = "glx:msg:$12;Spectator " + it->first->f_oName + " is visiting this galaxy.\n";
+				l_oMessage = "glx:msg:$12;Spectator " + it->first->f_oLogin + " is visiting this galaxy.\n";
 			a_poClientInfo->f_oSocket->write_until_eos ( l_oMessage );
 			}
 		}
@@ -359,7 +359,7 @@ void HGalaxy::handler_message ( OClientInfo* a_poClientInfo, HString const& a_ro
 		color = 12;
 	l_oMessage += color;
 	l_oMessage += ';';
-	l_oMessage += a_poClientInfo->f_oName;
+	l_oMessage += a_poClientInfo->f_oLogin;
 	l_oMessage += ";$12;: ";
 	l_oMessage += a_roMessage;
 	l_oMessage += '\n';
@@ -437,7 +437,7 @@ void HGalaxy::end_round( void )
 			{
 			it->second.f_iSystems = -1;
 			l_oMessage.format( "glx:msg:$12;Once mighty empire of ;$%d;%s;$12; fall in ruins.\n",
-					it->second.f_iColor, it->first->f_oName.raw() );
+					it->second.f_iColor, it->first->f_oLogin.raw() );
 			broadcast( l_oMessage );
 			}
 		if ( it->second.f_iColor >= 0 ) /* not spectator */
@@ -455,7 +455,7 @@ void HGalaxy::end_round( void )
 			if ( it->second.f_iSystems > 0 )
 				{
 				l_oMessage.format( "glx:msg:$12;The invincible ;$%d;%s;$12; crushed the galaxy.\n",
-						it->second.f_iColor, it->first->f_oName.raw() );
+						it->second.f_iColor, it->first->f_oLogin.raw() );
 				broadcast( l_oMessage );
 				}
 			}
@@ -533,10 +533,10 @@ void HGalaxy::do_kick( OClientInfo* a_poClientInfo )
 	if ( ( color >= 0 ) && ( f_iRound < 0 ) )
 		-- f_iReady;
 	if ( color >= 0 )
-		broadcast( HString( "glx:msg:$12;Emperor ;$" ) + color + ";" + a_poClientInfo->f_oName + ";$12; fleed from the galaxy.\n" );
+		broadcast( HString( "glx:msg:$12;Emperor ;$" ) + color + ";" + a_poClientInfo->f_oLogin + ";$12; fleed from the galaxy.\n" );
 	else
-		broadcast( HString( "glx:msg:$12;Spectator " ) + a_poClientInfo->f_oName + " left this universum.\n" );
-	out << "galaxy: dumping player: " << a_poClientInfo->f_oName << endl;
+		broadcast( HString( "glx:msg:$12;Spectator " ) + a_poClientInfo->f_oLogin + " left this universum.\n" );
+	out << "galaxy: dumping player: " << a_poClientInfo->f_oLogin << endl;
 	if ( f_iReady >= f_oEmperors.size() )
 		end_round();
 	out << "ready: " << f_iReady << ", emperors: " << f_oEmperors.size() << endl;

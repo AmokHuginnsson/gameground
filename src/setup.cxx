@@ -29,6 +29,7 @@ M_VCSID( "$Id: "__ID__" $" )
 #include "setup.hxx"
 
 using namespace yaal::hcore;
+using namespace yaal::dbwrapper;
 
 namespace gameground
 {
@@ -89,6 +90,8 @@ void OSetup::test_setup( void )
 		if ( f_oGameType.is_empty() || f_oGame.is_empty() || ( f_oGameType == "" ) || ( f_oGame == "" ) )
 			yaal::tools::util::failure ( 13, _( "when creating new game, you have specify both type and name of new game\n" ) );
 		}
+	HDataBase::ptr_t db = HDataBase::get_connector();
+	db->connect( setup.f_oDatabasePath, setup.f_oDatabaseLogin, setup.f_oDatabasePassword );
 	return;
 	M_EPILOG
 	}

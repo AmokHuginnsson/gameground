@@ -163,7 +163,7 @@ void HBoggle::handler_message( OClientInfo* a_poClientInfo, HString const& a_roM
 	HLock l( f_oMutex );
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::MSG << PROTOCOL::SEP
-			<< a_poClientInfo->f_oName << ": " << a_roMessage << endl << _out );
+			<< a_poClientInfo->f_oLogin << ": " << a_roMessage << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -198,7 +198,7 @@ HBoggle::OPlayerInfo* HBoggle::get_player_info( OClientInfo* a_poClientInfo )
 
 bool HBoggle::do_accept( OClientInfo* a_poClientInfo )
 	{
-	out << "new candidate " << a_poClientInfo->f_oName << endl;
+	out << "new candidate " << a_poClientInfo->f_oLogin << endl;
 	return ( false );
 	}
 
@@ -213,7 +213,7 @@ void HBoggle::do_post_accept( OClientInfo* a_poClientInfo )
 	 * Send proto info about new contestant to all players.
 	 */
 	broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
-			<< a_poClientInfo->f_oName << PROTOCOL::SEPP << 0 << PROTOCOL::SEPP << 0 << endl << _out );
+			<< a_poClientInfo->f_oLogin << PROTOCOL::SEPP << 0 << PROTOCOL::SEPP << 0 << endl << _out );
 	*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
 		<< "Welcome, this match settings are:" << endl
 		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
@@ -232,19 +232,19 @@ void HBoggle::do_post_accept( OClientInfo* a_poClientInfo )
 		if ( it->first != a_poClientInfo )
 			{
 			*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
-				<< PROTOCOL::PLAYER << PROTOCOL::SEP << it->first->f_oName
+				<< PROTOCOL::PLAYER << PROTOCOL::SEP << it->first->f_oLogin
 				<< PROTOCOL::SEPP << it->second.f_iScore << PROTOCOL::SEPP
 				<< it->second.f_iLast << endl;
 			*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
-				<< PROTOCOL::MSG << PROTOCOL::SEP << it->first->f_oName << " joined the mind contest." << endl;
+				<< PROTOCOL::MSG << PROTOCOL::SEP << it->first->f_oLogin << " joined the mind contest." << endl;
 			}
 		}
 	broadcast(
 			_out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::MSG << PROTOCOL::SEP
-			<< a_poClientInfo->f_oName
+			<< a_poClientInfo->f_oLogin
 			<< " joined the mind contest." << endl << _out );
-	out << "player [" << a_poClientInfo->f_oName << "] accepted" << endl;
+	out << "player [" << a_poClientInfo->f_oLogin << "] accepted" << endl;
 	if ( ! f_iRound && ( f_oPlayers.size() >= f_iPlayers ) )
 		{
 		schedule_end_round();
@@ -272,7 +272,7 @@ void HBoggle::do_kick( OClientInfo* a_poClientInfo )
 		}
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::MSG << PROTOCOL::SEP
-			<< "Player " << a_poClientInfo->f_oName << " left this match." << endl << _out );
+			<< "Player " << a_poClientInfo->f_oLogin << " left this match." << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -370,20 +370,20 @@ void HBoggle::on_end_round( void )
 			*(clInfo->f_oSocket) << PROTOCOL::NAME << PROTOCOL::SEP
 				<< PROTOCOL::SCORED << PROTOCOL::SEP << it->first << "[" << scores[ l_iLength - 1 ] << "]" << endl;
 			info.f_iLast += scores[ l_iLength - 1 ];
-			out << clInfo->f_oName << " scored: " << scores[ l_iLength - 1 ] << " for word: " << it->first << "." << endl;
+			out << clInfo->f_oLogin << " scored: " << scores[ l_iLength - 1 ] << " for word: " << it->first << "." << endl;
 			}
 		}
 	for ( players_t::iterator it = f_oPlayers.begin(); it != f_oPlayers.end(); ++ it )
 		{
 		it->second.f_iScore += it->second.f_iLast;
 		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::PLAYER << PROTOCOL::SEP
-				<< it->first->f_oName << PROTOCOL::SEPP << it->second.f_iScore
+				<< it->first->f_oLogin << PROTOCOL::SEPP << it->second.f_iScore
 				<< PROTOCOL::SEPP << it->second.f_iLast << endl << _out );
 		it->second.f_iLast = 0;
 		}
 	for ( longest_t::iterator it = longest.begin(); it != longest.end(); ++ it )
 		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::LONGEST << PROTOCOL::SEP
-				<< (*it)->first << " [" << (*(*it)->second->begin())->f_oName << "]" << endl << _out );
+				<< (*it)->first << " [" << (*(*it)->second->begin())->f_oLogin << "]" << endl << _out );
 	f_oWords.clear(); 
 	if ( f_iRound < f_iMaxRounds )
 		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::END_ROUND << endl << _out );

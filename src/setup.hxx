@@ -33,6 +33,9 @@ Copyright:
 namespace gameground
 {
 
+#define D_DATABASE_PATH "gameground"
+#define D_DATABASE_LOGIN "gameground"
+#define D_DATABASE_PASSWORD "g4m3gr0und"
 #define D_GALAXY_BOARD_SIZE         16
 #define D_DEFAULT_MAX_CONNECTIONS   64
 #define D_GALAXY_EMPERORS            4
@@ -88,6 +91,9 @@ struct OSetup
 	yaal::hcore::HString f_oGame;
 	yaal::hcore::HString f_oConsoleCharset;
 	yaal::hcore::HString f_oAspellLang;
+	yaal::hcore::HString f_oDatabasePath;
+	yaal::hcore::HString f_oDatabaseLogin;
+	yaal::hcore::HString f_oDatabasePassword;
 	char* f_pcProgramName;
 	yaal::hcore::HString f_oLogPath;
 	/* self-sufficient */
@@ -104,7 +110,9 @@ struct OSetup
 		f_iMainTime( D_GO_MAINTIME ), f_iByoYomiPeriods( D_GO_BYOYOMI_PERIODS ),
 		f_iByoYomiTime( D_GO_BYOYOMI_TIME ),
 		f_oLogin(), f_oHost(), f_oGameType(), f_oGame(),
-		f_oConsoleCharset(), f_oAspellLang(), f_pcProgramName( NULL ),
+		f_oConsoleCharset(), f_oAspellLang(), f_oDatabasePath( D_DATABASE_PATH ),
+		f_oDatabaseLogin( D_DATABASE_LOGIN ), f_oDatabasePassword( D_DATABASE_PASSWORD ),
+		f_pcProgramName( NULL ),
 		f_oLogPath() {}
 	void test_setup( void );
 	static bool test_glx_emperors( int, char*& );

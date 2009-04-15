@@ -6,6 +6,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.Container;
 import java.awt.Color;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import javax.swing.Action;
 import javax.swing.AbstractAction;
 import javax.swing.JPanel;
@@ -87,7 +89,7 @@ class HBrowser extends HAbstractLogic {
 			HAbstractLogic l = _app.getLogicBySymbol( ps._id );
 			HLogicInfo i = l.getInfo();
 			_app.setFace( i._face );
-			_client.println( "join:" + ps._name );
+			_client.println( "join:" + ps._login );
 		}
 		public void onDisconnect() {
 			_client.println( "quit" );
@@ -149,6 +151,20 @@ class HBrowser extends HAbstractLogic {
 			HLogin.OConnectionConfig cc = l.getConnectionConfig();
 			_gui.clearLog();
 			_gui.log( "###", HGUILocal.Colors.BLUE );
+			try {
+				MessageDigest md = MessageDigest.getInstance( "SHA1" );
+				md.update( cc._password.getBytes() );
+				byte[] d = md.digest();
+				cc._password = String.format( "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
+						d[0], d[1], d[2], d[3],
+						d[4], d[5], d[6], d[7],
+						d[8], d[9], d[10], d[11],
+						d[12], d[13], d[14], d[15],
+						d[16], d[17], d[18], d[19] );
+			} catch ( NoSuchAlgorithmException e ) {
+				e.printStackTrace();
+				System.exit( 1 );
+			}
 			_gui.log( " Connecting to server: " + cc._host + " to port " + cc._port + ".\n"  );
 			try {
 				_client = new HClient( _app );
@@ -158,8 +174,8 @@ class HBrowser extends HAbstractLogic {
 				_client.start();
 				_client.waitUntilRunning();
 				System.out.println( "Connection thread started." );
-				_client.println( "name:" + cc._name );
-				_app.setName( cc._name );
+				_client.println( "login:" + cc._login + ":" + cc._password );
+				_app.setName( cc._login );
 				_app.setClient( _client );
 			} catch ( Exception e ) {
 				e.printStackTrace();
@@ -232,7 +248,7 @@ class HBrowser extends HAbstractLogic {
 			for ( i = 0; i < childs; ++ i ) {
 				game = (DefaultMutableTreeNode)node.getChildAt( i );
 				HPlayerSet ps = (HPlayerSet)game.getUserObject();
-				if ( tokens[ 2 ].compareTo( ps._name ) == 0 )
+				if ( tokens[ 2 ].compareTo( ps._login ) == 0 )
 					break;
 			}
 			if ( i < childs ) {

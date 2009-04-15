@@ -3,7 +3,7 @@ import java.util.SortedSet;
 
 class HPlayerSet {
 	String _id;
-	String _name;
+	String _login;
 	String _configuration;
 	SortedSet<String> _players = java.util.Collections.synchronizedSortedSet( new TreeSet<String>() );
 
@@ -12,11 +12,11 @@ class HPlayerSet {
 	}
 	public HPlayerSet( String $id, String $name, String $configuration ) {
 		_id = $id;
-		_name = $name;
+		_login = $name;
 		_configuration = $configuration;
 	}
 	public String toString() {
-		return ( _name );
+		return ( _login );
 	}
 	public void addPlayer( String $player ) {
 		_players.add( $player );

@@ -22,23 +22,22 @@ class HLogin extends HAbstractLogic {
 	public static final String LABEL = "login";
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
-		public JTextField _name;
+		public JTextField _login;
 		public JTextField _password;
 		public JTextField _server;
 		public JTextField _port;
-		public JPanel _login;
 		public HGUILocal( String $resource ) {
 			super( $resource );
 		}
 		public void reinit() {
-			_name.requestFocusInWindow();
+			_login.requestFocusInWindow();
 			try {
 				int port = Integer.parseInt( _app.getParameter("port") );
 				if ( port >= 1024 )
 					_port.setText( "" + port );
 			} catch ( Exception e ) {
 			}
-			_name.setText( _app.getParameter( "login" ) );
+			_login.setText( _app.getParameter( "login" ) );
 			String host = _app.getParameter( "host" );
 			if ( host != null )
 				_server.setText( host );
@@ -63,7 +62,7 @@ class HLogin extends HAbstractLogic {
 		public void updateTagLib( XUL $xul ) {	}
 	}
 	public class OConnectionConfig {
-		public String _name;
+		public String _login;
 		public String _password;
 		public String _host;
 		public int _port;
@@ -90,10 +89,15 @@ class HLogin extends HAbstractLogic {
 	void onConnectClick() {
 		String errors = "";
 		String login = "";
-		if ( _gui._name.getText().compareTo( "" ) == 0 )
+		if ( _gui._login.getText().compareTo( "" ) == 0 )
 			errors += "name not set\n";
 		else
-			login = new String( _gui._name.getText() );
+			login = new String( _gui._login.getText() );
+		String password = "";
+		if ( _gui._password.getText().compareTo( "" ) == 0 )
+			errors += "password not set\n";
+		else
+			password = new String( _gui._password.getText() );
 		String server = "";
 		if ( _gui._server.getText().compareTo( "" ) == 0 )
 			errors += "server not set\n";
@@ -111,7 +115,8 @@ class HLogin extends HAbstractLogic {
 					"Your setup contains following errors:\n" + errors,
 					"GameGround - error ...", JOptionPane.ERROR_MESSAGE );
 		} else {
-			_connectionConfig._name = login;
+			_connectionConfig._login = login;
+			_connectionConfig._password = password;
 			_connectionConfig._host = server;
 			_connectionConfig._port = port;
 			_app.setFace( HBrowser.LABEL );

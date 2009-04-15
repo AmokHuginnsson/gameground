@@ -49,6 +49,7 @@ protected:
 	logics_t f_oLogics;
 	handlers_t f_oHandlers;
 	yaal::tools::HStringStream _out;
+	yaal::dbwrapper::HDataBase::ptr_t _db;
 	/*}*/
 	struct PROTOCOL
 		{
@@ -65,7 +66,7 @@ protected:
 		static char const* const KCK;
 		static char const* const LOGIC;
 		static char const* const MSG;
-		static char const* const NAME;
+		static char const* const LOGIN;
 		static char const* const PLAYER;
 		static char const* const PLAYER_QUIT;
 		static char const* const QUIT;
@@ -91,7 +92,7 @@ protected:
 	void kick_client( yaal::hcore::HSocket::ptr_t&, char const* const = NULL );
 	void broadcast( yaal::hcore::HString const& );
 	void broadcast_to_interested( yaal::hcore::HString const& );
-	void set_client_name( OClientInfo&, yaal::hcore::HString const& );
+	void handle_login( OClientInfo&, yaal::hcore::HString const& );
 	void pass_command( OClientInfo&, yaal::hcore::HString const& );
 	void create_game( OClientInfo&, yaal::hcore::HString const& );
 	void join_game( OClientInfo&, yaal::hcore::HString const& );

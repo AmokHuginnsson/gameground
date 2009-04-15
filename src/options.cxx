@@ -72,6 +72,9 @@ int handle_program_options( int a_iArgc, char** a_ppcArgv )
 	OOptionInfo info( po, setup.f_pcProgramName, "GameGround - universal networked multiplayer game server", NULL );
 	bool stop = false;
 	po( "log_path", program_options_helper::option_value( setup.f_oLogPath ), NULL, HProgramOptionsHandler::OOption::TYPE::D_REQUIRED, "path", "path pointing to file for application logs" )
+		( "database_path", program_options_helper::option_value( setup.f_oDatabasePath ), "D", HProgramOptionsHandler::OOption::TYPE::D_REQUIRED, "path", "database connection path scheme" )
+		( "database_login", program_options_helper::option_value( setup.f_oDatabaseLogin ), "U", HProgramOptionsHandler::OOption::TYPE::D_REQUIRED, "user", "datbase connection user name" )
+		( "database_password", program_options_helper::option_value( setup.f_oDatabasePassword ), "p", HProgramOptionsHandler::OOption::TYPE::D_REQUIRED, "password", "database connection password" )
 		( "aspell_lang", program_options_helper::option_value( setup.f_oAspellLang ), NULL, HProgramOptionsHandler::OOption::TYPE::D_REQUIRED, "language", "language used for spell checking" )
 		( "board", program_options_helper::option_value( setup.f_iBoardSize ), "B", HProgramOptionsHandler::OOption::TYPE::D_REQUIRED, "size", "size of the galaxy board" )
 		( "client", program_options_helper::option_value( setup.f_bClient ), "C", HProgramOptionsHandler::OOption::TYPE::D_NONE, NULL, "connect to server" )

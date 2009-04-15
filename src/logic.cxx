@@ -65,7 +65,7 @@ void HLogic::kick_client( OClientInfo* a_poClientInfo, char const* const a_pcRea
 	if ( a_pcReason )
 		*a_poClientInfo->f_oSocket << "err:" << a_pcReason << endl;
 	do_kick( a_poClientInfo );
-	broadcast( _out << PROTOCOL::PLAYER_QUIT << PROTOCOL::SEP << a_poClientInfo->f_oName << endl << _out );
+	broadcast( _out << PROTOCOL::PLAYER_QUIT << PROTOCOL::SEP << a_poClientInfo->f_oLogin << endl << _out );
 	return;
 	M_EPILOG
 	}
