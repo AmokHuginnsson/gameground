@@ -460,7 +460,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 	}
 	public void reinit() {
 		_client = _app.getClient();
-		_emperor = ((HLogin)_app.getLogic( "login" )).getConnectionConfig()._name;
+		_emperor = ((HLogin)_app.getLogic( "login" )).getConnectionConfig()._login;
 		_gui._emperor.setText( _emperor );
 		_systems = null;
 		_systemCount = 0;
