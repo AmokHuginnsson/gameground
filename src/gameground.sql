@@ -3,7 +3,9 @@ DROP TRIGGER IF EXISTS tgg_stats_id_game_insert;
 DROP TRIGGER IF EXISTS tgg_stats_id_user_update;
 DROP TRIGGER IF EXISTS tgg_stats_id_user_insert;
 DROP TRIGGER IF EXISTS tgg_game_delete;
+DROP TRIGGER IF EXISTS tgg_game_update;
 DROP TRIGGER IF EXISTS tgg_user_delete;
+DROP TRIGGER IF EXISTS tgg_user_update;
 DROP INDEX IF EXISTS idx_stats_id_user;
 DROP INDEX IF EXISTS idx_stats_id_game;
 DROP TABLE IF EXISTS tbl_stats;
@@ -31,6 +33,26 @@ CREATE TABLE tbl_stats (
 );
 CREATE INDEX idx_stats_id_user ON tbl_stats ( id_user );
 CREATE INDEX idx_stats_id_game ON tbl_stats ( id_game );
+CREATE TRIGGER tgg_user_update BEFORE UPDATE ON tbl_user FOR EACH ROW WHEN
+	NEW.id <> OLD.id
+BEGIN
+	SELECT RAISE ( FAIL, "Relation broken during UPDATE on TABLE tbl_user on COLUMN id." );
+END;
+CREATE TRIGGER tgg_user_delete BEFORE DELETE ON tbl_user FOR EACH ROW WHEN
+	( SELECT COUNT(*) FROM tbl_stats WHERE id_user = OLD.id ) <> 0
+BEGIN
+	SELECT RAISE ( FAIL, "Relation broken during DELETE on TABLE tbl_user on COLUMN id." );
+END;
+CREATE TRIGGER tgg_game_update BEFORE UPDATE ON tbl_game FOR EACH ROW WHEN
+	NEW.id <> OLD.id
+BEGIN
+	SELECT RAISE ( FAIL, "Relation broken during UPDATE on TABLE tbl_game on COLUMN id." );
+END;
+CREATE TRIGGER tgg_game_delete BEFORE DELETE ON tbl_game FOR EACH ROW WHEN
+	( SELECT COUNT(*) FROM tbl_stats WHERE id_game = OLD.id ) <> 0
+BEGIN
+	SELECT RAISE ( FAIL, "Relation broken during DELETE on TABLE tbl_game on COLUMN id." );
+END;
 CREATE TRIGGER tgg_stats_id_user_insert BEFORE INSERT ON tbl_stats FOR EACH ROW WHEN
 	( SELECT COUNT(*) FROM tbl_user WHERE id = NEW.id_user ) = 0
 BEGIN
@@ -50,16 +72,6 @@ CREATE TRIGGER tgg_stats_id_game_update BEFORE UPDATE ON tbl_stats FOR EACH ROW 
 	OLD.id_game <> NEW.id_game
 BEGIN
 	SELECT RAISE ( FAIL, "Relation broken during UPDATE on TABLE tbl_stats on COLUMN id_game." );
-END;
-CREATE TRIGGER tgg_user_delete BEFORE DELETE ON tbl_user FOR EACH ROW WHEN
-	( SELECT COUNT(*) FROM tbl_stats WHERE id_user = OLD.id ) <> 0
-BEGIN
-	SELECT RAISE ( FAIL, "Relation broken during DELETE on TABLE tbl_user on COLUMN id." );
-END;
-CREATE TRIGGER tgg_game_delete BEFORE DELETE ON tbl_game FOR EACH ROW WHEN
-	( SELECT COUNT(*) FROM tbl_stats WHERE id_game = OLD.id ) <> 0
-BEGIN
-	SELECT RAISE ( FAIL, "Relation broken during DELETE on TABLE tbl_game on COLUMN id." );
 END;
 
 INSERT INTO tbl_game ( name ) VALUES ( 'go' );
