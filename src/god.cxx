@@ -147,8 +147,8 @@ void HGo::handler_setup( OClientInfo* a_poClientInfo, HString const& a_roMessage
 		throw HLogicException( "you are not admin" );
 	if ( f_eState != STONE::D_NONE )
 		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
-	HString item = a_roMessage.split( ",", 0 );
-	int value = lexical_cast<int>( a_roMessage.split( ",", 1 ) );
+	HString item = get_token( a_roMessage, ",", 0 );
+	int value = lexical_cast<int>( get_token( a_roMessage, ",", 1 ) );
 	if ( item == PROTOCOL::GOBAN )
 		{
 		f_iGobanSize = value;
@@ -174,7 +174,7 @@ void HGo::handler_setup( OClientInfo* a_poClientInfo, HString const& a_roMessage
 void HGo::handler_sit( OClientInfo* a_poClientInfo, HString const& a_roMessage )
 	{
 	M_PROLOG
-	HString place = a_roMessage.split( ",", 1 );
+	HString place = get_token( a_roMessage, ",", 1 );
 	if ( place.get_length() < 1 )
 		throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
 	else
@@ -235,8 +235,8 @@ void HGo::handler_put_stone( OClientInfo* a_poClientInfo, HString const& a_roMes
 	if ( contestant( f_eState ) != a_poClientInfo )
 		throw HLogicException( GO_MSG[ GO_MSG_NOT_YOUR_TURN ] );
 	f_iPass = 0;
-	int col = lexical_cast<int>( a_roMessage.split( ",", 1 ) );
-	int row = lexical_cast<int>( a_roMessage.split( ",", 2 ) );
+	int col = lexical_cast<int>( get_token( a_roMessage, ",", 1 ) );
+	int row = lexical_cast<int>( get_token( a_roMessage, ",", 2 ) );
 	int before = count_stones( oponent( f_eState ) );
 	make_move( col, row, f_eState );
 	int after = count_stones( oponent( f_eState ) );
@@ -272,10 +272,10 @@ void HGo::handler_dead( OClientInfo* a_poClientInfo, HString const& a_roMessage 
 	if ( f_eState != STONE::D_MARK )
 		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
 	HString str;
-	for ( int i = 1; ! ( str = a_roMessage.split( ",", i ) ).is_empty() ; i += 2 )
+	for ( int i = 1; ! ( str = get_token( a_roMessage, ",", i ) ).is_empty() ; i += 2 )
 		{
 		int col = lexical_cast<int>( str );
-		int row = lexical_cast<int>( a_roMessage.split( ",", i + 1 ) );
+		int row = lexical_cast<int>( get_token( a_roMessage, ",", i + 1 ) );
 		out << "dead: " << col << "," << row << endl;
 		ensure_coordinates_validity( col, row );
 		STONE::stone_t stone = goban( col, row );
@@ -420,7 +420,7 @@ void HGo::handler_play( OClientInfo* a_poClientInfo, HString const& a_roMessage 
 	{
 	M_PROLOG
 	HLock l( f_oMutex );
-	HString item = a_roMessage.split( ",", 0 );
+	HString item = get_token( a_roMessage, ",", 0 );
 	if ( ( item != PROTOCOL::SIT )
 			&& ( contestant( STONE::D_BLACK ) != a_poClientInfo )
 			&& ( contestant( STONE::D_WHITE ) != a_poClientInfo ) )
@@ -947,7 +947,7 @@ HLogic::ptr_t HGoCreator::do_new_instance( HString const& a_oArgv )
 	{
 	M_PROLOG
 	out << "creating logic: " << a_oArgv << endl;
-	HString l_oName = a_oArgv.split( ",", 0 );
+	HString l_oName = get_token( a_oArgv, ",", 0 );
 	return ( HLogic::ptr_t( new go::HGo( l_oName ) ) );
 	M_EPILOG
 	}

@@ -121,7 +121,7 @@ void HGomoku::broadcast_contestants( yaal::hcore::HString const& a_oMessage )
 void HGomoku::handler_sit( OClientInfo* a_poClientInfo, HString const& a_roMessage )
 	{
 	M_PROLOG
-	HString place = a_roMessage.split( ",", 1 );
+	HString place = get_token( a_roMessage, ",", 1 );
 	if ( place.get_length() < 1 )
 		throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
 	else
@@ -168,8 +168,8 @@ void HGomoku::handler_put_stone( OClientInfo* a_poClientInfo, HString const& a_r
 		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
 	if ( contestant( f_eState ) != a_poClientInfo )
 		throw HLogicException( GO_MSG[ GO_MSG_NOT_YOUR_TURN ] );
-	int col = lexical_cast<int>( a_roMessage.split( ",", 1 ) );
-	int row = lexical_cast<int>( a_roMessage.split( ",", 2 ) );
+	int col = lexical_cast<int>( get_token( a_roMessage, ",", 1 ) );
+	int row = lexical_cast<int>( get_token( a_roMessage, ",", 2 ) );
 	make_move( col, row, f_eState ); /* TODO implement winning condition test */
 	f_eState = oponent( f_eState );
 	send_goban();
@@ -181,7 +181,7 @@ void HGomoku::handler_play( OClientInfo* a_poClientInfo, HString const& a_roMess
 	{
 	M_PROLOG
 	HLock l( f_oMutex );
-	HString item = a_roMessage.split( ",", 0 );
+	HString item = get_token( a_roMessage, ",", 0 );
 	if ( ( item != PROTOCOL::SIT )
 			&& ( contestant( STONE::D_BLACK ) != a_poClientInfo )
 			&& ( contestant( STONE::D_WHITE ) != a_poClientInfo ) )
@@ -403,7 +403,7 @@ HLogic::ptr_t HGomokuCreator::do_new_instance( HString const& a_oArgv )
 	{
 	M_PROLOG
 	out << "creating logic: " << a_oArgv << endl;
-	HString l_oName = a_oArgv.split( ",", 0 );
+	HString l_oName = get_token( a_oArgv, ",", 0 );
 	return ( HLogic::ptr_t( new gomoku::HGomoku( l_oName ) ) );
 	M_EPILOG
 	}

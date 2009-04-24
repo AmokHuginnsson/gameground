@@ -29,6 +29,8 @@ M_VCSID( "$Id: "__ID__" $" )
 #include "setup.hxx"
 
 using namespace yaal::hcore;
+using namespace yaal::tools;
+using namespace yaal::tools::util;
 using namespace yaal::dbwrapper;
 
 namespace gameground
@@ -84,8 +86,8 @@ void OSetup::test_setup( void )
 		yaal::tools::util::failure ( 12, _( "creating new game is enought, you do not have to join it explicite\n" ) );
 	if ( ! f_oGameType.is_empty() )
 		{
-		HString type = f_oGameType.split( ",", 0 );
-		f_oGame = f_oGameType.split( ",", 1 );
+		HString type = get_token( f_oGameType, ",", 0 );
+		f_oGame = get_token( f_oGameType, ",", 1 );
 		f_oGameType = type;
 		if ( f_oGameType.is_empty() || f_oGame.is_empty() || ( f_oGameType == "" ) || ( f_oGame == "" ) )
 			yaal::tools::util::failure ( 13, _( "when creating new game, you have specify both type and name of new game\n" ) );

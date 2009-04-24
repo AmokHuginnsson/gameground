@@ -154,8 +154,8 @@ void HServer::handle_login( OClientInfo& a_roInfo, HString const& a_oLoginInfo )
 	M_PROLOG
 	clients_t::iterator it;
 	int const D_MINIMUM_NAME_LENGTH = 4;
-	HString login( a_oLoginInfo.split( ":", 0 ) );
-	HString password( a_oLoginInfo.split( ":", 1 ) );
+	HString login( get_token( a_oLoginInfo, ":", 0 ) );
+	HString password( get_token( a_oLoginInfo, ":", 1 ) );
 	for ( it = f_oClients.begin(); it != f_oClients.end(); ++ it )
 		if ( ( ! strcasecmp( it->second.f_oLogin, login ) ) && ( it->second.f_oSocket != a_roInfo.f_oSocket ) )
 			break;
@@ -220,9 +220,9 @@ void HServer::create_game( OClientInfo& a_roInfo, HString const& a_oArg )
 		kick_client( a_roInfo.f_oSocket, _( "Set your name first." ) );
 	else
 		{
-		HString l_oType = a_oArg.split( ":", 0 );
-		HString l_oConfiguration = a_oArg.split( ":", 1 );
-		HString l_oName = l_oConfiguration.split( ",", 0 );
+		HString l_oType = get_token( a_oArg, ":", 0 );
+		HString l_oConfiguration = get_token( a_oArg, ":", 1 );
+		HString l_oName = get_token( l_oConfiguration, ",", 0 );
 		HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 		logics_t::iterator it = f_oLogics.find( l_oName );
 		if ( it != f_oLogics.end() )
@@ -326,7 +326,7 @@ int HServer::handler_message( int a_iFileDescriptor )
 			else
 				out << clientIt->second.f_oLogin; 
 			cout << "->" << l_oMessage << endl;
-			l_oCommand = l_oMessage.split( ":", 0 );
+			l_oCommand = get_token( l_oMessage, ":", 0 );
 			l_oArgument = l_oMessage.mid( l_oCommand.get_length() + 1 );
 			int l_iMsgLength = static_cast<int>( l_oCommand.get_length() );
 			if ( l_iMsgLength < 1 )

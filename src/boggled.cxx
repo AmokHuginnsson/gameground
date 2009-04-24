@@ -466,11 +466,12 @@ HLogic::ptr_t HBoggleCreator::do_new_instance( HString const& a_oArgv )
 	{
 	M_PROLOG
 	out << "creating logic: " << a_oArgv << endl;
-	HString l_oName = a_oArgv.split( ",", 0 );
-	HString l_oPlayers = a_oArgv.split( ",", 1 );
-	HString l_oRoundTime = a_oArgv.split( ",", 2 );
-	HString l_oMaxRounds = a_oArgv.split( ",", 3 );
-	HString l_oInterRoundDelay = a_oArgv.split( ",", 4 );
+	HTokenizer t( a_oArgv, "," );
+	HString l_oName = t[ 0 ];
+	HString l_oPlayers = t[ 1 ];
+	HString l_oRoundTime = t[ 2 ];
+	HString l_oMaxRounds = t[ 3 ];
+	HString l_oInterRoundDelay = t[ 4 ];
 	int l_iPlayers = lexical_cast<int>( l_oPlayers );
 	int l_iRoundTime = lexical_cast<int>( l_oRoundTime );
 	int l_iMaxRounds = lexical_cast<int>( l_oMaxRounds );

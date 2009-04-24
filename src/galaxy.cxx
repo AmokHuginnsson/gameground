@@ -926,7 +926,7 @@ int HClient::handler_message ( int )
 	HString l_oCommand;
 	if ( ( l_iMsgLength = f_oSocket.read_until( l_oMessage ).octets ) > 0 )
 		{
-		while ( ( l_oCommand = l_oMessage.split( ":", 0 ) ) == "glx" )
+		while ( ( l_oCommand = get_token( l_oMessage, ":", 0 ) ) == "glx" )
 			l_oMessage = l_oMessage.mid( l_oCommand.get_length() + 1 );
 		l_iMsgLength = static_cast<int>( l_oMessage.get_length() );
 		if ( l_iMsgLength < 1 )
@@ -952,7 +952,7 @@ void HClient::process_command( HString& a_roCommand )
 	handler_t HANDLER;
 	if ( setup.f_iVerbose > 2 )
 		hcore::log << "msg: " << a_roCommand << endl;
-	l_oMnemonic = a_roCommand.split ( ":", 0 );
+	l_oMnemonic = get_token( a_roCommand, ":", 0 );
 	l_oArgument = a_roCommand.mid( l_oMnemonic.get_length() + 1 );
 	if ( ! f_oHandlers.get( l_oMnemonic, HANDLER ) )
 		( this->*HANDLER )( l_oArgument );
@@ -965,14 +965,14 @@ void HClient::process_command( HString& a_roCommand )
 	M_EPILOG
 	}
 
-void HClient::handler_setup ( HString & a_roCommand )
+void HClient::handler_setup( HString& a_roCommand )
 	{
 	M_PROLOG
 	int l_iIndex = - 1, l_iCoordX = - 1, l_iCoordY = - 1;
 	HString l_oVariable;
 	HString l_oValue;
-	l_oVariable = a_roCommand.split ( "=", 0 );
-	l_oValue = a_roCommand.split ( "=", 1 );
+	l_oVariable = get_token( a_roCommand, "=", 0 );
+	l_oValue = get_token( a_roCommand, "=", 1 );
 	if ( l_oVariable == "board_size" )
 		f_oWindow->f_poBoard->f_iBoardSize = lexical_cast<int>( l_oValue );
 	else if ( l_oVariable == "systems" )
@@ -984,16 +984,16 @@ void HClient::handler_setup ( HString & a_roCommand )
 		}
 	else if ( l_oVariable == "system_coordinates" )
 		{
-		l_iIndex = lexical_cast<int>( l_oValue.split ( ",", 0 ) );
-		l_iCoordX = lexical_cast<int>( l_oValue.split ( ",", 1 ) );
-		l_iCoordY = lexical_cast<int>( l_oValue.split ( ",", 2 ) );
+		l_iIndex = lexical_cast<int>( get_token( l_oValue, ",", 0 ) );
+		l_iCoordX = lexical_cast<int>( get_token( l_oValue, ",", 1 ) );
+		l_iCoordY = lexical_cast<int>( get_token( l_oValue, ",", 2 ) );
 		f_oSystems [ l_iIndex ].f_iCoordinateX = l_iCoordX;
 		f_oSystems [ l_iIndex ].f_iCoordinateY = l_iCoordY;
 		}
 	else if ( l_oVariable == "emperor" )
 		{
-		l_iIndex = lexical_cast<int>( l_oValue.split ( ",", 0 ) );
-		f_oEmperors [ l_iIndex ] = l_oValue.split ( ",", 1 );
+		l_iIndex = lexical_cast<int>( get_token( l_oValue, ",", 0 ) );
+		f_oEmperors [ l_iIndex ] = get_token( l_oValue, ",", 1 );
 		if ( f_oEmperors [ l_iIndex ] == setup.f_oLogin )
 			f_iColor = l_iIndex;
 		}
@@ -1014,17 +1014,17 @@ void HClient::handler_play ( HString& a_roCommand )
 	int l_iSysNo = - 1, l_iColor = 0, l_iProduction = - 1;
 	HString l_oVariable;
 	HString l_oValue;
-	l_oVariable = a_roCommand.split ( "=", 0 );
-	l_oValue = a_roCommand.split ( "=", 1 );
+	l_oVariable = get_token( a_roCommand, "=", 0 );
+	l_oValue = get_token( a_roCommand, "=", 1 );
 	if ( l_oVariable == "system_info" )
 		{
 		l_cEvent = l_oValue [ 0 ];
-		l_iSysNo = lexical_cast<int>( l_oValue.split( ",", 1 ) );
-		l_iProduction = lexical_cast<int>( l_oValue.split( ",", 2 ) );
+		l_iSysNo = lexical_cast<int>( get_token( l_oValue, ",", 1 ) );
+		l_iProduction = lexical_cast<int>( get_token( l_oValue, ",", 2 ) );
 		if ( l_iProduction >= 0 )
 			f_oSystems [ l_iSysNo ].f_iProduction = l_iProduction;
-		f_oSystems [ l_iSysNo ].f_iFleet = lexical_cast<int>( l_oValue.split( ",", 4 ) );
-		l_iColor = lexical_cast<int>( l_oValue.split( ",", 3 ) );
+		f_oSystems [ l_iSysNo ].f_iFleet = lexical_cast<int>( get_token( l_oValue, ",", 4 ) );
+		l_iColor = lexical_cast<int>( get_token( l_oValue, ",", 3 ) );
 		f_oEmperors.get( l_iColor, l_oValue );
 		switch ( l_cEvent )
 			{

@@ -43,7 +43,7 @@ namespace gameground
 void HLogicFactory::register_logic_creator( HString const& a_oInfo, HLogicCreatorInterface* a_poInstatiator )
 	{
 	M_PROLOG
-	HString l_oName = a_oInfo.split( ":", 0 );
+	HString l_oName = get_token( a_oInfo, ":", 0 );
 	creators_t::iterator it = f_oCreators.find( l_oName );
 	if ( it != f_oCreators.end() )
 		M_THROW( _( "Logic already registered" ), errno );

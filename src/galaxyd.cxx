@@ -44,7 +44,7 @@ namespace gameground
 namespace galaxy
 {
 
-int n_piColors [ ] =
+int n_piColors[] =
 	{
 	( COLORS::D_FG_BRIGHTBLUE | COLORS::D_BG_BLACK ),
 	( COLORS::D_FG_BRIGHTGREEN | COLORS::D_BG_BLACK ),
@@ -380,14 +380,14 @@ void HGalaxy::handler_play ( OClientInfo* a_poClientInfo, HString const& a_roCom
 	HString l_oVariable;
 	HString l_oValue;
 	HFleet l_oFleet;
-	l_oVariable = a_roCommand.split ( "=", 0 );
-	l_oValue = a_roCommand.split ( "=", 1 );
+	l_oVariable = get_token( a_roCommand, "=", 0 );
+	l_oValue = get_token( a_roCommand, "=", 1 );
 	if ( l_oVariable == "move" )
 		{
 		l_oFleet.f_poEmperor = a_poClientInfo;
-		l_iSource = lexical_cast<int>( l_oValue.split ( ",", 0 ) );
-		l_iDestination = lexical_cast<int>( l_oValue.split ( ",", 1 ) );
-		l_oFleet.f_iSize = lexical_cast<int>( l_oValue.split ( ",", 2 ) );
+		l_iSource = lexical_cast<int>( get_token( l_oValue, ",", 0 ) );
+		l_iDestination = lexical_cast<int>( get_token( l_oValue, ",", 1 ) );
+		l_oFleet.f_iSize = lexical_cast<int>( get_token( l_oValue, ",", 2 ) );
 		if ( ( l_iSource == l_iDestination )
 				&& ( f_oSystems [ l_iSource ].f_poEmperor != a_poClientInfo )
 				&& ( f_oSystems [ l_iSource ].f_iFleet < l_oFleet.f_iSize ) )
@@ -564,10 +564,10 @@ public:
 HLogic::ptr_t HGalaxyCreator::do_new_instance( HString const& a_oArgv )
 	{
 	M_PROLOG
-	HString l_oName = a_oArgv.split( ",", 0 );
-	int l_iEmperors = lexical_cast<int>( a_oArgv.split( ",", 1 ) );
-	int l_iBoardSize = lexical_cast<int>( a_oArgv.split( ",", 2 ) ); 
-	int l_iSystems = lexical_cast<int>( a_oArgv.split( ",", 3 ) );
+	HString l_oName = get_token( a_oArgv, ",", 0 );
+	int l_iEmperors = lexical_cast<int>( get_token( a_oArgv, ",", 1 ) );
+	int l_iBoardSize = lexical_cast<int>( get_token( a_oArgv, ",", 2 ) ); 
+	int l_iSystems = lexical_cast<int>( get_token( a_oArgv, ",", 3 ) );
 	char* l_pcMessage = NULL;
 	out << "new glx: ( " << l_oName << " ) {" << endl;
 	cout << "emperors = " << l_iEmperors << endl;

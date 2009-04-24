@@ -113,9 +113,9 @@ bool HLogic::process_command( OClientInfo* a_poClientInfo, HString const& a_roCo
 	HString l_oMnemonic;
 	HString l_oArgument;
 	l_oArgument = a_roCommand;
-	while ( ( l_oMnemonic = l_oArgument.split( ":", 0 ) ) == f_oSymbol )
+	while ( ( l_oMnemonic = get_token( l_oArgument, ":", 0 ) ) == f_oSymbol )
 		l_oArgument = l_oArgument.mid( l_oMnemonic.get_length() + 1 );
-	l_oMnemonic = l_oArgument.split( ":", 0 );
+	l_oMnemonic = get_token( l_oArgument, ":", 0 );
 	l_oArgument = l_oArgument.mid( l_oMnemonic.get_length() + 1 );
 	bool failure = false;
 	handler_t HANDLER;
