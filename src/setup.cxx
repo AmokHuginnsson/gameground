@@ -36,6 +36,10 @@ using namespace yaal::dbwrapper;
 namespace gameground
 {
 
+char const* const DATABASE_PATH     = "gameground";
+char const* const DATABASE_LOGIN    = "gameground";
+char const* const DATABASE_PASSWORD = "g4m3gr0und";
+
 now_t now;
 
 HStreamInterface& operator << ( HStreamInterface& stream, now_t const& )

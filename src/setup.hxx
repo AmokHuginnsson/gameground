@@ -33,25 +33,25 @@ Copyright:
 namespace gameground
 {
 
-#define DATABASE_PATH "gameground"
-#define DATABASE_LOGIN "gameground"
-#define DATABASE_PASSWORD "g4m3gr0und"
-#define GALAXY_BOARD_SIZE         16
-#define DEFAULT_MAX_CONNECTIONS   64
-#define GALAXY_EMPERORS            4
-#define NEUTRAL_SYSTEM_PER_PLAYER  4
-#define MAX_BOARD_SIZE            20
-#define MAX_SYSTEM_COUNT          36
-#define BOGGLE_PLAYERS             2
-#define BOGGLE_ROUND_TIME        180
-#define BOGGLE_INTER_ROUND_DELAY  15
-#define BOGGLE_MAX_ROUNDS          5
-#define GO_GOBAN_SIZE             19
-#define GO_KOMI                    5
-#define GO_HANDICAPS               0
-#define GO_MAINTIME               30
-#define GO_BYOYOMI_PERIODS         5
-#define GO_BYOYOMI_TIME            1
+extern char const* const DATABASE_PATH;
+extern char const* const DATABASE_LOGIN;
+extern char const* const DATABASE_PASSWORD;
+static int const GALAXY_BOARD_SIZE         =  16;
+static int const DEFAULT_MAX_CONNECTIONS   =  64;
+static int const GALAXY_EMPERORS           =   4;
+static int const NEUTRAL_SYSTEM_PER_PLAYER =   4;
+static int const MAX_BOARD_SIZE            =  20;
+static int const MAX_SYSTEM_COUNT          =  36;
+static int const BOGGLE_PLAYERS            =   2;
+static int const BOGGLE_ROUND_TIME         = 180;
+static int const BOGGLE_INTER_ROUND_DELAY  =  15;
+static int const BOGGLE_MAX_ROUNDS         =   5;
+static int const GO_GOBAN_SIZE             =  19;
+static int const GO_KOMI                   =   5;
+static int const GO_HANDICAPS              =   0;
+static int const GO_MAINTIME               =  30;
+static int const GO_BYOYOMI_PERIODS        =   5;
+static int const GO_BYOYOMI_TIME           =   1;
 #define out ( cout << now << " " << __FILE__ + OSetup::PATH_OFFSET << ":" << __LINE__ << ": " )
 
 typedef double long ( *now_t )( bool, double, char, int, bool, double, void*, void*, double, char );
