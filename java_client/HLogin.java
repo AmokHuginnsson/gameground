@@ -20,6 +20,7 @@ import javax.swing.text.SimpleAttributeSet;
 
 class HLogin extends HAbstractLogic {
 	public static final String LABEL = "login";
+	static boolean once = true;
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
 		public JTextField _login;
@@ -38,6 +39,9 @@ class HLogin extends HAbstractLogic {
 			} catch ( Exception e ) {
 			}
 			_login.setText( _app.getParameter( "login" ) );
+			String password = _app.getParameter( "password" );
+			if ( password != null )
+				_password.setText( password );
 			String host = _app.getParameter( "host" );
 			if ( host != null )
 				_server.setText( host );
@@ -126,6 +130,10 @@ class HLogin extends HAbstractLogic {
 		return ( _connectionConfig );
 	}
 	public void reinit() {
+		if ( "true".equals( _app.getParameter( "auto-connect" ) ) && once ) {
+			once = false;
+			onConnectClick();
+		}
 	}
 	public void cleanup() {}
 	static boolean registerLogic( GameGround $app ) {

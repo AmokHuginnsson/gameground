@@ -34,14 +34,12 @@ class HClient extends Thread {
 	public HClient( GameGround $app ) throws Exception {
 		_app = $app;
 		_loop = true;
-		System.out.println( "HClient" );
 	}
 	void connect( String $server, int $port ) throws Exception {
 		SocketFactory sf = _sslContext.getSocketFactory();
 		_socket = sf.createSocket( $server, $port );
 		_out = new PrintStream( _socket.getOutputStream(), true, D_ENCODING );
 		_in = new BufferedReader( new InputStreamReader( _socket.getInputStream(), D_ENCODING ) );
-		System.out.println( "connect" );
 	}
 	void setLogic( HAbstractLogic $logic ) {
 		_logic = $logic;
@@ -108,10 +106,10 @@ class HClient extends Thread {
 				}
 				public void checkClientTrusted(
 						java.security.cert.X509Certificate[] certs, String authType) {
-						}
+				}
 				public void checkServerTrusted(
 						java.security.cert.X509Certificate[] certs, String authType) {
-						}
+				}
 			}
 		};
 

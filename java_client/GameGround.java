@@ -18,6 +18,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.Properties;
+import java.io.FileReader;
 
 public class /* Application or applet name: */ GameGround extends JApplet {
 	public static final long serialVersionUID = 13l;
@@ -30,13 +32,14 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	private String _name;
 	private HAbstractLogic _current = null;
 	boolean _applet = false;
+	Properties _ini;
 	CommandLine _cmd;
 
 	public GameGround() { this( null ); }
 	GameGround( String[] $argv ) {
 		if ( $argv == null )
 			_applet = true;
-		handleArguments( $argv );
+		handleProgramOptions( $argv );
 	}
 
 	public void init() {
@@ -57,7 +60,6 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 			EagerStaticInitializer.touch( this, "registerLogic" );
 			setFace( HLogin.LABEL );
 			resize( res.getRootElement().getAttribute( "size" ).getValue().split( ",", 2 ) );
-			setFace( HLogin.LABEL );
 			_frameName = _frame.getTitle();
 		} catch ( Exception e ) {
 			e.printStackTrace();
@@ -187,21 +189,42 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		return ( _applet );
 	}
 	public String getParameter( String $name ) {
+		String val;
 		if ( isApplet() )
-			return ( super.getParameter( $name ) );
-		else {
-			return ( _cmd.getOptionValue( $name ) );
-		}
+			val = super.getParameter( $name );
+		else 
+			val = _cmd.getOptionValue( $name );
+		if ( ( _ini != null ) && ( val == null ) )
+			val = _ini.getProperty( $name );
+		System.out.println( "Getting parameter: " + $name + ", of value: " + val + "." );
+		return ( val );
 	}
-	void handleArguments( String[] $argv ) {
+	void handleProgramOptions( String[] $argv ) {
+		try {
+			/* System.getProperties().list( System.out ); */
+			_ini = new Properties();
+			_ini.load( new FileReader( System.getenv( "HOME" ) + "/etc/conf/gameground-clientrc" ) );
+		} catch ( java.io.FileNotFoundException e ) {
+			System.out.println( e.getMessage() );
+		} catch ( java.io.IOException e ) {
+			System.out.println( "FATAL ERROR: " + e.getMessage() );
+			e.printStackTrace();
+			System.exit( 1 );
+		} catch ( java.security.AccessControlException e ) {
+			System.out.println( "Insufficient privileges to guess home directory: " + e.getMessage() );
+		}
 		if ( $argv != null ) {
 			Options opts = new Options();
 			opts.addOption( OptionBuilder.withLongOpt( "help" ).withDescription( "provide this help message and exit" ).create( 'h' ) );
+			opts.addOption( OptionBuilder.withLongOpt( "auto-connect" ).withDescription( "automatically connect to the server" ).create( 'A' ) );
 			opts.addOption( OptionBuilder.withLongOpt( "login" ).withArgName( "name" ).hasArg().withDescription( "your preferred nick name" ).create( 'L' ) );
 			opts.addOption( OptionBuilder.withLongOpt( "port" ).withArgName( "number" ).hasArg().withDescription( "port number where GameGround is running" ).create( 'P' ) );
 			opts.addOption( OptionBuilder.withLongOpt( "host" ).withArgName( "address" ).hasArg().withDescription( "Host address to connect to." ).create( 'H' ) );
 			Parser p = new PosixParser();
 			try {
+				System.out.println( "Command line:" );
+				for ( String s : $argv )
+					System.out.println( s );
 				_cmd = p.parse( opts, $argv );
 			} catch ( ParseException e ) {
 				System.out.println( "Application failed to start. Reaseon: " + e.getMessage() );
@@ -212,6 +235,8 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 				formatter.printHelp( "GameGround", opts );
 				System.exit( 0 );
 			}
+			if ( _cmd.hasOption( "auto-connect" ) && ( _ini != null ) )
+				_ini.setProperty( "auto-connect", "true" );
 		}
 	}
 	public String getName() {

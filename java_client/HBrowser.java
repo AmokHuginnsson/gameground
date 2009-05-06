@@ -178,7 +178,7 @@ class HBrowser extends HAbstractLogic {
 				_app.setName( cc._login );
 				_app.setClient( _client );
 			} catch ( Exception e ) {
-				e.printStackTrace();
+				System.out.println( "Connection error: " + e.getMessage() );
 				JOptionPane.showMessageDialog( _gui,
 						"GameGround client was unable to connect to server:\n" + e.getMessage(),
 						"GameGround - error ...", JOptionPane.ERROR_MESSAGE );

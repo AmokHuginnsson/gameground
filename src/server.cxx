@@ -167,7 +167,7 @@ void HServer::handle_login( OClientInfo& a_roInfo, HString const& a_oLoginInfo )
 		*a_roInfo.f_oSocket << "err:" << login << " already logged in." << endl;
 	else
 		{
-		HRecordSet::ptr_t rs = _db->query( lexical_cast<HString>( HFormat( "SELECT COUNT(*) FROM user WHERE login = LOWER('%s') AND password = LOWER('%s');" ) % login % password ) );
+		HRecordSet::ptr_t rs = _db->query( lexical_cast<HString>( HFormat( "SELECT COUNT(*) FROM tbl_user WHERE login = LOWER('%s') AND password = LOWER('%s');" ) % login % password ) );
 		M_ENSURE( !! rs );
 		HRecordSet::iterator row = rs->begin();
 		if ( row == rs->end() )
