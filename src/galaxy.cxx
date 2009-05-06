@@ -33,9 +33,9 @@ M_VCSID( "$Id: "__ID__" $" )
 
 #include "setup.hxx"
 
-#define D_ATTR_BOARD	 				( COLORS::D_FG_CYAN | COLORS::D_BG_BLACK )
-#define D_ATTR_NEUTRAL_SYSTEM	( COLORS::D_FG_LIGHTGRAY | COLORS::D_BG_BLACK )
-#define D_ATTR_CURSOR  				( COLORS::D_FG_WHITE | COLORS::D_BG_BLACK )
+#define ATTR_BOARD	 				( COLORS::FG_CYAN | COLORS::BG_BLACK )
+#define ATTR_NEUTRAL_SYSTEM	( COLORS::FG_LIGHTGRAY | COLORS::BG_BLACK )
+#define ATTR_CURSOR  				( COLORS::FG_WHITE | COLORS::BG_BLACK )
 
 using namespace std;
 using namespace yaal;
@@ -136,22 +136,22 @@ char const * const * n_ppcSystemNames = NULL;
 
 int n_piColors [ ] =
 	{
-	( COLORS::D_FG_BRIGHTBLUE | COLORS::D_BG_BLACK ),
-	( COLORS::D_FG_BRIGHTGREEN | COLORS::D_BG_BLACK ),
-	( COLORS::D_FG_BRIGHTRED | COLORS::D_BG_BLACK ),
-	( COLORS::D_FG_BRIGHTCYAN | COLORS::D_BG_BLACK ),
-	( COLORS::D_FG_BRIGHTMAGENTA | COLORS::D_BG_BLACK ),
-	( COLORS::D_FG_YELLOW | COLORS::D_BG_BLACK ),
-	( COLORS::D_FG_BLUE | COLORS::D_BG_BLACK ),
-	( COLORS::D_FG_GREEN | COLORS::D_BG_BLACK ),
-	( COLORS::D_FG_RED | COLORS::D_BG_BLACK ),
-	( COLORS::D_FG_CYAN | COLORS::D_BG_BLACK ),
-	( COLORS::D_FG_MAGENTA | COLORS::D_BG_BLACK ),
-	( COLORS::D_FG_BROWN | COLORS::D_BG_BLACK ),
-	( COLORS::D_FG_LIGHTGRAY | COLORS::D_BG_BLACK ),
-	( COLORS::D_FG_LIGHTGRAY | COLORS::D_BG_BLACK ),
-	( COLORS::D_FG_LIGHTGRAY | COLORS::D_BG_BLACK ),
-	( COLORS::D_FG_LIGHTGRAY | COLORS::D_BG_BLACK )
+	( COLORS::FG_BRIGHTBLUE | COLORS::BG_BLACK ),
+	( COLORS::FG_BRIGHTGREEN | COLORS::BG_BLACK ),
+	( COLORS::FG_BRIGHTRED | COLORS::BG_BLACK ),
+	( COLORS::FG_BRIGHTCYAN | COLORS::BG_BLACK ),
+	( COLORS::FG_BRIGHTMAGENTA | COLORS::BG_BLACK ),
+	( COLORS::FG_YELLOW | COLORS::BG_BLACK ),
+	( COLORS::FG_BLUE | COLORS::BG_BLACK ),
+	( COLORS::FG_GREEN | COLORS::BG_BLACK ),
+	( COLORS::FG_RED | COLORS::BG_BLACK ),
+	( COLORS::FG_CYAN | COLORS::BG_BLACK ),
+	( COLORS::FG_MAGENTA | COLORS::BG_BLACK ),
+	( COLORS::FG_BROWN | COLORS::BG_BLACK ),
+	( COLORS::FG_LIGHTGRAY | COLORS::BG_BLACK ),
+	( COLORS::FG_LIGHTGRAY | COLORS::BG_BLACK ),
+	( COLORS::FG_LIGHTGRAY | COLORS::BG_BLACK ),
+	( COLORS::FG_LIGHTGRAY | COLORS::BG_BLACK )
 	};
 
 class HBoard;
@@ -203,10 +203,10 @@ typedef HHashMap<int, HString> emperors_t;
 typedef HList<HMove> moves_t;
 typedef enum
 	{
-	D_NORMAL,
-	D_SELECT,
-	D_INPUT,
-	D_LOCKED
+	NORMAL,
+	SELECT,
+	INPUT,
+	LOCKED
 	} client_state_t;
 
 class HEventListener
@@ -404,24 +404,24 @@ void HEventListener::set_state ( client_state_t a_eState )
 	f_reState = a_eState;
 	switch ( f_reState )
 		{
-		case ( D_LOCKED ):
+		case ( LOCKED ):
 			{
-			msg ( COLORS::D_FG_WHITE, "A waiting for Galaxy events ..." );
+			msg ( COLORS::FG_WHITE, "A waiting for Galaxy events ..." );
 			break;
 			}
-		case ( D_NORMAL ):
+		case ( NORMAL ):
 			{
-			msg ( COLORS::D_FG_WHITE, "Make Your moves ..." );
+			msg ( COLORS::FG_WHITE, "Make Your moves ..." );
 			break;
 			}
-		case ( D_SELECT ):
+		case ( SELECT ):
 			{
-			msg ( COLORS::D_FG_WHITE, "Select destination for Your fleet ..." );
+			msg ( COLORS::FG_WHITE, "Select destination for Your fleet ..." );
 			break;
 			}
-		case ( D_INPUT ):
+		case ( INPUT ):
 			{
-			msg ( COLORS::D_FG_WHITE, "How many destroyers You wish to send ?" );
+			msg ( COLORS::FG_WHITE, "How many destroyers You wish to send ?" );
 			break;
 			}
 		default :
@@ -461,32 +461,32 @@ void HBoard::do_refresh ( void )
 	HBoard::draw_label ( );
 	HConsole& cons = HCons::get_instance();
 	if ( f_bFocused )
-		cons.curs_set ( CURSOR::D_INVISIBLE );
+		cons.curs_set ( CURSOR::INVISIBLE );
 	if ( f_iBoardSize >= 0 )
 		{
 		f_iHeight = f_iBoardSize + 1 /* for label */ + 2 /* for borders */;
 		f_iWidth = f_iBoardSize * 3 /* for System */ + 2 /* for borders */;
 		if ( f_iBoardSize < 12 )
 			{
-			cons.c_cmvprintf ( f_iRowRaw, f_iColumnRaw + 35, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, "{" );
-			cons.c_cmvprintf ( f_iRowRaw + 1, f_iColumnRaw + 20, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, "-+--+--+--+--+-'" );
+			cons.c_cmvprintf ( f_iRowRaw, f_iColumnRaw + 35, f_bFocused ? ATTR_BOARD : COLORS::ATTR_NORMAL, "{" );
+			cons.c_cmvprintf ( f_iRowRaw + 1, f_iColumnRaw + 20, f_bFocused ? ATTR_BOARD : COLORS::ATTR_NORMAL, "-+--+--+--+--+-'" );
 			}
 		l_oPen = ',';
 		for ( l_iCtr = 0; l_iCtr < f_iBoardSize; l_iCtr ++ )
 			l_oPen += "-+-";
 		l_oPen += '.';
-		cons.c_cmvprintf( f_iRowRaw, f_iColumnRaw, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, l_oPen.raw() );
+		cons.c_cmvprintf( f_iRowRaw, f_iColumnRaw, f_bFocused ? ATTR_BOARD : COLORS::ATTR_NORMAL, l_oPen.raw() );
 		l_oPen = '}';
 		for ( l_iCtr = 0; l_iCtr < f_iBoardSize; l_iCtr ++ )
 			l_oPen += " - ";
 		l_oPen += '{';
 		for ( l_iCtr = 0; l_iCtr < f_iBoardSize; l_iCtr ++ )
-			cons.c_cmvprintf ( f_iRowRaw + l_iCtr + 1, f_iColumnRaw, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, l_oPen.raw() );
+			cons.c_cmvprintf ( f_iRowRaw + l_iCtr + 1, f_iColumnRaw, f_bFocused ? ATTR_BOARD : COLORS::ATTR_NORMAL, l_oPen.raw() );
 		l_oPen = '`';
 		for ( l_iCtr = 0; l_iCtr < f_iBoardSize; l_iCtr ++ )
 			l_oPen += "-+-";
 		l_oPen += '\'';
-		cons.c_cmvprintf ( f_iRowRaw + f_iBoardSize + 1, f_iColumnRaw, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, l_oPen.raw() );
+		cons.c_cmvprintf ( f_iRowRaw + f_iBoardSize + 1, f_iColumnRaw, f_bFocused ? ATTR_BOARD : COLORS::ATTR_NORMAL, l_oPen.raw() );
 		if ( ( l_iSystems = static_cast<int>( f_poSystems->get_size() ) ) )
 			{
 			for ( l_iCtr = 0; l_iCtr < l_iSystems; l_iCtr ++ )
@@ -496,7 +496,7 @@ void HBoard::do_refresh ( void )
 				l_iColor = ( * f_poSystems ) [ l_iCtr ].f_iColor;
 				cons.c_cmvprintf ( f_iRowRaw + 1 + l_iCoordY,
 						f_iColumnRaw + 1 + l_iCoordX * 3,
-						( ( l_iColor >= 0 ) && f_bFocused ) ? n_piColors [ l_iColor ] : D_ATTR_NEUTRAL_SYSTEM, "(%c)",
+						( ( l_iColor >= 0 ) && f_bFocused ) ? n_piColors [ l_iColor ] : ATTR_NEUTRAL_SYSTEM, "(%c)",
 						l_iCtr + ( l_iCtr < 26 ? 'A' : ( l_iCtr < 35 ? '1' - 26 : '0' - 35 ) ) );
 				if ( ( l_iCoordX == f_iCursorX ) && ( l_iCoordY == f_iCursorY ) )
 					l_iSysNo = l_iCtr;
@@ -505,27 +505,27 @@ void HBoard::do_refresh ( void )
 			}
 		cons.c_cmvprintf ( f_iRowRaw + 1 + f_iCursorY,
 				f_iColumnRaw + 1 + f_iCursorX * 3,
-				f_bFocused ? D_ATTR_CURSOR : COLORS::D_ATTR_NORMAL, "{" );
+				f_bFocused ? ATTR_CURSOR : COLORS::ATTR_NORMAL, "{" );
 		cons.c_cmvprintf ( f_iRowRaw + 1 + f_iCursorY,
 				f_iColumnRaw + 3 + f_iCursorX * 3,
-				f_bFocused ? D_ATTR_CURSOR : COLORS::D_ATTR_NORMAL, "}" );
-		cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 8, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, ",--{" );
+				f_bFocused ? ATTR_CURSOR : COLORS::ATTR_NORMAL, "}" );
+		cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 8, f_bFocused ? ATTR_BOARD : COLORS::ATTR_NORMAL, ",--{" );
 		if ( l_iRound >= 0 )
-			cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 13, COLORS::D_ATTR_NORMAL, "%4d", l_iRound );
-		cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 17, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, "}--." );
-		cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 23, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, ",--{" );
-		cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 28, f_bFocused ? COLORS::D_FG_WHITE : COLORS::D_ATTR_NORMAL, "    " );
-		if ( ( l_eState == D_SELECT ) || ( l_eState == D_INPUT ) )
+			cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 13, COLORS::ATTR_NORMAL, "%4d", l_iRound );
+		cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 17, f_bFocused ? ATTR_BOARD : COLORS::ATTR_NORMAL, "}--." );
+		cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 23, f_bFocused ? ATTR_BOARD : COLORS::ATTR_NORMAL, ",--{" );
+		cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 28, f_bFocused ? COLORS::FG_WHITE : COLORS::ATTR_NORMAL, "    " );
+		if ( ( l_eState == SELECT ) || ( l_eState == INPUT ) )
 			{
 			l_iSysNo = get_sys_no ( f_iCursorX, f_iCursorY );
 			if ( l_iSysNo >= 0 )
 				{
 				cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 28,
-						f_bFocused ? COLORS::D_FG_WHITE : COLORS::D_ATTR_NORMAL, "%4d",
+						f_bFocused ? COLORS::FG_WHITE : COLORS::ATTR_NORMAL, "%4d",
 						distance ( f_iSourceSystem, l_iSysNo ) + l_iRound );
 				}
 			}
-		cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 32, f_bFocused ? D_ATTR_BOARD : COLORS::D_ATTR_NORMAL, "}--." );
+		cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 32, f_bFocused ? ATTR_BOARD : COLORS::ATTR_NORMAL, "}--." );
 		}
 	M_EPILOG
 	}
@@ -536,56 +536,56 @@ int HBoard::do_process_input( int a_iCode )
 	int l_iCode = 0, l_iSysNo = - 1;
 	client_state_t l_eState = f_roListener.get_state ( );
 	a_iCode = HControl::do_process_input ( a_iCode );
-	if ( l_eState == D_LOCKED )
+	if ( l_eState == LOCKED )
 		return ( a_iCode == '\t' ? '\t' : '\r' );
 	if ( f_iBoardSize >= 0 )
 		{
 		switch ( a_iCode )
 			{
-			case ( KEY_CODES::D_DOWN ):
+			case ( KEY_CODES::DOWN ):
 				{
 				if ( f_iCursorY < ( f_iBoardSize - 1 ) )
 					f_iCursorY ++;
 				else f_iCursorY = 0;
 				break;
 				}
-			case ( KEY_CODES::D_UP ):
+			case ( KEY_CODES::UP ):
 				{
 				if ( f_iCursorY > 0 )
 					f_iCursorY --;
 				else f_iCursorY = f_iBoardSize - 1;
 				break;
 				}
-			case ( KEY_CODES::D_LEFT ):
+			case ( KEY_CODES::LEFT ):
 				{
 				if ( f_iCursorX > 0 )
 					f_iCursorX --;
 				else f_iCursorX = f_iBoardSize - 1;
 				break;
 				}
-			case ( KEY_CODES::D_RIGHT ):
+			case ( KEY_CODES::RIGHT ):
 				{
 				if ( f_iCursorX < ( f_iBoardSize - 1 ) )
 					f_iCursorX ++;
 				else f_iCursorX = 0;
 				break;
 				}
-			case ( KEY_CODES::D_HOME ):
+			case ( KEY_CODES::HOME ):
 				{
 				f_iCursorX = 0;
 				break;
 				}
-			case ( KEY_CODES::D_END ):
+			case ( KEY_CODES::END ):
 				{
 				f_iCursorX = f_iBoardSize - 1;
 				break;
 				}
-			case ( KEY_CODES::D_PAGE_UP ):
+			case ( KEY_CODES::PAGE_UP ):
 				{
 				f_iCursorY = 0;
 				break;
 				}
-			case ( KEY_CODES::D_PAGE_DOWN ):
+			case ( KEY_CODES::PAGE_DOWN ):
 				{
 				f_iCursorY = f_iBoardSize - 1;
 				break;
@@ -595,16 +595,16 @@ int HBoard::do_process_input( int a_iCode )
 				l_iSysNo = get_sys_no ( f_iCursorX, f_iCursorY );
 				if ( l_iSysNo >= 0 )
 					{
-					if ( l_eState == D_NORMAL )
+					if ( l_eState == NORMAL )
 						{
 						if ( ( * f_poSystems ) [ l_iSysNo ].f_iColor == f_roListener.get_color ( ) )
 							{
 							f_iSourceSystem = l_iSysNo;
-							f_roListener.set_state ( D_SELECT );
+							f_roListener.set_state ( SELECT );
 							break;
 							}
 						}
-					else if ( l_eState == D_SELECT )
+					else if ( l_eState == SELECT )
 						{
 						f_iDestinationSystem = l_iSysNo;
 						f_roListener.make_move ( f_iSourceSystem, l_iSysNo );
@@ -723,7 +723,7 @@ int HGalaxyWindow::init ( void )
 	f_poLogPad->enable ( true );
 	f_poMessageInput->enable ( true );
 	register_postprocess_handler ( '\r', NULL, &HGalaxyWindow::handler_enter );
-	register_postprocess_handler ( KEY_CODES::D_ESC, NULL, &HGalaxyWindow::handler_esc );
+	register_postprocess_handler ( KEY_CODES::ESC, NULL, &HGalaxyWindow::handler_esc );
 	register_postprocess_handler ( ' ', NULL, &HGalaxyWindow::handler_space );
 	return ( 0 );
 	M_EPILOG
@@ -772,7 +772,7 @@ void HGalaxyWindow::make_move ( int a_iSourceSystem, int a_iDestinationSystem )
 	M_PROLOG
 	if ( a_iSourceSystem != a_iDestinationSystem )
 		{
-		set_state ( D_INPUT );
+		set_state ( INPUT );
 		f_poBoard->enable ( false );
 		f_poLogPad->enable ( false );
 		f_poFleet->enable ( true );
@@ -801,7 +801,7 @@ int HGalaxyWindow::handler_enter( int a_iCode, void const* )
 			}
 		a_iCode = 0;
 		}
-	else if ( f_reState == D_INPUT )
+	else if ( f_reState == INPUT )
 		{
 		if ( (*f_oFocusedChild) == f_poFleet )
 			{
@@ -818,18 +818,18 @@ int HGalaxyWindow::handler_enter( int a_iCode, void const* )
 				l_poMove->f_iDestinationSystem = f_poBoard->f_iDestinationSystem;
 				l_poMove->f_iFleet = l_iFleet;
 				( * f_poSystems ) [ f_poBoard->f_iSourceSystem ].f_iFleet -= l_iFleet;
-				set_state ( D_NORMAL );
+				set_state ( NORMAL );
 				}
 			else if ( l_iFleet > 0 )
-				f_oStatusBar->message ( COLORS::D_FG_RED, "Not enough resources!" );
+				f_oStatusBar->message ( COLORS::FG_RED, "Not enough resources!" );
 			else
-				f_oStatusBar->message ( COLORS::D_FG_RED, "Run! Run! Emperor is mad!" );
+				f_oStatusBar->message ( COLORS::FG_RED, "Run! Run! Emperor is mad!" );
 			a_iCode = 0;
 			}
 		}
-	else if ( f_reState == D_LOCKED )
+	else if ( f_reState == LOCKED )
 		{
-		f_oStatusBar->message ( COLORS::D_FG_RED, f_riRound >= 0 ? "Wait for new round!" : "Challange not started yet!" );
+		f_oStatusBar->message ( COLORS::FG_RED, f_riRound >= 0 ? "Wait for new round!" : "Challange not started yet!" );
 		a_iCode = 0;
 		}
 	return ( a_iCode );
@@ -839,16 +839,16 @@ int HGalaxyWindow::handler_enter( int a_iCode, void const* )
 int HGalaxyWindow::handler_esc( int, void const* )
 	{
 	M_PROLOG
-	if ( f_reState == D_INPUT )
+	if ( f_reState == INPUT )
 		{
 		f_poFleet->enable ( false );
 		f_poBoard->enable ( true );
 		f_poLogPad->enable ( true );
 		f_poBoard->set_focus ( );
-		set_state( D_SELECT );
+		set_state( SELECT );
 		}
-	else if ( f_reState == D_SELECT )
-		set_state( D_NORMAL );
+	else if ( f_reState == SELECT )
+		set_state( NORMAL );
 	schedule_refresh();
 	return ( 0 );
 	M_EPILOG
@@ -857,7 +857,7 @@ int HGalaxyWindow::handler_esc( int, void const* )
 int HGalaxyWindow::handler_space( int, void const* )
 	{
 	M_PROLOG
-	if ( f_reState == D_NORMAL )
+	if ( f_reState == NORMAL )
 		f_poClient->end_round ( );
 	return ( 0 );
 	M_EPILOG
@@ -871,7 +871,7 @@ void HGalaxyWindow::msg ( int a_iAttr, char const * const a_pcMsg )
 	}
 
 HClient::HClient ( char const * const a_pcProgramName )
-	: f_iColor ( - 1 ), f_iRound ( - 1 ), f_eState ( D_LOCKED ), f_oSocket ( ),
+	: f_iColor ( - 1 ), f_iRound ( - 1 ), f_eState ( LOCKED ), f_oSocket ( ),
 	f_oWindow ( new HGalaxyWindow( a_pcProgramName, this, f_iRound, f_iColor, f_eState ) ),
 	f_poBoard ( NULL ), f_oSystems ( 0 ), f_oHandlers ( 16 ), f_oEmperors ( 16 ),
 	f_oMoves ( )
@@ -1000,7 +1000,7 @@ void HClient::handler_setup( HString& a_roCommand )
 	else if ( l_oVariable == "ok" )
 		{
 		f_oWindow->schedule_refresh ( );
-		f_oWindow->set_state ( D_NORMAL );
+		f_oWindow->set_state ( NORMAL );
 		f_iRound = 0;
 		}
 	return;
@@ -1033,14 +1033,14 @@ void HClient::handler_play ( HString& a_roCommand )
 				{
 				f_oWindow->f_poLogPad->add( n_piColors [ l_iColor ] );
 				f_oWindow->f_poLogPad->add( l_oValue );
-				f_oWindow->f_poLogPad->add( COLORS::D_ATTR_NORMAL );
+				f_oWindow->f_poLogPad->add( COLORS::ATTR_NORMAL );
 				f_oWindow->f_poLogPad->add( " conquered " );
 				int l_iTemp = f_oSystems [ l_iSysNo ].f_iColor;
-				f_oWindow->f_poLogPad->add( ( l_iTemp >= 0 ) ? n_piColors [ l_iTemp ] : COLORS::D_ATTR_NORMAL );
+				f_oWindow->f_poLogPad->add( ( l_iTemp >= 0 ) ? n_piColors [ l_iTemp ] : COLORS::ATTR_NORMAL );
 				f_oWindow->f_poLogPad->add( n_ppcSystemNames [ l_iSysNo ] );
 				l_oValue.format ( "(%c)", n_pcSymbols [ l_iSysNo ] );
 				f_oWindow->f_poLogPad->add( l_oValue );
-				f_oWindow->f_poLogPad->add( COLORS::D_ATTR_NORMAL );
+				f_oWindow->f_poLogPad->add( COLORS::ATTR_NORMAL );
 				f_oWindow->f_poLogPad->add( ".\n" );
 				f_oSystems [ l_iSysNo ].f_iColor = l_iColor;
 				break;
@@ -1052,7 +1052,7 @@ void HClient::handler_play ( HString& a_roCommand )
 				f_oWindow->f_poLogPad->add( n_ppcSystemNames[ l_iSysNo ] );
 				l_oValue.format( "(%c)", n_pcSymbols[ l_iSysNo ] );
 				f_oWindow->f_poLogPad->add( l_oValue );
-				f_oWindow->f_poLogPad->add( COLORS::D_ATTR_NORMAL );
+				f_oWindow->f_poLogPad->add( COLORS::ATTR_NORMAL );
 				f_oWindow->f_poLogPad->add( " arrived.\n" );
 				break;
 				}
@@ -1065,15 +1065,15 @@ void HClient::handler_play ( HString& a_roCommand )
 			case ( 's' ): /* resisted attack */
 				{
 				int l_iTemp = f_oSystems [ l_iSysNo ].f_iColor;
-				f_oWindow->f_poLogPad->add ( ( l_iTemp >= 0 ) ? n_piColors [ l_iTemp ] : COLORS::D_ATTR_NORMAL );
+				f_oWindow->f_poLogPad->add ( ( l_iTemp >= 0 ) ? n_piColors [ l_iTemp ] : COLORS::ATTR_NORMAL );
 				f_oWindow->f_poLogPad->add ( n_ppcSystemNames [ l_iSysNo ] );
 				l_oVariable.format ( "(%c)", n_pcSymbols [ l_iSysNo ] );
 				f_oWindow->f_poLogPad->add ( l_oVariable );
-				f_oWindow->f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
+				f_oWindow->f_poLogPad->add ( COLORS::ATTR_NORMAL );
 				f_oWindow->f_poLogPad->add ( " resisted attack from " );
 				f_oWindow->f_poLogPad->add ( n_piColors [ l_iColor ] );
 				f_oWindow->f_poLogPad->add ( l_oValue );
-				f_oWindow->f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
+				f_oWindow->f_poLogPad->add ( COLORS::ATTR_NORMAL );
 				f_oWindow->f_poLogPad->add ( ".\n" );
 				break;
 				}
@@ -1086,17 +1086,17 @@ void HClient::handler_play ( HString& a_roCommand )
 		}
 	else if ( l_oVariable == "round" )
 		{
-		f_oWindow->f_poLogPad->add( D_ATTR_CURSOR );
+		f_oWindow->f_poLogPad->add( ATTR_CURSOR );
 		f_oWindow->f_poLogPad->add( "----- " );
-		f_oWindow->f_poLogPad->add( COLORS::D_ATTR_NORMAL );
+		f_oWindow->f_poLogPad->add( COLORS::ATTR_NORMAL );
 		f_oWindow->f_poLogPad->add( " round: " );
 		f_iRound = lexical_cast<int>( l_oValue );
 		l_oValue.format ( "%d", f_iRound );
-		f_oWindow->f_poLogPad->add( D_ATTR_CURSOR );
+		f_oWindow->f_poLogPad->add( ATTR_CURSOR );
 		f_oWindow->f_poLogPad->add( l_oValue );
 		f_oWindow->f_poLogPad->add( " -----\n" );
-		f_oWindow->f_poLogPad->add( COLORS::D_ATTR_NORMAL );
-		f_oWindow->set_state( D_NORMAL );
+		f_oWindow->f_poLogPad->add( COLORS::ATTR_NORMAL );
+		f_oWindow->set_state( NORMAL );
 		f_oWindow->schedule_refresh();
 		}
 	return;
@@ -1133,7 +1133,7 @@ void HClient::handler_msg( HString& a_roMessage )
 		l_iIndex = l_iOffset + 1;
 		}
 	f_oWindow->f_poLogPad->add ( "\n" );
-	f_oWindow->f_poLogPad->add ( COLORS::D_ATTR_NORMAL );
+	f_oWindow->f_poLogPad->add ( COLORS::ATTR_NORMAL );
 	return;
 	M_EPILOG
 	}
@@ -1142,7 +1142,7 @@ void HClient::end_round ( void )
 	{
 	M_PROLOG
 	HString l_oMessage;
-	f_oWindow->set_state ( D_LOCKED );
+	f_oWindow->set_state ( LOCKED );
 	if ( f_oMoves.size ( ) )
 		{
 		for ( moves_t::iterator it = f_oMoves.begin(); it != f_oMoves.end(); ++ it )

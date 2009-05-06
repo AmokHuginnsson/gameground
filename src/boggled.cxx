@@ -45,8 +45,8 @@ namespace gameground
 namespace boggle_data
 {
 
-static int const D_MINIMUM_WORD_LENGTH = 3;
-static int const D_MAXIMUM_WORD_LENGTH = 16;
+static int const MINIMUM_WORD_LENGTH = 3;
+static int const MAXIMUM_WORD_LENGTH = 16;
 
 static char const n_ppcDices[ 16 ][ 6 ] =
 	{
@@ -98,7 +98,7 @@ char const* const HBoggle::PROTOCOL::SCORED = "scored";
 char const* const HBoggle::PROTOCOL::LONGEST = "longest";
 
 HBoggle::HBoggle( HString const& a_oName, int a_iPlayers, int a_iRoundTime, int a_iMaxRounds, int a_iInterRoundDelay )
-	: HLogic( PROTOCOL::NAME, a_oName ), f_eState( STATE::D_LOCKED ), f_iPlayers( a_iPlayers ),
+	: HLogic( PROTOCOL::NAME, a_oName ), f_eState( STATE::LOCKED ), f_iPlayers( a_iPlayers ),
 	f_iRoundTime( a_iRoundTime ), f_iMaxRounds( a_iMaxRounds ),
 	f_iInterRoundDelay( a_iInterRoundDelay ), f_iRound( 0 ), f_oPlayers(),
 	f_oWords(), f_oMutex()
@@ -173,9 +173,9 @@ void HBoggle::handler_play( OClientInfo* a_poClientInfo, HString const& a_oWord 
 	M_PROLOG
 	HLock l( f_oMutex );
 	int l_iLength = static_cast<int>( a_oWord.get_length() );
-	if ( ( f_eState == STATE::D_ACCEPTING )
-			&& ( l_iLength >= boggle_data::D_MINIMUM_WORD_LENGTH )
-			&& ( l_iLength <= boggle_data::D_MAXIMUM_WORD_LENGTH ) )
+	if ( ( f_eState == STATE::ACCEPTING )
+			&& ( l_iLength >= boggle_data::MINIMUM_WORD_LENGTH )
+			&& ( l_iLength <= boggle_data::MAXIMUM_WORD_LENGTH ) )
 		{
 		words_t::iterator it = f_oWords.find( a_oWord );
 		if ( it == f_oWords.end() )
@@ -287,7 +287,7 @@ void HBoggle::schedule( EVENT::event_t a_eEvent )
 	{
 	M_PROLOG
 	HLock l( f_oMutex );
-	if ( a_eEvent == EVENT::D_BEGIN_ROUND )
+	if ( a_eEvent == EVENT::BEGIN_ROUND )
 		HScheduledAsyncCallerService::get_instance().register_call( time( NULL ) + f_iInterRoundDelay,
 				HCallInterface::ptr_t( new HCall<HBoggle&, typeof( &HBoggle::on_begin_round )>( *this, &HBoggle::on_begin_round ) ) );
 	else
@@ -303,7 +303,7 @@ void HBoggle::schedule_end_round( void )
 	HScheduledAsyncCallerService::get_instance().register_call( time( NULL ) + f_iRoundTime,
 			HCallInterface::ptr_t( new HCall<HBoggle&, typeof( &HBoggle::on_end_round )>( *this, &HBoggle::on_end_round ) ) );
 	generate_game();
-	f_eState = STATE::D_ACCEPTING;
+	f_eState = STATE::ACCEPTING;
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::DECK << PROTOCOL::SEP << make_deck() << endl << _out );
 	return;
 	M_EPILOG
@@ -315,7 +315,7 @@ void HBoggle::on_begin_round( void )
 	HLock l( f_oMutex );
 	out << "<<begin>>" << endl;
 	HAsyncCallerService::get_instance().register_call( 0,
-			HCallInterface::ptr_t( new HCall<HBoggle&, typeof( &HBoggle::schedule ), EVENT::event_t>( *this, &HBoggle::schedule, EVENT::D_END_ROUND ) ) );
+			HCallInterface::ptr_t( new HCall<HBoggle&, typeof( &HBoggle::schedule ), EVENT::event_t>( *this, &HBoggle::schedule, EVENT::END_ROUND ) ) );
 	broadcast(
 			_out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::MSG << PROTOCOL::SEP
@@ -332,11 +332,11 @@ void HBoggle::on_end_round( void )
 	M_PROLOG
 	HLock l( f_oMutex );
 	out << "<<end>>" << endl;
-	f_eState = STATE::D_LOCKED;
+	f_eState = STATE::LOCKED;
 	if ( f_iRound < f_iMaxRounds )
 		{
 		HAsyncCallerService::get_instance().register_call( 0,
-				HCallInterface::ptr_t( new HCall<HBoggle&, typeof( &HBoggle::schedule ), EVENT::event_t>( *this, &HBoggle::schedule, EVENT::D_BEGIN_ROUND ) ) );
+				HCallInterface::ptr_t( new HCall<HBoggle&, typeof( &HBoggle::schedule ), EVENT::event_t>( *this, &HBoggle::schedule, EVENT::BEGIN_ROUND ) ) );
 		_out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
 			<< "This round has ended, next round in " << f_iInterRoundDelay << " seconds!" << endl;
 		}
@@ -394,8 +394,8 @@ void HBoggle::on_end_round( void )
 bool HBoggle::is_good( int f, char const* ptr, int length )
 	{
 	bool good = false;
-	static int const D_DIRECTIONS = 8;
-	int versor[ D_DIRECTIONS ][ 2 ] = 
+	static int const DIRECTIONS = 8;
+	int versor[ DIRECTIONS ][ 2 ] = 
 		{
 			{ -1, -1 }, /* top left */
 			{ 0, -1 }, /* top */
@@ -416,7 +416,7 @@ bool HBoggle::is_good( int f, char const* ptr, int length )
 			f_ppcGame[ f ][ 1 ] = 1;
 			int x = f % 4;
 			int y = f / 4;
-			for ( int i = 0; ! good && ( i < D_DIRECTIONS ); ++ i )
+			for ( int i = 0; ! good && ( i < DIRECTIONS ); ++ i )
 				{
 				int nx = x + versor[ i ][ 0 ];
 				int ny = y + versor[ i ][ 1 ]; 
@@ -434,9 +434,9 @@ bool HBoggle::word_is_good( HString const& a_oWord, int a_iLength )
 	M_PROLOG
 	bool good = false;
 	char const* ptr = a_oWord.raw();
-	for ( int f = 0; f < boggle_data::D_MAXIMUM_WORD_LENGTH; ++ f )
+	for ( int f = 0; f < boggle_data::MAXIMUM_WORD_LENGTH; ++ f )
 		f_ppcGame[ f ][ 1 ] = 0;
-	for ( int f = 0; f < boggle_data::D_MAXIMUM_WORD_LENGTH; ++ f )
+	for ( int f = 0; f < boggle_data::MAXIMUM_WORD_LENGTH; ++ f )
 		{
 		if ( is_good( f, ptr, a_iLength ) )
 			{
@@ -487,8 +487,8 @@ HLogic::ptr_t HBoggleCreator::do_new_instance( HString const& a_oArgv )
 void HBoggleCreator::do_initialize_globals( void )
 	{
 	M_PROLOG
-	static char const* const D_MAGIC_WORD = "mama";
-	HSpellCheckerService::get_instance().spell_check( D_MAGIC_WORD );
+	static char const* const MAGIC_WORD = "mama";
+	HSpellCheckerService::get_instance().spell_check( MAGIC_WORD );
 	return;
 	M_EPILOG
 	}

@@ -51,7 +51,7 @@ HSpellChecker::HSpellChecker( void ) : f_pxSpellChecker( NULL ), f_pxSpellConfig
 		M_THROW( "Maybe console_charset, aspell_lang variable is not set!\n", 0 );
 		}
 
-	hcore::log( LOG_TYPE::D_INFO ) << "aspell_init - ";
+	hcore::log( LOG_TYPE::INFO ) << "aspell_init - ";
 
 	f_pxSpellConfig = new_aspell_config();
 	::aspell_config_replace( static_cast<AspellConfig*>( f_pxSpellConfig ), "encoding", setup.f_oConsoleCharset.raw() );
@@ -64,13 +64,13 @@ HSpellChecker::HSpellChecker( void ) : f_pxSpellChecker( NULL ), f_pxSpellConfig
 		HString msg = "Aspell error: "; 
 		msg += aspell_error_message( possible_err );
 		cleanup();
-		hcore::log( LOG_TYPE::D_INFO ) << "failure" << endl;
+		hcore::log( LOG_TYPE::INFO ) << "failure" << endl;
 		M_THROW( msg, err );
 		}
 	else
 		{
 		f_pxSpellChecker = to_aspell_speller( possible_err );
-		hcore::log( LOG_TYPE::D_INFO ) << "success" << endl;
+		hcore::log( LOG_TYPE::INFO ) << "success" << endl;
 		}
 	return;
 	M_EPILOG

@@ -50,21 +50,21 @@ class HGo : public HLogic
 	struct STONE
 		{
 		typedef char stone_t;
-		static stone_t const D_BLACK;
-		static stone_t const D_WHITE;
-		static stone_t const D_NONE;
-		static stone_t const D_MARK;
-		static stone_t const D_DEAD_WHITE;
-		static stone_t const D_DEAD_BLACK;
-		static stone_t const D_TERITORY_BLACK;
-		static stone_t const D_TERITORY_WHITE;
-		static stone_t const D_TERITORY_NONE;
+		static stone_t const BLACK;
+		static stone_t const WHITE;
+		static stone_t const NONE;
+		static stone_t const MARK;
+		static stone_t const DEAD_WHITE;
+		static stone_t const DEAD_BLACK;
+		static stone_t const TERITORY_BLACK;
+		static stone_t const TERITORY_WHITE;
+		static stone_t const TERITORY_NONE;
 		};
 	struct GOBAN_SIZE
 		{
-		static int const D_NORMAL = 19;
-		static int const D_SMALL = 13;
-		static int const D_TINY = 9;
+		static int const NORMAL = 19;
+		static int const SMALL = 13;
+		static int const TINY = 9;
 		};
 	struct PROTOCOL : public HLogic::PROTOCOL
 		{

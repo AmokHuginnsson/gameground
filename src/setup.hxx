@@ -33,25 +33,25 @@ Copyright:
 namespace gameground
 {
 
-#define D_DATABASE_PATH "gameground"
-#define D_DATABASE_LOGIN "gameground"
-#define D_DATABASE_PASSWORD "g4m3gr0und"
-#define D_GALAXY_BOARD_SIZE         16
-#define D_DEFAULT_MAX_CONNECTIONS   64
-#define D_GALAXY_EMPERORS            4
-#define D_NEUTRAL_SYSTEM_PER_PLAYER  4
-#define D_MAX_BOARD_SIZE            20
-#define D_MAX_SYSTEM_COUNT          36
-#define D_BOGGLE_PLAYERS             2
-#define D_BOGGLE_ROUND_TIME        180
-#define D_BOGGLE_INTER_ROUND_DELAY  15
-#define D_BOGGLE_MAX_ROUNDS          5
-#define D_GO_GOBAN_SIZE             19
-#define D_GO_KOMI                    5
-#define D_GO_HANDICAPS               0
-#define D_GO_MAINTIME               30
-#define D_GO_BYOYOMI_PERIODS         5
-#define D_GO_BYOYOMI_TIME            1
+#define DATABASE_PATH "gameground"
+#define DATABASE_LOGIN "gameground"
+#define DATABASE_PASSWORD "g4m3gr0und"
+#define GALAXY_BOARD_SIZE         16
+#define DEFAULT_MAX_CONNECTIONS   64
+#define GALAXY_EMPERORS            4
+#define NEUTRAL_SYSTEM_PER_PLAYER  4
+#define MAX_BOARD_SIZE            20
+#define MAX_SYSTEM_COUNT          36
+#define BOGGLE_PLAYERS             2
+#define BOGGLE_ROUND_TIME        180
+#define BOGGLE_INTER_ROUND_DELAY  15
+#define BOGGLE_MAX_ROUNDS          5
+#define GO_GOBAN_SIZE             19
+#define GO_KOMI                    5
+#define GO_HANDICAPS               0
+#define GO_MAINTIME               30
+#define GO_BYOYOMI_PERIODS         5
+#define GO_BYOYOMI_TIME            1
 #define out ( cout << now << " " << __FILE__ + OSetup::PATH_OFFSET << ":" << __LINE__ << ": " )
 
 typedef double long ( *now_t )( bool, double, char, int, bool, double, void*, void*, double, char );
@@ -100,18 +100,18 @@ struct OSetup
 	static int const PATH_OFFSET = sizeof ( __FILE__ ) - sizeof ( "setup.hxx" );
 	OSetup ( void )
 		: f_bQuiet( false ), f_iVerbose( 0 ), f_bServer( false ),
-		f_bClient( false ), f_iMaxConnections( D_DEFAULT_MAX_CONNECTIONS ),
-		f_iEmperors( D_GALAXY_EMPERORS ), f_iPort( 7777 ),
-		f_iSystems( D_GALAXY_EMPERORS * D_NEUTRAL_SYSTEM_PER_PLAYER ),
-		f_iBoardSize( D_GALAXY_BOARD_SIZE ), f_iPlayers( D_BOGGLE_PLAYERS ),
-		f_iRoundTime( D_BOGGLE_ROUND_TIME ), f_iMaxRounds( D_BOGGLE_MAX_ROUNDS ),
-		f_iInterRoundDelay( D_BOGGLE_INTER_ROUND_DELAY ),
-		f_iGobanSize( D_GO_GOBAN_SIZE ), f_iKomi( D_GO_KOMI ), f_iHandicaps( D_GO_HANDICAPS ),
-		f_iMainTime( D_GO_MAINTIME ), f_iByoYomiPeriods( D_GO_BYOYOMI_PERIODS ),
-		f_iByoYomiTime( D_GO_BYOYOMI_TIME ),
+		f_bClient( false ), f_iMaxConnections( DEFAULT_MAX_CONNECTIONS ),
+		f_iEmperors( GALAXY_EMPERORS ), f_iPort( 7777 ),
+		f_iSystems( GALAXY_EMPERORS * NEUTRAL_SYSTEM_PER_PLAYER ),
+		f_iBoardSize( GALAXY_BOARD_SIZE ), f_iPlayers( BOGGLE_PLAYERS ),
+		f_iRoundTime( BOGGLE_ROUND_TIME ), f_iMaxRounds( BOGGLE_MAX_ROUNDS ),
+		f_iInterRoundDelay( BOGGLE_INTER_ROUND_DELAY ),
+		f_iGobanSize( GO_GOBAN_SIZE ), f_iKomi( GO_KOMI ), f_iHandicaps( GO_HANDICAPS ),
+		f_iMainTime( GO_MAINTIME ), f_iByoYomiPeriods( GO_BYOYOMI_PERIODS ),
+		f_iByoYomiTime( GO_BYOYOMI_TIME ),
 		f_oLogin(), f_oHost(), f_oGameType(), f_oGame(),
-		f_oConsoleCharset(), f_oAspellLang(), f_oDatabasePath( D_DATABASE_PATH ),
-		f_oDatabaseLogin( D_DATABASE_LOGIN ), f_oDatabasePassword( D_DATABASE_PASSWORD ),
+		f_oConsoleCharset(), f_oAspellLang(), f_oDatabasePath( DATABASE_PATH ),
+		f_oDatabaseLogin( DATABASE_LOGIN ), f_oDatabasePassword( DATABASE_PASSWORD ),
 		f_pcProgramName( NULL ),
 		f_oLogPath() {}
 	void test_setup( void );

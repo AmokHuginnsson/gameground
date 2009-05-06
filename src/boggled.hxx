@@ -49,16 +49,16 @@ class HBoggle : public HLogic
 		{
 		typedef enum
 			{
-			D_LOCKED,
-			D_ACCEPTING
+			LOCKED,
+			ACCEPTING
 			} state_t;
 		};
 	struct EVENT
 		{
 		typedef enum
 			{
-			D_BEGIN_ROUND,
-			D_END_ROUND
+			BEGIN_ROUND,
+			END_ROUND
 			} event_t;
 		};
 protected:

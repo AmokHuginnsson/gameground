@@ -55,11 +55,11 @@ HString const& mark( int a_iColor )
 
 }
 
-static int const D_MAX_GAME_NAME_LENGTH = 20;
-#define D_LEGEAL_CHARACTER_SET_BASE "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
-static int const D_CONSTR_CHAR_SET_LOGIN_NAME = 0;
-static int const D_CONSTR_CHAR_SET_GAME_NAME = 1;
-char const* const D_LEGEAL_CHARACTER_SET[] = { D_LEGEAL_CHARACTER_SET_BASE, " "D_LEGEAL_CHARACTER_SET_BASE };
+static int const MAX_GAME_NAME_LENGTH = 20;
+#define LEGEAL_CHARACTER_SET_BASE "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
+static int const CONSTR_CHAR_SET_LOGIN_NAME = 0;
+static int const CONSTR_CHAR_SET_GAME_NAME = 1;
+char const* const LEGEAL_CHARACTER_SET[] = { LEGEAL_CHARACTER_SET_BASE, " "LEGEAL_CHARACTER_SET_BASE };
 char const* const HServer::PROTOCOL::ABANDON = "abandon";
 char const* const HServer::PROTOCOL::CMD = "cmd";
 char const* const HServer::PROTOCOL::CREATE = "create";
@@ -83,7 +83,7 @@ char const* const HServer::PROTOCOL::SHUTDOWN = "shutdown";
 
 HServer::HServer( int a_iConnections )
 	: HProcess( a_iConnections ), f_iMaxConnections( a_iConnections ),
-	f_oSocket( HSocket::socket_type_t( HSocket::TYPE::D_DEFAULT ) | HSocket::TYPE::D_NONBLOCKING | HSocket::TYPE::D_SSL_SERVER, a_iConnections ),
+	f_oSocket( HSocket::socket_type_t( HSocket::TYPE::DEFAULT ) | HSocket::TYPE::NONBLOCKING | HSocket::TYPE::SSL_SERVER, a_iConnections ),
 	f_oClients(), f_oLogics(), f_oHandlers(), _out(), _db( HDataBase::get_connector() )
 	{
 	M_PROLOG
@@ -153,15 +153,15 @@ void HServer::handle_login( OClientInfo& a_roInfo, HString const& a_oLoginInfo )
 	{
 	M_PROLOG
 	clients_t::iterator it;
-	int const D_MINIMUM_NAME_LENGTH = 4;
+	int const MINIMUM_NAME_LENGTH = 4;
 	HString login( get_token( a_oLoginInfo, ":", 0 ) );
 	HString password( get_token( a_oLoginInfo, ":", 1 ) );
 	for ( it = f_oClients.begin(); it != f_oClients.end(); ++ it )
 		if ( ( ! strcasecmp( it->second.f_oLogin, login ) ) && ( it->second.f_oSocket != a_roInfo.f_oSocket ) )
 			break;
-	if ( login.find_other_than( D_LEGEAL_CHARACTER_SET[ D_CONSTR_CHAR_SET_LOGIN_NAME ] ) >= 0 )
+	if ( login.find_other_than( LEGEAL_CHARACTER_SET[ CONSTR_CHAR_SET_LOGIN_NAME ] ) >= 0 )
 		*a_roInfo.f_oSocket << "err:Name may only take form of `[a-zA-Z0-9]+'." << endl;
-	else if ( login.get_length() < D_MINIMUM_NAME_LENGTH )
+	else if ( login.get_length() < MINIMUM_NAME_LENGTH )
 		*a_roInfo.f_oSocket << "err:Your name is too short, it needs to be at least 4 character long." << endl;
 	else if ( it != f_oClients.end() )
 		*a_roInfo.f_oSocket << "err:" << login << " already logged in." << endl;
@@ -180,7 +180,7 @@ void HServer::handle_login( OClientInfo& a_roInfo, HString const& a_oLoginInfo )
 			a_roInfo.f_oLogin = login;
 			broadcast_to_interested( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << login << _out );
 			broadcast_to_interested( _out << PROTOCOL::MSG << PROTOCOL::SEP
-					<< mark( COLORS::D_FG_BLUE ) << " " << login << " entered the GameGround." << _out );
+					<< mark( COLORS::FG_BLUE ) << " " << login << " entered the GameGround." << _out );
 			}
 		else
 			*a_roInfo.f_oSocket << "err:Login failed." << endl;
@@ -227,10 +227,10 @@ void HServer::create_game( OClientInfo& a_roInfo, HString const& a_oArg )
 		logics_t::iterator it = f_oLogics.find( l_oName );
 		if ( it != f_oLogics.end() )
 			a_roInfo.f_oSocket->write_until_eos( "err:Game already exists.\n" );
-		else if ( l_oName.find_other_than( D_LEGEAL_CHARACTER_SET[ D_CONSTR_CHAR_SET_GAME_NAME ] ) >= 0 )
+		else if ( l_oName.find_other_than( LEGEAL_CHARACTER_SET[ CONSTR_CHAR_SET_GAME_NAME ] ) >= 0 )
 			*a_roInfo.f_oSocket << "err:Game name may only take form of `[a-zA-Z0-9_-]+'." << endl;
-		else if ( l_oName.get_length() > D_MAX_GAME_NAME_LENGTH )
-			*a_roInfo.f_oSocket << "err:Game name cannot be longer than " << D_MAX_GAME_NAME_LENGTH << " characters." << endl;
+		else if ( l_oName.get_length() > MAX_GAME_NAME_LENGTH )
+			*a_roInfo.f_oSocket << "err:Game name cannot be longer than " << MAX_GAME_NAME_LENGTH << " characters." << endl;
 		else if ( l_oName[0] == ' ' )
 			*a_roInfo.f_oSocket << "err:Game name cannot start with whitespace." << endl;
 		else if ( ! factory.is_type_valid( l_oType ) )
@@ -319,7 +319,7 @@ int HServer::handler_message( int a_iFileDescriptor )
 		HSocket::HStreamInterface::STATUS const* status = NULL;
 		if ( ( clientIt = f_oClients.find( a_iFileDescriptor ) ) == f_oClients.end() )
 			kick_client( l_oClient );
-		else if ( ( status = &l_oClient->read_until( l_oMessage ) )->code == HSocket::HStreamInterface::STATUS::D_OK )
+		else if ( ( status = &l_oClient->read_until( l_oMessage ) )->code == HSocket::HStreamInterface::STATUS::OK )
 			{
 			if ( clientIt->second.f_oLogin.is_empty() )
 				out << "`unnamed'";
@@ -345,9 +345,9 @@ int HServer::handler_message( int a_iFileDescriptor )
 					kick_client( l_oClient, _( "Unknown command." ) );
 				}
 			}
-		else if ( status->code == HSocket::HStreamInterface::STATUS::D_ERROR )
+		else if ( status->code == HSocket::HStreamInterface::STATUS::ERROR )
 			kick_client( l_oClient, "" );
-		/* else status->code == HSocket::HStreamInterface::STATUS::D_REPEAT */
+		/* else status->code == HSocket::HStreamInterface::STATUS::REPEAT */
 		}
 	catch ( HOpenSSLException& )
 		{
@@ -379,7 +379,7 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& a_oClient, char const* c
 		reason += ( a_pcReason ? a_pcReason : "connection error" );
 		if ( ! clientIt->second.f_oLogin.is_empty() )
 			broadcast_to_interested( _out << PROTOCOL::MSG << PROTOCOL::SEP
-					<< mark( COLORS::D_FG_BRIGHTRED ) << " " << clientIt->second.f_oLogin << reason << _out );
+					<< mark( COLORS::FG_BRIGHTRED ) << " " << clientIt->second.f_oLogin << reason << _out );
 		cout << reason;
 		}
 	else
@@ -428,7 +428,7 @@ void HServer::handler_quit( OClientInfo& a_roInfo, HString const& )
 	kick_client( a_roInfo.f_oSocket, "" );
 	if ( ! login.is_empty() )
 		broadcast_to_interested( _out << PROTOCOL::MSG << PROTOCOL::SEP
-				<< mark( COLORS::D_FG_BROWN ) << " " << login << " has left the GameGround." << _out );
+				<< mark( COLORS::FG_BROWN ) << " " << login << " has left the GameGround." << _out );
 	return;
 	M_EPILOG
 	}

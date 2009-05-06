@@ -42,11 +42,11 @@ class HGomoku : public HLogic
 	struct STONE
 		{
 		typedef char stone_t;
-		static stone_t const D_NONE;
-		static stone_t const D_BLACK;
-		static stone_t const D_WHITE;
+		static stone_t const NONE;
+		static stone_t const BLACK;
+		static stone_t const WHITE;
 		};
-	static int const D_GOBAN_SIZE = 15;
+	static int const GOBAN_SIZE = 15;
 	struct PROTOCOL : public HLogic::PROTOCOL
 		{
 		static char const* const ADMIN;

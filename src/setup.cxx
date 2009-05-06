@@ -40,12 +40,12 @@ now_t now;
 
 HStreamInterface& operator << ( HStreamInterface& stream, now_t const& )
 	{
-	static int const D_TIMESTAMP_SIZE = 16;
+	static int const TIMESTAMP_SIZE = 16;
 	time_t l_xCurrentTime = ::time( NULL );
 	tm* l_psBrokenTime = ::localtime( &l_xCurrentTime );
-	char l_pcBuffer[ D_TIMESTAMP_SIZE ];
-	::memset( l_pcBuffer, 0, D_TIMESTAMP_SIZE );
-	::strftime( l_pcBuffer, D_TIMESTAMP_SIZE, "%b %d %H:%M:%S", l_psBrokenTime );
+	char l_pcBuffer[ TIMESTAMP_SIZE ];
+	::memset( l_pcBuffer, 0, TIMESTAMP_SIZE );
+	::strftime( l_pcBuffer, TIMESTAMP_SIZE, "%b %d %H:%M:%S", l_psBrokenTime );
 	stream << l_pcBuffer;
 	return ( stream );
 	}
@@ -107,7 +107,7 @@ bool OSetup::test_glx_emperors( int a_iEmperors, char*& a_rpcMessage )
 
 bool OSetup::test_glx_emperors_systems( int a_iEmperors, int a_iSystems, char*& a_rpcMessage )
 	{
-	return ( ( ( a_iEmperors + a_iSystems ) > D_MAX_SYSTEM_COUNT )
+	return ( ( ( a_iEmperors + a_iSystems ) > MAX_SYSTEM_COUNT )
 			&& ( a_rpcMessage = _( "bad total system count\n" ) ) );
 	}
 
@@ -119,7 +119,7 @@ bool OSetup::test_glx_systems( int a_iSystems, char*& a_rpcMessage )
 
 bool OSetup::test_glx_board_size( int a_iBoardSize, char*& a_rpcMessage )
 	{
-	return ( ( ( a_iBoardSize < 6 ) || ( a_iBoardSize > D_MAX_BOARD_SIZE ) )
+	return ( ( ( a_iBoardSize < 6 ) || ( a_iBoardSize > MAX_BOARD_SIZE ) )
 			&& ( a_rpcMessage = _( "bad board size specified\n" ) ) );
 	}
 
