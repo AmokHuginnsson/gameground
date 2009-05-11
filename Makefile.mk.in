@@ -30,11 +30,11 @@ VERSION				= 0
 SUBVERSION		= 0
 EXTRAVERSION	= 0
 include $(DIR_ROOT)/_aux/mk/0_paths.mk
+include $(DIR_ROOT)/_aux/mk/1_basic.mk
 LIBS					= pthread aspell hcore hconsole hdata dbwrapper tools
-TARGET				= gameground
-SRC_TARGET		= src
-EXEC_NAME			= 1exec
-TARGETS				= TARGET
+$(eval $(call NEW_TARGET,gameground,src,-D__GAMEGROUND_SERVER__))
+$(eval $(call NEW_TARGET,gameground-client,console_client,-D__GAMEGROUND_CLIENT__))
+EXEC_NAME				= 1exec
 CTAGS	= @CTAGS@
 GITID = @GITID@
 

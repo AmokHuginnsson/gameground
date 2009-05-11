@@ -30,7 +30,7 @@ Copyright:
 namespace gameground
 {
 
-int main_client ( void );
+int main_client( void );
 
 }
 

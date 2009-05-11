@@ -65,9 +65,6 @@ struct OSetup
 	{
 	bool f_bQuiet;			/* --quiet, --silent */
 	int f_iVerbose;		/* --verbose */
-	/* galaxy specific bools */
-	bool f_bServer;
-	bool f_bClient;
 	int	f_iMaxConnections;
 	/* galaxy/boggle specific integers */
 	int f_iEmperors;
@@ -99,8 +96,8 @@ struct OSetup
 	/* self-sufficient */
 	static int const PATH_OFFSET = sizeof ( __FILE__ ) - sizeof ( "setup.hxx" );
 	OSetup ( void )
-		: f_bQuiet( false ), f_iVerbose( 0 ), f_bServer( false ),
-		f_bClient( false ), f_iMaxConnections( DEFAULT_MAX_CONNECTIONS ),
+		: f_bQuiet( false ), f_iVerbose( 0 ),
+		f_iMaxConnections( DEFAULT_MAX_CONNECTIONS ),
 		f_iEmperors( GALAXY_EMPERORS ), f_iPort( 7777 ),
 		f_iSystems( GALAXY_EMPERORS * NEUTRAL_SYSTEM_PER_PLAYER ),
 		f_iBoardSize( GALAXY_BOARD_SIZE ), f_iPlayers( BOGGLE_PLAYERS ),

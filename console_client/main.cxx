@@ -30,7 +30,7 @@ M_VCSID( "$Id: "__ID__" $" )
 #include "version.hxx"
 #include "setup.hxx"
 #include "options.hxx"
-#include "server.hxx"
+#include "galaxy.hxx"
 
 using namespace std;
 using namespace yaal;
@@ -44,14 +44,6 @@ namespace gameground
 {
 
 OSetup setup;
-
-int main_server( void )
-	{
-	HServer l_oServer( setup.f_iMaxConnections );
-	l_oServer.init_server( setup.f_iPort );
-	l_oServer.run();
-	return ( 0 );
-	}
 
 }
 
@@ -68,10 +60,20 @@ int main( int a_iArgc, char* a_ppcArgv[] )
 		HSignalServiceFactory::get_instance();
 		setup.f_pcProgramName = a_ppcArgv [ 0 ];
 		l_iOpt = handle_program_options( a_iArgc, a_ppcArgv );
+		setup.f_oLogPath += "." + setup.f_oLogin;
 		hcore::log.rehash( setup.f_oLogPath, setup.f_pcProgramName );
 		setup.test_setup();
 /* *BOOM* */
-		main_server();
+		if ( ! cons.is_enabled() )
+			cons.enter_curses (); /* enabling ncurses ablilities */
+		if ( ( cons.get_height() >= 25 ) && ( cons.get_width() >= 80 ) )
+			l_iOpt = main_client();
+		else
+			l_iOpt = 1;
+		if ( cons.is_enabled() )
+			cons.leave_curses (); /* ending ncurses sesion */
+		if ( l_iOpt )
+			fprintf ( stdout, "Your terminal is too small.\n" );
 /* ... there is the place main loop ends. :OD-OT */
 		}
 	catch ( ... )
