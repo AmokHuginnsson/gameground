@@ -36,11 +36,9 @@ import java.util.Calendar;
 
 class GomokuPlayer {
 	public JLabel _name;
-	public JLabel _score;
 	public JButton _sit;
 	public void clear() {
 		_name.setText( "" );
-		_score.setText( "" );
 		_sit.setText( Gomoku.HGUILocal.SIT );
 	}
 }
@@ -182,12 +180,10 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		_gui._board.setImages( images );
 		GomokuPlayer black = new GomokuPlayer();
 		black._name = _gui._blackName;
-		black._score = _gui._blackScore;
 		black._sit = _gui._blackSit;
 		_contestants.put( new Character( STONE.BLACK ), black );
 		GomokuPlayer white = new GomokuPlayer();
 		white._name = _gui._whiteName;
-		white._score = _gui._whiteScore;
 		white._sit = _gui._whiteSit;
 		_contestants.put( new Character( STONE.WHITE ), white );
 	}
@@ -203,7 +199,6 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		char stone = STONE.NONE;
 		GomokuPlayer contestant = _contestants.get( new Character( stone = tokens[ 0 ].charAt( 0 ) ) );
 		contestant._name.setText( tokens[ 1 ] );
-		contestant._score.setText( tokens[ 3 ] );
 		if ( tokens[ 1 ].equals( _app.getName() ) ) {
 			_gui._board.setStone( _stone = stone );
 			contestant._sit.setText( HGUILocal.GETUP );
