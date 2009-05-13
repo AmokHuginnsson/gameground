@@ -68,21 +68,10 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	public static final class GOBAN_SIZE {
 		public static final int NORMAL = 19;
 	}
-	public static final class STONE {
-		public static final char BLACK = 'b';
-		public static final char WHITE = 'w';
-		public static final char NONE	= ' ';
-		public static final char MARK = 'm';
-		public static final char DEAD_BLACK = 's';
-		public static final char DEAD_WHITE = 't';
-		public static final char TERITORY_BLACK = 'p';
-		public static final char TERITORY_WHITE = 'q';
-		public static final char DAME = 'x';
+	public static final class STONE extends Goban.STONE {
+		public static final char WIN_BLACK = 'p';
+		public static final char WIN_WHITE = 'q';
 		public static final char INVALID = 'N';
-		public static final char WAIT = 'Z';
-		public static final String NONE_NAME = "None";
-		public static final String BLACK_NAME = "Black";
-		public static final String WHITE_NAME = "White";
 	}
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
@@ -243,14 +232,8 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	public char stone() {
 		return ( _stone );
 	}
-	public char stoneDead() {
-		return ( _stone == STONE.BLACK ? STONE.DEAD_BLACK : STONE.DEAD_WHITE );
-	}
 	public char toMove() {
 		return ( _toMove );
-	}
-	public void waitToMove() {
-		_toMove = STONE.WAIT;
 	}
 	public void reinit() {
 		_client = _app.getClient();

@@ -14,6 +14,16 @@ import java.util.Arrays;
 
 public abstract class Goban extends JPanel implements MouseInputListener {
 //--------------------------------------------//
+
+	public static class STONE {
+		public static final char BLACK = 'b';
+		public static final char WHITE = 'w';
+		public static final char NONE	= ' ';
+		public static final char INVALID = 'N';
+		public static final String NONE_NAME = "None";
+		public static final String BLACK_NAME = "Black";
+		public static final String WHITE_NAME = "White";
+	}
 	public static final long serialVersionUID = 7l;
 	public static final int D_MARGIN = 20;
 	int _size = Go.GOBAN_SIZE.NORMAL;
@@ -123,7 +133,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 			if ( i > 8 )
 				label[ 0 ] = '1';
 			else
-				label[ 0 ] = Go.STONE.NONE;
+				label[ 0 ] = STONE.NONE;
 			g.drawChars( label, 0, 2, D_MARGIN - 18, D_MARGIN + margin + ( inside * ( _size - 1 - i ) ) / ( _size - 1 ) + 5 );
 			g.drawChars( label, 0, 2, D_MARGIN + _virtSize + 2, D_MARGIN + margin + ( inside * ( _size - 1 - i ) ) / ( _size - 1 ) + 5 );
 		}
@@ -134,28 +144,28 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		Image img = null;
 		boolean teritory = false;
 		if ( $color == Go.STONE.TERITORY_BLACK ) {
-			$color = Go.STONE.BLACK;
+			$color = STONE.BLACK;
 			teritory = true;
 		}
 		if ( $color == Go.STONE.TERITORY_WHITE ) {
-			$color = Go.STONE.WHITE;
+			$color = STONE.WHITE;
 			teritory = true;
 		}
 		if ( $color == Go.STONE.DEAD_BLACK ) {
 			$alpha = true;
-			$color = Go.STONE.BLACK;
+			$color = STONE.BLACK;
 		}
 		if ( $color == Go.STONE.DEAD_WHITE ) {
 			$alpha = true;
-			$color = Go.STONE.WHITE;
+			$color = STONE.WHITE;
 		}
 		if ( $alpha ) {
-			if ( $color == Go.STONE.WHITE )
+			if ( $color == STONE.WHITE )
 				img = _images._whitesAlpha[ ( $yy * _size + $xx ) % GoImages.D_WHITE_LOOKS ];
 			else
 				img = _images._blackAlpha;
 		} else {
-			if ( $color == Go.STONE.WHITE )
+			if ( $color == STONE.WHITE )
 				img = _images._whites[ ( $yy * _size + $xx ) % GoImages.D_WHITE_LOOKS ];
 			else
 				img = _images._black;
@@ -180,7 +190,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 			size = ( size < _stones.length ? size : _stones.length );
 			for ( int i = 0; i < size; ++ i ) {
 				char stone = _stones[ i ];
-				if ( ( stone != Go.STONE.NONE ) && ( stone != Go.STONE.DAME ) )
+				if ( ( stone != STONE.NONE ) && ( stone != Go.STONE.DAME ) )
 					drawStone( i % _size, i / _size, stone, false, g );
 			}
 		}
@@ -189,7 +199,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		_stones[ $row * _size + $col ] = $stone;
 	}
 	char getStone( int $col, int $row ) {
-		char stone = Go.STONE.INVALID;
+		char stone = STONE.INVALID;
 		if ( validCoords( $col, $row ) )
 			stone = _stones[ $row * _size + $col ];
 		return ( stone );
@@ -197,9 +207,9 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	void clearGoban( boolean removeDead ) {
 		for ( int i = 0; i < _size; i++ ) {
 			for ( int j = 0; j < _size; j++ ) {
-				if ( getStone( i, j ) != Go.STONE.NONE ) {
+				if ( getStone( i, j ) != STONE.NONE ) {
 					if ( removeDead && Character.isUpperCase( getStone( i, j ) ) )
-						setStone( i, j, Go.STONE.NONE );
+						setStone( i, j, STONE.NONE );
 					else
 						setStone( i, j, Character.toLowerCase( getStone( i, j ) ) );
 				}
@@ -207,7 +217,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		}
 	}
 	public char oponent( char stone ) {
-		return ( stone == Go.STONE.WHITE ? Go.STONE.BLACK : Go.STONE.WHITE );
+		return ( stone == STONE.WHITE ? STONE.BLACK : STONE.WHITE );
 	}
 	boolean validCoords( int x, int y ) {
 		return ( ( x >= 0 ) && ( x < _size )
