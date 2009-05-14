@@ -1,16 +1,10 @@
-import java.io.InputStreamReader;
-import java.io.InputStream;
-import java.net.URL;
 import java.awt.Image;
 import java.awt.Graphics;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
-import java.awt.event.ActionListener;
 import java.awt.Color;
 import javax.swing.JPanel;
-import javax.swing.ImageIcon;
 import javax.swing.event.MouseInputListener;
-import java.util.Arrays;
 
 public abstract class Goban extends JPanel implements MouseInputListener {
 //--------------------------------------------//

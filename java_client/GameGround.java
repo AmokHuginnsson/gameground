@@ -1,15 +1,11 @@
 import org.apache.commons.cli.*;
-import javax.swing.JOptionPane;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.HashMap;
 import java.util.Collections;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.Container;
 import java.awt.Frame;
 import java.awt.Dimension;
-import java.awt.Insets;
 import javax.swing.JApplet;
 import org.swixml.SwingEngine;
 import org.swixml.TagLibrary;

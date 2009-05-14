@@ -1,34 +1,13 @@
-import java.awt.Container;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.Vector;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.Style;
 import java.util.Comparator;
-import org.swixml.SwingEngine;
 import javax.swing.table.TableRowSorter;
-import javax.swing.RowSorter;
 import java.util.Date;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 class BogglePlayer {
 	String _name;

@@ -1,5 +1,4 @@
 import javax.swing.JPanel;
-import org.swixml.TagLibrary;
 import javax.swing.JTextPane;
 import java.awt.Color;
 import javax.swing.text.SimpleAttributeSet; 

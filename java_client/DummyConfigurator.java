@@ -1,5 +1,3 @@
-import javax.swing.JPanel;
-
 public class DummyConfigurator extends HAbstractConfigurator {
 	public static final long serialVersionUID = 17l;
 	GameCreator _gc;

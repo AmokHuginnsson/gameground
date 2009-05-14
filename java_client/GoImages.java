@@ -1,7 +1,5 @@
 import java.awt.Image;
-import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.awt.Graphics2D;
 
 class GoImages {
 	private class WhiteDesc {

@@ -1,22 +1,9 @@
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.Container;
-import java.awt.Color;
 import javax.swing.Action;
 import javax.swing.AbstractAction;
-import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.Style;
-import javax.swing.text.SimpleAttributeSet; 
 
 class HLogin extends HAbstractLogic {
 	public static final String LABEL = "login";

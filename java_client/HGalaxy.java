@@ -1,24 +1,13 @@
-import java.lang.reflect.Method;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.awt.event.ActionEvent;
 import javax.swing.Action;
 import javax.swing.AbstractAction;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.Container;
-import org.swixml.SwingEngine;
-import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
-import javax.swing.text.Style;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.HashMap;
-import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.Map;
 

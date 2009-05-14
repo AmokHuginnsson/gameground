@@ -1,9 +1,3 @@
-import java.lang.reflect.Method;
-import java.lang.Class;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.HashMap;
-import java.util.Collections;
 import java.util.concurrent.Semaphore;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
@@ -13,7 +7,6 @@ import javax.net.SocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
 
 class HClient extends Thread {
 /*--------------------------------------------*/

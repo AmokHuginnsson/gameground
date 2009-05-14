@@ -1,7 +1,5 @@
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
 
 public class BoggleConfigurator extends HAbstractConfigurator {
 	public static final long serialVersionUID = 17l;
