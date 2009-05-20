@@ -1,2 +1,6 @@
 CASE
 gg-nest
+java_client/.classpath
+java_client/.externalToolBuilders/
+java_client/.project
+java_client/.settings/
