@@ -210,7 +210,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 			}
 		}
 	}
-	public char oponent( char stone ) {
+	public char opponent( char stone ) {
 		return ( stone == STONE.WHITE ? STONE.BLACK : STONE.WHITE );
 	}
 	boolean validCoords( int x, int y ) {

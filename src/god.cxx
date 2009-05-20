@@ -204,7 +204,7 @@ void HGo::handler_sit( OClientInfo* a_poClientInfo, HString const& a_roMessage )
 				}
 			else
 				{
-				OPlayerInfo& foe = *get_player_info( contestant( oponent( stone ) ) );
+				OPlayerInfo& foe = *get_player_info( contestant( opponent( stone ) ) );
 				foe.f_iTimeLeft = info.f_iTimeLeft;
 				foe.f_iByoYomiPeriods = info.f_iByoYomiPeriods;
 				f_eState = ( f_iHandicaps > 1 ? STONE::WHITE : STONE::BLACK );
@@ -237,11 +237,11 @@ void HGo::handler_put_stone( OClientInfo* a_poClientInfo, HString const& a_roMes
 	f_iPass = 0;
 	int col = lexical_cast<int>( get_token( a_roMessage, ",", 1 ) );
 	int row = lexical_cast<int>( get_token( a_roMessage, ",", 2 ) );
-	int before = count_stones( oponent( f_eState ) );
+	int before = count_stones( opponent( f_eState ) );
 	make_move( col, row, f_eState );
-	int after = count_stones( oponent( f_eState ) );
+	int after = count_stones( opponent( f_eState ) );
 	get_player_info( contestant( f_eState ) )->f_iStonesCaptured += ( before - after );
-	f_eState = oponent( f_eState );
+	f_eState = opponent( f_eState );
 	send_goban();
 	return;
 	M_EPILOG
@@ -254,7 +254,7 @@ void HGo::handler_pass( OClientInfo* a_poClientInfo, HString const& /*a_roMessag
 		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
 	if ( contestant( f_eState ) != a_poClientInfo )
 		throw HLogicException( GO_MSG[ GO_MSG_NOT_YOUR_TURN ] );
-	f_eState = oponent( f_eState );
+	f_eState = opponent( f_eState );
 	++ f_iPass;
 	if ( f_iPass == 3 )
 		{
@@ -724,7 +724,7 @@ void HGo::clear_goban( bool removeDead )
 		}
 	}
 
-HGo::STONE::stone_t HGo::oponent( STONE::stone_t stone )
+HGo::STONE::stone_t HGo::opponent( STONE::stone_t stone )
 	{
 	return ( stone == STONE::WHITE ? STONE::BLACK : STONE::WHITE );
 	}
@@ -732,7 +732,7 @@ HGo::STONE::stone_t HGo::oponent( STONE::stone_t stone )
 bool HGo::have_killed( int x, int y, STONE::stone_t stone )
 	{
 	bool killed = false;
-	STONE::stone_t foeStone = oponent( stone );
+	STONE::stone_t foeStone = opponent( stone );
 	goban( x, y ) = stone;
 	if ( ( x > 0 ) && ( goban( x - 1, y ) == foeStone ) && ( ! have_liberties( x - 1, y, foeStone ) ) )
 		clear_goban( killed = true );
@@ -914,7 +914,7 @@ void HGo::update_clocks( void )
 	M_PROLOG
 	revoke_scheduled_tasks();
 	int long l_iNow = time( NULL );
-	OPlayerInfo& p = *get_player_info( contestant( oponent( f_eState ) ) );
+	OPlayerInfo& p = *get_player_info( contestant( opponent( f_eState ) ) );
 	if ( f_iStart )
 		p.f_iTimeLeft -= ( l_iNow - f_iStart );
 	schedule_timeout();

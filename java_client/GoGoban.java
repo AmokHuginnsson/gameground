@@ -80,7 +80,7 @@ public class GoGoban extends Goban {
 	}
 	boolean haveKilled( int x, int y, char stone ) {
 		boolean killed = false;
-		char foeStone = oponent( stone );
+		char foeStone = opponent( stone );
 		setStone( x, y, stone );
 		if ( ( x > 0 ) && ( getStone( x - 1, y ) == foeStone ) && ( ! haveLiberties( x - 1, y, foeStone ) ) )
 			clearGoban( killed = true );

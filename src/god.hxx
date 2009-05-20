@@ -139,7 +139,7 @@ protected:
 	OClientInfo*& contestant( STONE::stone_t );
 	void clear_goban( bool );
 	bool have_killed( int, int, STONE::stone_t );
-	HGo::STONE::stone_t oponent( STONE::stone_t );
+	HGo::STONE::stone_t opponent( STONE::stone_t );
 	bool is_suicide( int, int, STONE::stone_t );
 	bool is_ko( void );
 	void make_move( int, int, STONE::stone_t );

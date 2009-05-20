@@ -282,12 +282,12 @@ class Go extends HAbstractLogic implements Runnable {
 			_gui._board.setStone( _stone = stone );
 			contestant._sit.setText( HGUILocal.GETUP );
 			contestant._sit.setEnabled( true );
-			GoPlayer foe = _contestants.get( _gui._board.oponent( _stone ) );
+			GoPlayer foe = _contestants.get( _gui._board.opponent( _stone ) );
 			foe._sit.setEnabled( false );
 		} else {
 			if ( ( stone == _stone ) && ( _stone != STONE.NONE ) ) {
 				contestant._sit.setText( HGUILocal.SIT );
-				GoPlayer foe = _contestants.get( _gui._board.oponent( _stone ) );
+				GoPlayer foe = _contestants.get( _gui._board.opponent( _stone ) );
 				foe._sit.setEnabled( "".equals( foe._name.getText() ) );
 				_gui._board.setStone( _stone = STONE.NONE );
 				if ( _gui._toolTip != null ) {

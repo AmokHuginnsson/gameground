@@ -171,7 +171,7 @@ void HGomoku::handler_put_stone( OClientInfo* a_poClientInfo, HString const& a_r
 	int col = lexical_cast<int>( get_token( a_roMessage, ",", 1 ) );
 	int row = lexical_cast<int>( get_token( a_roMessage, ",", 2 ) );
 	make_move( col, row, f_eState ); /* TODO implement winning condition test */
-	f_eState = oponent( f_eState );
+	f_eState = opponent( f_eState );
 	send_goban();
 	return;
 	M_EPILOG
@@ -314,7 +314,7 @@ void HGomoku::clear_goban( bool removeDead )
 		}
 	}
 
-HGomoku::STONE::stone_t HGomoku::oponent( STONE::stone_t stone )
+HGomoku::STONE::stone_t HGomoku::opponent( STONE::stone_t stone )
 	{
 	return ( stone == STONE::WHITE ? STONE::BLACK : STONE::WHITE );
 	}

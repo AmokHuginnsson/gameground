@@ -92,7 +92,7 @@ protected:
 	char& goban( int, int );
 	OClientInfo*& contestant( STONE::stone_t );
 	void clear_goban( bool );
-	HGomoku::STONE::stone_t oponent( STONE::stone_t );
+	HGomoku::STONE::stone_t opponent( STONE::stone_t );
 	void make_move( int, int, STONE::stone_t );
 	void contestant_gotup( OClientInfo* );
 	void send_contestants( void );
