@@ -84,6 +84,8 @@ HGomoku::HGomoku( HString const& a_oName )
 	f_ppoContestants[ 0 ] = f_ppoContestants[ 1 ] = NULL;
 	HRandomizer l_oRandom;
 	l_oRandom.set( time ( NULL ) );
+	::memset( f_oGame.raw(), STONE::NONE, GOBAN_SIZE * GOBAN_SIZE );
+	f_oGame.raw()[ GOBAN_SIZE * GOBAN_SIZE ] = 0;
 	f_oHandlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HGomoku::handler_play );
 	f_oHandlers[ PROTOCOL::SAY ] = static_cast<handler_t>( &HGomoku::handler_message );
 	return;

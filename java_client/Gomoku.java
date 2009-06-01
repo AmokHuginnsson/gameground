@@ -40,9 +40,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		public static final String PLAYERQUIT = "player_quit";
 		public static final String PREFIX = PROTOCOL.CMD + PROTOCOL.SEP + PROTOCOL.NAME + PROTOCOL.SEP;
 	}
-	public static final class GOBAN_SIZE {
-		public static final int NORMAL = 19;
-	}
+	public static final int GOBAN_SIZE = 15;
 	public static final class STONE extends Goban.STONE {
 		public static final char WIN_BLACK = 'p';
 		public static final char WIN_WHITE = 'q';
@@ -150,6 +148,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		white._name = _gui._whiteName;
 		white._sit = _gui._whiteSit;
 		_contestants.put( new Character( STONE.WHITE ), white );
+		_gui._board.setSize( GOBAN_SIZE );
 	}
 	void handlerGomoku( String $command ) {
 		processMessage( $command );
