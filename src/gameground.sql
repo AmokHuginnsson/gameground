@@ -80,5 +80,6 @@ INSERT INTO tbl_game ( name ) VALUES ( 'galaxy' );
 INSERT INTO tbl_game ( name ) VALUES ( 'gomoku' );
 
 INSERT INTO tbl_user ( login, password, name, email ) VALUES ( 'amok', '1c29cf0ceb89afce131e27b76c18af1e9cf7f5e3', 'Marcin Konarski', 'amok13@o2.pl' );
+INSERT INTO tbl_user ( login, password, name, email ) VALUES ( 'kamawanai', '0c7ebd714bbcfca66cc23ce5652569ccb48d6e48', 'Diana Blaszczyk', 'diana.blaszczyk@gmail.com' );
 INSERT INTO tbl_user ( login, password ) VALUES ( 'aNeutrino', 'b4434d5d3638c82cf2dc25c9e4cb75b1f7110e05' );
 
