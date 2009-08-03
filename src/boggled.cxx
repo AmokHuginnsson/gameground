@@ -45,7 +45,6 @@ namespace gameground
 namespace boggle_data
 {
 
-static int const MINIMUM_WORD_LENGTH = 3;
 static int const MAXIMUM_WORD_LENGTH = 16;
 
 static char const n_ppcDices[ 16 ][ 6 ] =
@@ -96,11 +95,15 @@ char const* const HBoggle::PROTOCOL::END_ROUND = "end_round";
 char const* const HBoggle::PROTOCOL::ROUND = "round";
 char const* const HBoggle::PROTOCOL::SCORED = "scored";
 char const* const HBoggle::PROTOCOL::LONGEST = "longest";
+HBoggle::SCORING::ORule HBoggle::RULES[] = { { 3, { 0, 0, 1, 1, 2, 3, 5, 11, 11, 11, 11, 11, 11, 11, 11, 11 } },
+		{ 4, { 0, 0, 0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 } },
+		{ 5, { 0, 0, 0, 0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233 } },
+		{ 5, { 0, 0, 0, 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048 } } };
 
 HBoggle::HBoggle( HString const& a_oName, int a_iPlayers, int a_iRoundTime, int a_iMaxRounds, int a_iInterRoundDelay )
 	: HLogic( PROTOCOL::NAME, a_oName ), f_eState( STATE::LOCKED ), f_iPlayers( a_iPlayers ),
 	f_iRoundTime( a_iRoundTime ), f_iMaxRounds( a_iMaxRounds ),
-	f_iInterRoundDelay( a_iInterRoundDelay ), f_iRound( 0 ), f_oPlayers(),
+	f_iInterRoundDelay( a_iInterRoundDelay ), f_iRuleSet( 0 ), f_iRound( 0 ), f_oPlayers(),
 	f_oWords(), f_oMutex()
 	{
 	M_PROLOG
@@ -174,7 +177,7 @@ void HBoggle::handler_play( OClientInfo* a_poClientInfo, HString const& a_oWord 
 	HLock l( f_oMutex );
 	int l_iLength = static_cast<int>( a_oWord.get_length() );
 	if ( ( f_eState == STATE::ACCEPTING )
-			&& ( l_iLength >= boggle_data::MINIMUM_WORD_LENGTH )
+			&& ( l_iLength >= RULES[ f_iRuleSet ]._minLength )
 			&& ( l_iLength <= boggle_data::MAXIMUM_WORD_LENGTH ) )
 		{
 		words_t::iterator it = f_oWords.find( a_oWord );
@@ -343,7 +346,7 @@ void HBoggle::on_end_round( void )
 	else
 		_out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP << "Game Over!" << endl;
 	broadcast( _out << _out );
-	int scores[ 16 ] = { 0, 0, 1, 1, 2, 3, 5, 7, 11, 15, 23, 31, 47, 63, 95, 159 };
+	int* scores = RULES[ f_iRuleSet ]._score;
 	typedef HList<words_t::iterator> longest_t;
 	longest_t longest;
 	int l_iLongestLength = 0;

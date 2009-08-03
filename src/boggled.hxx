@@ -81,12 +81,13 @@ protected:
 	typedef yaal::hcore::HPointer<client_set_t> client_set_ptr_t;
 	typedef yaal::hcore::HMap<yaal::hcore::HString, client_set_ptr_t> words_t;
 	typedef yaal::hcore::HMap<OClientInfo*, OPlayerInfo> players_t;
-	static SCORING::ORule RULES[3];
+	static SCORING::ORule RULES[4];
 	STATE::state_t f_eState;
 	int f_iPlayers;
 	int f_iRoundTime;
 	int f_iMaxRounds;
 	int f_iInterRoundDelay;
+	int f_iRuleSet;
 	int f_iRound;
 	players_t f_oPlayers;
 	char f_ppcGame[16][2];
