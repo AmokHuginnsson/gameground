@@ -561,8 +561,7 @@ yaal::hcore::HString HGo::get_info() const
 void HGo::reschedule_timeout( void )
 	{
 	M_PROLOG
-	HAsyncCallerService::get_instance().register_call( 0,
-			HCallInterface::ptr_t( new HCall<HGo&, typeof( &HGo::schedule_timeout )>( *this, &HGo::schedule_timeout ) ) );
+	HAsyncCallerService::get_instance().register_call( 0, bound_call<HGo&>( *this, &HGo::schedule_timeout ) );
 	return;
 	M_EPILOG
 	}
@@ -574,8 +573,7 @@ void HGo::schedule_timeout( void )
 	OPlayerInfo& p = *get_player_info( contestant( f_eState ) );
 	if ( p.f_iByoYomiPeriods < f_iByoYomiPeriods )
 		p.f_iTimeLeft = f_iByoYomiTime * SECONDS_IN_MINUTE;
-	HScheduledAsyncCallerService::get_instance().register_call( time( NULL ) + p.f_iTimeLeft,
-			HCallInterface::ptr_t( new HCall<HGo&, typeof( &HGo::on_timeout )>( *this, &HGo::on_timeout ) ) );
+	HScheduledAsyncCallerService::get_instance().register_call( time( NULL ) + p.f_iTimeLeft, bound_call<HGo&>( *this, &HGo::on_timeout ) );
 	return;
 	M_EPILOG
 	}
