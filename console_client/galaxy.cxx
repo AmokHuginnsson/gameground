@@ -921,14 +921,14 @@ void HClient::init_client ( HString & a_roHost, int a_iPort )
 int HClient::handler_message ( int )
 	{
 	M_PROLOG
-	int l_iMsgLength = 0;
+	int long l_iMsgLength = 0;
 	HString l_oMessage;
 	HString l_oCommand;
-	if ( ( l_iMsgLength = f_oSocket.read_until( l_oMessage ).octets ) > 0 )
+	if ( ( l_iMsgLength = f_oSocket.read_until( l_oMessage ) ) > 0 )
 		{
 		while ( ( l_oCommand = get_token( l_oMessage, ":", 0 ) ) == "glx" )
 			l_oMessage = l_oMessage.mid( l_oCommand.get_length() + 1 );
-		l_iMsgLength = static_cast<int>( l_oMessage.get_length() );
+		l_iMsgLength = l_oMessage.get_length();
 		if ( l_iMsgLength < 1 )
 			{
 			hcore::log << "got empty message from server" << endl;

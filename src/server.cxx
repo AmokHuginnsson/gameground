@@ -316,10 +316,10 @@ int HServer::handler_message( int a_iFileDescriptor )
 	HSocket::ptr_t l_oClient = f_oSocket.get_client( a_iFileDescriptor );
 	try
 		{
-		HSocket::HStreamInterface::STATUS const* status = NULL;
+		int long nRead( 0 );
 		if ( ( clientIt = f_oClients.find( a_iFileDescriptor ) ) == f_oClients.end() )
 			kick_client( l_oClient );
-		else if ( ( status = &l_oClient->read_until( l_oMessage ) )->code == HSocket::HStreamInterface::STATUS::OK )
+		else if ( ( nRead = l_oClient->read_until( l_oMessage ) ) > 0 )
 			{
 			if ( clientIt->second.f_oLogin.is_empty() )
 				out << "`unnamed'";
@@ -345,9 +345,9 @@ int HServer::handler_message( int a_iFileDescriptor )
 					kick_client( l_oClient, _( "Unknown command." ) );
 				}
 			}
-		else if ( status->code == HSocket::HStreamInterface::STATUS::ERROR )
+		else if ( ! nRead )
 			kick_client( l_oClient, "" );
-		/* else status->code == HSocket::HStreamInterface::STATUS::REPEAT */
+		/* else nRead < 0 => REPEAT */
 		}
 	catch ( HOpenSSLException& )
 		{
