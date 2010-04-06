@@ -608,9 +608,9 @@ void HGo::set_handicaps( int a_iHandicaps )
 	if ( ( a_iHandicaps > 9 ) || ( a_iHandicaps < 0 ) )
 		throw HLogicException( _out << "bad handicap value: " << a_iHandicaps << _out );
 	::memset( f_oGame.raw(), STONE::NONE, f_iGobanSize * f_iGobanSize );
-	f_oGame[ f_iGobanSize * f_iGobanSize ] = 0;
+	f_oGame.raw()[ f_iGobanSize * f_iGobanSize ] = 0;
 	::memset( f_oKoGame.raw(), STONE::NONE, f_iGobanSize * f_iGobanSize );
-	f_oKoGame[ f_iGobanSize * f_iGobanSize ] = 0;
+	f_oKoGame.raw()[ f_iGobanSize * f_iGobanSize ] = 0;
 	if ( a_iHandicaps != f_iHandicaps )
 		{
 		if ( a_iHandicaps > 0 )
@@ -669,7 +669,7 @@ void HGo::set_handi( int a_iHandi )
 void HGo::put_stone( int a_iCol, int a_iRow, STONE::stone_t a_eStone )
 	{
 	M_PROLOG
-	f_oGame[ a_iRow * f_iGobanSize + a_iCol ] = a_eStone;
+	f_oGame.raw()[ a_iRow * f_iGobanSize + a_iCol ] = a_eStone;
 	return;
 	M_EPILOG
 	}
@@ -684,7 +684,7 @@ void HGo::send_goban( void )
 
 char& HGo::goban( int a_iCol, int a_iRow )
 	{
-	return ( f_oKoGame[ a_iRow * f_iGobanSize + a_iCol ] );
+	return ( f_oKoGame.raw()[ a_iRow * f_iGobanSize + a_iCol ] );
 	}
 
 bool HGo::have_liberties( int a_iCol, int a_iRow, STONE::stone_t stone )

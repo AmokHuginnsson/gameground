@@ -281,7 +281,7 @@ yaal::hcore::HString HGomoku::get_info() const
 void HGomoku::put_stone( int a_iCol, int a_iRow, STONE::stone_t a_eStone )
 	{
 	M_PROLOG
-	f_oGame[ a_iRow * GOBAN_SIZE + a_iCol ] = a_eStone;
+	f_oGame.raw()[ a_iRow * GOBAN_SIZE + a_iCol ] = a_eStone;
 	return;
 	M_EPILOG
 	}
@@ -296,7 +296,7 @@ void HGomoku::send_goban( void )
 
 char& HGomoku::goban( int a_iCol, int a_iRow )
 	{
-	return ( f_oGame[ a_iRow * GOBAN_SIZE + a_iCol ] );
+	return ( f_oGame.raw()[ a_iRow * GOBAN_SIZE + a_iCol ] );
 	}
 
 void HGomoku::clear_goban( bool removeDead )

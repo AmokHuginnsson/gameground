@@ -30,6 +30,8 @@ Copyright:
 #include <libintl.h>
 #include <iostream>
 
+#include "config.hxx"
+
 namespace gameground
 {
 

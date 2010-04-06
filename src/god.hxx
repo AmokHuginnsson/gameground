@@ -104,9 +104,9 @@ protected:
 	int f_iMove;
 	int f_iPass;
 	int long f_iStart;
-	yaal::hcore::HPool<char> f_oGame;
-	yaal::hcore::HPool<char> f_oKoGame;
-	yaal::hcore::HPool<char> f_oOldGame;
+	yaal::hcore::HChunk f_oGame;
+	yaal::hcore::HChunk f_oKoGame;
+	yaal::hcore::HChunk f_oOldGame;
 	players_t f_oPlayers;
 	yaal::hcore::HString f_oVarTmpBuffer;
 	mutable yaal::hcore::HMutex f_oMutex;

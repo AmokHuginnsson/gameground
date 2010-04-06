@@ -68,7 +68,7 @@ protected:
 	STONE::stone_t f_eState;
 	int f_iMove;
 	int long f_iStart;
-	yaal::hcore::HPool<char> f_oGame;
+	yaal::hcore::HChunk f_oGame;
 	players_t f_oPlayers;
 	yaal::hcore::HString f_oVarTmpBuffer;
 	mutable yaal::hcore::HMutex f_oMutex;

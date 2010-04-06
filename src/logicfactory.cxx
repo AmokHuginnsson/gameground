@@ -31,6 +31,8 @@ Copyright:
 M_VCSID( "$Id: "__ID__" $" )
 #include "logicfactory.hxx"
 
+#include "setup.hxx"
+
 using namespace yaal;
 using namespace yaal::hcore;
 using namespace yaal::hconsole;
