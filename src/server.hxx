@@ -83,8 +83,8 @@ public:
 	/*}*/
 protected:
 	/*{*/
-	int handler_connection( int );
-	int handler_message( int );
+	void handler_connection( int );
+	void handler_message( int );
 	void handler_shutdown( OClientInfo&, yaal::hcore::HString const& );
 	void handler_quit( OClientInfo&, yaal::hcore::HString const& );
 	void handler_abandon( OClientInfo&, yaal::hcore::HString const& );

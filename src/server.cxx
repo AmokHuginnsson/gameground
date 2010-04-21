@@ -103,7 +103,7 @@ int HServer::init_server( int a_iPort )
 	factory.initialize_globals();
 	_db->connect( setup.f_oDatabasePath, setup.f_oDatabaseLogin, setup.f_oDatabasePassword );
 	f_oSocket.listen( "0.0.0.0", a_iPort );
-	register_file_descriptor_handler( f_oSocket.get_file_descriptor(), &HServer::handler_connection );
+	register_file_descriptor_handler( f_oSocket.get_file_descriptor(), bound_call( &HServer::handler_connection, this, _1 ) );
 	f_oHandlers[ PROTOCOL::SHUTDOWN ] = &HServer::handler_shutdown;
 	f_oHandlers[ PROTOCOL::QUIT ] = &HServer::handler_quit;
 	f_oHandlers[ PROTOCOL::MSG ] = &HServer::handler_chat;
@@ -289,7 +289,7 @@ void HServer::join_game( OClientInfo& a_roInfo, HString const& a_oName )
 	M_EPILOG
 	}
 
-int HServer::handler_connection( int )
+void HServer::handler_connection( int )
 	{
 	M_PROLOG
 	HSocket::ptr_t l_oClient = f_oSocket.accept();
@@ -298,15 +298,15 @@ int HServer::handler_connection( int )
 		l_oClient->close();
 	else
 		{
-		register_file_descriptor_handler( l_oClient->get_file_descriptor(), &HServer::handler_message );
+		register_file_descriptor_handler( l_oClient->get_file_descriptor(), bound_call( &HServer::handler_message, this, _1 ) );
 		f_oClients[ l_oClient->get_file_descriptor() ].f_oSocket = l_oClient;
 		}
 	out << l_oClient->get_host_name() << endl;
-	return ( 0 );
+	return;
 	M_EPILOG
 	}
 
-int HServer::handler_message( int a_iFileDescriptor )
+void HServer::handler_message( int a_iFileDescriptor )
 	{
 	M_PROLOG
 	HString l_oMessage;
@@ -353,7 +353,7 @@ int HServer::handler_message( int a_iFileDescriptor )
 		{
 		kick_client( l_oClient );
 		}
-	return ( 0 );
+	return;
 	M_EPILOG
 	}
 

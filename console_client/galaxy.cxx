@@ -332,7 +332,7 @@ public:
 	HClient ( char const * const );
 	virtual ~HClient ( void );
 	void init_client ( HString &, int );
-	int handler_message ( int );
+	void handler_message ( int );
 	void end_round ( void );
 	void send_message ( HString const & );
 	/*}*/
@@ -743,25 +743,26 @@ void HGalaxyWindow::set_data ( systems_t * a_poSystems,
 	return;
 	}
 
-void HGalaxyWindow::on_show_system_info ( int a_iSystem )
+void HGalaxyWindow::on_show_system_info( int a_iSystem )
 	{
 	M_PROLOG
 	int l_iColor = - 1;
 	HString l_oName;
-	f_poSystemName->set ( "" );
-	f_poEmperorName->set ( "" );
-	f_poProduction->set ( "" );
-	f_poFleet->set ( "" );
+	f_poSystemName->set( "" );
+	f_poEmperorName->set( "" );
+	f_poProduction->set( "" );
+	f_poFleet->set( "" );
 	if ( a_iSystem >= 0 )
 		{
-		f_poSystemName->set ( n_ppcSystemNames [ a_iSystem ] );
-		if ( ( * f_poSystems ) [ a_iSystem ].f_iProduction >= 0 )
-			f_poProduction->set ( HString ( ( * f_poSystems ) [ a_iSystem ].f_iProduction ) );
-		if ( ( * f_poSystems ) [ a_iSystem ].f_iFleet >= 0 )
-			f_poFleet->set ( HString ( ( * f_poSystems ) [ a_iSystem ].f_iFleet ) );
-		l_iColor = ( * f_poSystems ) [ a_iSystem ].f_iColor;
-		if ( ( l_iColor >= 0 ) && ! f_poEmperors->get( l_iColor, l_oName ) )
-			f_poEmperorName->set( l_oName );
+		f_poSystemName->set( n_ppcSystemNames [ a_iSystem ] );
+		if ( ( *f_poSystems ) [ a_iSystem ].f_iProduction >= 0 )
+			f_poProduction->set ( HString ( ( *f_poSystems )[ a_iSystem ].f_iProduction ) );
+		if ( ( *f_poSystems ) [ a_iSystem ].f_iFleet >= 0 )
+			f_poFleet->set( HString( ( *f_poSystems )[ a_iSystem ].f_iFleet ) );
+		l_iColor = ( *f_poSystems )[ a_iSystem ].f_iColor;
+		emperors_t::iterator it( f_poEmperors->find( l_iColor ) );
+		if ( ( l_iColor >= 0 ) && ( it != f_poEmperors->end() ) )
+			f_poEmperorName->set( it->second );
 		}
 	return;
 	M_EPILOG
@@ -895,12 +896,12 @@ HClient::~HClient ( void )
 	M_EPILOG
 	}
 
-void HClient::init_client ( HString & a_roHost, int a_iPort )
+void HClient::init_client( HString& a_roHost, int a_iPort )
 	{
 	M_PROLOG
 	HString l_oMessage;
 	f_oSocket.connect ( a_roHost, a_iPort );
-	register_file_descriptor_handler ( f_oSocket.get_file_descriptor ( ), & HClient::handler_message );
+	register_file_descriptor_handler( f_oSocket.get_file_descriptor ( ), bound_call( &HClient::handler_message, this, _1 ) );
 	l_oMessage = "name:";
 	l_oMessage += setup.f_oLogin + '\n';
 	f_oSocket.write_until_eos ( l_oMessage );
@@ -918,7 +919,7 @@ void HClient::init_client ( HString & a_roHost, int a_iPort )
 	M_EPILOG
 	}
 
-int HClient::handler_message ( int )
+void HClient::handler_message( int )
 	{
 	M_PROLOG
 	int long l_iMsgLength = 0;
@@ -940,7 +941,7 @@ int HClient::handler_message ( int )
 	else if ( l_iMsgLength < 0 )
 		f_bLoop = false;
 	refresh();
-	return ( 0 );
+	return;
 	M_EPILOG
 	}
 
@@ -949,13 +950,13 @@ void HClient::process_command( HString& a_roCommand )
 	M_PROLOG
 	HString l_oMnemonic;
 	HString l_oArgument;
-	handler_t HANDLER;
 	if ( setup.f_iVerbose > 2 )
 		hcore::log << "msg: " << a_roCommand << endl;
 	l_oMnemonic = get_token( a_roCommand, ":", 0 );
 	l_oArgument = a_roCommand.mid( l_oMnemonic.get_length() + 1 );
-	if ( ! f_oHandlers.get( l_oMnemonic, HANDLER ) )
-		( this->*HANDLER )( l_oArgument );
+	handlers_t::iterator it( f_oHandlers.find( l_oMnemonic ) );
+	if ( it != f_oHandlers.end() )
+		( this->*(it->second) )( l_oArgument );
 	else
 		{
 		hcore::log << "unknown mnemonic: " << l_oMnemonic << ", (the argument: " << l_oArgument << ")" << endl;
@@ -1007,7 +1008,7 @@ void HClient::handler_setup( HString& a_roCommand )
 	M_EPILOG
 	}
 
-void HClient::handler_play ( HString& a_roCommand )
+void HClient::handler_play( HString& a_roCommand )
 	{
 	M_PROLOG
 	char l_cEvent = 0;
@@ -1022,10 +1023,15 @@ void HClient::handler_play ( HString& a_roCommand )
 		l_iSysNo = lexical_cast<int>( get_token( l_oValue, ",", 1 ) );
 		l_iProduction = lexical_cast<int>( get_token( l_oValue, ",", 2 ) );
 		if ( l_iProduction >= 0 )
-			f_oSystems [ l_iSysNo ].f_iProduction = l_iProduction;
-		f_oSystems [ l_iSysNo ].f_iFleet = lexical_cast<int>( get_token( l_oValue, ",", 4 ) );
+			f_oSystems[ l_iSysNo ].f_iProduction = l_iProduction;
+		f_oSystems[ l_iSysNo ].f_iFleet = lexical_cast<int>( get_token( l_oValue, ",", 4 ) );
 		l_iColor = lexical_cast<int>( get_token( l_oValue, ",", 3 ) );
-		f_oEmperors.get( l_iColor, l_oValue );
+		/* scope to limit `it' visibility */
+			{
+			emperors_t::iterator it( f_oEmperors.find( l_iColor ) );
+			M_ASSERT( it != f_oEmperors.end() );
+			l_oValue = it->second;
+			}
 		switch ( l_cEvent )
 			{
 			case ( 'c' ): /* conquered */
@@ -1058,9 +1064,11 @@ void HClient::handler_play ( HString& a_roCommand )
 				}
 			case ( 'f' ): /* failed to conquer */
 				{
-				f_oSystems [ l_iSysNo ].f_iColor = l_iColor;
+				f_oSystems[ l_iSysNo ].f_iColor = l_iColor;
 				l_iColor = f_iColor;
-				f_oEmperors.get ( l_iColor, l_oValue );
+				emperors_t::iterator it( f_oEmperors.find( l_iColor ) );
+				M_ASSERT( it != f_oEmperors.end() );
+				l_oValue = it->second;
 				}
 			case ( 's' ): /* resisted attack */
 				{

@@ -118,9 +118,9 @@ bool HLogic::process_command( OClientInfo* a_poClientInfo, HString const& a_roCo
 	l_oMnemonic = get_token( l_oArgument, ":", 0 );
 	l_oArgument = l_oArgument.mid( l_oMnemonic.get_length() + 1 );
 	bool failure = false;
-	handler_t HANDLER;
-	if ( ! f_oHandlers.get( l_oMnemonic, HANDLER ) )
-		( this->*HANDLER )( a_poClientInfo, l_oArgument );
+	handlers_t::iterator it( f_oHandlers.find( l_oMnemonic ) );
+	if ( it != f_oHandlers.end() )
+		( this->*(it->second) )( a_poClientInfo, l_oArgument );
 	else
 		{
 		failure = true, kick_client( a_poClientInfo );
