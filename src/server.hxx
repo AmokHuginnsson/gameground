@@ -35,7 +35,7 @@ Copyright:
 namespace gameground
 {
 
-class HServer : public yaal::tools::HProcess
+class HServer
 	{
 protected:
 	/*{*/
@@ -50,6 +50,7 @@ protected:
 	handlers_t f_oHandlers;
 	yaal::tools::HStringStream _out;
 	yaal::dbwrapper::HDataBase::ptr_t _db;
+	yaal::tools::HProcess _dispatcher;
 	/*}*/
 	struct PROTOCOL
 		{
@@ -79,7 +80,7 @@ public:
 	HServer( int );
 	~HServer( void );
 	int init_server( int );
-	using yaal::tools::HProcess::run;
+	void run( void );
 	/*}*/
 protected:
 	/*{*/

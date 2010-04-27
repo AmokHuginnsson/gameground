@@ -33,7 +33,6 @@ M_VCSID( "$Id: "__ID__" $" )
 #include "options.hxx"
 #include "galaxy.hxx"
 
-using namespace std;
 using namespace yaal;
 using namespace yaal::hcore;
 using namespace yaal::hconsole;
@@ -74,7 +73,7 @@ int main( int a_iArgc, char* a_ppcArgv[] )
 		if ( cons.is_enabled() )
 			cons.leave_curses (); /* ending ncurses sesion */
 		if ( l_iOpt )
-			fprintf ( stdout, "Your terminal is too small.\n" );
+			cout << "Your terminal is too small." << endl;
 /* ... there is the place main loop ends. :OD-OT */
 		}
 	catch ( ... )
@@ -83,7 +82,7 @@ int main( int a_iArgc, char* a_ppcArgv[] )
 			cons.leave_curses (); /* ending ncurses sesion */
 		throw;
 		}
-	fprintf ( stderr, "Done.\n" );
+	cerr << _( "Done" ) << endl;
 	return ( l_iOpt );
 	M_FINAL
 	}

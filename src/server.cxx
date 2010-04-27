@@ -82,9 +82,9 @@ char const* const HServer::PROTOCOL::SEPP = ",";
 char const* const HServer::PROTOCOL::SHUTDOWN = "shutdown";
 
 HServer::HServer( int a_iConnections )
-	: HProcess( a_iConnections ), f_iMaxConnections( a_iConnections ),
+	: f_iMaxConnections( a_iConnections ),
 	f_oSocket( HSocket::socket_type_t( HSocket::TYPE::DEFAULT ) | HSocket::TYPE::NONBLOCKING | HSocket::TYPE::SSL_SERVER, a_iConnections ),
-	f_oClients(), f_oLogics(), f_oHandlers(), _out(), _db( HDataBase::get_connector() )
+	f_oClients(), f_oLogics(), f_oHandlers(), _out(), _db( HDataBase::get_connector() ), _dispatcher( a_iConnections, 3600 )
 	{
 	M_PROLOG
 	return;
@@ -103,7 +103,7 @@ int HServer::init_server( int a_iPort )
 	factory.initialize_globals();
 	_db->connect( setup.f_oDatabasePath, setup.f_oDatabaseLogin, setup.f_oDatabasePassword );
 	f_oSocket.listen( "0.0.0.0", a_iPort );
-	register_file_descriptor_handler( f_oSocket.get_file_descriptor(), bound_call( &HServer::handler_connection, this, _1 ) );
+	_dispatcher.register_file_descriptor_handler( f_oSocket.get_file_descriptor(), bound_call( &HServer::handler_connection, this, _1 ) );
 	f_oHandlers[ PROTOCOL::SHUTDOWN ] = &HServer::handler_shutdown;
 	f_oHandlers[ PROTOCOL::QUIT ] = &HServer::handler_quit;
 	f_oHandlers[ PROTOCOL::MSG ] = &HServer::handler_chat;
@@ -116,7 +116,6 @@ int HServer::init_server( int a_iPort )
 	f_oHandlers[ PROTOCOL::JOIN ] = &HServer::join_game;
 	f_oHandlers[ PROTOCOL::ABANDON ] = &HServer::handler_abandon;
 	f_oHandlers[ PROTOCOL::CMD ] = &HServer::pass_command;
-	HProcess::init( 3600 );
 	out << brightblue << "<<<GameGround>>>" << lightgray << " server started." << endl;
 	return ( 0 );
 	M_EPILOG
@@ -298,7 +297,7 @@ void HServer::handler_connection( int )
 		l_oClient->close();
 	else
 		{
-		register_file_descriptor_handler( l_oClient->get_file_descriptor(), bound_call( &HServer::handler_message, this, _1 ) );
+		_dispatcher.register_file_descriptor_handler( l_oClient->get_file_descriptor(), bound_call( &HServer::handler_message, this, _1 ) );
 		f_oClients[ l_oClient->get_file_descriptor() ].f_oSocket = l_oClient;
 		}
 	out << l_oClient->get_host_name() << endl;
@@ -365,7 +364,7 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& a_oClient, char const* c
 	if ( a_pcReason && a_pcReason[0] )
 		*a_oClient << PROTOCOL::KCK << PROTOCOL::SEP << a_pcReason << endl;
 	f_oSocket.shutdown_client( l_iFileDescriptor );
-	unregister_file_descriptor_handler( l_iFileDescriptor );
+	_dispatcher.unregister_file_descriptor_handler( l_iFileDescriptor );
 	clients_t::iterator clientIt = f_oClients.find( l_iFileDescriptor );
 	M_ASSERT( clientIt != f_oClients.end() );
 	out << "client ";
@@ -417,7 +416,7 @@ void HServer::get_logics_info( OClientInfo& a_roInfo, HString const& )
 
 void HServer::handler_shutdown( OClientInfo&, HString const& )
 	{
-	f_bLoop = false;
+	_dispatcher.stop();
 	return;
 	}
 
@@ -517,6 +516,13 @@ void HServer::send_game_info( OClientInfo& /*a_roInfo*/, HString const& )
 	M_EPILOG
 	}
 
+void HServer::run( void )
+	{
+	M_PROLOG
+	_dispatcher.run();
+	return;
+	M_EPILOG
+	}
 
 }
 
