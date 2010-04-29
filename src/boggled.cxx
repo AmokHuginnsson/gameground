@@ -265,7 +265,7 @@ void HBoggle::do_kick( OClientInfo* a_poClientInfo )
 	{
 	M_PROLOG
 	HLock l( f_oMutex );
-	f_oPlayers.remove( a_poClientInfo );
+	f_oPlayers.erase( a_poClientInfo );
 	for ( words_t::iterator it = f_oWords.begin(); it != f_oWords.end(); ++ it )
 		{
 		if ( it->second->size() > 1 )

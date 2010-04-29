@@ -529,7 +529,7 @@ void HGalaxy::do_kick( OClientInfo* a_poClientInfo )
 			f_oSystems[ l_iCtr ].f_poEmperor = NULL;
 		}
 	int color = get_color( a_poClientInfo );
-	f_oEmperors.remove( a_poClientInfo );
+	f_oEmperors.erase( a_poClientInfo );
 	if ( ( color >= 0 ) && ( f_iRound < 0 ) )
 		-- f_iReady;
 	if ( color >= 0 )

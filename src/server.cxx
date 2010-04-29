@@ -338,7 +338,7 @@ void HServer::handler_message( int a_iFileDescriptor )
 					HLogic::ptr_t l_oLogic = clientIt->second.f_oLogic;
 					( this->*it->second )( clientIt->second, l_oArgument );
 					if ( ( !! l_oLogic ) && ( ! l_oLogic->active_clients() ) )
-						f_oLogics.remove( l_oLogic->get_name() );
+						f_oLogics.erase( l_oLogic->get_name() );
 					}
 				else
 					kick_client( l_oClient, _( "Unknown command." ) );
@@ -388,7 +388,7 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& a_oClient, char const* c
 	HString login;
 	if ( ! clientIt->second.f_oLogin.is_empty() )
 		login = clientIt->second.f_oLogin;
-	f_oClients.remove( l_iFileDescriptor );
+	f_oClients.erase( l_iFileDescriptor );
 	if ( ! login.is_empty() )
 		broadcast_to_interested( _out << PROTOCOL::PLAYER_QUIT << PROTOCOL::SEP << login << _out );
 	return;
@@ -451,7 +451,7 @@ void HServer::remove_client_from_logic( OClientInfo& a_roInfo, char const* const
 		l_oLogic->kick_client( &a_roInfo, a_pcReason );
 		a_roInfo.f_oLogic = HLogic::ptr_t();
 		if ( ! l_oLogic->active_clients() )
-			f_oLogics.remove( l_oLogic->get_name() );
+			f_oLogics.erase( l_oLogic->get_name() );
 		}
 	return;
 	M_EPILOG
