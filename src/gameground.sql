@@ -61,7 +61,7 @@ CREATE INDEX idx_stats_id_game ON tbl_stats ( id_game );
 -- Automatically create session information while creating user data.
 CREATE TRIGGER tgg_user_insert AFTER INSERT ON tbl_user FOR EACH ROW
 BEGIN
-	INSERT INTO tbl_session ( id_user, last_activity ) VALUES ( NEW.id, datetime() );
+	INSERT INTO tbl_session ( id_user, last_activity ) VALUES ( NEW.id, datetime( 'now', 'localtime' ) );
 END;
 
 -- Make tbl_user.id read only.
@@ -178,7 +178,7 @@ INSERT INTO tbl_game ( name ) VALUES ( 'boggle' );
 INSERT INTO tbl_game ( name ) VALUES ( 'galaxy' );
 INSERT INTO tbl_game ( name ) VALUES ( 'gomoku' );
 
-INSERT INTO v_user_session ( login, password, name, email, registered ) VALUES ( 'amok', '1c29cf0ceb89afce131e27b76c18af1e9cf7f5e3', 'Marcin Konarski', 'amok13@o2.pl', datetime() );
+INSERT INTO v_user_session ( login, password, name, email, registered ) VALUES ( 'amok', '1c29cf0ceb89afce131e27b76c18af1e9cf7f5e3', 'Marcin Konarski', 'amok13@o2.pl', datetime( 'now', 'localtime' ) );
 INSERT INTO v_user_session ( login, password, name, email ) VALUES ( 'kamawanai', '0c7ebd714bbcfca66cc23ce5652569ccb48d6e48', 'Diana Blaszczyk', 'diana.blaszczyk@gmail.com' );
 INSERT INTO v_user_session ( login, password ) VALUES ( 'aNeutrino', 'b4434d5d3638c82cf2dc25c9e4cb75b1f7110e05' );
 

@@ -154,21 +154,22 @@ void HServer::handle_login( OClientInfo& a_roInfo, HString const& a_oLoginInfo )
 	{
 	M_PROLOG
 	clients_t::iterator it;
-	int const MINIMUM_NAME_LENGTH = 4;
+	int const MINIMUM_NAME_LENGTH( 4 );
 	HString login( get_token( a_oLoginInfo, ":", 0 ) );
 	HString password( get_token( a_oLoginInfo, ":", 1 ) );
 	for ( it = f_oClients.begin(); it != f_oClients.end(); ++ it )
 		if ( ( ! strcasecmp( it->second.f_oLogin, login ) ) && ( it->second.f_oSocket != a_roInfo.f_oSocket ) )
 			break;
 	if ( login.find_other_than( LEGEAL_CHARACTER_SET[ CONSTR_CHAR_SET_LOGIN_NAME ] ) >= 0 )
-		*a_roInfo.f_oSocket << "err:Name may only take form of `[a-zA-Z0-9]+'." << endl;
+		*a_roInfo.f_oSocket << "err:Name may only take form of `[a-zA-Z0-9]{4,}'." << endl;
 	else if ( login.get_length() < MINIMUM_NAME_LENGTH )
-		*a_roInfo.f_oSocket << "err:Your name is too short, it needs to be at least 4 character long." << endl;
+		*a_roInfo.f_oSocket << "err:Your name is too short, it needs to be at least " << MINIMUM_NAME_LENGTH << " character long." << endl;
 	else if ( it != f_oClients.end() )
 		*a_roInfo.f_oSocket << "err:" << login << " already logged in." << endl;
 	else
 		{
-		HRecordSet::ptr_t rs = _db->query( ( HFormat( "SELECT COUNT(*) FROM v_user_session WHERE login = LOWER('%s') AND password = LOWER('%s');" ) % login % password ).string() );
+		HRecordSet::ptr_t rs( _db->query( ( HFormat( "SELECT ( SELECT COUNT(*) FROM v_user_session WHERE login = LOWER('%s') AND password = LOWER('%s') )"
+						" + ( SELECT COUNT(*) FROM v_user_session WHERE login = LOWER('%s') );" ) % login % password % login ).string() ) );
 		M_ENSURE( !! rs );
 		HRecordSet::iterator row = rs->begin();
 		if ( row == rs->end() )
@@ -176,16 +177,32 @@ void HServer::handle_login( OClientInfo& a_roInfo, HString const& a_oLoginInfo )
 			out << _db->get_error() << endl;
 			M_ENSURE( ! "database query error" );
 			}
-		if ( lexical_cast<int>( row[0] ) == 1 )
+		int result( lexical_cast<int>( row[0] ) );
+		if ( ( result == 2 ) || ( result == 0 ) )
 			{
 			a_roInfo.f_oLogin = login;
+			if ( result ) /* user exists and supplied password was correct */
+				{
+				a_roInfo._anonymous = false;
+				update_last_activity( a_roInfo );
+				}
+			else if ( password != hash::sha1( "" ) )
+				{
+				rs = _db->query( ( HFormat( "INSERT INTO v_user_session ( login, password ) VALUES ( LOWER('%s'), LOWER('%s') );" ) % login % password ).string() );
+				M_ENSURE( !! rs );
+				}
+			else
+				*a_roInfo.f_oSocket << PROTOCOL::MSG << PROTOCOL::SEP << mark( COLORS::FG_RED ) << " Your game stats will not be preserved nor your login protected." << endl;
 			broadcast_to_interested( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << login << _out );
 			broadcast_to_interested( _out << PROTOCOL::MSG << PROTOCOL::SEP
 					<< mark( COLORS::FG_BLUE ) << " " << login << " entered the GameGround." << _out );
-			update_last_activity( a_roInfo );
 			}
 		else
+			{
+			M_ENSURE( result == 1 );
+			/* user exists but supplied password was incorrect */
 			*a_roInfo.f_oSocket << "err:Login failed." << endl;
+			}
 		}
 	return;
 	M_EPILOG
@@ -447,7 +464,8 @@ void HServer::handler_shutdown( OClientInfo&, HString const& )
 void HServer::handler_quit( OClientInfo& a_roInfo, HString const& )
 	{
 	M_PROLOG
-	update_last_activity( a_roInfo );
+	if ( ! a_roInfo._anonymous )
+		update_last_activity( a_roInfo );
 	HString login( a_roInfo.f_oLogin );
 	kick_client( a_roInfo.f_oSocket, "" );
 	if ( ! login.is_empty() )
@@ -537,7 +555,11 @@ void HServer::send_games_info( OClientInfo& a_roInfo )
 void HServer::update_last_activity( OClientInfo const& info_ )
 	{
 	M_PROLOG
-	_db->query( ( HFormat( "UPDATE v_user_session SET last_activity = datetime() WHERE login = LOWER('%s');" ) % info_.f_oLogin ).string() );
+	HRecordSet::ptr_t rs( _db->query(
+		( HFormat(
+				"UPDATE v_user_session SET last_activity = datetime('now', 'localtime') WHERE login = LOWER('%s');"
+		) % info_.f_oLogin ).string() ) );
+	M_ENSURE( !! rs );
 	return;
 	M_EPILOG
 	}

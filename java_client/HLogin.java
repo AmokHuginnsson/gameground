@@ -84,11 +84,7 @@ class HLogin extends HAbstractLogic {
 			errors += "name not set\n";
 		else
 			login = new String( _gui._login.getText() );
-		String password = "";
-		if ( _gui._password.getText().compareTo( "" ) == 0 )
-			errors += "password not set\n";
-		else
-			password = new String( _gui._password.getText() );
+		String password = new String( _gui._password.getText() );
 		String server = "";
 		if ( _gui._server.getText().compareTo( "" ) == 0 )
 			errors += "server not set\n";

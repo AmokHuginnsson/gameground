@@ -34,10 +34,11 @@ namespace gameground
 
 struct OClientInfo
 	{
+	bool _anonymous;
 	yaal::hcore::HString f_oLogin;
 	yaal::hcore::HSocket::ptr_t f_oSocket;
 	HLogic::ptr_t f_oLogic;
-	OClientInfo( void ) : f_oLogin(), f_oSocket(), f_oLogic() {}
+	OClientInfo( void ) : _anonymous( true ), f_oLogin(), f_oSocket(), f_oLogic() {}
 	};
 
 }
