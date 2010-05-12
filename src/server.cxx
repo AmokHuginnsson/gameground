@@ -61,6 +61,7 @@ static int const CONSTR_CHAR_SET_LOGIN_NAME = 0;
 static int const CONSTR_CHAR_SET_GAME_NAME = 1;
 char const* const LEGEAL_CHARACTER_SET[] = { LEGEAL_CHARACTER_SET_BASE, " "LEGEAL_CHARACTER_SET_BASE };
 char const* const HServer::PROTOCOL::ABANDON = "abandon";
+char const* const HServer::PROTOCOL::ACCOUNT = "account";
 char const* const HServer::PROTOCOL::CMD = "cmd";
 char const* const HServer::PROTOCOL::CREATE = "create";
 char const* const HServer::PROTOCOL::ERR = "err";
@@ -108,6 +109,7 @@ int HServer::init_server( int a_iPort )
 	f_oHandlers[ PROTOCOL::QUIT ] = &HServer::handler_quit;
 	f_oHandlers[ PROTOCOL::MSG ] = &HServer::handler_chat;
 	f_oHandlers[ PROTOCOL::LOGIN ] = &HServer::handle_login;
+	f_oHandlers[ PROTOCOL::ACCOUNT ] = &HServer::handle_account;
 	f_oHandlers[ PROTOCOL::GET_LOGISTICS ] = &HServer::get_logics_info;
 	f_oHandlers[ PROTOCOL::GET_PLAYERS ] = &HServer::get_players_info;
 	f_oHandlers[ PROTOCOL::GET_GAMES ] = &HServer::get_games_info;
@@ -166,7 +168,7 @@ void HServer::handle_login( OClientInfo& a_roInfo, HString const& a_oLoginInfo )
 		*a_roInfo.f_oSocket << "err:" << login << " already logged in." << endl;
 	else
 		{
-		HRecordSet::ptr_t rs = _db->query( lexical_cast<HString>( HFormat( "SELECT COUNT(*) FROM tbl_user WHERE login = LOWER('%s') AND password = LOWER('%s');" ) % login % password ) );
+		HRecordSet::ptr_t rs = _db->query( ( HFormat( "SELECT COUNT(*) FROM v_user_session WHERE login = LOWER('%s') AND password = LOWER('%s');" ) % login % password ).string() );
 		M_ENSURE( !! rs );
 		HRecordSet::iterator row = rs->begin();
 		if ( row == rs->end() )
@@ -180,9 +182,31 @@ void HServer::handle_login( OClientInfo& a_roInfo, HString const& a_oLoginInfo )
 			broadcast_to_interested( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << login << _out );
 			broadcast_to_interested( _out << PROTOCOL::MSG << PROTOCOL::SEP
 					<< mark( COLORS::FG_BLUE ) << " " << login << " entered the GameGround." << _out );
+			update_last_activity( a_roInfo );
 			}
 		else
 			*a_roInfo.f_oSocket << "err:Login failed." << endl;
+		}
+	return;
+	M_EPILOG
+	}
+
+void HServer::handle_account( OClientInfo& a_roInfo, HString const& accountInfo_ )
+	{
+	M_PROLOG
+	if ( a_roInfo.f_oLogin.is_empty() )
+		kick_client( a_roInfo.f_oSocket, _( "Set your name first (Just login with standard client, will ya?)." ) );
+	else
+		{
+		HString action( get_token( accountInfo_, ":", 0 ) );
+		if ( action == "register" )
+			{
+			}
+		else if ( action == "update" )
+			{
+			}
+		else
+			kick_client( a_roInfo.f_oSocket, _( "Unknown account related action." ) );
 		}
 	return;
 	M_EPILOG
@@ -216,7 +240,7 @@ void HServer::create_game( OClientInfo& a_roInfo, HString const& a_oArg )
 	{
 	M_PROLOG
 	if ( a_roInfo.f_oLogin.is_empty() )
-		kick_client( a_roInfo.f_oSocket, _( "Set your name first." ) );
+		kick_client( a_roInfo.f_oSocket, _( "Set your name first (Just login with standard client, will ya?)." ) );
 	else
 		{
 		HString l_oType = get_token( a_oArg, ":", 0 );
@@ -423,7 +447,8 @@ void HServer::handler_shutdown( OClientInfo&, HString const& )
 void HServer::handler_quit( OClientInfo& a_roInfo, HString const& )
 	{
 	M_PROLOG
-	HString login = a_roInfo.f_oLogin;
+	update_last_activity( a_roInfo );
+	HString login( a_roInfo.f_oLogin );
 	kick_client( a_roInfo.f_oSocket, "" );
 	if ( ! login.is_empty() )
 		broadcast_to_interested( _out << PROTOCOL::MSG << PROTOCOL::SEP
@@ -505,6 +530,14 @@ void HServer::send_games_info( OClientInfo& a_roInfo )
 	for( logics_t::iterator it = f_oLogics.begin();
 			it != f_oLogics.end(); ++ it )
 		*a_roInfo.f_oSocket << PROTOCOL::GAME << PROTOCOL::SEP << it->second->get_info() << endl;
+	return;
+	M_EPILOG
+	}
+
+void HServer::update_last_activity( OClientInfo const& info_ )
+	{
+	M_PROLOG
+	_db->query( ( HFormat( "UPDATE v_user_session SET last_activity = datetime() WHERE login = LOWER('%s');" ) % info_.f_oLogin ).string() );
 	return;
 	M_EPILOG
 	}

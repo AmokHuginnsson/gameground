@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="iso8859-2"?>
 <!DOCTYPE dialog SYSTEM "res/gameground.dtd">
-<dialog title="Create a new game ..." modal="true" size="320,240" resizable="false" focuscycleroot="true" defaultCloseOperation="JDialog.DISPOSE_ON_CLOSE"><!--{{{-->
+<dialog title="Create a new game ..." modal="true" size="480,320" resizable="false" focuscycleroot="true" defaultCloseOperation="JDialog.DISPOSE_ON_CLOSE"><!--{{{-->
 	<vbox border="EmptyBorder(8,8,8,8)">
-		<hbox size="320,220">
+		<hbox size="480,300">
 			<vbox border="TitledBorder(EmptyBorder,Game type ...,TitledBorder.LEFT, TitledBorder.ABOVE_TOP)">
 				<scrollpane>
 					<list id="_logics" selectionmode="ListSelectionModel.SINGLE_SELECTION" focusable="true" tooltiptext="Available game types." />

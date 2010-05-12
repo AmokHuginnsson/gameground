@@ -55,6 +55,7 @@ protected:
 	struct PROTOCOL
 		{
 		static char const* const ABANDON;
+		static char const* const ACCOUNT;
 		static char const* const CMD;
 		static char const* const CREATE;
 		static char const* const ERR;
@@ -94,6 +95,7 @@ protected:
 	void broadcast( yaal::hcore::HString const& );
 	void broadcast_to_interested( yaal::hcore::HString const& );
 	void handle_login( OClientInfo&, yaal::hcore::HString const& );
+	void handle_account( OClientInfo&, yaal::hcore::HString const& );
 	void pass_command( OClientInfo&, yaal::hcore::HString const& );
 	void create_game( OClientInfo&, yaal::hcore::HString const& );
 	void join_game( OClientInfo&, yaal::hcore::HString const& );
@@ -106,6 +108,7 @@ protected:
 	void send_games_info( OClientInfo& );
 	void send_game_info( OClientInfo&, yaal::hcore::HString const& );
 	void remove_client_from_logic( OClientInfo&, char const* const = NULL );
+	void update_last_activity( OClientInfo const& );
 	/*}*/
 	};
 
