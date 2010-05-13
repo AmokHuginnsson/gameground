@@ -48,8 +48,8 @@ char const* const HLogic::PROTOCOL::PLAYER = "player";
 char const* const HLogic::PROTOCOL::PLAYER_QUIT = "player_quit";
 
 HLogic::HLogic( HString const& a_oSymbol, HString const& a_oName )
-	: f_oSymbol( a_oSymbol ), f_oHandlers( setup.f_iMaxConnections ),
-	f_oClients(), f_oName( a_oName ), _out()
+	: f_oSymbol( a_oSymbol ), _handlers( setup._maxConnections ),
+	_clients(), f_oName( a_oName ), _out()
 	{
 	}
 
@@ -61,11 +61,11 @@ void HLogic::kick_client( OClientInfo* a_poClientInfo, char const* const a_pcRea
 	{
 	M_PROLOG
 	a_poClientInfo->f_oLogic = HLogic::ptr_t();
-	f_oClients.erase( a_poClientInfo );
+	_clients.erase( a_poClientInfo );
 	if ( a_pcReason )
-		*a_poClientInfo->f_oSocket << "err:" << a_pcReason << endl;
+		*a_poClientInfo->_socket << "err:" << a_pcReason << endl;
 	do_kick( a_poClientInfo );
-	broadcast( _out << PROTOCOL::PLAYER_QUIT << PROTOCOL::SEP << a_poClientInfo->f_oLogin << endl << _out );
+	broadcast( _out << PROTOCOL::PLAYER_QUIT << PROTOCOL::SEP << a_poClientInfo->_login << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -86,7 +86,7 @@ bool HLogic::accept_client( OClientInfo* a_poClientInfo )
 	bool rejected = false;
 	if ( ! do_accept( a_poClientInfo ) )
 		{
-		f_oClients.insert( a_poClientInfo );
+		_clients.insert( a_poClientInfo );
 		do_post_accept( a_poClientInfo );
 		}
 	else
@@ -98,7 +98,7 @@ bool HLogic::accept_client( OClientInfo* a_poClientInfo )
 int HLogic::active_clients( void ) const
 	{
 	M_PROLOG
-	return ( static_cast<int>( f_oClients.size() ) );
+	return ( static_cast<int>( _clients.size() ) );
 	M_EPILOG
 	}
 
@@ -118,8 +118,8 @@ bool HLogic::process_command( OClientInfo* a_poClientInfo, HString const& a_roCo
 	l_oMnemonic = get_token( l_oArgument, ":", 0 );
 	l_oArgument = l_oArgument.mid( l_oMnemonic.get_length() + 1 );
 	bool failure = false;
-	handlers_t::iterator it( f_oHandlers.find( l_oMnemonic ) );
-	if ( it != f_oHandlers.end() )
+	handlers_t::iterator it( _handlers.find( l_oMnemonic ) );
+	if ( it != _handlers.end() )
 		( this->*(it->second) )( a_poClientInfo, l_oArgument );
 	else
 		{
@@ -133,8 +133,8 @@ bool HLogic::process_command( OClientInfo* a_poClientInfo, HString const& a_roCo
 void HLogic::broadcast( HString const& a_roMessage )
 	{
 	M_PROLOG
-	for ( clients_t::HIterator it = f_oClients.begin(); it != f_oClients.end(); ++ it )
-		(*it)->f_oSocket->write_until_eos ( a_roMessage );
+	for ( clients_t::HIterator it = _clients.begin(); it != _clients.end(); ++ it )
+		(*it)->_socket->write_until_eos ( a_roMessage );
 	return;
 	M_EPILOG
 	}

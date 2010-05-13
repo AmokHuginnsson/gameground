@@ -39,18 +39,21 @@ class HServer
 	{
 protected:
 	/*{*/
+	typedef int long id_t;
 	typedef void ( HServer::* handler_t )( OClientInfo&, yaal::hcore::HString const& );
-	typedef yaal::hcore::HMap<yaal::hcore::HString, HLogic::ptr_t> logics_t;
+	typedef yaal::hcore::HMap<id_t, HLogic::ptr_t> logics_t;
 	typedef yaal::hcore::HMap<yaal::hcore::HString, handler_t> handlers_t;
 	typedef yaal::hcore::HMap<int, OClientInfo> clients_t;
-	int f_iMaxConnections;
-	yaal::hcore::HSocket f_oSocket;
-	clients_t f_oClients;
-	logics_t f_oLogics;
-	handlers_t f_oHandlers;
+	typedef yaal::hcore::HArray<id_t> free_ids_t;
+	int _maxConnections;
+	yaal::hcore::HSocket _socket;
+	clients_t _clients;
+	logics_t _logics;
+	handlers_t _handlers;
 	yaal::tools::HStringStream _out;
 	yaal::dbwrapper::HDataBase::ptr_t _db;
 	yaal::tools::HProcess _dispatcher;
+	free_ids_t _freeIds;
 	/*}*/
 	struct PROTOCOL
 		{
@@ -75,6 +78,8 @@ protected:
 		static char const* const SEP;
 		static char const* const SEPP;
 		static char const* const SHUTDOWN;
+		static char const* const VERSION;
+		static char const* const VERSION_ID;
 		};
 public:
 	/*{*/
@@ -109,6 +114,7 @@ protected:
 	void send_game_info( OClientInfo&, yaal::hcore::HString const& );
 	void remove_client_from_logic( OClientInfo&, char const* const = NULL );
 	void update_last_activity( OClientInfo const& );
+	id_t create_id( void );
 	/*}*/
 	};
 

@@ -58,7 +58,7 @@ void OSetup::test_setup( void )
 	{
 	M_PROLOG
 #ifdef __GAMEGROUND_SERVER__
-	if ( f_iMaxConnections < 2 )
+	if ( _maxConnections < 2 )
 		yaal::tools::util::failure ( 3,
 				_( "this server hosts multiplayer games only\n" ) );
 	if ( f_iPort < 1024 )

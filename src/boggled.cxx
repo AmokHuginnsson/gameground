@@ -109,8 +109,8 @@ HBoggle::HBoggle( HString const& a_oName, int a_iPlayers, int a_iRoundTime, int 
 	M_PROLOG
 	HRandomizer l_oRandom;
 	l_oRandom.set( time ( NULL ) );
-	f_oHandlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HBoggle::handler_play );
-	f_oHandlers[ PROTOCOL::SAY ] = static_cast<handler_t>( &HBoggle::handler_message );
+	_handlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HBoggle::handler_play );
+	_handlers[ PROTOCOL::SAY ] = static_cast<handler_t>( &HBoggle::handler_message );
 	return;
 	M_EPILOG
 	}
@@ -166,7 +166,7 @@ void HBoggle::handler_message( OClientInfo* a_poClientInfo, HString const& a_roM
 	HLock l( f_oMutex );
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::MSG << PROTOCOL::SEP
-			<< a_poClientInfo->f_oLogin << ": " << a_roMessage << endl << _out );
+			<< a_poClientInfo->_login << ": " << a_roMessage << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -201,7 +201,7 @@ HBoggle::OPlayerInfo* HBoggle::get_player_info( OClientInfo* a_poClientInfo )
 
 bool HBoggle::do_accept( OClientInfo* a_poClientInfo )
 	{
-	out << "new candidate " << a_poClientInfo->f_oLogin << endl;
+	out << "new candidate " << a_poClientInfo->_login << endl;
 	return ( false );
 	}
 
@@ -216,8 +216,8 @@ void HBoggle::do_post_accept( OClientInfo* a_poClientInfo )
 	 * Send proto info about new contestant to all players.
 	 */
 	broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
-			<< a_poClientInfo->f_oLogin << PROTOCOL::SEPP << 0 << PROTOCOL::SEPP << 0 << endl << _out );
-	*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+			<< a_poClientInfo->_login << PROTOCOL::SEPP << 0 << PROTOCOL::SEPP << 0 << endl << _out );
+	*a_poClientInfo->_socket << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
 		<< "Welcome, this match settings are:" << endl
 		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
 		<< "   round time - " << f_iRoundTime << " seconds" << endl
@@ -227,27 +227,27 @@ void HBoggle::do_post_accept( OClientInfo* a_poClientInfo )
 		<< "   round interval - " << f_iInterRoundDelay << endl
 		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
 		<< "This match requires " << f_iPlayers << " players to start the game." << endl;
-	*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
+	*a_poClientInfo->_socket << PROTOCOL::NAME << PROTOCOL::SEP
 		<< PROTOCOL::SETUP << PROTOCOL::SEP << f_iRoundTime
 		<< PROTOCOL::SEPP << f_iInterRoundDelay << endl;
 	for ( players_t::iterator it = f_oPlayers.begin(); it != f_oPlayers.end(); ++ it )
 		{
 		if ( it->first != a_poClientInfo )
 			{
-			*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
-				<< PROTOCOL::PLAYER << PROTOCOL::SEP << it->first->f_oLogin
+			*a_poClientInfo->_socket << PROTOCOL::NAME << PROTOCOL::SEP
+				<< PROTOCOL::PLAYER << PROTOCOL::SEP << it->first->_login
 				<< PROTOCOL::SEPP << it->second.f_iScore << PROTOCOL::SEPP
 				<< it->second.f_iLast << endl;
-			*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
-				<< PROTOCOL::MSG << PROTOCOL::SEP << it->first->f_oLogin << " joined the mind contest." << endl;
+			*a_poClientInfo->_socket << PROTOCOL::NAME << PROTOCOL::SEP
+				<< PROTOCOL::MSG << PROTOCOL::SEP << it->first->_login << " joined the mind contest." << endl;
 			}
 		}
 	broadcast(
 			_out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::MSG << PROTOCOL::SEP
-			<< a_poClientInfo->f_oLogin
+			<< a_poClientInfo->_login
 			<< " joined the mind contest." << endl << _out );
-	out << "player [" << a_poClientInfo->f_oLogin << "] accepted" << endl;
+	out << "player [" << a_poClientInfo->_login << "] accepted" << endl;
 	if ( ! f_iRound && ( f_oPlayers.size() >= f_iPlayers ) )
 		{
 		schedule_end_round();
@@ -256,7 +256,7 @@ void HBoggle::do_post_accept( OClientInfo* a_poClientInfo )
 				<< "The match has begun, good luck!" << endl << _out );
 		}
 	else if ( f_iRound > 0 )
-		*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::DECK << PROTOCOL::SEP << make_deck() << endl;
+		*a_poClientInfo->_socket << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::DECK << PROTOCOL::SEP << make_deck() << endl;
 	return;
 	M_EPILOG
 	}
@@ -275,7 +275,7 @@ void HBoggle::do_kick( OClientInfo* a_poClientInfo )
 		}
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::MSG << PROTOCOL::SEP
-			<< "Player " << a_poClientInfo->f_oLogin << " left this match." << endl << _out );
+			<< "Player " << a_poClientInfo->_login << " left this match." << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -366,23 +366,23 @@ void HBoggle::on_end_round( void )
 				longest.push_back( it );
 			OClientInfo* clInfo = *it->second->begin();
 			OPlayerInfo& info = *get_player_info( clInfo );
-			*(clInfo->f_oSocket) << PROTOCOL::NAME << PROTOCOL::SEP
+			*(clInfo->_socket) << PROTOCOL::NAME << PROTOCOL::SEP
 				<< PROTOCOL::SCORED << PROTOCOL::SEP << it->first << "[" << scores[ l_iLength - 1 ] << "]" << endl;
 			info.f_iLast += scores[ l_iLength - 1 ];
-			out << clInfo->f_oLogin << " scored: " << scores[ l_iLength - 1 ] << " for word: " << it->first << "." << endl;
+			out << clInfo->_login << " scored: " << scores[ l_iLength - 1 ] << " for word: " << it->first << "." << endl;
 			}
 		}
 	for ( players_t::iterator it = f_oPlayers.begin(); it != f_oPlayers.end(); ++ it )
 		{
 		it->second.f_iScore += it->second.f_iLast;
 		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::PLAYER << PROTOCOL::SEP
-				<< it->first->f_oLogin << PROTOCOL::SEPP << it->second.f_iScore
+				<< it->first->_login << PROTOCOL::SEPP << it->second.f_iScore
 				<< PROTOCOL::SEPP << it->second.f_iLast << endl << _out );
 		it->second.f_iLast = 0;
 		}
 	for ( longest_t::iterator it = longest.begin(); it != longest.end(); ++ it )
 		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::LONGEST << PROTOCOL::SEP
-				<< (*it)->first << " [" << (*(*it)->second->begin())->f_oLogin << "]" << endl << _out );
+				<< (*it)->first << " [" << (*(*it)->second->begin())->_login << "]" << endl << _out );
 	f_oWords.clear(); 
 	if ( f_iRound < f_iMaxRounds )
 		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::END_ROUND << endl << _out );

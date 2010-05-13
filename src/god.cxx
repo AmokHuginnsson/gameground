@@ -103,9 +103,9 @@ HGo::HGo( HString const& a_oName )
 	f_ppoContestants[ 0 ] = f_ppoContestants[ 1 ] = NULL;
 	HRandomizer l_oRandom;
 	l_oRandom.set( time ( NULL ) );
-	f_oHandlers[ PROTOCOL::SETUP ] = static_cast<handler_t>( &HGo::handler_setup );
-	f_oHandlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HGo::handler_play );
-	f_oHandlers[ PROTOCOL::SAY ] = static_cast<handler_t>( &HGo::handler_message );
+	_handlers[ PROTOCOL::SETUP ] = static_cast<handler_t>( &HGo::handler_setup );
+	_handlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HGo::handler_play );
+	_handlers[ PROTOCOL::SAY ] = static_cast<handler_t>( &HGo::handler_message );
 	set_handicaps( f_iHandicaps );
 	return;
 	M_EPILOG
@@ -124,7 +124,7 @@ void HGo::handler_message ( OClientInfo* a_poClientInfo, HString const& a_roMess
 	M_PROLOG
 	HLock l( f_oMutex );
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
-			<< PROTOCOL::MSG << PROTOCOL::SEP << a_poClientInfo->f_oLogin << ": " << a_roMessage << endl << _out );
+			<< PROTOCOL::MSG << PROTOCOL::SEP << a_poClientInfo->_login << ": " << a_roMessage << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -133,8 +133,8 @@ void HGo::broadcast_contestants( yaal::hcore::HString const& a_oMessage )
 	{
 	M_PROLOG
 	M_ASSERT( f_ppoContestants[ 0 ] && f_ppoContestants[ 1 ] );
-	f_ppoContestants[ 0 ]->f_oSocket->write_until_eos( a_oMessage );
-	f_ppoContestants[ 1 ]->f_oSocket->write_until_eos( a_oMessage );
+	f_ppoContestants[ 0 ]->_socket->write_until_eos( a_oMessage );
+	f_ppoContestants[ 1 ]->_socket->write_until_eos( a_oMessage );
 	return;
 	M_EPILOG
 	}
@@ -143,7 +143,7 @@ void HGo::handler_setup( OClientInfo* a_poClientInfo, HString const& a_roMessage
 	{
 	M_PROLOG
 	HLock l( f_oMutex );
-	if ( *f_oClients.begin() != a_poClientInfo )
+	if ( *_clients.begin() != a_poClientInfo )
 		throw HLogicException( "you are not admin" );
 	if ( f_eState != STONE::NONE )
 		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
@@ -186,7 +186,7 @@ void HGo::handler_sit( OClientInfo* a_poClientInfo, HString const& a_roMessage )
 				|| ( contestant( STONE::WHITE ) == a_poClientInfo ) )
 			throw HLogicException( "you were already sitting" );
 		else if ( contestant( stone ) != NULL )
-			*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
+			*a_poClientInfo->_socket << PROTOCOL::NAME << PROTOCOL::SEP
 				<< PROTOCOL::MSG << PROTOCOL::SEP << "Some one was faster." << endl;
 		else
 			{
@@ -471,7 +471,7 @@ HGo::OPlayerInfo* HGo::get_player_info( OClientInfo* a_poClientInfo )
 
 bool HGo::do_accept( OClientInfo* a_poClientInfo )
 	{
-	out << "new candidate " << a_poClientInfo->f_oLogin << endl;
+	out << "new candidate " << a_poClientInfo->_login << endl;
 	return ( false );
 	}
 
@@ -480,9 +480,9 @@ void HGo::do_post_accept( OClientInfo* a_poClientInfo )
 	M_PROLOG
 	HLock l( f_oMutex );
 	if ( f_oPlayers.size() == 0 )
-		*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
+		*a_poClientInfo->_socket << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::ADMIN << endl;
-	*a_poClientInfo->f_oSocket
+	*a_poClientInfo->_socket
 		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP
 		<< PROTOCOL::GOBAN << PROTOCOL::SEPP << f_iGobanSize << endl
 		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP
@@ -498,24 +498,24 @@ void HGo::do_post_accept( OClientInfo* a_poClientInfo )
 	player_t info;
 	info.first = a_poClientInfo;
 	f_oPlayers.push_back( info );
-	for ( clients_t::HIterator it = f_oClients.begin(); it != f_oClients.end(); ++ it )
+	for ( clients_t::HIterator it = _clients.begin(); it != _clients.end(); ++ it )
 		{
 		if ( *it != a_poClientInfo )
 			{
-			*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
+			*a_poClientInfo->_socket << PROTOCOL::NAME << PROTOCOL::SEP
 					<< PROTOCOL::PLAYER << PROTOCOL::SEP
-					<< (*it)->f_oLogin << endl;
-			*a_poClientInfo->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
+					<< (*it)->_login << endl;
+			*a_poClientInfo->_socket << PROTOCOL::NAME << PROTOCOL::SEP
 					<< PROTOCOL::MSG << PROTOCOL::SEP
-					<< "Player " << (*it)->f_oLogin << " approched this table." << endl;
+					<< "Player " << (*it)->_login << " approched this table." << endl;
 			}
 		}
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::PLAYER << PROTOCOL::SEP
-			<< a_poClientInfo->f_oLogin << endl << _out );
+			<< a_poClientInfo->_login << endl << _out );
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::MSG << PROTOCOL::SEP
-			<< "Player " << a_poClientInfo->f_oLogin << " approched this table." << endl << _out );
+			<< "Player " << a_poClientInfo->_login << " approched this table." << endl << _out );
 	send_contestants();
 	send_goban();
 	return;
@@ -535,7 +535,7 @@ void HGo::do_kick( OClientInfo* a_poClientInfo )
 		{
 		it = f_oPlayers.begin();
 		if ( it != f_oPlayers.end() )
-			*it->first->f_oSocket << PROTOCOL::NAME << PROTOCOL::SEP
+			*it->first->_socket << PROTOCOL::NAME << PROTOCOL::SEP
 				<< PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::ADMIN << endl;
 		}
 	if ( ( contestant( STONE::BLACK ) == a_poClientInfo )
@@ -547,7 +547,7 @@ void HGo::do_kick( OClientInfo* a_poClientInfo )
 		}
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::MSG << PROTOCOL::SEP
-			<< "Player " << a_poClientInfo->f_oLogin << " left this match." << endl << _out );
+			<< "Player " << a_poClientInfo->_login << " left this match." << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -841,7 +841,7 @@ void HGo::contestant_gotup( OClientInfo* a_poClientInfo )
 			&& ( ( foe = contestant( STONE::BLACK ) ) || ( foe = contestant( STONE::WHITE ) ) ) )
 		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 				<< PROTOCOL::MSG << PROTOCOL::SEP
-				<< a_poClientInfo->f_oLogin << " resigned - therefore " << foe->f_oLogin << " wins." << endl << _out );
+				<< a_poClientInfo->_login << " resigned - therefore " << foe->_login << " wins." << endl << _out );
 	contestant( stone ) = NULL;
 	f_eState = STONE::NONE;
 	return;
@@ -868,7 +868,7 @@ void HGo::send_contestant( char stone )
 	if ( cinfo )
 		{
 		OPlayerInfo& info = *get_player_info( cinfo );
-		name = cinfo->f_oLogin.raw();
+		name = cinfo->_login.raw();
 		captured = info.f_iStonesCaptured;
 		time = static_cast<int>( info.f_iTimeLeft );
 		byoyomi = info.f_iByoYomiPeriods;

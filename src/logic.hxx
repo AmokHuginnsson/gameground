@@ -45,8 +45,8 @@ private:
 protected:
 	/*{*/
 	yaal::hcore::HString f_oSymbol;
-	handlers_t f_oHandlers;
-	clients_t f_oClients;
+	handlers_t _handlers;
+	clients_t _clients;
 	yaal::hcore::HString f_oName;
 	yaal::tools::HStringStream _out;
 	/*}*/

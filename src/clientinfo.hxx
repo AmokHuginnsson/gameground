@@ -35,10 +35,10 @@ namespace gameground
 struct OClientInfo
 	{
 	bool _anonymous;
-	yaal::hcore::HString f_oLogin;
-	yaal::hcore::HSocket::ptr_t f_oSocket;
+	yaal::hcore::HString _login;
+	yaal::hcore::HSocket::ptr_t _socket;
 	HLogic::ptr_t f_oLogic;
-	OClientInfo( void ) : _anonymous( true ), f_oLogin(), f_oSocket(), f_oLogic() {}
+	OClientInfo( void ) : _anonymous( false ), _login(), _socket(), f_oLogic() {}
 	};
 
 }

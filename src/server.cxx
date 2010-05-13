@@ -81,11 +81,15 @@ char const* const HServer::PROTOCOL::QUIT = "quit";
 char const* const HServer::PROTOCOL::SEP = ":";
 char const* const HServer::PROTOCOL::SEPP = ",";
 char const* const HServer::PROTOCOL::SHUTDOWN = "shutdown";
+char const* const HServer::PROTOCOL::VERSION = "version";
+char const* const HServer::PROTOCOL::VERSION_ID = "0";
 
 HServer::HServer( int a_iConnections )
-	: f_iMaxConnections( a_iConnections ),
-	f_oSocket( HSocket::socket_type_t( HSocket::TYPE::DEFAULT ) | HSocket::TYPE::NONBLOCKING | HSocket::TYPE::SSL_SERVER, a_iConnections ),
-	f_oClients(), f_oLogics(), f_oHandlers(), _out(), _db( HDataBase::get_connector() ), _dispatcher( a_iConnections, 3600 )
+	: _maxConnections( a_iConnections ),
+	_socket( HSocket::socket_type_t( HSocket::TYPE::DEFAULT ) | HSocket::TYPE::NONBLOCKING | HSocket::TYPE::SSL_SERVER, a_iConnections ),
+	_clients(), _logics(), _handlers(), _out(),
+	_db( HDataBase::get_connector() ),
+	_dispatcher( a_iConnections, 3600 ), _freeIds()
 	{
 	M_PROLOG
 	return;
@@ -103,21 +107,21 @@ int HServer::init_server( int a_iPort )
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 	factory.initialize_globals();
 	_db->connect( setup.f_oDatabasePath, setup.f_oDatabaseLogin, setup.f_oDatabasePassword );
-	f_oSocket.listen( "0.0.0.0", a_iPort );
-	_dispatcher.register_file_descriptor_handler( f_oSocket.get_file_descriptor(), bound_call( &HServer::handler_connection, this, _1 ) );
-	f_oHandlers[ PROTOCOL::SHUTDOWN ] = &HServer::handler_shutdown;
-	f_oHandlers[ PROTOCOL::QUIT ] = &HServer::handler_quit;
-	f_oHandlers[ PROTOCOL::MSG ] = &HServer::handler_chat;
-	f_oHandlers[ PROTOCOL::LOGIN ] = &HServer::handle_login;
-	f_oHandlers[ PROTOCOL::ACCOUNT ] = &HServer::handle_account;
-	f_oHandlers[ PROTOCOL::GET_LOGISTICS ] = &HServer::get_logics_info;
-	f_oHandlers[ PROTOCOL::GET_PLAYERS ] = &HServer::get_players_info;
-	f_oHandlers[ PROTOCOL::GET_GAMES ] = &HServer::get_games_info;
-	f_oHandlers[ PROTOCOL::GET_GAME_INFO ] = &HServer::get_game_info;
-	f_oHandlers[ PROTOCOL::CREATE ] = &HServer::create_game;
-	f_oHandlers[ PROTOCOL::JOIN ] = &HServer::join_game;
-	f_oHandlers[ PROTOCOL::ABANDON ] = &HServer::handler_abandon;
-	f_oHandlers[ PROTOCOL::CMD ] = &HServer::pass_command;
+	_socket.listen( "0.0.0.0", a_iPort );
+	_dispatcher.register_file_descriptor_handler( _socket.get_file_descriptor(), bound_call( &HServer::handler_connection, this, _1 ) );
+	_handlers[ PROTOCOL::SHUTDOWN ] = &HServer::handler_shutdown;
+	_handlers[ PROTOCOL::QUIT ] = &HServer::handler_quit;
+	_handlers[ PROTOCOL::MSG ] = &HServer::handler_chat;
+	_handlers[ PROTOCOL::LOGIN ] = &HServer::handle_login;
+	_handlers[ PROTOCOL::ACCOUNT ] = &HServer::handle_account;
+	_handlers[ PROTOCOL::GET_LOGISTICS ] = &HServer::get_logics_info;
+	_handlers[ PROTOCOL::GET_PLAYERS ] = &HServer::get_players_info;
+	_handlers[ PROTOCOL::GET_GAMES ] = &HServer::get_games_info;
+	_handlers[ PROTOCOL::GET_GAME_INFO ] = &HServer::get_game_info;
+	_handlers[ PROTOCOL::CREATE ] = &HServer::create_game;
+	_handlers[ PROTOCOL::JOIN ] = &HServer::join_game;
+	_handlers[ PROTOCOL::ABANDON ] = &HServer::handler_abandon;
+	_handlers[ PROTOCOL::CMD ] = &HServer::pass_command;
 	out << brightblue << "<<<GameGround>>>" << lightgray << " server started." << endl;
 	return ( 0 );
 	M_EPILOG
@@ -126,8 +130,8 @@ int HServer::init_server( int a_iPort )
 void HServer::broadcast( HString const& a_roMessage )
 	{
 	M_PROLOG
-	for ( clients_t::iterator it = f_oClients.begin(); it != f_oClients.end(); ++ it )
-		*it->second.f_oSocket << a_roMessage << endl;
+	for ( clients_t::iterator it = _clients.begin(); it != _clients.end(); ++ it )
+		*it->second._socket << a_roMessage << endl;
 	return;
 	M_EPILOG
 	}
@@ -135,37 +139,37 @@ void HServer::broadcast( HString const& a_roMessage )
 void HServer::broadcast_to_interested( HString const& a_roMessage )
 	{
 	M_PROLOG
-	for ( clients_t::iterator it = f_oClients.begin(); it != f_oClients.end(); ++ it )
+	for ( clients_t::iterator it = _clients.begin(); it != _clients.end(); ++ it )
 		if ( ! it->second.f_oLogic )
-			*it->second.f_oSocket << a_roMessage << endl;
+			*it->second._socket << a_roMessage << endl;
 	return;
 	M_EPILOG
 	}
 
-void HServer::handler_chat( OClientInfo& a_roInfo, HString const& a_roMessage )
+void HServer::handler_chat( OClientInfo& client_, HString const& a_roMessage )
 	{
 	M_PROLOG
-	broadcast_to_interested( _out << PROTOCOL::MSG << PROTOCOL::SEP << a_roInfo.f_oLogin << ": " << a_roMessage << _out );
+	broadcast_to_interested( _out << PROTOCOL::MSG << PROTOCOL::SEP << client_._login << ": " << a_roMessage << _out );
 	return;
 	M_EPILOG
 	}
 
-void HServer::handle_login( OClientInfo& a_roInfo, HString const& a_oLoginInfo )
+void HServer::handle_login( OClientInfo& client_, HString const& a_oLoginInfo )
 	{
 	M_PROLOG
 	clients_t::iterator it;
 	int const MINIMUM_NAME_LENGTH( 4 );
 	HString login( get_token( a_oLoginInfo, ":", 0 ) );
 	HString password( get_token( a_oLoginInfo, ":", 1 ) );
-	for ( it = f_oClients.begin(); it != f_oClients.end(); ++ it )
-		if ( ( ! strcasecmp( it->second.f_oLogin, login ) ) && ( it->second.f_oSocket != a_roInfo.f_oSocket ) )
+	for ( it = _clients.begin(); it != _clients.end(); ++ it )
+		if ( ( ! strcasecmp( it->second._login, login ) ) && ( it->second._socket != client_._socket ) )
 			break;
 	if ( login.find_other_than( LEGEAL_CHARACTER_SET[ CONSTR_CHAR_SET_LOGIN_NAME ] ) >= 0 )
-		*a_roInfo.f_oSocket << "err:Name may only take form of `[a-zA-Z0-9]{4,}'." << endl;
+		*client_._socket << "err:Name may only take form of `[a-zA-Z0-9]{4,}'." << endl;
 	else if ( login.get_length() < MINIMUM_NAME_LENGTH )
-		*a_roInfo.f_oSocket << "err:Your name is too short, it needs to be at least " << MINIMUM_NAME_LENGTH << " character long." << endl;
-	else if ( it != f_oClients.end() )
-		*a_roInfo.f_oSocket << "err:" << login << " already logged in." << endl;
+		*client_._socket << "err:Your name is too short, it needs to be at least " << MINIMUM_NAME_LENGTH << " character long." << endl;
+	else if ( it != _clients.end() )
+		*client_._socket << "err:" << login << " already logged in." << endl;
 	else
 		{
 		HRecordSet::ptr_t rs( _db->query( ( HFormat( "SELECT ( SELECT COUNT(*) FROM v_user_session WHERE login = LOWER('%s') AND password = LOWER('%s') )"
@@ -180,19 +184,19 @@ void HServer::handle_login( OClientInfo& a_roInfo, HString const& a_oLoginInfo )
 		int result( lexical_cast<int>( row[0] ) );
 		if ( ( result == 2 ) || ( result == 0 ) )
 			{
-			a_roInfo.f_oLogin = login;
+			client_._login = login;
 			if ( result ) /* user exists and supplied password was correct */
-				{
-				a_roInfo._anonymous = false;
-				update_last_activity( a_roInfo );
-				}
+				update_last_activity( client_ );
 			else if ( password != hash::sha1( "" ) )
 				{
 				rs = _db->query( ( HFormat( "INSERT INTO v_user_session ( login, password ) VALUES ( LOWER('%s'), LOWER('%s') );" ) % login % password ).string() );
 				M_ENSURE( !! rs );
 				}
 			else
-				*a_roInfo.f_oSocket << PROTOCOL::MSG << PROTOCOL::SEP << mark( COLORS::FG_RED ) << " Your game stats will not be preserved nor your login protected." << endl;
+				{
+				client_._anonymous = true;
+				*client_._socket << PROTOCOL::MSG << PROTOCOL::SEP << mark( COLORS::FG_RED ) << " Your game stats will not be preserved nor your login protected." << endl;
+				}
 			broadcast_to_interested( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << login << _out );
 			broadcast_to_interested( _out << PROTOCOL::MSG << PROTOCOL::SEP
 					<< mark( COLORS::FG_BLUE ) << " " << login << " entered the GameGround." << _out );
@@ -201,18 +205,18 @@ void HServer::handle_login( OClientInfo& a_roInfo, HString const& a_oLoginInfo )
 			{
 			M_ENSURE( result == 1 );
 			/* user exists but supplied password was incorrect */
-			*a_roInfo.f_oSocket << "err:Login failed." << endl;
+			*client_._socket << "err:Login failed." << endl;
 			}
 		}
 	return;
 	M_EPILOG
 	}
 
-void HServer::handle_account( OClientInfo& a_roInfo, HString const& accountInfo_ )
+void HServer::handle_account( OClientInfo& client_, HString const& accountInfo_ )
 	{
 	M_PROLOG
-	if ( a_roInfo.f_oLogin.is_empty() )
-		kick_client( a_roInfo.f_oSocket, _( "Set your name first (Just login with standard client, will ya?)." ) );
+	if ( client_._login.is_empty() )
+		kick_client( client_._socket, _( "Set your name first (Just login with standard client, will ya?)." ) );
 	else
 		{
 		HString action( get_token( accountInfo_, ":", 0 ) );
@@ -223,23 +227,23 @@ void HServer::handle_account( OClientInfo& a_roInfo, HString const& accountInfo_
 			{
 			}
 		else
-			kick_client( a_roInfo.f_oSocket, _( "Unknown account related action." ) );
+			kick_client( client_._socket, _( "Unknown account related action." ) );
 		}
 	return;
 	M_EPILOG
 	}
 
-void HServer::pass_command( OClientInfo& a_roInfo, HString const& a_oCommand )
+void HServer::pass_command( OClientInfo& client_, HString const& a_oCommand )
 	{
 	M_PROLOG
-	if ( ! a_roInfo.f_oLogic )
-		a_roInfo.f_oSocket->write_until_eos( "err:Connect to some game first.\n" );
+	if ( ! client_.f_oLogic )
+		client_._socket->write_until_eos( "err:Connect to some game first.\n" );
 	else
 		{
 		HString msg;
 		try
 			{
-			if ( a_roInfo.f_oLogic->process_command( &a_roInfo, a_oCommand ) )
+			if ( client_.f_oLogic->process_command( &client_, a_oCommand ) )
 				msg = "Game logic could not comprehend your message: ";
 			}
 		catch ( HLogicException& e )
@@ -247,56 +251,46 @@ void HServer::pass_command( OClientInfo& a_roInfo, HString const& a_oCommand )
 			msg = e.what();
 			}
 		if ( ! msg.is_empty() )
-			remove_client_from_logic( a_roInfo, msg.raw() );
+			remove_client_from_logic( client_, msg.raw() );
 		}
 	return;
 	M_EPILOG
 	}
 
-void HServer::create_game( OClientInfo& a_roInfo, HString const& a_oArg )
+void HServer::create_game( OClientInfo& client_, HString const& a_oArg )
 	{
 	M_PROLOG
-	if ( a_roInfo.f_oLogin.is_empty() )
-		kick_client( a_roInfo.f_oSocket, _( "Set your name first (Just login with standard client, will ya?)." ) );
+	if ( client_._login.is_empty() )
+		kick_client( client_._socket, _( "Set your name first (Just login with standard client, will ya?)." ) );
 	else
 		{
 		HString l_oType = get_token( a_oArg, ":", 0 );
 		HString l_oConfiguration = get_token( a_oArg, ":", 1 );
 		HString l_oName = get_token( l_oConfiguration, ",", 0 );
 		HLogicFactory& factory = HLogicFactoryInstance::get_instance();
-		logics_t::iterator it = f_oLogics.find( l_oName );
-		if ( it != f_oLogics.end() )
-			a_roInfo.f_oSocket->write_until_eos( "err:Game already exists.\n" );
-		else if ( l_oName.find_other_than( LEGEAL_CHARACTER_SET[ CONSTR_CHAR_SET_GAME_NAME ] ) >= 0 )
-			*a_roInfo.f_oSocket << "err:Game name may only take form of `[a-zA-Z0-9_-]+'." << endl;
-		else if ( l_oName.get_length() > MAX_GAME_NAME_LENGTH )
-			*a_roInfo.f_oSocket << "err:Game name cannot be longer than " << MAX_GAME_NAME_LENGTH << " characters." << endl;
-		else if ( l_oName[0] == ' ' )
-			*a_roInfo.f_oSocket << "err:Game name cannot start with whitespace." << endl;
-		else if ( ! factory.is_type_valid( l_oType ) )
-			kick_client( a_roInfo.f_oSocket, _( "No such game type." ) );
-		else if ( l_oName.is_empty() )
-			kick_client( a_roInfo.f_oSocket, _( "No game name given." ) );
+		if ( ! factory.is_type_valid( l_oType ) )
+			kick_client( client_._socket, _( "No such game type." ) );
 		else
 			{
 			HLogic::ptr_t l_oLogic;
 			try
 				{
 				l_oLogic = factory.create_logic( l_oType, l_oConfiguration );
-				if ( ! l_oLogic->accept_client( &a_roInfo ) )
+				if ( ! l_oLogic->accept_client( &client_ ) )
 					{
-					f_oLogics[ l_oName ] = l_oLogic;
-					a_roInfo.f_oLogic = l_oLogic;
+					id_t id( 0 );
+					_logics[ id = create_id() ] = l_oLogic;
+					client_.f_oLogic = l_oLogic;
 					out << l_oName << "," << l_oType << endl;
 					broadcast_to_interested( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
-							<< a_roInfo.f_oLogin << PROTOCOL::SEPP << l_oLogic->get_info() << _out );
+							<< client_._login << PROTOCOL::SEPP << l_oLogic->get_info() << _out );
 					}
 				else
-					a_roInfo.f_oSocket->write_until_eos( "err:Specified configuration is inconsistent.\n" );
+					client_._socket->write_until_eos( "err:Specified configuration is inconsistent.\n" );
 				}
 			catch ( HLogicException& e )
 				{
-				kick_client( a_roInfo.f_oSocket, e.what() );
+				kick_client( client_._socket, e.what() );
 				}
 			}
 		}
@@ -304,26 +298,26 @@ void HServer::create_game( OClientInfo& a_roInfo, HString const& a_oArg )
 	M_EPILOG
 	}
 
-void HServer::join_game( OClientInfo& a_roInfo, HString const& a_oName )
+void HServer::join_game( OClientInfo& client_, HString const& a_oName )
 	{
 	M_PROLOG
-	if ( a_roInfo.f_oLogin.is_empty() )
-		kick_client( a_roInfo.f_oSocket, "Set your name first." );
+	if ( client_._login.is_empty() )
+		kick_client( client_._socket, _( "Set your name first (Just login with standard client, will ya?)." ) );
 	else
 		{
-		logics_t::iterator it = f_oLogics.find( a_oName );
-		if ( it == f_oLogics.end() )
-			a_roInfo.f_oSocket->write_until_eos( "err:Game does not exists.\n" );
-		else if ( !! a_roInfo.f_oLogic )
-			kick_client( a_roInfo.f_oSocket, _( "You were already in some game." ) );
-		else if ( ! it->second->accept_client( &a_roInfo ) )
+		logics_t::iterator it = _logics.find( a_oName );
+		if ( it == _logics.end() )
+			client_._socket->write_until_eos( "err:Game does not exists.\n" );
+		else if ( !! client_.f_oLogic )
+			kick_client( client_._socket, _( "You were already in some game." ) );
+		else if ( ! it->second->accept_client( &client_ ) )
 			{
-			a_roInfo.f_oLogic = it->second;
+			client_.f_oLogic = it->second;
 			broadcast_to_interested( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
-					<< a_roInfo.f_oLogin << PROTOCOL::SEPP << a_roInfo.f_oLogic->get_info() << _out );
+					<< client_._login << PROTOCOL::SEPP << client_.f_oLogic->get_info() << _out );
 			}
 		else
-			a_roInfo.f_oSocket->write_until_eos( "err:Game is full.\n" );
+			client_._socket->write_until_eos( "err:Game is full.\n" );
 		}
 	return;
 	M_EPILOG
@@ -332,14 +326,14 @@ void HServer::join_game( OClientInfo& a_roInfo, HString const& a_oName )
 void HServer::handler_connection( int )
 	{
 	M_PROLOG
-	HSocket::ptr_t l_oClient = f_oSocket.accept();
+	HSocket::ptr_t l_oClient = _socket.accept();
 	M_ASSERT( !! l_oClient );
-	if ( f_oSocket.get_client_count() >= f_iMaxConnections )
+	if ( _socket.get_client_count() >= _maxConnections )
 		l_oClient->close();
 	else
 		{
 		_dispatcher.register_file_descriptor_handler( l_oClient->get_file_descriptor(), bound_call( &HServer::handler_message, this, _1 ) );
-		f_oClients[ l_oClient->get_file_descriptor() ].f_oSocket = l_oClient;
+		_clients[ l_oClient->get_file_descriptor() ]._socket = l_oClient;
 		}
 	out << l_oClient->get_host_name() << endl;
 	return;
@@ -353,18 +347,18 @@ void HServer::handler_message( int a_iFileDescriptor )
 	HString l_oArgument;
 	HString l_oCommand;
 	clients_t::iterator clientIt;
-	HSocket::ptr_t l_oClient = f_oSocket.get_client( a_iFileDescriptor );
+	HSocket::ptr_t l_oClient = _socket.get_client( a_iFileDescriptor );
 	try
 		{
 		int long nRead( 0 );
-		if ( ( clientIt = f_oClients.find( a_iFileDescriptor ) ) == f_oClients.end() )
+		if ( ( clientIt = _clients.find( a_iFileDescriptor ) ) == _clients.end() )
 			kick_client( l_oClient );
 		else if ( ( nRead = l_oClient->read_until( l_oMessage ) ) > 0 )
 			{
-			if ( clientIt->second.f_oLogin.is_empty() )
+			if ( clientIt->second._login.is_empty() )
 				out << "`unnamed'";
 			else
-				out << clientIt->second.f_oLogin; 
+				out << clientIt->second._login; 
 			cout << "->" << l_oMessage << endl;
 			l_oCommand = get_token( l_oMessage, ":", 0 );
 			l_oArgument = l_oMessage.mid( l_oCommand.get_length() + 1 );
@@ -373,13 +367,13 @@ void HServer::handler_message( int a_iFileDescriptor )
 				kick_client( l_oClient, _( "Malformed data." ) );
 			else
 				{
-				handlers_t::iterator it = f_oHandlers.find( l_oCommand );
-				if ( it != f_oHandlers.end() )
+				handlers_t::iterator it = _handlers.find( l_oCommand );
+				if ( it != _handlers.end() )
 					{
 					HLogic::ptr_t l_oLogic = clientIt->second.f_oLogic;
 					( this->*it->second )( clientIt->second, l_oArgument );
 					if ( ( !! l_oLogic ) && ( ! l_oLogic->active_clients() ) )
-						f_oLogics.erase( l_oLogic->get_name() );
+						_logics.erase( l_oLogic->get_name() );
 					}
 				else
 					kick_client( l_oClient, _( "Unknown command." ) );
@@ -404,22 +398,22 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& a_oClient, char const* c
 	int l_iFileDescriptor = a_oClient->get_file_descriptor();
 	if ( a_pcReason && a_pcReason[0] )
 		*a_oClient << PROTOCOL::KCK << PROTOCOL::SEP << a_pcReason << endl;
-	f_oSocket.shutdown_client( l_iFileDescriptor );
+	_socket.shutdown_client( l_iFileDescriptor );
 	_dispatcher.unregister_file_descriptor_handler( l_iFileDescriptor );
-	clients_t::iterator clientIt = f_oClients.find( l_iFileDescriptor );
-	M_ASSERT( clientIt != f_oClients.end() );
+	clients_t::iterator clientIt = _clients.find( l_iFileDescriptor );
+	M_ASSERT( clientIt != _clients.end() );
 	out << "client ";
-	if ( clientIt->second.f_oLogin.is_empty() )
+	if ( clientIt->second._login.is_empty() )
 		cout << "`unnamed'";
 	else
-		cout << clientIt->second.f_oLogin; 
+		cout << clientIt->second._login; 
 	if ( ! a_pcReason || a_pcReason[ 0 ] )
 		{
 		HString reason = " was kicked because of: ";
 		reason += ( a_pcReason ? a_pcReason : "connection error" );
-		if ( ! clientIt->second.f_oLogin.is_empty() )
+		if ( ! clientIt->second._login.is_empty() )
 			broadcast_to_interested( _out << PROTOCOL::MSG << PROTOCOL::SEP
-					<< mark( COLORS::FG_BRIGHTRED ) << " " << clientIt->second.f_oLogin << reason << _out );
+					<< mark( COLORS::FG_BRIGHTRED ) << " " << clientIt->second._login << reason << _out );
 		cout << reason;
 		}
 	else
@@ -427,30 +421,30 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& a_oClient, char const* c
 	cout << endl;
 	remove_client_from_logic( clientIt->second );
 	HString login;
-	if ( ! clientIt->second.f_oLogin.is_empty() )
-		login = clientIt->second.f_oLogin;
-	f_oClients.erase( l_iFileDescriptor );
+	if ( ! clientIt->second._login.is_empty() )
+		login = clientIt->second._login;
+	_clients.erase( l_iFileDescriptor );
 	if ( ! login.is_empty() )
 		broadcast_to_interested( _out << PROTOCOL::PLAYER_QUIT << PROTOCOL::SEP << login << _out );
 	return;
 	M_EPILOG
 	}
 
-void HServer::send_logics_info( OClientInfo& a_roInfo )
+void HServer::send_logics_info( OClientInfo& client_ )
 	{
 	M_PROLOG
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 	for( HLogicFactory::creators_t::iterator it = factory.begin();
 			it != factory.end(); ++ it )
-		*a_roInfo.f_oSocket << PROTOCOL::LOGIC << PROTOCOL::SEP << it->second.f_oInfo << endl;
+		*client_._socket << PROTOCOL::LOGIC << PROTOCOL::SEP << it->second.f_oInfo << endl;
 	return;
 	M_EPILOG
 	}
 
-void HServer::get_logics_info( OClientInfo& a_roInfo, HString const& )
+void HServer::get_logics_info( OClientInfo& client_, HString const& )
 	{
 	M_PROLOG
-	send_logics_info( a_roInfo );
+	send_logics_info( client_ );
 	return;
 	M_EPILOG
 	}
@@ -461,13 +455,13 @@ void HServer::handler_shutdown( OClientInfo&, HString const& )
 	return;
 	}
 
-void HServer::handler_quit( OClientInfo& a_roInfo, HString const& )
+void HServer::handler_quit( OClientInfo& client_, HString const& )
 	{
 	M_PROLOG
-	if ( ! a_roInfo._anonymous )
-		update_last_activity( a_roInfo );
-	HString login( a_roInfo.f_oLogin );
-	kick_client( a_roInfo.f_oSocket, "" );
+	if ( ! client_._anonymous )
+		update_last_activity( client_ );
+	HString login( client_._login );
+	kick_client( client_._socket, "" );
 	if ( ! login.is_empty() )
 		broadcast_to_interested( _out << PROTOCOL::MSG << PROTOCOL::SEP
 				<< mark( COLORS::FG_BROWN ) << " " << login << " has left the GameGround." << _out );
@@ -475,79 +469,79 @@ void HServer::handler_quit( OClientInfo& a_roInfo, HString const& )
 	M_EPILOG
 	}
 
-void HServer::handler_abandon( OClientInfo& a_roInfo, HString const& )
+void HServer::handler_abandon( OClientInfo& client_, HString const& )
 	{
 	M_PROLOG
-	remove_client_from_logic( a_roInfo );
-	broadcast_to_interested( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << a_roInfo.f_oLogin << _out );
+	remove_client_from_logic( client_ );
+	broadcast_to_interested( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << client_._login << _out );
 	return;
 	M_EPILOG
 	}
 
-void HServer::remove_client_from_logic( OClientInfo& a_roInfo, char const* const a_pcReason )
+void HServer::remove_client_from_logic( OClientInfo& client_, char const* const a_pcReason )
 	{
 	M_PROLOG
-	if ( !! a_roInfo.f_oLogic )
+	if ( !! client_.f_oLogic )
 		{
-		HLogic::ptr_t l_oLogic = a_roInfo.f_oLogic;
-		out << "separating logic info from client info for: " << a_roInfo.f_oLogin << endl;
-		l_oLogic->kick_client( &a_roInfo, a_pcReason );
-		a_roInfo.f_oLogic = HLogic::ptr_t();
+		HLogic::ptr_t l_oLogic = client_.f_oLogic;
+		out << "separating logic info from client info for: " << client_._login << endl;
+		l_oLogic->kick_client( &client_, a_pcReason );
+		client_.f_oLogic = HLogic::ptr_t();
 		if ( ! l_oLogic->active_clients() )
-			f_oLogics.erase( l_oLogic->get_name() );
+			_logics.erase( l_oLogic->get_name() );
 		}
 	return;
 	M_EPILOG
 	}
 
-void HServer::get_players_info( OClientInfo& a_roInfo, HString const& )
+void HServer::get_players_info( OClientInfo& client_, HString const& )
 	{
 	M_PROLOG
-	send_players_info( a_roInfo );
+	send_players_info( client_ );
 	return;
 	M_EPILOG
 	}
 
-void HServer::get_games_info( OClientInfo& a_roInfo, HString const& )
+void HServer::get_games_info( OClientInfo& client_, HString const& )
 	{
 	M_PROLOG
-	send_games_info( a_roInfo );
+	send_games_info( client_ );
 	return;
 	M_EPILOG
 	}
 
-void HServer::get_game_info( OClientInfo& a_roInfo, HString const& a_oName )
+void HServer::get_game_info( OClientInfo& client_, HString const& a_oName )
 	{
 	M_PROLOG
-	send_game_info( a_roInfo, a_oName );
+	send_game_info( client_, a_oName );
 	return;
 	M_EPILOG
 	}
 
-void HServer::send_players_info( OClientInfo& a_roInfo )
+void HServer::send_players_info( OClientInfo& client_ )
 	{
 	M_PROLOG
-	for( clients_t::iterator it = f_oClients.begin();
-			it != f_oClients.end(); ++ it )
+	for( clients_t::iterator it = _clients.begin();
+			it != _clients.end(); ++ it )
 		{
-		if ( ! it->second.f_oLogin.is_empty() )
+		if ( ! it->second._login.is_empty() )
 			{
-			*a_roInfo.f_oSocket << PROTOCOL::PLAYER << PROTOCOL::SEP << it->second.f_oLogin;
+			*client_._socket << PROTOCOL::PLAYER << PROTOCOL::SEP << it->second._login;
 			if ( !! it->second.f_oLogic )
-				*a_roInfo.f_oSocket << PROTOCOL::SEPP << it->second.f_oLogic->get_info();
-			*a_roInfo.f_oSocket << endl;
+				*client_._socket << PROTOCOL::SEPP << it->second.f_oLogic->get_info();
+			*client_._socket << endl;
 			}
 		}
 	return;
 	M_EPILOG
 	}
 
-void HServer::send_games_info( OClientInfo& a_roInfo )
+void HServer::send_games_info( OClientInfo& client_ )
 	{
 	M_PROLOG
-	for( logics_t::iterator it = f_oLogics.begin();
-			it != f_oLogics.end(); ++ it )
-		*a_roInfo.f_oSocket << PROTOCOL::GAME << PROTOCOL::SEP << it->second->get_info() << endl;
+	for( logics_t::iterator it = _logics.begin();
+			it != _logics.end(); ++ it )
+		*client_._socket << PROTOCOL::GAME << PROTOCOL::SEP << it->second->get_info() << endl;
 	return;
 	M_EPILOG
 	}
@@ -558,16 +552,33 @@ void HServer::update_last_activity( OClientInfo const& info_ )
 	HRecordSet::ptr_t rs( _db->query(
 		( HFormat(
 				"UPDATE v_user_session SET last_activity = datetime('now', 'localtime') WHERE login = LOWER('%s');"
-		) % info_.f_oLogin ).string() ) );
+		) % info_._login ).string() ) );
 	M_ENSURE( !! rs );
 	return;
 	M_EPILOG
 	}
 
-void HServer::send_game_info( OClientInfo& /*a_roInfo*/, HString const& )
+void HServer::send_game_info( OClientInfo& /*client_*/, HString const& )
 	{
 	M_PROLOG
 	return;
+	M_EPILOG
+	}
+
+HServer::id_t HServer::create_id( void )
+	{
+	M_PROLOG
+	id_t id( 0 );
+	if ( _freeIds.empty() )
+		{
+		id = _logics.size();
+		}
+	else
+		{
+		id = *_freeIds.rend();
+		_freeIds.pop_back();
+		}
+	return ( id );
 	M_EPILOG
 	}
 
