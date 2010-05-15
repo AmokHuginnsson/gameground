@@ -47,7 +47,7 @@ namespace boggle_data
 
 static int const MAXIMUM_WORD_LENGTH = 16;
 
-static char const n_ppcDices[ 16 ][ 6 ] =
+static char const _dices_[ 16 ][ 6 ] =
 	{
 		{ 'a', 'a', 'd', 'e', '³', 'y' },
 		{ 'a', 'a', 'i', 'k', 'm', 'y' },
@@ -100,15 +100,15 @@ HBoggle::SCORING::ORule HBoggle::RULES[] = { { 3, { 0, 0, 1, 1, 2, 3, 5, 11, 11,
 		{ 5, { 0, 0, 0, 0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233 } },
 		{ 5, { 0, 0, 0, 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048 } } };
 
-HBoggle::HBoggle( HString const& a_oName, int a_iPlayers, int a_iRoundTime, int a_iMaxRounds, int a_iInterRoundDelay )
-	: HLogic( PROTOCOL::NAME, a_oName ), f_eState( STATE::LOCKED ), f_iPlayers( a_iPlayers ),
-	f_iRoundTime( a_iRoundTime ), f_iMaxRounds( a_iMaxRounds ),
-	f_iInterRoundDelay( a_iInterRoundDelay ), f_iRuleSet( 0 ), f_iRound( 0 ), f_oPlayers(),
-	f_oWords(), f_oMutex()
+HBoggle::HBoggle( HString const& name_, int players_, int roundTime_, int maxRounds_, int interRoundDelay_ )
+	: HLogic( PROTOCOL::NAME, name_ ), _state( STATE::LOCKED ), _players( players_ ),
+	_roundTime( roundTime_ ), _maxRounds( maxRounds_ ),
+	_interRoundDelay( interRoundDelay_ ), _ruleSet( 0 ), _round( 0 ), _players(),
+	_words(), _mutex()
 	{
 	M_PROLOG
-	HRandomizer l_oRandom;
-	l_oRandom.set( time ( NULL ) );
+	HRandomizer random;
+	random.set( time ( NULL ) );
 	_handlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HBoggle::handler_play );
 	_handlers[ PROTOCOL::SAY ] = static_cast<handler_t>( &HBoggle::handler_message );
 	return;
@@ -130,16 +130,16 @@ void HBoggle::generate_game( void )
 	HRandomizer rnd;
 	randomizer_helper::init_randomizer_from_time( rnd );
 	for ( int i = 0; i < boggle_data::BOGGLE::DICE_COUNT; ++ i )
-		f_ppcGame[ i ][ 0 ] = boggle_data::BOGGLE::UNINITIALIZED_SLOT;
+		_game[ i ][ 0 ] = boggle_data::BOGGLE::UNINITIALIZED_SLOT;
 	for ( int i = 0; i < boggle_data::BOGGLE::DICE_COUNT; ++ i )
 		{
-		int k = 0, l_iSlot = rnd.rnd( boggle_data::BOGGLE::DICE_COUNT - i );
-		for ( int j = 0; j < l_iSlot; ++ j, ++ k )
-			while ( f_ppcGame[ k ][ 0 ] != boggle_data::BOGGLE::UNINITIALIZED_SLOT )
+		int k = 0, slot = rnd.rnd( boggle_data::BOGGLE::DICE_COUNT - i );
+		for ( int j = 0; j < slot; ++ j, ++ k )
+			while ( _game[ k ][ 0 ] != boggle_data::BOGGLE::UNINITIALIZED_SLOT )
 				++ k;
-		while ( f_ppcGame[ k ][ 0 ] != boggle_data::BOGGLE::UNINITIALIZED_SLOT )
+		while ( _game[ k ][ 0 ] != boggle_data::BOGGLE::UNINITIALIZED_SLOT )
 			++ k;
-		f_ppcGame[ k ][ 0 ] = boggle_data::n_ppcDices[ i ][ rnd.rnd( boggle_data::BOGGLE::SIDES ) ];
+		_game[ k ][ 0 ] = boggle_data::_dices_[ i ][ rnd.rnd( boggle_data::BOGGLE::SIDES ) ];
 		}
 	return;
 	M_EPILOG
@@ -148,150 +148,150 @@ void HBoggle::generate_game( void )
 HString HBoggle::make_deck( void )
 	{
 	M_PROLOG
-	HString l_oDeck;
+	HString deck;
 	for ( int i = 0; i < boggle_data::BOGGLE::DICE_COUNT; ++ i )
-		l_oDeck += f_ppcGame[ i ][ 0 ];
+		deck += _game[ i ][ 0 ];
 	out << "new deck: " << endl;
-	cout << l_oDeck.left( 4 ) << endl;
-	cout << l_oDeck.mid( 4, 4 ) << endl;
-	cout << l_oDeck.mid( 8, 4 ) << endl;
-	cout << l_oDeck.mid( 12, 4 ) << endl;
-	return ( l_oDeck );
+	cout << deck.left( 4 ) << endl;
+	cout << deck.mid( 4, 4 ) << endl;
+	cout << deck.mid( 8, 4 ) << endl;
+	cout << deck.mid( 12, 4 ) << endl;
+	return ( deck );
 	M_EPILOG
 	}
 
-void HBoggle::handler_message( OClientInfo* a_poClientInfo, HString const& a_roMessage )
+void HBoggle::handler_message( OClientInfo* clientInfo_, HString const& message_ )
 	{
 	M_PROLOG
-	HLock l( f_oMutex );
+	HLock l( _mutex );
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::MSG << PROTOCOL::SEP
-			<< a_poClientInfo->_login << ": " << a_roMessage << endl << _out );
+			<< clientInfo_->_login << ": " << message_ << endl << _out );
 	return;
 	M_EPILOG
 	}
 
-void HBoggle::handler_play( OClientInfo* a_poClientInfo, HString const& a_oWord )
+void HBoggle::handler_play( OClientInfo* clientInfo_, HString const& word_ )
 	{
 	M_PROLOG
-	HLock l( f_oMutex );
-	int l_iLength = static_cast<int>( a_oWord.get_length() );
-	if ( ( f_eState == STATE::ACCEPTING )
-			&& ( l_iLength >= RULES[ f_iRuleSet ]._minLength )
-			&& ( l_iLength <= boggle_data::MAXIMUM_WORD_LENGTH ) )
+	HLock l( _mutex );
+	int length = static_cast<int>( word_.get_length() );
+	if ( ( _state == STATE::ACCEPTING )
+			&& ( length >= RULES[ _ruleSet ]._minLength )
+			&& ( length <= boggle_data::MAXIMUM_WORD_LENGTH ) )
 		{
-		words_t::iterator it = f_oWords.find( a_oWord );
-		if ( it == f_oWords.end() )
-			it = f_oWords.insert( hcore::make_pair( a_oWord, client_set_ptr_t( new client_set_t() ) ) ).first;
-		it->second->insert( a_poClientInfo );
-		out << "word: " << a_oWord << "< inserted, proof: " << f_oWords.size() << "," << it->second->size() << endl;
+		words_t::iterator it = _words.find( word_ );
+		if ( it == _words.end() )
+			it = _words.insert( hcore::make_pair( word_, client_set_ptr_t( new client_set_t() ) ) ).first;
+		it->second->insert( clientInfo_ );
+		out << "word: " << word_ << "< inserted, proof: " << _words.size() << "," << it->second->size() << endl;
 		}
 	return;
 	M_EPILOG
 	}
 
-HBoggle::OPlayerInfo* HBoggle::get_player_info( OClientInfo* a_poClientInfo )
+HBoggle::OPlayerInfo* HBoggle::get_player_info( OClientInfo* clientInfo_ )
 	{
 	M_PROLOG
-	players_t::iterator it = f_oPlayers.find( a_poClientInfo );
-	M_ASSERT( it != f_oPlayers.end() );
+	players_t::iterator it = _players.find( clientInfo_ );
+	M_ASSERT( it != _players.end() );
 	return ( &it->second );
 	M_EPILOG
 	}
 
-bool HBoggle::do_accept( OClientInfo* a_poClientInfo )
+bool HBoggle::do_accept( OClientInfo* clientInfo_ )
 	{
-	out << "new candidate " << a_poClientInfo->_login << endl;
+	out << "new candidate " << clientInfo_->_login << endl;
 	return ( false );
 	}
 
-void HBoggle::do_post_accept( OClientInfo* a_poClientInfo )
+void HBoggle::do_post_accept( OClientInfo* clientInfo_ )
 	{
 	M_PROLOG
-	HLock l( f_oMutex );
-	out << "conditions: f_oPlayers.size() = " << f_oPlayers.size() << ", f_iPlayers = " << f_iPlayers << endl;
+	HLock l( _mutex );
+	out << "conditions: _players.size() = " << _players.size() << ", _players = " << _players << endl;
 	OPlayerInfo info;
-	f_oPlayers[ a_poClientInfo ] = info;
+	_players[ clientInfo_ ] = info;
 	/*
 	 * Send proto info about new contestant to all players.
 	 */
 	broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
-			<< a_poClientInfo->_login << PROTOCOL::SEPP << 0 << PROTOCOL::SEPP << 0 << endl << _out );
-	*a_poClientInfo->_socket << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+			<< clientInfo_->_login << PROTOCOL::SEPP << 0 << PROTOCOL::SEPP << 0 << endl << _out );
+	*clientInfo_->_socket << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
 		<< "Welcome, this match settings are:" << endl
 		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
-		<< "   round time - " << f_iRoundTime << " seconds" << endl
+		<< "   round time - " << _roundTime << " seconds" << endl
 		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
-		<< "   number of rounds - " << f_iMaxRounds << endl
+		<< "   number of rounds - " << _maxRounds << endl
 		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
-		<< "   round interval - " << f_iInterRoundDelay << endl
+		<< "   round interval - " << _interRoundDelay << endl
 		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
-		<< "This match requires " << f_iPlayers << " players to start the game." << endl;
-	*a_poClientInfo->_socket << PROTOCOL::NAME << PROTOCOL::SEP
-		<< PROTOCOL::SETUP << PROTOCOL::SEP << f_iRoundTime
-		<< PROTOCOL::SEPP << f_iInterRoundDelay << endl;
-	for ( players_t::iterator it = f_oPlayers.begin(); it != f_oPlayers.end(); ++ it )
+		<< "This match requires " << _players << " players to start the game." << endl;
+	*clientInfo_->_socket << PROTOCOL::NAME << PROTOCOL::SEP
+		<< PROTOCOL::SETUP << PROTOCOL::SEP << _roundTime
+		<< PROTOCOL::SEPP << _interRoundDelay << endl;
+	for ( players_t::iterator it = _players.begin(); it != _players.end(); ++ it )
 		{
-		if ( it->first != a_poClientInfo )
+		if ( it->first != clientInfo_ )
 			{
-			*a_poClientInfo->_socket << PROTOCOL::NAME << PROTOCOL::SEP
+			*clientInfo_->_socket << PROTOCOL::NAME << PROTOCOL::SEP
 				<< PROTOCOL::PLAYER << PROTOCOL::SEP << it->first->_login
-				<< PROTOCOL::SEPP << it->second.f_iScore << PROTOCOL::SEPP
-				<< it->second.f_iLast << endl;
-			*a_poClientInfo->_socket << PROTOCOL::NAME << PROTOCOL::SEP
+				<< PROTOCOL::SEPP << it->second._score << PROTOCOL::SEPP
+				<< it->second._last << endl;
+			*clientInfo_->_socket << PROTOCOL::NAME << PROTOCOL::SEP
 				<< PROTOCOL::MSG << PROTOCOL::SEP << it->first->_login << " joined the mind contest." << endl;
 			}
 		}
 	broadcast(
 			_out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::MSG << PROTOCOL::SEP
-			<< a_poClientInfo->_login
+			<< clientInfo_->_login
 			<< " joined the mind contest." << endl << _out );
-	out << "player [" << a_poClientInfo->_login << "] accepted" << endl;
-	if ( ! f_iRound && ( f_oPlayers.size() >= f_iPlayers ) )
+	out << "player [" << clientInfo_->_login << "] accepted" << endl;
+	if ( ! _round && ( _players.size() >= _players ) )
 		{
 		schedule_end_round();
 		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 				<< PROTOCOL::MSG << PROTOCOL::SEP
 				<< "The match has begun, good luck!" << endl << _out );
 		}
-	else if ( f_iRound > 0 )
-		*a_poClientInfo->_socket << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::DECK << PROTOCOL::SEP << make_deck() << endl;
+	else if ( _round > 0 )
+		*clientInfo_->_socket << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::DECK << PROTOCOL::SEP << make_deck() << endl;
 	return;
 	M_EPILOG
 	}
 
-void HBoggle::do_kick( OClientInfo* a_poClientInfo )
+void HBoggle::do_kick( OClientInfo* clientInfo_ )
 	{
 	M_PROLOG
-	HLock l( f_oMutex );
-	f_oPlayers.erase( a_poClientInfo );
-	for ( words_t::iterator it = f_oWords.begin(); it != f_oWords.end(); ++ it )
+	HLock l( _mutex );
+	_players.erase( clientInfo_ );
+	for ( words_t::iterator it = _words.begin(); it != _words.end(); ++ it )
 		{
 		if ( it->second->size() > 1 )
 			continue;
-		if ( *(it->second->begin()) == a_poClientInfo )
-			it = f_oWords.erase( it );
+		if ( *(it->second->begin()) == clientInfo_ )
+			it = _words.erase( it );
 		}
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::MSG << PROTOCOL::SEP
-			<< "Player " << a_poClientInfo->_login << " left this match." << endl << _out );
+			<< "Player " << clientInfo_->_login << " left this match." << endl << _out );
 	return;
 	M_EPILOG
 	}
 
 yaal::hcore::HString HBoggle::get_info() const
 	{
-	HLock l( f_oMutex );
-	return ( HString( "bgl," ) + f_oName + "," + f_oPlayers.size() + "," + f_iPlayers + "," + f_iRoundTime + "," + f_iMaxRounds + "," + f_iInterRoundDelay );
+	HLock l( _mutex );
+	return ( HString( "bgl," ) + _name + "," + _players.size() + "," + _players + "," + _roundTime + "," + _maxRounds + "," + _interRoundDelay );
 	}
 
-void HBoggle::schedule( EVENT::event_t a_eEvent )
+void HBoggle::schedule( EVENT::event_t event_ )
 	{
 	M_PROLOG
-	HLock l( f_oMutex );
-	if ( a_eEvent == EVENT::BEGIN_ROUND )
-		HScheduledAsyncCallerService::get_instance().register_call( time( NULL ) + f_iInterRoundDelay, bound_call( &HBoggle::on_begin_round, this ) );
+	HLock l( _mutex );
+	if ( event_ == EVENT::BEGIN_ROUND )
+		HScheduledAsyncCallerService::get_instance().register_call( time( NULL ) + _interRoundDelay, bound_call( &HBoggle::on_begin_round, this ) );
 	else
 		schedule_end_round();
 	return;
@@ -301,10 +301,10 @@ void HBoggle::schedule( EVENT::event_t a_eEvent )
 void HBoggle::schedule_end_round( void )
 	{
 	M_PROLOG
-	++ f_iRound;
-	HScheduledAsyncCallerService::get_instance().register_call( time( NULL ) + f_iRoundTime, bound_call( &HBoggle::on_end_round, this ) );
+	++ _round;
+	HScheduledAsyncCallerService::get_instance().register_call( time( NULL ) + _roundTime, bound_call( &HBoggle::on_end_round, this ) );
 	generate_game();
-	f_eState = STATE::ACCEPTING;
+	_state = STATE::ACCEPTING;
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::DECK << PROTOCOL::SEP << make_deck() << endl << _out );
 	return;
 	M_EPILOG
@@ -313,16 +313,16 @@ void HBoggle::schedule_end_round( void )
 void HBoggle::on_begin_round( void )
 	{
 	M_PROLOG
-	HLock l( f_oMutex );
+	HLock l( _mutex );
 	out << "<<begin>>" << endl;
 	HAsyncCallerService::get_instance().register_call( 0, bound_call( &HBoggle::schedule, this, EVENT::END_ROUND ) );
 	broadcast(
 			_out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::MSG << PROTOCOL::SEP
-			<< "New round started, you have got " << f_iRoundTime
-			<< " seconds, " << f_iMaxRounds - f_iRound
+			<< "New round started, you have got " << _roundTime
+			<< " seconds, " << _maxRounds - _round
 			<< " rounds left!" << endl << _out );
-	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::ROUND << PROTOCOL::SEP << f_iRound << endl << _out );
+	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::ROUND << PROTOCOL::SEP << _round << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -330,23 +330,23 @@ void HBoggle::on_begin_round( void )
 void HBoggle::on_end_round( void )
 	{
 	M_PROLOG
-	HLock l( f_oMutex );
+	HLock l( _mutex );
 	out << "<<end>>" << endl;
-	f_eState = STATE::LOCKED;
-	if ( f_iRound < f_iMaxRounds )
+	_state = STATE::LOCKED;
+	if ( _round < _maxRounds )
 		{
 		HAsyncCallerService::get_instance().register_call( 0, bound_call( &HBoggle::schedule, this, EVENT::BEGIN_ROUND ) );
 		_out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
-			<< "This round has ended, next round in " << f_iInterRoundDelay << " seconds!" << endl;
+			<< "This round has ended, next round in " << _interRoundDelay << " seconds!" << endl;
 		}
 	else
 		_out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP << "Game Over!" << endl;
 	broadcast( _out << _out );
-	int* scores = RULES[ f_iRuleSet ]._score;
+	int* scores = RULES[ _ruleSet ]._score;
 	typedef HList<words_t::iterator> longest_t;
 	longest_t longest;
-	int l_iLongestLength = 0;
-	for ( words_t::iterator it = f_oWords.begin(); it != f_oWords.end(); ++ it )
+	int longestLength = 0;
+	for ( words_t::iterator it = _words.begin(); it != _words.end(); ++ it )
 		{
 		int appearance = static_cast<int>( it->second->size() );
 		if ( appearance > 1 )
@@ -354,37 +354,37 @@ void HBoggle::on_end_round( void )
 			out << appearance << " people found: " << it->first << endl;
 			continue;
 			}
-		int l_iLength = static_cast<int>( it->first.get_length() );
-		if ( word_is_good( it->first, l_iLength ) )
+		int length = static_cast<int>( it->first.get_length() );
+		if ( word_is_good( it->first, length ) )
 			{
-			if ( l_iLength > l_iLongestLength )
+			if ( length > longestLength )
 				{
 				longest.clear();
-				l_iLongestLength = l_iLength;
+				longestLength = length;
 				}
-			if ( l_iLength == l_iLongestLength )
+			if ( length == longestLength )
 				longest.push_back( it );
 			OClientInfo* clInfo = *it->second->begin();
 			OPlayerInfo& info = *get_player_info( clInfo );
 			*(clInfo->_socket) << PROTOCOL::NAME << PROTOCOL::SEP
-				<< PROTOCOL::SCORED << PROTOCOL::SEP << it->first << "[" << scores[ l_iLength - 1 ] << "]" << endl;
-			info.f_iLast += scores[ l_iLength - 1 ];
-			out << clInfo->_login << " scored: " << scores[ l_iLength - 1 ] << " for word: " << it->first << "." << endl;
+				<< PROTOCOL::SCORED << PROTOCOL::SEP << it->first << "[" << scores[ length - 1 ] << "]" << endl;
+			info._last += scores[ length - 1 ];
+			out << clInfo->_login << " scored: " << scores[ length - 1 ] << " for word: " << it->first << "." << endl;
 			}
 		}
-	for ( players_t::iterator it = f_oPlayers.begin(); it != f_oPlayers.end(); ++ it )
+	for ( players_t::iterator it = _players.begin(); it != _players.end(); ++ it )
 		{
-		it->second.f_iScore += it->second.f_iLast;
+		it->second._score += it->second._last;
 		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::PLAYER << PROTOCOL::SEP
-				<< it->first->_login << PROTOCOL::SEPP << it->second.f_iScore
-				<< PROTOCOL::SEPP << it->second.f_iLast << endl << _out );
-		it->second.f_iLast = 0;
+				<< it->first->_login << PROTOCOL::SEPP << it->second._score
+				<< PROTOCOL::SEPP << it->second._last << endl << _out );
+		it->second._last = 0;
 		}
 	for ( longest_t::iterator it = longest.begin(); it != longest.end(); ++ it )
 		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::LONGEST << PROTOCOL::SEP
 				<< (*it)->first << " [" << (*(*it)->second->begin())->_login << "]" << endl << _out );
-	f_oWords.clear(); 
-	if ( f_iRound < f_iMaxRounds )
+	_words.clear(); 
+	if ( _round < _maxRounds )
 		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::END_ROUND << endl << _out );
 	return;
 	M_EPILOG
@@ -405,14 +405,14 @@ bool HBoggle::is_good( int f, char const* ptr, int length )
 			{ 0, 1 }, /* bottom */
 			{ 1, 1 } /* bottom right */
 		};
-	char saved = f_ppcGame[ f ][ 1 ];
-	if ( ! f_ppcGame[ f ][ 1 ] && ( *ptr == f_ppcGame[ f ][ 0 ] ) )
+	char saved = _game[ f ][ 1 ];
+	if ( ! _game[ f ][ 1 ] && ( *ptr == _game[ f ][ 0 ] ) )
 		{
 		if ( length == 1 )
 			good = true;
 		else
 			{
-			f_ppcGame[ f ][ 1 ] = 1;
+			_game[ f ][ 1 ] = 1;
 			int x = f % 4;
 			int y = f / 4;
 			for ( int i = 0; ! good && ( i < DIRECTIONS ); ++ i )
@@ -424,27 +424,27 @@ bool HBoggle::is_good( int f, char const* ptr, int length )
 				}
 			}
 		}
-	f_ppcGame[ f ][ 1 ] = saved;
+	_game[ f ][ 1 ] = saved;
 	return ( good );
 	}
 
-bool HBoggle::word_is_good( HString const& a_oWord, int a_iLength )
+bool HBoggle::word_is_good( HString const& word_, int length_ )
 	{
 	M_PROLOG
 	bool good = false;
-	char const* ptr = a_oWord.raw();
+	char const* ptr = word_.raw();
 	for ( int f = 0; f < boggle_data::MAXIMUM_WORD_LENGTH; ++ f )
-		f_ppcGame[ f ][ 1 ] = 0;
+		_game[ f ][ 1 ] = 0;
 	for ( int f = 0; f < boggle_data::MAXIMUM_WORD_LENGTH; ++ f )
 		{
-		if ( is_good( f, ptr, a_iLength ) )
+		if ( is_good( f, ptr, length_ ) )
 			{
 			good = true;
 			break;
 			}
 		}
 	if ( good )
-		good = ! HSpellCheckerService::get_instance().spell_check( a_oWord );
+		good = ! HSpellCheckerService::get_instance().spell_check( word_ );
 	return ( good );
 	M_EPILOG
 	}
@@ -461,25 +461,25 @@ protected:
 	virtual void do_initialize_globals( void );
 	} boggleCreator;
 
-HLogic::ptr_t HBoggleCreator::do_new_instance( HString const& a_oArgv )
+HLogic::ptr_t HBoggleCreator::do_new_instance( HString const& argv_ )
 	{
 	M_PROLOG
-	out << "creating logic: " << a_oArgv << endl;
-	HTokenizer t( a_oArgv, "," );
-	HString l_oName = t[ 0 ];
-	HString l_oPlayers = t[ 1 ];
-	HString l_oRoundTime = t[ 2 ];
-	HString l_oMaxRounds = t[ 3 ];
-	HString l_oInterRoundDelay = t[ 4 ];
-	int l_iPlayers = lexical_cast<int>( l_oPlayers );
-	int l_iRoundTime = lexical_cast<int>( l_oRoundTime );
-	int l_iMaxRounds = lexical_cast<int>( l_oMaxRounds );
-	int l_iInterRoundDelay = lexical_cast<int>( l_oInterRoundDelay );
-	return ( HLogic::ptr_t( new boggle::HBoggle( l_oName,
-					l_iPlayers,
-					l_iRoundTime,
-					l_iMaxRounds,
-					l_iInterRoundDelay ) ) );
+	out << "creating logic: " << argv_ << endl;
+	HTokenizer t( argv_, "," );
+	HString name = t[ 0 ];
+	HString players = t[ 1 ];
+	HString roundTime = t[ 2 ];
+	HString maxRounds = t[ 3 ];
+	HString interRoundDelay = t[ 4 ];
+	int players = lexical_cast<int>( players );
+	int roundTime = lexical_cast<int>( roundTime );
+	int maxRounds = lexical_cast<int>( maxRounds );
+	int interRoundDelay = lexical_cast<int>( interRoundDelay );
+	return ( HLogic::ptr_t( new boggle::HBoggle( name,
+					players,
+					roundTime,
+					maxRounds,
+					interRoundDelay ) ) );
 	M_EPILOG
 	}
 
@@ -500,9 +500,9 @@ bool registrar( void )
 	M_PROLOG
 	bool volatile failed = false;
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
-	HString l_oSetup;
-	l_oSetup.format( "%s:%d,%d,%d,%d", "bgl", setup.f_iPlayers, setup.f_iRoundTime, setup.f_iMaxRounds, setup.f_iInterRoundDelay );
-	factory.register_logic_creator( l_oSetup, &boggleCreator );
+	HString setup;
+	setup.format( "%s:%d,%d,%d,%d", "bgl", setup._players, setup._roundTime, setup._maxRounds, setup._interRoundDelay );
+	factory.register_logic_creator( setup, &boggleCreator );
 	return ( failed );
 	M_EPILOG
 	}

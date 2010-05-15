@@ -37,8 +37,8 @@ struct OClientInfo
 	bool _anonymous;
 	yaal::hcore::HString _login;
 	yaal::hcore::HSocket::ptr_t _socket;
-	HLogic::ptr_t f_oLogic;
-	OClientInfo( void ) : _anonymous( false ), _login(), _socket(), f_oLogic() {}
+	HLogic::ptr_t _logic;
+	OClientInfo( void ) : _anonymous( false ), _login(), _socket(), _logic() {}
 	};
 
 }

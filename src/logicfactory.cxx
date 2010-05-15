@@ -42,38 +42,38 @@ using namespace yaal::tools::util;
 namespace gameground
 {
 
-void HLogicFactory::register_logic_creator( HString const& a_oInfo, HLogicCreatorInterface* a_poInstatiator )
+void HLogicFactory::register_logic_creator( HString const& info_, HLogicCreatorInterface* instatiator_ )
 	{
 	M_PROLOG
-	HString l_oName = get_token( a_oInfo, ":", 0 );
-	creators_t::iterator it = f_oCreators.find( l_oName );
-	if ( it != f_oCreators.end() )
+	HString name = get_token( info_, ":", 0 );
+	creators_t::iterator it = _creators.find( name );
+	if ( it != _creators.end() )
 		M_THROW( _( "Logic already registered" ), errno );
-	OCreator l_oCreator;
-	l_oCreator.f_poInstatiator = a_poInstatiator;
-	l_oCreator.f_oInfo = a_oInfo;
-	f_oCreators[ l_oName ] = l_oCreator;
+	OCreator creator;
+	creator._instatiator = instatiator_;
+	creator._info = info_;
+	_creators[ name ] = creator;
 	return;
 	M_EPILOG
 	}
 
-HLogic::ptr_t HLogicFactory::create_logic( HString const& a_oType, HString const& a_oArgv )
+HLogic::ptr_t HLogicFactory::create_logic( HString const& type_, HString const& argv_ )
 	{
 	M_PROLOG
-	HLogic::ptr_t l_oLogic;
-	creators_t::iterator it = f_oCreators.find( a_oType );
-	if ( it != f_oCreators.end() )
-		l_oLogic = it->second.f_poInstatiator->new_instance( a_oArgv );
-	return ( l_oLogic );
+	HLogic::ptr_t logic;
+	creators_t::iterator it = _creators.find( type_ );
+	if ( it != _creators.end() )
+		logic = it->second._instatiator->new_instance( argv_ );
+	return ( logic );
 	M_EPILOG
 	}
 
-bool HLogicFactory::is_type_valid( yaal::hcore::HString const& a_oType )
+bool HLogicFactory::is_type_valid( yaal::hcore::HString const& type_ )
 	{
 	M_PROLOG
 	bool valid = false;
-	creators_t::iterator it = f_oCreators.find( a_oType );
-	if ( it != f_oCreators.end() )
+	creators_t::iterator it = _creators.find( type_ );
+	if ( it != _creators.end() )
 		valid = true;
 	return ( valid );
 	M_EPILOG
@@ -81,24 +81,24 @@ bool HLogicFactory::is_type_valid( yaal::hcore::HString const& a_oType )
 
 HLogicFactory::creators_t::iterator HLogicFactory::begin( void )
 	{
-	return ( f_oCreators.begin() );
+	return ( _creators.begin() );
 	}
 
 HLogicFactory::creators_t::iterator HLogicFactory::end( void )
 	{
-	return ( f_oCreators.end() );
+	return ( _creators.end() );
 	}
 
-int HLogicFactory::life_time( int a_iLifeTime )
+int HLogicFactory::life_time( int lifeTime_ )
 	{
-	return ( a_iLifeTime );
+	return ( lifeTime_ );
 	}
 
 void HLogicFactory::initialize_globals( void )
 	{
 	M_PROLOG
-	for ( creators_t::iterator it = f_oCreators.begin(); it != f_oCreators.end(); ++ it )
-		it->second.f_poInstatiator->initialize_globals();
+	for ( creators_t::iterator it = _creators.begin(); it != _creators.end(); ++ it )
+		it->second._instatiator->initialize_globals();
 	return;
 	M_EPILOG
 	}

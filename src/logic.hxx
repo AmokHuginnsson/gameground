@@ -44,10 +44,10 @@ private:
 	typedef yaal::hcore::HHashMap<yaal::hcore::HString, handler_t> handlers_t;
 protected:
 	/*{*/
-	yaal::hcore::HString f_oSymbol;
+	yaal::hcore::HString _symbol;
 	handlers_t _handlers;
 	clients_t _clients;
-	yaal::hcore::HString f_oName;
+	yaal::hcore::HString _name;
 	yaal::tools::HStringStream _out;
 	/*}*/
 	struct PROTOCOL

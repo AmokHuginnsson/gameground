@@ -43,10 +43,10 @@ using namespace yaal::tools::util;
 namespace gameground
 {
 
-bool set_variables( HString& a_roOption, HString& a_roValue )
+bool set_variables( HString& option_, HString& value_ )
 	{
 	::fprintf( stdout, "option: [%s], value: [%s]\n",
-			a_roOption.raw(), a_roValue.raw() );
+			option_.raw(), value_.raw() );
 	return ( false );
 	}
 
@@ -59,51 +59,51 @@ void version( void* )
 
 void set_verbosity( void* )
 	{
-	++ setup.f_iVerbose;
+	++ setup._verbose;
 	return;
 	}
 
 /* Set all the option flags according to the switches specified.
    Return the index of the first non-option argument.                    */
-int handle_program_options( int a_iArgc, char** a_ppcArgv )
+int handle_program_options( int argc_, char** argv_ )
 	{
 	M_PROLOG
 	HProgramOptionsHandler po;
-	OOptionInfo info( po, setup.f_pcProgramName, "GameGround - universal networked multiplayer game server", NULL );
+	OOptionInfo info( po, setup._programName, "GameGround - universal networked multiplayer game server", NULL );
 	bool stop = false;
-	po( "log_path", program_options_helper::option_value( setup.f_oLogPath ), HProgramOptionsHandler::OOption::TYPE::REQUIRED, "path pointing to file for application logs", "path" )
-		( "database_path", program_options_helper::option_value( setup.f_oDatabasePath ), 'D', HProgramOptionsHandler::OOption::TYPE::REQUIRED, "database connection path scheme", "path" )
-		( "database_login", program_options_helper::option_value( setup.f_oDatabaseLogin ), 'U', HProgramOptionsHandler::OOption::TYPE::REQUIRED, "datbase connection user name", "user" )
-		( "database_password", program_options_helper::option_value( setup.f_oDatabasePassword ), 'p', HProgramOptionsHandler::OOption::TYPE::REQUIRED, "database connection password", "password" )
-		( "aspell_lang", program_options_helper::option_value( setup.f_oAspellLang ), HProgramOptionsHandler::OOption::TYPE::REQUIRED, "language used for spell checking", "language" )
-		( "board", program_options_helper::option_value( setup.f_iBoardSize ), "B", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "size of the galaxy board", "size" )
-		( "console_charset", program_options_helper::option_value( setup.f_oConsoleCharset ), HProgramOptionsHandler::OOption::TYPE::REQUIRED, "charset encoding for current terminal", "charset" )
-		( "emperors", program_options_helper::option_value( setup.f_iEmperors ), "E", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "set number of players", "count" )
-		( "host", program_options_helper::option_value( setup.f_oHost ), "H", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "select host to connect", "addr" )
-		( "join", program_options_helper::option_value( setup.f_oGame ), "J", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "join to game named {name}", "name" )
-		( "login", program_options_helper::option_value( setup.f_oLogin ), "L", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "set your player name", "name" )
-		( "new", program_options_helper::option_value( setup.f_oGameType ), "N", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "create game of type {type} and named {name}", "type,name" )
-		( "port", program_options_helper::option_value( setup.f_iPort ), "P", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "set port number", "num" )
-		( "systems", program_options_helper::option_value( setup.f_iSystems ), "S", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "set number of neutral systems", "count" )
-		( "quiet", program_options_helper::option_value( setup.f_bQuiet ), "q", HProgramOptionsHandler::OOption::TYPE::NONE, "inhibit usual output" )
-		( "silent", program_options_helper::option_value( setup.f_bQuiet ), "q", HProgramOptionsHandler::OOption::TYPE::NONE, "inhibit usual output" )
-		( "verbose", program_options_helper::option_value( setup.f_iVerbose ), "v", HProgramOptionsHandler::OOption::TYPE::NONE, "print more information", program_options_helper::callback( set_verbosity, NULL ) )
+	po( "log_path", program_options_helper::option_value( setup._logPath ), HProgramOptionsHandler::OOption::TYPE::REQUIRED, "path pointing to file for application logs", "path" )
+		( "database_path", program_options_helper::option_value( setup._databasePath ), 'D', HProgramOptionsHandler::OOption::TYPE::REQUIRED, "database connection path scheme", "path" )
+		( "database_login", program_options_helper::option_value( setup._databaseLogin ), 'U', HProgramOptionsHandler::OOption::TYPE::REQUIRED, "datbase connection user name", "user" )
+		( "database_password", program_options_helper::option_value( setup._databasePassword ), 'p', HProgramOptionsHandler::OOption::TYPE::REQUIRED, "database connection password", "password" )
+		( "aspell_lang", program_options_helper::option_value( setup._aspellLang ), HProgramOptionsHandler::OOption::TYPE::REQUIRED, "language used for spell checking", "language" )
+		( "board", program_options_helper::option_value( setup._boardSize ), "B", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "size of the galaxy board", "size" )
+		( "console_charset", program_options_helper::option_value( setup._consoleCharset ), HProgramOptionsHandler::OOption::TYPE::REQUIRED, "charset encoding for current terminal", "charset" )
+		( "emperors", program_options_helper::option_value( setup._emperors ), "E", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "set number of players", "count" )
+		( "host", program_options_helper::option_value( setup._host ), "H", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "select host to connect", "addr" )
+		( "join", program_options_helper::option_value( setup._game ), "J", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "join to game named {name}", "name" )
+		( "login", program_options_helper::option_value( setup._login ), "L", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "set your player name", "name" )
+		( "new", program_options_helper::option_value( setup._gameType ), "N", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "create game of type {type} and named {name}", "type,name" )
+		( "port", program_options_helper::option_value( setup._port ), "P", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "set port number", "num" )
+		( "systems", program_options_helper::option_value( setup._systems ), "S", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "set number of neutral systems", "count" )
+		( "quiet", program_options_helper::option_value( setup._quiet ), "q", HProgramOptionsHandler::OOption::TYPE::NONE, "inhibit usual output" )
+		( "silent", program_options_helper::option_value( setup._quiet ), "q", HProgramOptionsHandler::OOption::TYPE::NONE, "inhibit usual output" )
+		( "verbose", program_options_helper::option_value( setup._verbose ), "v", HProgramOptionsHandler::OOption::TYPE::NONE, "print more information", program_options_helper::callback( set_verbosity, NULL ) )
 		( "help", program_options_helper::option_value( stop ), "h", HProgramOptionsHandler::OOption::TYPE::NONE, "display this help and stop", program_options_helper::callback( util::show_help, &info ) )
 		( "dump-configuration", program_options_helper::option_value( stop ), "W", HProgramOptionsHandler::OOption::TYPE::NONE, "dump current configuration", program_options_helper::callback( util::dump_configuration, &info ) )
 		( "version", program_options_helper::no_value, "V", HProgramOptionsHandler::OOption::TYPE::NONE, "output version information and stop", program_options_helper::callback( version, NULL ) );
 	po.process_rc_file( "gameground", "", NULL );
-	if ( setup.f_oLogPath.is_empty() )
-		setup.f_oLogPath = "gameground.log";
-	int l_iUnknown = 0, l_iNonOption = 0;
-	l_iNonOption = po.process_command_line( a_iArgc, a_ppcArgv, &l_iUnknown );
-	if ( l_iUnknown > 0 )
+	if ( setup._logPath.is_empty() )
+		setup._logPath = "gameground.log";
+	int unknown = 0, nonOption = 0;
+	nonOption = po.process_command_line( argc_, argv_, &unknown );
+	if ( unknown > 0 )
 		{
 		util::show_help( &info );
-		throw l_iUnknown;
+		throw unknown;
 		}
 	if ( stop )
 		throw 0;
-	return ( l_iNonOption );
+	return ( nonOption );
 	M_EPILOG
 	}
 

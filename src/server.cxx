@@ -44,11 +44,11 @@ namespace gameground
 namespace
 {
 
-HString const& mark( int a_iColor )
+HString const& mark( int color_ )
 	{
 	static HString buf;
 	buf = "$";
-	buf += a_iColor;
+	buf += color_;
 	buf += ";###;$7;";
 	return ( buf );
 	}
@@ -84,12 +84,12 @@ char const* const HServer::PROTOCOL::SHUTDOWN = "shutdown";
 char const* const HServer::PROTOCOL::VERSION = "version";
 char const* const HServer::PROTOCOL::VERSION_ID = "0";
 
-HServer::HServer( int a_iConnections )
-	: _maxConnections( a_iConnections ),
-	_socket( HSocket::socket_type_t( HSocket::TYPE::DEFAULT ) | HSocket::TYPE::NONBLOCKING | HSocket::TYPE::SSL_SERVER, a_iConnections ),
+HServer::HServer( int connections_ )
+	: _maxConnections( connections_ ),
+	_socket( HSocket::socket_type_t( HSocket::TYPE::DEFAULT ) | HSocket::TYPE::NONBLOCKING | HSocket::TYPE::SSL_SERVER, connections_ ),
 	_clients(), _logics(), _handlers(), _out(),
 	_db( HDataBase::get_connector() ),
-	_dispatcher( a_iConnections, 3600 ), _freeIds()
+	_dispatcher( connections_, 3600 ), _freeIds()
 	{
 	M_PROLOG
 	return;
@@ -101,13 +101,13 @@ HServer::~HServer( void )
 	out << brightred << "<<<GameGround>>>" << lightgray << " server finished." << endl;
 	}
 
-int HServer::init_server( int a_iPort )
+int HServer::init_server( int port_ )
 	{
 	M_PROLOG
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 	factory.initialize_globals();
-	_db->connect( setup.f_oDatabasePath, setup.f_oDatabaseLogin, setup.f_oDatabasePassword );
-	_socket.listen( "0.0.0.0", a_iPort );
+	_db->connect( setup._databasePath, setup._databaseLogin, setup._databasePassword );
+	_socket.listen( "0.0.0.0", port_ );
 	_dispatcher.register_file_descriptor_handler( _socket.get_file_descriptor(), bound_call( &HServer::handler_connection, this, _1 ) );
 	_handlers[ PROTOCOL::SHUTDOWN ] = &HServer::handler_shutdown;
 	_handlers[ PROTOCOL::QUIT ] = &HServer::handler_quit;
@@ -127,40 +127,40 @@ int HServer::init_server( int a_iPort )
 	M_EPILOG
 	}
 
-void HServer::broadcast( HString const& a_roMessage )
+void HServer::broadcast( HString const& message_ )
 	{
 	M_PROLOG
 	for ( clients_t::iterator it = _clients.begin(); it != _clients.end(); ++ it )
-		*it->second._socket << a_roMessage << endl;
+		*it->second._socket << message_ << endl;
 	return;
 	M_EPILOG
 	}
 
-void HServer::broadcast_to_interested( HString const& a_roMessage )
+void HServer::broadcast_to_interested( HString const& message_ )
 	{
 	M_PROLOG
 	for ( clients_t::iterator it = _clients.begin(); it != _clients.end(); ++ it )
-		if ( ! it->second.f_oLogic )
-			*it->second._socket << a_roMessage << endl;
+		if ( ! it->second._logic )
+			*it->second._socket << message_ << endl;
 	return;
 	M_EPILOG
 	}
 
-void HServer::handler_chat( OClientInfo& client_, HString const& a_roMessage )
+void HServer::handler_chat( OClientInfo& client_, HString const& message_ )
 	{
 	M_PROLOG
-	broadcast_to_interested( _out << PROTOCOL::MSG << PROTOCOL::SEP << client_._login << ": " << a_roMessage << _out );
+	broadcast_to_interested( _out << PROTOCOL::MSG << PROTOCOL::SEP << client_._login << ": " << message_ << _out );
 	return;
 	M_EPILOG
 	}
 
-void HServer::handle_login( OClientInfo& client_, HString const& a_oLoginInfo )
+void HServer::handle_login( OClientInfo& client_, HString const& loginInfo_ )
 	{
 	M_PROLOG
 	clients_t::iterator it;
 	int const MINIMUM_NAME_LENGTH( 4 );
-	HString login( get_token( a_oLoginInfo, ":", 0 ) );
-	HString password( get_token( a_oLoginInfo, ":", 1 ) );
+	HString login( get_token( loginInfo_, ":", 0 ) );
+	HString password( get_token( loginInfo_, ":", 1 ) );
 	for ( it = _clients.begin(); it != _clients.end(); ++ it )
 		if ( ( ! strcasecmp( it->second._login, login ) ) && ( it->second._socket != client_._socket ) )
 			break;
@@ -233,17 +233,17 @@ void HServer::handle_account( OClientInfo& client_, HString const& accountInfo_ 
 	M_EPILOG
 	}
 
-void HServer::pass_command( OClientInfo& client_, HString const& a_oCommand )
+void HServer::pass_command( OClientInfo& client_, HString const& command_ )
 	{
 	M_PROLOG
-	if ( ! client_.f_oLogic )
+	if ( ! client_._logic )
 		client_._socket->write_until_eos( "err:Connect to some game first.\n" );
 	else
 		{
 		HString msg;
 		try
 			{
-			if ( client_.f_oLogic->process_command( &client_, a_oCommand ) )
+			if ( client_._logic->process_command( &client_, command_ ) )
 				msg = "Game logic could not comprehend your message: ";
 			}
 		catch ( HLogicException& e )
@@ -257,33 +257,33 @@ void HServer::pass_command( OClientInfo& client_, HString const& a_oCommand )
 	M_EPILOG
 	}
 
-void HServer::create_game( OClientInfo& client_, HString const& a_oArg )
+void HServer::create_game( OClientInfo& client_, HString const& arg_ )
 	{
 	M_PROLOG
 	if ( client_._login.is_empty() )
 		kick_client( client_._socket, _( "Set your name first (Just login with standard client, will ya?)." ) );
 	else
 		{
-		HString l_oType = get_token( a_oArg, ":", 0 );
-		HString l_oConfiguration = get_token( a_oArg, ":", 1 );
-		HString l_oName = get_token( l_oConfiguration, ",", 0 );
+		HString type = get_token( arg_, ":", 0 );
+		HString configuration = get_token( arg_, ":", 1 );
+		HString name = get_token( configuration, ",", 0 );
 		HLogicFactory& factory = HLogicFactoryInstance::get_instance();
-		if ( ! factory.is_type_valid( l_oType ) )
+		if ( ! factory.is_type_valid( type ) )
 			kick_client( client_._socket, _( "No such game type." ) );
 		else
 			{
-			HLogic::ptr_t l_oLogic;
+			HLogic::ptr_t logic;
 			try
 				{
-				l_oLogic = factory.create_logic( l_oType, l_oConfiguration );
-				if ( ! l_oLogic->accept_client( &client_ ) )
+				logic = factory.create_logic( type, configuration );
+				if ( ! logic->accept_client( &client_ ) )
 					{
 					id_t id( 0 );
-					_logics[ id = create_id() ] = l_oLogic;
-					client_.f_oLogic = l_oLogic;
-					out << l_oName << "," << l_oType << endl;
+					_logics[ id = create_id() ] = logic;
+					client_._logic = logic;
+					out << name << "," << type << endl;
 					broadcast_to_interested( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
-							<< client_._login << PROTOCOL::SEPP << l_oLogic->get_info() << _out );
+							<< client_._login << PROTOCOL::SEPP << logic->get_info() << _out );
 					}
 				else
 					client_._socket->write_until_eos( "err:Specified configuration is inconsistent.\n" );
@@ -298,23 +298,23 @@ void HServer::create_game( OClientInfo& client_, HString const& a_oArg )
 	M_EPILOG
 	}
 
-void HServer::join_game( OClientInfo& client_, HString const& a_oName )
+void HServer::join_game( OClientInfo& client_, HString const& name_ )
 	{
 	M_PROLOG
 	if ( client_._login.is_empty() )
 		kick_client( client_._socket, _( "Set your name first (Just login with standard client, will ya?)." ) );
 	else
 		{
-		logics_t::iterator it = _logics.find( a_oName );
+		logics_t::iterator it = _logics.find( name_ );
 		if ( it == _logics.end() )
 			client_._socket->write_until_eos( "err:Game does not exists.\n" );
-		else if ( !! client_.f_oLogic )
+		else if ( !! client_._logic )
 			kick_client( client_._socket, _( "You were already in some game." ) );
 		else if ( ! it->second->accept_client( &client_ ) )
 			{
-			client_.f_oLogic = it->second;
+			client_._logic = it->second;
 			broadcast_to_interested( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
-					<< client_._login << PROTOCOL::SEPP << client_.f_oLogic->get_info() << _out );
+					<< client_._login << PROTOCOL::SEPP << client_._logic->get_info() << _out );
 			}
 		else
 			client_._socket->write_until_eos( "err:Game is full.\n" );
@@ -326,91 +326,91 @@ void HServer::join_game( OClientInfo& client_, HString const& a_oName )
 void HServer::handler_connection( int )
 	{
 	M_PROLOG
-	HSocket::ptr_t l_oClient = _socket.accept();
-	M_ASSERT( !! l_oClient );
+	HSocket::ptr_t client = _socket.accept();
+	M_ASSERT( !! client );
 	if ( _socket.get_client_count() >= _maxConnections )
-		l_oClient->close();
+		client->close();
 	else
 		{
-		_dispatcher.register_file_descriptor_handler( l_oClient->get_file_descriptor(), bound_call( &HServer::handler_message, this, _1 ) );
-		_clients[ l_oClient->get_file_descriptor() ]._socket = l_oClient;
+		_dispatcher.register_file_descriptor_handler( client->get_file_descriptor(), bound_call( &HServer::handler_message, this, _1 ) );
+		_clients[ client->get_file_descriptor() ]._socket = client;
 		}
-	out << l_oClient->get_host_name() << endl;
+	out << client->get_host_name() << endl;
 	return;
 	M_EPILOG
 	}
 
-void HServer::handler_message( int a_iFileDescriptor )
+void HServer::handler_message( int fileDescriptor_ )
 	{
 	M_PROLOG
-	HString l_oMessage;
-	HString l_oArgument;
-	HString l_oCommand;
+	HString message;
+	HString argument;
+	HString command;
 	clients_t::iterator clientIt;
-	HSocket::ptr_t l_oClient = _socket.get_client( a_iFileDescriptor );
+	HSocket::ptr_t client = _socket.get_client( fileDescriptor_ );
 	try
 		{
 		int long nRead( 0 );
-		if ( ( clientIt = _clients.find( a_iFileDescriptor ) ) == _clients.end() )
-			kick_client( l_oClient );
-		else if ( ( nRead = l_oClient->read_until( l_oMessage ) ) > 0 )
+		if ( ( clientIt = _clients.find( fileDescriptor_ ) ) == _clients.end() )
+			kick_client( client );
+		else if ( ( nRead = client->read_until( message ) ) > 0 )
 			{
 			if ( clientIt->second._login.is_empty() )
 				out << "`unnamed'";
 			else
 				out << clientIt->second._login; 
-			cout << "->" << l_oMessage << endl;
-			l_oCommand = get_token( l_oMessage, ":", 0 );
-			l_oArgument = l_oMessage.mid( l_oCommand.get_length() + 1 );
-			int l_iMsgLength = static_cast<int>( l_oCommand.get_length() );
-			if ( l_iMsgLength < 1 )
-				kick_client( l_oClient, _( "Malformed data." ) );
+			cout << "->" << message << endl;
+			command = get_token( message, ":", 0 );
+			argument = message.mid( command.get_length() + 1 );
+			int msgLength = static_cast<int>( command.get_length() );
+			if ( msgLength < 1 )
+				kick_client( client, _( "Malformed data." ) );
 			else
 				{
-				handlers_t::iterator it = _handlers.find( l_oCommand );
+				handlers_t::iterator it = _handlers.find( command );
 				if ( it != _handlers.end() )
 					{
-					HLogic::ptr_t l_oLogic = clientIt->second.f_oLogic;
-					( this->*it->second )( clientIt->second, l_oArgument );
-					if ( ( !! l_oLogic ) && ( ! l_oLogic->active_clients() ) )
-						_logics.erase( l_oLogic->get_name() );
+					HLogic::ptr_t logic = clientIt->second._logic;
+					( this->*it->second )( clientIt->second, argument );
+					if ( ( !! logic ) && ( ! logic->active_clients() ) )
+						_logics.erase( logic->get_name() );
 					}
 				else
-					kick_client( l_oClient, _( "Unknown command." ) );
+					kick_client( client, _( "Unknown command." ) );
 				}
 			}
 		else if ( ! nRead )
-			kick_client( l_oClient, "" );
+			kick_client( client, "" );
 		/* else nRead < 0 => REPEAT */
 		}
 	catch ( HOpenSSLException& )
 		{
-		kick_client( l_oClient );
+		kick_client( client );
 		}
 	return;
 	M_EPILOG
 	}
 
-void HServer::kick_client( yaal::hcore::HSocket::ptr_t& a_oClient, char const* const a_pcReason )
+void HServer::kick_client( yaal::hcore::HSocket::ptr_t& client_, char const* const reason_ )
 	{
 	M_PROLOG
-	M_ASSERT( !! a_oClient );
-	int l_iFileDescriptor = a_oClient->get_file_descriptor();
-	if ( a_pcReason && a_pcReason[0] )
-		*a_oClient << PROTOCOL::KCK << PROTOCOL::SEP << a_pcReason << endl;
-	_socket.shutdown_client( l_iFileDescriptor );
-	_dispatcher.unregister_file_descriptor_handler( l_iFileDescriptor );
-	clients_t::iterator clientIt = _clients.find( l_iFileDescriptor );
+	M_ASSERT( !! client_ );
+	int fileDescriptor = client_->get_file_descriptor();
+	if ( reason_ && reason_[0] )
+		*client_ << PROTOCOL::KCK << PROTOCOL::SEP << reason_ << endl;
+	_socket.shutdown_client( fileDescriptor );
+	_dispatcher.unregister_file_descriptor_handler( fileDescriptor );
+	clients_t::iterator clientIt = _clients.find( fileDescriptor );
 	M_ASSERT( clientIt != _clients.end() );
 	out << "client ";
 	if ( clientIt->second._login.is_empty() )
 		cout << "`unnamed'";
 	else
 		cout << clientIt->second._login; 
-	if ( ! a_pcReason || a_pcReason[ 0 ] )
+	if ( ! reason_ || reason_[ 0 ] )
 		{
 		HString reason = " was kicked because of: ";
-		reason += ( a_pcReason ? a_pcReason : "connection error" );
+		reason += ( reason_ ? reason_ : "connection error" );
 		if ( ! clientIt->second._login.is_empty() )
 			broadcast_to_interested( _out << PROTOCOL::MSG << PROTOCOL::SEP
 					<< mark( COLORS::FG_BRIGHTRED ) << " " << clientIt->second._login << reason << _out );
@@ -423,7 +423,7 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& a_oClient, char const* c
 	HString login;
 	if ( ! clientIt->second._login.is_empty() )
 		login = clientIt->second._login;
-	_clients.erase( l_iFileDescriptor );
+	_clients.erase( fileDescriptor );
 	if ( ! login.is_empty() )
 		broadcast_to_interested( _out << PROTOCOL::PLAYER_QUIT << PROTOCOL::SEP << login << _out );
 	return;
@@ -436,7 +436,7 @@ void HServer::send_logics_info( OClientInfo& client_ )
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 	for( HLogicFactory::creators_t::iterator it = factory.begin();
 			it != factory.end(); ++ it )
-		*client_._socket << PROTOCOL::LOGIC << PROTOCOL::SEP << it->second.f_oInfo << endl;
+		*client_._socket << PROTOCOL::LOGIC << PROTOCOL::SEP << it->second._info << endl;
 	return;
 	M_EPILOG
 	}
@@ -478,17 +478,17 @@ void HServer::handler_abandon( OClientInfo& client_, HString const& )
 	M_EPILOG
 	}
 
-void HServer::remove_client_from_logic( OClientInfo& client_, char const* const a_pcReason )
+void HServer::remove_client_from_logic( OClientInfo& client_, char const* const reason_ )
 	{
 	M_PROLOG
-	if ( !! client_.f_oLogic )
+	if ( !! client_._logic )
 		{
-		HLogic::ptr_t l_oLogic = client_.f_oLogic;
+		HLogic::ptr_t logic = client_._logic;
 		out << "separating logic info from client info for: " << client_._login << endl;
-		l_oLogic->kick_client( &client_, a_pcReason );
-		client_.f_oLogic = HLogic::ptr_t();
-		if ( ! l_oLogic->active_clients() )
-			_logics.erase( l_oLogic->get_name() );
+		logic->kick_client( &client_, reason_ );
+		client_._logic = HLogic::ptr_t();
+		if ( ! logic->active_clients() )
+			_logics.erase( logic->get_name() );
 		}
 	return;
 	M_EPILOG
@@ -510,10 +510,10 @@ void HServer::get_games_info( OClientInfo& client_, HString const& )
 	M_EPILOG
 	}
 
-void HServer::get_game_info( OClientInfo& client_, HString const& a_oName )
+void HServer::get_game_info( OClientInfo& client_, HString const& name_ )
 	{
 	M_PROLOG
-	send_game_info( client_, a_oName );
+	send_game_info( client_, name_ );
 	return;
 	M_EPILOG
 	}
@@ -527,8 +527,8 @@ void HServer::send_players_info( OClientInfo& client_ )
 		if ( ! it->second._login.is_empty() )
 			{
 			*client_._socket << PROTOCOL::PLAYER << PROTOCOL::SEP << it->second._login;
-			if ( !! it->second.f_oLogic )
-				*client_._socket << PROTOCOL::SEPP << it->second.f_oLogic->get_info();
+			if ( !! it->second._logic )
+				*client_._socket << PROTOCOL::SEPP << it->second._logic->get_info();
 			*client_._socket << endl;
 			}
 		}

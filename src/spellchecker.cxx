@@ -39,12 +39,12 @@ namespace gameground
  * 
  * it inializes dictionary
  */
-HSpellChecker::HSpellChecker( void ) : f_pxSpellChecker( NULL ), f_pxSpellConfig( NULL )
+HSpellChecker::HSpellChecker( void ) : _spellChecker( NULL ), _spellConfig( NULL )
 	{
 	M_PROLOG
 	AspellCanHaveError* possible_err = NULL;
 
-	if ( setup.f_oConsoleCharset.is_empty() || setup.f_oAspellLang.is_empty() )
+	if ( setup._consoleCharset.is_empty() || setup._aspellLang.is_empty() )
 		{
 		/* jesli nie chcemy aspella to wywalamy go z pamieci */
 		cleanup();
@@ -53,10 +53,10 @@ HSpellChecker::HSpellChecker( void ) : f_pxSpellChecker( NULL ), f_pxSpellConfig
 
 	hcore::log( LOG_TYPE::INFO ) << "aspell_init - ";
 
-	f_pxSpellConfig = new_aspell_config();
-	::aspell_config_replace( static_cast<AspellConfig*>( f_pxSpellConfig ), "encoding", setup.f_oConsoleCharset.raw() );
-	::aspell_config_replace( static_cast<AspellConfig*>( f_pxSpellConfig ), "lang", setup.f_oAspellLang.raw() );
-	possible_err = new_aspell_speller( static_cast<AspellConfig*>( f_pxSpellConfig ) );
+	_spellConfig = new_aspell_config();
+	::aspell_config_replace( static_cast<AspellConfig*>( _spellConfig ), "encoding", setup._consoleCharset.raw() );
+	::aspell_config_replace( static_cast<AspellConfig*>( _spellConfig ), "lang", setup._aspellLang.raw() );
+	possible_err = new_aspell_speller( static_cast<AspellConfig*>( _spellConfig ) );
 
 	int err = 0;
 	if ( ( err = aspell_error_number( possible_err ) ) != 0 )
@@ -69,7 +69,7 @@ HSpellChecker::HSpellChecker( void ) : f_pxSpellChecker( NULL ), f_pxSpellConfig
 		}
 	else
 		{
-		f_pxSpellChecker = to_aspell_speller( possible_err );
+		_spellChecker = to_aspell_speller( possible_err );
 		hcore::log( LOG_TYPE::INFO ) << "success" << endl;
 		}
 	return;
@@ -89,18 +89,18 @@ bool HSpellChecker::spell_check( HString const& what )
 	{
 	M_PROLOG
 	M_ASSERT( !! what );
-	return ( aspell_speller_check( static_cast<AspellSpeller*>( f_pxSpellChecker ), what.raw(), static_cast<int>( what.length() ) ) == 0 );
+	return ( aspell_speller_check( static_cast<AspellSpeller*>( _spellChecker ), what.raw(), static_cast<int>( what.length() ) ) == 0 );
 	M_EPILOG
 	}
 
 void HSpellChecker::cleanup( void )
 	{
-	if ( f_pxSpellChecker )
-		delete_aspell_speller( static_cast<AspellSpeller*>( f_pxSpellChecker ) );
-	f_pxSpellChecker = NULL;
-	if ( f_pxSpellConfig )
-		delete_aspell_config( static_cast<AspellConfig*>( f_pxSpellConfig ) );
-	f_pxSpellConfig = NULL;
+	if ( _spellChecker )
+		delete_aspell_speller( static_cast<AspellSpeller*>( _spellChecker ) );
+	_spellChecker = NULL;
+	if ( _spellConfig )
+		delete_aspell_config( static_cast<AspellConfig*>( _spellConfig ) );
+	_spellConfig = NULL;
 	return;
 	}
 

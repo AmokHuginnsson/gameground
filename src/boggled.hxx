@@ -41,9 +41,9 @@ class HBoggle : public HLogic
 	{
 	struct OPlayerInfo
 		{
-		int f_iScore;
-		int f_iLast;
-		OPlayerInfo( void ) : f_iScore( 0 ), f_iLast( 0 ) {}
+		int _score;
+		int _last;
+		OPlayerInfo( void ) : _score( 0 ), _last( 0 ) {}
 		};
 	struct STATE
 		{
@@ -82,17 +82,17 @@ protected:
 	typedef yaal::hcore::HMap<yaal::hcore::HString, client_set_ptr_t> words_t;
 	typedef yaal::hcore::HMap<OClientInfo*, OPlayerInfo> players_t;
 	static SCORING::ORule RULES[4];
-	STATE::state_t f_eState;
-	int f_iPlayers;
-	int f_iRoundTime;
-	int f_iMaxRounds;
-	int f_iInterRoundDelay;
-	int f_iRuleSet;
-	int f_iRound;
-	players_t f_oPlayers;
-	char f_ppcGame[16][2];
-	words_t f_oWords;
-	mutable yaal::hcore::HMutex f_oMutex;
+	STATE::state_t _state;
+	int _players;
+	int _roundTime;
+	int _maxRounds;
+	int _interRoundDelay;
+	int _ruleSet;
+	int _round;
+	players_t _players;
+	char _game[16][2];
+	words_t _words;
+	mutable yaal::hcore::HMutex _mutex;
 	/*}*/
 	struct PROTOCOL
 		{

@@ -45,12 +45,12 @@ now_t now;
 HStreamInterface& operator << ( HStreamInterface& stream, now_t const& )
 	{
 	static int const TIMESTAMP_SIZE = 16;
-	time_t l_xCurrentTime = ::time( NULL );
-	tm* l_psBrokenTime = ::localtime( &l_xCurrentTime );
-	char l_pcBuffer[ TIMESTAMP_SIZE ];
-	::memset( l_pcBuffer, 0, TIMESTAMP_SIZE );
-	::strftime( l_pcBuffer, TIMESTAMP_SIZE, "%b %d %H:%M:%S", l_psBrokenTime );
-	stream << l_pcBuffer;
+	time_t currentTime = ::time( NULL );
+	tm* brokenTime = ::localtime( &currentTime );
+	char buffer[ TIMESTAMP_SIZE ];
+	::memset( buffer, 0, TIMESTAMP_SIZE );
+	::strftime( buffer, TIMESTAMP_SIZE, "%b %d %H:%M:%S", brokenTime );
+	stream << buffer;
 	return ( stream );
 	}
 
@@ -61,68 +61,68 @@ void OSetup::test_setup( void )
 	if ( _maxConnections < 2 )
 		yaal::tools::util::failure ( 3,
 				_( "this server hosts multiplayer games only\n" ) );
-	if ( f_iPort < 1024 )
+	if ( _port < 1024 )
 		yaal::tools::util::failure ( 5,
 				_( "galaxy cannot run on restricted ports\n" ) );
 #endif /* __GAMEGROUND_SERVER__ */
 #ifdef __GAMEGROUND_CLIENT__
-	if ( f_oHost.is_empty() )
+	if ( _host.is_empty() )
 		yaal::tools::util::failure( 6,
 				_( "as a client you must specify server host\n" ) );
-	if ( f_oLogin.is_empty() )
+	if ( _login.is_empty() )
 		yaal::tools::util::failure( 7,
 				_( "as a player you must specify Your name\n" ) );
-	if ( f_oGameType.is_empty() && f_oGame.is_empty() )
+	if ( _gameType.is_empty() && _game.is_empty() )
 		yaal::tools::util::failure( 11, _( "as client you have to specify game to play\n" ) );
 #endif /* __GAMEGROUND_CLIENT__ */
-	char* l_pcMessage = NULL;
-	if ( test_glx_emperors( f_iEmperors, l_pcMessage ) )
-		yaal::tools::util::failure ( 4, l_pcMessage );
-	if ( test_glx_board_size( f_iBoardSize, l_pcMessage ) )
-		yaal::tools::util::failure ( 8, l_pcMessage );
-	if ( test_glx_emperors_systems( f_iEmperors, f_iSystems, l_pcMessage ) )
-		yaal::tools::util::failure ( 9, l_pcMessage );
-	if ( test_glx_systems( f_iSystems, l_pcMessage ) )
-		yaal::tools::util::failure ( 10, l_pcMessage );
-	if ( ! ( f_oGameType.is_empty() || f_oGame.is_empty() ) )
+	char* message = NULL;
+	if ( test_glx_emperors( _emperors, message ) )
+		yaal::tools::util::failure ( 4, message );
+	if ( test_glx_board_size( _boardSize, message ) )
+		yaal::tools::util::failure ( 8, message );
+	if ( test_glx_emperors_systems( _emperors, _systems, message ) )
+		yaal::tools::util::failure ( 9, message );
+	if ( test_glx_systems( _systems, message ) )
+		yaal::tools::util::failure ( 10, message );
+	if ( ! ( _gameType.is_empty() || _game.is_empty() ) )
 		yaal::tools::util::failure ( 12, _( "creating new game is enought, you do not have to join it explicite\n" ) );
-	if ( ! f_oGameType.is_empty() )
+	if ( ! _gameType.is_empty() )
 		{
-		HString type = get_token( f_oGameType, ",", 0 );
-		f_oGame = get_token( f_oGameType, ",", 1 );
-		f_oGameType = type;
-		if ( f_oGameType.is_empty() || f_oGame.is_empty() || ( f_oGameType == "" ) || ( f_oGame == "" ) )
+		HString type = get_token( _gameType, ",", 0 );
+		_game = get_token( _gameType, ",", 1 );
+		_gameType = type;
+		if ( _gameType.is_empty() || _game.is_empty() || ( _gameType == "" ) || ( _game == "" ) )
 			yaal::tools::util::failure ( 13, _( "when creating new game, you have specify both type and name of new game\n" ) );
 		}
 	HDataBase::ptr_t db = HDataBase::get_connector();
-	db->connect( setup.f_oDatabasePath, setup.f_oDatabaseLogin, setup.f_oDatabasePassword );
+	db->connect( setup._databasePath, setup._databaseLogin, setup._databasePassword );
 	return;
 	M_EPILOG
 	}
 
-bool OSetup::test_glx_emperors( int a_iEmperors, char*& a_rpcMessage )
+bool OSetup::test_glx_emperors( int emperors_, char*& message_ )
 	{
-	return ( ( a_iEmperors < 2 )
-			&& ( a_rpcMessage = _( "galaxy is multiplayer game and makes sense"
+	return ( ( emperors_ < 2 )
+			&& ( message_ = _( "galaxy is multiplayer game and makes sense"
 					" only for at least two players\n" ) ) );
 	}
 
-bool OSetup::test_glx_emperors_systems( int a_iEmperors, int a_iSystems, char*& a_rpcMessage )
+bool OSetup::test_glx_emperors_systems( int emperors_, int systems_, char*& message_ )
 	{
-	return ( ( ( a_iEmperors + a_iSystems ) > MAX_SYSTEM_COUNT )
-			&& ( a_rpcMessage = _( "bad total system count\n" ) ) );
+	return ( ( ( emperors_ + systems_ ) > MAX_SYSTEM_COUNT )
+			&& ( message_ = _( "bad total system count\n" ) ) );
 	}
 
-bool OSetup::test_glx_systems( int a_iSystems, char*& a_rpcMessage )
+bool OSetup::test_glx_systems( int systems_, char*& message_ )
 	{
-	return ( ( a_iSystems < 0 )
-			&& ( a_rpcMessage = _( "neutral system count has to be nonnegative number\n" ) ) );
+	return ( ( systems_ < 0 )
+			&& ( message_ = _( "neutral system count has to be nonnegative number\n" ) ) );
 	}
 
-bool OSetup::test_glx_board_size( int a_iBoardSize, char*& a_rpcMessage )
+bool OSetup::test_glx_board_size( int boardSize_, char*& message_ )
 	{
-	return ( ( ( a_iBoardSize < 6 ) || ( a_iBoardSize > MAX_BOARD_SIZE ) )
-			&& ( a_rpcMessage = _( "bad board size specified\n" ) ) );
+	return ( ( ( boardSize_ < 6 ) || ( boardSize_ > MAX_BOARD_SIZE ) )
+			&& ( message_ = _( "bad board size specified\n" ) ) );
 	}
 
 }

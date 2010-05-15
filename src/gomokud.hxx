@@ -64,14 +64,14 @@ class HGomoku : public HLogic
 protected:
 	/*{*/
 	typedef yaal::hcore::HList<OClientInfo*> players_t;
-	OClientInfo* f_ppoContestants[ 2 ];
-	STONE::stone_t f_eState;
-	int f_iMove;
-	int long f_iStart;
-	yaal::hcore::HChunk f_oGame;
-	players_t f_oPlayers;
-	yaal::hcore::HString f_oVarTmpBuffer;
-	mutable yaal::hcore::HMutex f_oMutex;
+	OClientInfo* _contestants[ 2 ];
+	STONE::stone_t _state;
+	int _move;
+	int long _start;
+	yaal::hcore::HChunk _game;
+	players_t _players;
+	yaal::hcore::HString _varTmpBuffer;
+	mutable yaal::hcore::HMutex _mutex;
 	/*}*/
 public:
 	/*{*/

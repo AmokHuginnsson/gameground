@@ -43,9 +43,9 @@ class HFleet
 	{
 protected:
 	/*{*/
-	int f_iSize;
-	OClientInfo* f_poEmperor;
-	int f_iArrivalTime;
+	int _size;
+	OClientInfo* _emperor;
+	int _arrivalTime;
 	/*}*/
 public:
 	/*{*/
@@ -63,13 +63,13 @@ class HSystem
 protected:
 	/*{*/
 	typedef yaal::hcore::HList<HFleet> attackers_t;
-	int f_iId;
-	int f_iCoordinateX;
-	int f_iCoordinateY;
-	int f_iProduction;
-	int f_iFleet;
-	OClientInfo* f_poEmperor;
-	attackers_t f_oAttackers;
+	int _id;
+	int _coordinateX;
+	int _coordinateY;
+	int _production;
+	int _fleet;
+	OClientInfo* _emperor;
+	attackers_t _attackers;
 	/*}*/
 public:
 	/*{*/
@@ -90,20 +90,20 @@ class HGalaxy : public HLogic
 	{
 	struct OEmperorInfo
 		{
-		int f_iColor;
-		int f_iSystems;
-		OEmperorInfo( void ) : f_iColor( -1 ), f_iSystems( -1 ) {}
+		int _color;
+		int _systems;
+		OEmperorInfo( void ) : _color( -1 ), _systems( -1 ) {}
 		};
 	typedef yaal::hcore::HMap<OClientInfo*, OEmperorInfo> emperors_t;
 protected:
 	/*{*/
-	int f_iBoardSize;
-	int f_iSystems;
-	int f_iEmperors;
-	int f_iRound;
-	int f_iReady;
-	yaal::hcore::HArray<HSystem> f_oSystems;
-	emperors_t f_oEmperors;
+	int _boardSize;
+	int _systems;
+	int _emperors;
+	int _round;
+	int _ready;
+	yaal::hcore::HArray<HSystem> _systems;
+	emperors_t _emperors;
 	/*}*/
 public:
 	/*{*/

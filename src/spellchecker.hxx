@@ -34,8 +34,8 @@ namespace gameground
 
 class HSpellChecker : public yaal::hcore::HSingletonInterface
 	{
-	void* f_pxSpellChecker; /* AspellSpeller */
-	void* f_pxSpellConfig; /* AspellConfig */
+	void* _spellChecker; /* AspellSpeller */
+	void* _spellConfig; /* AspellConfig */
 public:
 	bool spell_check( yaal::hcore::HString const& );
 private:

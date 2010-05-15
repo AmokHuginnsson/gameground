@@ -41,11 +41,11 @@ class HGo : public HLogic
 	{
 	struct OPlayerInfo
 		{
-		int long f_iTimeLeft;
-		int f_iByoYomiPeriods;
-		int f_iStonesCaptured;
-		int f_iScore;
-		OPlayerInfo( void ) : f_iTimeLeft( 0 ), f_iByoYomiPeriods( 0 ), f_iStonesCaptured( 0 ), f_iScore( 0 ) {}
+		int long _timeLeft;
+		int _byoYomiPeriods;
+		int _stonesCaptured;
+		int _score;
+		OPlayerInfo( void ) : _timeLeft( 0 ), _byoYomiPeriods( 0 ), _stonesCaptured( 0 ), _score( 0 ) {}
 		};
 	struct STONE
 		{
@@ -93,23 +93,23 @@ protected:
 	/*{*/
 	typedef yaal::hcore::HPair<OClientInfo*, OPlayerInfo> player_t;
 	typedef yaal::hcore::HList<player_t> players_t;
-	OClientInfo* f_ppoContestants[ 2 ];
-	STONE::stone_t f_eState;
-	int f_iGobanSize;
-	int f_iKomi;
-	int f_iHandicaps;
-	int long f_iMainTime;
-	int f_iByoYomiPeriods;
-	int f_iByoYomiTime;
-	int f_iMove;
-	int f_iPass;
-	int long f_iStart;
-	yaal::hcore::HChunk f_oGame;
-	yaal::hcore::HChunk f_oKoGame;
-	yaal::hcore::HChunk f_oOldGame;
-	players_t f_oPlayers;
-	yaal::hcore::HString f_oVarTmpBuffer;
-	mutable yaal::hcore::HMutex f_oMutex;
+	OClientInfo* _contestants[ 2 ];
+	STONE::stone_t _state;
+	int _gobanSize;
+	int _komi;
+	int _handicaps;
+	int long _mainTime;
+	int _byoYomiPeriods;
+	int _byoYomiTime;
+	int _move;
+	int _pass;
+	int long _start;
+	yaal::hcore::HChunk _game;
+	yaal::hcore::HChunk _koGame;
+	yaal::hcore::HChunk _oldGame;
+	players_t _players;
+	yaal::hcore::HString _varTmpBuffer;
+	mutable yaal::hcore::HMutex _mutex;
 	/*}*/
 public:
 	/*{*/

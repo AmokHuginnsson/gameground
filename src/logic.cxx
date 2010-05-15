@@ -47,9 +47,9 @@ char const* const HLogic::PROTOCOL::MSG = "msg";
 char const* const HLogic::PROTOCOL::PLAYER = "player";
 char const* const HLogic::PROTOCOL::PLAYER_QUIT = "player_quit";
 
-HLogic::HLogic( HString const& a_oSymbol, HString const& a_oName )
-	: f_oSymbol( a_oSymbol ), _handlers( setup._maxConnections ),
-	_clients(), f_oName( a_oName ), _out()
+HLogic::HLogic( HString const& symbol_, HString const& name_ )
+	: _symbol( symbol_ ), _handlers( setup._maxConnections ),
+	_clients(), _name( name_ ), _out()
 	{
 	}
 
@@ -57,15 +57,15 @@ HLogic::~HLogic( void )
 	{
 	}
 
-void HLogic::kick_client( OClientInfo* a_poClientInfo, char const* const a_pcReason )
+void HLogic::kick_client( OClientInfo* clientInfo_, char const* const reason_ )
 	{
 	M_PROLOG
-	a_poClientInfo->f_oLogic = HLogic::ptr_t();
-	_clients.erase( a_poClientInfo );
-	if ( a_pcReason )
-		*a_poClientInfo->_socket << "err:" << a_pcReason << endl;
-	do_kick( a_poClientInfo );
-	broadcast( _out << PROTOCOL::PLAYER_QUIT << PROTOCOL::SEP << a_poClientInfo->_login << endl << _out );
+	clientInfo_->_logic = HLogic::ptr_t();
+	_clients.erase( clientInfo_ );
+	if ( reason_ )
+		*clientInfo_->_socket << "err:" << reason_ << endl;
+	do_kick( clientInfo_ );
+	broadcast( _out << PROTOCOL::PLAYER_QUIT << PROTOCOL::SEP << clientInfo_->_login << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -80,14 +80,14 @@ void HLogic::do_kick( OClientInfo* )
 	return;
 	}
 
-bool HLogic::accept_client( OClientInfo* a_poClientInfo )
+bool HLogic::accept_client( OClientInfo* clientInfo_ )
 	{
 	M_PROLOG
 	bool rejected = false;
-	if ( ! do_accept( a_poClientInfo ) )
+	if ( ! do_accept( clientInfo_ ) )
 		{
-		_clients.insert( a_poClientInfo );
-		do_post_accept( a_poClientInfo );
+		_clients.insert( clientInfo_ );
+		do_post_accept( clientInfo_ );
 		}
 	else
 		rejected = true;
@@ -104,37 +104,37 @@ int HLogic::active_clients( void ) const
 
 HString const& HLogic::get_name( void ) const
 	{
-	return ( f_oName );
+	return ( _name );
 	}
 
-bool HLogic::process_command( OClientInfo* a_poClientInfo, HString const& a_roCommand )
+bool HLogic::process_command( OClientInfo* clientInfo_, HString const& command_ )
 	{
 	M_PROLOG
-	HString l_oMnemonic;
-	HString l_oArgument;
-	l_oArgument = a_roCommand;
-	while ( ( l_oMnemonic = get_token( l_oArgument, ":", 0 ) ) == f_oSymbol )
-		l_oArgument = l_oArgument.mid( l_oMnemonic.get_length() + 1 );
-	l_oMnemonic = get_token( l_oArgument, ":", 0 );
-	l_oArgument = l_oArgument.mid( l_oMnemonic.get_length() + 1 );
+	HString mnemonic;
+	HString argument;
+	argument = command_;
+	while ( ( mnemonic = get_token( argument, ":", 0 ) ) == _symbol )
+		argument = argument.mid( mnemonic.get_length() + 1 );
+	mnemonic = get_token( argument, ":", 0 );
+	argument = argument.mid( mnemonic.get_length() + 1 );
 	bool failure = false;
-	handlers_t::iterator it( _handlers.find( l_oMnemonic ) );
+	handlers_t::iterator it( _handlers.find( mnemonic ) );
 	if ( it != _handlers.end() )
-		( this->*(it->second) )( a_poClientInfo, l_oArgument );
+		( this->*(it->second) )( clientInfo_, argument );
 	else
 		{
-		failure = true, kick_client( a_poClientInfo );
-		out << "mnemo: " << l_oMnemonic << ", arg: " << l_oArgument << ", cmd: " << a_roCommand << endl;
+		failure = true, kick_client( clientInfo_ );
+		out << "mnemo: " << mnemonic << ", arg: " << argument << ", cmd: " << command_ << endl;
 		}
 	return ( failure );
 	M_EPILOG
 	}
 
-void HLogic::broadcast( HString const& a_roMessage )
+void HLogic::broadcast( HString const& message_ )
 	{
 	M_PROLOG
 	for ( clients_t::HIterator it = _clients.begin(); it != _clients.end(); ++ it )
-		(*it)->_socket->write_until_eos ( a_roMessage );
+		(*it)->_socket->write_until_eos ( message_ );
 	return;
 	M_EPILOG
 	}
@@ -144,9 +144,9 @@ void HLogicCreatorInterface::initialize_globals( void )
 	do_initialize_globals();
 	}
 
-HLogic::ptr_t HLogicCreatorInterface::new_instance( HString const& a_oArgv )
+HLogic::ptr_t HLogicCreatorInterface::new_instance( HString const& argv_ )
 	{
-	return ( do_new_instance( a_oArgv ) );
+	return ( do_new_instance( argv_ ) );
 	}
 
 }

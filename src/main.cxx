@@ -47,28 +47,28 @@ OSetup setup;
 
 int main_server( void )
 	{
-	HServer l_oServer( setup._maxConnections );
-	l_oServer.init_server( setup.f_iPort );
-	l_oServer.run();
+	HServer server( setup._maxConnections );
+	server.init_server( setup._port );
+	server.run();
 	return ( 0 );
 	}
 
 }
 
-int main( int a_iArgc, char* a_ppcArgv[] )
+int main( int argc_, char* argv_[] )
 	{
 	M_PROLOG
 /* variables declarations for main loop: */
-	int l_iOpt = 0;
+	int opt = 0;
 	HConsole& cons = HCons::get_instance();
 /* end. */
 	try
 		{
 /* TO-DO: enter main loop code here */
 		HSignalServiceFactory::get_instance();
-		setup.f_pcProgramName = a_ppcArgv [ 0 ];
-		l_iOpt = handle_program_options( a_iArgc, a_ppcArgv );
-		hcore::log.rehash( setup.f_oLogPath, setup.f_pcProgramName );
+		setup._programName = argv_ [ 0 ];
+		opt = handle_program_options( argc_, argv_ );
+		hcore::log.rehash( setup._logPath, setup._programName );
 		setup.test_setup();
 /* *BOOM* */
 		main_server();
@@ -81,7 +81,7 @@ int main( int a_iArgc, char* a_ppcArgv[] )
 		throw;
 		}
 	cerr << _( "Done" ) << endl;
-	return ( l_iOpt );
+	return ( opt );
 	M_FINAL
 	}
 

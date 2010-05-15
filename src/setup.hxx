@@ -65,54 +65,54 @@ inline std::ostream& operator << ( std::ostream& o, yaal::hcore::HString const& 
 
 struct OSetup
 	{
-	bool f_bQuiet;			/* --quiet, --silent */
-	int f_iVerbose;		/* --verbose */
+	bool _quiet;			/* --quiet, --silent */
+	int _verbose;		/* --verbose */
 	int	_maxConnections;
 	/* galaxy/boggle specific integers */
-	int f_iEmperors;
-	int f_iPort;
-	int f_iSystems;
-	int f_iBoardSize;
-	int f_iPlayers;
-	int f_iRoundTime;
-	int f_iMaxRounds;
-	int f_iInterRoundDelay;
-	int f_iGobanSize;
-	int f_iKomi;
-	int f_iHandicaps;
-	int f_iMainTime;
-	int f_iByoYomiPeriods;
-	int f_iByoYomiTime;
+	int _emperors;
+	int _port;
+	int _systems;
+	int _boardSize;
+	int _players;
+	int _roundTime;
+	int _maxRounds;
+	int _interRoundDelay;
+	int _gobanSize;
+	int _komi;
+	int _handicaps;
+	int _mainTime;
+	int _byoYomiPeriods;
+	int _byoYomiTime;
 	/* galaxy/boggle specific strings */
-	yaal::hcore::HString f_oLogin;
-	yaal::hcore::HString f_oHost;
-	yaal::hcore::HString f_oGameType;
-	yaal::hcore::HString f_oGame;
-	yaal::hcore::HString f_oConsoleCharset;
-	yaal::hcore::HString f_oAspellLang;
-	yaal::hcore::HString f_oDatabasePath;
-	yaal::hcore::HString f_oDatabaseLogin;
-	yaal::hcore::HString f_oDatabasePassword;
-	char* f_pcProgramName;
-	yaal::hcore::HString f_oLogPath;
+	yaal::hcore::HString _login;
+	yaal::hcore::HString _host;
+	yaal::hcore::HString _gameType;
+	yaal::hcore::HString _game;
+	yaal::hcore::HString _consoleCharset;
+	yaal::hcore::HString _aspellLang;
+	yaal::hcore::HString _databasePath;
+	yaal::hcore::HString _databaseLogin;
+	yaal::hcore::HString _databasePassword;
+	char* _programName;
+	yaal::hcore::HString _logPath;
 	/* self-sufficient */
 	static int const PATH_OFFSET = sizeof ( __FILE__ ) - sizeof ( "setup.hxx" );
 	OSetup ( void )
-		: f_bQuiet( false ), f_iVerbose( 0 ),
+		: _quiet( false ), _verbose( 0 ),
 		_maxConnections( DEFAULT_MAX_CONNECTIONS ),
-		f_iEmperors( GALAXY_EMPERORS ), f_iPort( 7777 ),
-		f_iSystems( GALAXY_EMPERORS * NEUTRAL_SYSTEM_PER_PLAYER ),
-		f_iBoardSize( GALAXY_BOARD_SIZE ), f_iPlayers( BOGGLE_PLAYERS ),
-		f_iRoundTime( BOGGLE_ROUND_TIME ), f_iMaxRounds( BOGGLE_MAX_ROUNDS ),
-		f_iInterRoundDelay( BOGGLE_INTER_ROUND_DELAY ),
-		f_iGobanSize( GO_GOBAN_SIZE ), f_iKomi( GO_KOMI ), f_iHandicaps( GO_HANDICAPS ),
-		f_iMainTime( GO_MAINTIME ), f_iByoYomiPeriods( GO_BYOYOMI_PERIODS ),
-		f_iByoYomiTime( GO_BYOYOMI_TIME ),
-		f_oLogin(), f_oHost(), f_oGameType(), f_oGame(),
-		f_oConsoleCharset(), f_oAspellLang(), f_oDatabasePath( DATABASE_PATH ),
-		f_oDatabaseLogin( DATABASE_LOGIN ), f_oDatabasePassword( DATABASE_PASSWORD ),
-		f_pcProgramName( NULL ),
-		f_oLogPath() {}
+		_emperors( GALAXY_EMPERORS ), _port( 7777 ),
+		_systems( GALAXY_EMPERORS * NEUTRAL_SYSTEM_PER_PLAYER ),
+		_boardSize( GALAXY_BOARD_SIZE ), _players( BOGGLE_PLAYERS ),
+		_roundTime( BOGGLE_ROUND_TIME ), _maxRounds( BOGGLE_MAX_ROUNDS ),
+		_interRoundDelay( BOGGLE_INTER_ROUND_DELAY ),
+		_gobanSize( GO_GOBAN_SIZE ), _komi( GO_KOMI ), _handicaps( GO_HANDICAPS ),
+		_mainTime( GO_MAINTIME ), _byoYomiPeriods( GO_BYOYOMI_PERIODS ),
+		_byoYomiTime( GO_BYOYOMI_TIME ),
+		_login(), _host(), _gameType(), _game(),
+		_consoleCharset(), _aspellLang(), _databasePath( DATABASE_PATH ),
+		_databaseLogin( DATABASE_LOGIN ), _databasePassword( DATABASE_PASSWORD ),
+		_programName( NULL ),
+		_logPath() {}
 	void test_setup( void );
 	static bool test_glx_emperors( int, char*& );
 	static bool test_glx_emperors_systems( int, int, char*& );
