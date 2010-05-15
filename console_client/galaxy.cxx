@@ -50,7 +50,7 @@ namespace gameground
 namespace
 {
 
-char const * const n_ppcSystemNamesLatin [ ] =
+char const * const _systemNamesLatin_ [ ] =
 	{
 	"Aldebaran",
 	"Betelgeuse",
@@ -90,7 +90,7 @@ char const * const n_ppcSystemNamesLatin [ ] =
 	"Decimum"
 	};
 
-char const * const n_ppcSystemNamesNorse [ ] =
+char const * const _systemNamesNorse_ [ ] =
 	{
 	"Aegir",
 	"Balder",
@@ -130,11 +130,11 @@ char const * const n_ppcSystemNamesNorse [ ] =
 	"Yggdrasil"
 	};
 
-char const * const n_pcSymbols = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+char const * const _symbols_ = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 
-char const * const * n_ppcSystemNames = NULL;
+char const * const * _systemNames_ = NULL;
 
-int n_piColors [ ] =
+int _colors_ [ ] =
 	{
 	( COLORS::FG_BRIGHTBLUE | COLORS::BG_BLACK ),
 	( COLORS::FG_BRIGHTGREEN | COLORS::BG_BLACK ),
@@ -162,9 +162,9 @@ class HMove
 	{
 protected:
 	/*{*/
-	int f_iSourceSystem;
-	int f_iDestinationSystem;
-	int f_iFleet;
+	int _sourceSystem;
+	int _destinationSystem;
+	int _fleet;
 	/*}*/
 public:
 	/*{*/
@@ -180,11 +180,11 @@ class HSystem
 	{
 protected:
 	/*{*/
-	int f_iCoordinateX;
-	int f_iCoordinateY;
-	int f_iColor;
-	int f_iProduction;
-	int f_iFleet;
+	int _coordinateX;
+	int _coordinateY;
+	int _color;
+	int _production;
+	int _fleet;
 	/*}*/
 public:
 	/*{*/
@@ -213,9 +213,9 @@ class HEventListener
 	{
 protected:
 	/*{*/
-	int const& f_riRound;
-	int const& f_riColor;
-	client_state_t& f_reState;
+	int const& _round;
+	int const& _color;
+	client_state_t& _state;
 	/*}*/
 public:
 	/*{*/
@@ -235,13 +235,13 @@ class HBoard : public HControl
 	{
 protected:
 	/*{*/
-	int f_iCursorY;
-	int f_iCursorX;
-	int f_iBoardSize;
-	int f_iSourceSystem;
-	int f_iDestinationSystem;
-	systems_t* f_poSystems;
-	HEventListener& f_roListener;
+	int _cursorY;
+	int _cursorX;
+	int _boardSize;
+	int _sourceSystem;
+	int _destinationSystem;
+	systems_t* _systems;
+	HEventListener& _listener;
 	/*}*/
 public:
 	/*{*/
@@ -271,18 +271,18 @@ class HGalaxyWindow : public HWindow, public HEventListener
 	{
 protected:
 	/*{*/
-	HString f_oVarTmpBuffer;
-	HBoard* f_poBoard;
-	HEditControl* f_poSystemName;
-	HEditControl* f_poEmperorName;
-	HEditControl* f_poProduction;
-	HEditControl* f_poFleet;
-	HEditControl* f_poMessageInput;
-	HLogPad* f_poLogPad;
-	HClient* f_poClient;
-	systems_t* f_poSystems;
-	emperors_t* f_poEmperors;
-	moves_t* f_poMoves;
+	HString _varTmpBuffer;
+	HBoard* _board;
+	HEditControl* _systemName;
+	HEditControl* _emperorName;
+	HEditControl* _production;
+	HEditControl* _fleet;
+	HEditControl* _messageInput;
+	HLogPad* _logPad;
+	HClient* _client;
+	systems_t* _systems;
+	emperors_t* _emperors;
+	moves_t* _moves;
 	/*}*/
 public:
 	/*{*/
@@ -316,16 +316,16 @@ class HClient : public HTUIProcess
 	typedef HHashMap<HString, handler_t> handlers_t;
 protected:
 	/*{*/
-	int f_iColor;
-	int f_iRound;
-	client_state_t f_eState;
-	HSocket f_oSocket;
-	HGalaxyWindow::ptr_t f_oWindow;
-	HBoard* f_poBoard;
-	systems_t f_oSystems;
-	handlers_t f_oHandlers;
-	emperors_t f_oEmperors;
-	moves_t f_oMoves;
+	int _color;
+	int _round;
+	client_state_t _state;
+	HSocket _socket;
+	HGalaxyWindow::ptr_t _window;
+	HBoard* _board;
+	systems_t _systems;
+	handlers_t _handlers;
+	emperors_t _emperors;
+	moves_t _moves;
 	/*}*/
 public:
 	/*{*/
@@ -353,17 +353,17 @@ private:
 	};
 
 HSystem::HSystem( void )
-	: f_iCoordinateX( -1 ), f_iCoordinateY( -1 ),
-	f_iColor( -1 ), f_iProduction( -1 ), f_iFleet( -1 )
+	: _coordinateX( -1 ), _coordinateY( -1 ),
+	_color( -1 ), _production( -1 ), _fleet( -1 )
 	{
 	M_PROLOG
 	return;
 	M_EPILOG
 	}
 
-HEventListener::HEventListener( int const& a_riRound, int const& a_riColor,
-		client_state_t & a_reState )
-	: f_riRound( a_riRound ), f_riColor( a_riColor ), f_reState( a_reState )
+HEventListener::HEventListener( int const& round_, int const& color_,
+		client_state_t & state_ )
+	: _round( round_ ), _color( color_ ), _state( state_ )
 	{
 	M_PROLOG
 	return;
@@ -380,29 +380,29 @@ HEventListener::~HEventListener ( void )
 int HEventListener::get_round ( void ) const
 	{
 	M_PROLOG
-	return ( f_riRound );
+	return ( _round );
 	M_EPILOG
 	}
 
 int HEventListener::get_color ( void ) const
 	{
 	M_PROLOG
-	return ( f_riColor );
+	return ( _color );
 	M_EPILOG
 	}
 
 client_state_t HEventListener::get_state ( void ) const
 	{
 	M_PROLOG
-	return ( f_reState );
+	return ( _state );
 	M_EPILOG
 	}
 
-void HEventListener::set_state ( client_state_t a_eState )
+void HEventListener::set_state ( client_state_t state_ )
 	{
 	M_PROLOG
-	f_reState = a_eState;
-	switch ( f_reState )
+	_state = state_;
+	switch ( _state )
 		{
 		case ( LOCKED ):
 			{
@@ -433,11 +433,11 @@ void HEventListener::set_state ( client_state_t a_eState )
 	M_EPILOG
 	}
 
-HBoard::HBoard ( HWindow * a_poParent, HEventListener & a_roListener )
-	: HControl ( a_poParent, 0, 1, 0, 0, "&galaxy\n" ),
-	f_iCursorY ( 0 ), f_iCursorX ( 0 ), f_iBoardSize ( - 1 ),
-	f_iSourceSystem ( - 1 ), f_iDestinationSystem ( - 1 ),
-	f_poSystems ( NULL ), f_roListener ( a_roListener )
+HBoard::HBoard ( HWindow * parent_, HEventListener & listener_ )
+	: HControl ( parent_, 0, 1, 0, 0, "&galaxy\n" ),
+	_cursorY ( 0 ), _cursorX ( 0 ), _boardSize ( - 1 ),
+	_sourceSystem ( - 1 ), _destinationSystem ( - 1 ),
+	_systems ( NULL ), _listener ( listener_ )
 	{
 	M_PROLOG
 	return;
@@ -454,160 +454,160 @@ HBoard::~HBoard ( void )
 void HBoard::do_refresh ( void )
 	{
 	M_PROLOG
-	int l_iCtr = 0, l_iSystems = 0, l_iSysNo = - 1, l_iCoordX = - 1, l_iCoordY = - 1;
-	int l_iColor = - 1, l_iRound = f_roListener.get_round();
-	client_state_t l_eState = f_roListener.get_state();
-	HString l_oPen;
+	int ctr = 0, systems = 0, sysNo = - 1, coordX = - 1, coordY = - 1;
+	int color = - 1, round = _listener.get_round();
+	client_state_t state = _listener.get_state();
+	HString pen;
 	HBoard::draw_label();
 	HConsole& cons = HCons::get_instance();
-	if ( f_bFocused )
+	if ( _focused )
 		cons.curs_set ( CURSOR::INVISIBLE );
-	if ( f_iBoardSize >= 0 )
+	if ( _boardSize >= 0 )
 		{
-		f_iHeight = f_iBoardSize + 1 /* for label */ + 2 /* for borders */;
-		f_iWidth = f_iBoardSize * 3 /* for System */ + 2 /* for borders */;
-		if ( f_iBoardSize < 12 )
+		_height = _boardSize + 1 /* for label */ + 2 /* for borders */;
+		_width = _boardSize * 3 /* for System */ + 2 /* for borders */;
+		if ( _boardSize < 12 )
 			{
-			cons.c_cmvprintf ( f_iRowRaw, f_iColumnRaw + 35, f_bFocused ? ATTR_BOARD : COLORS::ATTR_NORMAL, "{" );
-			cons.c_cmvprintf ( f_iRowRaw + 1, f_iColumnRaw + 20, f_bFocused ? ATTR_BOARD : COLORS::ATTR_NORMAL, "-+--+--+--+--+-'" );
+			cons.c_cmvprintf ( _rowRaw, _columnRaw + 35, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, "{" );
+			cons.c_cmvprintf ( _rowRaw + 1, _columnRaw + 20, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, "-+--+--+--+--+-'" );
 			}
-		l_oPen = ',';
-		for ( l_iCtr = 0; l_iCtr < f_iBoardSize; l_iCtr ++ )
-			l_oPen += "-+-";
-		l_oPen += '.';
-		cons.c_cmvprintf( f_iRowRaw, f_iColumnRaw, f_bFocused ? ATTR_BOARD : COLORS::ATTR_NORMAL, l_oPen.raw() );
-		l_oPen = '}';
-		for ( l_iCtr = 0; l_iCtr < f_iBoardSize; l_iCtr ++ )
-			l_oPen += " - ";
-		l_oPen += '{';
-		for ( l_iCtr = 0; l_iCtr < f_iBoardSize; l_iCtr ++ )
-			cons.c_cmvprintf ( f_iRowRaw + l_iCtr + 1, f_iColumnRaw, f_bFocused ? ATTR_BOARD : COLORS::ATTR_NORMAL, l_oPen.raw() );
-		l_oPen = '`';
-		for ( l_iCtr = 0; l_iCtr < f_iBoardSize; l_iCtr ++ )
-			l_oPen += "-+-";
-		l_oPen += '\'';
-		cons.c_cmvprintf ( f_iRowRaw + f_iBoardSize + 1, f_iColumnRaw, f_bFocused ? ATTR_BOARD : COLORS::ATTR_NORMAL, l_oPen.raw() );
-		if ( ( l_iSystems = static_cast<int>( f_poSystems->get_size() ) ) )
+		pen = ',';
+		for ( ctr = 0; ctr < _boardSize; ctr ++ )
+			pen += "-+-";
+		pen += '.';
+		cons.c_cmvprintf( _rowRaw, _columnRaw, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, pen.raw() );
+		pen = '}';
+		for ( ctr = 0; ctr < _boardSize; ctr ++ )
+			pen += " - ";
+		pen += '{';
+		for ( ctr = 0; ctr < _boardSize; ctr ++ )
+			cons.c_cmvprintf ( _rowRaw + ctr + 1, _columnRaw, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, pen.raw() );
+		pen = '`';
+		for ( ctr = 0; ctr < _boardSize; ctr ++ )
+			pen += "-+-";
+		pen += '\'';
+		cons.c_cmvprintf ( _rowRaw + _boardSize + 1, _columnRaw, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, pen.raw() );
+		if ( ( systems = static_cast<int>( _systems->get_size() ) ) )
 			{
-			for ( l_iCtr = 0; l_iCtr < l_iSystems; l_iCtr ++ )
+			for ( ctr = 0; ctr < systems; ctr ++ )
 				{
-				l_iCoordX = ( * f_poSystems ) [ l_iCtr ].f_iCoordinateX;
-				l_iCoordY = ( * f_poSystems ) [ l_iCtr ].f_iCoordinateY;
-				l_iColor = ( * f_poSystems ) [ l_iCtr ].f_iColor;
-				cons.c_cmvprintf ( f_iRowRaw + 1 + l_iCoordY,
-						f_iColumnRaw + 1 + l_iCoordX * 3,
-						( ( l_iColor >= 0 ) && f_bFocused ) ? n_piColors [ l_iColor ] : ATTR_NEUTRAL_SYSTEM, "(%c)",
-						l_iCtr + ( l_iCtr < 26 ? 'A' : ( l_iCtr < 35 ? '1' - 26 : '0' - 35 ) ) );
-				if ( ( l_iCoordX == f_iCursorX ) && ( l_iCoordY == f_iCursorY ) )
-					l_iSysNo = l_iCtr;
+				coordX = ( * _systems ) [ ctr ]._coordinateX;
+				coordY = ( * _systems ) [ ctr ]._coordinateY;
+				color = ( * _systems ) [ ctr ]._color;
+				cons.c_cmvprintf ( _rowRaw + 1 + coordY,
+						_columnRaw + 1 + coordX * 3,
+						( ( color >= 0 ) && _focused ) ? _colors_ [ color ] : ATTR_NEUTRAL_SYSTEM, "(%c)",
+						ctr + ( ctr < 26 ? 'A' : ( ctr < 35 ? '1' - 26 : '0' - 35 ) ) );
+				if ( ( coordX == _cursorX ) && ( coordY == _cursorY ) )
+					sysNo = ctr;
 				}
-			f_roListener.on_show_system_info ( l_iSysNo );
+			_listener.on_show_system_info ( sysNo );
 			}
-		cons.c_cmvprintf ( f_iRowRaw + 1 + f_iCursorY,
-				f_iColumnRaw + 1 + f_iCursorX * 3,
-				f_bFocused ? ATTR_CURSOR : COLORS::ATTR_NORMAL, "{" );
-		cons.c_cmvprintf ( f_iRowRaw + 1 + f_iCursorY,
-				f_iColumnRaw + 3 + f_iCursorX * 3,
-				f_bFocused ? ATTR_CURSOR : COLORS::ATTR_NORMAL, "}" );
-		cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 8, f_bFocused ? ATTR_BOARD : COLORS::ATTR_NORMAL, ",--{" );
-		if ( l_iRound >= 0 )
-			cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 13, COLORS::ATTR_NORMAL, "%4d", l_iRound );
-		cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 17, f_bFocused ? ATTR_BOARD : COLORS::ATTR_NORMAL, "}--." );
-		cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 23, f_bFocused ? ATTR_BOARD : COLORS::ATTR_NORMAL, ",--{" );
-		cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 28, f_bFocused ? COLORS::FG_WHITE : COLORS::ATTR_NORMAL, "    " );
-		if ( ( l_eState == SELECT ) || ( l_eState == INPUT ) )
+		cons.c_cmvprintf ( _rowRaw + 1 + _cursorY,
+				_columnRaw + 1 + _cursorX * 3,
+				_focused ? ATTR_CURSOR : COLORS::ATTR_NORMAL, "{" );
+		cons.c_cmvprintf ( _rowRaw + 1 + _cursorY,
+				_columnRaw + 3 + _cursorX * 3,
+				_focused ? ATTR_CURSOR : COLORS::ATTR_NORMAL, "}" );
+		cons.c_cmvprintf ( _rowRaw - 1, _columnRaw + 8, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, ",--{" );
+		if ( round >= 0 )
+			cons.c_cmvprintf ( _rowRaw - 1, _columnRaw + 13, COLORS::ATTR_NORMAL, "%4d", round );
+		cons.c_cmvprintf ( _rowRaw - 1, _columnRaw + 17, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, "}--." );
+		cons.c_cmvprintf ( _rowRaw - 1, _columnRaw + 23, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, ",--{" );
+		cons.c_cmvprintf ( _rowRaw - 1, _columnRaw + 28, _focused ? COLORS::FG_WHITE : COLORS::ATTR_NORMAL, "    " );
+		if ( ( state == SELECT ) || ( state == INPUT ) )
 			{
-			l_iSysNo = get_sys_no ( f_iCursorX, f_iCursorY );
-			if ( l_iSysNo >= 0 )
+			sysNo = get_sys_no ( _cursorX, _cursorY );
+			if ( sysNo >= 0 )
 				{
-				cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 28,
-						f_bFocused ? COLORS::FG_WHITE : COLORS::ATTR_NORMAL, "%4d",
-						distance ( f_iSourceSystem, l_iSysNo ) + l_iRound );
+				cons.c_cmvprintf ( _rowRaw - 1, _columnRaw + 28,
+						_focused ? COLORS::FG_WHITE : COLORS::ATTR_NORMAL, "%4d",
+						distance ( _sourceSystem, sysNo ) + round );
 				}
 			}
-		cons.c_cmvprintf ( f_iRowRaw - 1, f_iColumnRaw + 32, f_bFocused ? ATTR_BOARD : COLORS::ATTR_NORMAL, "}--." );
+		cons.c_cmvprintf ( _rowRaw - 1, _columnRaw + 32, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, "}--." );
 		}
 	M_EPILOG
 	}
 
-int HBoard::do_process_input( int a_iCode )
+int HBoard::do_process_input( int code_ )
 	{
 	M_PROLOG
-	int l_iCode = 0, l_iSysNo = - 1;
-	client_state_t l_eState = f_roListener.get_state();
-	a_iCode = HControl::do_process_input ( a_iCode );
-	if ( l_eState == LOCKED )
-		return ( a_iCode == '\t' ? '\t' : '\r' );
-	if ( f_iBoardSize >= 0 )
+	int code = 0, sysNo = - 1;
+	client_state_t state = _listener.get_state();
+	code_ = HControl::do_process_input ( code_ );
+	if ( state == LOCKED )
+		return ( code_ == '\t' ? '\t' : '\r' );
+	if ( _boardSize >= 0 )
 		{
-		switch ( a_iCode )
+		switch ( code_ )
 			{
 			case ( KEY_CODES::DOWN ):
 				{
-				if ( f_iCursorY < ( f_iBoardSize - 1 ) )
-					f_iCursorY ++;
-				else f_iCursorY = 0;
+				if ( _cursorY < ( _boardSize - 1 ) )
+					_cursorY ++;
+				else _cursorY = 0;
 				break;
 				}
 			case ( KEY_CODES::UP ):
 				{
-				if ( f_iCursorY > 0 )
-					f_iCursorY --;
-				else f_iCursorY = f_iBoardSize - 1;
+				if ( _cursorY > 0 )
+					_cursorY --;
+				else _cursorY = _boardSize - 1;
 				break;
 				}
 			case ( KEY_CODES::LEFT ):
 				{
-				if ( f_iCursorX > 0 )
-					f_iCursorX --;
-				else f_iCursorX = f_iBoardSize - 1;
+				if ( _cursorX > 0 )
+					_cursorX --;
+				else _cursorX = _boardSize - 1;
 				break;
 				}
 			case ( KEY_CODES::RIGHT ):
 				{
-				if ( f_iCursorX < ( f_iBoardSize - 1 ) )
-					f_iCursorX ++;
-				else f_iCursorX = 0;
+				if ( _cursorX < ( _boardSize - 1 ) )
+					_cursorX ++;
+				else _cursorX = 0;
 				break;
 				}
 			case ( KEY_CODES::HOME ):
 				{
-				f_iCursorX = 0;
+				_cursorX = 0;
 				break;
 				}
 			case ( KEY_CODES::END ):
 				{
-				f_iCursorX = f_iBoardSize - 1;
+				_cursorX = _boardSize - 1;
 				break;
 				}
 			case ( KEY_CODES::PAGE_UP ):
 				{
-				f_iCursorY = 0;
+				_cursorY = 0;
 				break;
 				}
 			case ( KEY_CODES::PAGE_DOWN ):
 				{
-				f_iCursorY = f_iBoardSize - 1;
+				_cursorY = _boardSize - 1;
 				break;
 				}
 			case ( '\r' ):
 				{
-				l_iSysNo = get_sys_no ( f_iCursorX, f_iCursorY );
-				if ( l_iSysNo >= 0 )
+				sysNo = get_sys_no ( _cursorX, _cursorY );
+				if ( sysNo >= 0 )
 					{
-					if ( l_eState == NORMAL )
+					if ( state == NORMAL )
 						{
-						if ( ( *f_poSystems )[ l_iSysNo ].f_iColor == f_roListener.get_color() )
+						if ( ( *_systems )[ sysNo ]._color == _listener.get_color() )
 							{
-							f_iSourceSystem = l_iSysNo;
-							f_roListener.set_state ( SELECT );
+							_sourceSystem = sysNo;
+							_listener.set_state ( SELECT );
 							break;
 							}
 						}
-					else if ( l_eState == SELECT )
+					else if ( state == SELECT )
 						{
-						f_iDestinationSystem = l_iSysNo;
-						f_roListener.make_move( f_iSourceSystem, l_iSysNo );
+						_destinationSystem = sysNo;
+						_listener.make_move( _sourceSystem, sysNo );
 						return ( 0 );
 						}
 					}
@@ -615,84 +615,84 @@ int HBoard::do_process_input( int a_iCode )
 				}
 			default :
 				{
-				l_iCode = a_iCode;
+				code = code_;
 				break;
 				}
 			}
-		if ( ! l_iCode )
+		if ( ! code )
 			{
-			l_iSysNo = get_sys_no( f_iCursorX, f_iCursorY );
-			f_roListener.on_show_system_info( l_iSysNo );
+			sysNo = get_sys_no( _cursorX, _cursorY );
+			_listener.on_show_system_info( sysNo );
 			schedule_refresh();
 			}
 		}
-	return ( l_iCode );
+	return ( code );
 	M_EPILOG
 	}
 
-int HBoard::do_click( mouse::OMouse& a_rsMouse )
+int HBoard::do_click( mouse::OMouse& mouse_ )
 	{
-	if ( ! HControl::do_click( a_rsMouse ) )
+	if ( ! HControl::do_click( mouse_ ) )
 		return ( 1 );
-	if ( ( a_rsMouse.f_iRow > 1 )
-			&& ( a_rsMouse.f_iRow < ( f_iBoardSize + 2 ) )
-			&& ( a_rsMouse.f_iColumn > 1 )
-			&& ( a_rsMouse.f_iColumn < ( ( f_iBoardSize * 3 ) + 2 ) ) )
+	if ( ( mouse_._row > 1 )
+			&& ( mouse_._row < ( _boardSize + 2 ) )
+			&& ( mouse_._column > 1 )
+			&& ( mouse_._column < ( ( _boardSize * 3 ) + 2 ) ) )
 		{
-		f_iCursorY = a_rsMouse.f_iRow - 2;
-		f_iCursorX = ( a_rsMouse.f_iColumn - 2 ) / 3;
-		f_roListener.on_show_system_info( get_sys_no ( f_iCursorX, f_iCursorY ) );
+		_cursorY = mouse_._row - 2;
+		_cursorX = ( mouse_._column - 2 ) / 3;
+		_listener.on_show_system_info( get_sys_no ( _cursorX, _cursorY ) );
 		schedule_refresh();
 		}
 	return ( 0 );
 	}
 
-void HBoard::set_systems( systems_t* a_poSystems )
+void HBoard::set_systems( systems_t* systems_ )
 	{
-	f_poSystems = a_poSystems;
+	_systems = systems_;
 	}
 
-int HBoard::get_sys_no( int a_iCoordX, int a_iCoordY )
+int HBoard::get_sys_no( int coordX_, int coordY_ )
 	{
 	M_PROLOG
-	int l_iCtr = 0, l_iSystems = static_cast<int>( f_poSystems->get_size() );
-	for ( l_iCtr = 0; l_iCtr < l_iSystems; l_iCtr ++ )
-		if ( ( ( *f_poSystems )[ l_iCtr ].f_iCoordinateX == a_iCoordX )
-				&& ( ( *f_poSystems )[ l_iCtr ].f_iCoordinateY == a_iCoordY ) )
+	int ctr = 0, systems = static_cast<int>( _systems->get_size() );
+	for ( ctr = 0; ctr < systems; ctr ++ )
+		if ( ( ( *_systems )[ ctr ]._coordinateX == coordX_ )
+				&& ( ( *_systems )[ ctr ]._coordinateY == coordY_ ) )
 			break;
-	return ( l_iCtr < l_iSystems ? l_iCtr : - 1 );
+	return ( ctr < systems ? ctr : - 1 );
 	M_EPILOG
 	}
 
-int HBoard::distance( int a_iSource, int a_iDestination )
+int HBoard::distance( int source_, int destination_ )
 	{
 	M_PROLOG
-	int l_iDX = 0, l_iDY = 0, l_iDistance = 0;
-	if ( a_iSource != a_iDestination )
+	int dX = 0, dY = 0, distance = 0;
+	if ( source_ != destination_ )
 		{
-		l_iDX = ( *f_poSystems )[ a_iSource ].f_iCoordinateX - ( *f_poSystems )[ a_iDestination ].f_iCoordinateX;
-		l_iDY = ( *f_poSystems )[ a_iSource ].f_iCoordinateY - ( *f_poSystems )[ a_iDestination ].f_iCoordinateY;
-		l_iDX = ( l_iDX >= 0 ) ? l_iDX : - l_iDX;
-		l_iDY = ( l_iDY >= 0 ) ? l_iDY : - l_iDY;
-		l_iDX = ( ( f_iBoardSize - l_iDX ) < l_iDX ) ? f_iBoardSize - l_iDX : l_iDX;
-		l_iDY = ( ( f_iBoardSize - l_iDY ) < l_iDY ) ? f_iBoardSize - l_iDY : l_iDY;
-		l_iDistance = static_cast<int>( sqrt ( l_iDX * l_iDX + l_iDY * l_iDY ) + 0.5 );
+		dX = ( *_systems )[ source_ ]._coordinateX - ( *_systems )[ destination_ ]._coordinateX;
+		dY = ( *_systems )[ source_ ]._coordinateY - ( *_systems )[ destination_ ]._coordinateY;
+		dX = ( dX >= 0 ) ? dX : - dX;
+		dY = ( dY >= 0 ) ? dY : - dY;
+		dX = ( ( _boardSize - dX ) < dX ) ? _boardSize - dX : dX;
+		dY = ( ( _boardSize - dY ) < dY ) ? _boardSize - dY : dY;
+		distance = static_cast<int>( sqrt ( dX * dX + dY * dY ) + 0.5 );
 		}
-	return ( l_iDistance );
+	return ( distance );
 	M_EPILOG
 	}
 
-HGalaxyWindow::HGalaxyWindow( char const* const a_pcWindowTitle,
-		HClient* a_poClient,
-		int& a_riRound, int& a_riColor, client_state_t& a_reState )
-	: HWindow( a_pcWindowTitle ),
-	HEventListener( a_riRound, a_riColor, a_reState ),
-	f_oVarTmpBuffer(),
-	f_poBoard ( NULL ), f_poSystemName ( NULL ), f_poEmperorName ( NULL ),
-	f_poProduction ( NULL ), f_poFleet ( NULL ), f_poMessageInput ( NULL ),
-	f_poLogPad ( NULL ),
-	f_poClient ( a_poClient ),
-	f_poSystems ( NULL ), f_poEmperors ( NULL ), f_poMoves ( NULL )
+HGalaxyWindow::HGalaxyWindow( char const* const windowTitle_,
+		HClient* client_,
+		int& round_, int& color_, client_state_t& state_ )
+	: HWindow( windowTitle_ ),
+	HEventListener( round_, color_, state_ ),
+	_varTmpBuffer(),
+	_board ( NULL ), _systemName ( NULL ), _emperorName ( NULL ),
+	_production ( NULL ), _fleet ( NULL ), _messageInput ( NULL ),
+	_logPad ( NULL ),
+	_client ( client_ ),
+	_systems ( NULL ), _emperors ( NULL ), _moves ( NULL )
 	{
 	M_PROLOG
 	return;
@@ -710,18 +710,18 @@ int HGalaxyWindow::init ( void )
 	{
 	M_PROLOG
 	HWindow::init();
-	f_poBoard = new HBoard ( this, * this );
-	f_poBoard->enable ( true );
-	f_poBoard->set_focus();
-	f_poBoard->set_systems ( f_poSystems );
-	f_poSystemName = new HEditControl ( this, 1, 64, 1, 16, " System name \n", 64, "", n_pcMaskExtended );
-	f_poEmperorName = new HEditControl ( this, 4, 64, 1, 16, " Emperor \n", 64, "", n_pcMaskExtended );
-	f_poProduction = new HEditControl ( this, 7, 64, 1, 7, "Product\n", 6, "", n_pcMaskDigits );
-	f_poFleet = new HEditControl ( this, 7, 72, 1, 7, "Fleet\n", 6, "", n_pcMaskDigits );
-	f_poLogPad = new HLogPad ( this, 10, 64, - 5, - 1, " Event &log \n" );
-	f_poMessageInput = new HEditControl ( this, - 4, 64, 1, - 1, " &Message \n", 255, "", n_pcMaskLoose );
-	f_poLogPad->enable ( true );
-	f_poMessageInput->enable ( true );
+	_board = new HBoard ( this, * this );
+	_board->enable ( true );
+	_board->set_focus();
+	_board->set_systems ( _systems );
+	_systemName = new HEditControl ( this, 1, 64, 1, 16, " System name \n", 64, "", _maskExtended_ );
+	_emperorName = new HEditControl ( this, 4, 64, 1, 16, " Emperor \n", 64, "", _maskExtended_ );
+	_production = new HEditControl ( this, 7, 64, 1, 7, "Product\n", 6, "", _maskDigits_ );
+	_fleet = new HEditControl ( this, 7, 72, 1, 7, "Fleet\n", 6, "", _maskDigits_ );
+	_logPad = new HLogPad ( this, 10, 64, - 5, - 1, " Event &log \n" );
+	_messageInput = new HEditControl ( this, - 4, 64, 1, - 1, " &Message \n", 255, "", _maskLoose_ );
+	_logPad->enable ( true );
+	_messageInput->enable ( true );
 	register_postprocess_handler ( '\r', NULL, &HGalaxyWindow::handler_enter );
 	register_postprocess_handler ( KEY_CODES::ESC, NULL, &HGalaxyWindow::handler_esc );
 	register_postprocess_handler ( ' ', NULL, &HGalaxyWindow::handler_space );
@@ -731,53 +731,53 @@ int HGalaxyWindow::init ( void )
 
 HBoard * HGalaxyWindow::get_board ( void )
 	{
-	return ( f_poBoard );
+	return ( _board );
 	}
 
-void HGalaxyWindow::set_data ( systems_t * a_poSystems,
-		emperors_t * a_poEmperors, moves_t * a_poMoves )
+void HGalaxyWindow::set_data ( systems_t * systems_,
+		emperors_t * emperors_, moves_t * moves_ )
 	{
-	f_poSystems = a_poSystems;
-	f_poEmperors = a_poEmperors;
-	f_poMoves = a_poMoves;
+	_systems = systems_;
+	_emperors = emperors_;
+	_moves = moves_;
 	return;
 	}
 
-void HGalaxyWindow::on_show_system_info( int a_iSystem )
+void HGalaxyWindow::on_show_system_info( int system_ )
 	{
 	M_PROLOG
-	int l_iColor = - 1;
-	HString l_oName;
-	f_poSystemName->set( "" );
-	f_poEmperorName->set( "" );
-	f_poProduction->set( "" );
-	f_poFleet->set( "" );
-	if ( a_iSystem >= 0 )
+	int color = - 1;
+	HString name;
+	_systemName->set( "" );
+	_emperorName->set( "" );
+	_production->set( "" );
+	_fleet->set( "" );
+	if ( system_ >= 0 )
 		{
-		f_poSystemName->set( n_ppcSystemNames [ a_iSystem ] );
-		if ( ( *f_poSystems ) [ a_iSystem ].f_iProduction >= 0 )
-			f_poProduction->set ( HString ( ( *f_poSystems )[ a_iSystem ].f_iProduction ) );
-		if ( ( *f_poSystems ) [ a_iSystem ].f_iFleet >= 0 )
-			f_poFleet->set( HString( ( *f_poSystems )[ a_iSystem ].f_iFleet ) );
-		l_iColor = ( *f_poSystems )[ a_iSystem ].f_iColor;
-		emperors_t::iterator it( f_poEmperors->find( l_iColor ) );
-		if ( ( l_iColor >= 0 ) && ( it != f_poEmperors->end() ) )
-			f_poEmperorName->set( it->second );
+		_systemName->set( _systemNames_ [ system_ ] );
+		if ( ( *_systems ) [ system_ ]._production >= 0 )
+			_production->set ( HString ( ( *_systems )[ system_ ]._production ) );
+		if ( ( *_systems ) [ system_ ]._fleet >= 0 )
+			_fleet->set( HString( ( *_systems )[ system_ ]._fleet ) );
+		color = ( *_systems )[ system_ ]._color;
+		emperors_t::iterator it( _emperors->find( color ) );
+		if ( ( color >= 0 ) && ( it != _emperors->end() ) )
+			_emperorName->set( it->second );
 		}
 	return;
 	M_EPILOG
 	}
 
-void HGalaxyWindow::make_move ( int a_iSourceSystem, int a_iDestinationSystem )
+void HGalaxyWindow::make_move ( int sourceSystem_, int destinationSystem_ )
 	{
 	M_PROLOG
-	if ( a_iSourceSystem != a_iDestinationSystem )
+	if ( sourceSystem_ != destinationSystem_ )
 		{
 		set_state ( INPUT );
-		f_poBoard->enable ( false );
-		f_poLogPad->enable ( false );
-		f_poFleet->enable ( true );
-		f_poFleet->set_focus();
+		_board->enable ( false );
+		_logPad->enable ( false );
+		_fleet->enable ( true );
+		_fleet->set_focus();
 		}
 	else
 		handler_esc ( 0, NULL );
@@ -785,70 +785,70 @@ void HGalaxyWindow::make_move ( int a_iSourceSystem, int a_iDestinationSystem )
 	M_EPILOG
 	}
 
-int HGalaxyWindow::handler_enter( int a_iCode, void const* )
+int HGalaxyWindow::handler_enter( int code_, void const* )
 	{
 	M_PROLOG
-	int l_iFleet = 0;
-	HMove * l_poMove = NULL;
-	if ( (*f_oFocusedChild) == f_poMessageInput )
+	int fleet = 0;
+	HMove * move = NULL;
+	if ( (*_focusedChild) == _messageInput )
 		{
-		if ( f_poMessageInput->get().get<HString const&>().find_other_than( n_pcWhiteSpace ) >= 0 )
+		if ( _messageInput->get().get<HString const&>().find_other_than( _whiteSpace_ ) >= 0 )
 			{
-			f_oVarTmpBuffer = "cmd:glx:say:";
-			f_oVarTmpBuffer += f_poMessageInput->get().get<char const*>();
-			f_oVarTmpBuffer += "\n";
-			f_poClient->send_message( f_oVarTmpBuffer );
-			f_poMessageInput->set( "" );
+			_varTmpBuffer = "cmd:glx:say:";
+			_varTmpBuffer += _messageInput->get().get<char const*>();
+			_varTmpBuffer += "\n";
+			_client->send_message( _varTmpBuffer );
+			_messageInput->set( "" );
 			}
-		a_iCode = 0;
+		code_ = 0;
 		}
-	else if ( f_reState == INPUT )
+	else if ( _state == INPUT )
 		{
-		if ( (*f_oFocusedChild) == f_poFleet )
+		if ( (*_focusedChild) == _fleet )
 			{
-			l_iFleet = lexical_cast<int>( f_poFleet->get().get<char const*>() );
-			if ( ( l_iFleet > 0 )
-					&& ( l_iFleet <= ( * f_poSystems ) [ f_poBoard->f_iSourceSystem ].f_iFleet ) )
+			fleet = lexical_cast<int>( _fleet->get().get<char const*>() );
+			if ( ( fleet > 0 )
+					&& ( fleet <= ( * _systems ) [ _board->_sourceSystem ]._fleet ) )
 				{
-				f_poFleet->enable ( false );
-				f_poBoard->enable ( true );
-				f_poLogPad->enable ( true );
-				f_poBoard->set_focus();
-				l_poMove = & f_poMoves->add_tail();
-				l_poMove->f_iSourceSystem = f_poBoard->f_iSourceSystem;
-				l_poMove->f_iDestinationSystem = f_poBoard->f_iDestinationSystem;
-				l_poMove->f_iFleet = l_iFleet;
-				( * f_poSystems ) [ f_poBoard->f_iSourceSystem ].f_iFleet -= l_iFleet;
+				_fleet->enable ( false );
+				_board->enable ( true );
+				_logPad->enable ( true );
+				_board->set_focus();
+				move = & _moves->add_tail();
+				move->_sourceSystem = _board->_sourceSystem;
+				move->_destinationSystem = _board->_destinationSystem;
+				move->_fleet = fleet;
+				( * _systems ) [ _board->_sourceSystem ]._fleet -= fleet;
 				set_state ( NORMAL );
 				}
-			else if ( l_iFleet > 0 )
-				f_oStatusBar->message ( COLORS::FG_RED, "Not enough resources!" );
+			else if ( fleet > 0 )
+				_statusBar->message ( COLORS::FG_RED, "Not enough resources!" );
 			else
-				f_oStatusBar->message ( COLORS::FG_RED, "Run! Run! Emperor is mad!" );
-			a_iCode = 0;
+				_statusBar->message ( COLORS::FG_RED, "Run! Run! Emperor is mad!" );
+			code_ = 0;
 			}
 		}
-	else if ( f_reState == LOCKED )
+	else if ( _state == LOCKED )
 		{
-		f_oStatusBar->message ( COLORS::FG_RED, f_riRound >= 0 ? "Wait for new round!" : "Challange not started yet!" );
-		a_iCode = 0;
+		_statusBar->message ( COLORS::FG_RED, _round >= 0 ? "Wait for new round!" : "Challange not started yet!" );
+		code_ = 0;
 		}
-	return ( a_iCode );
+	return ( code_ );
 	M_EPILOG
 	}
 
 int HGalaxyWindow::handler_esc( int, void const* )
 	{
 	M_PROLOG
-	if ( f_reState == INPUT )
+	if ( _state == INPUT )
 		{
-		f_poFleet->enable ( false );
-		f_poBoard->enable ( true );
-		f_poLogPad->enable ( true );
-		f_poBoard->set_focus();
+		_fleet->enable ( false );
+		_board->enable ( true );
+		_logPad->enable ( true );
+		_board->set_focus();
 		set_state( SELECT );
 		}
-	else if ( f_reState == SELECT )
+	else if ( _state == SELECT )
 		set_state( NORMAL );
 	schedule_refresh();
 	return ( 0 );
@@ -858,33 +858,33 @@ int HGalaxyWindow::handler_esc( int, void const* )
 int HGalaxyWindow::handler_space( int, void const* )
 	{
 	M_PROLOG
-	if ( f_reState == NORMAL )
-		f_poClient->end_round();
+	if ( _state == NORMAL )
+		_client->end_round();
 	return ( 0 );
 	M_EPILOG
 	}
 
-void HGalaxyWindow::msg ( int a_iAttr, char const * const a_pcMsg )
+void HGalaxyWindow::msg ( int attr_, char const * const msg_ )
 	{
 	M_PROLOG
-	f_oStatusBar->message ( a_iAttr, a_pcMsg );
+	_statusBar->message ( attr_, msg_ );
 	M_EPILOG
 	}
 
-HClient::HClient ( char const * const a_pcProgramName )
-	: f_iColor ( - 1 ), f_iRound ( - 1 ), f_eState ( LOCKED ), f_oSocket(),
-	f_oWindow ( new HGalaxyWindow( a_pcProgramName, this, f_iRound, f_iColor, f_eState ) ),
-	f_poBoard ( NULL ), f_oSystems ( 0 ), f_oHandlers ( 16 ), f_oEmperors ( 16 ),
-	f_oMoves()
+HClient::HClient ( char const * const programName_ )
+	: _color ( - 1 ), _round ( - 1 ), _state ( LOCKED ), _socket(),
+	_window ( new HGalaxyWindow( programName_, this, _round, _color, _state ) ),
+	_board ( NULL ), _systems ( 0 ), _handlers ( 16 ), _emperors ( 16 ),
+	_moves()
 	{
 	M_PROLOG
-	f_oHandlers [ "setup" ] = &HClient::handler_setup;
-	f_oHandlers [ "play" ] = &HClient::handler_play;
-	f_oHandlers [ "msg" ] = &HClient::handler_msg;
-	f_oHandlers [ "err" ] = &HClient::handler_error;
-	f_oHandlers [ "kck" ] = &HClient::handler_error;
-	f_oHandlers [ "player" ] = &HClient::handler_dummy;
-	f_oHandlers [ "player_quit" ] = &HClient::handler_dummy;
+	_handlers [ "setup" ] = &HClient::handler_setup;
+	_handlers [ "play" ] = &HClient::handler_play;
+	_handlers [ "msg" ] = &HClient::handler_msg;
+	_handlers [ "err" ] = &HClient::handler_error;
+	_handlers [ "kck" ] = &HClient::handler_error;
+	_handlers [ "player" ] = &HClient::handler_dummy;
+	_handlers [ "player_quit" ] = &HClient::handler_dummy;
 	return;
 	M_EPILOG
 	}
@@ -896,25 +896,25 @@ HClient::~HClient ( void )
 	M_EPILOG
 	}
 
-void HClient::init_client( HString& a_roHost, int a_iPort )
+void HClient::init_client( HString& host_, int port_ )
 	{
 	M_PROLOG
-	HString l_oMessage;
-	f_oSocket.connect ( a_roHost, a_iPort );
-	_dispatcher.register_file_descriptor_handler( f_oSocket.get_file_descriptor(), bound_call( &HClient::handler_message, this, _1 ) );
-	l_oMessage = "name:";
-	l_oMessage += setup.f_oLogin + '\n';
-	f_oSocket.write_until_eos ( l_oMessage );
-	f_oWindow->set_data ( & f_oSystems, & f_oEmperors, & f_oMoves );
-	HTUIProcess::init_tui ( "galaxy", f_oWindow );
-	f_poBoard = f_oWindow->get_board();
-	if ( ! setup.f_oGameType.is_empty() )
-		l_oMessage.format( "create:glx:%s,%d,%d,%d\n",
-				setup.f_oGame.raw(),
-				setup.f_iEmperors, setup.f_iBoardSize, setup.f_iSystems );
+	HString message;
+	_socket.connect ( host_, port_ );
+	_dispatcher.register_file_descriptor_handler( _socket.get_file_descriptor(), bound_call( &HClient::handler_message, this, _1 ) );
+	message = "name:";
+	message += setup._login + '\n';
+	_socket.write_until_eos ( message );
+	_window->set_data ( & _systems, & _emperors, & _moves );
+	HTUIProcess::init_tui ( "galaxy", _window );
+	_board = _window->get_board();
+	if ( ! setup._gameType.is_empty() )
+		message.format( "create:glx:%s,%d,%d,%d\n",
+				setup._game.raw(),
+				setup._emperors, setup._boardSize, setup._systems );
 	else
-		l_oMessage.format( "join:%s\n", setup.f_oGame.raw() );
-	f_oSocket.write_until_eos( l_oMessage );
+		message.format( "join:%s\n", setup._game.raw() );
+	_socket.write_until_eos( message );
 	return;
 	M_EPILOG
 	}
@@ -922,167 +922,167 @@ void HClient::init_client( HString& a_roHost, int a_iPort )
 void HClient::handler_message( int )
 	{
 	M_PROLOG
-	int long l_iMsgLength = 0;
-	HString l_oMessage;
-	HString l_oCommand;
-	if ( ( l_iMsgLength = f_oSocket.read_until( l_oMessage ) ) > 0 )
+	int long msgLength = 0;
+	HString message;
+	HString command;
+	if ( ( msgLength = _socket.read_until( message ) ) > 0 )
 		{
-		while ( ( l_oCommand = get_token( l_oMessage, ":", 0 ) ) == "glx" )
-			l_oMessage = l_oMessage.mid( l_oCommand.get_length() + 1 );
-		l_iMsgLength = l_oMessage.get_length();
-		if ( l_iMsgLength < 1 )
+		while ( ( command = get_token( message, ":", 0 ) ) == "glx" )
+			message = message.mid( command.get_length() + 1 );
+		msgLength = message.get_length();
+		if ( msgLength < 1 )
 			{
 			hcore::log << "got empty message from server" << endl;
 			_dispatcher.stop();
 			}
 		else
-			process_command( l_oMessage );
+			process_command( message );
 		}
-	else if ( l_iMsgLength < 0 )
+	else if ( msgLength < 0 )
 		_dispatcher.stop();
 	refresh();
 	return;
 	M_EPILOG
 	}
 
-void HClient::process_command( HString& a_roCommand )
+void HClient::process_command( HString& command_ )
 	{
 	M_PROLOG
-	HString l_oMnemonic;
-	HString l_oArgument;
-	if ( setup.f_iVerbose > 2 )
-		hcore::log << "msg: " << a_roCommand << endl;
-	l_oMnemonic = get_token( a_roCommand, ":", 0 );
-	l_oArgument = a_roCommand.mid( l_oMnemonic.get_length() + 1 );
-	handlers_t::iterator it( f_oHandlers.find( l_oMnemonic ) );
-	if ( it != f_oHandlers.end() )
-		( this->*(it->second) )( l_oArgument );
+	HString mnemonic;
+	HString argument;
+	if ( setup._verbose > 2 )
+		hcore::log << "msg: " << command_ << endl;
+	mnemonic = get_token( command_, ":", 0 );
+	argument = command_.mid( mnemonic.get_length() + 1 );
+	handlers_t::iterator it( _handlers.find( mnemonic ) );
+	if ( it != _handlers.end() )
+		( this->*(it->second) )( argument );
 	else
 		{
-		hcore::log << "unknown mnemonic: " << l_oMnemonic << ", (the argument: " << l_oArgument << ")" << endl;
+		hcore::log << "unknown mnemonic: " << mnemonic << ", (the argument: " << argument << ")" << endl;
 		_dispatcher.stop();
 		}
 	return;
 	M_EPILOG
 	}
 
-void HClient::handler_setup( HString& a_roCommand )
+void HClient::handler_setup( HString& command_ )
 	{
 	M_PROLOG
-	int l_iIndex = - 1, l_iCoordX = - 1, l_iCoordY = - 1;
-	HString l_oVariable;
-	HString l_oValue;
-	l_oVariable = get_token( a_roCommand, "=", 0 );
-	l_oValue = get_token( a_roCommand, "=", 1 );
-	if ( l_oVariable == "board_size" )
-		f_oWindow->f_poBoard->f_iBoardSize = lexical_cast<int>( l_oValue );
-	else if ( l_oVariable == "systems" )
+	int index = - 1, coordX = - 1, coordY = - 1;
+	HString variable;
+	HString value;
+	variable = get_token( command_, "=", 0 );
+	value = get_token( command_, "=", 1 );
+	if ( variable == "board_size" )
+		_window->_board->_boardSize = lexical_cast<int>( value );
+	else if ( variable == "systems" )
 		{
-		if ( f_oSystems.get_size() )
+		if ( _systems.get_size() )
 			_dispatcher.stop();
 		else
-			f_oSystems = HArray < HSystem > ( setup.f_iSystems = lexical_cast<int>( l_oValue ) );
+			_systems = HArray < HSystem > ( setup._systems = lexical_cast<int>( value ) );
 		}
-	else if ( l_oVariable == "system_coordinates" )
+	else if ( variable == "system_coordinates" )
 		{
-		l_iIndex = lexical_cast<int>( get_token( l_oValue, ",", 0 ) );
-		l_iCoordX = lexical_cast<int>( get_token( l_oValue, ",", 1 ) );
-		l_iCoordY = lexical_cast<int>( get_token( l_oValue, ",", 2 ) );
-		f_oSystems [ l_iIndex ].f_iCoordinateX = l_iCoordX;
-		f_oSystems [ l_iIndex ].f_iCoordinateY = l_iCoordY;
+		index = lexical_cast<int>( get_token( value, ",", 0 ) );
+		coordX = lexical_cast<int>( get_token( value, ",", 1 ) );
+		coordY = lexical_cast<int>( get_token( value, ",", 2 ) );
+		_systems [ index ]._coordinateX = coordX;
+		_systems [ index ]._coordinateY = coordY;
 		}
-	else if ( l_oVariable == "emperor" )
+	else if ( variable == "emperor" )
 		{
-		l_iIndex = lexical_cast<int>( get_token( l_oValue, ",", 0 ) );
-		f_oEmperors [ l_iIndex ] = get_token( l_oValue, ",", 1 );
-		if ( f_oEmperors [ l_iIndex ] == setup.f_oLogin )
-			f_iColor = l_iIndex;
+		index = lexical_cast<int>( get_token( value, ",", 0 ) );
+		_emperors [ index ] = get_token( value, ",", 1 );
+		if ( _emperors [ index ] == setup._login )
+			_color = index;
 		}
-	else if ( l_oVariable == "ok" )
+	else if ( variable == "ok" )
 		{
-		f_oWindow->schedule_refresh();
-		f_oWindow->set_state ( NORMAL );
-		f_iRound = 0;
+		_window->schedule_refresh();
+		_window->set_state ( NORMAL );
+		_round = 0;
 		}
 	return;
 	M_EPILOG
 	}
 
-void HClient::handler_play( HString& a_roCommand )
+void HClient::handler_play( HString& command_ )
 	{
 	M_PROLOG
-	char l_cEvent = 0;
-	int l_iSysNo = - 1, l_iColor = 0, l_iProduction = - 1;
-	HString l_oVariable;
-	HString l_oValue;
-	l_oVariable = get_token( a_roCommand, "=", 0 );
-	l_oValue = get_token( a_roCommand, "=", 1 );
-	if ( l_oVariable == "system_info" )
+	char event = 0;
+	int sysNo = - 1, color = 0, production = - 1;
+	HString variable;
+	HString value;
+	variable = get_token( command_, "=", 0 );
+	value = get_token( command_, "=", 1 );
+	if ( variable == "system_info" )
 		{
-		l_cEvent = l_oValue [ 0 ];
-		l_iSysNo = lexical_cast<int>( get_token( l_oValue, ",", 1 ) );
-		l_iProduction = lexical_cast<int>( get_token( l_oValue, ",", 2 ) );
-		if ( l_iProduction >= 0 )
-			f_oSystems[ l_iSysNo ].f_iProduction = l_iProduction;
-		f_oSystems[ l_iSysNo ].f_iFleet = lexical_cast<int>( get_token( l_oValue, ",", 4 ) );
-		l_iColor = lexical_cast<int>( get_token( l_oValue, ",", 3 ) );
+		event = value [ 0 ];
+		sysNo = lexical_cast<int>( get_token( value, ",", 1 ) );
+		production = lexical_cast<int>( get_token( value, ",", 2 ) );
+		if ( production >= 0 )
+			_systems[ sysNo ]._production = production;
+		_systems[ sysNo ]._fleet = lexical_cast<int>( get_token( value, ",", 4 ) );
+		color = lexical_cast<int>( get_token( value, ",", 3 ) );
 		/* scope to limit `it' visibility */
 			{
-			emperors_t::iterator it( f_oEmperors.find( l_iColor ) );
-			M_ASSERT( it != f_oEmperors.end() );
-			l_oValue = it->second;
+			emperors_t::iterator it( _emperors.find( color ) );
+			M_ASSERT( it != _emperors.end() );
+			value = it->second;
 			}
-		switch ( l_cEvent )
+		switch ( event )
 			{
 			case ( 'c' ): /* conquered */
 			case ( 'd' ): /* defeted */
 				{
-				f_oWindow->f_poLogPad->add( n_piColors [ l_iColor ] );
-				f_oWindow->f_poLogPad->add( l_oValue );
-				f_oWindow->f_poLogPad->add( COLORS::ATTR_NORMAL );
-				f_oWindow->f_poLogPad->add( " conquered " );
-				int l_iTemp = f_oSystems [ l_iSysNo ].f_iColor;
-				f_oWindow->f_poLogPad->add( ( l_iTemp >= 0 ) ? n_piColors [ l_iTemp ] : COLORS::ATTR_NORMAL );
-				f_oWindow->f_poLogPad->add( n_ppcSystemNames [ l_iSysNo ] );
-				l_oValue.format ( "(%c)", n_pcSymbols [ l_iSysNo ] );
-				f_oWindow->f_poLogPad->add( l_oValue );
-				f_oWindow->f_poLogPad->add( COLORS::ATTR_NORMAL );
-				f_oWindow->f_poLogPad->add( ".\n" );
-				f_oSystems [ l_iSysNo ].f_iColor = l_iColor;
+				_window->_logPad->add( _colors_ [ color ] );
+				_window->_logPad->add( value );
+				_window->_logPad->add( COLORS::ATTR_NORMAL );
+				_window->_logPad->add( " conquered " );
+				int temp = _systems [ sysNo ]._color;
+				_window->_logPad->add( ( temp >= 0 ) ? _colors_ [ temp ] : COLORS::ATTR_NORMAL );
+				_window->_logPad->add( _systemNames_ [ sysNo ] );
+				value.format ( "(%c)", _symbols_ [ sysNo ] );
+				_window->_logPad->add( value );
+				_window->_logPad->add( COLORS::ATTR_NORMAL );
+				_window->_logPad->add( ".\n" );
+				_systems [ sysNo ]._color = color;
 				break;
 				}
 			case ( 'r' ): /* reinforcements */
 				{
-				f_oWindow->f_poLogPad->add( "Reinforcements for " );
-				f_oWindow->f_poLogPad->add( n_piColors[ l_iColor ] );
-				f_oWindow->f_poLogPad->add( n_ppcSystemNames[ l_iSysNo ] );
-				l_oValue.format( "(%c)", n_pcSymbols[ l_iSysNo ] );
-				f_oWindow->f_poLogPad->add( l_oValue );
-				f_oWindow->f_poLogPad->add( COLORS::ATTR_NORMAL );
-				f_oWindow->f_poLogPad->add( " arrived.\n" );
+				_window->_logPad->add( "Reinforcements for " );
+				_window->_logPad->add( _colors_[ color ] );
+				_window->_logPad->add( _systemNames_[ sysNo ] );
+				value.format( "(%c)", _symbols_[ sysNo ] );
+				_window->_logPad->add( value );
+				_window->_logPad->add( COLORS::ATTR_NORMAL );
+				_window->_logPad->add( " arrived.\n" );
 				break;
 				}
 			case ( 'f' ): /* failed to conquer */
 				{
-				f_oSystems[ l_iSysNo ].f_iColor = l_iColor;
-				l_iColor = f_iColor;
-				emperors_t::iterator it( f_oEmperors.find( l_iColor ) );
-				M_ASSERT( it != f_oEmperors.end() );
-				l_oValue = it->second;
+				_systems[ sysNo ]._color = color;
+				color = _color;
+				emperors_t::iterator it( _emperors.find( color ) );
+				M_ASSERT( it != _emperors.end() );
+				value = it->second;
 				}
 			case ( 's' ): /* resisted attack */
 				{
-				int l_iTemp = f_oSystems [ l_iSysNo ].f_iColor;
-				f_oWindow->f_poLogPad->add ( ( l_iTemp >= 0 ) ? n_piColors [ l_iTemp ] : COLORS::ATTR_NORMAL );
-				f_oWindow->f_poLogPad->add ( n_ppcSystemNames [ l_iSysNo ] );
-				l_oVariable.format ( "(%c)", n_pcSymbols [ l_iSysNo ] );
-				f_oWindow->f_poLogPad->add ( l_oVariable );
-				f_oWindow->f_poLogPad->add ( COLORS::ATTR_NORMAL );
-				f_oWindow->f_poLogPad->add ( " resisted attack from " );
-				f_oWindow->f_poLogPad->add ( n_piColors [ l_iColor ] );
-				f_oWindow->f_poLogPad->add ( l_oValue );
-				f_oWindow->f_poLogPad->add ( COLORS::ATTR_NORMAL );
-				f_oWindow->f_poLogPad->add ( ".\n" );
+				int temp = _systems [ sysNo ]._color;
+				_window->_logPad->add ( ( temp >= 0 ) ? _colors_ [ temp ] : COLORS::ATTR_NORMAL );
+				_window->_logPad->add ( _systemNames_ [ sysNo ] );
+				variable.format ( "(%c)", _symbols_ [ sysNo ] );
+				_window->_logPad->add ( variable );
+				_window->_logPad->add ( COLORS::ATTR_NORMAL );
+				_window->_logPad->add ( " resisted attack from " );
+				_window->_logPad->add ( _colors_ [ color ] );
+				_window->_logPad->add ( value );
+				_window->_logPad->add ( COLORS::ATTR_NORMAL );
+				_window->_logPad->add ( ".\n" );
 				break;
 				}
 			case ( 'i' ): /* info */
@@ -1092,56 +1092,56 @@ void HClient::handler_play( HString& a_roCommand )
 				}
 			}
 		}
-	else if ( l_oVariable == "round" )
+	else if ( variable == "round" )
 		{
-		f_oWindow->f_poLogPad->add( ATTR_CURSOR );
-		f_oWindow->f_poLogPad->add( "----- " );
-		f_oWindow->f_poLogPad->add( COLORS::ATTR_NORMAL );
-		f_oWindow->f_poLogPad->add( " round: " );
-		f_iRound = lexical_cast<int>( l_oValue );
-		l_oValue.format ( "%d", f_iRound );
-		f_oWindow->f_poLogPad->add( ATTR_CURSOR );
-		f_oWindow->f_poLogPad->add( l_oValue );
-		f_oWindow->f_poLogPad->add( " -----\n" );
-		f_oWindow->f_poLogPad->add( COLORS::ATTR_NORMAL );
-		f_oWindow->set_state( NORMAL );
-		f_oWindow->schedule_refresh();
+		_window->_logPad->add( ATTR_CURSOR );
+		_window->_logPad->add( "----- " );
+		_window->_logPad->add( COLORS::ATTR_NORMAL );
+		_window->_logPad->add( " round: " );
+		_round = lexical_cast<int>( value );
+		value.format ( "%d", _round );
+		_window->_logPad->add( ATTR_CURSOR );
+		_window->_logPad->add( value );
+		_window->_logPad->add( " -----\n" );
+		_window->_logPad->add( COLORS::ATTR_NORMAL );
+		_window->set_state( NORMAL );
+		_window->schedule_refresh();
 		}
 	return;
 	M_EPILOG
 	}
 
-void HClient::handler_error( HString& a_roMessage )
+void HClient::handler_error( HString& message_ )
 	{
 	M_PROLOG
-	hcore::log << "error: " << a_roMessage << endl;
+	hcore::log << "error: " << message_ << endl;
 	_dispatcher.stop();
 	return;
 	M_EPILOG
 	}
 
-void HClient::handler_msg( HString& a_roMessage )
+void HClient::handler_msg( HString& message_ )
 	{
 	M_PROLOG
-	int l_iIndex = 0, l_iOffset = 0;
-	int l_iLength = static_cast<int>( a_roMessage.get_length() );
-	HString l_oPart;
-	while ( l_iIndex < l_iLength )
+	int index = 0, offset = 0;
+	int length = static_cast<int>( message_.get_length() );
+	HString part;
+	while ( index < length )
 		{
-		l_iOffset = static_cast<int>( a_roMessage.find( ';', l_iIndex ) );
-		if ( l_iOffset < 0 )
-			l_iOffset = l_iLength;
-		l_oPart = a_roMessage.mid( l_iIndex, l_iOffset - l_iIndex );
-		if ( l_oPart.is_empty() )
+		offset = static_cast<int>( message_.find( ';', index ) );
+		if ( offset < 0 )
+			offset = length;
+		part = message_.mid( index, offset - index );
+		if ( part.is_empty() )
 			break;
-		if ( l_oPart [ 0 ] == '$' ) /* color */
-			f_oWindow->f_poLogPad->add( n_piColors[ lexical_cast<int> ( l_oPart.mid ( 1 ) ) ] );
+		if ( part [ 0 ] == '$' ) /* color */
+			_window->_logPad->add( _colors_[ lexical_cast<int> ( part.mid ( 1 ) ) ] );
 		else /* text */
-			f_oWindow->f_poLogPad->add( l_oPart );
-		l_iIndex = l_iOffset + 1;
+			_window->_logPad->add( part );
+		index = offset + 1;
 		}
-	f_oWindow->f_poLogPad->add ( "\n" );
-	f_oWindow->f_poLogPad->add ( COLORS::ATTR_NORMAL );
+	_window->_logPad->add ( "\n" );
+	_window->_logPad->add ( COLORS::ATTR_NORMAL );
 	return;
 	M_EPILOG
 	}
@@ -1149,29 +1149,29 @@ void HClient::handler_msg( HString& a_roMessage )
 void HClient::end_round ( void )
 	{
 	M_PROLOG
-	HString l_oMessage;
-	f_oWindow->set_state ( LOCKED );
-	if ( f_oMoves.size() )
+	HString message;
+	_window->set_state ( LOCKED );
+	if ( _moves.size() )
 		{
-		for ( moves_t::iterator it = f_oMoves.begin(); it != f_oMoves.end(); ++ it )
+		for ( moves_t::iterator it = _moves.begin(); it != _moves.end(); ++ it )
 			{
-			l_oMessage.format ( "cmd:glx:play:move=%d,%d,%d\n",
-					it->f_iSourceSystem,
-					it->f_iDestinationSystem,
-					it->f_iFleet );
-			f_oSocket.write_until_eos ( l_oMessage );
+			message.format ( "cmd:glx:play:move=%d,%d,%d\n",
+					it->_sourceSystem,
+					it->_destinationSystem,
+					it->_fleet );
+			_socket.write_until_eos ( message );
 			}
-		f_oMoves.clear();
+		_moves.clear();
 		}
-	f_oSocket.write_until_eos ( "cmd:glx:play:end_round\n" );
+	_socket.write_until_eos ( "cmd:glx:play:end_round\n" );
 	return;
 	M_EPILOG
 	}
 
-void HClient::send_message ( HString const & a_oMessage )
+void HClient::send_message ( HString const & message_ )
 	{
 	M_PROLOG
-	f_oSocket.write_until_eos ( a_oMessage );
+	_socket.write_until_eos ( message_ );
 	return;
 	M_EPILOG
 	}
@@ -1185,13 +1185,13 @@ void HClient::handler_dummy( HString& )
 int main_client ( void )
 	{
 	if ( HTime().get_hour ( ) % 2 )
-		n_ppcSystemNames = n_ppcSystemNamesNorse;
+		_systemNames_ = _systemNamesNorse_;
 	else
-		n_ppcSystemNames = n_ppcSystemNamesLatin;
-	M_ENSURE( setup.f_oGameType.is_empty() || ( setup.f_oGameType == "glx" ) );
-	HClient l_oClient( setup.f_oLogin.raw() );
-	l_oClient.init_client( setup.f_oHost, setup.f_iPort );
-	l_oClient.run();
+		_systemNames_ = _systemNamesLatin_;
+	M_ENSURE( setup._gameType.is_empty() || ( setup._gameType == "glx" ) );
+	HClient client( setup._login.raw() );
+	client.init_client( setup._host, setup._port );
+	client.run();
 	return ( 0 );
 	}
 

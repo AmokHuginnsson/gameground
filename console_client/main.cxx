@@ -47,32 +47,32 @@ OSetup setup;
 
 }
 
-int main( int a_iArgc, char* a_ppcArgv[] )
+int main( int argc_, char* argv_[] )
 	{
 	M_PROLOG
 /* variables declarations for main loop: */
-	int l_iOpt = 0;
+	int opt = 0;
 	HConsole& cons = HCons::get_instance();
 /* end. */
 	try
 		{
 /* TO-DO: enter main loop code here */
 		HSignalServiceFactory::get_instance();
-		setup.f_pcProgramName = a_ppcArgv [ 0 ];
-		l_iOpt = handle_program_options( a_iArgc, a_ppcArgv );
-		setup.f_oLogPath += "." + setup.f_oLogin;
-		hcore::log.rehash( setup.f_oLogPath, setup.f_pcProgramName );
+		setup._programName = argv_ [ 0 ];
+		opt = handle_program_options( argc_, argv_ );
+		setup._logPath += "." + setup._login;
+		hcore::log.rehash( setup._logPath, setup._programName );
 		setup.test_setup();
 /* *BOOM* */
 		if ( ! cons.is_enabled() )
 			cons.enter_curses (); /* enabling ncurses ablilities */
 		if ( ( cons.get_height() >= 25 ) && ( cons.get_width() >= 80 ) )
-			l_iOpt = main_client();
+			opt = main_client();
 		else
-			l_iOpt = 1;
+			opt = 1;
 		if ( cons.is_enabled() )
 			cons.leave_curses (); /* ending ncurses sesion */
-		if ( l_iOpt )
+		if ( opt )
 			cout << "Your terminal is too small." << endl;
 /* ... there is the place main loop ends. :OD-OT */
 		}
@@ -83,7 +83,7 @@ int main( int a_iArgc, char* a_ppcArgv[] )
 		throw;
 		}
 	cerr << _( "Done" ) << endl;
-	return ( l_iOpt );
+	return ( opt );
 	M_FINAL
 	}
 
