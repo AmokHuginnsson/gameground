@@ -667,7 +667,7 @@ int HBoard::get_sys_no( int coordX_, int coordY_ )
 int HBoard::distance( int source_, int destination_ )
 	{
 	M_PROLOG
-	int dX = 0, dY = 0, distance = 0;
+	int dX = 0, dY = 0, dist = 0;
 	if ( source_ != destination_ )
 		{
 		dX = ( *_systems )[ source_ ]._coordinateX - ( *_systems )[ destination_ ]._coordinateX;
@@ -676,9 +676,9 @@ int HBoard::distance( int source_, int destination_ )
 		dY = ( dY >= 0 ) ? dY : - dY;
 		dX = ( ( _boardSize - dX ) < dX ) ? _boardSize - dX : dX;
 		dY = ( ( _boardSize - dY ) < dY ) ? _boardSize - dY : dY;
-		distance = static_cast<int>( sqrt ( dX * dX + dY * dY ) + 0.5 );
+		dist = static_cast<int>( sqrt ( dX * dX + dY * dY ) + 0.5 );
 		}
-	return ( distance );
+	return ( dist );
 	M_EPILOG
 	}
 

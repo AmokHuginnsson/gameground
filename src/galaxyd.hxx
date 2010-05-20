@@ -98,8 +98,8 @@ class HGalaxy : public HLogic
 protected:
 	/*{*/
 	int _boardSize;
-	int _systems;
-	int _emperors;
+	int _neutralSystemCount;
+	int _startupPlayers;
 	int _round;
 	int _ready;
 	yaal::hcore::HArray<HSystem> _systems;

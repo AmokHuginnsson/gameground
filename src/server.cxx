@@ -89,7 +89,7 @@ HServer::HServer( int connections_ )
 	_socket( HSocket::socket_type_t( HSocket::TYPE::DEFAULT ) | HSocket::TYPE::NONBLOCKING | HSocket::TYPE::SSL_SERVER, connections_ ),
 	_clients(), _logics(), _handlers(), _out(),
 	_db( HDataBase::get_connector() ),
-	_dispatcher( connections_, 3600 ), _freeIds()
+	_dispatcher( connections_, 3600 ), _idPool()
 	{
 	M_PROLOG
 	return;
@@ -278,7 +278,7 @@ void HServer::create_game( OClientInfo& client_, HString const& arg_ )
 				logic = factory.create_logic( type, configuration );
 				if ( ! logic->accept_client( &client_ ) )
 					{
-					id_t id( 0 );
+					id_t id;
 					_logics[ id = create_id() ] = logic;
 					client_._logic = logic;
 					out << name << "," << type << endl;
@@ -568,16 +568,8 @@ void HServer::send_game_info( OClientInfo& /*client_*/, HString const& )
 HServer::id_t HServer::create_id( void )
 	{
 	M_PROLOG
-	id_t id( 0 );
-	if ( _freeIds.empty() )
-		{
-		id = _logics.size();
-		}
-	else
-		{
-		id = *_freeIds.rend();
-		_freeIds.pop_back();
-		}
+	id_t id = _idPool;
+	++ _idPool;
 	return ( id );
 	M_EPILOG
 	}

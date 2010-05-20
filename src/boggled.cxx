@@ -101,7 +101,7 @@ HBoggle::SCORING::ORule HBoggle::RULES[] = { { 3, { 0, 0, 1, 1, 2, 3, 5, 11, 11,
 		{ 5, { 0, 0, 0, 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048 } } };
 
 HBoggle::HBoggle( HString const& name_, int players_, int roundTime_, int maxRounds_, int interRoundDelay_ )
-	: HLogic( PROTOCOL::NAME, name_ ), _state( STATE::LOCKED ), _players( players_ ),
+	: HLogic( PROTOCOL::NAME, name_ ), _state( STATE::LOCKED ), _startupPlayers( players_ ),
 	_roundTime( roundTime_ ), _maxRounds( maxRounds_ ),
 	_interRoundDelay( interRoundDelay_ ), _ruleSet( 0 ), _round( 0 ), _players(),
 	_words(), _mutex()
@@ -209,7 +209,7 @@ void HBoggle::do_post_accept( OClientInfo* clientInfo_ )
 	{
 	M_PROLOG
 	HLock l( _mutex );
-	out << "conditions: _players.size() = " << _players.size() << ", _players = " << _players << endl;
+	out << "conditions: _players.size() = " << _players.size() << ", _startupPlayers = " << _startupPlayers << endl;
 	OPlayerInfo info;
 	_players[ clientInfo_ ] = info;
 	/*
@@ -226,7 +226,7 @@ void HBoggle::do_post_accept( OClientInfo* clientInfo_ )
 		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
 		<< "   round interval - " << _interRoundDelay << endl
 		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
-		<< "This match requires " << _players << " players to start the game." << endl;
+		<< "This match requires " << _startupPlayers << " players to start the game." << endl;
 	*clientInfo_->_socket << PROTOCOL::NAME << PROTOCOL::SEP
 		<< PROTOCOL::SETUP << PROTOCOL::SEP << _roundTime
 		<< PROTOCOL::SEPP << _interRoundDelay << endl;
@@ -248,7 +248,7 @@ void HBoggle::do_post_accept( OClientInfo* clientInfo_ )
 			<< clientInfo_->_login
 			<< " joined the mind contest." << endl << _out );
 	out << "player [" << clientInfo_->_login << "] accepted" << endl;
-	if ( ! _round && ( _players.size() >= _players ) )
+	if ( ! _round && ( _players.size() >= _startupPlayers ) )
 		{
 		schedule_end_round();
 		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
@@ -283,7 +283,7 @@ void HBoggle::do_kick( OClientInfo* clientInfo_ )
 yaal::hcore::HString HBoggle::get_info() const
 	{
 	HLock l( _mutex );
-	return ( HString( "bgl," ) + _name + "," + _players.size() + "," + _players + "," + _roundTime + "," + _maxRounds + "," + _interRoundDelay );
+	return ( HString( "bgl," ) + _name + "," + _players.size() + "," + _startupPlayers + "," + _roundTime + "," + _maxRounds + "," + _interRoundDelay );
 	}
 
 void HBoggle::schedule( EVENT::event_t event_ )
@@ -467,14 +467,10 @@ HLogic::ptr_t HBoggleCreator::do_new_instance( HString const& argv_ )
 	out << "creating logic: " << argv_ << endl;
 	HTokenizer t( argv_, "," );
 	HString name = t[ 0 ];
-	HString players = t[ 1 ];
-	HString roundTime = t[ 2 ];
-	HString maxRounds = t[ 3 ];
-	HString interRoundDelay = t[ 4 ];
-	int players = lexical_cast<int>( players );
-	int roundTime = lexical_cast<int>( roundTime );
-	int maxRounds = lexical_cast<int>( maxRounds );
-	int interRoundDelay = lexical_cast<int>( interRoundDelay );
+	int players = lexical_cast<int>( t[ 1 ] );
+	int roundTime = lexical_cast<int>( t[ 2 ] );
+	int maxRounds = lexical_cast<int>( t[ 3 ] );
+	int interRoundDelay = lexical_cast<int>( t[ 4 ] );
 	return ( HLogic::ptr_t( new boggle::HBoggle( name,
 					players,
 					roundTime,
@@ -500,9 +496,9 @@ bool registrar( void )
 	M_PROLOG
 	bool volatile failed = false;
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
-	HString setup;
-	setup.format( "%s:%d,%d,%d,%d", "bgl", setup._players, setup._roundTime, setup._maxRounds, setup._interRoundDelay );
-	factory.register_logic_creator( setup, &boggleCreator );
+	HString setupMsg;
+	setupMsg.format( "%s:%d,%d,%d,%d", "bgl", setup._players, setup._roundTime, setup._maxRounds, setup._interRoundDelay );
+	factory.register_logic_creator( setupMsg, &boggleCreator );
 	return ( failed );
 	M_EPILOG
 	}

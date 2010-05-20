@@ -39,7 +39,7 @@ class HServer
 	{
 protected:
 	/*{*/
-	typedef int long id_t;
+	typedef yaal::hcore::HNumber id_t;
 	typedef void ( HServer::* handler_t )( OClientInfo&, yaal::hcore::HString const& );
 	typedef yaal::hcore::HMap<id_t, HLogic::ptr_t> logics_t;
 	typedef yaal::hcore::HMap<yaal::hcore::HString, handler_t> handlers_t;
@@ -53,7 +53,7 @@ protected:
 	yaal::tools::HStringStream _out;
 	yaal::dbwrapper::HDataBase::ptr_t _db;
 	yaal::tools::HProcess _dispatcher;
-	free_ids_t _freeIds;
+	id_t _idPool;
 	/*}*/
 	struct PROTOCOL
 		{

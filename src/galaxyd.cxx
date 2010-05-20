@@ -185,8 +185,8 @@ void HSystem::do_round( HGalaxy& galaxy_ )
 	}
 
 HGalaxy::HGalaxy( HString const& name_, int boardSize_, int systems_, int emperors_ )
-	: HLogic( "glx", name_ ), _boardSize( boardSize_ ), _systems( systems_ ),
-	_emperors( emperors_ ), _round( -1 ), _ready( 0 ),
+	: HLogic( "glx", name_ ), _boardSize( boardSize_ ), _neutralSystemCount( systems_ ),
+	_startupPlayers( emperors_ ), _round( -1 ), _ready( 0 ),
 	_systems( systems_ + emperors_ ), _emperors()
 	{
 	M_PROLOG
@@ -204,9 +204,9 @@ HGalaxy::HGalaxy( HString const& name_, int boardSize_, int systems_, int empero
 			{
 			for ( ctrLoc = 0; ctrLoc < ctr; ctrLoc ++ )
 				if ( ( system->_coordinateX
-							== _systems [ ctrLoc ]._coordinateX )
+							== _systems[ ctrLoc ]._coordinateX )
 						&& ( system->_coordinateY
-							== _systems [ ctrLoc ]._coordinateY ) )
+							== _systems[ ctrLoc ]._coordinateY ) )
 					break;
 			if ( ctrLoc < ctr )
 				{
@@ -216,7 +216,7 @@ HGalaxy::HGalaxy( HString const& name_, int boardSize_, int systems_, int empero
 			}
 		}
 	for ( ctr = 0; ctr < ( emperors_ + systems_ ); ctr ++ )
-		_systems [ ctr ]._production = _systems [ ctr ]._fleet = random.rnd ( 16 );
+		_systems[ ctr ]._production = _systems[ ctr ]._fleet = random.rnd ( 16 );
 	_handlers[ "play" ] = static_cast<handler_t>( &HGalaxy::handler_play );
 	_handlers[ "say" ] = static_cast<handler_t>( &HGalaxy::handler_message );
 	return;
@@ -245,9 +245,9 @@ void HGalaxy::do_post_accept( OClientInfo* clientInfo_ )
 	 */
 	message.format ( "glx:setup:board_size=%d\n", _boardSize );
 	clientInfo_->_socket->write_until_eos( message ); /* send setup info to new emperor */
-	message.format ( "glx:setup:systems=%d\n", _emperors + _systems );
+	message.format ( "glx:setup:systems=%d\n", _startupPlayers + _neutralSystemCount );
 	clientInfo_->_socket->write_until_eos( message );
-	for ( int ctr = 0; ctr < ( _emperors + _systems ); ++ ctr )
+	for ( int ctr = 0; ctr < ( _startupPlayers + _neutralSystemCount ); ++ ctr )
 		{
 		message.format( "glx:setup:system_coordinates=%d,%d,%d\n",
 				ctr, _systems[ ctr ]._coordinateX,
@@ -261,7 +261,7 @@ void HGalaxy::do_post_accept( OClientInfo* clientInfo_ )
 			clientInfo_->_socket->write_until_eos ( message );
 			}
 		}
-	if ( ( _round < 0 ) && ( _ready < _emperors ) )
+	if ( ( _round < 0 ) && ( _ready < _startupPlayers ) )
 		{
 		sysNo = assign_system( clientInfo_ ); /* assign mother system for new emperor */
 		color = get_color( clientInfo_ );
@@ -271,8 +271,8 @@ void HGalaxy::do_post_accept( OClientInfo* clientInfo_ )
 		_systems[ sysNo ]._production = 10;
 		_systems[ sysNo ]._fleet = 10;
 		message.format ( "glx:play:system_info=%c,%d,%d,%d,%d\n",
-				'c', sysNo, _systems [ sysNo ]._production, color,
-				_systems [ sysNo ]._fleet );
+				'c', sysNo, _systems[ sysNo ]._production, color,
+				_systems[ sysNo ]._fleet );
 		clientInfo_->_socket->write_until_eos ( message );
 		message.format ( "glx:msg:$12;Emperor ;$%d;", color );
 		message += clientInfo_->_login;
@@ -307,7 +307,7 @@ void HGalaxy::do_post_accept( OClientInfo* clientInfo_ )
 			clientInfo_->_socket->write_until_eos ( message );
 			}
 		}
-	if ( ( _round < 0 ) && ( _ready >= _emperors ) )
+	if ( ( _round < 0 ) && ( _ready >= _startupPlayers ) )
 		{
 		_round = 0;
 		message = "glx:setup:ok\n";
@@ -335,7 +335,7 @@ int HGalaxy::assign_system( OClientInfo* clientInfo_ )
 	int rivals = static_cast<int>( _emperors.size() );
 	HRandomizer rnd;
 	randomizer_helper::init_randomizer_from_time( rnd );
-	int motherSystem = rnd.rnd( _emperors + _systems - rivals );
+	int motherSystem = rnd.rnd( _startupPlayers + _neutralSystemCount - rivals );
 	_emperors[ clientInfo_ ] = info;
 	ctr = 0;
 	for ( int i = 0; i < motherSystem; ++ i, ++ ctr )
@@ -389,14 +389,14 @@ void HGalaxy::handler_play ( OClientInfo* clientInfo_, HString const& command_ )
 		destination = lexical_cast<int>( get_token( value, ",", 1 ) );
 		fleet._size = lexical_cast<int>( get_token( value, ",", 2 ) );
 		if ( ( source == destination )
-				&& ( _systems [ source ]._emperor != clientInfo_ )
-				&& ( _systems [ source ]._fleet < fleet._size ) )
+				&& ( _systems[ source ]._emperor != clientInfo_ )
+				&& ( _systems[ source ]._fleet < fleet._size ) )
 			kick_client( clientInfo_ );
 		else
 			{
-			_systems [ source ]._fleet -= fleet._size;
-			dX = _systems [ source ]._coordinateX - _systems [ destination ]._coordinateX;
-			dY = _systems [ source ]._coordinateY - _systems [ destination ]._coordinateY;
+			_systems[ source ]._fleet -= fleet._size;
+			dX = _systems[ source ]._coordinateX - _systems[ destination ]._coordinateX;
+			dY = _systems[ source ]._coordinateY - _systems[ destination ]._coordinateY;
 			dX = ( dX >= 0 ) ? dX : - dX;
 			dY = ( dY >= 0 ) ? dY : - dY;
 			dX = ( ( _boardSize - dX ) < dX ) ? _boardSize - dX : dX;
@@ -428,8 +428,8 @@ void HGalaxy::end_round( void )
 	for ( emperors_t::iterator it = _emperors.begin(); it != _emperors.end(); ++ it )
 		if ( it->second._systems > 0 )
 			it->second._systems = 0;
-	for ( ctr = 0; ctr < ( _systems + _emperors ); ctr ++ )
-		_systems [ ctr ].do_round( *this );
+	for ( ctr = 0; ctr < ( _neutralSystemCount + _startupPlayers ); ctr ++ )
+		_systems[ ctr ].do_round( *this );
 	HString message;
 	for ( emperors_t::iterator it = _emperors.begin(); it != _emperors.end(); ++ it )
 		{
@@ -460,7 +460,7 @@ void HGalaxy::end_round( void )
 				}
 			}
 		}
-	for ( ctr = 0; ctr < ( _emperors + _systems ); ctr ++ )
+	for ( ctr = 0; ctr < ( _startupPlayers + _neutralSystemCount ); ctr ++ )
 		{
 		message.format ( "glx:play:system_info=%c,%d,%d,%d,%d\n",
 				'i', ctr, _systems[ ctr ]._production, get_color( _systems[ ctr ]._emperor ),
@@ -512,7 +512,7 @@ HGalaxy::OEmperorInfo* HGalaxy::get_emperor_info( OClientInfo* clientInfo_ )
 void HGalaxy::do_kick( OClientInfo* clientInfo_ )
 	{
 	M_PROLOG
-	for ( int ctr = 0; ctr < ( _systems + _emperors ); ++ ctr )
+	for ( int ctr = 0; ctr < ( _neutralSystemCount + _startupPlayers ); ++ ctr )
 		{
 		HSystem::attackers_t& attackers = _systems[ ctr ]._attackers;
 		for ( HSystem::attackers_t::iterator it = attackers.begin();
@@ -546,7 +546,7 @@ void HGalaxy::do_kick( OClientInfo* clientInfo_ )
 
 yaal::hcore::HString HGalaxy::get_info() const
 	{
-	return ( HString( "glx," ) + _name + "," + _emperors.size() + "," + _emperors + "," + _boardSize + "," + _systems );
+	return ( HString( "glx," ) + _name + "," + _emperors.size() + "," + _startupPlayers + "," + _boardSize + "," + _neutralSystemCount );
 	}
 
 }
@@ -594,9 +594,9 @@ bool registrar( void )
 	M_PROLOG
 	bool volatile failed = false;
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
-	HString setup;
-	setup.format( "%s:%d,%d,%d", "glx", setup._emperors, setup._boardSize, setup._systems );
-	factory.register_logic_creator( setup, &galaxyCreator );
+	HString setupMsg;
+	setupMsg.format( "%s:%d,%d,%d", "glx", setup._emperors, setup._boardSize, setup._systems );
+	factory.register_logic_creator( setupMsg, &galaxyCreator );
 	return ( failed );
 	M_EPILOG
 	}

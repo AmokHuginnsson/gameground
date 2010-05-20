@@ -958,10 +958,10 @@ bool registrar( void )
 	M_PROLOG
 	bool volatile failed = false;
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
-	HString setup;
-	setup.format( "go:%d,%d,%d,%d,%d,%d", setup._gobanSize, setup._komi, setup._handicaps,
+	HString setupMsg;
+	setupMsg.format( "go:%d,%d,%d,%d,%d,%d", setup._gobanSize, setup._komi, setup._handicaps,
 			setup._mainTime, setup._byoYomiPeriods, setup._byoYomiTime );
-	factory.register_logic_creator( setup, &goCreator );
+	factory.register_logic_creator( setupMsg, &goCreator );
 	return ( failed );
 	M_EPILOG
 	}

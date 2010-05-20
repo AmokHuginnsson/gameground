@@ -83,7 +83,7 @@ protected:
 	typedef yaal::hcore::HMap<OClientInfo*, OPlayerInfo> players_t;
 	static SCORING::ORule RULES[4];
 	STATE::state_t _state;
-	int _players;
+	int _startupPlayers;
 	int _roundTime;
 	int _maxRounds;
 	int _interRoundDelay;
