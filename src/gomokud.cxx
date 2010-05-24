@@ -73,8 +73,8 @@ char const* const GO_MSG[] =
 	_( "malformed packet" )
 	};
 
-HGomoku::HGomoku( HString const& name_ )
-	: HLogic( "gomoku", name_ ),
+HGomoku::HGomoku( HLogic::id_t const& id_, HString const& comment_ )
+	: HLogic( id_, "gomoku", comment_ ),
 	_state( STONE::NONE ),
 	_move( 0 ), _start( 0 ),
 	_game( GOBAN_SIZE * GOBAN_SIZE + sizeof ( '\0' ) ),
@@ -272,10 +272,10 @@ void HGomoku::do_kick( OClientInfo* clientInfo_ )
 	M_EPILOG
 	}
 
-yaal::hcore::HString HGomoku::get_info() const
+yaal::hcore::HString HGomoku::do_get_info() const
 	{
 	HLock l( _mutex );
-	return ( HString( "gomoku," ) + _name + "," + _players.size() );
+	return ( HString( "gomoku," ) + get_comment() + "," + _players.size() );
 	}
 
 void HGomoku::put_stone( int col_, int row_, STONE::stone_t stone_ )
@@ -398,15 +398,15 @@ namespace logic_factory
 class HGomokuCreator : public HLogicCreatorInterface
 	{
 protected:
-	virtual HLogic::ptr_t do_new_instance( HString const& );
+	virtual HLogic::ptr_t do_new_instance( HLogic::id_t const&, HString const& );
 	} gomokuCreator;
 
-HLogic::ptr_t HGomokuCreator::do_new_instance( HString const& argv_ )
+HLogic::ptr_t HGomokuCreator::do_new_instance( HLogic::id_t const& id_, HString const& argv_ )
 	{
 	M_PROLOG
 	out << "creating logic: " << argv_ << endl;
 	HString name = get_token( argv_, ",", 0 );
-	return ( HLogic::ptr_t( new gomoku::HGomoku( name ) ) );
+	return ( HLogic::ptr_t( new gomoku::HGomoku( id_, name ) ) );
 	M_EPILOG
 	}
 

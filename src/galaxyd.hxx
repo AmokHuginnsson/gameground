@@ -107,11 +107,10 @@ protected:
 	/*}*/
 public:
 	/*{*/
-	HGalaxy( yaal::hcore::HString const&, int, int, int );
+	HGalaxy( id_t const&, yaal::hcore::HString const&, int, int, int );
 	virtual ~HGalaxy( void );
 	int get_color( OClientInfo* );
 	void mark_alive( OClientInfo* );
-	virtual yaal::hcore::HString get_info() const;
 	/*}*/
 protected:
 	/*{*/
@@ -120,6 +119,7 @@ protected:
 	virtual bool do_accept( OClientInfo* );
 	virtual void do_post_accept( OClientInfo* );
 	virtual void do_kick( OClientInfo* );
+	virtual yaal::hcore::HString do_get_info() const;
 	void handler_message( OClientInfo*, yaal::hcore::HString const& );
 	void handler_play( OClientInfo*, yaal::hcore::HString const& );
 	void end_round( void );

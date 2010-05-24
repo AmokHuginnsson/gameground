@@ -27,6 +27,8 @@ Copyright:
 #ifndef CLIENTINFO_HXX_INCLUDED
 #define CLIENTINFO_HXX_INCLUDED
 
+#include <yaal/hcore/hset.hxx>
+
 #include "logic.hxx"
 
 namespace gameground
@@ -35,10 +37,11 @@ namespace gameground
 struct OClientInfo
 	{
 	bool _anonymous;
+	typedef yaal::hcore::HSet<HLogic::id_t> logics_t;
 	yaal::hcore::HString _login;
 	yaal::hcore::HSocket::ptr_t _socket;
-	HLogic::ptr_t _logic;
-	OClientInfo( void ) : _anonymous( false ), _login(), _socket(), _logic() {}
+	logics_t _logics;
+	OClientInfo( void ) : _anonymous( false ), _login(), _socket(), _logics() {}
 	};
 
 }

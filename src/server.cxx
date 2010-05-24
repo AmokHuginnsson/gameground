@@ -275,11 +275,11 @@ void HServer::create_game( OClientInfo& client_, HString const& arg_ )
 			HLogic::ptr_t logic;
 			try
 				{
-				logic = factory.create_logic( type, configuration );
+				logic = factory.create_logic( type, create_id(), configuration );
 				if ( ! logic->accept_client( &client_ ) )
 					{
 					id_t id;
-					_logics[ id = create_id() ] = logic;
+					_logics[ logic->get_id() ] = logic;
 					client_._logic = logic;
 					out << name << "," << type << endl;
 					broadcast_to_interested( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
@@ -298,14 +298,14 @@ void HServer::create_game( OClientInfo& client_, HString const& arg_ )
 	M_EPILOG
 	}
 
-void HServer::join_game( OClientInfo& client_, HString const& name_ )
+void HServer::join_game( OClientInfo& client_, HString const& id_ )
 	{
 	M_PROLOG
 	if ( client_._login.is_empty() )
 		kick_client( client_._socket, _( "Set your name first (Just login with standard client, will ya?)." ) );
 	else
 		{
-		logics_t::iterator it = _logics.find( name_ );
+		logics_t::iterator it = _logics.find( id_ );
 		if ( it == _logics.end() )
 			client_._socket->write_until_eos( "err:Game does not exists.\n" );
 		else if ( !! client_._logic )
@@ -565,10 +565,10 @@ void HServer::send_game_info( OClientInfo& /*client_*/, HString const& )
 	M_EPILOG
 	}
 
-HServer::id_t HServer::create_id( void )
+HLogic::id_t HServer::create_id( void )
 	{
 	M_PROLOG
-	id_t id = _idPool;
+	HLogic::id_t id = _idPool;
 	++ _idPool;
 	return ( id );
 	M_EPILOG

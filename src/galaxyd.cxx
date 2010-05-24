@@ -184,8 +184,8 @@ void HSystem::do_round( HGalaxy& galaxy_ )
 	M_EPILOG
 	}
 
-HGalaxy::HGalaxy( HString const& name_, int boardSize_, int systems_, int emperors_ )
-	: HLogic( "glx", name_ ), _boardSize( boardSize_ ), _neutralSystemCount( systems_ ),
+HGalaxy::HGalaxy( id_t const& id_, HString const& comment_, int boardSize_, int systems_, int emperors_ )
+	: HLogic( id_, "glx", comment_ ), _boardSize( boardSize_ ), _neutralSystemCount( systems_ ),
 	_startupPlayers( emperors_ ), _round( -1 ), _ready( 0 ),
 	_systems( systems_ + emperors_ ), _emperors()
 	{
@@ -544,9 +544,9 @@ void HGalaxy::do_kick( OClientInfo* clientInfo_ )
 	M_EPILOG
 	}
 
-yaal::hcore::HString HGalaxy::get_info() const
+yaal::hcore::HString HGalaxy::do_get_info() const
 	{
-	return ( HString( "glx," ) + _name + "," + _emperors.size() + "," + _startupPlayers + "," + _boardSize + "," + _neutralSystemCount );
+	return ( HString( "glx," ) + get_comment() + "," + _emperors.size() + "," + _startupPlayers + "," + _boardSize + "," + _neutralSystemCount );
 	}
 
 }
@@ -557,11 +557,11 @@ namespace logic_factory
 class HGalaxyCreator : public HLogicCreatorInterface
 	{
 protected:
-	virtual HLogic::ptr_t do_new_instance( HString const& );
+	virtual HLogic::ptr_t do_new_instance( HLogic::id_t const&, HString const& );
 public:
 	} galaxyCreator;
 
-HLogic::ptr_t HGalaxyCreator::do_new_instance( HString const& argv_ )
+HLogic::ptr_t HGalaxyCreator::do_new_instance( HLogic::id_t const& id_, HString const& argv_ )
 	{
 	M_PROLOG
 	HString name = get_token( argv_, ",", 0 );
@@ -579,7 +579,7 @@ HLogic::ptr_t HGalaxyCreator::do_new_instance( HString const& argv_ )
 			|| OSetup::test_glx_systems( systems, message )
 			|| OSetup::test_glx_board_size( boardSize, message ) )
 		throw HLogicException( message );
-	return ( HLogic::ptr_t( new galaxy::HGalaxy( name,
+	return ( HLogic::ptr_t( new galaxy::HGalaxy( id_, name,
 					boardSize,
 					systems,
 					emperors ) ) );

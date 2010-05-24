@@ -57,13 +57,13 @@ void HLogicFactory::register_logic_creator( HString const& info_, HLogicCreatorI
 	M_EPILOG
 	}
 
-HLogic::ptr_t HLogicFactory::create_logic( HString const& type_, HString const& argv_ )
+HLogic::ptr_t HLogicFactory::create_logic( HString const& type_, HLogic::id_t const& id_, HString const& argv_ )
 	{
 	M_PROLOG
 	HLogic::ptr_t logic;
 	creators_t::iterator it = _creators.find( type_ );
 	if ( it != _creators.end() )
-		logic = it->second._instatiator->new_instance( argv_ );
+		logic = it->second._instatiator->new_instance( id_, argv_ );
 	return ( logic );
 	M_EPILOG
 	}

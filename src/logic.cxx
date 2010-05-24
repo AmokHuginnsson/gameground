@@ -47,9 +47,9 @@ char const* const HLogic::PROTOCOL::MSG = "msg";
 char const* const HLogic::PROTOCOL::PLAYER = "player";
 char const* const HLogic::PROTOCOL::PLAYER_QUIT = "player_quit";
 
-HLogic::HLogic( HString const& symbol_, HString const& name_ )
-	: _symbol( symbol_ ), _handlers( setup._maxConnections ),
-	_clients(), _name( name_ ), _out()
+HLogic::HLogic( id_t const& id_, HString const& symbol_, HString const& comment_ )
+	: _id( id_ ), _symbol( symbol_ ), _handlers( setup._maxConnections ),
+	_clients(), _comment( comment_ ), _out()
 	{
 	}
 
@@ -60,7 +60,7 @@ HLogic::~HLogic( void )
 void HLogic::kick_client( OClientInfo* clientInfo_, char const* const reason_ )
 	{
 	M_PROLOG
-	clientInfo_->_logic = HLogic::ptr_t();
+	clientInfo_->_logics.erase( _id );
 	_clients.erase( clientInfo_ );
 	if ( reason_ )
 		*clientInfo_->_socket << "err:" << reason_ << endl;
@@ -102,9 +102,14 @@ int HLogic::active_clients( void ) const
 	M_EPILOG
 	}
 
-HString const& HLogic::get_name( void ) const
+HString HLogic::get_info( void ) const
 	{
-	return ( _name );
+	return ( do_get_info() );
+	}
+
+HString const& HLogic::get_comment( void ) const
+	{
+	return ( _comment );
 	}
 
 bool HLogic::process_command( OClientInfo* clientInfo_, HString const& command_ )
@@ -139,14 +144,19 @@ void HLogic::broadcast( HString const& message_ )
 	M_EPILOG
 	}
 
+HLogic::id_t HLogic::get_id( void ) const
+	{
+	return ( _id );
+	}
+
 void HLogicCreatorInterface::initialize_globals( void )
 	{
 	do_initialize_globals();
 	}
 
-HLogic::ptr_t HLogicCreatorInterface::new_instance( HString const& argv_ )
+HLogic::ptr_t HLogicCreatorInterface::new_instance( HLogic::id_t const& id_, HString const& argv_ )
 	{
-	return ( do_new_instance( argv_ ) );
+	return ( do_new_instance( id_, argv_ ) );
 	}
 
 }

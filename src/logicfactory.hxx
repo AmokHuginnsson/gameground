@@ -52,7 +52,7 @@ private:
 	creators_t _creators;
 public:
 	void register_logic_creator( yaal::hcore::HString const&, HLogicCreatorInterface* );
-	HLogic::ptr_t create_logic( yaal::hcore::HString const&, yaal::hcore::HString const& );
+	HLogic::ptr_t create_logic( yaal::hcore::HString const&, HLogic::id_t const&, yaal::hcore::HString const& );
 	bool is_type_valid( yaal::hcore::HString const& );
 	creators_t::iterator begin( void );
 	creators_t::iterator end( void );

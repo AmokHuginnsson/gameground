@@ -88,8 +88,8 @@ char const* const GO_MSG[] =
 	_( "malformed packet" )
 	};
 
-HGo::HGo( HString const& name_ )
-	: HLogic( "go", name_ ),
+HGo::HGo( HLogic::id_t const& id_, HString const& comment_ )
+	: HLogic( id_, "go", comment_ ),
 	_state( STONE::NONE ), _gobanSize( setup._gobanSize ),
 	_komi( setup._komi ), _handicaps( setup._handicaps ), _mainTime( setup._mainTime ),
 	_byoYomiPeriods( setup._byoYomiPeriods ), _byoYomiTime( setup._byoYomiTime ),
@@ -552,10 +552,10 @@ void HGo::do_kick( OClientInfo* clientInfo_ )
 	M_EPILOG
 	}
 
-yaal::hcore::HString HGo::get_info() const
+yaal::hcore::HString HGo::do_get_info() const
 	{
 	HLock l( _mutex );
-	return ( HString( "go," ) + _name + "," + _players.size() + "," + _gobanSize + "," + _komi + "," + _handicaps + "," + _mainTime + "," + _byoYomiPeriods + "," + _byoYomiTime );
+	return ( HString( "go," ) + get_comment() + "," + _players.size() + "," + _gobanSize + "," + _komi + "," + _handicaps + "," + _mainTime + "," + _byoYomiPeriods + "," + _byoYomiTime );
 	}
 
 void HGo::reschedule_timeout( void )
@@ -938,15 +938,15 @@ namespace logic_factory
 class HGoCreator : public HLogicCreatorInterface
 	{
 protected:
-	virtual HLogic::ptr_t do_new_instance( HString const& );
+	virtual HLogic::ptr_t do_new_instance( HLogic::id_t const&, HString const& );
 	} goCreator;
 
-HLogic::ptr_t HGoCreator::do_new_instance( HString const& argv_ )
+HLogic::ptr_t HGoCreator::do_new_instance( HLogic::id_t const& id_, HString const& argv_ )
 	{
 	M_PROLOG
 	out << "creating logic: " << argv_ << endl;
 	HString name = get_token( argv_, ",", 0 );
-	return ( HLogic::ptr_t( new go::HGo( name ) ) );
+	return ( HLogic::ptr_t( new go::HGo( id_, name ) ) );
 	M_EPILOG
 	}
 
