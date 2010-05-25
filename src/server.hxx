@@ -110,7 +110,9 @@ protected:
 	void send_players_info( OClientInfo& );
 	void send_games_info( OClientInfo& );
 	void send_game_info( OClientInfo&, yaal::hcore::HString const& );
-	void remove_client_from_logic( OClientInfo&, char const* const = NULL );
+	void remove_client_from_logic( OClientInfo&, HLogic::ptr_t, char const* const = NULL );
+	void remove_client_from_all_logics( OClientInfo& );
+	void flush_logics( void );
 	void update_last_activity( OClientInfo const& );
 	HLogic::id_t create_id( void );
 	/*}*/

@@ -77,7 +77,6 @@ HSystem::HSystem( HSystem const& s )
 	: _id( s._id ), _coordinateX( s._coordinateX ), _coordinateY( s._coordinateY ),
 	_production( s._production ), _fleet( s._fleet ), _emperor( s._emperor ), _attackers( s._attackers )
 	{
-	M_ASSERT( ! "wrong execution path" );
 	}
 
 HSystem& HSystem::operator = ( HSystem const& s )
@@ -349,7 +348,7 @@ int HGalaxy::assign_system( OClientInfo* clientInfo_ )
 	M_EPILOG
 	}
 
-void HGalaxy::handler_message ( OClientInfo* clientInfo_, HString const& message_ )
+void HGalaxy::handler_message( OClientInfo* clientInfo_, HString const& message_ )
 	{
 	M_PROLOG
 	HString message;

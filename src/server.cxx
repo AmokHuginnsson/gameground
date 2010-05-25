@@ -140,7 +140,7 @@ void HServer::broadcast_to_interested( HString const& message_ )
 	{
 	M_PROLOG
 	for ( clients_t::iterator it = _clients.begin(); it != _clients.end(); ++ it )
-		if ( ! it->second._logic )
+		if ( it->second._logics.is_empty() )
 			*it->second._socket << message_ << endl;
 	return;
 	M_EPILOG
@@ -236,22 +236,34 @@ void HServer::handle_account( OClientInfo& client_, HString const& accountInfo_ 
 void HServer::pass_command( OClientInfo& client_, HString const& command_ )
 	{
 	M_PROLOG
-	if ( ! client_._logic )
+	if ( client_._logics.is_empty() )
 		client_._socket->write_until_eos( "err:Connect to some game first.\n" );
 	else
 		{
-		HString msg;
-		try
+		HString id( get_token( command_, ":", 0 ) );
+		logics_t::iterator logic( _logics.find( id ) );
+		if ( logic == _logics.end() )
+			client_._socket->write_until_eos( "err:No such party exists.\n" );
+		else
 			{
-			if ( client_._logic->process_command( &client_, command_ ) )
-				msg = "Game logic could not comprehend your message: ";
+			if ( client_._logics.count( id ) == 0 )
+				client_._socket->write_until_eos( "err:You are not part of this party.\n" );
+			else
+				{
+				HString msg;
+				try
+					{
+					if ( logic->second->process_command( &client_, command_.mid( id.get_length() + 1 ) ) )
+						msg = "Game logic could not comprehend your message: ";
+					}
+				catch ( HLogicException& e )
+					{
+					msg = e.what();
+					}
+				if ( ! msg.is_empty() )
+					remove_client_from_logic( client_, logic->second, msg.raw() );
+				}
 			}
-		catch ( HLogicException& e )
-			{
-			msg = e.what();
-			}
-		if ( ! msg.is_empty() )
-			remove_client_from_logic( client_, msg.raw() );
 		}
 	return;
 	M_EPILOG
@@ -278,9 +290,8 @@ void HServer::create_game( OClientInfo& client_, HString const& arg_ )
 				logic = factory.create_logic( type, create_id(), configuration );
 				if ( ! logic->accept_client( &client_ ) )
 					{
-					id_t id;
 					_logics[ logic->get_id() ] = logic;
-					client_._logic = logic;
+					client_._logics.insert( logic->get_id() );
 					out << name << "," << type << endl;
 					broadcast_to_interested( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
 							<< client_._login << PROTOCOL::SEPP << logic->get_info() << _out );
@@ -307,14 +318,14 @@ void HServer::join_game( OClientInfo& client_, HString const& id_ )
 		{
 		logics_t::iterator it = _logics.find( id_ );
 		if ( it == _logics.end() )
-			client_._socket->write_until_eos( "err:Game does not exists.\n" );
-		else if ( !! client_._logic )
-			kick_client( client_._socket, _( "You were already in some game." ) );
+			client_._socket->write_until_eos( "err:Party does not exists.\n" );
+		else if ( client_._logics.count( id_ ) != 0 )
+			kick_client( client_._socket, _( "You were already in this party." ) );
 		else if ( ! it->second->accept_client( &client_ ) )
 			{
-			client_._logic = it->second;
+			client_._logics.insert( id_ );
 			broadcast_to_interested( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
-					<< client_._login << PROTOCOL::SEPP << client_._logic->get_info() << _out );
+					<< client_._login << PROTOCOL::SEPP << it->second->get_info() << _out );
 			}
 		else
 			client_._socket->write_until_eos( "err:Game is full.\n" );
@@ -367,13 +378,11 @@ void HServer::handler_message( int fileDescriptor_ )
 				kick_client( client, _( "Malformed data." ) );
 			else
 				{
-				handlers_t::iterator it = _handlers.find( command );
-				if ( it != _handlers.end() )
+				handlers_t::iterator handler = _handlers.find( command );
+				if ( handler != _handlers.end() )
 					{
-					HLogic::ptr_t logic = clientIt->second._logic;
-					( this->*it->second )( clientIt->second, argument );
-					if ( ( !! logic ) && ( ! logic->active_clients() ) )
-						_logics.erase( logic->get_name() );
+					( this->*handler->second )( clientIt->second, argument );
+					flush_logics();
 					}
 				else
 					kick_client( client, _( "Unknown command." ) );
@@ -419,7 +428,7 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& client_, char const* con
 	else
 		cout << " disconnected from server.";
 	cout << endl;
-	remove_client_from_logic( clientIt->second );
+	remove_client_from_all_logics( clientIt->second );
 	HString login;
 	if ( ! clientIt->second._login.is_empty() )
 		login = clientIt->second._login;
@@ -472,23 +481,56 @@ void HServer::handler_quit( OClientInfo& client_, HString const& )
 void HServer::handler_abandon( OClientInfo& client_, HString const& )
 	{
 	M_PROLOG
-	remove_client_from_logic( client_ );
+	remove_client_from_all_logics( client_ );
 	broadcast_to_interested( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << client_._login << _out );
 	return;
 	M_EPILOG
 	}
 
-void HServer::remove_client_from_logic( OClientInfo& client_, char const* const reason_ )
+void HServer::remove_client_from_all_logics( OClientInfo& client_ )
 	{
 	M_PROLOG
-	if ( !! client_._logic )
+	out << "removing client from all logics: " << client_._login << endl;
+	for ( OClientInfo::logics_t::iterator it( client_._logics.begin() ), end( client_._logics.end() ); it != end; )
 		{
-		HLogic::ptr_t logic = client_._logic;
-		out << "separating logic info from client info for: " << client_._login << endl;
-		logic->kick_client( &client_, reason_ );
-		client_._logic = HLogic::ptr_t();
-		if ( ! logic->active_clients() )
-			_logics.erase( logic->get_name() );
+		logics_t::iterator logic( _logics.find( *it ) );
+		M_ASSERT( logic != _logics.end() );
+		logic->second->kick_client( &client_ );
+		}
+	flush_logics();
+	client_._logics.clear();
+	return;
+	M_EPILOG
+	}
+
+void HServer::flush_logics( void )
+	{
+	M_PROLOG
+	for ( logics_t::iterator it( _logics.begin() ), end( _logics.end() ); it != end; )
+		{
+		if ( ! it->second->active_clients() )
+			{
+			logics_t::iterator del( it );
+			++ it;
+			_logics.erase( del );
+			}
+		else
+			++ it;
+		}
+	return;
+	M_EPILOG
+	}
+
+void HServer::remove_client_from_logic( OClientInfo& client_, HLogic::ptr_t logic_, char const* const reason_ )
+	{
+	M_PROLOG
+	if ( !! logic_ )
+		{
+		out << "separating logic info from client info for: " << client_._login << " and party: " << logic_->get_info() << endl;
+		logic_->kick_client( &client_, reason_ );
+		client_._logics.erase( logic_->get_id() );
+		if ( ! logic_->active_clients() )
+			_logics.erase( logic_->get_id() );
 		}
 	return;
 	M_EPILOG
@@ -521,14 +563,18 @@ void HServer::get_game_info( OClientInfo& client_, HString const& name_ )
 void HServer::send_players_info( OClientInfo& client_ )
 	{
 	M_PROLOG
-	for( clients_t::iterator it = _clients.begin();
-			it != _clients.end(); ++ it )
+	for( clients_t::iterator client = _clients.begin();
+			client != _clients.end(); ++ client )
 		{
-		if ( ! it->second._login.is_empty() )
+		if ( ! client->second._login.is_empty() )
 			{
-			*client_._socket << PROTOCOL::PLAYER << PROTOCOL::SEP << it->second._login;
-			if ( !! it->second._logic )
-				*client_._socket << PROTOCOL::SEPP << it->second._logic->get_info();
+			*client_._socket << PROTOCOL::PLAYER << PROTOCOL::SEP << client->second._login;
+			for ( OClientInfo::logics_t::iterator it( client_._logics.begin() ), end( client_._logics.end() ); it != end; ++ it )
+				{
+				logics_t::iterator logic( _logics.find( *it ) );
+				if ( logic != _logics.end() )
+					*client_._socket << PROTOCOL::SEPP << logic->second->get_info();
+				}
 			*client_._socket << endl;
 			}
 		}

@@ -74,7 +74,7 @@ protected:
 public:
 	/*{*/
 	HSystem ( void );
-	HSystem( HSystem const& ) __attribute__(( __noreturn__ ));
+	HSystem( HSystem const& );
 	HSystem& operator = ( HSystem const& );
 	void do_round( HGalaxy & );
 	void swap( HSystem& );
