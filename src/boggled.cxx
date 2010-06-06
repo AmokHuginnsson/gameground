@@ -291,7 +291,7 @@ void HBoggle::schedule( EVENT::event_t event_ )
 	M_PROLOG
 	HLock l( _mutex );
 	if ( event_ == EVENT::BEGIN_ROUND )
-		HScheduledAsyncCallerService::get_instance().register_call( time( NULL ) + _interRoundDelay, bound_call( &HBoggle::on_begin_round, this ) );
+		HScheduledAsyncCallerService::get_instance().register_call( time( NULL ) + _interRoundDelay, call( &HBoggle::on_begin_round, this ) );
 	else
 		schedule_end_round();
 	return;
@@ -302,7 +302,7 @@ void HBoggle::schedule_end_round( void )
 	{
 	M_PROLOG
 	++ _round;
-	HScheduledAsyncCallerService::get_instance().register_call( time( NULL ) + _roundTime, bound_call( &HBoggle::on_end_round, this ) );
+	HScheduledAsyncCallerService::get_instance().register_call( time( NULL ) + _roundTime, call( &HBoggle::on_end_round, this ) );
 	generate_game();
 	_state = STATE::ACCEPTING;
 	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::DECK << PROTOCOL::SEP << make_deck() << endl << _out );
@@ -315,7 +315,7 @@ void HBoggle::on_begin_round( void )
 	M_PROLOG
 	HLock l( _mutex );
 	out << "<<begin>>" << endl;
-	HAsyncCallerService::get_instance().register_call( 0, bound_call( &HBoggle::schedule, this, EVENT::END_ROUND ) );
+	HAsyncCallerService::get_instance().register_call( 0, call( &HBoggle::schedule, this, EVENT::END_ROUND ) );
 	broadcast(
 			_out << PROTOCOL::NAME << PROTOCOL::SEP
 			<< PROTOCOL::MSG << PROTOCOL::SEP
@@ -335,7 +335,7 @@ void HBoggle::on_end_round( void )
 	_state = STATE::LOCKED;
 	if ( _round < _maxRounds )
 		{
-		HAsyncCallerService::get_instance().register_call( 0, bound_call( &HBoggle::schedule, this, EVENT::BEGIN_ROUND ) );
+		HAsyncCallerService::get_instance().register_call( 0, call( &HBoggle::schedule, this, EVENT::BEGIN_ROUND ) );
 		_out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
 			<< "This round has ended, next round in " << _interRoundDelay << " seconds!" << endl;
 		}

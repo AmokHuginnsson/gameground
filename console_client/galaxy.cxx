@@ -901,7 +901,7 @@ void HClient::init_client( HString& host_, int port_ )
 	M_PROLOG
 	HString message;
 	_socket.connect ( host_, port_ );
-	_dispatcher.register_file_descriptor_handler( _socket.get_file_descriptor(), bound_call( &HClient::handler_message, this, _1 ) );
+	_dispatcher.register_file_descriptor_handler( _socket.get_file_descriptor(), call( &HClient::handler_message, this, _1 ) );
 	message = "name:";
 	message += setup._login + '\n';
 	_socket.write_until_eos ( message );

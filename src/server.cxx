@@ -108,7 +108,7 @@ int HServer::init_server( int port_ )
 	factory.initialize_globals();
 	_db->connect( setup._databasePath, setup._databaseLogin, setup._databasePassword );
 	_socket.listen( "0.0.0.0", port_ );
-	_dispatcher.register_file_descriptor_handler( _socket.get_file_descriptor(), bound_call( &HServer::handler_connection, this, _1 ) );
+	_dispatcher.register_file_descriptor_handler( _socket.get_file_descriptor(), call( &HServer::handler_connection, this, _1 ) );
 	_handlers[ PROTOCOL::SHUTDOWN ] = &HServer::handler_shutdown;
 	_handlers[ PROTOCOL::QUIT ] = &HServer::handler_quit;
 	_handlers[ PROTOCOL::MSG ] = &HServer::handler_chat;
@@ -343,7 +343,7 @@ void HServer::handler_connection( int )
 		client->close();
 	else
 		{
-		_dispatcher.register_file_descriptor_handler( client->get_file_descriptor(), bound_call( &HServer::handler_message, this, _1 ) );
+		_dispatcher.register_file_descriptor_handler( client->get_file_descriptor(), call( &HServer::handler_message, this, _1 ) );
 		_clients[ client->get_file_descriptor() ]._socket = client;
 		}
 	out << client->get_host_name() << endl;
