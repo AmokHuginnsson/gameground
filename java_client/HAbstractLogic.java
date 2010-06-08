@@ -7,6 +7,7 @@ public abstract class HAbstractLogic {
 	GameGround _app = null;
 	SortedMap<String,Method> _handlers;
 	HLogicInfo _info;
+	String _id = "0";
 	public HAbstractLogic( GameGround $app ) {
 		_app = $app;
 	}
@@ -29,6 +30,9 @@ public abstract class HAbstractLogic {
 	}
 	public HLogicInfo getInfo() {
 		return ( _info );
+	}
+	public setId( $id ) {
+		_id = $id;
 	}
 	public void setDefaults( String $defaults ) {
 		_info._defaults = $defaults;

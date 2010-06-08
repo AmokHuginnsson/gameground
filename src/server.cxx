@@ -89,7 +89,7 @@ HServer::HServer( int connections_ )
 	_socket( HSocket::socket_type_t( HSocket::TYPE::DEFAULT ) | HSocket::TYPE::NONBLOCKING | HSocket::TYPE::SSL_SERVER, connections_ ),
 	_clients(), _logics(), _handlers(), _out(),
 	_db( HDataBase::get_connector() ),
-	_dispatcher( connections_, 3600 ), _idPool()
+	_dispatcher( connections_, 3600 ), _idPool( 1 )
 	{
 	M_PROLOG
 	return;
@@ -136,12 +136,31 @@ void HServer::broadcast( HString const& message_ )
 	M_EPILOG
 	}
 
-void HServer::broadcast_to_interested( HString const& message_ )
+void HServer::broadcast_party( HNumber const& id_, HString const& message_ )
 	{
 	M_PROLOG
-	for ( clients_t::iterator it = _clients.begin(); it != _clients.end(); ++ it )
-		if ( it->second._logics.is_empty() )
-			*it->second._socket << message_ << endl;
+	logics_t::iterator logic( _logics.find( id_ ) );
+	if ( logic != _logics.end() )
+		logic->second->broadcast( message_ );
+	return;
+	M_EPILOG
+	}
+
+void HServer::broadcast_all_parties( OClientInfo* info_, HString const& message_ )
+	{
+	M_PROLOG
+	broadcast_loose( message_ );
+	for ( OClientInfo::logics_t::iterator it( info_->_logics.begin() ), end( info_->_logics.end() ); it != end; ++ it )
+		broadcast_party( *it, message_ );
+	return;
+	M_EPILOG
+	}
+
+void HServer::broadcast_loose( HString const& message_ )
+	{
+	M_PROLOG
+	for ( clients_t::iterator it( _clients.begin() ), end( _clients.end() ); it != end; ++ it )
+		*(it->second._socket) << message_ << endl;
 	return;
 	M_EPILOG
 	}
@@ -149,7 +168,7 @@ void HServer::broadcast_to_interested( HString const& message_ )
 void HServer::handler_chat( OClientInfo& client_, HString const& message_ )
 	{
 	M_PROLOG
-	broadcast_to_interested( _out << PROTOCOL::MSG << PROTOCOL::SEP << client_._login << ": " << message_ << _out );
+	broadcast_loose( _out << PROTOCOL::MSG << PROTOCOL::SEP << client_._login << ": " << message_ << _out );
 	return;
 	M_EPILOG
 	}
@@ -197,8 +216,8 @@ void HServer::handle_login( OClientInfo& client_, HString const& loginInfo_ )
 				client_._anonymous = true;
 				*client_._socket << PROTOCOL::MSG << PROTOCOL::SEP << mark( COLORS::FG_RED ) << " Your game stats will not be preserved nor your login protected." << endl;
 				}
-			broadcast_to_interested( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << login << _out );
-			broadcast_to_interested( _out << PROTOCOL::MSG << PROTOCOL::SEP
+			broadcast_loose( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << login << _out );
+			broadcast_loose( _out << PROTOCOL::MSG << PROTOCOL::SEP
 					<< mark( COLORS::FG_BLUE ) << " " << login << " entered the GameGround." << _out );
 			}
 		else
@@ -290,11 +309,12 @@ void HServer::create_game( OClientInfo& client_, HString const& arg_ )
 				logic = factory.create_logic( type, create_id(), configuration );
 				if ( ! logic->accept_client( &client_ ) )
 					{
-					_logics[ logic->get_id() ] = logic;
-					client_._logics.insert( logic->get_id() );
+					HNumber const& id( logic->get_id() );
+					_logics[ id ] = logic;
+					client_._logics.insert( id );
 					out << name << "," << type << endl;
-					broadcast_to_interested( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
-							<< client_._login << PROTOCOL::SEPP << logic->get_info() << _out );
+					broadcast( _out << PROTOCOL::GAME << PROTOCOL::SEP << id << PROTOCOL::SEPP << logic->get_info() << _out );
+					broadcast_party( id, _out << PROTOCOL::PLAYER << PROTOCOL::SEP << client_._login << PROTOCOL::SEPP << id << _out );
 					}
 				else
 					client_._socket->write_until_eos( "err:Specified configuration is inconsistent.\n" );
@@ -324,7 +344,7 @@ void HServer::join_game( OClientInfo& client_, HString const& id_ )
 		else if ( ! it->second->accept_client( &client_ ) )
 			{
 			client_._logics.insert( id_ );
-			broadcast_to_interested( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
+			broadcast_party( id_, _out << PROTOCOL::PLAYER << PROTOCOL::SEP
 					<< client_._login << PROTOCOL::SEPP << it->second->get_info() << _out );
 			}
 		else
@@ -421,7 +441,7 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& client_, char const* con
 		HString reason = " was kicked because of: ";
 		reason += ( reason_ ? reason_ : "connection error" );
 		if ( ! clientIt->second._login.is_empty() )
-			broadcast_to_interested( _out << PROTOCOL::MSG << PROTOCOL::SEP
+			broadcast_all_parties( &clientIt->second, _out << PROTOCOL::MSG << PROTOCOL::SEP
 					<< mark( COLORS::FG_BRIGHTRED ) << " " << clientIt->second._login << reason << _out );
 		cout << reason;
 		}
@@ -434,7 +454,7 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& client_, char const* con
 		login = clientIt->second._login;
 	_clients.erase( fileDescriptor );
 	if ( ! login.is_empty() )
-		broadcast_to_interested( _out << PROTOCOL::PLAYER_QUIT << PROTOCOL::SEP << login << _out );
+		broadcast_loose( _out << PROTOCOL::PLAYER_QUIT << PROTOCOL::SEP << login << _out );
 	return;
 	M_EPILOG
 	}
@@ -472,7 +492,7 @@ void HServer::handler_quit( OClientInfo& client_, HString const& )
 	HString login( client_._login );
 	kick_client( client_._socket, "" );
 	if ( ! login.is_empty() )
-		broadcast_to_interested( _out << PROTOCOL::MSG << PROTOCOL::SEP
+		broadcast_loose( _out << PROTOCOL::MSG << PROTOCOL::SEP
 				<< mark( COLORS::FG_BROWN ) << " " << login << " has left the GameGround." << _out );
 	return;
 	M_EPILOG
@@ -482,7 +502,7 @@ void HServer::handler_abandon( OClientInfo& client_, HString const& )
 	{
 	M_PROLOG
 	remove_client_from_all_logics( client_ );
-	broadcast_to_interested( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << client_._login << _out );
+	broadcast_loose( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << client_._login << _out );
 	return;
 	M_EPILOG
 	}

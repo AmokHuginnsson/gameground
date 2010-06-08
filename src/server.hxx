@@ -96,7 +96,9 @@ protected:
 	void handler_chat( OClientInfo&, yaal::hcore::HString const& );
 	void kick_client( yaal::hcore::HSocket::ptr_t&, char const* const = NULL );
 	void broadcast( yaal::hcore::HString const& );
-	void broadcast_to_interested( yaal::hcore::HString const& );
+	void broadcast_loose( yaal::hcore::HString const& );
+	void broadcast_party( yaal::hcore::HNumber const&, yaal::hcore::HString const& );
+	void broadcast_all_parties( OClientInfo*, yaal::hcore::HString const& );
 	void handle_login( OClientInfo&, yaal::hcore::HString const& );
 	void handle_account( OClientInfo&, yaal::hcore::HString const& );
 	void pass_command( OClientInfo&, yaal::hcore::HString const& );

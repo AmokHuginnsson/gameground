@@ -139,7 +139,7 @@ void HLogic::broadcast( HString const& message_ )
 	{
 	M_PROLOG
 	for ( clients_t::HIterator it = _clients.begin(); it != _clients.end(); ++ it )
-		(*it)->_socket->write_until_eos ( message_ );
+		(*it)->_socket->write_until_eos( message_ );
 	return;
 	M_EPILOG
 	}
