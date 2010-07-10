@@ -459,7 +459,7 @@ void HBoard::do_refresh ( void )
 	client_state_t state = _listener.get_state();
 	HString pen;
 	HBoard::draw_label();
-	HConsole& cons = HCons::get_instance();
+	HConsole& cons = HConsole::get_instance();
 	if ( _focused )
 		cons.curs_set ( CURSOR::INVISIBLE );
 	if ( _boardSize >= 0 )

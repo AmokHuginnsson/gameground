@@ -386,8 +386,8 @@ void HGomoku::send_contestant( char stone )
 void HGomoku::revoke_scheduled_tasks( void )
 	{
 	M_PROLOG
-	HAsyncCallerService::get_instance().flush( this );
-	HScheduledAsyncCallerService::get_instance().flush( this );
+	HAsyncCaller::get_instance().flush( this );
+	HScheduledAsyncCaller::get_instance().flush( this );
 	return;
 	M_EPILOG
 	}
