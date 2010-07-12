@@ -537,6 +537,8 @@ void HServer::flush_logics( void )
 		else
 			++ it;
 		}
+	/* does not work becuse HCall does not know how to handle HPointer<>. */
+	// _logics.erase( remove_if( _logics.begin(), _logics.end(), not1( compose1( call( &HLogic::active_clients, _1 ), select2nd<logics_t::value_type>() ) ) ), _logics.end() );
 	return;
 	M_EPILOG
 	}
