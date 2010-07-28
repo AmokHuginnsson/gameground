@@ -89,7 +89,7 @@ HServer::HServer( int connections_ )
 	_socket( HSocket::socket_type_t( HSocket::TYPE::DEFAULT ) | HSocket::TYPE::NONBLOCKING | HSocket::TYPE::SSL_SERVER, connections_ ),
 	_clients(), _logics(), _handlers(), _out(),
 	_db( HDataBase::get_connector() ),
-	_dispatcher( connections_, 3600 ), _idPool( 1 )
+	_dispatcher( connections_, 3600 * 1000 ), _idPool( 1 )
 	{
 	M_PROLOG
 	return;

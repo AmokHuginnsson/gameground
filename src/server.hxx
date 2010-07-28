@@ -50,7 +50,7 @@ protected:
 	handlers_t _handlers;
 	yaal::tools::HStringStream _out;
 	yaal::dbwrapper::HDataBase::ptr_t _db;
-	yaal::tools::HProcess _dispatcher;
+	yaal::tools::HIODispatcher _dispatcher;
 	HLogic::id_t _idPool;
 	/*}*/
 	struct PROTOCOL
