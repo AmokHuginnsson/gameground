@@ -98,10 +98,10 @@ class HClient extends Thread {
 					return null;
 				}
 				public void checkClientTrusted(
-						java.security.cert.X509Certificate[] certs, String authType) {
+						java.security.cert.X509Certificate[] certs, String authType ) {
 				}
 				public void checkServerTrusted(
-						java.security.cert.X509Certificate[] certs, String authType) {
+						java.security.cert.X509Certificate[] certs, String authType ) {
 				}
 			}
 		};
@@ -110,8 +110,8 @@ class HClient extends Thread {
 		 * Install the all-trusting trust manager
 		 */
 		try {
-			_sslContext = SSLContext.getInstance("SSL");
-			_sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+			_sslContext = SSLContext.getInstance( "SSL" );
+			_sslContext.init( null, trustAllCerts, new java.security.SecureRandom() );
 		} catch (Exception e) {
 		}
 		return ( true );

@@ -31,7 +31,7 @@ public abstract class HAbstractLogic {
 	public HLogicInfo getInfo() {
 		return ( _info );
 	}
-	public setId( $id ) {
+	public void setId( String $id ) {
 		_id = $id;
 	}
 	public void setDefaults( String $defaults ) {
