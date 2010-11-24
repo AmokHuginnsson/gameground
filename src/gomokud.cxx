@@ -84,8 +84,6 @@ HGomoku::HGomoku( HLogic::id_t const& id_, HString const& comment_ )
 	{
 	M_PROLOG
 	_contestants[ 0 ] = _contestants[ 1 ] = NULL;
-	HRandomizer random;
-	random.set( time ( NULL ) );
 	::memset( _game.raw(), STONE::NONE, GOBAN_SIZE * GOBAN_SIZE );
 	_game.raw()[ GOBAN_SIZE * GOBAN_SIZE ] = 0;
 	_handlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HGomoku::handler_play );

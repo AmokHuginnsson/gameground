@@ -107,8 +107,6 @@ HBoggle::HBoggle( id_t const& id_, HString const& comment_, int players_, int ro
 	_words(), _mutex()
 	{
 	M_PROLOG
-	HRandomizer random;
-	random.set( time ( NULL ) );
 	_handlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HBoggle::handler_play );
 	_handlers[ PROTOCOL::SAY ] = static_cast<handler_t>( &HBoggle::handler_message );
 	return;
@@ -127,19 +125,18 @@ HBoggle::~HBoggle ( void )
 void HBoggle::generate_game( void )
 	{
 	M_PROLOG
-	HRandomizer rnd;
-	randomizer_helper::init_randomizer_from_time( rnd );
+	HRandomizer rnd( randomizer_helper::make_randomizer() );
 	for ( int i = 0; i < boggle_data::BOGGLE::DICE_COUNT; ++ i )
 		_game[ i ][ 0 ] = boggle_data::BOGGLE::UNINITIALIZED_SLOT;
 	for ( int i = 0; i < boggle_data::BOGGLE::DICE_COUNT; ++ i )
 		{
-		int k = 0, slot = rnd.rnd( boggle_data::BOGGLE::DICE_COUNT - i );
+		int k = 0, slot = rnd( boggle_data::BOGGLE::DICE_COUNT - i );
 		for ( int j = 0; j < slot; ++ j, ++ k )
 			while ( _game[ k ][ 0 ] != boggle_data::BOGGLE::UNINITIALIZED_SLOT )
 				++ k;
 		while ( _game[ k ][ 0 ] != boggle_data::BOGGLE::UNINITIALIZED_SLOT )
 			++ k;
-		_game[ k ][ 0 ] = boggle_data::_dices_[ i ][ rnd.rnd( boggle_data::BOGGLE::SIDES ) ];
+		_game[ k ][ 0 ] = boggle_data::_dices_[ i ][ rnd( boggle_data::BOGGLE::SIDES ) ];
 		}
 	return;
 	M_EPILOG

@@ -103,8 +103,6 @@ HGo::HGo( HLogic::id_t const& id_, HString const& comment_ )
 	{
 	M_PROLOG
 	_contestants[ 0 ] = _contestants[ 1 ] = NULL;
-	HRandomizer random;
-	random.set( time ( NULL ) );
 	_handlers[ PROTOCOL::SETUP ] = static_cast<handler_t>( &HGo::handler_setup );
 	_handlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HGo::handler_play );
 	_handlers[ PROTOCOL::SAY ] = static_cast<handler_t>( &HGo::handler_message );
