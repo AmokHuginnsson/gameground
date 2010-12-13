@@ -60,9 +60,6 @@ typedef double long ( *now_t )( bool, double, char, int, bool, double, void*, vo
 extern now_t now;
 yaal::hcore::HStreamInterface& operator << ( yaal::hcore::HStreamInterface&, now_t const& );
 
-inline std::ostream& operator << ( std::ostream& o, yaal::hcore::HString const& s )
-	{ return ( o << s.raw() ); }
-
 struct OSetup
 	{
 	bool _quiet;			/* --quiet, --silent */
