@@ -200,7 +200,7 @@ void HServer::handle_login( OClientInfo& client_, HString const& loginInfo_ )
 			out << _db->get_error() << endl;
 			M_ENSURE( ! "database query error" );
 			}
-		int result( lexical_cast<int>( row[0] ) );
+		int result( lexical_cast<int>( *row[0] ) );
 		if ( ( result == 2 ) || ( result == 0 ) )
 			{
 			client_._login = login;
