@@ -131,7 +131,15 @@ void HServer::broadcast( HString const& message_ )
 	{
 	M_PROLOG
 	for ( clients_t::iterator it = _clients.begin(); it != _clients.end(); ++ it )
-		*it->second._socket << message_ << endl;
+		{
+		try
+			{
+			*it->second._socket << message_ << endl;
+			}
+		catch ( HOpenSSLException const& )
+			{
+			}
+		}
 	return;
 	M_EPILOG
 	}
@@ -151,7 +159,15 @@ void HServer::broadcast_all_parties( OClientInfo* info_, HString const& message_
 	M_PROLOG
 	broadcast_loose( message_ );
 	for ( OClientInfo::logics_t::iterator it( info_->_logics.begin() ), end( info_->_logics.end() ); it != end; ++ it )
-		broadcast_party( *it, message_ );
+		{
+		try
+			{
+			broadcast_party( *it, message_ );
+			}
+		catch ( HOpenSSLException const& )
+			{
+			}
+		}
 	return;
 	M_EPILOG
 	}
@@ -160,7 +176,15 @@ void HServer::broadcast_loose( HString const& message_ )
 	{
 	M_PROLOG
 	for ( clients_t::iterator it( _clients.begin() ), end( _clients.end() ); it != end; ++ it )
-		*(it->second._socket) << message_ << endl;
+		{
+		try
+			{
+			*(it->second._socket) << message_ << endl;
+			}
+		catch ( HOpenSSLException const& )
+			{
+			}
+		}
 	return;
 	M_EPILOG
 	}
@@ -379,6 +403,7 @@ void HServer::handler_message( int fileDescriptor_ )
 	HString command;
 	clients_t::iterator clientIt;
 	HSocket::ptr_t client = _socket.get_client( fileDescriptor_ );
+	bool kick( false );
 	try
 		{
 		int long nRead( 0 );
@@ -414,7 +439,17 @@ void HServer::handler_message( int fileDescriptor_ )
 		}
 	catch ( HOpenSSLException& )
 		{
-		kick_client( client );
+		kick = true;
+		}
+	try
+		{
+		if ( kick && !! client )
+			kick_client( client );
+		}
+	catch ( HOpenSSLException const& e )
+		{
+		log_trace << e.what() << endl;
+		out << e.what() << endl;
 		}
 	return;
 	M_EPILOG
@@ -513,7 +548,9 @@ void HServer::remove_client_from_all_logics( OClientInfo& client_ )
 	out << "removing client from all logics: " << client_._login << endl;
 	for ( OClientInfo::logics_t::iterator it( client_._logics.begin() ), end( client_._logics.end() ); it != end; )
 		{
-		logics_t::iterator logic( _logics.find( *it ) );
+		HLogic::id_t id( *it );
+		++ it;
+		logics_t::iterator logic( _logics.find( id ) );
 		M_ASSERT( logic != _logics.end() );
 		logic->second->kick_client( &client_ );
 		}
