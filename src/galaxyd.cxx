@@ -576,10 +576,10 @@ HLogic::ptr_t HGalaxyCreator::do_new_instance( HLogic::id_t const& id_, HString 
 			|| OSetup::test_glx_systems( systems, message )
 			|| OSetup::test_glx_board_size( boardSize, message ) )
 		throw HLogicException( message );
-	return ( HLogic::ptr_t( new galaxy::HGalaxy( id_, name,
+	return ( make_pointer<galaxy::HGalaxy>( id_, name,
 					boardSize,
 					systems,
-					emperors ) ) );
+					emperors ) );
 	M_EPILOG
 	}
 

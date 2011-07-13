@@ -179,7 +179,7 @@ void HBoggle::handler_play( OClientInfo* clientInfo_, HString const& word_ )
 		{
 		words_t::iterator it = _words.find( word_ );
 		if ( it == _words.end() )
-			it = _words.insert( hcore::make_pair( word_, client_set_ptr_t( new client_set_t() ) ) ).first;
+			it = _words.insert( hcore::make_pair( word_, make_pointer<client_set_t>() ) ).first;
 		it->second->insert( clientInfo_ );
 		out << "word: " << word_ << "< inserted, proof: " << _words.size() << "," << it->second->size() << endl;
 		}
@@ -468,11 +468,11 @@ HLogic::ptr_t HBoggleCreator::do_new_instance( HLogic::id_t const& id_, HString 
 	int roundTime = lexical_cast<int>( t[ 2 ] );
 	int maxRounds = lexical_cast<int>( t[ 3 ] );
 	int interRoundDelay = lexical_cast<int>( t[ 4 ] );
-	return ( HLogic::ptr_t( new boggle::HBoggle( id_, name,
+	return ( make_pointer<boggle::HBoggle>( id_, name,
 					players,
 					roundTime,
 					maxRounds,
-					interRoundDelay ) ) );
+					interRoundDelay ) );
 	M_EPILOG
 	}
 

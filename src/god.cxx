@@ -946,7 +946,7 @@ HLogic::ptr_t HGoCreator::do_new_instance( HLogic::id_t const& id_, HString cons
 	M_PROLOG
 	out << "creating logic: " << argv_ << endl;
 	HString name = get_token( argv_, ",", 0 );
-	return ( HLogic::ptr_t( new go::HGo( id_, name ) ) );
+	return ( make_pointer<go::HGo>( id_, name ) );
 	M_EPILOG
 	}
 

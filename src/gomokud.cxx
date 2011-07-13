@@ -406,7 +406,7 @@ HLogic::ptr_t HGomokuCreator::do_new_instance( HLogic::id_t const& id_, HString 
 	M_PROLOG
 	out << "creating logic: " << argv_ << endl;
 	HString name = get_token( argv_, ",", 0 );
-	return ( HLogic::ptr_t( new gomoku::HGomoku( id_, name ) ) );
+	return ( make_pointer<gomoku::HGomoku>( id_, name ) );
 	M_EPILOG
 	}
 
