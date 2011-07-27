@@ -63,7 +63,7 @@ yaal::hcore::HStreamInterface& operator << ( yaal::hcore::HStreamInterface&, now
 struct OSetup
 	{
 	bool _quiet;			/* --quiet, --silent */
-	int _verbose;		/* --verbose */
+	bool _verbose;		/* --verbose */
 	int	_maxConnections;
 	/* galaxy/boggle specific integers */
 	int _emperors;

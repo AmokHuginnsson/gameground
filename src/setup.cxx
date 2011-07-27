@@ -25,6 +25,7 @@ Copyright:
 */
 
 #include <cstring>
+#include <cstdio>
 
 #include <yaal/yaal.hxx>
 M_VCSID( "$Id: "__ID__" $" )
@@ -59,6 +60,18 @@ HStreamInterface& operator << ( HStreamInterface& stream, now_t const& )
 void OSetup::test_setup( void )
 	{
 	M_PROLOG
+	if ( _quiet && _verbose )
+		yaal::tools::util::failure( 1,
+				_( "quiet and verbose options are exclusive\n" ) );
+	if ( _verbose )
+		clog.reset( make_pointer<HFile>( stdout ) );
+	else
+		std::clog.rdbuf( NULL );
+	if ( _quiet )
+		{
+		cout.reset();
+		std::cout.rdbuf( NULL );
+		}
 #ifdef __GAMEGROUND_SERVER__
 	if ( _maxConnections < 2 )
 		yaal::tools::util::failure ( 3,
