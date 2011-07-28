@@ -43,6 +43,7 @@ protected:
 	typedef yaal::hcore::HMap<HLogic::id_t, HLogic::ptr_t> logics_t;
 	typedef yaal::hcore::HMap<yaal::hcore::HString, handler_t> handlers_t;
 	typedef yaal::hcore::HMap<int, OClientInfo> clients_t;
+	typedef yaal::hcore::HDeque<yaal::hcore::HSocket::ptr_t> dropouts_t;
 	int _maxConnections;
 	yaal::hcore::HSocket _socket;
 	clients_t _clients;
@@ -52,6 +53,7 @@ protected:
 	yaal::dbwrapper::HDataBase::ptr_t _db;
 	yaal::tools::HIODispatcher _dispatcher;
 	HLogic::id_t _idPool;
+	dropouts_t _dropouts;
 	/*}*/
 	struct PROTOCOL
 		{
@@ -63,7 +65,7 @@ protected:
 		static char const* const GAME;
 		static char const* const GET_GAMES;
 		static char const* const GET_GAME_INFO;
-		static char const* const GET_LOGISTICS;
+		static char const* const GET_LOGICS;
 		static char const* const GET_PLAYERS;
 		static char const* const JOIN;
 		static char const* const KCK;
@@ -116,6 +118,8 @@ protected:
 	void remove_client_from_all_logics( OClientInfo& );
 	void flush_logics( void );
 	void update_last_activity( OClientInfo const& );
+	void disect_dropouts( void );
+	void flush_droupouts( void );
 	HLogic::id_t create_id( void );
 	/*}*/
 	};

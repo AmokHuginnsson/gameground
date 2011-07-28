@@ -68,7 +68,7 @@ char const* const HServer::PROTOCOL::ERR = "err";
 char const* const HServer::PROTOCOL::GAME = "game";
 char const* const HServer::PROTOCOL::GET_GAMES = "get_games";
 char const* const HServer::PROTOCOL::GET_GAME_INFO = "get_game_info";
-char const* const HServer::PROTOCOL::GET_LOGISTICS = "get_logics";
+char const* const HServer::PROTOCOL::GET_LOGICS = "get_logics";
 char const* const HServer::PROTOCOL::GET_PLAYERS = "get_players";
 char const* const HServer::PROTOCOL::JOIN = "join";
 char const* const HServer::PROTOCOL::KCK = "kck";
@@ -89,7 +89,8 @@ HServer::HServer( int connections_ )
 	_socket( HSocket::socket_type_t( HSocket::TYPE::DEFAULT ) | HSocket::TYPE::NONBLOCKING | HSocket::TYPE::SSL_SERVER, connections_ ),
 	_clients(), _logics(), _handlers(), _out(),
 	_db( HDataBase::get_connector() ),
-	_dispatcher( connections_, 3600 * 1000 ), _idPool( 1 )
+	_dispatcher( connections_, 3600 * 1000 ), _idPool( 1 ),
+	_dropouts()
 	{
 	M_PROLOG
 	return;
@@ -114,7 +115,7 @@ int HServer::init_server( int port_ )
 	_handlers[ PROTOCOL::MSG ] = &HServer::handler_chat;
 	_handlers[ PROTOCOL::LOGIN ] = &HServer::handle_login;
 	_handlers[ PROTOCOL::ACCOUNT ] = &HServer::handle_account;
-	_handlers[ PROTOCOL::GET_LOGISTICS ] = &HServer::get_logics_info;
+	_handlers[ PROTOCOL::GET_LOGICS ] = &HServer::get_logics_info;
 	_handlers[ PROTOCOL::GET_PLAYERS ] = &HServer::get_players_info;
 	_handlers[ PROTOCOL::GET_GAMES ] = &HServer::get_games_info;
 	_handlers[ PROTOCOL::GET_GAME_INFO ] = &HServer::get_game_info;
@@ -124,6 +125,142 @@ int HServer::init_server( int port_ )
 	_handlers[ PROTOCOL::CMD ] = &HServer::pass_command;
 	out << brightblue << "<<<GameGround>>>" << lightgray << " server started." << endl;
 	return ( 0 );
+	M_EPILOG
+	}
+
+void HServer::handler_connection( int )
+	{
+	M_PROLOG
+	HSocket::ptr_t client = _socket.accept();
+	M_ASSERT( !! client );
+	if ( _socket.get_client_count() >= _maxConnections )
+		client->close();
+	else
+		{
+		_dispatcher.register_file_descriptor_handler( client->get_file_descriptor(), call( &HServer::handler_message, this, _1 ) );
+		_clients[ client->get_file_descriptor() ]._socket = client;
+		}
+	out << client->get_host_name() << endl;
+	return;
+	M_EPILOG
+	}
+
+void HServer::handler_message( int fileDescriptor_ )
+	{
+	M_PROLOG
+	HString message;
+	HString argument;
+	HString command;
+	clients_t::iterator clientIt;
+	HSocket::ptr_t client = _socket.get_client( fileDescriptor_ );
+	bool kick( false );
+	try
+		{
+		int long nRead( 0 );
+		if ( ( clientIt = _clients.find( fileDescriptor_ ) ) == _clients.end() )
+			kick_client( client );
+		else if ( ( nRead = client->read_until( message ) ) > 0 )
+			{
+			if ( clientIt->second._login.is_empty() )
+				out << "`unnamed'";
+			else
+				out << clientIt->second._login; 
+			cout << "->" << message << endl;
+			command = get_token( message, ":", 0 );
+			argument = message.mid( command.get_length() + 1 );
+			int msgLength = static_cast<int>( command.get_length() );
+			if ( msgLength < 1 )
+				kick_client( client, _( "Malformed data." ) );
+			else
+				{
+				handlers_t::iterator handler = _handlers.find( command );
+				if ( handler != _handlers.end() )
+					{
+					( this->*handler->second )( clientIt->second, argument );
+					flush_logics();
+					}
+				else
+					kick_client( client, _( "Unknown command." ) );
+				}
+			}
+		else if ( ! nRead )
+			kick_client( client, "" );
+		/* else nRead < 0 => REPEAT */
+		}
+	catch ( HOpenSSLException& )
+		{
+		kick = true;
+		}
+	try
+		{
+		if ( kick && !! client )
+			kick_client( client );
+		}
+	catch ( HOpenSSLException const& e )
+		{
+		log_trace << e.what() << endl;
+		out << e.what() << endl;
+		}
+	return;
+	M_EPILOG
+	}
+
+void HServer::kick_client( yaal::hcore::HSocket::ptr_t& client_, char const* const reason_ )
+	{
+	M_PROLOG
+	M_ASSERT( !! client_ );
+	int fileDescriptor = client_->get_file_descriptor();
+	if ( reason_ && reason_[0] )
+		*client_ << PROTOCOL::KCK << PROTOCOL::SEP << reason_ << endl;
+	_socket.shutdown_client( fileDescriptor );
+	_dispatcher.unregister_file_descriptor_handler( fileDescriptor );
+	clients_t::iterator clientIt = _clients.find( fileDescriptor );
+	M_ASSERT( clientIt != _clients.end() );
+	out << "client ";
+	if ( clientIt->second._login.is_empty() )
+		cout << "`unnamed'";
+	else
+		cout << clientIt->second._login; 
+	if ( ! reason_ || reason_[ 0 ] )
+		{
+		HString reason = " was kicked because of: ";
+		reason += ( reason_ ? reason_ : "connection error" );
+		if ( ! clientIt->second._login.is_empty() )
+			broadcast_all_parties( &clientIt->second, _out << PROTOCOL::MSG << PROTOCOL::SEP
+					<< mark( COLORS::FG_BRIGHTRED ) << " " << clientIt->second._login << reason << _out );
+		cout << reason;
+		}
+	else
+		cout << " disconnected from server.";
+	cout << endl;
+	remove_client_from_all_logics( clientIt->second );
+	HString login;
+	if ( ! clientIt->second._login.is_empty() )
+		login = clientIt->second._login;
+	_clients.erase( fileDescriptor );
+	if ( ! login.is_empty() )
+		broadcast_loose( _out << PROTOCOL::PLAYER_QUIT << PROTOCOL::SEP << login << _out );
+	return;
+	M_EPILOG
+	}
+
+void HServer::handler_shutdown( OClientInfo&, HString const& )
+	{
+	_dispatcher.stop();
+	return;
+	}
+
+void HServer::handler_quit( OClientInfo& client_, HString const& )
+	{
+	M_PROLOG
+	if ( ! client_._anonymous )
+		update_last_activity( client_ );
+	HString login( client_._login );
+	kick_client( client_._socket, "" );
+	if ( ! login.is_empty() )
+		broadcast_loose( _out << PROTOCOL::MSG << PROTOCOL::SEP
+				<< mark( COLORS::FG_BROWN ) << " " << login << " has left the GameGround." << _out );
+	return;
 	M_EPILOG
 	}
 
@@ -138,8 +275,10 @@ void HServer::broadcast( HString const& message_ )
 			}
 		catch ( HOpenSSLException const& )
 			{
+			_dropouts.push_back( it->second._socket );
 			}
 		}
+	disect_dropouts();
 	return;
 	M_EPILOG
 	}
@@ -159,15 +298,7 @@ void HServer::broadcast_all_parties( OClientInfo* info_, HString const& message_
 	M_PROLOG
 	broadcast_loose( message_ );
 	for ( OClientInfo::logics_t::iterator it( info_->_logics.begin() ), end( info_->_logics.end() ); it != end; ++ it )
-		{
-		try
-			{
-			broadcast_party( *it, message_ );
-			}
-		catch ( HOpenSSLException const& )
-			{
-			}
-		}
+		broadcast_party( *it, message_ );
 	return;
 	M_EPILOG
 	}
@@ -183,8 +314,10 @@ void HServer::broadcast_loose( HString const& message_ )
 			}
 		catch ( HOpenSSLException const& )
 			{
+			_dropouts.push_back( it->second._socket );
 			}
 		}
+	disect_dropouts();
 	return;
 	M_EPILOG
 	}
@@ -378,127 +511,11 @@ void HServer::join_game( OClientInfo& client_, HString const& id_ )
 	M_EPILOG
 	}
 
-void HServer::handler_connection( int )
-	{
-	M_PROLOG
-	HSocket::ptr_t client = _socket.accept();
-	M_ASSERT( !! client );
-	if ( _socket.get_client_count() >= _maxConnections )
-		client->close();
-	else
-		{
-		_dispatcher.register_file_descriptor_handler( client->get_file_descriptor(), call( &HServer::handler_message, this, _1 ) );
-		_clients[ client->get_file_descriptor() ]._socket = client;
-		}
-	out << client->get_host_name() << endl;
-	return;
-	M_EPILOG
-	}
-
-void HServer::handler_message( int fileDescriptor_ )
-	{
-	M_PROLOG
-	HString message;
-	HString argument;
-	HString command;
-	clients_t::iterator clientIt;
-	HSocket::ptr_t client = _socket.get_client( fileDescriptor_ );
-	bool kick( false );
-	try
-		{
-		int long nRead( 0 );
-		if ( ( clientIt = _clients.find( fileDescriptor_ ) ) == _clients.end() )
-			kick_client( client );
-		else if ( ( nRead = client->read_until( message ) ) > 0 )
-			{
-			if ( clientIt->second._login.is_empty() )
-				out << "`unnamed'";
-			else
-				out << clientIt->second._login; 
-			cout << "->" << message << endl;
-			command = get_token( message, ":", 0 );
-			argument = message.mid( command.get_length() + 1 );
-			int msgLength = static_cast<int>( command.get_length() );
-			if ( msgLength < 1 )
-				kick_client( client, _( "Malformed data." ) );
-			else
-				{
-				handlers_t::iterator handler = _handlers.find( command );
-				if ( handler != _handlers.end() )
-					{
-					( this->*handler->second )( clientIt->second, argument );
-					flush_logics();
-					}
-				else
-					kick_client( client, _( "Unknown command." ) );
-				}
-			}
-		else if ( ! nRead )
-			kick_client( client, "" );
-		/* else nRead < 0 => REPEAT */
-		}
-	catch ( HOpenSSLException& )
-		{
-		kick = true;
-		}
-	try
-		{
-		if ( kick && !! client )
-			kick_client( client );
-		}
-	catch ( HOpenSSLException const& e )
-		{
-		log_trace << e.what() << endl;
-		out << e.what() << endl;
-		}
-	return;
-	M_EPILOG
-	}
-
-void HServer::kick_client( yaal::hcore::HSocket::ptr_t& client_, char const* const reason_ )
-	{
-	M_PROLOG
-	M_ASSERT( !! client_ );
-	int fileDescriptor = client_->get_file_descriptor();
-	if ( reason_ && reason_[0] )
-		*client_ << PROTOCOL::KCK << PROTOCOL::SEP << reason_ << endl;
-	_socket.shutdown_client( fileDescriptor );
-	_dispatcher.unregister_file_descriptor_handler( fileDescriptor );
-	clients_t::iterator clientIt = _clients.find( fileDescriptor );
-	M_ASSERT( clientIt != _clients.end() );
-	out << "client ";
-	if ( clientIt->second._login.is_empty() )
-		cout << "`unnamed'";
-	else
-		cout << clientIt->second._login; 
-	if ( ! reason_ || reason_[ 0 ] )
-		{
-		HString reason = " was kicked because of: ";
-		reason += ( reason_ ? reason_ : "connection error" );
-		if ( ! clientIt->second._login.is_empty() )
-			broadcast_all_parties( &clientIt->second, _out << PROTOCOL::MSG << PROTOCOL::SEP
-					<< mark( COLORS::FG_BRIGHTRED ) << " " << clientIt->second._login << reason << _out );
-		cout << reason;
-		}
-	else
-		cout << " disconnected from server.";
-	cout << endl;
-	remove_client_from_all_logics( clientIt->second );
-	HString login;
-	if ( ! clientIt->second._login.is_empty() )
-		login = clientIt->second._login;
-	_clients.erase( fileDescriptor );
-	if ( ! login.is_empty() )
-		broadcast_loose( _out << PROTOCOL::PLAYER_QUIT << PROTOCOL::SEP << login << _out );
-	return;
-	M_EPILOG
-	}
-
 void HServer::send_logics_info( OClientInfo& client_ )
 	{
 	M_PROLOG
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
-	for( HLogicFactory::creators_t::iterator it = factory.begin();
+	for ( HLogicFactory::creators_t::iterator it = factory.begin();
 			it != factory.end(); ++ it )
 		*client_._socket << PROTOCOL::LOGIC << PROTOCOL::SEP << it->second._info << endl;
 	return;
@@ -509,26 +526,6 @@ void HServer::get_logics_info( OClientInfo& client_, HString const& )
 	{
 	M_PROLOG
 	send_logics_info( client_ );
-	return;
-	M_EPILOG
-	}
-
-void HServer::handler_shutdown( OClientInfo&, HString const& )
-	{
-	_dispatcher.stop();
-	return;
-	}
-
-void HServer::handler_quit( OClientInfo& client_, HString const& )
-	{
-	M_PROLOG
-	if ( ! client_._anonymous )
-		update_last_activity( client_ );
-	HString login( client_._login );
-	kick_client( client_._socket, "" );
-	if ( ! login.is_empty() )
-		broadcast_loose( _out << PROTOCOL::MSG << PROTOCOL::SEP
-				<< mark( COLORS::FG_BROWN ) << " " << login << " has left the GameGround." << _out );
 	return;
 	M_EPILOG
 	}
@@ -676,6 +673,15 @@ HLogic::id_t HServer::create_id( void )
 	HLogic::id_t id = _idPool;
 	++ _idPool;
 	return ( id );
+	M_EPILOG
+	}
+
+void HServer::disect_dropouts( void )
+	{
+	M_PROLOG
+	for ( dropouts_t::iterator it( _dropouts.begin() ), end( _dropouts.end() ); it != end; ++ it )
+		{
+		}
 	M_EPILOG
 	}
 
