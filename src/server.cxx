@@ -191,16 +191,10 @@ void HServer::handler_message( int fileDescriptor_ )
 		{
 		kick = true;
 		}
-	try
-		{
-		if ( kick && !! client )
-			kick_client( client );
-		}
-	catch ( HOpenSSLException const& e )
-		{
-		log_trace << e.what() << endl;
-		out << e.what() << endl;
-		}
+	if ( kick && !! client )
+		kick_client( client );
+	if ( ! _dropouts.is_empty() )
+		flush_droupouts();
 	return;
 	M_EPILOG
 	}
@@ -681,6 +675,21 @@ void HServer::disect_dropouts( void )
 	M_PROLOG
 	for ( dropouts_t::iterator it( _dropouts.begin() ), end( _dropouts.end() ); it != end; ++ it )
 		{
+		clients_t::iterator del( _clients.find( (*it)->get_file_descriptor() ) );
+		if ( del != _clients.end() )
+			_clients.erase( del );
+		}
+	M_EPILOG
+	}
+
+void HServer::flush_droupouts( void )
+	{
+	M_PROLOG
+	while ( ! _dropouts.is_empty() )
+		{
+		HSocket::ptr_t dropout( _dropouts.back() );
+		_dropouts.pop_back();
+		kick_client( dropout, NULL );
 		}
 	M_EPILOG
 	}
