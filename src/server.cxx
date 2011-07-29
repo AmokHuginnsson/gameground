@@ -269,7 +269,7 @@ void HServer::broadcast( HString const& message_ )
 			}
 		catch ( HOpenSSLException const& )
 			{
-			_dropouts.push_back( it->second._socket );
+			drop_client( &it->second );
 			}
 		}
 	disect_dropouts();
@@ -304,11 +304,11 @@ void HServer::broadcast_loose( HString const& message_ )
 		{
 		try
 			{
-			*(it->second._socket) << message_ << endl;
+			*it->second._socket << message_ << endl;
 			}
 		catch ( HOpenSSLException const& )
 			{
-			_dropouts.push_back( it->second._socket );
+			drop_client( &it->second );
 			}
 		}
 	disect_dropouts();
@@ -670,12 +670,18 @@ HLogic::id_t HServer::create_id( void )
 	M_EPILOG
 	}
 
+void HServer::drop_client( OClientInfo* clientInfo_ )
+	{
+	_dropouts.push_back( clientInfo_ );
+	}
+
 void HServer::disect_dropouts( void )
 	{
 	M_PROLOG
 	for ( dropouts_t::iterator it( _dropouts.begin() ), end( _dropouts.end() ); it != end; ++ it )
 		{
-		clients_t::iterator del( _clients.find( (*it)->get_file_descriptor() ) );
+		M_ASSERT( !! (*it)->_socket );
+		clients_t::iterator del( _clients.find( (*it)->_socket->get_file_descriptor() ) );
 		if ( del != _clients.end() )
 			_clients.erase( del );
 		}
@@ -687,9 +693,10 @@ void HServer::flush_droupouts( void )
 	M_PROLOG
 	while ( ! _dropouts.is_empty() )
 		{
-		HSocket::ptr_t dropout( _dropouts.back() );
+		OClientInfo* dropout( _dropouts.back() );
 		_dropouts.pop_back();
-		kick_client( dropout, NULL );
+		M_ASSERT( !! dropout->_socket );
+		kick_client( dropout->_socket, NULL );
 		}
 	M_EPILOG
 	}

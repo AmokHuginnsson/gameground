@@ -27,7 +27,7 @@ Copyright:
 #include <yaal/yaal.hxx>
 M_VCSID( "$Id: "__ID__" $" )
 #include "logic.hxx"
-
+#include "server.hxx"
 #include "setup.hxx"
 #include "clientinfo.hxx"
 
@@ -139,7 +139,17 @@ void HLogic::broadcast( HString const& message_ )
 	{
 	M_PROLOG
 	for ( clients_t::HIterator it = _clients.begin(); it != _clients.end(); ++ it )
-		(*it)->_socket->write_until_eos( message_ );
+		{
+		try
+			{
+			(*it)->_socket->write_until_eos( message_ );
+			}
+		catch ( HOpenSSLException const& )
+			{
+			drop_client( *it );
+			}
+		}
+	disect_dropouts();
 	return;
 	M_EPILOG
 	}
@@ -151,12 +161,30 @@ HLogic::id_t HLogic::get_id( void ) const
 
 void HLogicCreatorInterface::initialize_globals( void )
 	{
+	M_PROLOG
 	do_initialize_globals();
+	M_EPILOG
 	}
 
 HLogic::ptr_t HLogicCreatorInterface::new_instance( HServer* server_, HLogic::id_t const& id_, HString const& argv_ )
 	{
+	M_PROLOG
 	return ( do_new_instance( server_, id_, argv_ ) );
+	M_EPILOG
+	}
+
+void HLogic::drop_client( OClientInfo* clientInfo_ )
+	{
+	M_PROLOG
+	_server->drop_client( clientInfo_ );
+	M_EPILOG
+	}
+
+void HLogic::disect_dropouts( void )
+	{
+	M_PROLOG
+	_server->disect_dropouts();
+	M_EPILOG
 	}
 
 }

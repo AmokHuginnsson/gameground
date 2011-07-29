@@ -79,6 +79,7 @@ public:
 protected:
 	/*{*/
 	void drop_client( OClientInfo* );
+	void disect_dropouts( void );
 	virtual bool do_accept( OClientInfo* ) = 0;
 	virtual void do_post_accept( OClientInfo* ) = 0;
 	virtual void do_kick( OClientInfo* ) = 0;
