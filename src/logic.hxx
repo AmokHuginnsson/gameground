@@ -33,6 +33,7 @@ namespace gameground
 {
 
 struct OClientInfo;
+class HServer;
 
 class HLogic
 	{
@@ -43,6 +44,7 @@ public:
 	typedef void ( HLogic::*handler_t ) ( OClientInfo*, yaal::hcore::HString const& );
 private:
 	typedef yaal::hcore::HHashMap<yaal::hcore::HString, handler_t> handlers_t;
+	HServer* _server;
 protected:
 	/*{*/
 	id_t _id;
@@ -64,7 +66,7 @@ protected:
 		};
 public:
 	/*{*/
-	HLogic( id_t const&, yaal::hcore::HString const&, yaal::hcore::HString const& );
+	HLogic( HServer*, id_t const&, yaal::hcore::HString const&, yaal::hcore::HString const& );
 	virtual ~HLogic( void );
 	bool process_command( OClientInfo*, yaal::hcore::HString const& );
 	bool accept_client( OClientInfo* );
@@ -76,6 +78,7 @@ public:
 	/*}*/
 protected:
 	/*{*/
+	void drop_client( OClientInfo* );
 	virtual bool do_accept( OClientInfo* ) = 0;
 	virtual void do_post_accept( OClientInfo* ) = 0;
 	virtual void do_kick( OClientInfo* ) = 0;
@@ -98,11 +101,11 @@ class HLogicCreatorInterface
 	{
 protected:
 	virtual void do_initialize_globals( void ){};
-	virtual HLogic::ptr_t do_new_instance( HLogic::id_t const&, yaal::hcore::HString const& ) = 0;
+	virtual HLogic::ptr_t do_new_instance( HServer*, HLogic::id_t const&, yaal::hcore::HString const& ) = 0;
 public:
 	virtual ~HLogicCreatorInterface( void ){}
 	void initialize_globals( void );
-	HLogic::ptr_t new_instance( HLogic::id_t const&, yaal::hcore::HString const& );
+	HLogic::ptr_t new_instance( HServer*, HLogic::id_t const&, yaal::hcore::HString const& );
 	};
 
 }

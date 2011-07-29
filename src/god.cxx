@@ -90,8 +90,8 @@ char const* const GO_MSG[] =
 	_( "malformed packet" )
 	};
 
-HGo::HGo( HLogic::id_t const& id_, HString const& comment_ )
-	: HLogic( id_, "go", comment_ ),
+HGo::HGo( HServer* server_, HLogic::id_t const& id_, HString const& comment_ )
+	: HLogic( server_, id_, "go", comment_ ),
 	_state( STONE::NONE ), _gobanSize( setup._gobanSize ),
 	_komi( setup._komi ), _handicaps( setup._handicaps ), _mainTime( setup._mainTime ),
 	_byoYomiPeriods( setup._byoYomiPeriods ), _byoYomiTime( setup._byoYomiTime ),
@@ -938,15 +938,15 @@ namespace logic_factory
 class HGoCreator : public HLogicCreatorInterface
 	{
 protected:
-	virtual HLogic::ptr_t do_new_instance( HLogic::id_t const&, HString const& );
+	virtual HLogic::ptr_t do_new_instance( HServer*, HLogic::id_t const&, HString const& );
 	} goCreator;
 
-HLogic::ptr_t HGoCreator::do_new_instance( HLogic::id_t const& id_, HString const& argv_ )
+HLogic::ptr_t HGoCreator::do_new_instance( HServer* server_, HLogic::id_t const& id_, HString const& argv_ )
 	{
 	M_PROLOG
 	out << "creating logic: " << argv_ << endl;
 	HString name = get_token( argv_, ",", 0 );
-	return ( make_pointer<go::HGo>( id_, name ) );
+	return ( make_pointer<go::HGo>( server_, id_, name ) );
 	M_EPILOG
 	}
 

@@ -100,8 +100,8 @@ HBoggle::SCORING::ORule HBoggle::RULES[] = { { 3, { 0, 0, 1, 1, 2, 3, 5, 11, 11,
 		{ 5, { 0, 0, 0, 0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233 } },
 		{ 5, { 0, 0, 0, 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048 } } };
 
-HBoggle::HBoggle( id_t const& id_, HString const& comment_, int players_, int roundTime_, int maxRounds_, int interRoundDelay_ )
-	: HLogic( id_, PROTOCOL::NAME, comment_ ), _state( STATE::LOCKED ), _startupPlayers( players_ ),
+HBoggle::HBoggle( HServer* server_, id_t const& id_, HString const& comment_, int players_, int roundTime_, int maxRounds_, int interRoundDelay_ )
+	: HLogic( server_, id_, PROTOCOL::NAME, comment_ ), _state( STATE::LOCKED ), _startupPlayers( players_ ),
 	_roundTime( roundTime_ ), _maxRounds( maxRounds_ ),
 	_interRoundDelay( interRoundDelay_ ), _ruleSet( 0 ), _round( 0 ), _players(),
 	_words(), _mutex()
@@ -454,11 +454,11 @@ namespace logic_factory
 class HBoggleCreator : public HLogicCreatorInterface
 	{
 protected:
-	virtual HLogic::ptr_t do_new_instance( HLogic::id_t const&, HString const& );
+	virtual HLogic::ptr_t do_new_instance( HServer*, HLogic::id_t const&, HString const& );
 	virtual void do_initialize_globals( void );
 	} boggleCreator;
 
-HLogic::ptr_t HBoggleCreator::do_new_instance( HLogic::id_t const& id_, HString const& argv_ )
+HLogic::ptr_t HBoggleCreator::do_new_instance( HServer* server_, HLogic::id_t const& id_, HString const& argv_ )
 	{
 	M_PROLOG
 	out << "creating logic: " << argv_ << endl;
@@ -468,7 +468,7 @@ HLogic::ptr_t HBoggleCreator::do_new_instance( HLogic::id_t const& id_, HString 
 	int roundTime = lexical_cast<int>( t[ 2 ] );
 	int maxRounds = lexical_cast<int>( t[ 3 ] );
 	int interRoundDelay = lexical_cast<int>( t[ 4 ] );
-	return ( make_pointer<boggle::HBoggle>( id_, name,
+	return ( make_pointer<boggle::HBoggle>( server_, id_, name,
 					players,
 					roundTime,
 					maxRounds,

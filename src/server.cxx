@@ -457,7 +457,7 @@ void HServer::create_game( OClientInfo& client_, HString const& arg_ )
 			HLogic::ptr_t logic;
 			try
 				{
-				logic = factory.create_logic( type, create_id(), configuration );
+				logic = factory.create_logic( type, this, create_id(), configuration );
 				if ( ! logic->accept_client( &client_ ) )
 					{
 					HNumber const& id( logic->get_id() );

@@ -183,8 +183,8 @@ void HSystem::do_round( HGalaxy& galaxy_ )
 	M_EPILOG
 	}
 
-HGalaxy::HGalaxy( id_t const& id_, HString const& comment_, int boardSize_, int systems_, int emperors_ )
-	: HLogic( id_, "glx", comment_ ), _boardSize( boardSize_ ), _neutralSystemCount( systems_ ),
+HGalaxy::HGalaxy( HServer* server_, id_t const& id_, HString const& comment_, int boardSize_, int systems_, int emperors_ )
+	: HLogic( server_, id_, "glx", comment_ ), _boardSize( boardSize_ ), _neutralSystemCount( systems_ ),
 	_startupPlayers( emperors_ ), _round( -1 ), _ready( 0 ),
 	_systems( systems_ + emperors_ ), _emperors()
 	{
@@ -554,11 +554,11 @@ namespace logic_factory
 class HGalaxyCreator : public HLogicCreatorInterface
 	{
 protected:
-	virtual HLogic::ptr_t do_new_instance( HLogic::id_t const&, HString const& );
+	virtual HLogic::ptr_t do_new_instance( HServer*, HLogic::id_t const&, HString const& );
 public:
 	} galaxyCreator;
 
-HLogic::ptr_t HGalaxyCreator::do_new_instance( HLogic::id_t const& id_, HString const& argv_ )
+HLogic::ptr_t HGalaxyCreator::do_new_instance( HServer* server_, HLogic::id_t const& id_, HString const& argv_ )
 	{
 	M_PROLOG
 	HString name = get_token( argv_, ",", 0 );
@@ -576,7 +576,7 @@ HLogic::ptr_t HGalaxyCreator::do_new_instance( HLogic::id_t const& id_, HString 
 			|| OSetup::test_glx_systems( systems, message )
 			|| OSetup::test_glx_board_size( boardSize, message ) )
 		throw HLogicException( message );
-	return ( make_pointer<galaxy::HGalaxy>( id_, name,
+	return ( make_pointer<galaxy::HGalaxy>( server_, id_, name,
 					boardSize,
 					systems,
 					emperors ) );

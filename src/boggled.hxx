@@ -112,7 +112,7 @@ protected:
 		};
 public:
 	/*{*/
-	HBoggle( id_t const&, yaal::hcore::HString const&, int, int, int, int );
+	HBoggle( HServer*, id_t const&, yaal::hcore::HString const&, int, int, int, int );
 	virtual ~HBoggle( void );
 	void generate_game( void );
 	/*}*/

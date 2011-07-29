@@ -113,7 +113,7 @@ protected:
 	/*}*/
 public:
 	/*{*/
-	HGo( id_t const&, yaal::hcore::HString const& );
+	HGo( HServer*, id_t const&, yaal::hcore::HString const& );
 	virtual ~HGo( void );
 	/*}*/
 protected:

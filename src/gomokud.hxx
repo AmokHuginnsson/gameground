@@ -75,7 +75,7 @@ protected:
 	/*}*/
 public:
 	/*{*/
-	HGomoku( HLogic::id_t const&, yaal::hcore::HString const& );
+	HGomoku( HServer*, HLogic::id_t const&, yaal::hcore::HString const& );
 	virtual ~HGomoku( void );
 	/*}*/
 protected:

@@ -47,8 +47,8 @@ char const* const HLogic::PROTOCOL::MSG = "msg";
 char const* const HLogic::PROTOCOL::PLAYER = "player";
 char const* const HLogic::PROTOCOL::PLAYER_QUIT = "player_quit";
 
-HLogic::HLogic( id_t const& id_, HString const& symbol_, HString const& comment_ )
-	: _id( id_ ), _symbol( symbol_ ), _handlers( setup._maxConnections ),
+HLogic::HLogic( HServer* server_, id_t const& id_, HString const& symbol_, HString const& comment_ )
+	: _server( server_ ), _id( id_ ), _symbol( symbol_ ), _handlers( setup._maxConnections ),
 	_clients(), _comment( comment_ ), _out()
 	{
 	}
@@ -154,9 +154,9 @@ void HLogicCreatorInterface::initialize_globals( void )
 	do_initialize_globals();
 	}
 
-HLogic::ptr_t HLogicCreatorInterface::new_instance( HLogic::id_t const& id_, HString const& argv_ )
+HLogic::ptr_t HLogicCreatorInterface::new_instance( HServer* server_, HLogic::id_t const& id_, HString const& argv_ )
 	{
-	return ( do_new_instance( id_, argv_ ) );
+	return ( do_new_instance( server_, id_, argv_ ) );
 	}
 
 }
