@@ -65,7 +65,7 @@ char const* const HServer::PROTOCOL::ACCOUNT = "account";
 char const* const HServer::PROTOCOL::CMD = "cmd";
 char const* const HServer::PROTOCOL::CREATE = "create";
 char const* const HServer::PROTOCOL::ERR = "err";
-char const* const HServer::PROTOCOL::GAME = "game";
+char const* const HServer::PROTOCOL::PARTY = "party";
 char const* const HServer::PROTOCOL::GET_GAMES = "get_games";
 char const* const HServer::PROTOCOL::GET_GAME_INFO = "get_game_info";
 char const* const HServer::PROTOCOL::GET_LOGICS = "get_logics";
@@ -465,7 +465,7 @@ void HServer::create_game( OClientInfo& client_, HString const& arg_ )
 					_logics[ id ] = logic;
 					client_._logics.insert( id );
 					out << name << "," << type << endl;
-					broadcast( _out << PROTOCOL::GAME << PROTOCOL::SEP << id << PROTOCOL::SEPP << logic->get_info() << _out );
+					//broadcast( _out << PROTOCOL::PARTY << PROTOCOL::SEP << id << PROTOCOL::SEPP << logic->get_info() << _out );
 					broadcast_party( id, _out << PROTOCOL::PLAYER << PROTOCOL::SEP << client_._login << PROTOCOL::SEPP << id << _out );
 					}
 				else
@@ -637,7 +637,7 @@ void HServer::send_games_info( OClientInfo& client_ )
 	{
 	M_PROLOG
 	for( logics_t::iterator it( _logics.begin() ), end( _logics.end() ); it != end; ++ it )
-		SEND( *client_._socket, PROTOCOL::GAME << PROTOCOL::SEP << it->second->get_info() << endl );
+		SEND( *client_._socket, PROTOCOL::PARTY << PROTOCOL::SEP << it->second->get_info() << endl );
 	return;
 	M_EPILOG
 	}

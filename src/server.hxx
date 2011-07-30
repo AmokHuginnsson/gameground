@@ -62,7 +62,7 @@ protected:
 		static char const* const CMD;
 		static char const* const CREATE;
 		static char const* const ERR;
-		static char const* const GAME;
+		static char const* const PARTY;
 		static char const* const GET_GAMES;
 		static char const* const GET_GAME_INFO;
 		static char const* const GET_LOGICS;

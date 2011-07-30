@@ -72,6 +72,13 @@ public abstract class HAbstractLogic {
 			_app.setFace( HBrowser.LABEL );
 	}
 	public void processMessage( String $message ) {
+		String[] toks = $message.split( ":", 2 );
+		if ( "party".equals( toks[0] ) ) {
+			String[] p = toks[1].split( ",", 3 );
+			$message = p[1] + ":" + p[2];
+			System.out.println( $message );
+		}
+		
 		String[] tokens = $message.split( ":", 2 );
 		String mnemonic = tokens[0];
 		String argument = tokens.length > 1 ? tokens[1] : null;
