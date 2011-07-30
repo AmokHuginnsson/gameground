@@ -42,17 +42,15 @@ using namespace yaal::tools::util;
 namespace gameground
 {
 
-void HLogicFactory::register_logic_creator( HString const& info_, HLogicCreatorInterface* instatiator_ )
+void HLogicFactory::register_logic_creator( HString const& name_, HLogicCreatorInterface* instatiator_ )
 	{
 	M_PROLOG
-	HString name = get_token( info_, ":", 0 );
-	creators_t::iterator it = _creators.find( name );
+	creators_t::iterator it = _creators.find( name_ );
 	if ( it != _creators.end() )
 		M_THROW( _( "Logic already registered" ), errno );
 	OCreator creator;
-	creator._instatiator = instatiator_;
-	creator._info = info_;
-	_creators[ name ] = creator;
+	creator._instantiator = instatiator_;
+	_creators[ name_ ] = creator;
 	return;
 	M_EPILOG
 	}
@@ -63,7 +61,7 @@ HLogic::ptr_t HLogicFactory::create_logic( HString const& type_, HServer* server
 	HLogic::ptr_t logic;
 	creators_t::iterator it = _creators.find( type_ );
 	if ( it != _creators.end() )
-		logic = it->second._instatiator->new_instance( server_, id_, argv_ );
+		logic = it->second._instantiator->new_instance( server_, id_, argv_ );
 	return ( logic );
 	M_EPILOG
 	}
@@ -98,7 +96,7 @@ void HLogicFactory::initialize_globals( void )
 	{
 	M_PROLOG
 	for ( creators_t::iterator it = _creators.begin(); it != _creators.end(); ++ it )
-		it->second._instatiator->initialize_globals();
+		it->second._instantiator->initialize_globals();
 	return;
 	M_EPILOG
 	}

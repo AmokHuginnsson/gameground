@@ -555,6 +555,7 @@ class HGalaxyCreator : public HLogicCreatorInterface
 	{
 protected:
 	virtual HLogic::ptr_t do_new_instance( HServer*, HLogic::id_t const&, HString const& );
+	virtual HString do_get_info( void ) const;
 public:
 	} galaxyCreator;
 
@@ -583,6 +584,14 @@ HLogic::ptr_t HGalaxyCreator::do_new_instance( HServer* server_, HLogic::id_t co
 	M_EPILOG
 	}
 
+HString HGalaxyCreator::do_get_info( void ) const
+	{
+	HString setupMsg;
+	setupMsg.format( "%s:%d,%d,%d", "glx", setup._emperors, setup._boardSize, setup._systems );
+	out << setupMsg << endl;
+	return ( setupMsg );
+	}
+
 namespace
 {
 
@@ -591,9 +600,7 @@ bool registrar( void )
 	M_PROLOG
 	bool volatile failed = false;
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
-	HString setupMsg;
-	setupMsg.format( "%s:%d,%d,%d", "glx", setup._emperors, setup._boardSize, setup._systems );
-	factory.register_logic_creator( setupMsg, &galaxyCreator );
+	factory.register_logic_creator( HTokenizer( galaxyCreator.get_info(), ":" )[0], &galaxyCreator );
 	return ( failed );
 	M_EPILOG
 	}

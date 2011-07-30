@@ -41,11 +41,11 @@ class HLogicFactory
 public:
 	struct OCreator
 		{
-		OCreator( void ) : _info(), _instatiator( NULL ) {}
-		OCreator( OCreator const& c ) : _info( c._info ), _instatiator( c._instatiator ) {}
-		OCreator& operator = ( OCreator const& c ) { _info = c._info; _instatiator = c._instatiator; return ( *this ); }
-		yaal::hcore::HString _info;
-		HLogicCreatorInterface* _instatiator;
+		OCreator( void ) : _instantiator( NULL ) {}
+		OCreator( OCreator const& c ) : _instantiator( c._instantiator ) {}
+		OCreator& operator = ( OCreator const& c ) { _instantiator = c._instantiator; return ( *this ); }
+		HLogicCreatorInterface* _instantiator;
+		yaal::hcore::HString get_info( void ) const { return ( _instantiator->get_info() ); }
 		};
 	typedef yaal::hcore::HMap<yaal::hcore::HString, OCreator> creators_t;
 private:

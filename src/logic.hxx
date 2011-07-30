@@ -103,9 +103,11 @@ class HLogicCreatorInterface
 protected:
 	virtual void do_initialize_globals( void ){};
 	virtual HLogic::ptr_t do_new_instance( HServer*, HLogic::id_t const&, yaal::hcore::HString const& ) = 0;
+	virtual yaal::hcore::HString do_get_info( void ) const = 0;
 public:
 	virtual ~HLogicCreatorInterface( void ){}
 	void initialize_globals( void );
+	yaal::hcore::HString get_info( void ) const;
 	HLogic::ptr_t new_instance( HServer*, HLogic::id_t const&, yaal::hcore::HString const& );
 	};
 

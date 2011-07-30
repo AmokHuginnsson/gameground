@@ -512,7 +512,7 @@ void HServer::send_logics_info( OClientInfo& client_ )
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 	for ( HLogicFactory::creators_t::iterator it = factory.begin();
 			it != factory.end(); ++ it )
-		*client_._socket << PROTOCOL::LOGIC << PROTOCOL::SEP << it->second._info << endl;
+		SEND( *client_._socket, PROTOCOL::LOGIC << PROTOCOL::SEP << it->second.get_info() << endl );
 	return;
 	M_EPILOG
 	}
@@ -636,9 +636,8 @@ void HServer::send_players_info( OClientInfo& client_ )
 void HServer::send_games_info( OClientInfo& client_ )
 	{
 	M_PROLOG
-	for( logics_t::iterator it = _logics.begin();
-			it != _logics.end(); ++ it )
-		*client_._socket << PROTOCOL::GAME << PROTOCOL::SEP << it->second->get_info() << endl;
+	for( logics_t::iterator it( _logics.begin() ), end( _logics.end() ); it != end; ++ it )
+		SEND( *client_._socket, PROTOCOL::GAME << PROTOCOL::SEP << it->second->get_info() << endl );
 	return;
 	M_EPILOG
 	}

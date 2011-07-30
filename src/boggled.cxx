@@ -456,6 +456,7 @@ class HBoggleCreator : public HLogicCreatorInterface
 protected:
 	virtual HLogic::ptr_t do_new_instance( HServer*, HLogic::id_t const&, HString const& );
 	virtual void do_initialize_globals( void );
+	virtual HString do_get_info( void ) const;
 	} boggleCreator;
 
 HLogic::ptr_t HBoggleCreator::do_new_instance( HServer* server_, HLogic::id_t const& id_, HString const& argv_ )
@@ -476,6 +477,14 @@ HLogic::ptr_t HBoggleCreator::do_new_instance( HServer* server_, HLogic::id_t co
 	M_EPILOG
 	}
 
+HString HBoggleCreator::do_get_info( void ) const
+	{
+	HString setupMsg;
+	setupMsg.format( "%s:%d,%d,%d,%d", "bgl", setup._players, setup._roundTime, setup._maxRounds, setup._interRoundDelay );
+	out << setupMsg << endl;
+	return ( setupMsg );
+	}
+
 void HBoggleCreator::do_initialize_globals( void )
 	{
 	M_PROLOG
@@ -493,9 +502,7 @@ bool registrar( void )
 	M_PROLOG
 	bool volatile failed = false;
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
-	HString setupMsg;
-	setupMsg.format( "%s:%d,%d,%d,%d", "bgl", setup._players, setup._roundTime, setup._maxRounds, setup._interRoundDelay );
-	factory.register_logic_creator( setupMsg, &boggleCreator );
+	factory.register_logic_creator( HTokenizer( boggleCreator.get_info(), ":" )[0], &boggleCreator );
 	return ( failed );
 	M_EPILOG
 	}

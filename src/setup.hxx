@@ -54,7 +54,13 @@ static int const GO_HANDICAPS              =   0;
 static int const GO_MAINTIME               =  30;
 static int const GO_BYOYOMI_PERIODS        =   5;
 static int const GO_BYOYOMI_TIME           =   1;
-#define out ( cout << now << " " << __FILE__ + OSetup::PATH_OFFSET << ":" << __LINE__ << ": " )
+#define out ( clog << now << " " << __FILE__ + OSetup::PATH_OFFSET << ":" << __LINE__ << ": " )
+
+#ifndef NDEBUG
+#define SEND( sock, message ) do { tee( sock, out ) << message; } while ( 0 )
+#else /* #ifndef NDEBUG */
+#define SEND( sock, message ) do { sock << message; } while ( 0 )
+#endif /* #else #ifndef NDEBUG */
 
 typedef double long ( *now_t )( bool, double, char, int, bool, double, void*, void*, double, char );
 extern now_t now;

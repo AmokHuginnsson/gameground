@@ -939,6 +939,7 @@ class HGoCreator : public HLogicCreatorInterface
 	{
 protected:
 	virtual HLogic::ptr_t do_new_instance( HServer*, HLogic::id_t const&, HString const& );
+	virtual HString do_get_info( void ) const;
 	} goCreator;
 
 HLogic::ptr_t HGoCreator::do_new_instance( HServer* server_, HLogic::id_t const& id_, HString const& argv_ )
@@ -950,6 +951,17 @@ HLogic::ptr_t HGoCreator::do_new_instance( HServer* server_, HLogic::id_t const&
 	M_EPILOG
 	}
 
+HString HGoCreator::do_get_info( void ) const
+	{
+	M_PROLOG
+	HString setupMsg;
+	setupMsg.format( "go:%d,%d,%d,%d,%d,%d", setup._gobanSize, setup._komi, setup._handicaps,
+			setup._mainTime, setup._byoYomiPeriods, setup._byoYomiTime );
+	out << setupMsg << endl;
+	return ( setupMsg );
+	M_EPILOG
+	}
+
 namespace
 {
 
@@ -958,10 +970,7 @@ bool registrar( void )
 	M_PROLOG
 	bool volatile failed = false;
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
-	HString setupMsg;
-	setupMsg.format( "go:%d,%d,%d,%d,%d,%d", setup._gobanSize, setup._komi, setup._handicaps,
-			setup._mainTime, setup._byoYomiPeriods, setup._byoYomiTime );
-	factory.register_logic_creator( setupMsg, &goCreator );
+	factory.register_logic_creator( HTokenizer( goCreator.get_info(), ":" )[0], &goCreator );
 	return ( failed );
 	M_EPILOG
 	}

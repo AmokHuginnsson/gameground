@@ -173,6 +173,13 @@ HLogic::ptr_t HLogicCreatorInterface::new_instance( HServer* server_, HLogic::id
 	M_EPILOG
 	}
 
+HString HLogicCreatorInterface::get_info( void ) const
+	{
+	M_PROLOG
+	return ( do_get_info() );
+	M_EPILOG
+	}
+
 void HLogic::drop_client( OClientInfo* clientInfo_ )
 	{
 	M_PROLOG

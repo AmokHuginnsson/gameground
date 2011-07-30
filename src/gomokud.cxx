@@ -399,6 +399,7 @@ class HGomokuCreator : public HLogicCreatorInterface
 	{
 protected:
 	virtual HLogic::ptr_t do_new_instance( HServer*, HLogic::id_t const&, HString const& );
+	virtual HString do_get_info( void ) const;
 	} gomokuCreator;
 
 HLogic::ptr_t HGomokuCreator::do_new_instance( HServer* server_, HLogic::id_t const& id_, HString const& argv_ )
@@ -410,6 +411,16 @@ HLogic::ptr_t HGomokuCreator::do_new_instance( HServer* server_, HLogic::id_t co
 	M_EPILOG
 	}
 
+HString HGomokuCreator::do_get_info( void ) const
+	{
+	M_PROLOG
+	HString setup;
+	setup.format( "gomoku:" );
+	out << setup << endl;
+	return ( setup );
+	M_EPILOG
+	}
+
 namespace
 {
 
@@ -418,9 +429,7 @@ bool registrar( void )
 	M_PROLOG
 	bool volatile failed = false;
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
-	HString setup;
-	setup.format( "gomoku:" );
-	factory.register_logic_creator( setup, &gomokuCreator );
+	factory.register_logic_creator( HTokenizer( gomokuCreator.get_info(), ":"  )[0], &gomokuCreator );
 	return ( failed );
 	M_EPILOG
 	}
