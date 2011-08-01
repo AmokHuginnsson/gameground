@@ -27,6 +27,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	private String _frameName;
 	private String _name;
 	private HAbstractLogic _current = null;
+	private HLogin _loginScreen = null;
 	boolean _applet = false;
 	Properties _ini;
 	CommandLine _cmd;
@@ -54,6 +55,9 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 				((javax.swing.JFrame)_frame).setContentPane( this );
 			}
 			EagerStaticInitializer.touch( this, "registerLogic" );
+			_loginScreen = new HLogin( this );
+			_current = _loginScreen;
+
 			setFace( HLogin.LABEL );
 			resize( res.getRootElement().getAttribute( "size" ).getValue().split( ",", 2 ) );
 			_frameName = _frame.getTitle();
@@ -61,6 +65,16 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 			e.printStackTrace();
 			System.exit( 1 );
 		}
+	}
+	void showLoginScreen() {
+		_current = _loginScreen;
+		HGUIface f = _loginScreen.getGUI();
+		setContentPane( f );
+		validate();
+		f.reinit();
+		if ( _client != null )
+			_client.setLogic( _loginScreen );
+		_loginScreen.reinit();
 	}
 	public void destroy() {
 		if ( _client != null )

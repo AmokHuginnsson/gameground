@@ -106,7 +106,7 @@ class HLogin extends HAbstractLogic {
 			_connectionConfig._password = password;
 			_connectionConfig._host = server;
 			_connectionConfig._port = port;
-			_app.setFace( HBrowser.LABEL );
+			_app.setFace( WorkArea.LABEL );
 		}
 	}
 	public OConnectionConfig getConnectionConfig() {
