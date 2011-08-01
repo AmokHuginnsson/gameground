@@ -77,7 +77,6 @@ class HGo : public HLogic
 		static char const* const HANDICAPS;
 		static char const* const KOMI;
 		static char const* const MAINTIME;
-		static char const* const NAME;
 		static char const* const PASS;
 		static char const* const PLAY;
 		static char const* const PUTSTONE;

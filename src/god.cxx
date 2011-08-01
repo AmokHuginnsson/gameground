@@ -57,7 +57,6 @@ HGo::STONE::stone_t const HGo::STONE::TERITORY_BLACK = 'p';
 HGo::STONE::stone_t const HGo::STONE::TERITORY_WHITE = 'q';
 HGo::STONE::stone_t const HGo::STONE::TERITORY_NONE = 'x';
 
-char const* const HGo::PROTOCOL::NAME = "go";
 char const* const HGo::PROTOCOL::SETUP = "setup";
 char const* const HGo::PROTOCOL::ADMIN = "admin";
 char const* const HGo::PROTOCOL::PLAY = "play";
@@ -123,8 +122,7 @@ void HGo::handler_message ( OClientInfo* clientInfo_, HString const& message_ )
 	{
 	M_PROLOG
 	HLock l( _mutex );
-	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
-			<< PROTOCOL::MSG << PROTOCOL::SEP << clientInfo_->_login << ": " << message_ << endl << _out );
+	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << clientInfo_->_login << ": " << message_ << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -166,7 +164,7 @@ void HGo::handler_setup( OClientInfo* clientInfo_, HString const& message_ )
 		_byoYomiTime = value;
 	else
 		throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
-	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP << message_ << endl << _out );
+	broadcast( _out << PROTOCOL::SETUP << PROTOCOL::SEP << message_ << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -186,7 +184,7 @@ void HGo::handler_sit( OClientInfo* clientInfo_, HString const& message_ )
 				|| ( contestant( STONE::WHITE ) == clientInfo_ ) )
 			throw HLogicException( "you were already sitting" );
 		else if ( contestant( stone ) != NULL )
-			*clientInfo_->_socket << PROTOCOL::NAME << PROTOCOL::SEP
+			*clientInfo_->_socket << *this
 				<< PROTOCOL::MSG << PROTOCOL::SEP << "Some one was faster." << endl;
 		else
 			{
@@ -209,8 +207,7 @@ void HGo::handler_sit( OClientInfo* clientInfo_, HString const& message_ )
 				foe._byoYomiPeriods = info._byoYomiPeriods;
 				_state = ( _handicaps > 1 ? STONE::WHITE : STONE::BLACK );
 				_pass = 0;
-				broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
-						<< PROTOCOL::MSG << PROTOCOL::SEP << "The Go match started." << endl << _out );
+				broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The Go match started." << endl << _out );
 				}
 			}
 		}
@@ -259,8 +256,8 @@ void HGo::handler_pass( OClientInfo* clientInfo_, HString const& /*message_*/ )
 	if ( _pass == 3 )
 		{
 		_state = STONE::MARK;
-		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP << "The match has ended." << endl << _out );
-		broadcast_contestants( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP << "Select your dead stones." << endl << _out );
+		broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The match has ended." << endl << _out );
+		broadcast_contestants( _out << *this << PROTOCOL::MSG << PROTOCOL::SEP << "Select your dead stones." << endl << _out );
 		}
 	return;
 	M_EPILOG
@@ -342,7 +339,7 @@ void HGo::count_score( void )
 	int whiteCaptures = count_stones( STONE::DEAD_WHITE );
 	blackTeritory += whiteCaptures;
 	whiteTeritory += blackCaptures;
-	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< "The game results are: " << endl << _out );
 	OPlayerInfo& b = *get_player_info( _contestants[ 0 ] );
 	OPlayerInfo& w = *get_player_info( _contestants[ 1 ] );
@@ -350,14 +347,14 @@ void HGo::count_score( void )
 	w._stonesCaptured += blackCaptures;
 	b._score = b._stonesCaptured + blackTeritory;
 	w._score += ( w._stonesCaptured + whiteTeritory );
-	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< "Black teritory: " << blackTeritory
 			<< ", captutes: " << b._stonesCaptured << "." << endl << _out );
-	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< "White teritory: " << whiteTeritory
 			<< ", captutes: " << w._stonesCaptured
 			<< ", and " << _komi << " of komi." << endl << _out );
-	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< ( b._score > w._score ? "Black" : "White" )
 			<< " wins by " << ( b._score > w._score ? b._score - w._score : w._score - b._score ) + .5
 			<< endl << _out );
@@ -439,8 +436,7 @@ void HGo::handler_play( OClientInfo* clientInfo_, HString const& message_ )
 		handler_accept( clientInfo_ );
 	else
 		throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
-	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
-			<< PROTOCOL::TOMOVE << PROTOCOL::SEP
+	broadcast( _out << PROTOCOL::TOMOVE << PROTOCOL::SEP
 			<< static_cast<char>( _state ) << endl << _out );
 	if ( ( _state == STONE::BLACK ) || ( _state == STONE::WHITE ) )
 		update_clocks();
@@ -480,20 +476,20 @@ void HGo::do_post_accept( OClientInfo* clientInfo_ )
 	M_PROLOG
 	HLock l( _mutex );
 	if ( _players.size() == 0 )
-		*clientInfo_->_socket << PROTOCOL::NAME << PROTOCOL::SEP
+		*clientInfo_->_socket << *this
 			<< PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::ADMIN << endl;
 	*clientInfo_->_socket
-		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP
+		<< *this << PROTOCOL::SETUP << PROTOCOL::SEP
 		<< PROTOCOL::GOBAN << PROTOCOL::SEPP << _gobanSize << endl
-		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP
+		<< *this << PROTOCOL::SETUP << PROTOCOL::SEP
 		<< PROTOCOL::KOMI << PROTOCOL::SEPP << _komi << endl
-		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP
+		<< *this << PROTOCOL::SETUP << PROTOCOL::SEP
 		<< PROTOCOL::HANDICAPS << PROTOCOL::SEPP << _handicaps << endl
-		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP
+		<< *this << PROTOCOL::SETUP << PROTOCOL::SEP
 		<< PROTOCOL::MAINTIME << PROTOCOL::SEPP << _mainTime << endl
-		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP
+		<< *this << PROTOCOL::SETUP << PROTOCOL::SEP
 		<< PROTOCOL::BYOYOMIPERIODS << PROTOCOL::SEPP << _byoYomiPeriods << endl
-		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::SETUP << PROTOCOL::SEP
+		<< *this << PROTOCOL::SETUP << PROTOCOL::SEP
 		<< PROTOCOL::BYOYOMITIME << PROTOCOL::SEPP << _byoYomiTime << endl;
 	player_t info;
 	info.first = clientInfo_;
@@ -502,19 +498,17 @@ void HGo::do_post_accept( OClientInfo* clientInfo_ )
 		{
 		if ( *it != clientInfo_ )
 			{
-			*clientInfo_->_socket << PROTOCOL::NAME << PROTOCOL::SEP
+			*clientInfo_->_socket << *this
 					<< PROTOCOL::PLAYER << PROTOCOL::SEP
 					<< (*it)->_login << endl;
-			*clientInfo_->_socket << PROTOCOL::NAME << PROTOCOL::SEP
+			*clientInfo_->_socket << *this
 					<< PROTOCOL::MSG << PROTOCOL::SEP
 					<< "Player " << (*it)->_login << " approched this table." << endl;
 			}
 		}
-	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
-			<< PROTOCOL::PLAYER << PROTOCOL::SEP
+	broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
 			<< clientInfo_->_login << endl << _out );
-	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
-			<< PROTOCOL::MSG << PROTOCOL::SEP
+	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< "Player " << clientInfo_->_login << " approched this table." << endl << _out );
 	send_contestants();
 	send_goban();
@@ -535,7 +529,7 @@ void HGo::do_kick( OClientInfo* clientInfo_ )
 		{
 		it = _players.begin();
 		if ( it != _players.end() )
-			*it->first->_socket << PROTOCOL::NAME << PROTOCOL::SEP
+			*it->first->_socket << *this
 				<< PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::ADMIN << endl;
 		}
 	if ( ( contestant( STONE::BLACK ) == clientInfo_ )
@@ -545,8 +539,7 @@ void HGo::do_kick( OClientInfo* clientInfo_ )
 		contestant_gotup( contestant( stone ) );
 		send_contestants();
 		}
-	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
-			<< PROTOCOL::MSG << PROTOCOL::SEP
+	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< "Player " << clientInfo_->_login << " left this match." << endl << _out );
 	return;
 	M_EPILOG
@@ -587,10 +580,9 @@ void HGo::on_timeout( void )
 	if ( p._byoYomiPeriods < 0 )
 		{
 		_state = STONE::NONE;
-		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
-				<< PROTOCOL::TOMOVE << PROTOCOL::SEP
+		broadcast( _out << PROTOCOL::TOMOVE << PROTOCOL::SEP
 				<< static_cast<char>( _state ) << endl << _out );
-		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP << "End of time." << endl << _out );
+		broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "End of time." << endl << _out );
 		}
 	else
 		{
@@ -621,8 +613,7 @@ void HGo::set_handicaps( int handicaps_ )
 	_handicaps = handicaps_;
 	if ( _handicaps > 1 )
 		set_handi( _handicaps );
-	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
-			<< PROTOCOL::SETUP << PROTOCOL::SEP
+	broadcast( _out << PROTOCOL::SETUP << PROTOCOL::SEP
 			<< PROTOCOL::KOMI << PROTOCOL::SEPP << _komi << endl << _out );
 	send_goban();
 	return;
@@ -677,7 +668,7 @@ void HGo::put_stone( int col_, int row_, STONE::stone_t stone_ )
 void HGo::send_goban( void )
 	{
 	M_PROLOG
-	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::STONES << PROTOCOL::SEP << _game.raw() << endl << _out );
+	broadcast( _out << PROTOCOL::STONES << PROTOCOL::SEP << _game.raw() << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -839,8 +830,7 @@ void HGo::contestant_gotup( OClientInfo* clientInfo_ )
 	OClientInfo* foe = NULL;
 	if ( ( _state != STONE::NONE )
 			&& ( ( foe = contestant( STONE::BLACK ) ) || ( foe = contestant( STONE::WHITE ) ) ) )
-		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
-				<< PROTOCOL::MSG << PROTOCOL::SEP
+		broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
 				<< clientInfo_->_login << " resigned - therefore " << foe->_login << " wins." << endl << _out );
 	contestant( stone ) = NULL;
 	_state = STONE::NONE;
@@ -874,8 +864,7 @@ void HGo::send_contestant( char stone )
 		byoyomi = info._byoYomiPeriods;
 		score = info._score;
 		}
-	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
-			<< PROTOCOL::CONTESTANT << PROTOCOL::SEP
+	broadcast( _out << PROTOCOL::CONTESTANT << PROTOCOL::SEP
 			<< stone << PROTOCOL::SEPP
 			<< name << PROTOCOL::SEPP
 			<< captured << PROTOCOL::SEPP

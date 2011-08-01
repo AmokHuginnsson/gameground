@@ -136,6 +136,17 @@ bool HLogic::process_command( OClientInfo* clientInfo_, HString const& command_ 
 	M_EPILOG
 	}
 
+void HLogic::party( HStreamInterface& stream_ ) const
+	{
+	stream_ << PROTOCOL::PARTY << PROTOCOL::SEP << _id << PROTOCOL::SEPP;
+	}
+
+yaal::hcore::HStreamInterface& operator << ( HStreamInterface& stream_, HLogic const& party_ )
+	{
+	party_.party( stream_ );
+	return ( stream_ );
+	}
+
 void HLogic::broadcast( HString const& message_ )
 	{
 	M_PROLOG
@@ -155,7 +166,7 @@ void HLogic::broadcast( HString const& message_ )
 	M_EPILOG
 	}
 
-HLogic::id_t HLogic::get_id( void ) const
+HLogic::id_t HLogic::id( void ) const
 	{
 	return ( _id );
 	}

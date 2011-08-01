@@ -69,11 +69,12 @@ protected:
 	int _production;
 	int _fleet;
 	OClientInfo* _emperor;
+	HLogic const* _logic;
 	attackers_t _attackers;
 	/*}*/
 public:
 	/*{*/
-	HSystem ( void );
+	HSystem( HLogic const* );
 	HSystem( HSystem const& );
 	HSystem& operator = ( HSystem const& );
 	void do_round( HGalaxy & );

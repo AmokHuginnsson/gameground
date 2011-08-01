@@ -277,7 +277,7 @@ void HServer::broadcast( HString const& message_ )
 	M_EPILOG
 	}
 
-void HServer::broadcast_party( HNumber const& id_, HString const& message_ )
+void HServer::broadcast_party( HString const& id_, HString const& message_ )
 	{
 	M_PROLOG
 	logics_t::iterator logic( _logics.find( id_ ) );
@@ -441,7 +441,7 @@ void HServer::create_game( OClientInfo& client_, HString const& arg_ )
 				logic = factory.create_logic( type, this, create_id(), configuration );
 				if ( ! logic->accept_client( &client_ ) )
 					{
-					HNumber const& id( logic->get_id() );
+					HLogic::id_t const& id( logic->id() );
 					_logics[ id ] = logic;
 					client_._logics.insert( id );
 					out << name << "," << type << endl;
@@ -558,9 +558,9 @@ void HServer::remove_client_from_logic( OClientInfo& client_, HLogic::ptr_t logi
 		{
 		out << "separating logic info from client info for: " << client_._login << " and party: " << logic_->get_info() << endl;
 		logic_->kick_client( &client_, reason_ );
-		client_._logics.erase( logic_->get_id() );
+		client_._logics.erase( logic_->id() );
 		if ( ! logic_->active_clients() )
-			_logics.erase( logic_->get_id() );
+			_logics.erase( logic_->id() );
 		}
 	return;
 	M_EPILOG
@@ -651,7 +651,7 @@ void HServer::update_last_activity( OClientInfo const& info_ )
 HLogic::id_t HServer::create_id( void )
 	{
 	M_PROLOG
-	HLogic::id_t id = _idPool;
+	HLogic::id_t id = _idPool.to_string();
 	++ _idPool;
 	return ( id );
 	M_EPILOG

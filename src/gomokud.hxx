@@ -52,7 +52,6 @@ class HGomoku : public HLogic
 		static char const* const ADMIN;
 		static char const* const CONTESTANT;
 		static char const* const GETUP;
-		static char const* const NAME;
 		static char const* const PLAY;
 		static char const* const PUTSTONE;
 		static char const* const SETUP;

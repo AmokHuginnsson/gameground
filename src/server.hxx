@@ -52,7 +52,7 @@ protected:
 	yaal::tools::HStringStream _out;
 	yaal::dbwrapper::HDataBase::ptr_t _db;
 	yaal::tools::HIODispatcher _dispatcher;
-	HLogic::id_t _idPool;
+	yaal::hcore::HNumber _idPool;
 	dropouts_t _dropouts;
 	/*}*/
 	struct PROTOCOL
@@ -101,7 +101,7 @@ protected:
 	void handler_chat( OClientInfo&, yaal::hcore::HString const& );
 	void kick_client( yaal::hcore::HSocket::ptr_t&, char const* const = NULL );
 	void broadcast( yaal::hcore::HString const& );
-	void broadcast_party( yaal::hcore::HNumber const&, yaal::hcore::HString const& );
+	void broadcast_party( yaal::hcore::HString const&, yaal::hcore::HString const& );
 	void broadcast_all_parties( OClientInfo*, yaal::hcore::HString const& );
 	void handle_login( OClientInfo&, yaal::hcore::HString const& );
 	void handle_account( OClientInfo&, yaal::hcore::HString const& );

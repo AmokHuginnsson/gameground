@@ -34,11 +34,14 @@ namespace gameground
 
 struct OClientInfo;
 class HServer;
+class HLogic;
+
+yaal::hcore::HStreamInterface& operator << ( yaal::hcore::HStreamInterface&, HLogic const* );
 
 class HLogic
 	{
 public:
-	typedef yaal::hcore::HNumber id_t;
+	typedef yaal::hcore::HString id_t;
 	typedef yaal::hcore::HPointer<HLogic> ptr_t;
 	typedef yaal::hcore::HSet<OClientInfo*> clients_t;
 	typedef void ( HLogic::*handler_t ) ( OClientInfo*, yaal::hcore::HString const& );
@@ -75,7 +78,7 @@ public:
 	yaal::hcore::HString const& get_comment() const;
 	yaal::hcore::HString get_info() const;
 	void kick_client( OClientInfo*, char const* const = NULL );
-	id_t get_id( void ) const;
+	id_t id( void ) const;
 	/*}*/
 protected:
 	/*{*/
@@ -88,6 +91,8 @@ protected:
 	void broadcast( yaal::hcore::HString const& );
 	void handler_message( OClientInfo*, yaal::hcore::HString const& );
 	void handler_play( OClientInfo*, yaal::hcore::HString const& );
+	void party( yaal::hcore::HStreamInterface& ) const;
+	friend yaal::hcore::HStreamInterface& operator << ( yaal::hcore::HStreamInterface&, HLogic const& );
 	/*}*/
 private:
 	/*{*/
