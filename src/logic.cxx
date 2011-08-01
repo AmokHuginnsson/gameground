@@ -45,6 +45,7 @@ char const* const HLogic::PROTOCOL::SEPP = ",";
 char const* const HLogic::PROTOCOL::SAY = "say";
 char const* const HLogic::PROTOCOL::MSG = "msg";
 char const* const HLogic::PROTOCOL::PLAYER = "player";
+char const* const HLogic::PROTOCOL::PARTY = "party";
 char const* const HLogic::PROTOCOL::PLAYER_QUIT = "player_quit";
 
 HLogic::HLogic( HServer* server_, id_t const& id_, HString const& symbol_, HString const& comment_ )
@@ -142,7 +143,7 @@ void HLogic::broadcast( HString const& message_ )
 		{
 		try
 			{
-			(*it)->_socket->write_until_eos( message_ );
+			(*it)->_socket->write_until_eos( _out << PROTOCOL::PARTY << PROTOCOL::SEP << _id << PROTOCOL::SEPP << message_ << _out );
 			}
 		catch ( HOpenSSLException const& )
 			{

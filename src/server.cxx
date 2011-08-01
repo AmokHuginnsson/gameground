@@ -66,8 +66,8 @@ char const* const HServer::PROTOCOL::CMD = "cmd";
 char const* const HServer::PROTOCOL::CREATE = "create";
 char const* const HServer::PROTOCOL::ERR = "err";
 char const* const HServer::PROTOCOL::PARTY = "party";
-char const* const HServer::PROTOCOL::GET_GAMES = "get_games";
-char const* const HServer::PROTOCOL::GET_GAME_INFO = "get_game_info";
+char const* const HServer::PROTOCOL::PARTY_INFO = "party_info";
+char const* const HServer::PROTOCOL::GET_PARTYS = "get_partys";
 char const* const HServer::PROTOCOL::GET_LOGICS = "get_logics";
 char const* const HServer::PROTOCOL::GET_PLAYERS = "get_players";
 char const* const HServer::PROTOCOL::JOIN = "join";
@@ -115,10 +115,9 @@ int HServer::init_server( int port_ )
 	_handlers[ PROTOCOL::MSG ] = &HServer::handler_chat;
 	_handlers[ PROTOCOL::LOGIN ] = &HServer::handle_login;
 	_handlers[ PROTOCOL::ACCOUNT ] = &HServer::handle_account;
-	_handlers[ PROTOCOL::GET_LOGICS ] = &HServer::get_logics_info;
-	_handlers[ PROTOCOL::GET_PLAYERS ] = &HServer::get_players_info;
-	_handlers[ PROTOCOL::GET_GAMES ] = &HServer::get_games_info;
-	_handlers[ PROTOCOL::GET_GAME_INFO ] = &HServer::get_game_info;
+	_handlers[ PROTOCOL::GET_LOGICS ] = &HServer::handle_get_logics;
+	_handlers[ PROTOCOL::GET_PLAYERS ] = &HServer::handle_get_players;
+	_handlers[ PROTOCOL::GET_PARTYS ] = &HServer::handle_get_partys;
 	_handlers[ PROTOCOL::CREATE ] = &HServer::create_game;
 	_handlers[ PROTOCOL::JOIN ] = &HServer::join_game;
 	_handlers[ PROTOCOL::ABANDON ] = &HServer::handler_abandon;
@@ -227,14 +226,14 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& client_, char const* con
 		reason += ( reason_ ? reason_ : "connection error" );
 		if ( ! clientIt->second._login.is_empty() )
 			broadcast_all_parties( &clientIt->second, _out << PROTOCOL::MSG << PROTOCOL::SEP
-					<< mark( COLORS::FG_BRIGHTRED ) << " " << clientIt->second._login << reason << _out );
+					<< mark( COLORS::FG_BRIGHTRED ) << " " << clientIt->second._login << reason << endl << _out );
 		cout << reason;
 		}
 	else
 		cout << " disconnected from server.";
 	cout << endl;
 	if ( ! login.is_empty() )
-		broadcast_loose( _out << PROTOCOL::PLAYER_QUIT << PROTOCOL::SEP << login << _out );
+		broadcast( _out << PROTOCOL::PLAYER_QUIT << PROTOCOL::SEP << login << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -253,8 +252,8 @@ void HServer::handler_quit( OClientInfo& client_, HString const& )
 	HString login( client_._login );
 	kick_client( client_._socket, "" );
 	if ( ! login.is_empty() )
-		broadcast_loose( _out << PROTOCOL::MSG << PROTOCOL::SEP
-				<< mark( COLORS::FG_BROWN ) << " " << login << " has left the GameGround." << _out );
+		broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
+				<< mark( COLORS::FG_BROWN ) << " " << login << " has left the GameGround." << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -262,11 +261,11 @@ void HServer::handler_quit( OClientInfo& client_, HString const& )
 void HServer::broadcast( HString const& message_ )
 	{
 	M_PROLOG
-	for ( clients_t::iterator it = _clients.begin(); it != _clients.end(); ++ it )
+	for ( clients_t::iterator it( _clients.begin() ), end( _clients.end() ); it != end; ++ it )
 		{
 		try
 			{
-			*it->second._socket << message_ << endl;
+			it->second._socket->write_until_eos( message_ );
 			}
 		catch ( HOpenSSLException const& )
 			{
@@ -291,28 +290,9 @@ void HServer::broadcast_party( HNumber const& id_, HString const& message_ )
 void HServer::broadcast_all_parties( OClientInfo* info_, HString const& message_ )
 	{
 	M_PROLOG
-	broadcast_loose( message_ );
+	broadcast( message_ );
 	for ( OClientInfo::logics_t::iterator it( info_->_logics.begin() ), end( info_->_logics.end() ); it != end; ++ it )
 		broadcast_party( *it, message_ );
-	return;
-	M_EPILOG
-	}
-
-void HServer::broadcast_loose( HString const& message_ )
-	{
-	M_PROLOG
-	for ( clients_t::iterator it( _clients.begin() ), end( _clients.end() ); it != end; ++ it )
-		{
-		try
-			{
-			*it->second._socket << message_ << endl;
-			}
-		catch ( HOpenSSLException const& )
-			{
-			drop_client( &it->second );
-			}
-		}
-	disect_dropouts();
 	return;
 	M_EPILOG
 	}
@@ -320,7 +300,7 @@ void HServer::broadcast_loose( HString const& message_ )
 void HServer::handler_chat( OClientInfo& client_, HString const& message_ )
 	{
 	M_PROLOG
-	broadcast_loose( _out << PROTOCOL::MSG << PROTOCOL::SEP << client_._login << ": " << message_ << _out );
+	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << client_._login << ": " << message_ << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -368,9 +348,9 @@ void HServer::handle_login( OClientInfo& client_, HString const& loginInfo_ )
 				client_._anonymous = true;
 				*client_._socket << PROTOCOL::MSG << PROTOCOL::SEP << mark( COLORS::FG_RED ) << " Your game stats will not be preserved nor your login protected." << endl;
 				}
-			broadcast_loose( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << login << _out );
-			broadcast_loose( _out << PROTOCOL::MSG << PROTOCOL::SEP
-					<< mark( COLORS::FG_BLUE ) << " " << login << " entered the GameGround." << _out );
+			broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << login << endl << _out );
+			broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
+					<< mark( COLORS::FG_BLUE ) << " " << login << " entered the GameGround." << endl << _out );
 			}
 		else
 			{
@@ -465,8 +445,8 @@ void HServer::create_game( OClientInfo& client_, HString const& arg_ )
 					_logics[ id ] = logic;
 					client_._logics.insert( id );
 					out << name << "," << type << endl;
-					//broadcast( _out << PROTOCOL::PARTY << PROTOCOL::SEP << id << PROTOCOL::SEPP << logic->get_info() << _out );
-					broadcast_party( id, _out << PROTOCOL::PLAYER << PROTOCOL::SEP << client_._login << PROTOCOL::SEPP << id << _out );
+					broadcast( _out << PROTOCOL::PARTY_INFO << PROTOCOL::SEP << id << PROTOCOL::SEPP << logic->get_info() << endl << _out );
+					send_player_info( client_ );
 					}
 				else
 					client_._socket->write_until_eos( "err:Specified configuration is inconsistent.\n" );
@@ -496,8 +476,7 @@ void HServer::join_game( OClientInfo& client_, HString const& id_ )
 		else if ( ! it->second->accept_client( &client_ ) )
 			{
 			client_._logics.insert( id_ );
-			broadcast_party( id_, _out << PROTOCOL::PLAYER << PROTOCOL::SEP
-					<< client_._login << PROTOCOL::SEPP << it->second->get_info() << _out );
+			send_player_info( client_ );
 			}
 		else
 			client_._socket->write_until_eos( "err:Game is full.\n" );
@@ -512,12 +491,12 @@ void HServer::send_logics_info( OClientInfo& client_ )
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 	for ( HLogicFactory::creators_t::iterator it = factory.begin();
 			it != factory.end(); ++ it )
-		SEND( *client_._socket, PROTOCOL::LOGIC << PROTOCOL::SEP << it->second.get_info() << endl );
+		SENDF( *client_._socket ) << PROTOCOL::LOGIC << PROTOCOL::SEP << it->second.get_info() << endl;
 	return;
 	M_EPILOG
 	}
 
-void HServer::get_logics_info( OClientInfo& client_, HString const& )
+void HServer::handle_get_logics( OClientInfo& client_, HString const& )
 	{
 	M_PROLOG
 	send_logics_info( client_ );
@@ -529,7 +508,7 @@ void HServer::handler_abandon( OClientInfo& client_, HString const& )
 	{
 	M_PROLOG
 	remove_client_from_all_logics( client_ );
-	broadcast_loose( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << client_._login << _out );
+	broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << client_._login << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -587,7 +566,7 @@ void HServer::remove_client_from_logic( OClientInfo& client_, HLogic::ptr_t logi
 	M_EPILOG
 	}
 
-void HServer::get_players_info( OClientInfo& client_, HString const& )
+void HServer::handle_get_players( OClientInfo& client_, HString const& )
 	{
 	M_PROLOG
 	send_players_info( client_ );
@@ -595,7 +574,7 @@ void HServer::get_players_info( OClientInfo& client_, HString const& )
 	M_EPILOG
 	}
 
-void HServer::get_games_info( OClientInfo& client_, HString const& )
+void HServer::handle_get_partys( OClientInfo& client_, HString const& )
 	{
 	M_PROLOG
 	send_games_info( client_ );
@@ -603,10 +582,17 @@ void HServer::get_games_info( OClientInfo& client_, HString const& )
 	M_EPILOG
 	}
 
-void HServer::get_game_info( OClientInfo& client_, HString const& name_ )
+void HServer::send_player_info( OClientInfo& client_ )
 	{
 	M_PROLOG
-	send_game_info( client_, name_ );
+	_out << PROTOCOL::PLAYER << PROTOCOL::SEP << client_._login;
+	for ( OClientInfo::logics_t::iterator it( client_._logics.begin() ), end( client_._logics.end() ); it != end; ++ it )
+		{
+		logics_t::iterator logic( _logics.find( *it ) );
+		if ( logic != _logics.end() )
+		 _out << PROTOCOL::SEPP << logic->first;
+		}
+	broadcast( _out << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -617,18 +603,26 @@ void HServer::send_players_info( OClientInfo& client_ )
 	for( clients_t::iterator client = _clients.begin();
 			client != _clients.end(); ++ client )
 		{
-		if ( ! client->second._login.is_empty() )
+		try
 			{
-			*client_._socket << PROTOCOL::PLAYER << PROTOCOL::SEP << client->second._login;
-			for ( OClientInfo::logics_t::iterator it( client_._logics.begin() ), end( client_._logics.end() ); it != end; ++ it )
+			if ( ! client->second._login.is_empty() )
 				{
-				logics_t::iterator logic( _logics.find( *it ) );
-				if ( logic != _logics.end() )
-					*client_._socket << PROTOCOL::SEPP << logic->second->get_info();
+				SENDF( *client_._socket ) << PROTOCOL::PLAYER << PROTOCOL::SEP << client->second._login;
+				for ( OClientInfo::logics_t::iterator it( client->second._logics.begin() ), end( client->second._logics.end() ); it != end; ++ it )
+					{
+					logics_t::iterator logic( _logics.find( *it ) );
+					if ( logic != _logics.end() )
+						SEND( *client_._socket ) << PROTOCOL::SEPP << logic->first;
+					}
+				SEND( *client_._socket ) << endl;
 				}
-			*client_._socket << endl;
+			}
+		catch ( HOpenSSLException const& )
+			{
+			drop_client( &client_ );
 			}
 		}
+	disect_dropouts();
 	return;
 	M_EPILOG
 	}
@@ -637,7 +631,7 @@ void HServer::send_games_info( OClientInfo& client_ )
 	{
 	M_PROLOG
 	for( logics_t::iterator it( _logics.begin() ), end( _logics.end() ); it != end; ++ it )
-		SEND( *client_._socket, PROTOCOL::PARTY << PROTOCOL::SEP << it->second->get_info() << endl );
+		SENDF( *client_._socket ) << PROTOCOL::PARTY_INFO << PROTOCOL::SEP << it->first << PROTOCOL::SEPP << it->second->get_info() << endl;
 	return;
 	M_EPILOG
 	}
@@ -650,13 +644,6 @@ void HServer::update_last_activity( OClientInfo const& info_ )
 				"UPDATE v_user_session SET last_activity = datetime('now', 'localtime') WHERE login = LOWER('%s');"
 		) % info_._login ).string() ) );
 	M_ENSURE( !! rs );
-	return;
-	M_EPILOG
-	}
-
-void HServer::send_game_info( OClientInfo& /*client_*/, HString const& )
-	{
-	M_PROLOG
 	return;
 	M_EPILOG
 	}

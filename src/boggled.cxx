@@ -82,12 +82,8 @@ struct BOGGLE
 namespace boggle
 {
 
-char const* const HBoggle::PROTOCOL::SEP = ":";
-char const* const HBoggle::PROTOCOL::SEPP = ",";
 char const* const HBoggle::PROTOCOL::NAME = "bgl";
 char const* const HBoggle::PROTOCOL::PLAY = "play";
-char const* const HBoggle::PROTOCOL::SAY = "say";
-char const* const HBoggle::PROTOCOL::MSG = "msg";
 char const* const HBoggle::PROTOCOL::PLAYER = "player";
 char const* const HBoggle::PROTOCOL::DECK = "deck";
 char const* const HBoggle::PROTOCOL::SETUP = "setup";
@@ -161,8 +157,7 @@ void HBoggle::handler_message( OClientInfo* clientInfo_, HString const& message_
 	{
 	M_PROLOG
 	HLock l( _mutex );
-	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
-			<< PROTOCOL::MSG << PROTOCOL::SEP
+	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< clientInfo_->_login << ": " << message_ << endl << _out );
 	return;
 	M_EPILOG
@@ -214,46 +209,44 @@ void HBoggle::do_post_accept( OClientInfo* clientInfo_ )
 	 */
 	broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
 			<< clientInfo_->_login << PROTOCOL::SEPP << 0 << PROTOCOL::SEPP << 0 << endl << _out );
-	*clientInfo_->_socket << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+	*clientInfo_->_socket << PROTOCOL::PARTY << PROTOCOL::SEP << _id << PROTOCOL::SEPP << PROTOCOL::MSG << PROTOCOL::SEP
 		<< "Welcome, this match settings are:" << endl
-		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+		<< PROTOCOL::PARTY << PROTOCOL::SEP << _id << PROTOCOL::SEPP << PROTOCOL::MSG << PROTOCOL::SEP
 		<< "   round time - " << _roundTime << " seconds" << endl
-		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+		<< PROTOCOL::PARTY << PROTOCOL::SEP << _id << PROTOCOL::SEPP << PROTOCOL::MSG << PROTOCOL::SEP
 		<< "   number of rounds - " << _maxRounds << endl
-		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+		<< PROTOCOL::PARTY << PROTOCOL::SEP << _id << PROTOCOL::SEPP << PROTOCOL::MSG << PROTOCOL::SEP
 		<< "   round interval - " << _interRoundDelay << endl
-		<< PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+		<< PROTOCOL::PARTY << PROTOCOL::SEP << _id << PROTOCOL::SEPP << PROTOCOL::MSG << PROTOCOL::SEP
 		<< "This match requires " << _startupPlayers << " players to start the game." << endl;
-	*clientInfo_->_socket << PROTOCOL::NAME << PROTOCOL::SEP
+	*clientInfo_->_socket << PROTOCOL::PARTY << PROTOCOL::SEP << _id << PROTOCOL::SEPP
 		<< PROTOCOL::SETUP << PROTOCOL::SEP << _roundTime
 		<< PROTOCOL::SEPP << _interRoundDelay << endl;
 	for ( players_t::iterator it = _players.begin(); it != _players.end(); ++ it )
 		{
 		if ( it->first != clientInfo_ )
 			{
-			*clientInfo_->_socket << PROTOCOL::NAME << PROTOCOL::SEP
+			*clientInfo_->_socket << PROTOCOL::PARTY << PROTOCOL::SEP << _id << PROTOCOL::SEPP
 				<< PROTOCOL::PLAYER << PROTOCOL::SEP << it->first->_login
 				<< PROTOCOL::SEPP << it->second._score << PROTOCOL::SEPP
 				<< it->second._last << endl;
-			*clientInfo_->_socket << PROTOCOL::NAME << PROTOCOL::SEP
+			*clientInfo_->_socket << PROTOCOL::PARTY << PROTOCOL::SEP << _id << PROTOCOL::SEPP
 				<< PROTOCOL::MSG << PROTOCOL::SEP << it->first->_login << " joined the mind contest." << endl;
 			}
 		}
 	broadcast(
-			_out << PROTOCOL::NAME << PROTOCOL::SEP
-			<< PROTOCOL::MSG << PROTOCOL::SEP
+			_out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< clientInfo_->_login
 			<< " joined the mind contest." << endl << _out );
 	out << "player [" << clientInfo_->_login << "] accepted" << endl;
 	if ( ! _round && ( _players.size() >= _startupPlayers ) )
 		{
 		schedule_end_round();
-		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
-				<< PROTOCOL::MSG << PROTOCOL::SEP
+		broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
 				<< "The match has begun, good luck!" << endl << _out );
 		}
 	else if ( _round > 0 )
-		*clientInfo_->_socket << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::DECK << PROTOCOL::SEP << make_deck() << endl;
+		*clientInfo_->_socket << PROTOCOL::PARTY << PROTOCOL::SEP << _id << PROTOCOL::SEPP << PROTOCOL::DECK << PROTOCOL::SEP << make_deck() << endl;
 	return;
 	M_EPILOG
 	}
@@ -270,8 +263,7 @@ void HBoggle::do_kick( OClientInfo* clientInfo_ )
 		if ( *(it->second->begin()) == clientInfo_ )
 			it = _words.erase( it );
 		}
-	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP
-			<< PROTOCOL::MSG << PROTOCOL::SEP
+	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< "Player " << clientInfo_->_login << " left this match." << endl << _out );
 	return;
 	M_EPILOG
@@ -302,7 +294,7 @@ void HBoggle::schedule_end_round( void )
 	HScheduledAsyncCaller::get_instance().register_call( time( NULL ) + _roundTime, call( &HBoggle::on_end_round, this ) );
 	generate_game();
 	_state = STATE::ACCEPTING;
-	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::DECK << PROTOCOL::SEP << make_deck() << endl << _out );
+	broadcast( _out << PROTOCOL::DECK << PROTOCOL::SEP << make_deck() << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -314,12 +306,11 @@ void HBoggle::on_begin_round( void )
 	out << "<<begin>>" << endl;
 	HAsyncCaller::get_instance().register_call( 0, call( &HBoggle::schedule, this, EVENT::END_ROUND ) );
 	broadcast(
-			_out << PROTOCOL::NAME << PROTOCOL::SEP
-			<< PROTOCOL::MSG << PROTOCOL::SEP
+			_out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< "New round started, you have got " << _roundTime
 			<< " seconds, " << _maxRounds - _round
 			<< " rounds left!" << endl << _out );
-	broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::ROUND << PROTOCOL::SEP << _round << endl << _out );
+	broadcast( _out << PROTOCOL::ROUND << PROTOCOL::SEP << _round << endl << _out );
 	return;
 	M_EPILOG
 	}
@@ -333,11 +324,11 @@ void HBoggle::on_end_round( void )
 	if ( _round < _maxRounds )
 		{
 		HAsyncCaller::get_instance().register_call( 0, call( &HBoggle::schedule, this, EVENT::BEGIN_ROUND ) );
-		_out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP
+		_out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< "This round has ended, next round in " << _interRoundDelay << " seconds!" << endl;
 		}
 	else
-		_out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::MSG << PROTOCOL::SEP << "Game Over!" << endl;
+		_out << PROTOCOL::MSG << PROTOCOL::SEP << "Game Over!" << endl;
 	broadcast( _out << _out );
 	int* scores = RULES[ _ruleSet ]._score;
 	typedef HList<words_t::iterator> longest_t;
@@ -363,8 +354,7 @@ void HBoggle::on_end_round( void )
 				longest.push_back( it );
 			OClientInfo* clInfo = *it->second->begin();
 			OPlayerInfo& info = *get_player_info( clInfo );
-			*(clInfo->_socket) << PROTOCOL::NAME << PROTOCOL::SEP
-				<< PROTOCOL::SCORED << PROTOCOL::SEP << it->first << "[" << scores[ length - 1 ] << "]" << endl;
+			*(clInfo->_socket) << PROTOCOL::PARTY << PROTOCOL::SEP << _id << PROTOCOL::SEPP << PROTOCOL::SCORED << PROTOCOL::SEP << it->first << "[" << scores[ length - 1 ] << "]" << endl;
 			info._last += scores[ length - 1 ];
 			out << clInfo->_login << " scored: " << scores[ length - 1 ] << " for word: " << it->first << "." << endl;
 			}
@@ -372,17 +362,17 @@ void HBoggle::on_end_round( void )
 	for ( players_t::iterator it = _players.begin(); it != _players.end(); ++ it )
 		{
 		it->second._score += it->second._last;
-		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::PLAYER << PROTOCOL::SEP
+		broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
 				<< it->first->_login << PROTOCOL::SEPP << it->second._score
 				<< PROTOCOL::SEPP << it->second._last << endl << _out );
 		it->second._last = 0;
 		}
 	for ( longest_t::iterator it = longest.begin(); it != longest.end(); ++ it )
-		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::LONGEST << PROTOCOL::SEP
+		broadcast( _out << PROTOCOL::LONGEST << PROTOCOL::SEP
 				<< (*it)->first << " [" << (*(*it)->second->begin())->_login << "]" << endl << _out );
 	_words.clear(); 
 	if ( _round < _maxRounds )
-		broadcast( _out << PROTOCOL::NAME << PROTOCOL::SEP << PROTOCOL::END_ROUND << endl << _out );
+		broadcast( _out << PROTOCOL::END_ROUND << endl << _out );
 	return;
 	M_EPILOG
 	}

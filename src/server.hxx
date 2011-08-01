@@ -63,8 +63,9 @@ protected:
 		static char const* const CREATE;
 		static char const* const ERR;
 		static char const* const PARTY;
-		static char const* const GET_GAMES;
-		static char const* const GET_GAME_INFO;
+		static char const* const PARTY_INFO;
+		static char const* const GET_PARTYS;
+		static char const* const GET_PARTY_INFO;
 		static char const* const GET_LOGICS;
 		static char const* const GET_PLAYERS;
 		static char const* const JOIN;
@@ -100,7 +101,6 @@ protected:
 	void handler_chat( OClientInfo&, yaal::hcore::HString const& );
 	void kick_client( yaal::hcore::HSocket::ptr_t&, char const* const = NULL );
 	void broadcast( yaal::hcore::HString const& );
-	void broadcast_loose( yaal::hcore::HString const& );
 	void broadcast_party( yaal::hcore::HNumber const&, yaal::hcore::HString const& );
 	void broadcast_all_parties( OClientInfo*, yaal::hcore::HString const& );
 	void handle_login( OClientInfo&, yaal::hcore::HString const& );
@@ -108,14 +108,13 @@ protected:
 	void pass_command( OClientInfo&, yaal::hcore::HString const& );
 	void create_game( OClientInfo&, yaal::hcore::HString const& );
 	void join_game( OClientInfo&, yaal::hcore::HString const& );
-	void get_logics_info( OClientInfo&, yaal::hcore::HString const& );
-	void get_players_info( OClientInfo&, yaal::hcore::HString const& );
-	void get_games_info( OClientInfo&, yaal::hcore::HString const& );
-	void get_game_info( OClientInfo&, yaal::hcore::HString const& );
+	void handle_get_logics( OClientInfo&, yaal::hcore::HString const& );
+	void handle_get_players( OClientInfo&, yaal::hcore::HString const& );
+	void handle_get_partys( OClientInfo&, yaal::hcore::HString const& );
 	void send_logics_info( OClientInfo& );
 	void send_players_info( OClientInfo& );
+	void send_player_info( OClientInfo& );
 	void send_games_info( OClientInfo& );
-	void send_game_info( OClientInfo&, yaal::hcore::HString const& );
 	void remove_client_from_logic( OClientInfo&, HLogic::ptr_t, char const* const = NULL );
 	void remove_client_from_all_logics( OClientInfo& );
 	void flush_logics( void );

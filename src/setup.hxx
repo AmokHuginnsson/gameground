@@ -57,9 +57,11 @@ static int const GO_BYOYOMI_TIME           =   1;
 #define out ( clog << now << " " << __FILE__ + OSetup::PATH_OFFSET << ":" << __LINE__ << ": " )
 
 #ifndef NDEBUG
-#define SEND( sock, message ) do { tee( sock, out ) << message; } while ( 0 )
+#define SENDF( sock ) tee( sock, out )
+#define SEND( sock ) tee( sock, clog )
 #else /* #ifndef NDEBUG */
-#define SEND( sock, message ) do { sock << message; } while ( 0 )
+#define SEND( sock ) ( sock )
+#define SENDF( sock ) ( sock )
 #endif /* #else #ifndef NDEBUG */
 
 typedef double long ( *now_t )( bool, double, char, int, bool, double, void*, void*, double, char );

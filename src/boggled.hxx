@@ -94,13 +94,9 @@ protected:
 	words_t _words;
 	mutable yaal::hcore::HMutex _mutex;
 	/*}*/
-	struct PROTOCOL
+	struct PROTOCOL : public HLogic::PROTOCOL
 		{
-		static char const* const SEP;
-		static char const* const SEPP;
 		static char const* const NAME;
-		static char const* const SAY;
-		static char const* const MSG;
 		static char const* const PLAY;
 		static char const* const PLAYER;
 		static char const* const DECK;

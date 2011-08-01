@@ -60,6 +60,7 @@ protected:
 		static char const* const SEPP;
 		static char const* const SAY;
 		static char const* const MSG;
+		static char const* const PARTY;
 		static char const* const PLAYER;
 		static char const* const PLAYER_QUIT;
 		virtual ~PROTOCOL(){}
