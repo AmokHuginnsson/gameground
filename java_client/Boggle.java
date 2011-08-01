@@ -50,7 +50,6 @@ class Boggle extends HAbstractLogic implements Runnable {
 		public static final String SEPP = ",";
 		public static final String CMD = "cmd";
 		public static final String SAY = "say";
-		public static final String NAME = "bgl";
 		public static final String LONGEST = "longest";
 		public static final String ROUND = "round";
 		public static final String SETUP = "setup";
@@ -59,7 +58,6 @@ class Boggle extends HAbstractLogic implements Runnable {
 		public static final String ENDROUND = "end_round";
 		public static final String PLAYER = "player";
 		public static final String PLAYERQUIT = "player_quit";
-		public static final String PREFIX = PROTOCOL.CMD + PROTOCOL.SEP + PROTOCOL.NAME + PROTOCOL.SEP;
 	}
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
@@ -156,14 +154,14 @@ class Boggle extends HAbstractLogic implements Runnable {
 		public void onMessage() {
 			String msg = _messageInput.getText();
 			if ( msg.matches( ".*\\S+.*" ) ) {	
-				_client.println( "cmd:bgl:say:" + msg );
+				_client.println( "cmd:" + _id + ":say:" + msg );
 				_messageInput.setText( "" );
 			}
 		}
 		public void onWord() {
 			String msg = _wordInput.getText();
 			if ( msg.matches( ".*\\S+.*" ) ) {	
-				_client.println( "cmd:bgl:play:" + msg );
+				_client.println( "cmd:" + _id + ":play:" + msg );
 				_wordInput.setText( "" );
 				add( _wordsSent, msg + "\n" );
 			}
@@ -188,9 +186,9 @@ class Boggle extends HAbstractLogic implements Runnable {
 	public Boggle( GameGround $applet ) throws Exception {
 		super( $applet );
 		init( _gui = new HGUILocal( LABEL ) );
-		_handlers.put( PROTOCOL.NAME, Boggle.class.getDeclaredMethod( "handlerBoggle", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYER, Boggle.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYERQUIT, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
+		_handlers.put( "party_info", HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.DECK, Boggle.class.getDeclaredMethod( "handlerDeck", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.SCORED, Boggle.class.getDeclaredMethod( "handlerScored", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.LONGEST, Boggle.class.getDeclaredMethod( "handlerLongest", new Class[]{ String.class } ) );
@@ -198,9 +196,6 @@ class Boggle extends HAbstractLogic implements Runnable {
 		_handlers.put( PROTOCOL.ENDROUND, Boggle.class.getDeclaredMethod( "handlerEndRound", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.SETUP, Boggle.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
 		_info = new HLogicInfo( "bgl", "boggle", "Boggle" );
-	}
-	void handlerBoggle( String $command ) {
-		processMessage( $command );
 	}
 	void handlerPlayer( String $command ) {
 		String[] tokens = $command.split( ",", 3 );

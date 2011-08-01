@@ -74,8 +74,8 @@ public abstract class HAbstractLogic {
 	public void processMessage( String $message ) {
 		String[] toks = $message.split( ":", 2 );
 		if ( "party".equals( toks[0] ) ) {
-			String[] p = toks[1].split( ",", 3 );
-			$message = p[1] + ":" + p[2];
+			String[] p = $message.split( ",", 2 );
+			$message = p[1];
 			System.out.println( $message );
 		}
 		

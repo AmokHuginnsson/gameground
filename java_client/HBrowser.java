@@ -123,6 +123,7 @@ class HBrowser extends HAbstractLogic {
 		try {
 			_handlers.put( "logic", HBrowser.class.getDeclaredMethod( "handleLogic", new Class[]{ String.class } ) );
 			_handlers.put( "party", HBrowser.class.getDeclaredMethod( "handleParty", new Class[]{ String.class } ) );
+			_handlers.put( "party_info", HBrowser.class.getDeclaredMethod( "handlePartyInfo", new Class[]{ String.class } ) );
 			_handlers.put( "player", HBrowser.class.getDeclaredMethod( "handlePlayer", new Class[]{ String.class } ) );
 			_handlers.put( "player_quit", HBrowser.class.getDeclaredMethod( "handlePlayerQuit", new Class[]{ String.class } ) );
 		} catch ( java.lang.NoSuchMethodException e ) {
@@ -174,7 +175,7 @@ class HBrowser extends HAbstractLogic {
 			_client.println( "abandon" );
 		}
 		_client.println( "get_logics" );
-		_client.println( "get_games" );
+		_client.println( "get_partys" );
 		_client.println( "get_players" );
 	}
 	public void handleLogic( String $message ) {
@@ -201,6 +202,8 @@ class HBrowser extends HAbstractLogic {
 			_gui._games.setSelectionPath( path );
 	}
 	public void handleParty( String $message ) {
+	}
+	public void handlePartyInfo( String $message ) {
 	}
 	public void handlePlayer( String $message ) {
 		DefaultMutableTreeNode node = null;
