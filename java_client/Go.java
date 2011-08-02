@@ -107,9 +107,6 @@ class Go extends HAbstractLogic implements Runnable {
 			super.init();
 			_toolTip = _pass.getToolTipText();
 			_passText = _pass.getText();
-		}
-		public void reinit() {
-			clearLog();
 			_conf.setOwner( this );
 			_conf.gobanModel();
 			((DefaultListModel)_visitors.getModel()).clear();
@@ -196,7 +193,6 @@ class Go extends HAbstractLogic implements Runnable {
 	public static final long serialVersionUID = 17l;
 	public static final String LABEL = "go";
 	public HGUILocal _gui;
-	public HClient _client;
 	private char _stone = STONE.NONE;
 	private char _toMove = STONE.NONE;
 	private long _start = 0;
@@ -351,7 +347,7 @@ class Go extends HAbstractLogic implements Runnable {
 	public void waitToMove() {
 		_toMove = STONE.WAIT;
 	}
-	public void reinit() {
+	public void init() {
 		_client = _app.getClient();
 		_contestants.get( new Character( STONE.BLACK ) ).clear();
 		_contestants.get( new Character( STONE.WHITE ) ).clear();

@@ -146,8 +146,8 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 			$xul.getTaglib().registerTag( "hboard", HBoard.class );
 			$xul.getTaglib().registerTag( "panel", HGalaxyConfigurator.class );
 		}
-		public void reinit() {
-			clearLog();
+		public void init() {
+			super.init();
 			log( COLOR_NORMAL );
 			log( "##", 0 );log( " ##", 1 );log( " ##", 2 );
 			log( " ##", 3 );log( " ##", 4 );log( " ##\n", 5 );
@@ -226,7 +226,6 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'
 	};
 	public HGUILocal _gui;
-	private HClient _client;
 //--------------------------------------------//
 	public HGalaxy( GameGround $applet ) throws Exception {
 		super( $applet );
@@ -447,9 +446,9 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		_client.println( "cmd:glx:play:end_round" );
 		$moves.clear();
 	}
-	public void reinit() {
+	public void init() {
 		_client = _app.getClient();
-		_emperor = ((HLogin)_app.getLogic( "login" )).getConnectionConfig()._login;
+		_emperor = _app.getConnectionConfig()._login;
 		_gui._emperor.setText( _emperor );
 		_systems = null;
 		_systemCount = 0;

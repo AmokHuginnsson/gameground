@@ -5,6 +5,7 @@ import java.util.TreeMap;
 public abstract class HAbstractLogic {
 	public HGUIface _gui;
 	GameGround _app = null;
+	HClient _client = null;
 	SortedMap<String,Method> _handlers;
 	HLogicInfo _info;
 	String _id = "0";
@@ -23,7 +24,10 @@ public abstract class HAbstractLogic {
 			System.exit( 1 );
 		}
 	}
-	public abstract void reinit();
+	public void setClient( HClient $client ) {
+		_client = $client;
+	}
+	public abstract void init();
 	public abstract void cleanup();
 	public HGUIface getGUI() {
 		return ( _gui );

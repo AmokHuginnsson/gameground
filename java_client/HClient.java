@@ -18,7 +18,6 @@ class HClient extends Thread {
 	}
 	GameGround _app = null;
 	boolean _loop;
-	HAbstractLogic _logic;
 	BufferedReader _in;
 	PrintStream _out;
 	Socket _socket;
@@ -33,9 +32,6 @@ class HClient extends Thread {
 		_socket = sf.createSocket( $server, $port );
 		_out = new PrintStream( _socket.getOutputStream(), true, D_ENCODING );
 		_in = new BufferedReader( new InputStreamReader( _socket.getInputStream(), D_ENCODING ) );
-	}
-	void setLogic( HAbstractLogic $logic ) {
-		_logic = $logic;
 	}
 	void println( String $line ) {
 		_out.print( $line + "\n" );
@@ -54,7 +50,7 @@ class HClient extends Thread {
 			while ( _loop && ( message = _in.readLine() ) != null ) {
 				if ( message.length() > 0 ) {
 					System.out.println( message );
-					_logic.processMessage( message );
+					_app.processMessage( message );
 				} else {
 					System.out.println( "Empty message." );
 				}
@@ -64,7 +60,7 @@ class HClient extends Thread {
 						"The connection was closed by the GameGround server.",
 						"GameGround - read error ...", javax.swing.JOptionPane.ERROR_MESSAGE );
 				_app.setClient( null );
-				_app.setFace( HLogin.LABEL );
+				_app.showLoginScreen();
 			}
 		} catch ( java.io.IOException e ) {
 			if ( _loop ) {
@@ -81,7 +77,7 @@ class HClient extends Thread {
 	public void disconnect() {
 		_loop = false;
 		_app.setClient( null );
-		_app.setFace( HLogin.LABEL );
+		_app.showLoginScreen();
 		try {
 			_socket.close();
 		} catch ( java.io.IOException e ) {

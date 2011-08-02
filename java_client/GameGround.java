@@ -19,8 +19,8 @@ import java.io.FileReader;
 
 public class /* Application or applet name: */ GameGround extends JApplet {
 	public static final long serialVersionUID = 13l;
-	private SortedMap<String,HAbstractLogic> _logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String,HAbstractLogic>() );
 	public Frame _frame;
+	private SortedMap<String,HAbstractLogic> _logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String,HAbstractLogic>() );
 	private final ScheduledExecutorService _scheduler = Executors.newScheduledThreadPool( 1 );
 	private Map<Object, ScheduledFuture<?>> _tasks = Collections.synchronizedMap( new HashMap<Object, ScheduledFuture<?>>() );
 	private HClient _client;
@@ -28,6 +28,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	private String _name;
 	private HAbstractLogic _current = null;
 	private HLogin _loginScreen = null;
+	private HWorkArea _workArea = null;
 	boolean _applet = false;
 	Properties _ini;
 	CommandLine _cmd;
@@ -56,9 +57,8 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 			}
 			EagerStaticInitializer.touch( this, "registerLogic" );
 			_loginScreen = new HLogin( this );
-			_current = _loginScreen;
-
-			setFace( HLogin.LABEL );
+			_workArea = new HWorkArea( this );
+			showLoginScreen();
 			resize( res.getRootElement().getAttribute( "size" ).getValue().split( ",", 2 ) );
 			_frameName = _frame.getTitle();
 		} catch ( Exception e ) {
@@ -67,14 +67,25 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		}
 	}
 	void showLoginScreen() {
-		_current = _loginScreen;
-		HGUIface f = _loginScreen.getGUI();
-		setContentPane( f );
+		if ( _client != null ) {
+			_client.disconnect();
+			_client = null;
+		}
+		showWorkArea( _loginScreen );
+	}
+	void showWorkArea() {
+		showWorkArea( _workArea );
+	}
+	void showWorkArea( HAbstractWorkArea $workArea ) {
+		setContentPane( $workArea.getGUI() );
+		$workArea.reinit();
 		validate();
-		f.reinit();
-		if ( _client != null )
-			_client.setLogic( _loginScreen );
-		_loginScreen.reinit();
+	}
+	public void processMessage( String $message ) {
+		_workArea.processMessage( $message );
+	}
+	public HLogin.OConnectionConfig getConnectionConfig() {
+		return ( _loginScreen.getConnectionConfig() );
 	}
 	public void destroy() {
 		if ( _client != null )
@@ -98,10 +109,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 			HGUIface f = _current.getGUI();
 			setContentPane( f );
 			validate();
-			f.reinit();
-			if ( _client != null )
-				_client.setLogic( _current );
-			logic.reinit();
+			logic.init();
 		} else {
 			java.util.Set<java.util.Map.Entry<String,HAbstractLogic>> entSet = _logics.entrySet();
 			java.util.Map.Entry<String,HAbstractLogic> ent = null;

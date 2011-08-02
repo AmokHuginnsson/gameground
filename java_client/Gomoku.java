@@ -77,10 +77,6 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		public void init() {
 			super.init();
 		}
-		public void reinit() {
-			clearLog();
-			((DefaultListModel)_visitors.getModel()).clear();
-		}
 		public JTextPane getLogPad() {
 			return ( _logPad );
 		}
@@ -116,7 +112,6 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	public static final long serialVersionUID = 17l;
 	public static final String LABEL = "gomoku";
 	public HGUILocal _gui;
-	public HClient _client;
 	private char _stone = STONE.NONE;
 	private char _toMove = STONE.NONE;
 	private long _start = 0;
@@ -209,7 +204,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	public char toMove() {
 		return ( _toMove );
 	}
-	public void reinit() {
+	public void init() {
 		_client = _app.getClient();
 		_contestants.get( new Character( STONE.BLACK ) ).clear();
 		_contestants.get( new Character( STONE.WHITE ) ).clear();

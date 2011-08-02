@@ -94,7 +94,8 @@ class Boggle extends HAbstractLogic implements Runnable {
 		public void updateTagLib( XUL $xul ) {
 			$xul.getTaglib().registerTag( "panel", BoggleConfigurator.class );
 		}
-		public void reinit() {
+		public void init() {
+			super.init();
 			_letters[ 0 ] = _letter00;
 			_letters[ 1 ] = _letter01;
 			_letters[ 2 ] = _letter02;
@@ -175,7 +176,6 @@ class Boggle extends HAbstractLogic implements Runnable {
 	public static final long serialVersionUID = 17l;
 	public static final String LABEL = "boggle";
 	public HGUILocal _gui;
-	private HClient _client;
 	private long _start = 0;
 	private long _timeLeft = 0;
 	private long _roundTime = 0;
@@ -259,7 +259,7 @@ class Boggle extends HAbstractLogic implements Runnable {
 			}
 		}
 	}
-	public void reinit() {
+	public void init() {
 		_client = _app.getClient();
 		_state = State.INIT;
 		_app.registerTask( this, 1 );

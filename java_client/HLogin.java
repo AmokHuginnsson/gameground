@@ -5,7 +5,7 @@ import javax.swing.JTextField;
 import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
 
-class HLogin extends HAbstractLogic {
+class HLogin extends HAbstractWorkArea {
 	public static final String LABEL = "login";
 	static boolean once = true;
 	public class HGUILocal extends HGUIface {
@@ -16,6 +16,10 @@ class HLogin extends HAbstractLogic {
 		public JTextField _port;
 		public HGUILocal( String $resource ) {
 			super( $resource );
+		}
+		public void init() {
+			super.init();
+			reinit();
 		}
 		public void reinit() {
 			_login.requestFocusInWindow();
@@ -65,8 +69,8 @@ class HLogin extends HAbstractLogic {
 //--------------------------------------------//
 	public HLogin( GameGround $applet ) throws Exception {
 		super( $applet );
-		_connectionConfig = new OConnectionConfig();
 		init( _gui = new HGUILocal( LABEL ) );
+		_connectionConfig = new OConnectionConfig();
 		String serverAddress = "";
 		try {
 			serverAddress = $applet.getCodeBase().getHost();
@@ -106,7 +110,7 @@ class HLogin extends HAbstractLogic {
 			_connectionConfig._password = password;
 			_connectionConfig._host = server;
 			_connectionConfig._port = port;
-			_app.setFace( WorkArea.LABEL );
+			_app.showWorkArea();
 		}
 	}
 	public OConnectionConfig getConnectionConfig() {
@@ -119,14 +123,5 @@ class HLogin extends HAbstractLogic {
 		}
 	}
 	public void cleanup() {}
-	static boolean registerLogic( GameGround $app ) {
-		try {
-			$app.registerLogic( LABEL, new HLogin( $app ) );
-		} catch ( Exception e ) {
-			e.printStackTrace();
-			System.exit( 1 );
-		}
-		return ( true );
-	}
 }
 

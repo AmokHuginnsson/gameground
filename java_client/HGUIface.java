@@ -58,8 +58,27 @@ abstract class HGUIface extends JPanel {
 		_colors[ Colors.WHITE ] = Color.white;
 		_colors[ Colors.OTHERGRAY ] = Color.gray;
 	}
+	void init() {
+		try {
+			String res = "/res/" + _resource + ".xml";
+			System.out.println( "Loading resources: " + res );
+			XUL xul = new XUL( this );
+			updateTagLib( xul );
+			xul.insert( AppletJDOMHelper.loadResource( res, this ), this );
+			HAbstractConfigurator ac = getConfigurator();
+			if ( ac != null )
+				xul.mapMembers( ac );
+		} catch ( java.lang.Exception e ) {
+			e.printStackTrace();
+			System.exit( 1 );
+		}
+		if ( getLogPad() != null ) {
+			_logPad = getLogPad();
+			_log = ( DefaultStyledDocument )_logPad.getStyledDocument();
+		} else
+			System.out.println( "No logPad for this face." );
+	}
 	public abstract void updateTagLib( XUL $se );
-	public abstract void reinit();
 	public abstract JTextPane getLogPad();
 	public Color color( int $color ) { return ( color( $color, null ) ); }
 	public Color color( int $color, java.awt.Component $on ) {
@@ -82,26 +101,6 @@ abstract class HGUIface extends JPanel {
 	}
 	public int lcolor( int $color ) {
 		return ( $color );
-	}
-	public void init() {
-		try {
-			String res = "/res/" + _resource + ".xml";
-			System.out.println( "Loading resources: " + res );
-			XUL xul = new XUL( this );
-			updateTagLib( xul );
-			xul.insert( AppletJDOMHelper.loadResource( res, this ), this );
-			HAbstractConfigurator ac = getConfigurator();
-			if ( ac != null )
-				xul.mapMembers( ac );
-		} catch ( java.lang.Exception e ) {
-			e.printStackTrace();
-			System.exit( 1 );
-		}
-		if ( getLogPad() != null ) {
-			_logPad = getLogPad();
-			_log = ( DefaultStyledDocument )_logPad.getStyledDocument();
-		} else
-			System.out.println( "No logPad for this face." );
 	}
 	void log( String $message, int $color ) {
 		StyleConstants.setForeground( _attribute, color( lcolor( $color ) ) );
