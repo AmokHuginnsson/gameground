@@ -154,14 +154,14 @@ void HLogic::broadcast( HString const& message_ )
 		{
 		try
 			{
-			(*it)->_socket->write_until_eos( _out << PROTOCOL::PARTY << PROTOCOL::SEP << _id << PROTOCOL::SEPP << message_ << _out );
+			if ( (*it)->_valid )
+				(*it)->_socket->write_until_eos( _out << PROTOCOL::PARTY << PROTOCOL::SEP << _id << PROTOCOL::SEPP << message_ << _out );
 			}
 		catch ( HOpenSSLException const& )
 			{
 			drop_client( *it );
 			}
 		}
-	disect_dropouts();
 	return;
 	M_EPILOG
 	}
@@ -196,13 +196,6 @@ void HLogic::drop_client( OClientInfo* clientInfo_ )
 	{
 	M_PROLOG
 	_server->drop_client( clientInfo_ );
-	M_EPILOG
-	}
-
-void HLogic::disect_dropouts( void )
-	{
-	M_PROLOG
-	_server->disect_dropouts();
 	M_EPILOG
 	}
 

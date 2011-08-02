@@ -89,7 +89,6 @@ public:
 	int init_server( int );
 	void run( void );
 	void drop_client( OClientInfo* );
-	void disect_dropouts( void );
 	/*}*/
 protected:
 	/*{*/

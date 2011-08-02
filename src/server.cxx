@@ -190,7 +190,9 @@ void HServer::handler_message( int fileDescriptor_ )
 		{
 		kick = true;
 		}
-	if ( kick && !! client )
+	if ( kick && !! client
+			&& ( _dropouts.is_empty()
+				|| ! ( find( _dropouts.begin(), _dropouts.end(), &clientIt->second ) != _dropouts.end() ) ) )
 		kick_client( client );
 	if ( ! _dropouts.is_empty() )
 		flush_droupouts();
@@ -265,14 +267,14 @@ void HServer::broadcast( HString const& message_ )
 		{
 		try
 			{
-			it->second._socket->write_until_eos( message_ );
+			if ( it->second._valid )
+				it->second._socket->write_until_eos( message_ );
 			}
 		catch ( HOpenSSLException const& )
 			{
 			drop_client( &it->second );
 			}
 		}
-	disect_dropouts();
 	return;
 	M_EPILOG
 	}
@@ -603,26 +605,28 @@ void HServer::send_players_info( OClientInfo& client_ )
 	for( clients_t::iterator client = _clients.begin();
 			client != _clients.end(); ++ client )
 		{
-		try
+		if ( client->second._valid )
 			{
-			if ( ! client->second._login.is_empty() )
+			try
 				{
-				SENDF( *client_._socket ) << PROTOCOL::PLAYER << PROTOCOL::SEP << client->second._login;
-				for ( OClientInfo::logics_t::iterator it( client->second._logics.begin() ), end( client->second._logics.end() ); it != end; ++ it )
+				if ( ! client->second._login.is_empty() )
 					{
-					logics_t::iterator logic( _logics.find( *it ) );
-					if ( logic != _logics.end() )
-						SEND( *client_._socket ) << PROTOCOL::SEPP << logic->first;
+					SENDF( *client_._socket ) << PROTOCOL::PLAYER << PROTOCOL::SEP << client->second._login;
+					for ( OClientInfo::logics_t::iterator it( client->second._logics.begin() ), end( client->second._logics.end() ); it != end; ++ it )
+						{
+						logics_t::iterator logic( _logics.find( *it ) );
+						if ( logic != _logics.end() )
+							SEND( *client_._socket ) << PROTOCOL::SEPP << logic->first;
+						}
+					SEND( *client_._socket ) << endl;
 					}
-				SEND( *client_._socket ) << endl;
+				}
+			catch ( HOpenSSLException const& )
+				{
+				drop_client( &client_ );
 				}
 			}
-		catch ( HOpenSSLException const& )
-			{
-			drop_client( &client_ );
-			}
 		}
-	disect_dropouts();
 	return;
 	M_EPILOG
 	}
@@ -659,19 +663,10 @@ HLogic::id_t HServer::create_id( void )
 
 void HServer::drop_client( OClientInfo* clientInfo_ )
 	{
-	_dropouts.push_back( clientInfo_ );
-	}
-
-void HServer::disect_dropouts( void )
-	{
 	M_PROLOG
-	for ( dropouts_t::iterator it( _dropouts.begin() ), end( _dropouts.end() ); it != end; ++ it )
-		{
-		M_ASSERT( !! (*it)->_socket );
-		clients_t::iterator del( _clients.find( (*it)->_socket->get_file_descriptor() ) );
-		if ( del != _clients.end() )
-			_clients.erase( del );
-		}
+	_dropouts.push_back( clientInfo_ );
+	clientInfo_->_valid = false;
+	return;
 	M_EPILOG
 	}
 
