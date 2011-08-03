@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="iso8859-2"?>
 <!DOCTYPE panel SYSTEM "res/gameground.dtd">
 <panel layout="BorderLayout" border="EmptyBorder(4,4,4,4)"><!--{{{-->
-	<setup id="_conf" visible="false" />
 	<hbox>
 		<panel layout="GridBagLayout">
 			<gridbagconstraints fill="GridBagConstraints.BOTH" />
