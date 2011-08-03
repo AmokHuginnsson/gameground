@@ -22,9 +22,6 @@ class HWorkArea extends HAbstractWorkArea {
 		}
 		void init() {
 			super.init();
-			if ( _tabs == null ) {
-				System.out.println( ":(" );
-			}
 			_browser = new HBrowser( _app );
 			_tabs.addTab( "Browser", _browser.getGUI() );
 		}
@@ -36,7 +33,8 @@ class HWorkArea extends HAbstractWorkArea {
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
-	SortedMap<String,Method> _handlers;
+	SortedMap<String, Method> _handlers;
+	SortedMap<String, HLogicInfo> _logics;
 	HClient _client;
 	HGUILocal _gui;
 	private HBrowser _browser;
@@ -44,7 +42,8 @@ class HWorkArea extends HAbstractWorkArea {
 	public HWorkArea( GameGround $applet ) throws Exception {
 		super( $applet );
 		init( _gui = new HGUILocal( LABEL ) );
-		_handlers = java.util.Collections.synchronizedSortedMap( new TreeMap<String,Method>() );
+		_logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String, HLogicInfo>() );
+		_handlers = java.util.Collections.synchronizedSortedMap( new TreeMap<String, Method>() );
 		try {
 			_handlers.put( "err", HWorkArea.class.getDeclaredMethod( "handleError", new Class[]{ String.class } ) );
 			_handlers.put( "party", HWorkArea.class.getDeclaredMethod( "handleParty", new Class[]{ String.class } ) );
@@ -55,7 +54,7 @@ class HWorkArea extends HAbstractWorkArea {
 	}
 	public void reinit() {
 		HLogin.OConnectionConfig cc = _app.getConnectionConfig();
-		_browser.clearLog();
+		_browser.cleanup();
 		_browser.log( "###", HGUILocal.Colors.BLUE );
 		try {
 			MessageDigest md = MessageDigest.getInstance( "SHA1" );
@@ -132,6 +131,10 @@ class HWorkArea extends HAbstractWorkArea {
 	public void handlerDummy( String $msg ) {
 		System.out.println( "Message processed by dummy handler: " + $msg + " in [HWorkArea]" );
 	}
-	public void cleanup() {}
+	public void cleanup() {
+		_logics.clear();
+	}
+	public void closeParty( String $id ) {
+	}
 }
 

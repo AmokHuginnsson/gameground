@@ -116,10 +116,8 @@ class HBrowser extends HAbstractLogic {
 	public HBrowser( GameGround $applet ) {
 		super( $applet );
 		init( _gui = new HGUILocal( LABEL ) );
-		_info = new HLogicInfo( "", "browser", "" );
 		try {
 			_handlers.put( "logic", HBrowser.class.getDeclaredMethod( "handleLogic", new Class[]{ String.class } ) );
-			_handlers.put( "party", HBrowser.class.getDeclaredMethod( "handleParty", new Class[]{ String.class } ) );
 			_handlers.put( "party_info", HBrowser.class.getDeclaredMethod( "handlePartyInfo", new Class[]{ String.class } ) );
 			_handlers.put( "player", HBrowser.class.getDeclaredMethod( "handlePlayer", new Class[]{ String.class } ) );
 			_handlers.put( "player_quit", HBrowser.class.getDeclaredMethod( "handlePlayerQuit", new Class[]{ String.class } ) );
@@ -151,8 +149,6 @@ class HBrowser extends HAbstractLogic {
 		((DefaultTreeModel)_gui._games.getModel()).reload();
 		if ( path != null )
 			_gui._games.setSelectionPath( path );
-	}
-	public void handleParty( String $message ) {
 	}
 	public void handlePartyInfo( String $message ) {
 	}
@@ -228,15 +224,16 @@ class HBrowser extends HAbstractLogic {
 		removePlayer((DefaultMutableTreeNode) _gui._games.getModel().getRoot(), $message );
 		System.out.println( "Player: [" + $message + "] removed." );
 	}
-	public void cleanup() {}
+	public void cleanup() {
+		((DefaultMutableTreeNode)((DefaultTreeModel)_gui._games.getModel()).getRoot()).removeAllChildren();
+		((DefaultTreeModel)_gui._games.getModel()).reload();
+		_gui.clearLog();
+	}
 	public void log( String $message, int $color ) {
 		_gui.log( $message, $color );
 	}
 	public void log( String $message ) {
 		_gui.log( $message );
-	}
-	public void clearLog() {
-		_gui.clearLog();
 	}
 }
 

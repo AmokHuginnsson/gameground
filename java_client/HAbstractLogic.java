@@ -70,10 +70,7 @@ public abstract class HAbstractLogic {
 		javax.swing.JOptionPane.showMessageDialog( _gui,
 				"The GameGround server reported error condition:\n" + $message,
 				"GameGround - error ...", javax.swing.JOptionPane.ERROR_MESSAGE );
-		if ( HBrowser.LABEL.equals( getInfo()._face ) )
-			_app.getClient().disconnect();
-		else
-			_app.setFace( HBrowser.LABEL );
+		assert false : "To be implemented";
 	}
 	public void processMessage( String $message ) {
 		String[] toks = $message.split( ":", 2 );
@@ -98,11 +95,11 @@ public abstract class HAbstractLogic {
 				System.exit( 1 );
 			}
 		} else {
-			System.out.println( "Unhandled mnemonic: [" + mnemonic + "], in [" + getInfo()._face + "] while processing message: " + $message );
+			System.out.println( "Unhandled mnemonic: [" + mnemonic + "], in [" + _info._face + "] while processing message: " + $message );
 			System.exit( 0 );
 		}
 	}
 	public void handlerDummy( String $msg ) {
-		System.out.println( "Message processed by dummy handler: " + $msg + " in [" + getInfo()._face + "]" );
+		System.out.println( "Message processed by dummy handler: " + $msg + " in [" + _info._face + "]" );
 	}
 }

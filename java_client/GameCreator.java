@@ -18,7 +18,7 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 	GameGround _app = null;
 	boolean _confirmed = false;
 	String _configuration;
-	String _face;
+	HLogicInfo _info;
 	HPlayerSet _playerSet;
 	HAbstractConfigurator _conf;
 	public JPanel _confHolder;

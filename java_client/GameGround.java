@@ -20,13 +20,12 @@ import java.io.FileReader;
 public class /* Application or applet name: */ GameGround extends JApplet {
 	public static final long serialVersionUID = 13l;
 	public Frame _frame;
-	private SortedMap<String,HAbstractLogic> _logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String,HAbstractLogic>() );
+	private SortedMap<String,HLogicInfo> _logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String,HLogicInfo>() );
 	private final ScheduledExecutorService _scheduler = Executors.newScheduledThreadPool( 1 );
 	private Map<Object, ScheduledFuture<?>> _tasks = Collections.synchronizedMap( new HashMap<Object, ScheduledFuture<?>>() );
 	private HClient _client;
 	private String _frameName;
 	private String _name;
-	private HAbstractLogic _current = null;
 	private HLogin _loginScreen = null;
 	private HWorkArea _workArea = null;
 	boolean _applet = false;
@@ -100,42 +99,16 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		_frame.validate();
 	}
 
-	public void setFace( String $face ) {
-		HAbstractLogic logic = _logics.get( $face );
-		if ( logic != null ) {
-			if ( _current != null )
-				_current.cleanup();
-			_current = logic;
-			HGUIface f = _current.getGUI();
-			setContentPane( f );
-			validate();
-			logic.init();
-		} else {
-			java.util.Set<java.util.Map.Entry<String,HAbstractLogic>> entSet = _logics.entrySet();
-			java.util.Map.Entry<String,HAbstractLogic> ent = null;
-			java.util.Iterator<java.util.Map.Entry<String,HAbstractLogic>> it = entSet.iterator();
-			while ( it.hasNext() ) {
-				ent = it.next();
-				System.out.println( "logic: " + ent.getKey() );
-			}
-			System.out.println( "No such logic: " + $face + "." );
-			CallStack.print();
-			System.exit( 1 );
-		}
-		return;
-	}
-
-	public HAbstractLogic getLogicBySymbol( String $symbol ) {
-		java.util.Set<java.util.Map.Entry<String,HAbstractLogic>> entSet = _logics.entrySet();
-		java.util.Map.Entry<String,HAbstractLogic> ent = null;
-		java.util.Iterator<java.util.Map.Entry<String,HAbstractLogic>> it = entSet.iterator();
+	public HLogicInfo getLogicBySymbol( String $symbol ) {
+		java.util.Set<java.util.Map.Entry<String,HLogicInfo>> entSet = _logics.entrySet();
+		java.util.Map.Entry<String,HLogicInfo> ent = null;
+		java.util.Iterator<java.util.Map.Entry<String,HLogicInfo>> it = entSet.iterator();
 		while ( it.hasNext() ) {
 			ent = it.next();
 			if ( ent != null ) {
-				HAbstractLogic al = ent.getValue();
-				HLogicInfo info = al.getInfo();
+				HLogicInfo info = ent.getValue();
 				if ( ( info != null ) && ( info._symbol.compareTo( $symbol ) == 0 ) )
-					return ( al );
+					return ( info );
 			}
 		}
 		return ( null );
@@ -167,8 +140,8 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		}
 	}
 
-	public void registerLogic( String $name, HAbstractLogic $logic ) {
-		_logics.put( $name, $logic );
+	public void registerLogic( String $name, HLogicInfo $info ) {
+		_logics.put( $name, $info );
 		return;
 	}
 
@@ -182,6 +155,9 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		return null;
 	} 
 
+	public void closeParty( String $id ) {
+		_workArea.closeParty( $id );
+	}
 	public HClient getClient() {
 		return ( _client );
 	}
@@ -193,7 +169,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 			_frame.setTitle( _frameName );
 	}
 
-	public HAbstractLogic getLogic( String $name ) {
+	public HLogicInfo getLogic( String $name ) {
 		return ( _logics.get( $name ) );
 	}
 	public void shutdown() {

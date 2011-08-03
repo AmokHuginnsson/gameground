@@ -168,7 +168,7 @@ class Boggle extends HAbstractLogic implements Runnable {
 			}
 		}
 		public void onExit() {
-			_app.setFace( HBrowser.LABEL );
+			_app.closeParty( _id );
 		}
 	}
 	enum State { INIT, PLAY, WAIT }
@@ -183,8 +183,9 @@ class Boggle extends HAbstractLogic implements Runnable {
 	private State _state = State.INIT;
 	private Vector<BogglePlayer> _players = new Vector<BogglePlayer>();
 //--------------------------------------------//
-	public Boggle( GameGround $applet ) throws Exception {
+	public Boggle( GameGround $applet, HLogicInfo $info ) throws Exception {
 		super( $applet );
+		_info = $info;
 		init( _gui = new HGUILocal( LABEL ) );
 		_handlers.put( PROTOCOL.PLAYER, Boggle.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYERQUIT, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
@@ -195,7 +196,6 @@ class Boggle extends HAbstractLogic implements Runnable {
 		_handlers.put( PROTOCOL.ROUND, Boggle.class.getDeclaredMethod( "handlerRound", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.ENDROUND, Boggle.class.getDeclaredMethod( "handlerEndRound", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.SETUP, Boggle.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
-		_info = new HLogicInfo( "bgl", "boggle", "Boggle" );
 	}
 	void handlerPlayer( String $command ) {
 		String[] tokens = $command.split( ",", 3 );
@@ -264,9 +264,17 @@ class Boggle extends HAbstractLogic implements Runnable {
 		_state = State.INIT;
 		_app.registerTask( this, 1 );
 	}
+	static HAbstractLogic create( GameGround $app, HLogicInfo $info ) {
+		HAbstractLogic logic = null;
+		try {
+			logic = new Boggle( $app, $info );
+		} catch ( Exception e ) {
+		}
+		return ( logic );
+	}
 	static boolean registerLogic( GameGround $app ) {
 		try {
-			$app.registerLogic( LABEL, new Boggle( $app ) );
+			$app.registerLogic( LABEL, new HLogicInfo( "bgl", "boggle", "Boggle", Boggle.class.getDeclaredMethod( "create", new Class[] { GameGround.class, HLogicInfo.class } ) ) );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );
