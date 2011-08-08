@@ -20,8 +20,8 @@ import java.io.FileReader;
 public class /* Application or applet name: */ GameGround extends JApplet {
 	public static final long serialVersionUID = 13l;
 	public Frame _frame;
-	private SortedMap<String, HLogicInfo> _logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String,HLogicInfo>() );
 	private final ScheduledExecutorService _scheduler = Executors.newScheduledThreadPool( 1 );
+	private SortedMap<String, HLogicInfo> _clientSupportedLogics = java.util.Collections.synchronizedSortedMap( new TreeMap<String, HLogicInfo>() );
 	private Map<Object, ScheduledFuture<?>> _tasks = Collections.synchronizedMap( new HashMap<Object, ScheduledFuture<?>>() );
 	private HClient _client;
 	private String _frameName;
@@ -126,8 +126,13 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	}
 
 	public void registerLogic( String $name, HLogicInfo $info ) {
-		_logics.put( $name, $info );
+		System.out.println( "Registering client supported logic: `" + $name + "'." );
+		_clientSupportedLogics.put( $name, $info );
 		return;
+	}
+
+	public HLogicInfo getSupportedLogic( String $name ) {
+		return ( _clientSupportedLogics.get( $name ) );
 	}
 
 	private Frame getParentFrame() {
@@ -154,9 +159,6 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 			_frame.setTitle( _frameName );
 	}
 
-	public HLogicInfo getLogic( String $name ) {
-		return ( _logics.get( $name ) );
-	}
 	public void shutdown() {
 		if ( _applet ) {
 			_frame.setVisible( false );

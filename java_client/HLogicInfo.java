@@ -1,4 +1,6 @@
 import java.lang.reflect.Method;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class HLogicInfo {
 	public String _symbol;
@@ -6,6 +8,7 @@ public class HLogicInfo {
 	public String _name;
 	public String _defaults;
 	private Method _creator;
+	private SortedMap<String, Party> _partys = java.util.Collections.synchronizedSortedMap( new TreeMap<String, Party>() );
 
 	public HLogicInfo( String $symbol, String $face, String $name, Method $creator ) {
 		_symbol = $symbol;
@@ -25,5 +28,11 @@ public class HLogicInfo {
 			System.exit( 1 );
 		}
 		return ( logic );
+	}
+	public int getPartysCount() {
+		return ( _partys.size() );
+	}
+	public String toString() {
+		return ( _name );
 	}
 }

@@ -22,7 +22,7 @@ class HWorkArea extends HAbstractWorkArea {
 		}
 		void init() {
 			super.init();
-			_browser = new HBrowser( _app, HWorkArea.this );
+			_browser = new HBrowser( _app, HWorkArea.this, new PartysModel( _logics ), _logics, _players );
 			_tabs.addTab( "Browser", _browser.getGUI() );
 		}
 		public void onExit() {
@@ -33,10 +33,10 @@ class HWorkArea extends HAbstractWorkArea {
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
-	private SortedMap<String, Method> _handlers;
-	private SortedMap<String, HLogicInfo> _logics;
-	private SortedMap<String, Player> _players;
-	private SortedMap<String, Party> _partys;
+	private SortedMap<String, Method> _handlers = java.util.Collections.synchronizedSortedMap( new TreeMap<String, Method>() );
+	private SortedMap<String, HLogicInfo> _logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String, HLogicInfo>() );
+	private SortedMap<String, Player> _players = java.util.Collections.synchronizedSortedMap( new TreeMap<String, Player>() );
+	private SortedMap<String, Party> _partys = java.util.Collections.synchronizedSortedMap( new TreeMap<String, Party>() );
 	HClient _client;
 	HGUILocal _gui;
 	private HBrowser _browser;
@@ -44,11 +44,13 @@ class HWorkArea extends HAbstractWorkArea {
 	public HWorkArea( GameGround $applet ) throws Exception {
 		super( $applet );
 		init( _gui = new HGUILocal( LABEL ) );
-		_logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String, HLogicInfo>() );
-		_handlers = java.util.Collections.synchronizedSortedMap( new TreeMap<String, Method>() );
 		try {
 			_handlers.put( "err", HWorkArea.class.getDeclaredMethod( "handleError", new Class[]{ String.class } ) );
 			_handlers.put( "party", HWorkArea.class.getDeclaredMethod( "handleParty", new Class[]{ String.class } ) );
+			_handlers.put( "logic", HWorkArea.class.getDeclaredMethod( "handleLogic", new Class[]{ String.class } ) );
+			_handlers.put( "party_info", HWorkArea.class.getDeclaredMethod( "handlePartyInfo", new Class[]{ String.class } ) );
+			_handlers.put( "player", HWorkArea.class.getDeclaredMethod( "handlePlayer", new Class[]{ String.class } ) );
+			_handlers.put( "player_quit", HWorkArea.class.getDeclaredMethod( "handlePlayerQuit", new Class[]{ String.class } ) );
 		} catch ( java.lang.NoSuchMethodException e ) {
 			e.printStackTrace();
 			System.exit( 1 );
@@ -56,6 +58,7 @@ class HWorkArea extends HAbstractWorkArea {
 	}
 	public void reinit() {
 		HLogin.OConnectionConfig cc = _app.getConnectionConfig();
+		cleanup();
 		_browser.cleanup();
 		_browser.log( "###", HGUILocal.Colors.BLUE );
 		try {
@@ -111,7 +114,6 @@ class HWorkArea extends HAbstractWorkArea {
 		}
 	}
 	public void processMessage( String $message ) {
-		
 		String[] tokens = $message.split( ":", 2 );
 		String mnemonic = tokens[0];
 		String argument = tokens.length > 1 ? tokens[1] : null;
@@ -154,6 +156,27 @@ class HWorkArea extends HAbstractWorkArea {
 			}
 		}
 		return ( null );
+	}
+	public void handleLogic( String $message ) {
+		System.out.println( "GameGround serves [" + $message + "] logic." );
+		String[] tokens = $message.split( ":", 2 );
+		HLogicInfo l = _app.getSupportedLogic( tokens[ 0 ] );
+		if ( l != null ) {
+			System.out.println( "Client serves [" + $message + "] logic." );
+			_logics.put( tokens[0], l );
+			_browser.reload();
+		}
+	}
+	public void handlePartyInfo( String $message ) {
+	}
+	public void handlePlayer( String $message ) {
+		System.out.println( "Another player: [" + $message + "]." );
+		String[] tokens = $message.split( ",", 2 );
+		String name = tokens[0];
+		_players.put( name, new Player( name ) );
+	}
+	public void handlePlayerQuit( String $message ) {
+		System.out.println( "Player: [" + $message + "] removed." );
 	}
 }
 

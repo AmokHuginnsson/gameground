@@ -274,7 +274,7 @@ class Boggle extends HAbstractLogic implements Runnable {
 	}
 	static boolean registerLogic( GameGround $app ) {
 		try {
-			$app.registerLogic( LABEL, new HLogicInfo( "bgl", "boggle", "Boggle", Boggle.class.getDeclaredMethod( "create", new Class[] { GameGround.class, HLogicInfo.class } ) ) );
+			$app.registerLogic( "bgl", new HLogicInfo( "bgl", "boggle", "Boggle", Boggle.class.getDeclaredMethod( "create", new Class[] { GameGround.class, HLogicInfo.class } ) ) );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );

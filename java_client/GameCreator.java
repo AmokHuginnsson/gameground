@@ -1,4 +1,5 @@
-import java.util.Vector;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JButton;
@@ -9,6 +10,7 @@ import javax.swing.Action;
 import javax.swing.AbstractAction;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
+import javax.swing.AbstractListModel;
 import java.awt.event.ActionEvent;
 import org.swixml.XDialog;
 import org.swixml.SwingEngine;
@@ -19,18 +21,36 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 	boolean _confirmed = false;
 	String _configuration;
 	HLogicInfo _info;
-	HPlayerSet _playerSet;
 	HAbstractConfigurator _conf;
 	public JPanel _confHolder;
 	public JList _logics;
 	public JTextField _name;
 	public JButton _ok;
-	public GameCreator( GameGround $app, Vector<HPlayerSet> $logics ) {
+	public GameCreator( GameGround $app, final SortedMap<String, HLogicInfo> $logics ) {
 		_app = $app;
 		try {
 			new SwingEngine( this ).insert( AppletJDOMHelper.loadResource( "/res/creator.xml", this ), this );
 			System.out.println( "dialogInit: " + $logics );
-			_logics.setListData( $logics );
+			_logics.setModel( new AbstractListModel() {
+				public static final long serialVersionUID = 17l;
+				public int getSize() { return ( $logics.size() ); }
+				public Object getElementAt( int index ) {
+					java.util.Set<java.util.Map.Entry<String,HLogicInfo>> entSet = $logics.entrySet();
+					java.util.Map.Entry<String,HLogicInfo> ent = null;
+					java.util.Iterator<java.util.Map.Entry<String,HLogicInfo>> it = entSet.iterator();
+					int i = 0;
+					while ( it.hasNext() ) {
+						ent = it.next();
+						if ( ent != null ) {
+							if ( i == index ) {
+								break;
+							}
+							++ i;
+						}
+					}
+					return ( ent.getValue() );
+				}
+			} );
 			_logics.addListSelectionListener( this );
 			_name.getDocument().addDocumentListener( this );
 			setVisible( true );
@@ -61,7 +81,6 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 			if ( _conf != null ) {
 				_conf.setVisible( false );
 				_conf = null;
-				_playerSet = null;
 			}
 			_confHolder.removeAll();
 /*			if ( idx >= 0 ) {
@@ -85,7 +104,7 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 	}
 	public void onOk() {
 		_confirmed = true;
-		_configuration = _playerSet._id + ":" + _name.getText() + "," + _conf.getConfigurationString();
+		_configuration = _info._symbol + ":" + _name.getText() + "," + _conf.getConfigurationString();
 		dispose();
 	}
 	public void onCancel() {

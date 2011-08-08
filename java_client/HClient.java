@@ -49,7 +49,7 @@ class HClient extends Thread {
 			String message = "";
 			while ( _loop && ( message = _in.readLine() ) != null ) {
 				if ( message.length() > 0 ) {
-					System.out.println( message );
+					System.out.println( "-> " + Con.blue + message + Con.reset );
 					_app.processMessage( message );
 				} else {
 					System.out.println( "Empty message." );

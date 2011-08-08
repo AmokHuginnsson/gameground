@@ -9,29 +9,33 @@ public class PartysModel implements TreeModel {
 	public class PartysModelNode {
 		public HLogicInfo _logic = null;
 		public Party _party = null;
-		public Player _player = null;
 		PartysModelNode() {
 		}
 		PartysModelNode( HLogicInfo $logic ) {
 			_logic = $logic;
 		}
-		PartysModelNode( HLogicInfo $logic ) {
+		PartysModelNode( Party $party ) {
 			_party = $party;
 		}
-		PartysModelNode( Player $player ) {
-			_player = $player;
-		}
 		public String toString() {
-			return ( _player != null ? _player.toString() : ( _party != null ? _party.toString() : ( _logic != null ? _logic.toString() : "GameGround" ) ) );
+			return ( _party != null ? _party.toString() : ( _logic != null ? _logic.toString() : "GameGround" ) );
+		}
+		public int getLevel() {
+			int level = -1;
+			if ( ( _logic == null ) && ( _party == null ) )
+				level = 0;
+			else if ( _logic != null )
+				level = 1;
+			else if ( _party != null )
+				level = 2;
+			return ( level );
 		}
 	}
 	private Vector<TreeModelListener> treeModelListeners = new Vector<TreeModelListener>();
 	private SortedMap<String, HLogicInfo> _logics;
-	private SortedMap<String, Party> _partys;
 
-	public PartysModel( SortedMap<String, HLogicInfo> $logics, SortedMap<String, Party> $partys ) {
+	public PartysModel( SortedMap<String, HLogicInfo> $logics ) {
 		_logics = $logics;
-		_partys = $partys;
 	}
 
 	//////////////// Fire events //////////////////////////////////////////////
@@ -40,10 +44,10 @@ public class PartysModel implements TreeModel {
 	 * The only event raised by this model is TreeStructureChanged with the
 	 * root as path, i.e. the whole tree has changed.
 	 */
-	protected void fireTreeStructureChanged(Person oldRoot) {
+	protected void reload() {
 		int len = treeModelListeners.size();
 		TreeModelEvent e = new TreeModelEvent(this, 
-				new Object[] {oldRoot});
+				new Object[] {new PartysModelNode()});
 		for (TreeModelListener tml : treeModelListeners) {
 			tml.treeStructureChanged(e);
 		}
@@ -62,12 +66,26 @@ public class PartysModel implements TreeModel {
 	/**
 	 * Returns the child of parent at index index in the parent's child array.
 	 */
-	public Object getChild(Object parent, int index) {
+	public Object getChild( Object parent, int index ) {
 		PartysModelNode p = (PartysModelNode)parent;
 		PartysModelNode child = null;
-		if ( ( p._logic == null ) && ( p._party == null ) && ( p._player == null ) ) {
-		} else if ( p._logic != null ) {
-		} else if ( p._party != null ) {
+		int level = p.getLevel();
+		if ( level == 0 ) {
+			java.util.Set<java.util.Map.Entry<String,HLogicInfo>> entSet = _logics.entrySet();
+			java.util.Map.Entry<String,HLogicInfo> ent = null;
+			java.util.Iterator<java.util.Map.Entry<String,HLogicInfo>> it = entSet.iterator();
+			int i = 0;
+			while ( it.hasNext() ) {
+				ent = it.next();
+				if ( ent != null ) {
+					if ( i == index ) {
+						child = new PartysModelNode( ent.getValue() );
+						break;
+					}
+					++ i;
+				}
+			}
+		} else if ( level == 1 ) {
 		}
 		return ( child );
 	}
@@ -78,11 +96,11 @@ public class PartysModel implements TreeModel {
 	public int getChildCount(Object parent) {
 		PartysModelNode p = (PartysModelNode)parent;
 		int childCount = 0;
-		if ( ( p._logic == null ) && ( p._party == null ) && ( p._player == null ) )
-			childCount = _logics.count();
-		else if ( p._logic != null ) {
-		} else if ( p._party != null )
-			childCount = p._party.getPlayerCount();
+		int level = p.getLevel();
+		if ( level == 0 )
+			childCount = _logics.size();
+		else if ( level == 1 )
+			childCount = p._logic.getPartysCount();
 		return childCount;
 	}
 
@@ -90,22 +108,16 @@ public class PartysModel implements TreeModel {
 	 * Returns the index of child in parent.
 	 */
 	public int getIndexOfChild(Object parent, Object child) {
-		Person p = (Person)parent;
-		if (showAncestors) {
-			int count = 0;
-			Person father = p.getFather();
-			if (father != null) {
-				count++;
-				if (father == child) {
-					return 0;
-				}
+		PartysModelNode p = (PartysModelNode)parent;
+		int index = -1;
+		int childCount = getChildCount( parent );
+		for ( int i = 0; i < childCount; ++ i ) {
+			if ( getChild( parent, i ) == child ) {
+				index = i;
+				break;
 			}
-			if (p.getMother() != child) {
-				return count;
-			}
-			return -1;
 		}
-		return p.getIndexOfChild((Person)child);
+		return ( index );
 	}
 
 	/**
@@ -119,18 +131,7 @@ public class PartysModel implements TreeModel {
 	 * Returns true if node is a leaf.
 	 */
 	public boolean isLeaf(Object node) {
-		PartysModelNode p = (PartysModelNode)parent;
-		boolean isLeaf = false;
-		if ( ( p._logic == null ) && ( p._party == null ) && ( p._player == null ) ) {
-			if ( _logic.count() == 0 )
-				isLeaf = true;
-		} else if ( p._logic != null ) {
-		} else if ( p._party != null ) {
-		} else {
-			assert p._player != null : "Inconsistient PartysModelNode!";
-			isLeaf = true;
-		}
-		return ( isLeaf );
+		return ( getChildCount( node ) == 0 );
 	}
 
 	/**

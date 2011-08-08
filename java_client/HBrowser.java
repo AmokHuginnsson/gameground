@@ -1,3 +1,5 @@
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.awt.event.ActionEvent;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -37,13 +39,13 @@ class HBrowser extends HAbstractLogic {
 			java.awt.event.MouseListener ml = new java.awt.event.MouseAdapter() {
 				public void mousePressed( java.awt.event.MouseEvent e ) {
 					if ( e.getClickCount() == 2 ) {
-						DefaultMutableTreeNode node = (DefaultMutableTreeNode)_games.getLastSelectedPathComponent();
+						PartysModel.PartysModelNode node = (PartysModel.PartysModelNode)_games.getLastSelectedPathComponent();
 						if ( ( node != null ) && ( node.getLevel() == 2 ) )
 							onJoin();
 					}
 				}
 			};
-			_games.setModel( new DefaultTreeModel( new DefaultMutableTreeNode( new HPlayerSet( "root", "GameGround" ) ) ) );
+			_games.setModel( _partysModel );
 			_games.addMouseListener( ml );
 			_msg.requestFocusInWindow();
 		}
@@ -51,16 +53,7 @@ class HBrowser extends HAbstractLogic {
 			return ( _logPad );
 		}
 		public void onCreate() {
-			DefaultMutableTreeNode node = null;
-			node = (DefaultMutableTreeNode)_games.getModel().getRoot();
-			int i = 0, childs = node.getChildCount();
-			Vector<HPlayerSet> v = new Vector<HPlayerSet>();
-			for ( i = 0; i < childs; ++ i ) {
-				DefaultMutableTreeNode gameType = (DefaultMutableTreeNode)node.getChildAt( i );
-				HPlayerSet ps = (HPlayerSet)gameType.getUserObject();
-				v.add( ps );
-			}
-			GameCreator gc = new GameCreator( _app, v );
+			GameCreator gc = new GameCreator( _app, _logics );
 			if ( gc.confirmed() ) {
 				_workArea.addParty( gc.createParty() );
 				_client.println( "create:" + gc.getConfiguration() );
@@ -81,21 +74,32 @@ class HBrowser extends HAbstractLogic {
 			_client.disconnect();
 		}
 		public void valueChanged(TreeSelectionEvent e) {
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode)_games.getLastSelectedPathComponent();
+			PartysModel.PartysModelNode node = (PartysModel.PartysModelNode)_games.getLastSelectedPathComponent();
 			updatePlayers( node );
 			_join.setEnabled( ( node != null ) && ( node.getLevel() == 2 ) );
 		};
-		public void updatePlayers( DefaultMutableTreeNode $node ) {
+		public void updatePlayers( PartysModel.PartysModelNode $node ) {
 			DefaultListModel lm = new DefaultListModel();
 			_people.setModel( lm );
 			if ( $node == null )
 				return;
-			HPlayerSet ps = (HPlayerSet)$node.getUserObject();
-			String ent = "";
-			java.util.Iterator<String> it = ps.peopleIterator();
-			while ( it.hasNext() ) {
-				ent = it.next();
-				lm.addElement( ent );
+			if ( $node.getLevel() == 2 ) {
+				String ent = "";
+				java.util.Iterator<Player> it = $node._party.playerIterator();
+				while ( it.hasNext() ) {
+					ent = it.next().toString();
+					lm.addElement( ent );
+				}
+			} else {
+				java.util.Set<java.util.Map.Entry<String,Player>> entSet = _players.entrySet();
+				java.util.Map.Entry<String,Player> ent = null;
+				java.util.Iterator<java.util.Map.Entry<String,Player>> it = entSet.iterator();
+				while ( it.hasNext() ) {
+					ent = it.next();
+					if ( ent != null ) {
+						lm.addElement( ent.getValue() );
+					}
+				}
 			}
 			_people.setModel( lm );
 		}
@@ -115,124 +119,24 @@ class HBrowser extends HAbstractLogic {
 	public static final long serialVersionUID = 17l;
 	HGUILocal _gui;
 	HWorkArea _workArea;
+	PartysModel _partysModel;
+	private SortedMap<String, HLogicInfo> _logics = null;
+	private SortedMap<String, Player> _players = null;
 //--------------------------------------------//
-	public HBrowser( GameGround $applet, HWorkArea $workArea ) {
+	public HBrowser( GameGround $applet, HWorkArea $workArea, PartysModel $partysModel, SortedMap<String, HLogicInfo> $logics, SortedMap<String, Player> $players ) {
 		super( $applet );
 		_workArea = $workArea;
+		_partysModel = $partysModel;
+		_logics = $logics;
+		_players = $players;
 		init( _gui = new HGUILocal( LABEL ) );
-		try {
-			_handlers.put( "logic", HBrowser.class.getDeclaredMethod( "handleLogic", new Class[]{ String.class } ) );
-			_handlers.put( "party_info", HBrowser.class.getDeclaredMethod( "handlePartyInfo", new Class[]{ String.class } ) );
-			_handlers.put( "player", HBrowser.class.getDeclaredMethod( "handlePlayer", new Class[]{ String.class } ) );
-			_handlers.put( "player_quit", HBrowser.class.getDeclaredMethod( "handlePlayerQuit", new Class[]{ String.class } ) );
-		} catch ( java.lang.NoSuchMethodException e ) {
-			e.printStackTrace();
-			System.exit( 1 );
-		}
 	}
 	public void init() { }
-	public void handleLogic( String $message ) {
-	/*
-		System.out.println( "GameGround serves [" + $message + "] logic." );
-		String[] tokens = $message.split( ":", 2 );
-		HAbstractLogic l = _app.getLogicBySymbol( tokens[ 0 ] );
-		if ( l != null ) {
-			l.setDefaults( tokens[ 1 ] );
-			HLogicInfo i = l.getInfo();
-			((DefaultMutableTreeNode)_gui._games.getModel().getRoot()).add( new DefaultMutableTreeNode( new HPlayerSet( tokens[ 0 ], i._name, tokens[ 1 ] ) ) );
-			((DefaultTreeModel)_gui._games.getModel()).reload();
-		}
-	*/
-	}
-	void addPlayer( DefaultMutableTreeNode $node, String $name ) {
-		((HPlayerSet)$node.getUserObject()).addPlayer( $name );
-		DefaultMutableTreeNode node = (DefaultMutableTreeNode)_gui._games.getLastSelectedPathComponent();
-		TreePath path = null;
-		if ( node != null )
-			path = new TreePath( node.getPath() );
-		if ( node == $node )
-			_gui.updatePlayers( node );
-		((DefaultTreeModel)_gui._games.getModel()).reload();
-		if ( path != null )
-			_gui._games.setSelectionPath( path );
-	}
-	public void handlePartyInfo( String $message ) {
-	}
-	public void handlePlayer( String $message ) {
-		DefaultMutableTreeNode node = null;
-		String[] tokens = $message.split( ",", 4 );
-		handlePlayerQuit( tokens[ 0 ] );
-		node = (DefaultMutableTreeNode)_gui._games.getModel().getRoot();
-		if ( tokens.length > 1 ) {
-			/*
-			 * Player is inside some game.
-			 * Lets find game type in the tree.
-			 */
-			int i = 0, childs = node.getChildCount();
-			for ( i = 0; i < childs; ++ i ) {
-				DefaultMutableTreeNode gameType = (DefaultMutableTreeNode)node.getChildAt( i );
-				HPlayerSet ps = (HPlayerSet)gameType.getUserObject();
-				if ( tokens[ 1 ].compareTo( ps._id ) == 0 ) {
-					node = gameType;
-					break;
-				}
-			}
-			if ( i >= childs ) {
-				System.out.println( "Internal logic implementation error." );
-				System.exit( 1 );
-			}
-			/*
-			 * Lets look for specyfic game.
-			 */
-			childs = node.getChildCount();
-			DefaultMutableTreeNode game = null;
-			for ( i = 0; i < childs; ++ i ) {
-				game = (DefaultMutableTreeNode)node.getChildAt( i );
-				HPlayerSet ps = (HPlayerSet)game.getUserObject();
-				if ( tokens[ 2 ].compareTo( ps._login ) == 0 )
-					break;
-			}
-			if ( i < childs ) {
-				node = game;
-			} else {
-				DefaultMutableTreeNode newGame = null;
-				node.add( newGame = new DefaultMutableTreeNode( new HPlayerSet( tokens[ 1 ], tokens[ 2 ], tokens[ 3 ] ) ) );
-				node = newGame;
-			}
-		}
-		addPlayer( node, tokens[ 0 ] );
-		System.out.println( "Another player: [" + tokens[ 0 ] + "]." );
-	}
-	boolean removePlayer( DefaultMutableTreeNode $node, String $name ) {
-		HPlayerSet ps = (HPlayerSet)$node.getUserObject();
-		if ( ps._players.remove( $name ) ) {
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode)_gui._games.getLastSelectedPathComponent();
-			TreePath path = null;
-			if ( node != null )
-				path = new TreePath( node.getPath() );
-			if ( node == $node )
-				_gui.updatePlayers( node );
-			if ( ps._players.isEmpty() && $node.isLeaf() )
-				((DefaultMutableTreeNode)$node.getParent()).remove( $node );
-			((DefaultTreeModel)_gui._games.getModel()).reload();
-			if ( path != null )
-				_gui._games.setSelectionPath( path );
-			return ( false );
-		} else {
-			int childs = $node.getChildCount();
-			for ( int i = 0; i < childs; ++ i )
-				if ( ! removePlayer( (DefaultMutableTreeNode)$node.getChildAt( i ), $name ) )
-					return ( false );
-		}
-		return ( true );
-	}
-	public void handlePlayerQuit( String $message ) {
-		removePlayer((DefaultMutableTreeNode) _gui._games.getModel().getRoot(), $message );
-		System.out.println( "Player: [" + $message + "] removed." );
+	public void reload() {
+		((PartysModel)_gui._games.getModel()).reload();
 	}
 	public void cleanup() {
-		((DefaultMutableTreeNode)((DefaultTreeModel)_gui._games.getModel()).getRoot()).removeAllChildren();
-		((DefaultTreeModel)_gui._games.getModel()).reload();
+		reload();
 		_gui.clearLog();
 	}
 	public void log( String $message, int $color ) {

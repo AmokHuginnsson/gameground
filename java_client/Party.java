@@ -28,4 +28,7 @@ class Party {
 	public java.util.Iterator<Player> playerIterator() {
 		return ( _players.iterator() );
 	}
+	public int getPlayerCount() {
+		return ( _players.size() );
+	}
 }
