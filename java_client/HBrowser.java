@@ -62,17 +62,19 @@ class HBrowser extends HAbstractLogic {
 			}
 			GameCreator gc = new GameCreator( _app, v );
 			if ( gc.confirmed() ) {
-				_app.setFace( gc.getFace() );
+				_workArea.addParty( gc.createParty() );
 				_client.println( "create:" + gc.getConfiguration() );
 			}
 		}
 		public void onJoin() {
+		/*
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode)_games.getLastSelectedPathComponent();
 			HPlayerSet ps = (HPlayerSet)node.getUserObject();
 			HAbstractLogic l = _app.getLogicBySymbol( ps._id );
 			HLogicInfo i = l.getInfo();
 			_app.setFace( i._face );
 			_client.println( "join:" + ps._login );
+		*/
 		}
 		public void onDisconnect() {
 			_client.println( "quit" );
@@ -112,9 +114,11 @@ class HBrowser extends HAbstractLogic {
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
 	HGUILocal _gui;
+	HWorkArea _workArea;
 //--------------------------------------------//
-	public HBrowser( GameGround $applet ) {
+	public HBrowser( GameGround $applet, HWorkArea $workArea ) {
 		super( $applet );
+		_workArea = $workArea;
 		init( _gui = new HGUILocal( LABEL ) );
 		try {
 			_handlers.put( "logic", HBrowser.class.getDeclaredMethod( "handleLogic", new Class[]{ String.class } ) );
@@ -128,6 +132,7 @@ class HBrowser extends HAbstractLogic {
 	}
 	public void init() { }
 	public void handleLogic( String $message ) {
+	/*
 		System.out.println( "GameGround serves [" + $message + "] logic." );
 		String[] tokens = $message.split( ":", 2 );
 		HAbstractLogic l = _app.getLogicBySymbol( tokens[ 0 ] );
@@ -137,6 +142,7 @@ class HBrowser extends HAbstractLogic {
 			((DefaultMutableTreeNode)_gui._games.getModel().getRoot()).add( new DefaultMutableTreeNode( new HPlayerSet( tokens[ 0 ], i._name, tokens[ 1 ] ) ) );
 			((DefaultTreeModel)_gui._games.getModel()).reload();
 		}
+	*/
 	}
 	void addPlayer( DefaultMutableTreeNode $node, String $name ) {
 		((HPlayerSet)$node.getUserObject()).addPlayer( $name );

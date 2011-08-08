@@ -22,7 +22,7 @@ class HWorkArea extends HAbstractWorkArea {
 		}
 		void init() {
 			super.init();
-			_browser = new HBrowser( _app );
+			_browser = new HBrowser( _app, HWorkArea.this );
 			_tabs.addTab( "Browser", _browser.getGUI() );
 		}
 		public void onExit() {
@@ -33,8 +33,10 @@ class HWorkArea extends HAbstractWorkArea {
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
-	SortedMap<String, Method> _handlers;
-	SortedMap<String, HLogicInfo> _logics;
+	private SortedMap<String, Method> _handlers;
+	private SortedMap<String, HLogicInfo> _logics;
+	private SortedMap<String, Player> _players;
+	private SortedMap<String, Party> _partys;
 	HClient _client;
 	HGUILocal _gui;
 	private HBrowser _browser;
@@ -135,6 +137,23 @@ class HWorkArea extends HAbstractWorkArea {
 		_logics.clear();
 	}
 	public void closeParty( String $id ) {
+	}
+	void addParty( HAbstractLogic $logic ) {
+	}
+
+	public HLogicInfo getLogicBySymbol( String $symbol ) {
+		java.util.Set<java.util.Map.Entry<String,HLogicInfo>> entSet = _logics.entrySet();
+		java.util.Map.Entry<String,HLogicInfo> ent = null;
+		java.util.Iterator<java.util.Map.Entry<String,HLogicInfo>> it = entSet.iterator();
+		while ( it.hasNext() ) {
+			ent = it.next();
+			if ( ent != null ) {
+				HLogicInfo info = ent.getValue();
+				if ( ( info != null ) && ( info._symbol.compareTo( $symbol ) == 0 ) )
+					return ( info );
+			}
+		}
+		return ( null );
 	}
 }
 

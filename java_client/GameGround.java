@@ -20,7 +20,7 @@ import java.io.FileReader;
 public class /* Application or applet name: */ GameGround extends JApplet {
 	public static final long serialVersionUID = 13l;
 	public Frame _frame;
-	private SortedMap<String,HLogicInfo> _logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String,HLogicInfo>() );
+	private SortedMap<String, HLogicInfo> _logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String,HLogicInfo>() );
 	private final ScheduledExecutorService _scheduler = Executors.newScheduledThreadPool( 1 );
 	private Map<Object, ScheduledFuture<?>> _tasks = Collections.synchronizedMap( new HashMap<Object, ScheduledFuture<?>>() );
 	private HClient _client;
@@ -97,21 +97,6 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		Dimension withJunk = _frame.getSize();
 		_frame.setSize( preferred.width + withJunk.width - real.width, preferred.height + withJunk.height - real.height );
 		_frame.validate();
-	}
-
-	public HLogicInfo getLogicBySymbol( String $symbol ) {
-		java.util.Set<java.util.Map.Entry<String,HLogicInfo>> entSet = _logics.entrySet();
-		java.util.Map.Entry<String,HLogicInfo> ent = null;
-		java.util.Iterator<java.util.Map.Entry<String,HLogicInfo>> it = entSet.iterator();
-		while ( it.hasNext() ) {
-			ent = it.next();
-			if ( ent != null ) {
-				HLogicInfo info = ent.getValue();
-				if ( ( info != null ) && ( info._symbol.compareTo( $symbol ) == 0 ) )
-					return ( info );
-			}
-		}
-		return ( null );
 	}
 
 	static public void main( final String $argv[] ) {
