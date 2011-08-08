@@ -36,7 +36,6 @@ class HWorkArea extends HAbstractWorkArea {
 	private SortedMap<String, Method> _handlers = java.util.Collections.synchronizedSortedMap( new TreeMap<String, Method>() );
 	private SortedMap<String, HLogicInfo> _logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String, HLogicInfo>() );
 	private SortedMap<String, Player> _players = java.util.Collections.synchronizedSortedMap( new TreeMap<String, Player>() );
-	private SortedMap<String, Party> _partys = java.util.Collections.synchronizedSortedMap( new TreeMap<String, Party>() );
 	HClient _client;
 	HGUILocal _gui;
 	private HBrowser _browser;
@@ -107,10 +106,9 @@ class HWorkArea extends HAbstractWorkArea {
 	}
 	public void handleParty( String $message ) {
 		String[] toks = $message.split( ",", 2 );
-		if ( "party".equals( toks[0] ) ) {
-			String[] p = $message.split( ",", 2 );
-			$message = p[1];
-			System.out.println( $message );
+		Party p = getPartyById( toks[0] );
+		if ( p != null ) {
+			p._party.processMessage( toks[1] );
 		}
 	}
 	public void processMessage( String $message ) {
@@ -143,19 +141,23 @@ class HWorkArea extends HAbstractWorkArea {
 	void addParty( HAbstractLogic $logic ) {
 	}
 
-	public HLogicInfo getLogicBySymbol( String $symbol ) {
+	public Party getPartyById( String $id ) {
 		java.util.Set<java.util.Map.Entry<String,HLogicInfo>> entSet = _logics.entrySet();
 		java.util.Map.Entry<String,HLogicInfo> ent = null;
 		java.util.Iterator<java.util.Map.Entry<String,HLogicInfo>> it = entSet.iterator();
+		Party p = null;
 		while ( it.hasNext() ) {
 			ent = it.next();
 			if ( ent != null ) {
 				HLogicInfo info = ent.getValue();
-				if ( ( info != null ) && ( info._symbol.compareTo( $symbol ) == 0 ) )
-					return ( info );
+				if ( info != null ) {
+					p = info.getParty( $id );
+					if ( p != null )
+						break;
+				}
 			}
 		}
-		return ( null );
+		return ( p );
 	}
 	public void handleLogic( String $message ) {
 		System.out.println( "GameGround serves [" + $message + "] logic." );
@@ -163,11 +165,17 @@ class HWorkArea extends HAbstractWorkArea {
 		HLogicInfo l = _app.getSupportedLogic( tokens[ 0 ] );
 		if ( l != null ) {
 			System.out.println( "Client serves [" + $message + "] logic." );
+			l.setDefaults( tokens[1] );
 			_logics.put( tokens[0], l );
 			_browser.reload();
 		}
 	}
 	public void handlePartyInfo( String $message ) {
+		System.out.println( "New party: [" + $message + "]." );
+		String[] tokens = $message.split( ",", 3 );
+		HLogicInfo l = _logics.get( tokens[1] );
+		l.addParty( tokens[0], new Party( tokens[0], tokens[2] ) );
+		_browser.reload();
 	}
 	public void handlePlayer( String $message ) {
 		System.out.println( "Another player: [" + $message + "]." );

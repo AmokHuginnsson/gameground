@@ -32,14 +32,8 @@ public abstract class HAbstractLogic {
 	public HGUIface getGUI() {
 		return ( _gui );
 	}
-	public HLogicInfo getInfo() {
-		return ( _info );
-	}
 	public void setId( String $id ) {
 		_id = $id;
-	}
-	public void setDefaults( String $defaults ) {
-		_info._defaults = $defaults;
 	}
 	public void handleMessage( String $message ) {
 		int index = 0, offset = 0;

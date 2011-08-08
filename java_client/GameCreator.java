@@ -83,18 +83,15 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 				_conf = null;
 			}
 			_confHolder.removeAll();
-/*			if ( idx >= 0 ) {
-				_playerSet = (HPlayerSet)_logics.getModel().getElementAt( idx );
-				HAbstractLogic l = _app.getLogicBySymbol( _playerSet._id );
-				_conf = l._gui.getConfigurator();
-				_face = l.getInfo()._face;
+			if ( idx >= 0 ) {
+				_info = (HLogicInfo)_logics.getModel().getElementAt( idx );
+				_conf = _info._conf;
 				assert _conf != null : _conf;
 				_conf.setVisible( false );
 				_confHolder.add( _conf );
 				_conf.setVisible( true );
-				_conf.setup( this, _playerSet._configuration );
+				_conf.setup( this );
 			}
-*/
 		setEnabledOk();
 		}
 	}
@@ -122,8 +119,5 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 	}
 	String getConfiguration() {
 		return ( _configuration );
-	}
-	public HAbstractLogic createParty() {
-		return ( null );
 	}
 }

@@ -86,7 +86,6 @@ class Boggle extends HAbstractLogic implements Runnable {
 		public JLabel _letter32;
 		public JLabel _letter33;
 		public JLabel[] _letters = new JLabel[16];
-		public BoggleConfigurator _conf;
 		final String[] _header = { "Player", "Score", "Last" };
 		public HGUILocal( String $resource ) {
 			super( $resource );
@@ -148,9 +147,6 @@ class Boggle extends HAbstractLogic implements Runnable {
 		}
 		public JTextPane getLogPad() {
 			return ( _logPad );
-		}
-		public HAbstractConfigurator getConfigurator() {
-			return ( _conf );
 		}
 		public void onMessage() {
 			String msg = _messageInput.getText();
@@ -274,7 +270,7 @@ class Boggle extends HAbstractLogic implements Runnable {
 	}
 	static boolean registerLogic( GameGround $app ) {
 		try {
-			$app.registerLogic( "bgl", new HLogicInfo( "bgl", "boggle", "Boggle", Boggle.class.getDeclaredMethod( "create", new Class[] { GameGround.class, HLogicInfo.class } ) ) );
+			$app.registerLogic( "bgl", new HLogicInfo( "bgl", "boggle", "Boggle", new BoggleConfigurator(), Boggle.class.getDeclaredMethod( "create", new Class[] { GameGround.class, HLogicInfo.class } ) ) );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );

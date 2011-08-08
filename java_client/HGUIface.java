@@ -65,9 +65,6 @@ abstract class HGUIface extends JPanel {
 			XUL xul = new XUL( this );
 			updateTagLib( xul );
 			xul.insert( AppletJDOMHelper.loadResource( res, this ), this );
-			HAbstractConfigurator ac = getConfigurator();
-			if ( ac != null )
-				xul.mapMembers( ac );
 		} catch ( java.lang.Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );

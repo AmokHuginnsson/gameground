@@ -4,11 +4,14 @@ import java.util.SortedSet;
 class Party {
 	String _id;
 	String _name;
+	String _configuration;
 	HAbstractLogic _party;
 	SortedSet<Player> _players = java.util.Collections.synchronizedSortedSet( new TreeSet<Player>() );
-	public Party( String $id, String $name ) {
+	public Party( String $id, String $conf ) {
+		String[] tokens = $conf.split( ",", 2 );
 		_id = $id;
-		_name = $name;
+		_name = tokens[0];
+		_configuration = tokens[1];
 	}
 	public String toString() {
 		return ( _name + ":" + _id );

@@ -55,7 +55,6 @@ class HBrowser extends HAbstractLogic {
 		public void onCreate() {
 			GameCreator gc = new GameCreator( _app, _logics );
 			if ( gc.confirmed() ) {
-				_workArea.addParty( gc.createParty() );
 				_client.println( "create:" + gc.getConfiguration() );
 			}
 		}

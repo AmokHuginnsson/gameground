@@ -86,6 +86,19 @@ public class PartysModel implements TreeModel {
 				}
 			}
 		} else if ( level == 1 ) {
+			java.util.Map.Entry<String,Party> ent = null;
+			java.util.Iterator<java.util.Map.Entry<String,Party>> it = p._logic.partyIterator();
+			int i = 0;
+			while ( it.hasNext() ) {
+				ent = it.next();
+				if ( ent != null ) {
+					if ( i == index ) {
+						child = new PartysModelNode( ent.getValue() );
+						break;
+					}
+					++ i;
+				}
+			}
 		}
 		return ( child );
 	}

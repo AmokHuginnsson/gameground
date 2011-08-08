@@ -56,6 +56,7 @@ HLogic::HLogic( HServer* server_, id_t const& id_, HString const& symbol_, HStri
 
 HLogic::~HLogic( void )
 	{
+	out << "Destroying logic: " << _id << endl;
 	}
 
 void HLogic::kick_client( OClientInfo* clientInfo_, char const* const reason_ )
