@@ -34,4 +34,7 @@ class Party {
 	public int getPlayerCount() {
 		return ( _players.size() );
 	}
+	public boolean hasPlayer( Player $player ) {
+		return ( _players.contains( $player ) );
+	}
 }

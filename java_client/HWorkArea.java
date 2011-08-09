@@ -121,7 +121,7 @@ class HWorkArea extends HAbstractWorkArea {
 			lp._party._party.processMessage( toks[1] );
 		}
 	}
-	public void processMessage( String $message ) {
+	public synchronized void processMessage( String $message ) {
 		String[] tokens = $message.split( ":", 2 );
 		String mnemonic = tokens[0];
 		String argument = tokens.length > 1 ? tokens[1] : null;
@@ -143,8 +143,10 @@ class HWorkArea extends HAbstractWorkArea {
 	public void handlerDummy( String $msg ) {
 		System.out.println( "Message processed by dummy handler: " + $msg + " in [HWorkArea]" );
 	}
-	public void cleanup() {
+	public synchronized void cleanup() {
 		_players.clear();
+		for ( int i = 1, COUNT = _gui._tabs.getTabCount(); i < COUNT; ++ i )
+			_gui._tabs.removeTabAt( 1 );
 		for ( HLogicInfo l : _logics.values() ) {
 			l.clear();
 		}
@@ -200,7 +202,7 @@ class HWorkArea extends HAbstractWorkArea {
 		l.addParty( tokens[0], new Party( tokens[0], tokens[2] ) );
 		_browser.reload();
 	}
-	public synchronized void handlePartyClose( String $message ) {
+	public void handlePartyClose( String $message ) {
 		System.out.println( "Party [" + $message + "] closed." );
 		LogicParty lp = getPartyById( $message );
 		if ( lp != null ) {
@@ -250,6 +252,9 @@ class HWorkArea extends HAbstractWorkArea {
 		}
 		_browser.reload();
 		System.out.println( "Player: [" + $message + "] removed." );
+	}
+	public Player getPlayer( String $name ) {
+		return ( _players.get( $name ) );
 	}
 }
 

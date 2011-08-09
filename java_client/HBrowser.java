@@ -40,7 +40,7 @@ class HBrowser extends HAbstractLogic {
 				public void mousePressed( java.awt.event.MouseEvent e ) {
 					if ( e.getClickCount() == 2 ) {
 						PartysModel.PartysModelNode node = (PartysModel.PartysModelNode)_games.getLastSelectedPathComponent();
-						if ( ( node != null ) && ( node.getLevel() == 2 ) )
+						if ( _join.isEnabled() )
 							onJoin();
 					}
 				}
@@ -69,7 +69,11 @@ class HBrowser extends HAbstractLogic {
 		public void valueChanged(TreeSelectionEvent e) {
 			PartysModel.PartysModelNode node = (PartysModel.PartysModelNode)_games.getLastSelectedPathComponent();
 			updatePlayers( node );
-			_join.setEnabled( ( node != null ) && ( node.getLevel() == 2 ) );
+			if ( ( node != null ) && ( node.getLevel() == 2 ) ) {
+				if ( _us == null )
+					_us = _workArea.getPlayer( _app.getName() );
+				_join.setEnabled( ! node._party.hasPlayer( _us ) );
+			}
 		};
 		public void updatePlayers( PartysModel.PartysModelNode $node ) {
 			DefaultListModel lm = new DefaultListModel();
@@ -113,6 +117,7 @@ class HBrowser extends HAbstractLogic {
 	HGUILocal _gui;
 	HWorkArea _workArea;
 	PartysModel _partysModel;
+	private Player _us = null;
 	private SortedMap<String, HLogicInfo> _logics = null;
 	private SortedMap<String, Player> _players = null;
 //--------------------------------------------//
@@ -133,6 +138,7 @@ class HBrowser extends HAbstractLogic {
 	public void cleanup() {
 		reload();
 		_gui.clearLog();
+		_us = null;
 	}
 	public void log( String $message, int $color ) {
 		_gui.log( $message, $color );

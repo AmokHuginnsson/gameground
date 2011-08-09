@@ -212,6 +212,7 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& client_, char const* con
 	_dispatcher.unregister_file_descriptor_handler( fileDescriptor );
 	clients_t::iterator clientIt = _clients.find( fileDescriptor );
 	M_ASSERT( clientIt != _clients.end() );
+	clientIt->second._valid = false;
 	remove_client_from_all_logics( clientIt->second );
 	out << "client ";
 	HString login;
