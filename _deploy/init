@@ -118,8 +118,17 @@ case "$1" in
 			;;
 		esac
 	;;
+	status)
+		log_daemon_msg "Service ${DESC}"
+		if is_running ; then
+			log_daemon_msg " is running."
+		else
+			log_daemon_msg " is NOT running."
+		fi
+		log_end_msg 0
+	;;
   *)
-		echo "Usage: $SCRIPTNAME {start|stop|restart|reload|force-reload}" >&2
+		echo "Usage: $SCRIPTNAME {start|stop|restart|reload|force-reload|status}" >&2
 		exit 3
 	;;
 esac
