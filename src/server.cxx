@@ -223,7 +223,6 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& client_, char const* con
 		}
 	else
 		cout << "`unnamed'";
-	_clients.erase( fileDescriptor );
 	if ( ! reason_ || reason_[ 0 ] )
 		{
 		HString reason = " was kicked because of: ";
@@ -235,6 +234,7 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& client_, char const* con
 		}
 	else
 		cout << " disconnected from server.";
+	_clients.erase( fileDescriptor );
 	cout << endl;
 	if ( ! login.is_empty() )
 		broadcast( _out << PROTOCOL::PLAYER_QUIT << PROTOCOL::SEP << login << endl << _out );
