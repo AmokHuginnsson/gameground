@@ -81,8 +81,12 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		$workArea.reinit();
 		validate();
 	}
-	public void processMessage( String $message ) {
-		_workArea.processMessage( $message );
+	public void processMessage( final String $message ) {
+		javax.swing.SwingUtilities.invokeLater( new Runnable() {
+			public void run() {
+				_workArea.processMessage( $message );
+			}
+		});
 	}
 	public HLogin.OConnectionConfig getConnectionConfig() {
 		return ( _loginScreen.getConnectionConfig() );
@@ -101,12 +105,11 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	}
 
 	static public void main( final String $argv[] ) {
-		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+		javax.swing.SwingUtilities.invokeLater( new Runnable() {
 			public void run() {
 				eventDispatchThreadMain( $argv );
 			}
 		});
-
 	}
 
 	static void eventDispatchThreadMain( String $argv[] ) {
