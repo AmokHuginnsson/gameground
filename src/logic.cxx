@@ -85,15 +85,22 @@ void HLogic::do_kick( OClientInfo* )
 bool HLogic::accept_client( OClientInfo* clientInfo_ )
 	{
 	M_PROLOG
-	bool rejected = false;
+	bool rejected( false );
 	if ( ! do_accept( clientInfo_ ) )
 		{
 		_clients.insert( clientInfo_ );
-		do_post_accept( clientInfo_ );
+		clientInfo_->_logics.insert( _id );
 		}
 	else
 		rejected = true;
 	return ( rejected );
+	M_EPILOG
+	}
+
+void HLogic::post_accept_client( OClientInfo* clientInfo_ )
+	{
+	M_PROLOG
+	do_post_accept( clientInfo_ );
 	M_EPILOG
 	}
 

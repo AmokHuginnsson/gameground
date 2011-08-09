@@ -40,6 +40,9 @@ run: $(TARGET)
 test: $(TARGET)
 	java -Dcom.sun.management.jmxremote -Djava.security.manager -Djava.security.policy=gameground.policy -ea -cp build/gameground.jar GameGround
 
+test2: $(TARGET)
+	java -Dcom.sun.management.jmxremote -Djava.security.manager -Djava.security.policy=gameground.policy -ea -cp build/gameground.jar GameGround --login Ktos
+
 dist:
 	$(MAKE)
 	@mv build/gameground.jar gameground.jar.keep

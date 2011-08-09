@@ -28,10 +28,10 @@ public class HLogicInfo {
 			System.exit( 1 );
 		}
 	}
-	public HAbstractLogic create( GameGround $app ) {
+	public HAbstractLogic create( GameGround $app, String $id, String $configuration ) {
 		HAbstractLogic logic = null;
 		try {
-			logic = (HAbstractLogic)_creator.invoke( null, new Object [] { $app, this } );
+			logic = (HAbstractLogic)_creator.invoke( null, new Object [] { $app, $id, $configuration } );
 		} catch ( java.lang.IllegalAccessException e ) {
 			e.printStackTrace();
 			System.exit( 1 );
@@ -59,4 +59,10 @@ public class HLogicInfo {
 	public java.util.Iterator<java.util.Map.Entry<String, Party>> partyIterator() {
 		return ( _partys.entrySet().iterator() );
 	}
+	public void dropPlayer( Player $player ) {
+		for ( Party p : _partys.values() ) {
+			p.removePlayer( $player );
+		}
+	}
 }
+

@@ -272,7 +272,7 @@ void HBoggle::do_kick( OClientInfo* clientInfo_ )
 yaal::hcore::HString HBoggle::do_get_info() const
 	{
 	HLock l( _mutex );
-	return ( HString( "bgl," ) + get_comment() + "," + _players.size() + "," + _startupPlayers + "," + _roundTime + "," + _maxRounds + "," + _interRoundDelay );
+	return ( HString( "bgl," ) + get_comment() + "," + _startupPlayers + "," + _roundTime + "," + _maxRounds + "," + _interRoundDelay );
 	}
 
 void HBoggle::schedule( EVENT::event_t event_ )

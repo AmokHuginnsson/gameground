@@ -11,6 +11,15 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
 import org.swixml.XTabbedPane;
 
+class LogicParty {
+	public HLogicInfo _logicInfo;
+	public Party _party;
+	LogicParty( HLogicInfo $logicInfo, Party $party ) {
+		_logicInfo = $logicInfo;
+		_party = $party;
+	}
+}
+
 class HWorkArea extends HAbstractWorkArea {
 	public static final String LABEL = "workarea";
 	static boolean once = true;
@@ -106,9 +115,9 @@ class HWorkArea extends HAbstractWorkArea {
 	}
 	public void handleParty( String $message ) {
 		String[] toks = $message.split( ",", 2 );
-		Party p = getPartyById( toks[0] );
-		if ( p != null ) {
-			p._party.processMessage( toks[1] );
+		LogicParty lp = getPartyById( toks[0] );
+		if ( lp._party != null ) {
+			lp._party._party.processMessage( toks[1] );
 		}
 	}
 	public void processMessage( String $message ) {
@@ -138,26 +147,26 @@ class HWorkArea extends HAbstractWorkArea {
 	}
 	public void closeParty( String $id ) {
 	}
-	void addParty( HAbstractLogic $logic ) {
-	}
 
-	public Party getPartyById( String $id ) {
+	public LogicParty getPartyById( String $id ) {
 		java.util.Set<java.util.Map.Entry<String,HLogicInfo>> entSet = _logics.entrySet();
 		java.util.Map.Entry<String,HLogicInfo> ent = null;
 		java.util.Iterator<java.util.Map.Entry<String,HLogicInfo>> it = entSet.iterator();
-		Party p = null;
+		LogicParty lp = null;
 		while ( it.hasNext() ) {
 			ent = it.next();
 			if ( ent != null ) {
 				HLogicInfo info = ent.getValue();
 				if ( info != null ) {
-					p = info.getParty( $id );
-					if ( p != null )
+					Party p = info.getParty( $id );
+					if ( p != null ) {
+						lp = new LogicParty( info, p );
 						break;
+					}
 				}
 			}
 		}
-		return ( p );
+		return ( lp );
 	}
 	public void handleLogic( String $message ) {
 		System.out.println( "GameGround serves [" + $message + "] logic." );
@@ -181,9 +190,36 @@ class HWorkArea extends HAbstractWorkArea {
 		System.out.println( "Another player: [" + $message + "]." );
 		String[] tokens = $message.split( ",", 2 );
 		String name = tokens[0];
-		_players.put( name, new Player( name ) );
+		Player p = _players.get( name );
+		if ( p != null ) {
+			for ( HLogicInfo l : _logics.values() )
+				l.dropPlayer( p );
+		} else {
+			_players.put( name, p = new Player( name ) );
+		}
+		if ( tokens.length > 1 ) {
+			String[] partys = tokens[1].split( "," );
+			for ( String id : partys ) {
+				LogicParty lp = getPartyById( id );
+				lp._party.addPlayer( p );
+				if ( ( lp._party._party == null ) && ( name.equals( _app.getName() ) ) ) {
+					System.out.println( "Adding new local party: [" + lp._party + "]." );
+					java.awt.Component c = null;
+					_gui._tabs.addTab( lp._party.toString(), c = ( lp._party._party = lp._logicInfo.create( _app, id, lp._party._configuration ) ).getGUI() );
+					_gui._tabs.setSelectedComponent( c );
+				}
+			}
+		}
+		_browser.reload();
 	}
 	public void handlePlayerQuit( String $message ) {
+		Player p = _players.get( $message );
+		if ( p != null ) {
+			for ( HLogicInfo l : _logics.values() )
+				l.dropPlayer( p );
+			_players.remove( $message );
+		}
+		_browser.reload();
 		System.out.println( "Player: [" + $message + "] removed." );
 	}
 }

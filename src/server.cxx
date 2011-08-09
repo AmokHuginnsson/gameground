@@ -445,10 +445,10 @@ void HServer::create_game( OClientInfo& client_, HString const& arg_ )
 					{
 					HLogic::id_t const& id( logic->id() );
 					_logics[ id ] = logic;
-					client_._logics.insert( id );
 					out << name << "," << type << endl;
 					broadcast( _out << PROTOCOL::PARTY_INFO << PROTOCOL::SEP << id << PROTOCOL::SEPP << logic->get_info() << endl << _out );
 					send_player_info( client_ );
+					logic->post_accept_client( &client_ );
 					}
 				else
 					client_._socket->write_until_eos( "err:Specified configuration is inconsistent.\n" );
@@ -477,8 +477,8 @@ void HServer::join_game( OClientInfo& client_, HString const& id_ )
 			kick_client( client_._socket, _( "You were already in this party." ) );
 		else if ( ! it->second->accept_client( &client_ ) )
 			{
-			client_._logics.insert( id_ );
 			send_player_info( client_ );
+			it->second->post_accept_client( &client_ );
 			}
 		else
 			client_._socket->write_until_eos( "err:Game is full.\n" );

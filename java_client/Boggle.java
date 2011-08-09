@@ -179,19 +179,19 @@ class Boggle extends HAbstractLogic implements Runnable {
 	private State _state = State.INIT;
 	private Vector<BogglePlayer> _players = new Vector<BogglePlayer>();
 //--------------------------------------------//
-	public Boggle( GameGround $applet, HLogicInfo $info ) throws Exception {
+	public Boggle( GameGround $applet, String $id, String $configuration ) throws Exception {
 		super( $applet );
-		_info = $info;
 		init( _gui = new HGUILocal( LABEL ) );
 		_handlers.put( PROTOCOL.PLAYER, Boggle.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYERQUIT, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
-		_handlers.put( "party_info", HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.DECK, Boggle.class.getDeclaredMethod( "handlerDeck", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.SCORED, Boggle.class.getDeclaredMethod( "handlerScored", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.LONGEST, Boggle.class.getDeclaredMethod( "handlerLongest", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.ROUND, Boggle.class.getDeclaredMethod( "handlerRound", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.ENDROUND, Boggle.class.getDeclaredMethod( "handlerEndRound", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.SETUP, Boggle.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
+		_state = State.INIT;
+		_app.registerTask( this, 1 );
 	}
 	void handlerPlayer( String $command ) {
 		String[] tokens = $command.split( ",", 3 );
@@ -255,22 +255,17 @@ class Boggle extends HAbstractLogic implements Runnable {
 			}
 		}
 	}
-	public void init() {
-		_client = _app.getClient();
-		_state = State.INIT;
-		_app.registerTask( this, 1 );
-	}
-	static HAbstractLogic create( GameGround $app, HLogicInfo $info ) {
+	static HAbstractLogic create( GameGround $app, String $id, String $configuration ) {
 		HAbstractLogic logic = null;
 		try {
-			logic = new Boggle( $app, $info );
+			logic = new Boggle( $app, $id, $configuration );
 		} catch ( Exception e ) {
 		}
 		return ( logic );
 	}
 	static boolean registerLogic( GameGround $app ) {
 		try {
-			$app.registerLogic( "bgl", new HLogicInfo( "bgl", "boggle", "Boggle", new BoggleConfigurator(), Boggle.class.getDeclaredMethod( "create", new Class[] { GameGround.class, HLogicInfo.class } ) ) );
+			$app.registerLogic( "bgl", new HLogicInfo( "bgl", "boggle", "Boggle", new BoggleConfigurator(), Boggle.class.getDeclaredMethod( "create", new Class[] { GameGround.class, String.class, String.class } ) ) );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );

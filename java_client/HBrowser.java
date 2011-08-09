@@ -59,14 +59,8 @@ class HBrowser extends HAbstractLogic {
 			}
 		}
 		public void onJoin() {
-		/*
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode)_games.getLastSelectedPathComponent();
-			HPlayerSet ps = (HPlayerSet)node.getUserObject();
-			HAbstractLogic l = _app.getLogicBySymbol( ps._id );
-			HLogicInfo i = l.getInfo();
-			_app.setFace( i._face );
-			_client.println( "join:" + ps._login );
-		*/
+			PartysModel.PartysModelNode party = (PartysModel.PartysModelNode)_games.getLastSelectedPathComponent();
+			_client.println( "join:" + party._party._id );
 		}
 		public void onDisconnect() {
 			_client.println( "quit" );
@@ -130,9 +124,11 @@ class HBrowser extends HAbstractLogic {
 		_players = $players;
 		init( _gui = new HGUILocal( LABEL ) );
 	}
-	public void init() { }
 	public void reload() {
+		TreePath path = _gui._games.getSelectionPath();
 		((PartysModel)_gui._games.getModel()).reload();
+		if ( path != null )
+			_gui._games.setSelectionPath( path );
 	}
 	public void cleanup() {
 		reload();
@@ -143,6 +139,9 @@ class HBrowser extends HAbstractLogic {
 	}
 	public void log( String $message ) {
 		_gui.log( $message );
+	}
+	public void setClient( HClient $client ) {
+		_client = $client;
 	}
 }
 

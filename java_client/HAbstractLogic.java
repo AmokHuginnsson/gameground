@@ -7,10 +7,16 @@ public abstract class HAbstractLogic {
 	GameGround _app = null;
 	HClient _client = null;
 	SortedMap<String,Method> _handlers;
-	HLogicInfo _info;
 	String _id = "0";
+	String _configuration;
 	public HAbstractLogic( GameGround $app ) {
 		_app = $app;
+		_client = $app.getClient();
+	}
+	public HAbstractLogic( GameGround $app, String $id, String $configuration ) {
+		this( $app );
+		_id = $id;
+		_configuration = $configuration;
 	}
 	public void init( HGUIface $ext ) {
 		_gui = $ext;
@@ -24,10 +30,6 @@ public abstract class HAbstractLogic {
 			System.exit( 1 );
 		}
 	}
-	public void setClient( HClient $client ) {
-		_client = $client;
-	}
-	public abstract void init();
 	public abstract void cleanup();
 	public HGUIface getGUI() {
 		return ( _gui );
@@ -89,11 +91,11 @@ public abstract class HAbstractLogic {
 				System.exit( 1 );
 			}
 		} else {
-			System.out.println( "Unhandled mnemonic: [" + mnemonic + "], in [" + _info._face + "] while processing message: " + $message );
+			System.out.println( "Unhandled mnemonic: [" + mnemonic + "], in [" + _configuration + "] while processing message: " + $message );
 			System.exit( 0 );
 		}
 	}
 	public void handlerDummy( String $msg ) {
-		System.out.println( "Message processed by dummy handler: " + $msg + " in [" + _info._face + "]" );
+		System.out.println( "Message processed by dummy handler: " + $msg + " in [" + _configuration + "]" );
 	}
 }

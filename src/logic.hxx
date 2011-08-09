@@ -74,6 +74,7 @@ public:
 	virtual ~HLogic( void );
 	bool process_command( OClientInfo*, yaal::hcore::HString const& );
 	bool accept_client( OClientInfo* );
+	void post_accept_client( OClientInfo* );
 	int active_clients( void ) const;
 	yaal::hcore::HString const& get_comment() const;
 	yaal::hcore::HString get_info() const;

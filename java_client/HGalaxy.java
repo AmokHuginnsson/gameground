@@ -169,7 +169,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		public void onMessage() {
 			String msg = _messageInput.getText();
 			if ( msg.matches( ".*\\S+.*" ) ) {	
-				_client.println( "cmd:glx:say:" + msg );
+				_client.println( "cmd:" + _id + ":glx:say:" + msg );
 				_messageInput.setText( "" );
 			}
 		}
@@ -205,7 +205,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 			HGalaxy.this.onEndRound();
 		}
 		public void onExit() {
-			_app.setFace( HBrowser.LABEL );
+			_app.closeParty( _id );
 		}
 	}
 //--------------------------------------------//
@@ -227,8 +227,8 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 	};
 	public HGUILocal _gui;
 //--------------------------------------------//
-	public HGalaxy( GameGround $applet ) throws Exception {
-		super( $applet );
+	public HGalaxy( GameGround $applet, String $id, String $configuration ) throws Exception {
+		super( $applet, $id, $configuration );
 		init( _gui = new HGUILocal( LABEL ) );
 		_emperors = Collections.synchronizedMap( new HashMap<Integer,String>() );
 		_handlers.put( "setup", HGalaxy.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
@@ -240,7 +240,6 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 			_systemNames = HSystemNames.getNames( HSystemNames.NORSE );
 		else
 			_systemNames = HSystemNames.getNames( HSystemNames.LATIN );
-		_info = new HLogicInfo( "glx", "galaxy", "Galaxy" );
 		HImages images = new HImages();
 		_gui._board.setGui( this );
 		_gui._board.setImages( images );
@@ -248,6 +247,11 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		$applet.addGlobalKeyListener( _gui, this );
 		_state = State.LOCKED;
 		_moves = java.util.Collections.<HMove>synchronizedList( new java.util.LinkedList<HMove>() );
+		_emperor = _app.getName();
+		_gui._emperor.setText( _emperor );
+		_systems = null;
+		_systemCount = 0;
+		_emperors.clear();
 	}
 	void handlerGalaxy( String $command ) {
 		processMessage( $command );
@@ -440,24 +444,24 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		setState( State.LOCKED );
 		for ( java.util.ListIterator i = $moves.listIterator(); i.hasNext(); ) {
 			HMove move = (HMove)i.next();
-			String message = "cmd:glx:play:move=" + move._sourceSystem + "," + move._destinationSystem + "," + move._fleet;
+			String message = "cmd:" + _id + ":glx:play:move=" + move._sourceSystem + "," + move._destinationSystem + "," + move._fleet;
 			_client.println( message );
 		}
-		_client.println( "cmd:glx:play:end_round" );
+		_client.println( "cmd:" + _id + ":glx:play:end_round" );
 		$moves.clear();
 	}
-	public void init() {
-		_client = _app.getClient();
-		_emperor = _app.getConnectionConfig()._login;
-		_gui._emperor.setText( _emperor );
-		_systems = null;
-		_systemCount = 0;
-		_emperors.clear();
-	}
 	public void cleanup() {}
+	static HAbstractLogic create( GameGround $app, String $id, String $configuration ) {
+		HAbstractLogic logic = null;
+		try {
+			logic = new HGalaxy( $app, $id, $configuration );
+		} catch ( Exception e ) {
+		}
+		return ( logic );
+	}
 	static boolean registerLogic( GameGround $app ) {
 		try {
-			$app.registerLogic( LABEL, new HGalaxy( $app ) );
+			$app.registerLogic( "glx", new HLogicInfo( "glx", "galaxy", "Galaxy", new HGalaxyConfigurator(), HGalaxy.class.getDeclaredMethod( "create", new Class[] { GameGround.class, String.class, String.class } ) ) );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );

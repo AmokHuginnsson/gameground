@@ -548,7 +548,7 @@ void HGo::do_kick( OClientInfo* clientInfo_ )
 yaal::hcore::HString HGo::do_get_info() const
 	{
 	HLock l( _mutex );
-	return ( HString( "go," ) + get_comment() + "," + _players.size() + "," + _gobanSize + "," + _komi + "," + _handicaps + "," + _mainTime + "," + _byoYomiPeriods + "," + _byoYomiTime );
+	return ( HString( "go," ) + get_comment() + "," + _gobanSize + "," + _komi + "," + _handicaps + "," + _mainTime + "," + _byoYomiPeriods + "," + _byoYomiTime );
 	}
 
 void HGo::reschedule_timeout( void )
