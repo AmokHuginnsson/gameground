@@ -128,7 +128,7 @@ class Go extends HAbstractLogic implements Runnable {
 			}
 		}
 		public void onExit() {
-			_app.setFace( HBrowser.LABEL );
+			_app.closeParty( _id );
 		}
 		public void onGobanSize() {
 			if ( _conf.eventsIgnored() )
@@ -201,8 +201,8 @@ class Go extends HAbstractLogic implements Runnable {
 	private String _stones = null;
 	private SortedMap<Character,GoPlayer> _contestants = java.util.Collections.synchronizedSortedMap( new TreeMap<Character,GoPlayer>() );
 //--------------------------------------------//
-	public Go( GameGround $applet ) throws Exception {
-		super( $applet );
+	public Go( GameGround $applet, String $id, String $configuration ) throws Exception {
+		super( $applet, $id, $configuration );
 		init( _gui = new HGUILocal( LABEL ) );
 		_handlers.put( PROTOCOL.NAME, Go.class.getDeclaredMethod( "handlerGo", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.SETUP, Go.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
@@ -212,7 +212,6 @@ class Go extends HAbstractLogic implements Runnable {
 		_handlers.put( PROTOCOL.STONE, Go.class.getDeclaredMethod( "handlerStone", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.CONTESTANT, Go.class.getDeclaredMethod( "handlerContestant", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYERQUIT, Go.class.getDeclaredMethod( "handlerPlayerQuit", new Class[]{ String.class } ) );
-		_info = new HLogicInfo( "go", "go", "Go" );
 		GoImages images = new GoImages();
 		_gui._board.setGui( this );
 		_gui._board.setImages( images );
@@ -371,9 +370,17 @@ class Go extends HAbstractLogic implements Runnable {
 			}
 		}
 	}
+	static HAbstractLogic create( GameGround $app, String $id, String $configuration ) {
+		HAbstractLogic logic = null;
+		try {
+			logic = new Go( $app, $id, $configuration );
+		} catch ( Exception e ) {
+		}
+		return ( logic );
+	}
 	static boolean registerLogic( GameGround $app ) {
 		try {
-			$app.registerLogic( LABEL, new Go( $app ) );
+			$app.registerLogic( "go", new HLogicInfo( "go", "go", "Go", null, Go.class.getDeclaredMethod( "create", new Class[] { GameGround.class, String.class, String.class } ) ) );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );

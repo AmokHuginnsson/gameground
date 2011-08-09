@@ -174,7 +174,8 @@ class HWorkArea extends HAbstractWorkArea {
 		HLogicInfo l = _app.getSupportedLogic( tokens[ 0 ] );
 		if ( l != null ) {
 			System.out.println( "Client serves [" + $message + "] logic." );
-			l.setDefaults( tokens[1] );
+			if ( tokens.length > 1 )
+				l.setDefaults( tokens[1] );
 			_logics.put( tokens[0], l );
 			_browser.reload();
 		}

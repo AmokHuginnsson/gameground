@@ -17,15 +17,17 @@ public class HLogicInfo {
 		_name = $name;
 		_conf = $conf;
 		_creator = $creator;
-		try {
-			String res = "/res/" + _face + "-conf.xml";
-			System.out.println( "Loading resources: " + res );
-			XUL xul = new XUL( _conf );
-			xul.insert( AppletJDOMHelper.loadResource( res, _conf ), _conf );
-			xul.mapMembers( _conf );
-		} catch ( java.lang.Exception e ) {
-			e.printStackTrace();
-			System.exit( 1 );
+		String res = "/res/" + _face + "-conf.xml";
+		if ( getClass().getResourceAsStream( res ) != null ) {
+			try {
+				System.out.println( "Loading resources: " + res );
+				XUL xul = new XUL( _conf );
+				xul.insert( AppletJDOMHelper.loadResource( res, _conf ), _conf );
+				xul.mapMembers( _conf );
+			} catch ( java.lang.Exception e ) {
+				e.printStackTrace();
+				System.exit( 1 );
+			}
 		}
 	}
 	public HAbstractLogic create( GameGround $app, String $id, String $configuration ) {
@@ -54,7 +56,8 @@ public class HLogicInfo {
 		_partys.put( $id, $party );
 	}
 	public void setDefaults( String $defaults ) {
-		_conf.setDefaults( $defaults );
+		if ( _conf != null )
+			_conf.setDefaults( $defaults );
 	}
 	public java.util.Iterator<java.util.Map.Entry<String, Party>> partyIterator() {
 		return ( _partys.entrySet().iterator() );

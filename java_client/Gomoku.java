@@ -91,7 +91,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 			}
 		}
 		public void onExit() {
-			_app.setFace( HBrowser.LABEL );
+			_app.closeParty( _id );
 		}
 		public void onBlack() {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
@@ -120,8 +120,8 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	private String _stones = null;
 	private SortedMap<Character,GomokuPlayer> _contestants = java.util.Collections.synchronizedSortedMap( new TreeMap<Character,GomokuPlayer>() );
 //--------------------------------------------//
-	public Gomoku( GameGround $applet ) throws Exception {
-		super( $applet );
+	public Gomoku( GameGround $applet, String $id, String $configuration ) throws Exception {
+		super( $applet, $id, $configuration );
 		init( _gui = new HGUILocal( LABEL ) );
 		_handlers.put( PROTOCOL.NAME, Gomoku.class.getDeclaredMethod( "handlerGomoku", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.STONES, Gomoku.class.getDeclaredMethod( "handlerStones", new Class[]{ String.class } ) );
@@ -131,7 +131,6 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		_handlers.put( PROTOCOL.PLAYERQUIT, Gomoku.class.getDeclaredMethod( "handlerPlayerQuit", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.ADMIN, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.SETUP, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
-		_info = new HLogicInfo( "gomoku", "gomoku", "Gomoku" );
 		GoImages images = new GoImages();
 		//_gui._board.setGui( this );
 		_gui._board.setImages( images );
@@ -219,9 +218,17 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	}
 	public void run() {
 	}
+	static HAbstractLogic create( GameGround $app, String $id, String $configuration ) {
+		HAbstractLogic logic = null;
+		try {
+			logic = new Gomoku( $app, $id, $configuration );
+		} catch ( Exception e ) {
+		}
+		return ( logic );
+	}
 	static boolean registerLogic( GameGround $app ) {
 		try {
-			$app.registerLogic( LABEL, new Gomoku( $app ) );
+			$app.registerLogic( "gomoku", new HLogicInfo( "gomoku", "gomoku", "Gomoku", null, Gomoku.class.getDeclaredMethod( "create", new Class[] { GameGround.class, String.class, String.class } ) ) );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );

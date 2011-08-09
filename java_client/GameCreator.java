@@ -86,11 +86,12 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 			if ( idx >= 0 ) {
 				_info = (HLogicInfo)_logics.getModel().getElementAt( idx );
 				_conf = _info._conf;
-				assert _conf != null : _conf;
-				_conf.setVisible( false );
-				_confHolder.add( _conf );
-				_conf.setVisible( true );
-				_conf.setup( this );
+				if ( _conf != null ) {
+					_conf.setVisible( false );
+					_confHolder.add( _conf );
+					_conf.setVisible( true );
+					_conf.setup( this );
+				}
 			}
 		setEnabledOk();
 		}
