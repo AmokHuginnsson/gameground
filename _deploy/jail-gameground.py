@@ -15,7 +15,7 @@ forceCopy=["/dev/urandom",
 		"/usr/lib/aspell/standard.kbd",
 		"/lib/tfurca-makejail-to-pizda"]
 chroot="/home/gameground"
-testCommandsInsideJail=["/bin/sh -c 'cd /nest;/usr/bin/env HOME=/nest NEST=/ LD_LIBRARY_PATH=/nest/lib /nest/1exec -G'"]
+testCommandsInsideJail=["/bin/launchtool -u gameground --chdir='/nest' -t gameground-install \". /nest/set-limits.sh; /usr/bin/env HOME=/nest NEST=/ LD_LIBRARY_PATH=/nest/lib /nest/1exec\""]
 processNames=["1exec"]
 cleanJailFirst=0
 sleepAfterStartCommand=1
