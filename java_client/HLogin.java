@@ -76,10 +76,11 @@ class HLogin extends HAbstractWorkArea {
 			serverAddress = $applet.getCodeBase().getHost();
 		} catch ( java.lang.NullPointerException e ) {
 		} finally {
-			if ( serverAddress.compareTo( "" ) == 0 )
+			if ( "".equals( serverAddress ) && ( "".equals( _app.getParameter( "host" ) ) || ( _app.getParameter( "host" ) == null ) ) )
 				serverAddress = "127.0.0.1";
 		}
-		_gui._server.setText( serverAddress );
+		if ( ! "".equals( serverAddress ) )
+			_gui._server.setText( serverAddress );
 	}
 	void onConnectClick() {
 		String errors = "";
