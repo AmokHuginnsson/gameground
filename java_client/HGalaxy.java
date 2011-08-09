@@ -456,6 +456,8 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		try {
 			logic = new HGalaxy( $app, $id, $configuration );
 		} catch ( Exception e ) {
+			e.printStackTrace();
+			System.exit( 1 );
 		}
 		return ( logic );
 	}

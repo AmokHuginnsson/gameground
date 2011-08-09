@@ -98,7 +98,6 @@ protected:
 		{
 		static char const* const NAME;
 		static char const* const PLAY;
-		static char const* const PLAYER;
 		static char const* const DECK;
 		static char const* const SETUP;
 		static char const* const ROUND;

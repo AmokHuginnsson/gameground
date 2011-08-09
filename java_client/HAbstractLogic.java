@@ -34,9 +34,6 @@ public abstract class HAbstractLogic {
 	public HGUIface getGUI() {
 		return ( _gui );
 	}
-	public void setId( String $id ) {
-		_id = $id;
-	}
 	public void handleMessage( String $message ) {
 		int index = 0, offset = 0;
 		int length = $message.length();

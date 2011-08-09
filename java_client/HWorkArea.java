@@ -57,6 +57,7 @@ class HWorkArea extends HAbstractWorkArea {
 			_handlers.put( "party", HWorkArea.class.getDeclaredMethod( "handleParty", new Class[]{ String.class } ) );
 			_handlers.put( "logic", HWorkArea.class.getDeclaredMethod( "handleLogic", new Class[]{ String.class } ) );
 			_handlers.put( "party_info", HWorkArea.class.getDeclaredMethod( "handlePartyInfo", new Class[]{ String.class } ) );
+			_handlers.put( "party_close", HWorkArea.class.getDeclaredMethod( "handlePartyClose", new Class[]{ String.class } ) );
 			_handlers.put( "player", HWorkArea.class.getDeclaredMethod( "handlePlayer", new Class[]{ String.class } ) );
 			_handlers.put( "player_quit", HWorkArea.class.getDeclaredMethod( "handlePlayerQuit", new Class[]{ String.class } ) );
 		} catch ( java.lang.NoSuchMethodException e ) {
@@ -143,9 +144,21 @@ class HWorkArea extends HAbstractWorkArea {
 		System.out.println( "Message processed by dummy handler: " + $msg + " in [HWorkArea]" );
 	}
 	public void cleanup() {
+		_players.clear();
+		for ( HLogicInfo l : _logics.values() ) {
+			l.clear();
+		}
 		_logics.clear();
 	}
-	public void closeParty( String $id ) {
+	public synchronized void closeParty( String $id ) {
+		System.out.println( "Abandoning party: " + $id );
+		LogicParty lp = getPartyById( $id );
+		_client.println( "abandon:" + $id );
+		lp._party.removePlayer( _players.get( _app.getName() ) );
+		_gui._tabs.setSelectedComponent( _browser.getGUI() );
+		_gui._tabs.remove( lp._party._party.getGUI() );
+		lp._party._party = null;
+		_browser.reload();
 	}
 
 	public LogicParty getPartyById( String $id ) {
@@ -187,6 +200,20 @@ class HWorkArea extends HAbstractWorkArea {
 		l.addParty( tokens[0], new Party( tokens[0], tokens[2] ) );
 		_browser.reload();
 	}
+	public synchronized void handlePartyClose( String $message ) {
+		System.out.println( "Party [" + $message + "] closed." );
+		LogicParty lp = getPartyById( $message );
+		if ( lp != null ) {
+			if ( lp._party._party != null ) {
+				if ( _gui._tabs.getSelectedComponent() == lp._party._party.getGUI() )
+					_gui._tabs.setSelectedComponent( _browser.getGUI() );
+				_gui._tabs.remove( lp._party._party.getGUI() );
+				lp._party._party = null;
+			}
+			lp._logicInfo.dropParty( $message );
+		}
+		_browser.reload();
+	}
 	public void handlePlayer( String $message ) {
 		System.out.println( "Another player: [" + $message + "]." );
 		String[] tokens = $message.split( ",", 2 );
@@ -205,8 +232,9 @@ class HWorkArea extends HAbstractWorkArea {
 				lp._party.addPlayer( p );
 				if ( ( lp._party._party == null ) && ( name.equals( _app.getName() ) ) ) {
 					System.out.println( "Adding new local party: [" + lp._party + "]." );
-					java.awt.Component c = null;
-					_gui._tabs.addTab( lp._party.toString(), c = ( lp._party._party = lp._logicInfo.create( _app, id, lp._party._configuration ) ).getGUI() );
+					lp._party._party = lp._logicInfo.create( _app, id, lp._party._configuration );
+					java.awt.Component c = lp._party._party.getGUI();
+					_gui._tabs.addTab( lp._party.toString(), c );
 					_gui._tabs.setSelectedComponent( c );
 				}
 			}

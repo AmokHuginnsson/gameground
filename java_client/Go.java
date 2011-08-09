@@ -55,7 +55,6 @@ class Go extends HAbstractLogic implements Runnable {
 		public static final String PLAYERQUIT = "player_quit";
 		public static final String DEAD = "dead";
 		public static final String ACCEPT = "accept";
-		public static final String PREFIX = PROTOCOL.CMD + PROTOCOL.SEP + PROTOCOL.NAME + PROTOCOL.SEP;
 	}
 	public static final class GOBAN_SIZE {
 		public static final int NORMAL = 19;
@@ -91,7 +90,7 @@ class Go extends HAbstractLogic implements Runnable {
 		public JButton _pass;
 		public JList _visitors;
 		public GoGoban _board;
-		public GoConfigurator _conf;
+		public GoConfigurator _conf = new GoConfigurator();
 		public JLabel _toMove;
 		public JLabel _move;
 		public String _toolTip;
@@ -102,6 +101,9 @@ class Go extends HAbstractLogic implements Runnable {
 		public void updateTagLib( XUL $xul ) {
 			$xul.getTaglib().registerTag( "goban", GoGoban.class );
 			$xul.getTaglib().registerTag( "panel", GoConfigurator.class );
+		}
+		public void mapMembers( XUL $se ) {
+			$se.mapMembers( _conf );
 		}
 		public void init() {
 			super.init();
@@ -123,7 +125,7 @@ class Go extends HAbstractLogic implements Runnable {
 		public void onMessage() {
 			String msg = _messageInput.getText();
 			if ( msg.matches( ".*\\S+.*" ) ) {	
-				_client.println( PROTOCOL.PREFIX + PROTOCOL.SAY + PROTOCOL.SEP + msg );
+				_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP + PROTOCOL.SAY + PROTOCOL.SEP + msg );
 				_messageInput.setText( "" );
 			}
 		}
@@ -133,57 +135,57 @@ class Go extends HAbstractLogic implements Runnable {
 		public void onGobanSize() {
 			if ( _conf.eventsIgnored() )
 				return;
-			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
 					+ PROTOCOL.SETUP + PROTOCOL.SEP
 					+ PROTOCOL.GOBAN + PROTOCOL.SEPP
 					+ (String)_conf._confGoban.getSelectedItem() );
 		}
 		public void onKomi() {
-			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
 					+ PROTOCOL.SETUP + PROTOCOL.SEP
 					+ PROTOCOL.KOMI + PROTOCOL.SEPP
 					+ _conf._confKomi.getValue() );
 		}
 		public void onHandicaps() {
-			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
 					+ PROTOCOL.SETUP + PROTOCOL.SEP
 					+ PROTOCOL.HANDICAPS + PROTOCOL.SEPP
 					+ _conf._confHandicaps.getValue() );
 		}
 		public void onMainTime() {
-			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
 					+ PROTOCOL.SETUP + PROTOCOL.SEP
 					+ PROTOCOL.MAINTIME + PROTOCOL.SEPP
 					+ _conf._confMainTime.getValue() );
 		}
 		public void onByoyomiPeriods() {
-			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
 					+ PROTOCOL.SETUP + PROTOCOL.SEP
 					+ PROTOCOL.BYOYOMIPERIODS + PROTOCOL.SEPP
 					+ _conf._confByoYomiPeriods.getValue() );
 		}
 		public void onByoyomiTime() {
-			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
 					+ PROTOCOL.SETUP + PROTOCOL.SEP
 					+ PROTOCOL.BYOYOMITIME + PROTOCOL.SEPP
 					+ _conf._confByoYomiTime.getValue() );
 		}
 		public void onBlack() {
-			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
 					+ ( ( _stone == Go.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + STONE.BLACK : PROTOCOL.GETUP ) );
 			_blackSit.setEnabled( _stone != Go.STONE.NONE );
 			_whiteSit.setEnabled( _stone != Go.STONE.NONE );
 		}
 		public void onWhite() {
-			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
 					+ ( ( _stone == Go.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + STONE.WHITE : PROTOCOL.GETUP ) );
 			_blackSit.setEnabled( _stone != Go.STONE.NONE );
 			_whiteSit.setEnabled( _stone != Go.STONE.NONE );
 		}
 		public void onPass() {
-			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
 					+ ( Go.this._toMove != STONE.MARK ? PROTOCOL.PASS : PROTOCOL.ACCEPT ) );
 			_pass.setEnabled( false );
@@ -204,6 +206,7 @@ class Go extends HAbstractLogic implements Runnable {
 	public Go( GameGround $applet, String $id, String $configuration ) throws Exception {
 		super( $applet, $id, $configuration );
 		init( _gui = new HGUILocal( LABEL ) );
+		_gui._conf.setDefaults( $configuration );
 		_handlers.put( PROTOCOL.NAME, Go.class.getDeclaredMethod( "handlerGo", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.SETUP, Go.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.STONES, Go.class.getDeclaredMethod( "handlerStones", new Class[]{ String.class } ) );
@@ -231,6 +234,14 @@ class Go extends HAbstractLogic implements Runnable {
 		white._byoyomi = _gui._whiteByoYomiLeft;
 		white._sit = _gui._whiteSit;
 		_contestants.put( new Character( STONE.WHITE ), white );
+		/* Was in init(). */
+		_contestants.get( new Character( STONE.BLACK ) ).clear();
+		_contestants.get( new Character( STONE.WHITE ) ).clear();
+		_stone = STONE.NONE;
+		_toMove = STONE.NONE;
+		_admin = false;
+		_move = 0;
+		_app.registerTask( this, 1 );
 	}
 	void handlerGo( String $command ) {
 		processMessage( $command );
@@ -346,16 +357,6 @@ class Go extends HAbstractLogic implements Runnable {
 	public void waitToMove() {
 		_toMove = STONE.WAIT;
 	}
-	public void init() {
-		_client = _app.getClient();
-		_contestants.get( new Character( STONE.BLACK ) ).clear();
-		_contestants.get( new Character( STONE.WHITE ) ).clear();
-		_stone = STONE.NONE;
-		_toMove = STONE.NONE;
-		_admin = false;
-		_move = 0;
-		_app.registerTask( this, 1 );
-	}
 	public void cleanup() {
 		_app.flush( this );
 	}
@@ -375,6 +376,8 @@ class Go extends HAbstractLogic implements Runnable {
 		try {
 			logic = new Go( $app, $id, $configuration );
 		} catch ( Exception e ) {
+			e.printStackTrace();
+			System.exit( 1 );
 		}
 		return ( logic );
 	}

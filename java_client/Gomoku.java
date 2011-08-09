@@ -38,7 +38,6 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		public static final String TOMOVE = "to_move";
 		public static final String PLAYER = "player";
 		public static final String PLAYERQUIT = "player_quit";
-		public static final String PREFIX = PROTOCOL.CMD + PROTOCOL.SEP + PROTOCOL.NAME + PROTOCOL.SEP;
 	}
 	public static final int GOBAN_SIZE = 15;
 	public static final class STONE extends Goban.STONE {
@@ -86,7 +85,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		public void onMessage() {
 			String msg = _messageInput.getText();
 			if ( msg.matches( ".*\\S+.*" ) ) {	
-				_client.println( PROTOCOL.PREFIX + PROTOCOL.SAY + PROTOCOL.SEP + msg );
+				_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP + PROTOCOL.SAY + PROTOCOL.SEP + msg );
 				_messageInput.setText( "" );
 			}
 		}
@@ -94,14 +93,14 @@ class Gomoku extends HAbstractLogic implements Runnable {
 			_app.closeParty( _id );
 		}
 		public void onBlack() {
-			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
 					+ ( ( _stone == Gomoku.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + STONE.BLACK : PROTOCOL.GETUP ) );
 			_blackSit.setEnabled( _stone != Gomoku.STONE.NONE );
 			_whiteSit.setEnabled( _stone != Gomoku.STONE.NONE );
 		}
 		public void onWhite() {
-			_client.println( PROTOCOL.CMD + PROTOCOL.SEP
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
 					+ ( ( _stone == Gomoku.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + STONE.WHITE : PROTOCOL.GETUP ) );
 			_blackSit.setEnabled( _stone != Gomoku.STONE.NONE );
@@ -143,6 +142,15 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		white._sit = _gui._whiteSit;
 		_contestants.put( new Character( STONE.WHITE ), white );
 		_gui._board.setSize( GOBAN_SIZE );
+		/* Was in init(). */
+		_client = _app.getClient();
+		_contestants.get( new Character( STONE.BLACK ) ).clear();
+		_contestants.get( new Character( STONE.WHITE ) ).clear();
+		_stone = STONE.NONE;
+		_toMove = STONE.NONE;
+		_admin = false;
+		_move = 0;
+		_app.registerTask( this, 1 );
 	}
 	void handlerGomoku( String $command ) {
 		processMessage( $command );
@@ -203,16 +211,6 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	public char toMove() {
 		return ( _toMove );
 	}
-	public void init() {
-		_client = _app.getClient();
-		_contestants.get( new Character( STONE.BLACK ) ).clear();
-		_contestants.get( new Character( STONE.WHITE ) ).clear();
-		_stone = STONE.NONE;
-		_toMove = STONE.NONE;
-		_admin = false;
-		_move = 0;
-		_app.registerTask( this, 1 );
-	}
 	public void cleanup() {
 		_app.flush( this );
 	}
@@ -223,6 +221,8 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		try {
 			logic = new Gomoku( $app, $id, $configuration );
 		} catch ( Exception e ) {
+			e.printStackTrace();
+			System.exit( 1 );
 		}
 		return ( logic );
 	}

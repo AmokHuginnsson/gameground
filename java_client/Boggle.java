@@ -180,7 +180,7 @@ class Boggle extends HAbstractLogic implements Runnable {
 	private Vector<BogglePlayer> _players = new Vector<BogglePlayer>();
 //--------------------------------------------//
 	public Boggle( GameGround $applet, String $id, String $configuration ) throws Exception {
-		super( $applet );
+		super( $applet, $id, $configuration );
 		init( _gui = new HGUILocal( LABEL ) );
 		_handlers.put( PROTOCOL.PLAYER, Boggle.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYERQUIT, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
@@ -260,6 +260,8 @@ class Boggle extends HAbstractLogic implements Runnable {
 		try {
 			logic = new Boggle( $app, $id, $configuration );
 		} catch ( Exception e ) {
+			e.printStackTrace();
+			System.exit( 1 );
 		}
 		return ( logic );
 	}

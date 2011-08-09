@@ -64,6 +64,7 @@ protected:
 		static char const* const ERR;
 		static char const* const PARTY;
 		static char const* const PARTY_INFO;
+		static char const* const PARTY_CLOSE;
 		static char const* const GET_PARTYS;
 		static char const* const GET_PARTY_INFO;
 		static char const* const GET_LOGICS;

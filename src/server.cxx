@@ -67,6 +67,7 @@ char const* const HServer::PROTOCOL::CREATE = "create";
 char const* const HServer::PROTOCOL::ERR = "err";
 char const* const HServer::PROTOCOL::PARTY = "party";
 char const* const HServer::PROTOCOL::PARTY_INFO = "party_info";
+char const* const HServer::PROTOCOL::PARTY_CLOSE = "party_close";
 char const* const HServer::PROTOCOL::GET_PARTYS = "get_partys";
 char const* const HServer::PROTOCOL::GET_LOGICS = "get_logics";
 char const* const HServer::PROTOCOL::GET_PLAYERS = "get_players";
@@ -506,11 +507,20 @@ void HServer::handle_get_logics( OClientInfo& client_, HString const& )
 	M_EPILOG
 	}
 
-void HServer::handler_abandon( OClientInfo& client_, HString const& )
+void HServer::handler_abandon( OClientInfo& client_, HString const& id_ )
 	{
 	M_PROLOG
-	remove_client_from_all_logics( client_ );
-	broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << client_._login << endl << _out );
+	if ( client_._logics.count( id_ ) == 0 )
+		kick_client( client_._socket, _( "You were not part of this party." ) );
+	else
+		{
+		logics_t::iterator logic( _logics.find( id_ ) );
+		if ( logic != _logics.end() )
+			{
+			out << "client " << client_._login << " abandoned party `" << id_ << "'" << endl;
+			remove_client_from_logic( client_, logic->second );
+			}
+		}
 	return;
 	M_EPILOG
 	}
@@ -527,8 +537,9 @@ void HServer::remove_client_from_all_logics( OClientInfo& client_ )
 		M_ASSERT( logic != _logics.end() );
 		logic->second->kick_client( &client_ );
 		}
-	flush_logics();
 	client_._logics.clear();
+	send_player_info( client_ );
+	flush_logics();
 	return;
 	M_EPILOG
 	}
@@ -542,6 +553,7 @@ void HServer::flush_logics( void )
 			{
 			logics_t::iterator del( it );
 			++ it;
+			broadcast( _out << PROTOCOL::PARTY_CLOSE << PROTOCOL::SEP << del->first << endl << _out );
 			_logics.erase( del );
 			}
 		else
@@ -560,9 +572,14 @@ void HServer::remove_client_from_logic( OClientInfo& client_, HLogic::ptr_t logi
 		{
 		out << "separating logic info from client info for: " << client_._login << " and party: " << logic_->get_info() << endl;
 		logic_->kick_client( &client_, reason_ );
-		client_._logics.erase( logic_->id() );
+		HString const& id( logic_->id() );
+		client_._logics.erase( id );
+		send_player_info( client_ );
 		if ( ! logic_->active_clients() )
-			_logics.erase( logic_->id() );
+			{
+			broadcast( _out << PROTOCOL::PARTY_CLOSE << PROTOCOL::SEP << id << endl << _out );
+			_logics.erase( id );
+			}
 		}
 	return;
 	M_EPILOG
@@ -611,14 +628,15 @@ void HServer::send_players_info( OClientInfo& client_ )
 				{
 				if ( ! client->second._login.is_empty() )
 					{
-					SENDF( *client_._socket ) << PROTOCOL::PLAYER << PROTOCOL::SEP << client->second._login;
+					_out << PROTOCOL::PLAYER << PROTOCOL::SEP << client->second._login;
 					for ( OClientInfo::logics_t::iterator it( client->second._logics.begin() ), end( client->second._logics.end() ); it != end; ++ it )
 						{
 						logics_t::iterator logic( _logics.find( *it ) );
 						if ( logic != _logics.end() )
-							SEND( *client_._socket ) << PROTOCOL::SEPP << logic->first;
+							_out << PROTOCOL::SEPP << logic->first;
 						}
-					SEND( *client_._socket ) << endl;
+					_out << endl;
+					SENDF( *client_._socket ) << ( _out << _out );
 					}
 				}
 			catch ( HOpenSSLException const& )

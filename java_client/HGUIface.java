@@ -65,6 +65,7 @@ abstract class HGUIface extends JPanel {
 			XUL xul = new XUL( this );
 			updateTagLib( xul );
 			xul.insert( AppletJDOMHelper.loadResource( res, this ), this );
+			mapMembers( xul );
 		} catch ( java.lang.Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );
@@ -76,6 +77,7 @@ abstract class HGUIface extends JPanel {
 			System.out.println( "No logPad for this face." );
 	}
 	public abstract void updateTagLib( XUL $se );
+	public void mapMembers( XUL $se ) {}
 	public abstract JTextPane getLogPad();
 	public Color color( int $color ) { return ( color( $color, null ) ); }
 	public Color color( int $color, java.awt.Component $on ) {

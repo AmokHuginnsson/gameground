@@ -55,6 +55,9 @@ public class HLogicInfo {
 	public void addParty( String $id, Party $party ) {
 		_partys.put( $id, $party );
 	}
+	public void dropParty( String $party ) {
+		_partys.remove( $party );
+	}
 	public void setDefaults( String $defaults ) {
 		if ( _conf != null )
 			_conf.setDefaults( $defaults );
@@ -66,6 +69,9 @@ public class HLogicInfo {
 		for ( Party p : _partys.values() ) {
 			p.removePlayer( $player );
 		}
+	}
+	public void clear() {
+		_partys.clear();
 	}
 }
 

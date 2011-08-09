@@ -91,6 +91,8 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 					_confHolder.add( _conf );
 					_conf.setVisible( true );
 					_conf.setup( this );
+				} else {
+					_configuration = _info._defaults;
 				}
 			}
 		setEnabledOk();
@@ -98,11 +100,14 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 	}
 	void setEnabledOk() { setEnabledOk( true ); }
 	void setEnabledOk( boolean $enabled ) {
-		_ok.setEnabled( $enabled && ( _conf != null ) && ( "".compareTo( _name.getText() ) != 0 ) );
+		_ok.setEnabled( $enabled && ( _logics.getSelectedIndex() >= 0 ) && ( "".compareTo( _name.getText() ) != 0 ) );
 	}
 	public void onOk() {
 		_confirmed = true;
-		_configuration = _info._symbol + ":" + _name.getText() + "," + _conf.getConfigurationString();
+		if ( _conf != null )
+			_configuration = _info._symbol + ":" + _name.getText() + "," + _conf.getConfigurationString();
+		else
+			_configuration = _info._symbol + ":" + _name.getText() + "," + _configuration;
 		dispose();
 	}
 	public void onCancel() {
@@ -122,3 +127,4 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 		return ( _configuration );
 	}
 }
+

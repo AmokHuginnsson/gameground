@@ -84,7 +84,6 @@ namespace boggle
 
 char const* const HBoggle::PROTOCOL::NAME = "bgl";
 char const* const HBoggle::PROTOCOL::PLAY = "play";
-char const* const HBoggle::PROTOCOL::PLAYER = "player";
 char const* const HBoggle::PROTOCOL::DECK = "deck";
 char const* const HBoggle::PROTOCOL::SETUP = "setup";
 char const* const HBoggle::PROTOCOL::END_ROUND = "end_round";
