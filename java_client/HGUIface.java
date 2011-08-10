@@ -34,6 +34,7 @@ abstract class HGUIface extends JPanel {
 		public static final int NORMAL = 7;
 		public static final int PALLETE_SIZE = 20;
 	}
+	public int COLOR_NORMAL = Colors.NORMAL;
 	public HGUIface( String $resource ) {
 		_resource = $resource;
 		_attribute = new SimpleAttributeSet();
@@ -63,6 +64,7 @@ abstract class HGUIface extends JPanel {
 			String res = "/res/" + _resource + ".xml";
 			System.out.println( "Loading resources: " + res );
 			XUL xul = new XUL( this );
+			xul.getTaglib().registerTag( "readlineprompt", ReadlinePrompt.class );
 			updateTagLib( xul );
 			xul.insert( AppletJDOMHelper.loadResource( res, this ), this );
 			mapMembers( xul );

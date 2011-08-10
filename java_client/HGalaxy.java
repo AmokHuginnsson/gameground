@@ -121,7 +121,6 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		public JTextPane _tips;
 		public HGalaxyConfigurator _conf;
 		public int[] _colorMap;
-		public int COLOR_NORMAL = 12;
 		public HGUILocal( String $resource ) {
 			super( $resource );
 			_colorMap = new int[ 20 ];
@@ -141,6 +140,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 			_colorMap[ 13 ] = Colors.OTHERGRAY;
 			_colorMap[ 14 ] = Colors.DARKGRAY;
 			_colorMap[ 15 ] = Colors.WHITE;
+			COLOR_NORMAL = 12;
 		}
 		public void updateTagLib( XUL $xul ) {
 			$xul.getTaglib().registerTag( "hboard", HBoard.class );

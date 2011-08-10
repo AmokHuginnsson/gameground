@@ -7,11 +7,11 @@
 			<vbox border="&X;cyan)">
 				<hbox border="TitledBorder(EmptyBorder,Server messages,TitledBorder.LEFT, TitledBorder.ABOVE_TOP)">
 					<scrollpane autoscrolls="true">
-						<textpane id="_logPad" caretcolor="white" editable="false" focusable="false" />
+						<textpane id="_logPad" caretcolor="white" editable="false" focusable="true" />
 					</scrollpane>
 				</hbox>
 				<hbox border="TitledBorder(EmptyBorder,Type your message,TitledBorder.LEFT, TitledBorder.ABOVE_TOP)">
-					<textfield id="_msg" maximumsize="2000,20" columns="16" focusable="true" action="onMessage" tooltiptext="Send message to all people on the server that are currently not in the game." />
+					<readlineprompt id="_msg" maximumsize="2000,20" columns="16" focusable="true" action="onMessage" tooltiptext="Send message to all people on the server that are currently not in the game." />
 				</hbox>
 			</vbox>
 		</panel>

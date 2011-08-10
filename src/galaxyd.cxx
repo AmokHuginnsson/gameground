@@ -351,7 +351,7 @@ void HGalaxy::handler_message( OClientInfo* clientInfo_, HString const& message_
 	{
 	M_PROLOG
 	HString message;
-	message = "party:" + _id + ",say:$";
+	message = "say:$";
 	int color = get_emperor_info( clientInfo_ )->_color;
 	if ( color < 0 )
 		color = 12;

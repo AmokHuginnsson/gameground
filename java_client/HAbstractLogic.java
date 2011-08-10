@@ -64,7 +64,7 @@ public abstract class HAbstractLogic {
 			index = offset + 1;
 		}
 		_gui.log( "\n" );
-		_gui.log( HGUIface.Colors.NORMAL );
+		_gui.log( _gui.COLOR_NORMAL );
 	}
 	public void handleError( String $message ) {
 		javax.swing.JOptionPane.showMessageDialog( _gui,
@@ -73,13 +73,6 @@ public abstract class HAbstractLogic {
 		assert false : "To be implemented";
 	}
 	public void processMessage( String $message ) {
-		String[] toks = $message.split( ":", 2 );
-		if ( "party".equals( toks[0] ) ) {
-			String[] p = $message.split( ",", 2 );
-			$message = p[1];
-			System.out.println( $message );
-		}
-		
 		String[] tokens = $message.split( ":", 2 );
 		String mnemonic = tokens[0];
 		String argument = tokens.length > 1 ? tokens[1] : null;

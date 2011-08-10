@@ -4,7 +4,7 @@
 	<hbox>
 		<vbox>
 			<panel layout="GridBagLayout" border="&X;red)">
-				<bogglebox layout="GridLayout(4,4,4,4)" opaque="true" background="orange" preferredsize="380,380" border="MatteBorder(58,58,58,58,orange)" tooltiptext="Find as many words on this board as you can." >
+				<bogglebox layout="GridLayout(4,4,4,4)" opaque="true" background="orange" preferredsize="380,380" border="EmptyBorder(58,58,58,58)" tooltiptext="Find as many words on this board as you can." >
 					<label id="_letter00" font="-BOLD-36" background="white" opaque="true" border="RaisedBevelBorder" horizontalalignment="CENTER" horizontaltextposition="CENTER" text="G" />
 					<label id="_letter01" use="_letter00" text="A" />
 					<label id="_letter02" use="_letter00" text="M" />
@@ -53,11 +53,11 @@
 					<table id="_players" />
 				</scrollpane>
 				<scrollpane autoscrolls="true">
-					<textpane id="_logPad" editable="false" focusable="false" />
+					<textpane id="_logPad" editable="false" focusable="true" />
 				</scrollpane>
 			</panel>
 			<panel maximumsize="&v_sidebar_width_galaxy;,40" layout="BorderLayout">
-				<textfield id="_messageInput" focusable="true" editable="true" action="onMessage" constraints="BorderLayout.NORTH" tooltiptext="Enter message You want to send to other players." />
+				<readlineprompt id="_messageInput" focusable="true" editable="true" action="onMessage" constraints="BorderLayout.NORTH" tooltiptext="Enter message You want to send to other players." />
 			</panel>
 			<hbox>
 				<glue maximumsize="1000,1"/>

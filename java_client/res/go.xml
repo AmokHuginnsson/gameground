@@ -80,10 +80,10 @@
 				<list id="_visitors" initclass="javax.swing.DefaultListModel" focusable="false" tooltiptext="People that are visiting this table." />
 			</scrollpane>
 			<scrollpane autoscrolls="true">
-				<textpane id="_logPad" editable="false" focusable="false" />
+				<textpane id="_logPad" editable="false" focusable="true" />
 			</scrollpane>
 			<panel maximumsize="&v_sidebar_width_galaxy;,40" layout="BorderLayout">
-				<textfield id="_messageInput" focusable="true" editable="true" action="onMessage" constraints="BorderLayout.NORTH" tooltiptext="Enter message You want to send to other players." />
+				<readlineprompt id="_messageInput" focusable="true" editable="true" action="onMessage" constraints="BorderLayout.NORTH" tooltiptext="Enter message You want to send to other players." />
 			</panel>
 			<hbox>
 				<glue maximumsize="1000,1"/>
