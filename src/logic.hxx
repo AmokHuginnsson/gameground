@@ -56,6 +56,7 @@ protected:
 	clients_t _clients;
 	yaal::hcore::HString _comment;
 	yaal::tools::HStringStream _out;
+	mutable yaal::hcore::HMutex _mutex;
 	/*}*/
 	struct PROTOCOL
 		{

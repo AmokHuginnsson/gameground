@@ -123,7 +123,6 @@ protected:
 	virtual void do_post_accept( OClientInfo* );
 	virtual void do_kick( OClientInfo* );
 	virtual yaal::hcore::HString do_get_info() const;
-	void handler_message( OClientInfo*, yaal::hcore::HString const& );
 	void handler_play( OClientInfo*, yaal::hcore::HString const& );
 	void handler_setup( OClientInfo*, yaal::hcore::HString const& );
 	void on_timeout( void );

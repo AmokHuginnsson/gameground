@@ -3,9 +3,8 @@
 <panel layout="BorderLayout"><!--{{{-->
 	<hbox>
 		<vbox>
-			<panel layout="GridBagLayout">
-				<gridbagconstraints fill="GridBagConstraints.BOTH" />
-				<panel layout="GridLayout(4,4,4,4)" opaque="true" background="orange" preferredsize="320,320" border="MatteBorder(8,8,8,8,orange)" tooltiptext="Find as many words on this board as you can." >
+			<panel layout="GridBagLayout" border="&X;red)">
+				<bogglebox layout="GridLayout(4,4,4,4)" opaque="true" background="orange" preferredsize="380,380" border="MatteBorder(58,58,58,58,orange)" tooltiptext="Find as many words on this board as you can." >
 					<label id="_letter00" font="-BOLD-36" background="white" opaque="true" border="RaisedBevelBorder" horizontalalignment="CENTER" horizontaltextposition="CENTER" text="G" />
 					<label id="_letter01" use="_letter00" text="A" />
 					<label id="_letter02" use="_letter00" text="M" />
@@ -22,7 +21,7 @@
 					<label id="_letter31" use="_letter00" text="G" />
 					<label id="_letter32" use="_letter00" text="L" />
 					<label id="_letter33" use="_letter00" text="E" />
-				</panel>
+				</bogglebox>
 			</panel>
 			<hbox preferredsize="-1,240">
 				<vbox border="TitledBorder(EmptyBorder,Words sent ...,TitledBorder.LEFT, TitledBorder.ABOVE_TOP)">

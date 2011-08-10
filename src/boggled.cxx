@@ -99,11 +99,10 @@ HBoggle::HBoggle( HServer* server_, id_t const& id_, HString const& comment_, in
 	: HLogic( server_, id_, PROTOCOL::NAME, comment_ ), _state( STATE::LOCKED ), _startupPlayers( players_ ),
 	_roundTime( roundTime_ ), _maxRounds( maxRounds_ ),
 	_interRoundDelay( interRoundDelay_ ), _ruleSet( 0 ), _round( 0 ), _players(),
-	_words(), _mutex()
+	_words()
 	{
 	M_PROLOG
 	_handlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HBoggle::handler_play );
-	_handlers[ PROTOCOL::SAY ] = static_cast<handler_t>( &HBoggle::handler_message );
 	return;
 	M_EPILOG
 	}
@@ -149,16 +148,6 @@ HString HBoggle::make_deck( void )
 	cout << deck.mid( 8, 4 ) << endl;
 	cout << deck.mid( 12, 4 ) << endl;
 	return ( deck );
-	M_EPILOG
-	}
-
-void HBoggle::handler_message( OClientInfo* clientInfo_, HString const& message_ )
-	{
-	M_PROLOG
-	HLock l( _mutex );
-	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
-			<< clientInfo_->_login << ": " << message_ << endl << _out );
-	return;
 	M_EPILOG
 	}
 

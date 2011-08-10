@@ -86,7 +86,6 @@ HGomoku::HGomoku( HServer* server_, HLogic::id_t const& id_, HString const& comm
 	::memset( _game.raw(), STONE::NONE, GOBAN_SIZE * GOBAN_SIZE );
 	_game.raw()[ GOBAN_SIZE * GOBAN_SIZE ] = 0;
 	_handlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HGomoku::handler_play );
-	_handlers[ PROTOCOL::SAY ] = static_cast<handler_t>( &HGomoku::handler_message );
 	return;
 	M_EPILOG
 	}
@@ -95,15 +94,6 @@ HGomoku::~HGomoku ( void )
 	{
 	M_PROLOG
 	revoke_scheduled_tasks();
-	return;
-	M_EPILOG
-	}
-
-void HGomoku::handler_message ( OClientInfo* clientInfo_, HString const& message_ )
-	{
-	M_PROLOG
-	HLock l( _mutex );
-	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << clientInfo_->_login << ": " << message_ << endl << _out );
 	return;
 	M_EPILOG
 	}

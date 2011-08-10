@@ -75,6 +75,7 @@ char const* const HServer::PROTOCOL::JOIN = "join";
 char const* const HServer::PROTOCOL::KCK = "kck";
 char const* const HServer::PROTOCOL::LOGIC = "logic";
 char const* const HServer::PROTOCOL::MSG = "msg";
+char const* const HServer::PROTOCOL::SAY = "say";
 char const* const HServer::PROTOCOL::LOGIN = "login";
 char const* const HServer::PROTOCOL::PLAYER = "player";
 char const* const HServer::PROTOCOL::PLAYER_QUIT = "player_quit";
@@ -304,7 +305,7 @@ void HServer::broadcast_all_parties( OClientInfo* info_, HString const& message_
 void HServer::handler_chat( OClientInfo& client_, HString const& message_ )
 	{
 	M_PROLOG
-	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << client_._login << ": " << message_ << endl << _out );
+	broadcast( _out << PROTOCOL::SAY << PROTOCOL::SEP << client_._login << ": " << message_ << endl << _out );
 	return;
 	M_EPILOG
 	}

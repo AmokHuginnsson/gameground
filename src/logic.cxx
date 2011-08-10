@@ -50,8 +50,9 @@ char const* const HLogic::PROTOCOL::PLAYER_QUIT = "player_quit";
 
 HLogic::HLogic( HServer* server_, id_t const& id_, HString const& symbol_, HString const& comment_ )
 	: _server( server_ ), _id( id_ ), _symbol( symbol_ ), _handlers( setup._maxConnections ),
-	_clients(), _comment( comment_ ), _out()
+	_clients(), _comment( comment_ ), _out(), _mutex()
 	{
+	_handlers[ PROTOCOL::SAY ] = static_cast<handler_t>( &HLogic::handler_message );
 	}
 
 HLogic::~HLogic( void )
@@ -170,6 +171,15 @@ void HLogic::broadcast( HString const& message_ )
 			drop_client( *it );
 			}
 		}
+	return;
+	M_EPILOG
+	}
+
+void HLogic::handler_message( OClientInfo* clientInfo_, HString const& message_ )
+	{
+	M_PROLOG
+	HLock l( _mutex );
+	broadcast( _out << PROTOCOL::SAY << PROTOCOL::SEP << clientInfo_->_login << ": " << message_ << endl << _out );
 	return;
 	M_EPILOG
 	}

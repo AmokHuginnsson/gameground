@@ -73,6 +73,7 @@ protected:
 		static char const* const KCK;
 		static char const* const LOGIC;
 		static char const* const MSG;
+		static char const* const SAY;
 		static char const* const LOGIN;
 		static char const* const PLAYER;
 		static char const* const PLAYER_QUIT;

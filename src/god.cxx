@@ -104,7 +104,6 @@ HGo::HGo( HServer* server_, HLogic::id_t const& id_, HString const& comment_ )
 	_contestants[ 0 ] = _contestants[ 1 ] = NULL;
 	_handlers[ PROTOCOL::SETUP ] = static_cast<handler_t>( &HGo::handler_setup );
 	_handlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HGo::handler_play );
-	_handlers[ PROTOCOL::SAY ] = static_cast<handler_t>( &HGo::handler_message );
 	set_handicaps( _handicaps );
 	return;
 	M_EPILOG
@@ -114,15 +113,6 @@ HGo::~HGo ( void )
 	{
 	M_PROLOG
 	revoke_scheduled_tasks();
-	return;
-	M_EPILOG
-	}
-
-void HGo::handler_message ( OClientInfo* clientInfo_, HString const& message_ )
-	{
-	M_PROLOG
-	HLock l( _mutex );
-	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << clientInfo_->_login << ": " << message_ << endl << _out );
 	return;
 	M_EPILOG
 	}

@@ -92,6 +92,7 @@ class Boggle extends HAbstractLogic implements Runnable {
 		}
 		public void updateTagLib( XUL $xul ) {
 			$xul.getTaglib().registerTag( "panel", BoggleConfigurator.class );
+			$xul.getTaglib().registerTag( "bogglebox", BoggleBox.class );
 		}
 		public void init() {
 			super.init();

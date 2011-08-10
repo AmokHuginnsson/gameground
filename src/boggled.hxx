@@ -92,7 +92,6 @@ protected:
 	players_t _players;
 	char _game[16][2];
 	words_t _words;
-	mutable yaal::hcore::HMutex _mutex;
 	/*}*/
 	struct PROTOCOL : public HLogic::PROTOCOL
 		{
@@ -118,7 +117,6 @@ protected:
 	virtual void do_post_accept( OClientInfo* );
 	virtual void do_kick( OClientInfo* );
 	virtual yaal::hcore::HString do_get_info() const;
-	void handler_message( OClientInfo*, yaal::hcore::HString const& );
 	void handler_play( OClientInfo*, yaal::hcore::HString const& );
 	void on_begin_round( void );
 	void on_end_round( void );

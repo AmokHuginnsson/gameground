@@ -9,6 +9,8 @@ public abstract class HAbstractLogic {
 	SortedMap<String,Method> _handlers;
 	String _id = "0";
 	String _configuration;
+	java.text.SimpleDateFormat _timestampFormat = new java.text.SimpleDateFormat( "[HH:mm:ss] " );
+
 	public HAbstractLogic( GameGround $app ) {
 		_app = $app;
 		_client = $app.getClient();
@@ -24,6 +26,7 @@ public abstract class HAbstractLogic {
 		_handlers = java.util.Collections.synchronizedSortedMap( new TreeMap<String,Method>() );
 		try {
 			_handlers.put( "msg", HAbstractLogic.class.getDeclaredMethod( "handleMessage", new Class[]{ String.class } ) );
+			_handlers.put( "say", HAbstractLogic.class.getDeclaredMethod( "handleSay", new Class[]{ String.class } ) );
 			_handlers.put( "err", HAbstractLogic.class.getDeclaredMethod( "handleError", new Class[]{ String.class } ) );
 		} catch ( java.lang.NoSuchMethodException e ) {
 			e.printStackTrace();
@@ -33,6 +36,10 @@ public abstract class HAbstractLogic {
 	public abstract void cleanup();
 	public HGUIface getGUI() {
 		return ( _gui );
+	}
+	public void handleSay( String $message ) {
+		_gui.log( _timestampFormat.format( java.util.Calendar.getInstance().getTime() ) );
+		handleMessage( $message );
 	}
 	public void handleMessage( String $message ) {
 		int index = 0, offset = 0;
