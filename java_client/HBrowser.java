@@ -62,6 +62,13 @@ class HBrowser extends HAbstractLogic {
 			PartysModel.PartysModelNode party = (PartysModel.PartysModelNode)_games.getLastSelectedPathComponent();
 			_client.println( "join:" + party._party._id );
 		}
+		public void onAccount() {
+			Account acc = new Account( _app );
+			if ( acc.confirmed() ) {
+				System.out.println( "account:" + acc.getConfiguration() );
+				//_client.println( "account:" + acc.getConfiguration() );
+			}
+		}
 		public void onDisconnect() {
 			_client.println( "quit" );
 			_client.disconnect();

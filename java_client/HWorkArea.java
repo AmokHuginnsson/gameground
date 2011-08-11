@@ -1,8 +1,6 @@
 import java.lang.reflect.Method;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.awt.event.ActionEvent;
 import javax.swing.Action;
 import javax.swing.AbstractAction;
@@ -70,20 +68,7 @@ class HWorkArea extends HAbstractWorkArea {
 		cleanup();
 		_browser.cleanup();
 		_browser.log( "###", HGUILocal.Colors.BLUE );
-		try {
-			MessageDigest md = MessageDigest.getInstance( "SHA1" );
-			md.update( cc._password.getBytes() );
-			byte[] d = md.digest();
-			cc._password = String.format( "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-					d[0], d[1], d[2], d[3],
-					d[4], d[5], d[6], d[7],
-					d[8], d[9], d[10], d[11],
-					d[12], d[13], d[14], d[15],
-					d[16], d[17], d[18], d[19] );
-		} catch ( NoSuchAlgorithmException e ) {
-			e.printStackTrace();
-			System.exit( 1 );
-		}
+		cc._password = Crypt.SHA1( cc._password );
 		_browser.log( " Connecting to server: " + cc._host + " to port " + cc._port + ".\n"  );
 		try {
 			_client = new HClient( _app );
@@ -255,6 +240,9 @@ class HWorkArea extends HAbstractWorkArea {
 	}
 	public Player getPlayer( String $name ) {
 		return ( _players.get( $name ) );
+	}
+	public void gracefullShutdown() {
+		((HBrowser.HGUILocal)_browser.getGUI()).onDisconnect();
 	}
 }
 

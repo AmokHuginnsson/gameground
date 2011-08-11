@@ -53,6 +53,14 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 				se.render( res );
 				_frame = SwingEngine.getAppFrame();
 				((javax.swing.JFrame)_frame).setContentPane( this );
+				_frame.addWindowListener( new java.awt.event.WindowAdapter() {
+						public void windowClosing( java.awt.event.WindowEvent e ) {
+							if ( _client != null ) {
+								_workArea.gracefullShutdown();
+							}
+							System.out.println( "Bye!" );
+						}
+				});
 			}
 			_frameName = _frame.getTitle();
 			EagerStaticInitializer.touch( this, "registerLogic" );

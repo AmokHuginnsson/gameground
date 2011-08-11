@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="iso8859-2"?>
+<!DOCTYPE dialog SYSTEM "res/gameground.dtd">
+<dialog title="Edit your account information ..." modal="true" size="480,320" resizable="false" focuscycleroot="true" defaultCloseOperation="JDialog.DISPOSE_ON_CLOSE"><!--{{{-->
+	<vbox border="EmptyBorder(8,8,8,8)">
+		<panel border="EmptyBorder(8,8,8,8)">
+			<panel border="EtchedBorder()">
+				<panel border="EmptyBorder(8,8,8,8)">
+					<layout type="FormLayout" columns="p,4px,p,p:grow" rows="p,4px,p,4px,p,4px,p,4px,p" />
+					<label constraints="1,1">Name:</label>
+					<textfield id="_name" constraints="3,1,2,1" columns="20" focusable="true" tooltiptext="Your real life name." />
+					<label constraints="1,3">Email:</label>
+					<textfield id="_email" constraints="3,3,2,1" columns="20" focusable="true" tooltiptext="Your email address (it will not be shown)." />
+					<label constraints="1,5">Old password:</label>
+					<passwordfield id="_oldPassword" constraints="3,5" columns="4" focusable="true" tooltiptext="Your currently used password." />
+					<label constraints="1,7">New password:</label>
+					<passwordfield id="_newPassword" constraints="3,7" columns="4" focusable="true" tooltiptext="Your newly requested password." />
+					<label constraints="1,9">New password (repeat):</label>
+					<passwordfield id="_newPasswordRepeat" constraints="3,9" columns="12" focusable="true" tooltiptext="Repeated version of your newly requested password." />
+				</panel>
+			</panel>
+		</panel>
+		<panel maximumsize="2000,200">
+			<button id="_ok" text="Apply" action="onOk" focusable="true" />
+			<button text="Cancel" action="onCancel" />
+		</panel>
+	</vbox>
+</dialog><!--}}}-->
