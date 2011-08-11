@@ -3,8 +3,8 @@
 <dialog title="Edit your account information ..." modal="true" size="480,320" resizable="false" focuscycleroot="true" defaultCloseOperation="JDialog.DISPOSE_ON_CLOSE"><!--{{{-->
 	<vbox border="EmptyBorder(8,8,8,8)">
 		<panel border="EmptyBorder(8,8,8,8)">
-			<panel border="EtchedBorder()">
-				<panel border="EmptyBorder(8,8,8,8)">
+			<panel layout="BorderLayout" border="EtchedBorder()">
+				<panel constraints="BorderLayout.NORTH" border="EmptyBorder(8,8,8,8)">
 					<layout type="FormLayout" columns="p,4px,p,p:grow" rows="p,4px,p,4px,p,4px,p,4px,p" />
 					<label constraints="1,1">Name:</label>
 					<textfield id="_name" constraints="3,1,2,1" columns="20" focusable="true" tooltiptext="Your real life name." />
@@ -17,6 +17,13 @@
 					<label constraints="1,9">New password (repeat):</label>
 					<passwordfield id="_newPasswordRepeat" constraints="3,9" columns="12" focusable="true" tooltiptext="Repeated version of your newly requested password." />
 				</panel>
+				<vbox constraints="BorderLayout.SOUTH" border="EmptyBorder(2,2,2,2)">
+					<hbox border="TitledBorder(EmptyBorder,Description,TitledBorder.LEFT, TitledBorder.ABOVE_TOP)">
+						<scrollpane autoscrolls="true">
+							<textarea id="_description" rows="6" columns="16" />
+						</scrollpane>
+					</hbox>
+				</vbox>
 			</panel>
 		</panel>
 		<panel maximumsize="2000,200">

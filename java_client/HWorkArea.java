@@ -54,6 +54,7 @@ class HWorkArea extends HAbstractWorkArea {
 			_handlers.put( "err", HWorkArea.class.getDeclaredMethod( "handleError", new Class[]{ String.class } ) );
 			_handlers.put( "party", HWorkArea.class.getDeclaredMethod( "handleParty", new Class[]{ String.class } ) );
 			_handlers.put( "logic", HWorkArea.class.getDeclaredMethod( "handleLogic", new Class[]{ String.class } ) );
+			_handlers.put( "account", HWorkArea.class.getDeclaredMethod( "handleAccount", new Class[]{ String.class } ) );
 			_handlers.put( "party_info", HWorkArea.class.getDeclaredMethod( "handlePartyInfo", new Class[]{ String.class } ) );
 			_handlers.put( "party_close", HWorkArea.class.getDeclaredMethod( "handlePartyClose", new Class[]{ String.class } ) );
 			_handlers.put( "player", HWorkArea.class.getDeclaredMethod( "handlePlayer", new Class[]{ String.class } ) );
@@ -237,6 +238,13 @@ class HWorkArea extends HAbstractWorkArea {
 		}
 		_browser.reload();
 		System.out.println( "Player: [" + $message + "] removed." );
+	}
+	public void handleAccount( String $message ) {
+		Account acc = new Account( _app, $message );
+		if ( acc.confirmed() ) {
+			// System.out.println( "account:" + acc.getConfiguration() );
+			_client.println( "account:" + acc.getConfiguration() );
+		}
 	}
 	public Player getPlayer( String $name ) {
 		return ( _players.get( $name ) );

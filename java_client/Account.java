@@ -1,4 +1,5 @@
 import javax.swing.JTextField;
+import javax.swing.JTextArea;
 import org.swixml.XDialog;
 import org.swixml.SwingEngine;
 
@@ -12,10 +13,15 @@ public class Account extends XDialog {
 	public JTextField _oldPassword;
 	public JTextField _newPassword;
 	public JTextField _newPasswordRepeat;
-	public Account( GameGround $app ) {
+	public JTextArea _description;
+	public Account( GameGround $app, String $conf ) {
 		_app = $app;
+		String[] tokens = $conf.split( ",", 3 );
 		try {
 			new SwingEngine( this ).insert( AppletJDOMHelper.loadResource( "/res/account.xml", this ), this );
+			_name.setText( tokens[0] );
+			_email.setText( tokens[1] );
+			_description.setText( tokens[2] );
 			setVisible( true );
 		} catch ( java.lang.Exception e ) {
 			e.printStackTrace();
@@ -24,7 +30,10 @@ public class Account extends XDialog {
 	}
 	public void onOk() {
 		_confirmed = true;
-		_configuration = _name.getText() + "," + _email.getText() + ","
+		_configuration =
+			Sec.escape( _name.getText() ) + ","
+			+ Sec.escape( _email.getText() )+ ","
+			+ Sec.escape( _description.getText() ) + ","
 			+ Crypt.SHA1( _oldPassword.getText() ) + ","
 			+ Crypt.SHA1( _newPassword.getText() ) + ","
 			+ Crypt.SHA1( _newPasswordRepeat.getText() );

@@ -69,6 +69,7 @@ protected:
 		static char const* const GET_PARTY_INFO;
 		static char const* const GET_LOGICS;
 		static char const* const GET_PLAYERS;
+		static char const* const GET_ACCOUNT;
 		static char const* const JOIN;
 		static char const* const KCK;
 		static char const* const LOGIC;
@@ -112,6 +113,7 @@ protected:
 	void handle_get_logics( OClientInfo&, yaal::hcore::HString const& );
 	void handle_get_players( OClientInfo&, yaal::hcore::HString const& );
 	void handle_get_partys( OClientInfo&, yaal::hcore::HString const& );
+	void handle_get_account( OClientInfo&, yaal::hcore::HString const& );
 	void send_logics_info( OClientInfo& );
 	void send_players_info( OClientInfo& );
 	void send_player_info( OClientInfo& );

@@ -71,6 +71,7 @@ char const* const HServer::PROTOCOL::PARTY_CLOSE = "party_close";
 char const* const HServer::PROTOCOL::GET_PARTYS = "get_partys";
 char const* const HServer::PROTOCOL::GET_LOGICS = "get_logics";
 char const* const HServer::PROTOCOL::GET_PLAYERS = "get_players";
+char const* const HServer::PROTOCOL::GET_ACCOUNT = "get_account";
 char const* const HServer::PROTOCOL::JOIN = "join";
 char const* const HServer::PROTOCOL::KCK = "kck";
 char const* const HServer::PROTOCOL::LOGIC = "logic";
@@ -85,6 +86,8 @@ char const* const HServer::PROTOCOL::SEPP = ",";
 char const* const HServer::PROTOCOL::SHUTDOWN = "shutdown";
 char const* const HServer::PROTOCOL::VERSION = "version";
 char const* const HServer::PROTOCOL::VERSION_ID = "0";
+
+static const HString NULL_PASS = hash::sha1( "" );
 
 HServer::HServer( int connections_ )
 	: _maxConnections( connections_ ),
@@ -120,6 +123,7 @@ int HServer::init_server( int port_ )
 	_handlers[ PROTOCOL::GET_LOGICS ] = &HServer::handle_get_logics;
 	_handlers[ PROTOCOL::GET_PLAYERS ] = &HServer::handle_get_players;
 	_handlers[ PROTOCOL::GET_PARTYS ] = &HServer::handle_get_partys;
+	_handlers[ PROTOCOL::GET_ACCOUNT ] = &HServer::handle_get_account;
 	_handlers[ PROTOCOL::CREATE ] = &HServer::create_game;
 	_handlers[ PROTOCOL::JOIN ] = &HServer::join_game;
 	_handlers[ PROTOCOL::ABANDON ] = &HServer::handler_abandon;
@@ -166,7 +170,7 @@ void HServer::handler_message( int fileDescriptor_ )
 				out << "`unnamed'";
 			else
 				out << clientIt->second._login; 
-			cout << "->" << message << endl;
+			clog << "->" << message << endl;
 			command = get_token( message, ":", 0 );
 			argument = message.mid( command.get_length() + 1 );
 			int msgLength = static_cast<int>( command.get_length() );
@@ -343,7 +347,7 @@ void HServer::handle_login( OClientInfo& client_, HString const& loginInfo_ )
 			client_._login = login;
 			if ( result ) /* user exists and supplied password was correct */
 				update_last_activity( client_ );
-			else if ( password != hash::sha1( "" ) )
+			else if ( password != NULL_PASS )
 				{
 				rs = _db->query( ( HFormat( "INSERT INTO v_user_session ( login, password ) VALUES ( LOWER('%s'), LOWER('%s') );" ) % login % password ).string() );
 				M_ENSURE( !! rs );
@@ -375,15 +379,52 @@ void HServer::handle_account( OClientInfo& client_, HString const& accountInfo_ 
 		kick_client( client_._socket, _( "Set your name first (Just login with standard client, will ya?)." ) );
 	else
 		{
-		HString action( get_token( accountInfo_, ":", 0 ) );
-		if ( action == "register" )
+		HTokenizer t( accountInfo_, "," );
+		int item( 0 );
+		HString name;
+		HString email;
+		HString description;
+		HString oldPassword;
+		HString newPassword;
+		HString newPasswordRepeat;
+		for ( HTokenizer::HIterator it( t.begin() ), end( t.end() ); it != end; ++ it, ++ item )
 			{
+			switch ( item )
+				{
+				case ( 0 ): name = *it; break;
+				case ( 1 ): email = *it; break;
+				case ( 2 ): description = *it; break;
+				case ( 3 ): oldPassword = *it; break;
+				case ( 4 ): newPassword = *it; break;
+				case ( 5 ): newPasswordRepeat = *it; break;
+				default: break;
+				}
 			}
-		else if ( action == "update" )
+		bool oldPasswordNull( oldPassword == NULL_PASS );
+		bool newPasswordNull( newPassword == NULL_PASS );
+		bool newPasswordRepeatNull( newPasswordRepeat == NULL_PASS );
+		if ( oldPasswordNull && newPasswordNull && newPasswordRepeatNull )
 			{
+			HRecordSet::ptr_t rs( _db->query( ( HFormat( "UPDATE tbl_user SET name = '%s', email = '%s', description = '%s' WHERE login = LOWER('%s');" ) % name % email % description % client_._login ).string() ) );
+			M_ENSURE( !! rs );
 			}
 		else
-			kick_client( client_._socket, _( "Unknown account related action." ) );
+			{
+			if ( ! ( oldPasswordNull || newPasswordNull || newPasswordRepeatNull ) )
+				{
+				if ( newPassword == newPasswordRepeat )
+					{
+					HRecordSet::ptr_t rs( _db->query( ( HFormat( "UPDATE tbl_user SET name = '%s', email = '%s', description = '%s', password = '%s' WHERE login = LOWER('%s') AND password = LOWER('%s');" ) % name % email % description % newPassword % client_._login % oldPassword ).string() ) );
+					M_ENSURE( !! rs );
+					}
+				else
+					{
+					}
+				}
+			else
+				{
+				}
+			}
 		}
 	return;
 	M_EPILOG
@@ -599,6 +640,31 @@ void HServer::handle_get_partys( OClientInfo& client_, HString const& )
 	{
 	M_PROLOG
 	send_games_info( client_ );
+	return;
+	M_EPILOG
+	}
+
+void HServer::handle_get_account( OClientInfo& client_, HString const& )
+	{
+	M_PROLOG
+	if ( client_._login.is_empty() )
+		kick_client( client_._socket, _( "Set your name first (Just login with standard client, will ya?)." ) );
+	else
+		{
+		HRecordSet::ptr_t rs( _db->query( _out << "SELECT name, email, description FROM tbl_user WHERE login = LOWER('" << client_._login << "');" << _out ) );
+		M_ENSURE( !! rs );
+		HRecordSet::iterator row = rs->begin();
+		if ( row != rs->end() )
+			{
+			HRecordSet::value_t name( row[0] );
+			HRecordSet::value_t email( row[2] );
+			HRecordSet::value_t description( row[2] );
+			SENDF( *client_._socket ) << PROTOCOL::ACCOUNT << PROTOCOL::SEP
+				<< ( name ? *name : "" ) << PROTOCOL::SEPP
+				<< ( email ? *email : "" ) << PROTOCOL::SEPP
+				<< ( description ? *description : "" ) << endl;
+			}
+		}
 	return;
 	M_EPILOG
 	}
