@@ -18,3 +18,4 @@ public class Con {
 	public static String brightcyan = "\033[1;36m";
 	public static String white = "\033[1;37m";
 }
+

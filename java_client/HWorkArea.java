@@ -2,6 +2,9 @@ import java.lang.reflect.Method;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.awt.event.ActionEvent;
+import java.awt.Color;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.Action;
 import javax.swing.AbstractAction;
 import javax.swing.JTextField;
@@ -24,12 +27,21 @@ class HWorkArea extends HAbstractWorkArea {
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
 		public XTabbedPane _tabs = null;
+		int _previouslySelectedTab = 0;
 		public HGUILocal( String $resource ) {
 			super( $resource );
 		}
 		void init() {
 			super.init();
 			_browser = new HBrowser( _app, HWorkArea.this, new PartysModel( _logics ), _logics, _players );
+			_tabs.addChangeListener( new ChangeListener() {
+				public void stateChanged( ChangeEvent evt ) {
+					int selectedTab = _tabs.getSelectedIndex();
+					if ( selectedTab != _previouslySelectedTab ) {
+						_tabs.setBackgroundAt( _previouslySelectedTab = selectedTab, null );
+					}
+				}
+			});
 			_tabs.addTab( "Browser", _browser.getGUI() );
 		}
 		public void onExit() {
@@ -110,6 +122,10 @@ class HWorkArea extends HAbstractWorkArea {
 		String[] toks = $message.split( ",", 2 );
 		LogicParty lp = getPartyById( toks[0] );
 		if ( lp._party != null ) {
+			if ( lp._party._party.getGUI() != _gui._tabs.getSelectedComponent() ) {
+				int idx = _gui._tabs.indexOfTab( lp._party.toString() );
+				_gui._tabs.setBackgroundAt( idx, Color.CYAN.brighter().brighter().brighter().brighter() );
+			}
 			lp._party._party.processMessage( toks[1] );
 		}
 	}
@@ -129,6 +145,10 @@ class HWorkArea extends HAbstractWorkArea {
 				System.exit( 1 );
 			}
 		} else {
+			if ( _browser.getGUI() != _gui._tabs.getSelectedComponent() ) {
+				int idx = _gui._tabs.indexOfTab( "Browser" );
+				_gui._tabs.setBackgroundAt( idx, Color.CYAN.brighter().brighter().brighter().brighter() );
+			}
 			_browser.processMessage( $message );
 		}
 	}
