@@ -62,6 +62,9 @@ class HClient extends Thread {
 				_app.setClient( null );
 				_app.showLoginScreen();
 			}
+		} catch ( javax.net.ssl.SSLException sslEx ) {
+			_app.setClient( null );
+			_app.showLoginScreen();
 		} catch ( java.io.IOException e ) {
 			if ( _loop ) {
 				System.out.println( "Connection error." );

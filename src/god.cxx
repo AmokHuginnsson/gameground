@@ -493,13 +493,13 @@ void HGo::do_post_accept( OClientInfo* clientInfo_ )
 					<< (*it)->_login << endl;
 			*clientInfo_->_socket << *this
 					<< PROTOCOL::MSG << PROTOCOL::SEP
-					<< "Player " << (*it)->_login << " approched this table." << endl;
+					<< "Player " << (*it)->_login << " approached this table." << endl;
 			}
 		}
 	broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
 			<< clientInfo_->_login << endl << _out );
 	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
-			<< "Player " << clientInfo_->_login << " approched this table." << endl << _out );
+			<< "Player " << clientInfo_->_login << " approached this table." << endl << _out );
 	send_contestants();
 	send_goban();
 	return;

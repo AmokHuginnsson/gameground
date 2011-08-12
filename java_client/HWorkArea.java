@@ -52,6 +52,7 @@ class HWorkArea extends HAbstractWorkArea {
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
+	private static final String CLIENT_VERSION = "0";
 	private SortedMap<String, Method> _handlers = java.util.Collections.synchronizedSortedMap( new TreeMap<String, Method>() );
 	private SortedMap<String, HLogicInfo> _logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String, HLogicInfo>() );
 	private SortedMap<String, Player> _players = java.util.Collections.synchronizedSortedMap( new TreeMap<String, Player>() );
@@ -91,7 +92,7 @@ class HWorkArea extends HAbstractWorkArea {
 			_client.start();
 			_client.waitUntilRunning();
 			System.out.println( "Connection thread started." );
-			_client.println( "login:" + cc._login + ":" + cc._password );
+			_client.println( "login:" + CLIENT_VERSION + ":" + cc._login + ":" + cc._password );
 			_app.setName( cc._login );
 			_app.setClient( _client );
 			_browser.setClient( _client );

@@ -326,55 +326,66 @@ void HServer::handle_login( OClientInfo& client_, HString const& loginInfo_ )
 	M_PROLOG
 	clients_t::iterator it;
 	int const MINIMUM_NAME_LENGTH( 4 );
-	HString login( get_token( loginInfo_, ":", 0 ) );
-	HString password( get_token( loginInfo_, ":", 1 ) );
-	for ( it = _clients.begin(); it != _clients.end(); ++ it )
-		if ( ( ! strcasecmp( it->second._login, login ) ) && ( it->second._socket != client_._socket ) )
-			break;
-	if ( login.find_other_than( LEGEAL_CHARACTER_SET[ CONSTR_CHAR_SET_LOGIN_NAME ] ) >= 0 )
-		*client_._socket << "err:Name may only take form of `[a-zA-Z0-9]{4,}'." << endl;
-	else if ( login.get_length() < MINIMUM_NAME_LENGTH )
-		*client_._socket << "err:Your name is too short, it needs to be at least " << MINIMUM_NAME_LENGTH << " character long." << endl;
-	else if ( it != _clients.end() )
-		*client_._socket << "err:" << login << " already logged in." << endl;
-	else
+	HString version( get_token( loginInfo_, ":", 0 ) );
+	HString login( get_token( loginInfo_, ":", 1 ) );
+	HString password( get_token( loginInfo_, ":", 2 ) );
+	do
 		{
-		HRecordSet::ptr_t rs( _db->query( ( HFormat( "SELECT ( SELECT COUNT(*) FROM v_user_session WHERE login = LOWER('%s') AND password = LOWER('%s') )"
-						" + ( SELECT COUNT(*) FROM v_user_session WHERE login = LOWER('%s') );" ) % login % password % login ).string() ) );
-		M_ENSURE( !! rs );
-		HRecordSet::iterator row = rs->begin();
-		if ( row == rs->end() )
+		if ( version != PROTOCOL::VERSION_ID )
 			{
-			out << _db->get_error() << endl;
-			M_ENSURE( ! "database query error" );
+			*client_._socket << "err:Your client version is not supported." << endl;
+			kick_client( client_._socket );
+			break;
 			}
-		int result( lexical_cast<int>( *row[0] ) );
-		if ( ( result == 2 ) || ( result == 0 ) )
+		for ( it = _clients.begin(); it != _clients.end(); ++ it )
+			if ( ( ! strcasecmp( it->second._login, login ) ) && ( it->second._socket != client_._socket ) )
+				break;
+		if ( login.find_other_than( LEGEAL_CHARACTER_SET[ CONSTR_CHAR_SET_LOGIN_NAME ] ) >= 0 )
+			*client_._socket << "err:Name may only take form of `[a-zA-Z0-9]{4,}'." << endl;
+		else if ( login.get_length() < MINIMUM_NAME_LENGTH )
+			*client_._socket << "err:Your name is too short, it needs to be at least " << MINIMUM_NAME_LENGTH << " character long." << endl;
+		else if ( it != _clients.end() )
+			*client_._socket << "err:" << login << " already logged in." << endl;
+		else
 			{
-			client_._login = login;
-			if ( result ) /* user exists and supplied password was correct */
-				update_last_activity( client_ );
-			else if ( password != NULL_PASS )
+			HRecordSet::ptr_t rs( _db->query( ( HFormat( "SELECT ( SELECT COUNT(*) FROM v_user_session WHERE login = LOWER('%s') AND password = LOWER('%s') )"
+							" + ( SELECT COUNT(*) FROM v_user_session WHERE login = LOWER('%s') );" ) % login % password % login ).string() ) );
+			M_ENSURE( !! rs );
+			HRecordSet::iterator row = rs->begin();
+			if ( row == rs->end() )
 				{
-				rs = _db->query( ( HFormat( "INSERT INTO v_user_session ( login, password ) VALUES ( LOWER('%s'), LOWER('%s') );" ) % login % password ).string() );
-				M_ENSURE( !! rs );
+				out << _db->get_error() << endl;
+				M_ENSURE( ! "database query error" );
+				}
+			int result( lexical_cast<int>( *row[0] ) );
+			if ( ( result == 2 ) || ( result == 0 ) )
+				{
+				client_._login = login;
+				if ( result ) /* user exists and supplied password was correct */
+					update_last_activity( client_ );
+				else if ( password != NULL_PASS )
+					{
+					rs = _db->query( ( HFormat( "INSERT INTO v_user_session ( login, password ) VALUES ( LOWER('%s'), LOWER('%s') );" ) % login % password ).string() );
+					M_ENSURE( !! rs );
+					}
+				else
+					{
+					client_._anonymous = true;
+					*client_._socket << PROTOCOL::MSG << PROTOCOL::SEP << mark( COLORS::FG_RED ) << " Your game stats will not be preserved nor your login protected." << endl;
+					}
+				broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << login << endl << _out );
+				broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
+						<< mark( COLORS::FG_BLUE ) << " " << login << " entered the GameGround." << endl << _out );
 				}
 			else
 				{
-				client_._anonymous = true;
-				*client_._socket << PROTOCOL::MSG << PROTOCOL::SEP << mark( COLORS::FG_RED ) << " Your game stats will not be preserved nor your login protected." << endl;
+				M_ENSURE( result == 1 );
+				/* user exists but supplied password was incorrect */
+				*client_._socket << "err:Login failed." << endl;
 				}
-			broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << login << endl << _out );
-			broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
-					<< mark( COLORS::FG_BLUE ) << " " << login << " entered the GameGround." << endl << _out );
-			}
-		else
-			{
-			M_ENSURE( result == 1 );
-			/* user exists but supplied password was incorrect */
-			*client_._socket << "err:Login failed." << endl;
 			}
 		}
+	while ( false );
 	return;
 	M_EPILOG
 	}
