@@ -26,9 +26,9 @@ public class Account extends XDialog implements DocumentListener {
 			_oldPassword.getDocument().addDocumentListener( this );
 			_newPassword.getDocument().addDocumentListener( this );
 			_newPasswordRepeat.getDocument().addDocumentListener( this );
-			_name.setText( tokens[0] );
-			_email.setText( tokens[1] );
-			_description.setText( tokens[2] );
+			_name.setText( Sec.unescape( tokens[0] ) );
+			_email.setText( Sec.unescape( tokens[1] ) );
+			_description.setText( Sec.unescape( tokens[2] ) );
 			setVisible( true );
 		} catch ( java.lang.Exception e ) {
 			e.printStackTrace();

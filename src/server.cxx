@@ -225,10 +225,10 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& client_, char const* con
 	if ( ! clientIt->second._login.is_empty() )
 		{
 		login = clientIt->second._login;
-		cout << login;
+		clog << login;
 		}
 	else
-		cout << "`unnamed'";
+		clog << "`unnamed'";
 	if ( ! reason_ || reason_[ 0 ] )
 		{
 		HString reason = " was kicked because of: ";
@@ -236,12 +236,18 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& client_, char const* con
 		if ( ! clientIt->second._login.is_empty() )
 			broadcast_all_parties( &clientIt->second, _out << PROTOCOL::MSG << PROTOCOL::SEP
 					<< mark( COLORS::FG_BRIGHTRED ) << " " << clientIt->second._login << reason << endl << _out );
-		cout << reason;
+		clog << reason;
 		}
 	else
-		cout << " disconnected from server.";
+		{
+		char const msgDisconnected[] = " disconnected from server.";
+		if ( ! clientIt->second._login.is_empty() )
+			broadcast_all_parties( &clientIt->second, _out << PROTOCOL::MSG << PROTOCOL::SEP
+					<< mark( COLORS::FG_YELLOW ) << " " << clientIt->second._login << msgDisconnected << endl << _out );
+		clog << msgDisconnected;
+		}
 	_clients.erase( fileDescriptor );
-	cout << endl;
+	clog << endl;
 	if ( ! login.is_empty() )
 		broadcast( _out << PROTOCOL::PLAYER_QUIT << PROTOCOL::SEP << login << endl << _out );
 	return;
@@ -664,7 +670,7 @@ void HServer::handle_get_account( OClientInfo& client_, HString const& )
 		if ( row != rs->end() )
 			{
 			HRecordSet::value_t name( row[0] );
-			HRecordSet::value_t email( row[2] );
+			HRecordSet::value_t email( row[1] );
 			HRecordSet::value_t description( row[2] );
 			SENDF( *client_._socket ) << PROTOCOL::ACCOUNT << PROTOCOL::SEP
 				<< ( name ? *name : "" ) << PROTOCOL::SEPP
