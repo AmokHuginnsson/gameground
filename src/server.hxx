@@ -84,6 +84,7 @@ protected:
 		static char const* const SHUTDOWN;
 		static char const* const VERSION;
 		static char const* const VERSION_ID;
+		static char const* const WARN;
 		};
 public:
 	/*{*/

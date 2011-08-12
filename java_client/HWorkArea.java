@@ -52,6 +52,7 @@ class HWorkArea extends HAbstractWorkArea {
 		init( _gui = new HGUILocal( LABEL ) );
 		try {
 			_handlers.put( "err", HWorkArea.class.getDeclaredMethod( "handleError", new Class[]{ String.class } ) );
+			_handlers.put( "warn", HWorkArea.class.getDeclaredMethod( "handleWarning", new Class[]{ String.class } ) );
 			_handlers.put( "party", HWorkArea.class.getDeclaredMethod( "handleParty", new Class[]{ String.class } ) );
 			_handlers.put( "logic", HWorkArea.class.getDeclaredMethod( "handleLogic", new Class[]{ String.class } ) );
 			_handlers.put( "account", HWorkArea.class.getDeclaredMethod( "handleAccount", new Class[]{ String.class } ) );
@@ -99,6 +100,11 @@ class HWorkArea extends HAbstractWorkArea {
 				"The GameGround server reported error condition:\n" + $message,
 				"GameGround - error ...", javax.swing.JOptionPane.ERROR_MESSAGE );
 		_app.showLoginScreen();
+	}
+	public void handleWarning( String $message ) {
+		javax.swing.JOptionPane.showMessageDialog( _gui,
+				"The GameGround server issued a warning:\n" + $message,
+				"GameGround - warning ...", javax.swing.JOptionPane.WARNING_MESSAGE );
 	}
 	public void handleParty( String $message ) {
 		String[] toks = $message.split( ",", 2 );

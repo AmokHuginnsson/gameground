@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso8859-2"?>
 <!DOCTYPE dialog SYSTEM "res/gameground.dtd">
-<dialog title="Edit your account information ..." modal="true" size="480,320" resizable="false" focuscycleroot="true" defaultCloseOperation="JDialog.DISPOSE_ON_CLOSE"><!--{{{-->
+<dialog title="Edit your account information ..." modal="true" size="480,360" resizable="false" focuscycleroot="true" defaultCloseOperation="JDialog.DISPOSE_ON_CLOSE"><!--{{{-->
 	<vbox border="EmptyBorder(8,8,8,8)">
 		<panel border="EmptyBorder(8,8,8,8)">
 			<panel layout="BorderLayout" border="EtchedBorder()">

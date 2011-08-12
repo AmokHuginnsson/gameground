@@ -86,6 +86,7 @@ char const* const HServer::PROTOCOL::SEPP = ",";
 char const* const HServer::PROTOCOL::SHUTDOWN = "shutdown";
 char const* const HServer::PROTOCOL::VERSION = "version";
 char const* const HServer::PROTOCOL::VERSION_ID = "0";
+char const* const HServer::PROTOCOL::WARN = "warn";
 
 static const HString NULL_PASS = hash::sha1( "" );
 
@@ -416,13 +417,17 @@ void HServer::handle_account( OClientInfo& client_, HString const& accountInfo_ 
 					{
 					HRecordSet::ptr_t rs( _db->query( ( HFormat( "UPDATE tbl_user SET name = '%s', email = '%s', description = '%s', password = '%s' WHERE login = LOWER('%s') AND password = LOWER('%s');" ) % name % email % description % newPassword % client_._login % oldPassword ).string() ) );
 					M_ENSURE( !! rs );
+					if ( rs->get_size() != 1 )
+						client_._socket->write_until_eos( "warn:Password not changed - old password do not match.\n" );
 					}
 				else
 					{
+					client_._socket->write_until_eos( "warn:Cannot change your password - passwords do not match.\n" );
 					}
 				}
 			else
 				{
+				client_._socket->write_until_eos( "warn:You have to enter all of - old, new and repeated passwords to change the password.\n" );
 				}
 			}
 		}
