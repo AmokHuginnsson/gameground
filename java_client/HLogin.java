@@ -101,7 +101,9 @@ class HLogin extends HAbstractWorkArea {
 		} catch ( NumberFormatException e ) {
 		}
 		if ( port <= 1024 )
-			errors += "invalid port number (must be over 1024)";
+			errors += "invalid port number (must be over 1024)\n";
+		if ( ( password.length() > 0 ) && ( password.length() < 6 ) )
+			errors += "if you want to use password it must be at least 6 characters long";
 		if( errors.compareTo( "" ) != 0 ) {
 			JOptionPane.showMessageDialog( _gui,
 					"Your setup contains following errors:\n" + errors,

@@ -30,7 +30,6 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 		_app = $app;
 		try {
 			new SwingEngine( this ).insert( AppletJDOMHelper.loadResource( "/res/creator.xml", this ), this );
-			System.out.println( "dialogInit: " + $logics );
 			_logics.setModel( new AbstractListModel() {
 				public static final long serialVersionUID = 17l;
 				public int getSize() { return ( $logics.size() ); }
@@ -59,17 +58,10 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 			System.exit( 1 );
 		}
 	}
-	public Action onEditChange = new AbstractAction() {
-		public static final long serialVersionUID = 17l;
-		public void actionPerformed( ActionEvent $event ) {
-			if ( ( _conf != null ) && ( "".compareTo( _name.getText() ) != 0 ) )
-				onOk();
-		}
-	};
 	public void changedUpdate( DocumentEvent e ) {
 		setEnabledOk();
 	}
-	public void insertUpdate (DocumentEvent e ) {
+	public void insertUpdate( DocumentEvent e ) {
 		setEnabledOk();
 	}
 	public void removeUpdate( DocumentEvent e ) {

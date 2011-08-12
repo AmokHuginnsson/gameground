@@ -378,6 +378,8 @@ void HServer::handle_account( OClientInfo& client_, HString const& accountInfo_ 
 	M_PROLOG
 	if ( client_._login.is_empty() )
 		kick_client( client_._socket, _( "Set your name first (Just login with standard client, will ya?)." ) );
+	else if ( client_._anonymous )
+		kick_client( client_._socket, _( "Only registered users are allowed to do that." ) );
 	else
 		{
 		HTokenizer t( accountInfo_, "," );
