@@ -72,6 +72,7 @@ struct OSetup
 	{
 	bool _quiet;			/* --quiet, --silent */
 	bool _verbose;		/* --verbose */
+	bool _debug;
 	int	_maxConnections;
 	/* galaxy/boggle specific integers */
 	int _emperors;
@@ -89,10 +90,6 @@ struct OSetup
 	int _byoYomiPeriods;
 	int _byoYomiTime;
 	/* galaxy/boggle specific strings */
-	yaal::hcore::HString _login;
-	yaal::hcore::HString _host;
-	yaal::hcore::HString _gameType;
-	yaal::hcore::HString _game;
 	yaal::hcore::HString _consoleCharset;
 	yaal::hcore::HString _aspellLang;
 	yaal::hcore::HString _databasePath;
@@ -103,7 +100,7 @@ struct OSetup
 	/* self-sufficient */
 	static int const PATH_OFFSET = sizeof ( __FILE__ ) - sizeof ( "setup.hxx" );
 	OSetup ( void )
-		: _quiet( false ), _verbose( 0 ),
+		: _quiet( false ), _verbose( false ), _debug( false ),
 		_maxConnections( DEFAULT_MAX_CONNECTIONS ),
 		_emperors( GALAXY_EMPERORS ), _port( 7777 ),
 		_systems( GALAXY_EMPERORS * NEUTRAL_SYSTEM_PER_PLAYER ),
@@ -113,7 +110,6 @@ struct OSetup
 		_gobanSize( GO_GOBAN_SIZE ), _komi( GO_KOMI ), _handicaps( GO_HANDICAPS ),
 		_mainTime( GO_MAINTIME ), _byoYomiPeriods( GO_BYOYOMI_PERIODS ),
 		_byoYomiTime( GO_BYOYOMI_TIME ),
-		_login(), _host(), _gameType(), _game(),
 		_consoleCharset(), _aspellLang(), _databasePath( DATABASE_PATH ),
 		_databaseLogin( DATABASE_LOGIN ), _databasePassword( DATABASE_PASSWORD ),
 		_programName( NULL ),

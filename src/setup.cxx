@@ -72,25 +72,13 @@ void OSetup::test_setup( void )
 		cout.reset();
 		std::cout.rdbuf( NULL );
 		}
-#ifdef __GAMEGROUND_SERVER__
 	if ( _maxConnections < 2 )
 		yaal::tools::util::failure ( 3,
 				_( "this server hosts multiplayer games only\n" ) );
 	if ( _port < 1024 )
 		yaal::tools::util::failure ( 5,
 				_( "galaxy cannot run on restricted ports\n" ) );
-#endif /* __GAMEGROUND_SERVER__ */
-#ifdef __GAMEGROUND_CLIENT__
-	if ( _host.is_empty() )
-		yaal::tools::util::failure( 6,
-				_( "as a client you must specify server host\n" ) );
-	if ( _login.is_empty() )
-		yaal::tools::util::failure( 7,
-				_( "as a player you must specify Your name\n" ) );
-	if ( _gameType.is_empty() && _game.is_empty() )
-		yaal::tools::util::failure( 11, _( "as client you have to specify game to play\n" ) );
-#endif /* __GAMEGROUND_CLIENT__ */
-	char* message = NULL;
+	char* message( NULL );
 	if ( test_glx_emperors( _emperors, message ) )
 		yaal::tools::util::failure ( 4, message );
 	if ( test_glx_board_size( _boardSize, message ) )
@@ -99,16 +87,6 @@ void OSetup::test_setup( void )
 		yaal::tools::util::failure ( 9, message );
 	if ( test_glx_systems( _systems, message ) )
 		yaal::tools::util::failure ( 10, message );
-	if ( ! ( _gameType.is_empty() || _game.is_empty() ) )
-		yaal::tools::util::failure ( 12, _( "creating new game is enought, you do not have to join it explicite\n" ) );
-	if ( ! _gameType.is_empty() )
-		{
-		HString type = get_token( _gameType, ",", 0 );
-		_game = get_token( _gameType, ",", 1 );
-		_gameType = type;
-		if ( _gameType.is_empty() || _game.is_empty() || ( _gameType == "" ) || ( _game == "" ) )
-			yaal::tools::util::failure ( 13, _( "when creating new game, you have specify both type and name of new game\n" ) );
-		}
 	HDataBase::ptr_t db = HDataBase::get_connector();
 	db->connect( setup._databasePath, setup._databaseLogin, setup._databasePassword );
 	return;
