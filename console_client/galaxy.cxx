@@ -934,6 +934,8 @@ void HClient::init_client( HString& host_, int port_ )
 				setup._emperors, setup._boardSize, setup._systems );
 		_socket.write_until_eos( message );
 		}
+	else
+		_socket.write_until_eos( "get_partys\n" );
 	return;
 	M_EPILOG
 	}
@@ -951,8 +953,6 @@ void HClient::handler_message( int )
 			_window->_logPad->add( message );
 			_window->_logPad->add( "\n" );
 			}
-		while ( ( command = get_token( message, ":", 0 ) ) == "glx" )
-			message = message.mid( command.get_length() + 1 );
 		msgLength = message.get_length();
 		if ( msgLength < 1 )
 			{
@@ -1039,7 +1039,7 @@ void HClient::handler_setup( HString& command_ )
 		if ( _systems.get_size() )
 			_dispatcher.stop();
 		else
-			_systems = HArray < HSystem > ( setup._systems = lexical_cast<int>( value ) );
+			_systems = HArray<HSystem>( setup._systems = lexical_cast<int>( value ) );
 		}
 	else if ( variable == "system_coordinates" )
 		{
