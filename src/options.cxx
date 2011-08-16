@@ -63,27 +63,18 @@ int handle_program_options( int argc_, char** argv_ )
 	{
 	M_PROLOG
 	HProgramOptionsHandler po;
-	OOptionInfo info( po, setup._programName, "GameGround - universal networked multiplayer game server", NULL );
+	OOptionInfo info( po, setup._programName, "GameGround - universal networked multiplayer game server.", NULL );
 	bool stop = false;
 	po( "log_path", program_options_helper::option_value( setup._logPath ), HProgramOptionsHandler::OOption::TYPE::REQUIRED, "path pointing to file for application logs", "path" )
-#ifdef __GAMEGROUND_SERVER__
 		( "database_path", program_options_helper::option_value( setup._databasePath ), 'D', HProgramOptionsHandler::OOption::TYPE::REQUIRED, "database connection path scheme", "path" )
 		( "database_login", program_options_helper::option_value( setup._databaseLogin ), 'U', HProgramOptionsHandler::OOption::TYPE::REQUIRED, "datbase connection user name", "user" )
 		( "database_password", program_options_helper::option_value( setup._databasePassword ), 'p', HProgramOptionsHandler::OOption::TYPE::REQUIRED, "database connection password", "password" )
 		( "aspell_lang", program_options_helper::option_value( setup._aspellLang ), HProgramOptionsHandler::OOption::TYPE::REQUIRED, "language used for spell checking", "language" )
 		( "console_charset", program_options_helper::option_value( setup._consoleCharset ), HProgramOptionsHandler::OOption::TYPE::REQUIRED, "charset encoding for current terminal", "charset" )
-#endif /* #ifdef __GAMEGROUND_SERVER__ */
 		( "port", program_options_helper::option_value( setup._port ), "P", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "set port number", "num" )
 		( "board", program_options_helper::option_value( setup._boardSize ), "B", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "size of the galaxy board", "size" )
 		( "emperors", program_options_helper::option_value( setup._emperors ), "E", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "set number of players", "count" )
 		( "systems", program_options_helper::option_value( setup._systems ), "S", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "set number of neutral systems", "count" )
-#ifdef __GAMEGROUND_CLIENT__
-		( "host", program_options_helper::option_value( setup._host ), "H", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "select host to connect", "addr" )
-		( "join", program_options_helper::option_value( setup._game ), "J", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "join to game named {name}", "name" )
-		( "login", program_options_helper::option_value( setup._login ), "L", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "set your player name", "name" )
-		( "password", program_options_helper::option_value( setup._password ), 'p', HProgramOptionsHandler::OOption::TYPE::REQUIRED, "password for your account", "password" )
-		( "new", program_options_helper::option_value( setup._gameType ), "N", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "create game of type {type} and named {name}", "type,name" )
-#endif /* #ifdef __GAMEGROUND_CLIENT__ */
 		( "quiet", program_options_helper::option_value( setup._quiet ), "q", HProgramOptionsHandler::OOption::TYPE::NONE, "inhibit usual output" )
 		( "silent", program_options_helper::option_value( setup._quiet ), "q", HProgramOptionsHandler::OOption::TYPE::NONE, "inhibit usual output" )
 		( "verbose", program_options_helper::option_value( setup._verbose ), "v", HProgramOptionsHandler::OOption::TYPE::NONE, "print more information" )

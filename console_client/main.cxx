@@ -59,9 +59,9 @@ int main( int argc_, char* argv_[] )
 		{
 /* TO-DO: enter main loop code here */
 		HSignalService::get_instance();
-		setup._programName = argv_ [ 0 ];
+		setup._programName = argv_[ 0 ];
 		opt = handle_program_options( argc_, argv_ );
-		setup._logPath += "." + setup._login;
+		setup._logPath.replace( ".log", "_" + setup._login + ".log" );
 		hcore::log.rehash( setup._logPath, setup._programName );
 		setup.test_setup();
 /* *BOOM* */
