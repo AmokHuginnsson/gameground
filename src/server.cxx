@@ -105,6 +105,9 @@ HServer::HServer( int connections_ )
 
 HServer::~HServer( void )
 	{
+	M_ASSERT( _logics.is_empty() );
+	M_ASSERT( _logins.is_empty() );
+	M_ASSERT( _clients.is_empty() );
 	out << brightred << "<<<GameGround>>>" << lightgray << " server finished." << endl;
 	}
 
@@ -246,6 +249,8 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& client_, char const* con
 					<< mark( COLORS::FG_YELLOW ) << " " << clientIt->second._login << msgDisconnected << endl << _out );
 		clog << msgDisconnected;
 		}
+	if ( ! login.is_empty() )
+		_logins.erase( login );
 	_clients.erase( fileDescriptor );
 	clog << endl;
 	if ( ! login.is_empty() )
@@ -324,7 +329,6 @@ void HServer::handler_chat( OClientInfo& client_, HString const& message_ )
 void HServer::handle_login( OClientInfo& client_, HString const& loginInfo_ )
 	{
 	M_PROLOG
-	clients_t::iterator it;
 	int const MINIMUM_NAME_LENGTH( 4 );
 	HString version( get_token( loginInfo_, ":", 0 ) );
 	HString login( get_token( loginInfo_, ":", 1 ) );
@@ -335,16 +339,12 @@ void HServer::handle_login( OClientInfo& client_, HString const& loginInfo_ )
 			{
 			*client_._socket << "err:Your client version is not supported." << endl;
 			kick_client( client_._socket );
-			break;
 			}
-		for ( it = _clients.begin(); it != _clients.end(); ++ it )
-			if ( ( ! strcasecmp( it->second._login, login ) ) && ( it->second._socket != client_._socket ) )
-				break;
-		if ( login.find_other_than( LEGEAL_CHARACTER_SET[ CONSTR_CHAR_SET_LOGIN_NAME ] ) >= 0 )
+		else if ( login.find_other_than( LEGEAL_CHARACTER_SET[ CONSTR_CHAR_SET_LOGIN_NAME ] ) >= 0 )
 			*client_._socket << "err:Name may only take form of `[a-zA-Z0-9]{4,}'." << endl;
 		else if ( login.get_length() < MINIMUM_NAME_LENGTH )
 			*client_._socket << "err:Your name is too short, it needs to be at least " << MINIMUM_NAME_LENGTH << " character long." << endl;
-		else if ( it != _clients.end() )
+		else if ( _logins.count( login ) > 0 )
 			*client_._socket << "err:" << login << " already logged in." << endl;
 		else
 			{
@@ -361,6 +361,7 @@ void HServer::handle_login( OClientInfo& client_, HString const& loginInfo_ )
 			if ( ( result == 2 ) || ( result == 0 ) )
 				{
 				client_._login = login;
+				_logins.insert( make_pair( login, &client_ ) );
 				if ( result ) /* user exists and supplied password was correct */
 					update_last_activity( client_ );
 				else if ( password != NULL_PASS )

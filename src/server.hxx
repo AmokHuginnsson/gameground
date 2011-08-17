@@ -43,7 +43,7 @@ protected:
 	typedef yaal::hcore::HMap<HLogic::id_t, HLogic::ptr_t> logics_t;
 	typedef yaal::hcore::HMap<yaal::hcore::HString, handler_t> handlers_t;
 	typedef yaal::hcore::HMap<int, OClientInfo> clients_t;
-	typedef yaal::hcore::HMap<yaal::hcore::HString, int> logins_t;
+	typedef yaal::hcore::HMap<yaal::hcore::HString, OClientInfo*> logins_t;
 	typedef yaal::hcore::HArray<OClientInfo*> dropouts_t;
 	int _maxConnections;
 	yaal::hcore::HSocket _socket;
