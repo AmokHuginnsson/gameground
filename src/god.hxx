@@ -108,7 +108,6 @@ protected:
 	yaal::hcore::HChunk _oldGame;
 	players_t _players;
 	yaal::hcore::HString _varTmpBuffer;
-	mutable yaal::hcore::HMutex _mutex;
 	/*}*/
 public:
 	/*{*/

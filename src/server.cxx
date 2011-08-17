@@ -94,7 +94,7 @@ HServer::HServer( int connections_ )
 	: _maxConnections( connections_ ),
 	_socket( HSocket::socket_type_t( HSocket::TYPE::DEFAULT ) | HSocket::TYPE::NONBLOCKING | HSocket::TYPE::SSL_SERVER, connections_ ),
 	_clients(), _logins(), _logics(), _handlers(), _out(),
-	_db( HDataBase::get_connector() ),
+	_db( HDataBase::get_connector() ), _mutex(),
 	_dispatcher( connections_, 3600 * 1000 ), _idPool( 1 ),
 	_dropouts()
 	{
@@ -791,6 +791,23 @@ void HServer::flush_droupouts( void )
 		M_ASSERT( !! dropout->_socket );
 		kick_client( dropout->_socket, NULL );
 		}
+	return;
+	M_EPILOG
+	}
+
+OClientInfo* HServer::get_client( HString const& login_ )
+	{
+	M_PROLOG
+	logins_t::iterator it( _logins.find( login_ ) );
+	return ( it != _logins.end() ? it->second : NULL );
+	M_EPILOG
+	}
+
+HServer::db_accessor_t HServer::db( void )
+	{
+	M_PROLOG
+	db_accessor_t dbAccessor( external_lock_t( ref( _mutex ) ), _db );
+	return ( dbAccessor );
 	M_EPILOG
 	}
 

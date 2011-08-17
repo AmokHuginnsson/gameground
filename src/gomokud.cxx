@@ -79,7 +79,7 @@ HGomoku::HGomoku( HServer* server_, HLogic::id_t const& id_, HString const& comm
 	_state( STONE::NONE ),
 	_move( 0 ), _start( 0 ),
 	_game( GOBAN_SIZE * GOBAN_SIZE + sizeof ( '\0' ) ),
-	_players(), _varTmpBuffer(), _mutex()
+	_players(), _varTmpBuffer()
 	{
 	M_PROLOG
 	_contestants[ 0 ] = _contestants[ 1 ] = NULL;

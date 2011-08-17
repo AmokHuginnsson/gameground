@@ -35,6 +35,26 @@ Copyright:
 namespace gameground
 {
 
+template<typename T>
+class HExclusiveAccessor
+	{
+	T _object;
+	yaal::hcore::external_lock_t _lock;
+public:
+	HExclusiveAccessor( yaal::hcore::external_lock_t lock_, T object_ )
+		: _object( object_ ), _lock( lock_ ) { }
+	HExclusiveAccessor( HExclusiveAccessor& ea_ )
+		: _object( ea_._object ), _lock( ea_._lock ) { }
+	T& operator->( void )
+		{ return ( _object ); }
+	T const& operator->( void ) const
+		{ return ( _object ); }
+	T& operator*( void )
+		{ return ( *_object ); }
+	T const& operator*( void ) const
+		{ return ( *_object ); }
+	};
+
 class HServer
 	{
 protected:
@@ -45,6 +65,7 @@ protected:
 	typedef yaal::hcore::HMap<int, OClientInfo> clients_t;
 	typedef yaal::hcore::HMap<yaal::hcore::HString, OClientInfo*> logins_t;
 	typedef yaal::hcore::HArray<OClientInfo*> dropouts_t;
+	typedef HExclusiveAccessor<yaal::dbwrapper::HDataBase::ptr_t> db_accessor_t;
 	int _maxConnections;
 	yaal::hcore::HSocket _socket;
 	clients_t _clients;
@@ -53,6 +74,7 @@ protected:
 	handlers_t _handlers;
 	yaal::tools::HStringStream _out;
 	yaal::dbwrapper::HDataBase::ptr_t _db;
+	yaal::hcore::HMutex _mutex;
 	yaal::tools::HIODispatcher _dispatcher;
 	yaal::hcore::HNumber _idPool;
 	dropouts_t _dropouts;
@@ -95,6 +117,8 @@ public:
 	int init_server( int );
 	void run( void );
 	void drop_client( OClientInfo* );
+	OClientInfo* get_client( yaal::hcore::HString const& );
+	db_accessor_t db( void );
 	/*}*/
 protected:
 	/*{*/

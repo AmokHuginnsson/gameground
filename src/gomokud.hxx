@@ -1,7 +1,7 @@
 /*
 ---           `gameground' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski            ---
 
-	god.hxx - this file is integral part of `gameground' project.
+	gomokud.hxx - this file is integral part of `gameground' project.
 
 	i.  You may not make any changes in Copyright information.
 	ii. You must attach Copyright information to any part of every copy
@@ -70,7 +70,6 @@ protected:
 	yaal::hcore::HChunk _game;
 	players_t _players;
 	yaal::hcore::HString _varTmpBuffer;
-	mutable yaal::hcore::HMutex _mutex;
 	/*}*/
 public:
 	/*{*/
