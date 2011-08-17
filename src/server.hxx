@@ -24,8 +24,8 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#ifndef SERVER_HXX_INCLUDED
-#define SERVER_HXX_INCLUDED
+#ifndef GAMEGROUND_SERVER_HXX_INCLUDED
+#define GAMEGROUND_SERVER_HXX_INCLUDED
 
 #include <yaal/yaal.hxx>
 
@@ -34,26 +34,6 @@ Copyright:
 
 namespace gameground
 {
-
-template<typename T>
-class HExclusiveAccessor
-	{
-	T _object;
-	yaal::hcore::external_lock_t _lock;
-public:
-	HExclusiveAccessor( yaal::hcore::external_lock_t lock_, T object_ )
-		: _object( object_ ), _lock( lock_ ) { }
-	HExclusiveAccessor( HExclusiveAccessor& ea_ )
-		: _object( ea_._object ), _lock( ea_._lock ) { }
-	T& operator->( void )
-		{ return ( _object ); }
-	T const& operator->( void ) const
-		{ return ( _object ); }
-	T& operator*( void )
-		{ return ( *_object ); }
-	T const& operator*( void ) const
-		{ return ( *_object ); }
-	};
 
 class HServer
 	{
@@ -65,7 +45,7 @@ protected:
 	typedef yaal::hcore::HMap<int, OClientInfo> clients_t;
 	typedef yaal::hcore::HMap<yaal::hcore::HString, OClientInfo*> logins_t;
 	typedef yaal::hcore::HArray<OClientInfo*> dropouts_t;
-	typedef HExclusiveAccessor<yaal::dbwrapper::HDataBase::ptr_t> db_accessor_t;
+	typedef yaal::hcore::HExclusiveAccessor<yaal::dbwrapper::HDataBase::ptr_t> db_accessor_t;
 	int _maxConnections;
 	yaal::hcore::HSocket _socket;
 	clients_t _clients;
@@ -135,8 +115,8 @@ protected:
 	void handle_login( OClientInfo&, yaal::hcore::HString const& );
 	void handle_account( OClientInfo&, yaal::hcore::HString const& );
 	void pass_command( OClientInfo&, yaal::hcore::HString const& );
-	void create_game( OClientInfo&, yaal::hcore::HString const& );
-	void join_game( OClientInfo&, yaal::hcore::HString const& );
+	void create_party( OClientInfo&, yaal::hcore::HString const& );
+	void join_party( OClientInfo&, yaal::hcore::HString const& );
 	void handle_get_logics( OClientInfo&, yaal::hcore::HString const& );
 	void handle_get_players( OClientInfo&, yaal::hcore::HString const& );
 	void handle_get_partys( OClientInfo&, yaal::hcore::HString const& );
@@ -144,13 +124,14 @@ protected:
 	void send_logics_info( OClientInfo& );
 	void send_players_info( OClientInfo& );
 	void send_player_info( OClientInfo& );
-	void send_games_info( OClientInfo& );
+	void send_partys_info( OClientInfo& );
 	void remove_client_from_logic( OClientInfo&, HLogic::ptr_t, char const* const = NULL );
 	void remove_client_from_all_logics( OClientInfo& );
 	void flush_logics( void );
 	void update_last_activity( OClientInfo const& );
 	void flush_droupouts( void );
 	HLogic::id_t create_id( void );
+	void free_id( HLogic::id_t const& );
 	/*}*/
 	};
 
@@ -158,5 +139,5 @@ int main_server( void );
 
 }
 
-#endif /* not SERVER_HXX_INCLUDED */
+#endif /* not GAMEGROUND_SERVER_HXX_INCLUDED */
 

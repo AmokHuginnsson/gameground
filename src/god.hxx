@@ -24,8 +24,8 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#ifndef GOD_HXX_INCLUDED
-#define GOD_HXX_INCLUDED
+#ifndef GAMEGROUND_GOD_HXX_INCLUDED
+#define GAMEGROUND_GOD_HXX_INCLUDED
 
 #include <yaal/yaal.hxx>
 
@@ -172,5 +172,5 @@ private:
 
 }
 
-#endif /* not GOD_HXX_INCLUDED */
+#endif /* not GAMEGROUND_GOD_HXX_INCLUDED */
 

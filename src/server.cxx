@@ -128,8 +128,8 @@ int HServer::init_server( int port_ )
 	_handlers[ PROTOCOL::GET_PLAYERS ] = &HServer::handle_get_players;
 	_handlers[ PROTOCOL::GET_PARTYS ] = &HServer::handle_get_partys;
 	_handlers[ PROTOCOL::GET_ACCOUNT ] = &HServer::handle_get_account;
-	_handlers[ PROTOCOL::CREATE ] = &HServer::create_game;
-	_handlers[ PROTOCOL::JOIN ] = &HServer::join_game;
+	_handlers[ PROTOCOL::CREATE ] = &HServer::create_party;
+	_handlers[ PROTOCOL::JOIN ] = &HServer::join_party;
 	_handlers[ PROTOCOL::ABANDON ] = &HServer::handler_abandon;
 	_handlers[ PROTOCOL::CMD ] = &HServer::pass_command;
 	out << brightblue << "<<<GameGround>>>" << lightgray << " server started." << endl;
@@ -491,7 +491,7 @@ void HServer::pass_command( OClientInfo& client_, HString const& command_ )
 	M_EPILOG
 	}
 
-void HServer::create_game( OClientInfo& client_, HString const& arg_ )
+void HServer::create_party( OClientInfo& client_, HString const& arg_ )
 	{
 	M_PROLOG
 	if ( client_._login.is_empty() )
@@ -507,20 +507,28 @@ void HServer::create_game( OClientInfo& client_, HString const& arg_ )
 		else
 			{
 			HLogic::ptr_t logic;
+			HLogic::id_t id( create_id() );
 			try
 				{
-				logic = factory.create_logic( type, this, create_id(), configuration );
+				logic = factory.create_logic( type, this, id, configuration );
 				if ( ! logic->accept_client( &client_ ) )
 					{
-					HLogic::id_t const& id( logic->id() );
-					_logics[ id ] = logic;
-					out << name << "," << type << endl;
-					broadcast( _out << PROTOCOL::PARTY_INFO << PROTOCOL::SEP << id << PROTOCOL::SEPP << logic->get_info() << endl << _out );
-					send_player_info( client_ );
-					logic->post_accept_client( &client_ );
+					if ( id == logic->id() )
+						{
+						_logics[ id ] = logic;
+						out << name << "," << type << endl;
+						broadcast( _out << PROTOCOL::PARTY_INFO << PROTOCOL::SEP << id << PROTOCOL::SEPP << logic->get_info() << endl << _out );
+						send_player_info( client_ );
+						logic->post_accept_client( &client_ );
+						}
+					else
+						free_id( id );
 					}
 				else
+					{
+					free_id( id );
 					client_._socket->write_until_eos( "err:Specified configuration is inconsistent.\n" );
+					}
 				}
 			catch ( HLogicException& e )
 				{
@@ -532,7 +540,7 @@ void HServer::create_game( OClientInfo& client_, HString const& arg_ )
 	M_EPILOG
 	}
 
-void HServer::join_game( OClientInfo& client_, HString const& id_ )
+void HServer::join_party( OClientInfo& client_, HString const& id_ )
 	{
 	M_PROLOG
 	if ( client_._login.is_empty() )
@@ -664,7 +672,7 @@ void HServer::handle_get_players( OClientInfo& client_, HString const& )
 void HServer::handle_get_partys( OClientInfo& client_, HString const& )
 	{
 	M_PROLOG
-	send_games_info( client_ );
+	send_partys_info( client_ );
 	return;
 	M_EPILOG
 	}
@@ -742,7 +750,7 @@ void HServer::send_players_info( OClientInfo& client_ )
 	M_EPILOG
 	}
 
-void HServer::send_games_info( OClientInfo& client_ )
+void HServer::send_partys_info( OClientInfo& client_ )
 	{
 	M_PROLOG
 	for( logics_t::iterator it( _logics.begin() ), end( _logics.end() ); it != end; ++ it )
@@ -769,6 +777,17 @@ HLogic::id_t HServer::create_id( void )
 	HLogic::id_t id = _idPool.to_string();
 	++ _idPool;
 	return ( id );
+	M_EPILOG
+	}
+
+void HServer::free_id( HLogic::id_t const& id_ )
+	{
+	M_PROLOG
+	HNumber id( _idPool );
+	-- id;
+	if ( id.to_string() == id_ )
+		_idPool.swap( id );
+	return;
 	M_EPILOG
 	}
 
@@ -806,8 +825,8 @@ OClientInfo* HServer::get_client( HString const& login_ )
 HServer::db_accessor_t HServer::db( void )
 	{
 	M_PROLOG
-	db_accessor_t dbAccessor( external_lock_t( ref( _mutex ) ), _db );
-	return ( dbAccessor );
+	db_accessor_t eaDB( external_lock_t( ref( _mutex ) ), _db );
+	return ( eaDB );
 	M_EPILOG
 	}
 
