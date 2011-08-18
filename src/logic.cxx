@@ -193,6 +193,7 @@ void HLogicCreatorInterface::initialize_globals( void )
 	{
 	M_PROLOG
 	do_initialize_globals();
+	return;
 	M_EPILOG
 	}
 
@@ -214,7 +215,20 @@ void HLogic::drop_client( OClientInfo* clientInfo_ )
 	{
 	M_PROLOG
 	_server->drop_client( clientInfo_ );
+	return;
 	M_EPILOG
+	}
+
+bool HLogic::is_private( void ) const
+	{
+	M_PROLOG
+	return ( do_is_private() );
+	M_EPILOG
+	}
+
+bool HLogic::do_is_private( void ) const
+	{
+	return ( false );
 	}
 
 }

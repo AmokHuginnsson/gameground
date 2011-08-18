@@ -47,7 +47,7 @@ CREATE TABLE tbl_stats (
 	score FLOAT
 );
 
--- Session information, should not be stored in tbl_user
+-- Session information should not be stored in tbl_user
 -- cause session infromation changes frequently while user information
 -- changes rarely.
 -- There is 1 to 1 relation between tbl_user and tbl_session.

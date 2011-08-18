@@ -37,6 +37,9 @@ public abstract class HAbstractLogic {
 	public HGUIface getGUI() {
 		return ( _gui );
 	}
+	public String id() {
+		return ( _id );
+	}
 	public void handleSay( String $message ) {
 		_gui.log( _timestampFormat.format( java.util.Calendar.getInstance().getTime() ) );
 		handleMessage( $message );

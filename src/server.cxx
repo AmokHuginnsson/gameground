@@ -30,6 +30,7 @@ M_VCSID( "$Id: "__ID__" $" )
 
 #include "setup.hxx"
 #include "logicfactory.hxx"
+#include "security.hxx"
 
 using namespace yaal;
 using namespace yaal::hcore;
@@ -426,7 +427,8 @@ void HServer::handle_account( OClientInfo& client_, HString const& accountInfo_ 
 		bool newPasswordRepeatNull( newPasswordRepeat == NULL_PASS );
 		if ( oldPasswordNull && newPasswordNull && newPasswordRepeatNull )
 			{
-			HRecordSet::ptr_t rs( _db->query( ( HFormat( "UPDATE tbl_user SET name = '%s', email = '%s', description = '%s' WHERE login = LOWER('%s');" ) % name % email % description % client_._login ).string() ) );
+			HRecordSet::ptr_t rs( _db->query( ( HFormat( "UPDATE tbl_user SET name = '%s', email = '%s', description = '%s' WHERE login = LOWER('%s');" )
+							% escape( name ) % escape( email ) % escape( description ) % client_._login ).string() ) );
 			M_ENSURE( !! rs );
 			}
 		else
@@ -435,7 +437,8 @@ void HServer::handle_account( OClientInfo& client_, HString const& accountInfo_ 
 				{
 				if ( newPassword == newPasswordRepeat )
 					{
-					HRecordSet::ptr_t rs( _db->query( ( HFormat( "UPDATE tbl_user SET name = '%s', email = '%s', description = '%s', password = '%s' WHERE login = LOWER('%s') AND password = LOWER('%s');" ) % name % email % description % newPassword % client_._login % oldPassword ).string() ) );
+					HRecordSet::ptr_t rs( _db->query( ( HFormat( "UPDATE tbl_user SET name = '%s', email = '%s', description = '%s', password = '%s' WHERE login = LOWER('%s') AND password = LOWER('%s');" )
+									% escape( name ) % escape( email ) % escape( description ) % newPassword % client_._login % oldPassword ).string() ) );
 					M_ENSURE( !! rs );
 					if ( rs->get_size() != 1 )
 						client_._socket->write_until_eos( "warn:Password not changed - old password do not match.\n" );
@@ -517,8 +520,11 @@ void HServer::create_party( OClientInfo& client_, HString const& arg_ )
 						{
 						_logics[ id ] = logic;
 						out << name << "," << type << endl;
-						broadcast( _out << PROTOCOL::PARTY_INFO << PROTOCOL::SEP << id << PROTOCOL::SEPP << logic->get_info() << endl << _out );
-						send_player_info( client_ );
+						if ( ! logic->is_private() )
+							{
+							broadcast( _out << PROTOCOL::PARTY_INFO << PROTOCOL::SEP << id << PROTOCOL::SEPP << logic->get_info() << endl << _out );
+							send_player_info( client_ );
+							}
 						logic->post_accept_client( &client_ );
 						}
 					else
@@ -693,9 +699,9 @@ void HServer::handle_get_account( OClientInfo& client_, HString const& )
 			HRecordSet::value_t email( row[1] );
 			HRecordSet::value_t description( row[2] );
 			SENDF( *client_._socket ) << PROTOCOL::ACCOUNT << PROTOCOL::SEP
-				<< ( name ? *name : "" ) << PROTOCOL::SEPP
-				<< ( email ? *email : "" ) << PROTOCOL::SEPP
-				<< ( description ? *description : "" ) << endl;
+				<< ( name ? unescape( *name ) : "" ) << PROTOCOL::SEPP
+				<< ( email ? unescape( *email ) : "" ) << PROTOCOL::SEPP
+				<< ( description ? unescape( *description ) : "" ) << endl;
 			}
 		}
 	return;

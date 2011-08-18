@@ -1,7 +1,7 @@
 /*
 ---           `gameground' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski            ---
 
-	chatd.hxx - this file is integral part of `gameground' project.
+	security.cxx - this file is integral part of `gameground' project.
 
 	i.  You may not make any changes in Copyright information.
 	ii. You must attach Copyright information to any part of every copy
@@ -24,43 +24,43 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#ifndef GAMEGROUND_CHATD_HXX_INCLUDED
-#define GAMEGROUND_CHATD_HXX_INCLUDED
-
 #include <yaal/yaal.hxx>
+M_VCSID( "$Id: "__ID__" $" )
+#include "security.hxx"
 
-#include "logic.hxx"
+using namespace yaal;
+using namespace yaal::hcore;
 
 namespace gameground
 {
 
-namespace chat
-{
+/* Dangerous characters and their mappings:
+ * " - \Q
+ * ' = \A
+ */
 
-class HChat : public HLogic
+yaal::hcore::HString escape( yaal::hcore::HString const& evil_ )
 	{
-	typedef yaal::hcore::HMap<yaal::hcore::HString, HLogic::ptr_t> chats_t;
-	yaal::hcore::HString _key;
-public:
-	HChat( HServer*, HLogic::id_t const&, yaal::hcore::HString const& );
-	virtual ~HChat( void );
-	static HLogic::ptr_t get_chat( HServer*, HLogic::id_t const&, yaal::hcore::HString const& );
-protected:
-	virtual bool do_accept( OClientInfo* );
-	virtual void do_post_accept( OClientInfo* );
-	virtual void do_kick( OClientInfo* );
-	virtual yaal::hcore::HString do_get_info() const;
-	virtual bool do_is_private( void ) const;
-private:
-	static chats_t _chats_;
-	HChat( HChat const& );
-	HChat& operator = ( HChat const& );
-	friend class HServer;
-	};
+	HString str( evil_.get_length() * 2, true );
+	str = evil_;
+	str.replace( "\"", "\\Q" ).replace( "'", "\\A" );
+	return ( str );
+	}
+
+yaal::hcore::HString unescape( yaal::hcore::HString const& safe_ )
+	{
+	HString str( safe_ );
+	str.replace( "\\A", "'" ).replace( "\\Q", "\"" );
+	return ( str );
+	}
+
+bool is_sha1( yaal::hcore::HString const& str_ )
+	{
+	int len( static_cast<int>( str_.get_length() ) );
+	char const SHA1chars[] = "01234567890aAbBcCdDeEfF";
+	int idx( static_cast<int>( str_.find_other_than( SHA1chars ) ) );
+	return ( ( len == 40 ) && ( idx == HString::npos ) );
+	}
 
 }
-
-}
-
-#endif /* not GAMEGROUND_CHATD_HXX_INCLUDED */
 

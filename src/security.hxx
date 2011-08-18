@@ -1,7 +1,7 @@
 /*
 ---           `gameground' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski            ---
 
-	chatd.hxx - this file is integral part of `gameground' project.
+	security.hxx - this file is integral part of `gameground' project.
 
 	i.  You may not make any changes in Copyright information.
 	ii. You must attach Copyright information to any part of every copy
@@ -24,43 +24,19 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#ifndef GAMEGROUND_CHATD_HXX_INCLUDED
-#define GAMEGROUND_CHATD_HXX_INCLUDED
+#ifndef GAMEGROUND_SECURITY_HXX_INCLUDED
+#define GAMEGROUND_SECURITY_HXX_INCLUDED 1
 
-#include <yaal/yaal.hxx>
-
-#include "logic.hxx"
+#include <yaal/hcore/hstring.hxx>
 
 namespace gameground
 {
 
-namespace chat
-{
-
-class HChat : public HLogic
-	{
-	typedef yaal::hcore::HMap<yaal::hcore::HString, HLogic::ptr_t> chats_t;
-	yaal::hcore::HString _key;
-public:
-	HChat( HServer*, HLogic::id_t const&, yaal::hcore::HString const& );
-	virtual ~HChat( void );
-	static HLogic::ptr_t get_chat( HServer*, HLogic::id_t const&, yaal::hcore::HString const& );
-protected:
-	virtual bool do_accept( OClientInfo* );
-	virtual void do_post_accept( OClientInfo* );
-	virtual void do_kick( OClientInfo* );
-	virtual yaal::hcore::HString do_get_info() const;
-	virtual bool do_is_private( void ) const;
-private:
-	static chats_t _chats_;
-	HChat( HChat const& );
-	HChat& operator = ( HChat const& );
-	friend class HServer;
-	};
+yaal::hcore::HString escape( yaal::hcore::HString const& );
+yaal::hcore::HString unescape( yaal::hcore::HString const& );
+bool is_sha1( yaal::hcore::HString const& );
 
 }
 
-}
-
-#endif /* not GAMEGROUND_CHATD_HXX_INCLUDED */
+#endif /* #ifndef GAMEGROUND_SECURITY_HXX_INCLUDED */
 

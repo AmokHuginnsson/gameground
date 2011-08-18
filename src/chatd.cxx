@@ -46,8 +46,10 @@ namespace gameground
 namespace chat
 {
 
+HChat::chats_t HChat::_chats_;
+
 HChat::HChat( HServer* server_, HLogic::id_t const& id_, HString const& comment_ )
-	: HLogic( server_, id_, "chat", comment_ )
+	: HLogic( server_, id_, "chat", comment_ ), _key( comment_ )
 	{
 	M_PROLOG
 	return;
@@ -57,6 +59,7 @@ HChat::HChat( HServer* server_, HLogic::id_t const& id_, HString const& comment_
 HChat::~HChat ( void )
 	{
 	M_PROLOG
+	_chats_.erase( _key );
 	return;
 	M_EPILOG
 	}
@@ -89,6 +92,35 @@ yaal::hcore::HString HChat::do_get_info() const
 	return ( HString( "chat," ) + get_comment() );
 	}
 
+bool HChat::do_is_private( void ) const
+	{
+	return ( true );
+	}
+
+HLogic::ptr_t HChat::get_chat( HServer* server_, HLogic::id_t const& id_, HString const& argv_ )
+	{
+	M_PROLOG
+	HString chatter1( get_token( argv_, ",", 0 ) );
+	HString chatter2( get_token( argv_, ",", 1 ) );
+	if ( chatter1.is_empty() || chatter2.is_empty() || ( chatter1 == chatter2 ) )
+		throw HLogicException( "invalid chatters" );
+	HString key( chatter1 < chatter2 ? chatter1 + ":" + chatter2 : chatter2 + ":" + chatter1 );
+	chats_t::iterator it( _chats_.find( key ) );
+	HLogic::ptr_t logic;
+	if ( it != _chats_.end() )
+		{
+		logic = it->second;
+		}
+	else
+		{
+		out << "creating logic: " << argv_ << endl;
+		logic = make_pointer<chat::HChat>( server_, id_, key );
+		_chats_.insert( make_pair( key, logic ) );
+		}
+	return ( logic );
+	M_EPILOG
+	}
+
 }
 
 namespace logic_factory
@@ -104,9 +136,7 @@ protected:
 HLogic::ptr_t HChatCreator::do_new_instance( HServer* server_, HLogic::id_t const& id_, HString const& argv_ )
 	{
 	M_PROLOG
-	out << "creating logic: " << argv_ << endl;
-	HString name( get_token( argv_, ",", 0 ) );
-	return ( make_pointer<chat::HChat>( server_, id_, name ) );
+	return ( chat::HChat::get_chat( server_, id_, argv_ ) );
 	M_EPILOG
 	}
 

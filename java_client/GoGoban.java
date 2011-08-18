@@ -17,7 +17,7 @@ public class GoGoban extends Goban {
 	}
 	public void mouseClicked( MouseEvent $event ) {
 		if ( _logic.isMyMove() && ! breakTheRules( _cursorX, _cursorY, _stone ) ) {
-			_logic._client.println( Go.PROTOCOL.CMD + Go.PROTOCOL.SEP
+			_logic._client.println( Go.PROTOCOL.CMD + Go.PROTOCOL.SEP + _logic.id() + Go.PROTOCOL.SEP
 					+ Go.PROTOCOL.PLAY + Go.PROTOCOL.SEP
 					+ Go.PROTOCOL.PUTSTONE + Go.PROTOCOL.SEPP + _cursorX + Go.PROTOCOL.SEPP + _cursorY );
 			_logic.waitToMove();
@@ -25,7 +25,7 @@ public class GoGoban extends Goban {
 			char stone = getStone( _cursorX, _cursorY );
 			if ( ( _logic.stone() == stone ) || ( _logic.stoneDead() == stone ) ) {
 				System.out.println( "dead mark" );
-				_logic._client.println( Go.PROTOCOL.CMD + Go.PROTOCOL.SEP
+				_logic._client.println( Go.PROTOCOL.CMD + Go.PROTOCOL.SEP + _logic.id() + Go.PROTOCOL.SEP
 						+ Go.PROTOCOL.PLAY + Go.PROTOCOL.SEP
 						+ Go.PROTOCOL.DEAD + stoneGroup( _cursorX, _cursorY ) );
 			}

@@ -81,6 +81,7 @@ public:
 	yaal::hcore::HString get_info() const;
 	void kick_client( OClientInfo*, char const* const = NULL );
 	id_t id( void ) const;
+	bool is_private( void ) const;
 	/*}*/
 protected:
 	/*{*/
@@ -88,6 +89,7 @@ protected:
 	virtual bool do_accept( OClientInfo* ) = 0;
 	virtual void do_post_accept( OClientInfo* ) = 0;
 	virtual void do_kick( OClientInfo* ) = 0;
+	virtual bool do_is_private( void ) const;
 	virtual yaal::hcore::HString do_get_info() const = 0;
 	void broadcast( yaal::hcore::HString const& );
 	void handler_message( OClientInfo*, yaal::hcore::HString const& );
