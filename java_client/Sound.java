@@ -7,28 +7,28 @@ import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.Clip;
 
 class ClipCloser implements LineListener {
-	Clip _clip = null;
-	ClipCloser( Clip $clip ) {
-		_clip = $clip;
-	}
 	public void update( LineEvent event ) {
 		if ( event.getType() == LineEvent.Type.STOP )
-			_clip.close();
+			Sound.close();
 	}
 }
 
 class Sound {
-	static public void play( String $name ) {
+	static Clip _clip = null;
+	static ClipCloser _closer = new ClipCloser();
+	static synchronized public void play( String $name ) {
 		try {
-			Clip clip = AudioSystem.getClip();
+			if ( _clip == null ) {
+				_clip = AudioSystem.getClip();
+				_clip.addLineListener( _closer );
+			}
 			InputStream is = GameGround.class.getResourceAsStream( "/res/" + $name + ".wav" );
 			BufferedInputStream bufferedInputStream = new BufferedInputStream( is );
 			AudioInputStream audioStream = AudioSystem.getAudioInputStream( bufferedInputStream );
-			clip.open( audioStream );
-			clip.setFramePosition( 0 );
-			clip.loop( 0 );
-			clip.addLineListener( new ClipCloser( clip ) );
-			clip.start(); 
+			if ( _clip.isOpen() )
+				_clip.close();
+			_clip.open( audioStream );
+			_clip.start(); 
 		} catch ( javax.sound.sampled.LineUnavailableException lue ) {
 			Con.err( "LineUnavailableException: " + lue.getMessage() );
 		} catch ( javax.sound.sampled.UnsupportedAudioFileException uafe ) {
@@ -36,6 +36,10 @@ class Sound {
 		} catch ( java.io.IOException ioe ) {
 			Con.err( "IOException: " + ioe.getMessage() );
 		}
+	}
+	static synchronized void close() {
+		if ( ( _clip != null ) && ( _clip.isOpen() ) )
+			_clip.close();
 	}
 }
 
