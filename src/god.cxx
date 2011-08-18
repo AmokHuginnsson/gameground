@@ -83,9 +83,9 @@ int const GO_MSG_YOU_CANT_DO_IT_NOW = 1;
 int const GO_MSG_MALFORMED = 2;
 char const* const GO_MSG[] =
 	{
-	_( "not your turn" ),
-	_( "you cannot do it now" ),
-	_( "malformed packet" )
+	"not your turn",
+	"you cannot do it now",
+	"malformed packet"
 	};
 
 HGo::HGo( HServer* server_, HLogic::id_t const& id_, HString const& comment_ )

@@ -12,7 +12,7 @@ class AppletJDOMHelper {
 			url = url.substring( url.indexOf( "/res/" ) );
 			is = new InputSource( $for.getClass().getResourceAsStream( url ) );
 		} catch ( Exception e ) {
-			System.out.println( "URL(dtd): " + url );
+			Con.err( "URL(dtd): " + url );
 			e.printStackTrace();
 			System.exit( 1 );
 		}
@@ -31,7 +31,7 @@ class AppletJDOMHelper {
 		try {
 			xml = xmlBuilder.build( new InputSource( $for.getClass().getResourceAsStream( $resource ) ) );
 		} catch ( Exception e ) {
-			System.out.println( "URL: " + $resource );
+			Con.err( "URL: " + $resource );
 			e.printStackTrace();
 			System.exit( 1 );
 		}

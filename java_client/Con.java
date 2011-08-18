@@ -17,5 +17,11 @@ public class Con {
 	public static String brightmagenta = "\033[1;35m";
 	public static String brightcyan = "\033[1;36m";
 	public static String white = "\033[1;37m";
+	static public void err( String $msg ) {
+		System.err.println( red + $msg + reset );
+	}
+	static public void stack( String $msg ) {
+		System.err.println( yellow + $msg + reset );
+	}
 }
 

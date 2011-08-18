@@ -228,7 +228,7 @@ class Boggle extends HAbstractLogic implements Runnable {
 	}
 	void handlerDeck( String $command ) {
 		if ( $command.length() < 16 ) {
-			System.out.println( "Bad deck configuration: " + $command );
+			Con.err( "Bad deck configuration: " + $command );
 			CallStack.print();
 			System.exit( 1 );
 		}

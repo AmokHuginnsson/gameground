@@ -97,7 +97,7 @@ class HWorkArea extends HAbstractWorkArea {
 			_app.setClient( _client );
 			_browser.setClient( _client );
 		} catch ( Exception e ) {
-			System.out.println( "Connection error: " + e.getMessage() );
+			Con.err( "Connection error: " + e.getMessage() );
 			JOptionPane.showMessageDialog( _gui,
 					"GameGround client was unable to connect to server:\n" + e.getMessage(),
 					"GameGround - error ...", JOptionPane.ERROR_MESSAGE );
@@ -107,6 +107,7 @@ class HWorkArea extends HAbstractWorkArea {
 		_client.println( "get_logics" );
 		_client.println( "get_partys" );
 		_client.println( "get_players" );
+		Sound.play( "service-login" );
 	}
 	public void handleError( String $message ) {
 		javax.swing.JOptionPane.showMessageDialog( _gui,

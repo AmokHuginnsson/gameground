@@ -269,6 +269,8 @@ class Go extends HAbstractLogic implements Runnable {
 		}
 	}
 	void handlerStones( String $command ) {
+		if ( ( _toMove == STONE.BLACK ) || ( _toMove == STONE.WHITE ) )
+			Sound.play( "stone" );
 		_gui._board.setStones( ( _stones = $command ).getBytes() );
 		_gui._board.repaint();
 	}

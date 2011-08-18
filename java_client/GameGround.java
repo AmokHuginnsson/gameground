@@ -198,13 +198,13 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 			_ini = new Properties();
 			_ini.load( new FileReader( System.getenv( "HOME" ) + "/etc/conf/gameground-clientrc" ) );
 		} catch ( java.io.FileNotFoundException e ) {
-			System.out.println( e.getMessage() );
+			Con.err( e.getMessage() );
 		} catch ( java.io.IOException e ) {
-			System.out.println( "FATAL ERROR: " + e.getMessage() );
+			Con.err( "FATAL ERROR: " + e.getMessage() );
 			e.printStackTrace();
 			System.exit( 1 );
 		} catch ( java.security.AccessControlException e ) {
-			System.out.println( "Insufficient privileges to guess home directory: " + e.getMessage() );
+			Con.err( "Insufficient privileges to guess home directory: " + e.getMessage() );
 		}
 		if ( $argv != null ) {
 			Options opts = new Options();
@@ -220,7 +220,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 					System.out.println( s );
 				_cmd = p.parse( opts, $argv );
 			} catch ( ParseException e ) {
-				System.out.println( "Application failed to start. Reaseon: " + e.getMessage() );
+				Con.err( "Application failed to start. Reaseon: " + e.getMessage() );
 				System.exit( 1 );
 			}
 			if ( _cmd.hasOption( "help" ) ) {

@@ -67,7 +67,7 @@ class HClient extends Thread {
 			_app.showLoginScreen();
 		} catch ( java.io.IOException e ) {
 			if ( _loop ) {
-				System.out.println( "Connection error." );
+				Con.err( "Connection error." );
 				e.printStackTrace();
 				System.exit( 0 );
 			}
@@ -78,6 +78,7 @@ class HClient extends Thread {
 	}
 
 	public void disconnect() {
+		Sound.play( "service-logout" );
 		_loop = false;
 		_app.setClient( null );
 		_app.showLoginScreen();

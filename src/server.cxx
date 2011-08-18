@@ -91,6 +91,8 @@ char const* const HServer::PROTOCOL::WARN = "warn";
 
 static const HString NULL_PASS = hash::sha1( "" );
 
+char const _msgYourClientIsTainted_[] = "Your client is tainted, go away!";
+
 HServer::HServer( int connections_ )
 	: _maxConnections( connections_ ),
 	_socket( HSocket::socket_type_t( HSocket::TYPE::DEFAULT ) | HSocket::TYPE::NONBLOCKING | HSocket::TYPE::SSL_SERVER, connections_ ),
@@ -180,7 +182,7 @@ void HServer::handler_message( int fileDescriptor_ )
 			argument = message.mid( command.get_length() + 1 );
 			int msgLength = static_cast<int>( command.get_length() );
 			if ( msgLength < 1 )
-				kick_client( client, _( "Malformed data." ) );
+				kick_client( client, "Malformed data." );
 			else
 				{
 				handlers_t::iterator handler = _handlers.find( command );
@@ -190,7 +192,7 @@ void HServer::handler_message( int fileDescriptor_ )
 					flush_logics();
 					}
 				else
-					kick_client( client, _( "Unknown command." ) );
+					kick_client( client, "Unknown command." );
 				}
 			}
 		else if ( ! nRead )
@@ -345,6 +347,8 @@ void HServer::handle_login( OClientInfo& client_, HString const& loginInfo_ )
 			*client_._socket << "err:Name may only take form of `[a-zA-Z0-9]{4,}'." << endl;
 		else if ( login.get_length() < MINIMUM_NAME_LENGTH )
 			*client_._socket << "err:Your name is too short, it needs to be at least " << MINIMUM_NAME_LENGTH << " character long." << endl;
+		else if ( ! is_sha1( password ) )
+			kick_client( client_._socket, _msgYourClientIsTainted_ );
 		else if ( _logins.count( login ) > 0 )
 			*client_._socket << "err:" << login << " already logged in." << endl;
 		else
@@ -396,9 +400,9 @@ void HServer::handle_account( OClientInfo& client_, HString const& accountInfo_ 
 	{
 	M_PROLOG
 	if ( client_._login.is_empty() )
-		kick_client( client_._socket, _( "Set your name first (Just login with standard client, will ya?)." ) );
+		kick_client( client_._socket, "Set your name first (Just login with standard client, will ya?)." );
 	else if ( client_._anonymous )
-		kick_client( client_._socket, _( "Only registered users are allowed to do that." ) );
+		kick_client( client_._socket, "Only registered users are allowed to do that." );
 	else
 		{
 		HTokenizer t( accountInfo_, "," );
@@ -437,11 +441,16 @@ void HServer::handle_account( OClientInfo& client_, HString const& accountInfo_ 
 				{
 				if ( newPassword == newPasswordRepeat )
 					{
-					HRecordSet::ptr_t rs( _db->query( ( HFormat( "UPDATE tbl_user SET name = '%s', email = '%s', description = '%s', password = '%s' WHERE login = LOWER('%s') AND password = LOWER('%s');" )
-									% escape( name ) % escape( email ) % escape( description ) % newPassword % client_._login % oldPassword ).string() ) );
-					M_ENSURE( !! rs );
-					if ( rs->get_size() != 1 )
-						client_._socket->write_until_eos( "warn:Password not changed - old password do not match.\n" );
+					if ( ! ( is_sha1( newPassword ) && is_sha1( oldPassword ) ) )
+						kick_client( client_._socket, _msgYourClientIsTainted_ );
+					else
+						{
+						HRecordSet::ptr_t rs( _db->query( ( HFormat( "UPDATE tbl_user SET name = '%s', email = '%s', description = '%s', password = '%s' WHERE login = LOWER('%s') AND password = LOWER('%s');" )
+										% escape( name ) % escape( email ) % escape( description ) % newPassword % client_._login % oldPassword ).string() ) );
+						M_ENSURE( !! rs );
+						if ( rs->get_size() != 1 )
+							client_._socket->write_until_eos( "warn:Password not changed - old password do not match.\n" );
+						}
 					}
 				else
 					{
@@ -498,7 +507,7 @@ void HServer::create_party( OClientInfo& client_, HString const& arg_ )
 	{
 	M_PROLOG
 	if ( client_._login.is_empty() )
-		kick_client( client_._socket, _( "Set your name first (Just login with standard client, will ya?)." ) );
+		kick_client( client_._socket, "Set your name first (Just login with standard client, will ya?)." );
 	else
 		{
 		HString type = get_token( arg_, ":", 0 );
@@ -506,7 +515,7 @@ void HServer::create_party( OClientInfo& client_, HString const& arg_ )
 		HString name = get_token( configuration, ",", 0 );
 		HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 		if ( ! factory.is_type_valid( type ) )
-			kick_client( client_._socket, _( "No such game type." ) );
+			kick_client( client_._socket, "No such game type." );
 		else
 			{
 			HLogic::ptr_t logic;
@@ -550,14 +559,14 @@ void HServer::join_party( OClientInfo& client_, HString const& id_ )
 	{
 	M_PROLOG
 	if ( client_._login.is_empty() )
-		kick_client( client_._socket, _( "Set your name first (Just login with standard client, will ya?)." ) );
+		kick_client( client_._socket, "Set your name first (Just login with standard client, will ya?)." );
 	else
 		{
 		logics_t::iterator it = _logics.find( id_ );
 		if ( it == _logics.end() )
 			client_._socket->write_until_eos( "err:Party does not exists.\n" );
 		else if ( client_._logics.count( id_ ) != 0 )
-			kick_client( client_._socket, _( "You were already in this party." ) );
+			kick_client( client_._socket, "You were already in this party." );
 		else if ( ! it->second->accept_client( &client_ ) )
 			{
 			send_player_info( client_ );
@@ -593,7 +602,7 @@ void HServer::handler_abandon( OClientInfo& client_, HString const& id_ )
 	{
 	M_PROLOG
 	if ( client_._logics.count( id_ ) == 0 )
-		kick_client( client_._socket, _( "You were not part of this party." ) );
+		kick_client( client_._socket, "You were not part of this party." );
 	else
 		{
 		logics_t::iterator logic( _logics.find( id_ ) );
@@ -687,7 +696,7 @@ void HServer::handle_get_account( OClientInfo& client_, HString const& )
 	{
 	M_PROLOG
 	if ( client_._login.is_empty() )
-		kick_client( client_._socket, _( "Set your name first (Just login with standard client, will ya?)." ) );
+		kick_client( client_._socket, "Set your name first (Just login with standard client, will ya?)." );
 	else
 		{
 		HRecordSet::ptr_t rs( _db->query( _out << "SELECT name, email, description FROM tbl_user WHERE login = LOWER('" << client_._login << "');" << _out ) );

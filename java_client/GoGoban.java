@@ -17,6 +17,7 @@ public class GoGoban extends Goban {
 	}
 	public void mouseClicked( MouseEvent $event ) {
 		if ( _logic.isMyMove() && ! breakTheRules( _cursorX, _cursorY, _stone ) ) {
+			Sound.play( "stone" );
 			_logic._client.println( Go.PROTOCOL.CMD + Go.PROTOCOL.SEP + _logic.id() + Go.PROTOCOL.SEP
 					+ Go.PROTOCOL.PLAY + Go.PROTOCOL.SEP
 					+ Go.PROTOCOL.PUTSTONE + Go.PROTOCOL.SEPP + _cursorX + Go.PROTOCOL.SEPP + _cursorY );
