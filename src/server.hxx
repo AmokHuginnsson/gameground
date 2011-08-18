@@ -45,7 +45,7 @@ protected:
 	typedef yaal::hcore::HMap<int, OClientInfo> clients_t;
 	typedef yaal::hcore::HMap<yaal::hcore::HString, OClientInfo*> logins_t;
 	typedef yaal::hcore::HArray<OClientInfo*> dropouts_t;
-	typedef yaal::hcore::HExclusiveAccessor<yaal::dbwrapper::HDataBase::ptr_t> db_accessor_t;
+	typedef yaal::tools::HExclusiveAccessor<yaal::dbwrapper::HDataBase::ptr_t> db_accessor_t;
 	int _maxConnections;
 	yaal::hcore::HSocket _socket;
 	clients_t _clients;
