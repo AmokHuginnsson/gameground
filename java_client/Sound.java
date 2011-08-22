@@ -1,3 +1,5 @@
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.io.InputStream;
 import java.io.BufferedInputStream;
 import javax.sound.sampled.AudioInputStream;
@@ -8,7 +10,7 @@ import javax.sound.sampled.Clip;
 
 class ClipCloser implements LineListener {
 	public void update( LineEvent event ) {
-		if ( event.getType() == LineEvent.Type.STOP )
+		if ( ! Sound.playing() && ( event.getType() == LineEvent.Type.STOP ) )
 			Sound.close();
 	}
 }
@@ -16,15 +18,26 @@ class ClipCloser implements LineListener {
 class Sound {
 	static Clip _clip = null;
 	static ClipCloser _closer = new ClipCloser();
+	static boolean _playing = false;
+	private static SortedMap<String, AudioInputStream> _clipCache = java.util.Collections.synchronizedSortedMap( new TreeMap<String, AudioInputStream>() );
+
 	static synchronized public void play( String $name ) {
+		_playing = true;
 		try {
 			if ( _clip == null ) {
 				_clip = AudioSystem.getClip();
 				_clip.addLineListener( _closer );
 			}
-			InputStream is = GameGround.class.getResourceAsStream( "/res/" + $name + ".wav" );
-			BufferedInputStream bufferedInputStream = new BufferedInputStream( is );
-			AudioInputStream audioStream = AudioSystem.getAudioInputStream( bufferedInputStream );
+			AudioInputStream audioStream = _clipCache.get( $name );
+			if ( audioStream == null ) {
+				InputStream is = GameGround.class.getResourceAsStream( "/res/" + $name + ".wav" );
+				BufferedInputStream bufferedInputStream = new BufferedInputStream( is );
+				_clipCache.put( $name, audioStream = AudioSystem.getAudioInputStream( bufferedInputStream ) );
+			} else
+				audioStream.reset();
+			if ( _clip.isRunning() ) {
+				_clip.stop();
+			}
 			if ( _clip.isOpen() )
 				_clip.close();
 			_clip.open( audioStream );
@@ -36,10 +49,14 @@ class Sound {
 		} catch ( java.io.IOException ioe ) {
 			Con.err( "IOException: " + ioe.getMessage() );
 		}
+		_playing = false;
 	}
 	static synchronized void close() {
 		if ( ( _clip != null ) && ( _clip.isOpen() ) )
 			_clip.close();
+	}
+	static boolean playing() {
+		return ( _playing || _clip.isRunning() );
 	}
 }
 
