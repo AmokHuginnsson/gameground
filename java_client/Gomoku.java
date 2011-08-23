@@ -122,7 +122,6 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	public Gomoku( GameGround $applet, String $id, String $configuration ) throws Exception {
 		super( $applet, $id, $configuration );
 		init( _gui = new HGUILocal( LABEL ) );
-		_handlers.put( PROTOCOL.NAME, Gomoku.class.getDeclaredMethod( "handlerGomoku", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.STONES, Gomoku.class.getDeclaredMethod( "handlerStones", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYER, Gomoku.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.TOMOVE, Gomoku.class.getDeclaredMethod( "handlerToMove", new Class[]{ String.class } ) );
@@ -151,9 +150,6 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		_admin = false;
 		_move = 0;
 		_app.registerTask( this, 1 );
-	}
-	void handlerGomoku( String $command ) {
-		processMessage( $command );
 	}
 	void handlerStones( String $command ) {
 		_gui._board.setStones( ( _stones = $command ).getBytes() );

@@ -232,7 +232,6 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		init( _gui = new HGUILocal( LABEL ) );
 		_emperors = Collections.synchronizedMap( new HashMap<Integer,String>() );
 		_handlers.put( "setup", HGalaxy.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
-		_handlers.put( "glx", HGalaxy.class.getDeclaredMethod( "handlerGalaxy", new Class[]{ String.class } ) );
 		_handlers.put( "play", HGalaxy.class.getDeclaredMethod( "handlerPlay", new Class[]{ String.class } ) );
 		_handlers.put( "player", HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
 		_handlers.put( "player_quit", HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
@@ -252,9 +251,6 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		_systems = null;
 		_systemCount = 0;
 		_emperors.clear();
-	}
-	void handlerGalaxy( String $command ) {
-		processMessage( $command );
 	}
 	void handlerSetup( String $command ) {
 		int index = - 1, coordX = - 1, coordY = - 1;

@@ -207,7 +207,6 @@ class Go extends HAbstractLogic implements Runnable {
 		super( $applet, $id, $configuration );
 		init( _gui = new HGUILocal( LABEL ) );
 		_gui._conf.setDefaults( $configuration );
-		_handlers.put( PROTOCOL.NAME, Go.class.getDeclaredMethod( "handlerGo", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.SETUP, Go.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.STONES, Go.class.getDeclaredMethod( "handlerStones", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYER, Go.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
@@ -242,9 +241,6 @@ class Go extends HAbstractLogic implements Runnable {
 		_admin = false;
 		_move = 0;
 		_app.registerTask( this, 1 );
-	}
-	void handlerGo( String $command ) {
-		processMessage( $command );
 	}
 	void handlerSetup( String $command ) {
 		String[] tokens = $command.split( ",", 2 );
