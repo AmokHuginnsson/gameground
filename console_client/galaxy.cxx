@@ -347,6 +347,7 @@ protected:
 	void handler_play( HString& );
 	void handler_msg( HString& );
 	void handler_error( HString& );
+/* cppcheck-suppress functionConst */
 	void handler_dummy( HString& );
 	void handler_party( HString& );
 	void handler_party_info( HString& );
@@ -462,9 +463,8 @@ HBoard::~HBoard( void )
 void HBoard::do_refresh( void )
 	{
 	M_PROLOG
-	int ctr = 0, systems = 0, sysNo = - 1, coordX = - 1, coordY = - 1;
-	int color = - 1, round = _listener.get_round();
-	client_state_t state = _listener.get_state();
+	int round( _listener.get_round() );
+	client_state_t state( _listener.get_state() );
 	HString pen;
 	HBoard::draw_label();
 	HConsole& cons = HConsole::get_instance();
@@ -480,28 +480,30 @@ void HBoard::do_refresh( void )
 			cons.c_cmvprintf( _rowRaw + 1, _columnRaw + 20, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, "-+--+--+--+--+-'" );
 			}
 		pen = ',';
-		for ( ctr = 0; ctr < _boardSize; ctr ++ )
+		for ( int ctr( 0 ); ctr < _boardSize; ctr ++ )
 			pen += "-+-";
 		pen += '.';
 		cons.c_cmvprintf( _rowRaw, _columnRaw, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, pen.raw() );
 		pen = '}';
-		for ( ctr = 0; ctr < _boardSize; ctr ++ )
+		for ( int ctr( 0 ); ctr < _boardSize; ctr ++ )
 			pen += " - ";
 		pen += '{';
-		for ( ctr = 0; ctr < _boardSize; ctr ++ )
+		for ( int ctr( 0 ); ctr < _boardSize; ctr ++ )
 			cons.c_cmvprintf( _rowRaw + ctr + 1, _columnRaw, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, pen.raw() );
 		pen = '`';
-		for ( ctr = 0; ctr < _boardSize; ctr ++ )
+		for ( int ctr( 0 ); ctr < _boardSize; ctr ++ )
 			pen += "-+-";
 		pen += '\'';
 		cons.c_cmvprintf( _rowRaw + _boardSize + 1, _columnRaw, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, pen.raw() );
-		if ( ( systems = static_cast<int>( _systems->get_size() ) ) )
+		int systems( static_cast<int>( _systems->get_size() ) );
+		if ( systems > 0 )
 			{
-			for ( ctr = 0; ctr < systems; ctr ++ )
+			int sysNo( -1 );
+			for ( int ctr( 0 ); ctr < systems; ctr ++ )
 				{
-				coordX = ( * _systems )[ ctr ]._coordinateX;
-				coordY = ( * _systems )[ ctr ]._coordinateY;
-				color = ( * _systems )[ ctr ]._color;
+				int coordX( ( * _systems )[ ctr ]._coordinateX );
+				int coordY( ( * _systems )[ ctr ]._coordinateY );
+				int color( ( * _systems )[ ctr ]._color );
 				cons.c_cmvprintf( _rowRaw + 1 + coordY,
 						_columnRaw + 1 + coordX * 3,
 						( ( color >= 0 ) && _focused ) ? _colors_[ color ] : ATTR_NEUTRAL_SYSTEM, "(%c)",
@@ -525,7 +527,7 @@ void HBoard::do_refresh( void )
 		cons.c_cmvprintf( _rowRaw - 1, _columnRaw + 28, _focused ? COLORS::FG_WHITE : COLORS::ATTR_NORMAL, "    " );
 		if ( ( state == SELECT ) || ( state == INPUT ) )
 			{
-			sysNo = get_sys_no( _cursorX, _cursorY );
+			int sysNo( get_sys_no( _cursorX, _cursorY ) );
 			if ( sysNo >= 0 )
 				{
 				cons.c_cmvprintf( _rowRaw - 1, _columnRaw + 28,
@@ -796,8 +798,7 @@ void HGalaxyWindow::make_move( int sourceSystem_, int destinationSystem_ )
 int HGalaxyWindow::handler_enter( int code_, void const* )
 	{
 	M_PROLOG
-	int fleet = 0;
-	HMove* move = NULL;
+	HMove* move( NULL );
 	if ( (*_focusedChild) == _messageInput )
 		{
 		if ( _messageInput->get().get<HString const&>().find_other_than( _whiteSpace_ ) >= 0 )
@@ -816,7 +817,7 @@ int HGalaxyWindow::handler_enter( int code_, void const* )
 		{
 		if ( (*_focusedChild) == _fleet )
 			{
-			fleet = lexical_cast<int>( _fleet->get().get<char const*>() );
+			int fleet( lexical_cast<int>( _fleet->get().get<char const*>() ) );
 			if ( ( fleet > 0 )
 					&& ( fleet <= ( * _systems )[ _board->_sourceSystem ]._fleet ) )
 				{
@@ -1027,11 +1028,9 @@ void HClient::handler_party_info( HString& command_ )
 void HClient::handler_setup( HString& command_ )
 	{
 	M_PROLOG
-	int index = - 1, coordX = - 1, coordY = - 1;
-	HString variable;
-	HString value;
-	variable = get_token( command_, "=", 0 );
-	value = get_token( command_, "=", 1 );
+	int index( -1 );
+	HString variable( get_token( command_, "=", 0 ) );
+	HString value( get_token( command_, "=", 1 ) );
 	if ( variable == "board_size" )
 		_window->_board->_boardSize = lexical_cast<int>( value );
 	else if ( variable == "systems" )
@@ -1044,8 +1043,8 @@ void HClient::handler_setup( HString& command_ )
 	else if ( variable == "system_coordinates" )
 		{
 		index = lexical_cast<int>( get_token( value, ",", 0 ) );
-		coordX = lexical_cast<int>( get_token( value, ",", 1 ) );
-		coordY = lexical_cast<int>( get_token( value, ",", 2 ) );
+		int coordX( lexical_cast<int>( get_token( value, ",", 1 ) ) );
+		int coordY( lexical_cast<int>( get_token( value, ",", 2 ) ) );
 		_systems[ index ]._coordinateX = coordX;
 		_systems[ index ]._coordinateY = coordY;
 		}
@@ -1069,21 +1068,17 @@ void HClient::handler_setup( HString& command_ )
 void HClient::handler_play( HString& command_ )
 	{
 	M_PROLOG
-	char event = 0;
-	int sysNo = - 1, color = 0, production = - 1;
-	HString variable;
-	HString value;
-	variable = get_token( command_, "=", 0 );
-	value = get_token( command_, "=", 1 );
+	HString variable( get_token( command_, "=", 0 ) );
+	HString value( get_token( command_, "=", 1 ) );
 	if ( variable == "system_info" )
 		{
-		event = value[ 0 ];
-		sysNo = lexical_cast<int>( get_token( value, ",", 1 ) );
-		production = lexical_cast<int>( get_token( value, ",", 2 ) );
+		char event( value[ 0 ] );
+		int sysNo( lexical_cast<int>( get_token( value, ",", 1 ) ) );
+		int production( lexical_cast<int>( get_token( value, ",", 2 ) ) );
 		if ( production >= 0 )
 			_systems[ sysNo ]._production = production;
 		_systems[ sysNo ]._fleet = lexical_cast<int>( get_token( value, ",", 4 ) );
-		color = lexical_cast<int>( get_token( value, ",", 3 ) );
+		int color( lexical_cast<int>( get_token( value, ",", 3 ) ) );
 		/* scope to limit `it' visibility */
 			{
 			emperors_t::iterator it( _emperors.find( color ) );

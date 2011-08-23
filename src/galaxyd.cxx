@@ -111,7 +111,6 @@ void HSystem::swap( HSystem& other )
 void HSystem::do_round( HGalaxy& galaxy_ )
 	{
 	M_PROLOG
-	int color = 0;
 	HString message;
 	if ( _emperor != NULL )
 		_fleet += _production;
@@ -125,7 +124,7 @@ void HSystem::do_round( HGalaxy& galaxy_ )
 			it->_arrivalTime --;
 			if ( it->_arrivalTime <= 0 )
 				{
-				color = _emperor ? galaxy_.get_color( _emperor ) : 0;
+				int color( _emperor ? galaxy_.get_color( _emperor ) : 0 );
 				if ( it->_emperor == _emperor ) /* reinforcements */
 					{
 					_fleet += it->_size;
@@ -374,7 +373,6 @@ void HGalaxy::handler_play ( OClientInfo* clientInfo_, HString const& command_ )
 		*clientInfo_->_socket << "err:Illegal message!\n" << endl;
 		return;
 		}
-	int source = - 1, destination = - 1, dX = 0, dY = 0;
 	HString variable;
 	HString value;
 	HFleet fleet;
@@ -383,8 +381,8 @@ void HGalaxy::handler_play ( OClientInfo* clientInfo_, HString const& command_ )
 	if ( variable == "move" )
 		{
 		fleet._emperor = clientInfo_;
-		source = lexical_cast<int>( get_token( value, ",", 0 ) );
-		destination = lexical_cast<int>( get_token( value, ",", 1 ) );
+		int source( lexical_cast<int>( get_token( value, ",", 0 ) ) );
+		int destination( lexical_cast<int>( get_token( value, ",", 1 ) ) );
 		fleet._size = lexical_cast<int>( get_token( value, ",", 2 ) );
 		if ( ( source == destination )
 				&& ( _systems[ source ]._emperor != clientInfo_ )
@@ -393,8 +391,8 @@ void HGalaxy::handler_play ( OClientInfo* clientInfo_, HString const& command_ )
 		else
 			{
 			_systems[ source ]._fleet -= fleet._size;
-			dX = _systems[ source ]._coordinateX - _systems[ destination ]._coordinateX;
-			dY = _systems[ source ]._coordinateY - _systems[ destination ]._coordinateY;
+			int dX( _systems[ source ]._coordinateX - _systems[ destination ]._coordinateX );
+			int dY( _systems[ source ]._coordinateY - _systems[ destination ]._coordinateY );
 			dX = ( dX >= 0 ) ? dX : - dX;
 			dY = ( dY >= 0 ) ? dY : - dY;
 			dX = ( ( _boardSize - dX ) < dX ) ? _boardSize - dX : dX;
@@ -517,11 +515,7 @@ void HGalaxy::do_kick( OClientInfo* clientInfo_ )
 				it != attackers.end(); ++ it )
 			{
 			if ( it->_emperor == clientInfo_ )
-				{
-				HSystem::attackers_t::iterator kicked = it;
-				++ it;
-				attackers.erase( kicked );
-				}
+				attackers.erase( it ++ ); /* First we increment iterator position and then we pass old iterator to erase() here. */
 			}
 		if ( _systems[ ctr ]._emperor == clientInfo_ )
 			_systems[ ctr ]._emperor = NULL;
