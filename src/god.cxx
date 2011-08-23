@@ -89,7 +89,7 @@ char const* const GO_MSG[] =
 	};
 
 HGo::HGo( HServer* server_, HLogic::id_t const& id_, HString const& comment_ )
-	: HLogic( server_, id_, "go", comment_ ),
+	: HLogic( server_, id_, comment_ ),
 	_state( STONE::NONE ), _gobanSize( setup._gobanSize ),
 	_komi( setup._komi ), _handicaps( setup._handicaps ), _mainTime( setup._mainTime ),
 	_byoYomiPeriods( setup._byoYomiPeriods ), _byoYomiTime( setup._byoYomiTime ),

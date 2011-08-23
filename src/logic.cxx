@@ -48,8 +48,8 @@ char const* const HLogic::PROTOCOL::PLAYER = "player";
 char const* const HLogic::PROTOCOL::PARTY = "party";
 char const* const HLogic::PROTOCOL::PLAYER_QUIT = "player_quit";
 
-HLogic::HLogic( HServer* server_, id_t const& id_, HString const& symbol_, HString const& comment_ )
-	: _server( server_ ), _id( id_ ), _symbol( symbol_ ), _handlers( setup._maxConnections ),
+HLogic::HLogic( HServer* server_, id_t const& id_, HString const& comment_ )
+	: _server( server_ ), _id( id_ ), _name( get_token( comment_, ",", 0 ) ), _handlers( setup._maxConnections ),
 	_clients(), _comment( comment_ ), _out(), _mutex()
 	{
 	_handlers[ PROTOCOL::SAY ] = static_cast<handler_t>( &HLogic::handler_message );
@@ -122,17 +122,17 @@ HString const& HLogic::get_comment( void ) const
 	return ( _comment );
 	}
 
+HString const& HLogic::get_name( void ) const
+	{
+	return ( _name );
+	}
+
 bool HLogic::process_command( OClientInfo* clientInfo_, HString const& command_ )
 	{
 	M_PROLOG
-	HString mnemonic;
-	HString argument;
-	argument = command_;
-	while ( ( mnemonic = get_token( argument, ":", 0 ) ) == _symbol )
-		argument = argument.mid( mnemonic.get_length() + 1 );
-	mnemonic = get_token( argument, ":", 0 );
-	argument = argument.mid( mnemonic.get_length() + 1 );
-	bool failure = false;
+	HString mnemonic( get_token( command_, ":", 0 ) );
+	HString argument( command_.mid( mnemonic.get_length() + 1 ) );
+	bool failure( false );
 	handlers_t::iterator it( _handlers.find( mnemonic ) );
 	if ( it != _handlers.end() )
 		( this->*(it->second) )( clientInfo_, argument );

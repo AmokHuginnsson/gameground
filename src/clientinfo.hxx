@@ -43,6 +43,13 @@ struct OClientInfo
 	yaal::hcore::HSocket::ptr_t _socket;
 	logics_t _logics;
 	OClientInfo( void ) : _valid( true ), _anonymous( false ), _login(), _socket(), _logics() {}
+	~OClientInfo( void )
+		{
+		M_PROLOG
+		M_ASSERT( _logics.is_empty() );
+		return;
+		M_EPILOG
+		};
 	};
 
 }

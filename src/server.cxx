@@ -512,7 +512,6 @@ void HServer::create_party( OClientInfo& client_, HString const& arg_ )
 		{
 		HString type = get_token( arg_, ":", 0 );
 		HString configuration = get_token( arg_, ":", 1 );
-		HString name = get_token( configuration, ",", 0 );
 		HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 		if ( ! factory.is_type_valid( type ) )
 			kick_client( client_._socket, "No such game type." );
@@ -528,7 +527,7 @@ void HServer::create_party( OClientInfo& client_, HString const& arg_ )
 					if ( id == logic->id() )
 						{
 						_logics[ id ] = logic;
-						out << name << "," << type << endl;
+						out << "creating new party: " << logic->get_name() << "," << id << " (" << type << ')' << endl;
 						if ( ! logic->is_private() )
 							{
 							broadcast( _out << PROTOCOL::PARTY_INFO << PROTOCOL::SEP << id << PROTOCOL::SEPP << logic->get_info() << endl << _out );
@@ -537,7 +536,10 @@ void HServer::create_party( OClientInfo& client_, HString const& arg_ )
 						logic->post_accept_client( &client_ );
 						}
 					else
+						{
 						free_id( id );
+						out << "reusing old party: " << logic->get_name() << "," << logic->id() << " (" << type << ')' << endl; 
+						}
 					}
 				else
 					{

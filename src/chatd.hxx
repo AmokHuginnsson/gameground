@@ -50,6 +50,7 @@ protected:
 	virtual bool do_accept( OClientInfo* );
 	virtual void do_post_accept( OClientInfo* );
 	virtual void do_kick( OClientInfo* );
+	void handler_message( OClientInfo*, yaal::hcore::HString const& );
 	virtual yaal::hcore::HString do_get_info() const;
 	virtual bool do_is_private( void ) const;
 private:

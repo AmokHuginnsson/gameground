@@ -45,13 +45,12 @@ public:
 	typedef yaal::hcore::HPointer<HLogic> ptr_t;
 	typedef yaal::hcore::HSet<OClientInfo*> clients_t;
 	typedef void ( HLogic::*handler_t ) ( OClientInfo*, yaal::hcore::HString const& );
-private:
+protected:
 	typedef yaal::hcore::HHashMap<yaal::hcore::HString, handler_t> handlers_t;
 	HServer* _server;
-protected:
 	/*{*/
 	id_t _id;
-	yaal::hcore::HString _symbol;
+	yaal::hcore::HString _name;
 	handlers_t _handlers;
 	clients_t _clients;
 	yaal::hcore::HString _comment;
@@ -71,7 +70,7 @@ protected:
 		};
 public:
 	/*{*/
-	HLogic( HServer*, id_t const&, yaal::hcore::HString const&, yaal::hcore::HString const& );
+	HLogic( HServer*, id_t const&, yaal::hcore::HString const& );
 	virtual ~HLogic( void );
 	bool process_command( OClientInfo*, yaal::hcore::HString const& );
 	bool accept_client( OClientInfo* );
@@ -81,6 +80,7 @@ public:
 	yaal::hcore::HString get_info() const;
 	void kick_client( OClientInfo*, char const* const = NULL );
 	id_t id( void ) const;
+	yaal::hcore::HString const& get_name( void ) const;
 	bool is_private( void ) const;
 	/*}*/
 protected:

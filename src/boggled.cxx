@@ -96,7 +96,7 @@ HBoggle::SCORING::ORule HBoggle::RULES[] = { { 3, { 0, 0, 1, 1, 2, 3, 5, 11, 11,
 		{ 5, { 0, 0, 0, 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048 } } };
 
 HBoggle::HBoggle( HServer* server_, id_t const& id_, HString const& comment_, int players_, int roundTime_, int maxRounds_, int interRoundDelay_ )
-	: HLogic( server_, id_, PROTOCOL::NAME, comment_ ), _state( STATE::LOCKED ), _startupPlayers( players_ ),
+	: HLogic( server_, id_, comment_ ), _state( STATE::LOCKED ), _startupPlayers( players_ ),
 	_roundTime( roundTime_ ), _maxRounds( maxRounds_ ),
 	_interRoundDelay( interRoundDelay_ ), _ruleSet( 0 ), _round( 0 ), _players(),
 	_words()
@@ -458,7 +458,7 @@ HLogic::ptr_t HBoggleCreator::do_new_instance( HServer* server_, HLogic::id_t co
 HString HBoggleCreator::do_get_info( void ) const
 	{
 	HString setupMsg;
-	setupMsg.format( "%s:%d,%d,%d,%d", "bgl", setup._players, setup._roundTime, setup._maxRounds, setup._interRoundDelay );
+	setupMsg.format( "%s:%d,%d,%d,%d", boggle::HBoggle::PROTOCOL::NAME, setup._players, setup._roundTime, setup._maxRounds, setup._interRoundDelay );
 	out << setupMsg << endl;
 	return ( setupMsg );
 	}

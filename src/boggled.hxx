@@ -75,6 +75,18 @@ class HBoggle : public HLogic
 			int _score[16];
 			};
 		};
+public:
+	struct PROTOCOL : public HLogic::PROTOCOL
+		{
+		static char const* const NAME;
+		static char const* const PLAY;
+		static char const* const DECK;
+		static char const* const SETUP;
+		static char const* const ROUND;
+		static char const* const END_ROUND;
+		static char const* const SCORED;
+		static char const* const LONGEST;
+		};
 protected:
 	/*{*/
 	typedef yaal::hcore::HSet<OClientInfo*> client_set_t;
@@ -93,17 +105,6 @@ protected:
 	char _game[16][2];
 	words_t _words;
 	/*}*/
-	struct PROTOCOL : public HLogic::PROTOCOL
-		{
-		static char const* const NAME;
-		static char const* const PLAY;
-		static char const* const DECK;
-		static char const* const SETUP;
-		static char const* const ROUND;
-		static char const* const END_ROUND;
-		static char const* const SCORED;
-		static char const* const LONGEST;
-		};
 public:
 	/*{*/
 	HBoggle( HServer*, id_t const&, yaal::hcore::HString const&, int, int, int, int );

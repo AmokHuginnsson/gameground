@@ -75,7 +75,7 @@ char const* const GO_MSG[] =
 	};
 
 HGomoku::HGomoku( HServer* server_, HLogic::id_t const& id_, HString const& comment_ )
-	: HLogic( server_, id_, "gomoku", comment_ ),
+	: HLogic( server_, id_, comment_ ),
 	_state( STONE::NONE ),
 	_move( 0 ), _start( 0 ),
 	_game( GOBAN_SIZE * GOBAN_SIZE + sizeof ( '\0' ) ),

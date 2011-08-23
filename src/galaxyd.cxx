@@ -185,7 +185,7 @@ void HSystem::do_round( HGalaxy& galaxy_ )
 	}
 
 HGalaxy::HGalaxy( HServer* server_, id_t const& id_, HString const& comment_, int boardSize_, int systems_, int emperors_ )
-	: HLogic( server_, id_, "glx", comment_ ), _boardSize( boardSize_ ), _neutralSystemCount( systems_ ),
+	: HLogic( server_, id_, comment_ ), _boardSize( boardSize_ ), _neutralSystemCount( systems_ ),
 	_startupPlayers( emperors_ ), _round( -1 ), _ready( 0 ),
 	_systems( systems_ + emperors_, this ), _emperors()
 	{
