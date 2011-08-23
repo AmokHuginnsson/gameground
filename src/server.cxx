@@ -117,7 +117,7 @@ HServer::~HServer( void )
 int HServer::init_server( int port_ )
 	{
 	M_PROLOG
-	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
+	HLogicFactory& factory( HLogicFactoryInstance::get_instance() );
 	factory.initialize_globals();
 	_db->connect( setup._databasePath, setup._databaseLogin, setup._databasePassword );
 	_socket.listen( "0.0.0.0", port_ );
@@ -848,7 +848,12 @@ HServer::db_accessor_t HServer::db( void )
 void HServer::run( void )
 	{
 	M_PROLOG
+	HLogicFactory& factory( HLogicFactoryInstance::get_instance() );
 	_dispatcher.run();
+	factory.cleanup_globals();
+	_logins.clear();
+	_logics.clear();
+	_clients.clear();
 	return;
 	M_EPILOG
 	}

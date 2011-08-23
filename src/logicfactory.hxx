@@ -57,6 +57,7 @@ public:
 	creators_t::iterator begin( void );
 	creators_t::iterator end( void );
 	void initialize_globals( void );
+	void cleanup_globals( void );
 private:
 	HLogicFactory( void ) : _creators() {}
 	~HLogicFactory( void ) {}

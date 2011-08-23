@@ -101,5 +101,14 @@ void HLogicFactory::initialize_globals( void )
 	M_EPILOG
 	}
 
+void HLogicFactory::cleanup_globals( void )
+	{
+	M_PROLOG
+	for ( creators_t::iterator it = _creators.begin(); it != _creators.end(); ++ it )
+		it->second._instantiator->cleanup_globals();
+	return;
+	M_EPILOG
+	}
+
 }
 

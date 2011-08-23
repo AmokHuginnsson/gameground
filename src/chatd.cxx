@@ -121,6 +121,14 @@ HLogic::ptr_t HChat::get_chat( HServer* server_, HLogic::id_t const& id_, HStrin
 	M_EPILOG
 	}
 
+void HChat::cleanup( void )
+	{
+	M_PROLOG
+	_chats_.clear();
+	return;
+	M_EPILOG
+	}
+
 }
 
 namespace logic_factory
@@ -131,12 +139,21 @@ class HChatCreator : public HLogicCreatorInterface
 protected:
 	virtual HLogic::ptr_t do_new_instance( HServer*, HLogic::id_t const&, HString const& );
 	virtual HString do_get_info( void ) const;
+	virtual void do_cleanup_globals( void );
 	} chatCreator;
 
 HLogic::ptr_t HChatCreator::do_new_instance( HServer* server_, HLogic::id_t const& id_, HString const& argv_ )
 	{
 	M_PROLOG
 	return ( chat::HChat::get_chat( server_, id_, argv_ ) );
+	M_EPILOG
+	}
+
+void HChatCreator::do_cleanup_globals( void )
+	{
+	M_PROLOG
+	chat::HChat::cleanup();
+	return;
 	M_EPILOG
 	}
 

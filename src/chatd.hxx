@@ -45,6 +45,7 @@ public:
 	HChat( HServer*, HLogic::id_t const&, yaal::hcore::HString const& );
 	virtual ~HChat( void );
 	static HLogic::ptr_t get_chat( HServer*, HLogic::id_t const&, yaal::hcore::HString const& );
+	static void cleanup( void );
 protected:
 	virtual bool do_accept( OClientInfo* );
 	virtual void do_post_accept( OClientInfo* );

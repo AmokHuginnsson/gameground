@@ -36,7 +36,7 @@ class HBrowser extends HAbstractLogic {
 			super.init();
 			_games.getSelectionModel().setSelectionMode( TreeSelectionModel.SINGLE_TREE_SELECTION );
 			_games.addTreeSelectionListener( this );
-			java.awt.event.MouseListener ml = new java.awt.event.MouseAdapter() {
+			java.awt.event.MouseListener partysML = new java.awt.event.MouseAdapter() {
 				public void mousePressed( java.awt.event.MouseEvent e ) {
 					if ( e.getClickCount() == 2 ) {
 						PartysModel.PartysModelNode node = (PartysModel.PartysModelNode)_games.getLastSelectedPathComponent();
@@ -45,8 +45,25 @@ class HBrowser extends HAbstractLogic {
 					}
 				}
 			};
+			java.awt.event.MouseListener usersML = new java.awt.event.MouseAdapter() {
+				public void mousePressed( java.awt.event.MouseEvent e ) {
+					int selectedIndex = _people.getSelectedIndex();
+					if ( ! _people.getCellBounds( selectedIndex, selectedIndex ).contains( e.getPoint() ) )
+						_people.clearSelection();
+					int clicks = e.getClickCount();
+					if ( clicks == 2 ) {
+						Player selected = (Player)_people.getSelectedValue();
+						if ( ( selected != null ) && ! selected.toString().equals( _app.getName() ) ) {
+							_client.println( "create:chat:" + selected.toString() + "," + _app.getName() );
+						} else {
+							System.out.println( selected );
+						}
+					}
+				}
+			};
 			_games.setModel( _partysModel );
-			_games.addMouseListener( ml );
+			_games.addMouseListener( partysML );
+			_people.addMouseListener( usersML );
 			_msg.requestFocusInWindow();
 		}
 		public JTextPane getLogPad() {

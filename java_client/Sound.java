@@ -33,6 +33,7 @@ class Sound {
 				InputStream is = GameGround.class.getResourceAsStream( "/res/" + $name + ".wav" );
 				BufferedInputStream bufferedInputStream = new BufferedInputStream( is );
 				_clipCache.put( $name, audioStream = AudioSystem.getAudioInputStream( bufferedInputStream ) );
+				audioStream.mark( 1 << 24 );
 			} else
 				audioStream.reset();
 			if ( _clip.isRunning() ) {

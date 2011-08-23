@@ -197,6 +197,14 @@ void HLogicCreatorInterface::initialize_globals( void )
 	M_EPILOG
 	}
 
+void HLogicCreatorInterface::cleanup_globals( void )
+	{
+	M_PROLOG
+	do_cleanup_globals();
+	return;
+	M_EPILOG
+	}
+
 HLogic::ptr_t HLogicCreatorInterface::new_instance( HServer* server_, HLogic::id_t const& id_, HString const& argv_ )
 	{
 	M_PROLOG
