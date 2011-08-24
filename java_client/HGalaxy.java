@@ -169,7 +169,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		public void onMessage() {
 			String msg = _messageInput.getText();
 			if ( msg.matches( ".*\\S+.*" ) ) {	
-				_client.println( "cmd:" + _id + ":glx:say:" + msg );
+				_client.println( "cmd:" + _id + ":say:" + msg );
 				_messageInput.setText( "" );
 			}
 		}
@@ -440,10 +440,10 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		setState( State.LOCKED );
 		for ( java.util.ListIterator i = $moves.listIterator(); i.hasNext(); ) {
 			HMove move = (HMove)i.next();
-			String message = "cmd:" + _id + ":glx:play:move=" + move._sourceSystem + "," + move._destinationSystem + "," + move._fleet;
+			String message = "cmd:" + _id + ":play:move=" + move._sourceSystem + "," + move._destinationSystem + "," + move._fleet;
 			_client.println( message );
 		}
-		_client.println( "cmd:" + _id + ":glx:play:end_round" );
+		_client.println( "cmd:" + _id + ":play:end_round" );
 		$moves.clear();
 	}
 	public void cleanup() {}

@@ -54,7 +54,8 @@ class HBrowser extends HAbstractLogic {
 					if ( clicks == 2 ) {
 						Player selected = (Player)_people.getSelectedValue();
 						if ( ( selected != null ) && ! selected.toString().equals( _app.getName() ) ) {
-							_client.println( "create:chat:" + selected.toString() + "," + _app.getName() );
+							_client.println( "get_account:" + selected.toString() );
+//							_client.println( "create:chat:" + selected.toString() + "," + _app.getName() );
 						} else {
 							System.out.println( selected );
 						}

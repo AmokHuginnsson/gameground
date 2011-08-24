@@ -268,10 +268,18 @@ class HWorkArea extends HAbstractWorkArea {
 		System.out.println( "Player: [" + $message + "] removed." );
 	}
 	public void handleAccount( String $message ) {
-		Account acc = new Account( _app, $message );
-		if ( acc.confirmed() ) {
-			// System.out.println( "account:" + acc.getConfiguration() );
-			_client.println( "account:" + acc.getConfiguration() );
+		String[] tokens = $message.split( ",", 2 );
+		if ( tokens[0].equals( _app.getName() ) ) {
+			Account acc = new Account( _app, $message );
+			if ( acc.confirmed() ) {
+				// System.out.println( "account:" + acc.getConfiguration() );
+				_client.println( "account:" + acc.getConfiguration() );
+			}
+		} else {
+			Chat chat = Chat.showUserInfo( _app, $message );
+			java.awt.Component c = chat.getGUI();
+			_gui._tabs.addTab( tokens[0], c );
+			_gui._tabs.setSelectedComponent( c );
 		}
 	}
 	public Player getPlayer( String $name ) {

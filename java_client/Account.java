@@ -20,14 +20,14 @@ public class Account extends XDialog implements DocumentListener {
 	public JButton _ok;
 	public Account( GameGround $app, String $conf ) {
 		_app = $app;
-		String[] tokens = $conf.split( ",", 3 );
+		String[] tokens = $conf.split( ",", 4 );
 		try {
 			new SwingEngine( this ).insert( AppletJDOMHelper.loadResource( "/res/account.xml", this ), this );
 			_oldPassword.getDocument().addDocumentListener( this );
 			_newPassword.getDocument().addDocumentListener( this );
 			_newPasswordRepeat.getDocument().addDocumentListener( this );
-			_name.setText( Sec.unescape( tokens[0] ) );
-			_email.setText( Sec.unescape( tokens[1] ) );
+			_name.setText( Sec.unescape( tokens[1] ) );
+			_email.setText( Sec.unescape( tokens[3] ) );
 			_description.setText( Sec.unescape( tokens[2] ) );
 			setVisible( true );
 		} catch ( java.lang.Exception e ) {

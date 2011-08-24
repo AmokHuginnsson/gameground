@@ -50,7 +50,7 @@ HString const& mark( int color_ )
 	static HString buf;
 	buf = "$";
 	buf += color_;
-	buf += ";###;$7;";
+	buf += ";###$7;";
 	return ( buf );
 	}
 
@@ -528,18 +528,24 @@ void HServer::create_party( OClientInfo& client_, HString const& arg_ )
 						{
 						_logics[ id ] = logic;
 						out << "creating new party: " << logic->get_name() << "," << id << " (" << type << ')' << endl;
-						if ( ! logic->is_private() )
-							{
-							broadcast( _out << PROTOCOL::PARTY_INFO << PROTOCOL::SEP << id << PROTOCOL::SEPP << logic->get_info() << endl << _out );
-							send_player_info( client_ );
-							}
-						logic->post_accept_client( &client_ );
 						}
 					else
 						{
 						free_id( id );
 						out << "reusing old party: " << logic->get_name() << "," << logic->id() << " (" << type << ')' << endl; 
 						}
+					_out << PROTOCOL::PARTY_INFO << PROTOCOL::SEP << id << PROTOCOL::SEPP << logic->get_info() << endl;
+					if ( ! logic->is_private() )
+						{
+						broadcast( _out << _out );
+						broadcast_player_info( client_ );
+						}
+					else
+						{
+						*client_._socket << ( _out << _out );
+						broadcast_player_info( client_, *logic );
+						}
+					logic->post_accept_client( &client_ );
 					}
 				else
 					{
@@ -571,11 +577,14 @@ void HServer::join_party( OClientInfo& client_, HString const& id_ )
 			kick_client( client_._socket, "You were already in this party." );
 		else if ( ! it->second->accept_client( &client_ ) )
 			{
-			send_player_info( client_ );
+			if ( ! it->second->is_private() )
+				broadcast_player_info( client_ );
+			else
+				broadcast_player_info( client_, *it->second );
 			it->second->post_accept_client( &client_ );
 			}
 		else
-			client_._socket->write_until_eos( "err:Game is full.\n" );
+			client_._socket->write_until_eos( "err:You are not allowed in this party.\n" );
 		}
 	return;
 	M_EPILOG
@@ -631,7 +640,7 @@ void HServer::remove_client_from_all_logics( OClientInfo& client_ )
 		logic->second->kick_client( &client_ );
 		}
 	client_._logics.clear();
-	send_player_info( client_ );
+	broadcast_player_info( client_ );
 	flush_logics();
 	return;
 	M_EPILOG
@@ -667,10 +676,14 @@ void HServer::remove_client_from_logic( OClientInfo& client_, HLogic::ptr_t logi
 		logic_->kick_client( &client_, reason_ );
 		HString const& id( logic_->id() );
 		client_._logics.erase( id );
-		send_player_info( client_ );
+		if ( ! logic_->is_private() )
+			broadcast_player_info( client_ );
+		else
+			broadcast_player_info( client_, *logic_ );
 		if ( ! logic_->active_clients() )
 			{
-			broadcast( _out << PROTOCOL::PARTY_CLOSE << PROTOCOL::SEP << id << endl << _out );
+			if ( ! logic_->is_private() )
+				broadcast( _out << PROTOCOL::PARTY_CLOSE << PROTOCOL::SEP << id << endl << _out );
 			_logics.erase( id );
 			}
 		}
@@ -694,32 +707,39 @@ void HServer::handle_get_partys( OClientInfo& client_, HString const& )
 	M_EPILOG
 	}
 
-void HServer::handle_get_account( OClientInfo& client_, HString const& )
+void HServer::handle_get_account( OClientInfo& client_, HString const& login_ )
 	{
 	M_PROLOG
 	if ( client_._login.is_empty() )
 		kick_client( client_._socket, "Set your name first (Just login with standard client, will ya?)." );
 	else
 		{
-		HRecordSet::ptr_t rs( _db->query( _out << "SELECT name, email, description FROM tbl_user WHERE login = LOWER('" << client_._login << "');" << _out ) );
+		bool accountSelf( login_.is_empty() || ( login_ == client_._login ) );
+		HString const& login( accountSelf ? client_._login : login_ );
+		char const accountQuerySelf[] = "SELECT name, description, email FROM tbl_user WHERE login = LOWER('";
+		char const accountQueryOther[] = "SELECT name, description FROM tbl_user WHERE login = LOWER('";
+		HRecordSet::ptr_t rs( _db->query( _out << ( accountSelf ? accountQuerySelf : accountQueryOther ) << login << "');" << _out ) );
 		M_ENSURE( !! rs );
-		HRecordSet::iterator row = rs->begin();
+		HRecordSet::iterator row( rs->begin() );
 		if ( row != rs->end() )
 			{
 			HRecordSet::value_t name( row[0] );
-			HRecordSet::value_t email( row[1] );
-			HRecordSet::value_t description( row[2] );
+			HRecordSet::value_t description( row[1] );
+			HRecordSet::value_t email;
+			if ( accountSelf )
+				email = row[2];
 			SENDF( *client_._socket ) << PROTOCOL::ACCOUNT << PROTOCOL::SEP
+				<< login << PROTOCOL::SEPP
 				<< ( name ? unescape( *name ) : "" ) << PROTOCOL::SEPP
-				<< ( email ? unescape( *email ) : "" ) << PROTOCOL::SEPP
-				<< ( description ? unescape( *description ) : "" ) << endl;
+				<< ( description ? unescape( *description ) : "" ) << PROTOCOL::SEPP
+				<< ( email ? unescape( *email ) : "" ) << endl;
 			}
 		}
 	return;
 	M_EPILOG
 	}
 
-void HServer::send_player_info( OClientInfo& client_ )
+void HServer::broadcast_player_info( OClientInfo& client_ )
 	{
 	M_PROLOG
 	_out << PROTOCOL::PLAYER << PROTOCOL::SEP << client_._login;
@@ -734,6 +754,47 @@ void HServer::send_player_info( OClientInfo& client_ )
 	M_EPILOG
 	}
 
+void HServer::broadcast_player_info( OClientInfo& client_, HLogic& logic_ )
+	{
+	M_PROLOG
+	_out << PROTOCOL::PLAYER << PROTOCOL::SEP << client_._login;
+	for ( OClientInfo::logics_t::iterator it( client_._logics.begin() ), end( client_._logics.end() ); it != end; ++ it )
+		{
+		logics_t::iterator logic( _logics.find( *it ) );
+		if ( logic != _logics.end() )
+		 _out << PROTOCOL::SEPP << logic->first;
+		}
+	logic_.broadcast( _out << endl << _out );
+	return;
+	M_EPILOG
+	}
+
+void HServer::send_player_info( OClientInfo& about_, OClientInfo& to_ )
+	{
+	M_PROLOG
+	try
+		{
+		if ( ! about_._login.is_empty() )
+			{
+			_out << PROTOCOL::PLAYER << PROTOCOL::SEP << about_._login;
+			for ( OClientInfo::logics_t::iterator it( about_._logics.begin() ), end( about_._logics.end() ); it != end; ++ it )
+				{
+				logics_t::iterator logic( _logics.find( *it ) );
+				if ( logic != _logics.end() )
+					_out << PROTOCOL::SEPP << logic->first;
+				}
+			_out << endl;
+			SENDF( *to_._socket ) << ( _out << _out );
+			}
+		}
+	catch ( HOpenSSLException const& )
+		{
+		drop_client( &to_ );
+		}
+	return;
+	M_EPILOG
+	}
+
 void HServer::send_players_info( OClientInfo& client_ )
 	{
 	M_PROLOG
@@ -741,27 +802,7 @@ void HServer::send_players_info( OClientInfo& client_ )
 			client != _clients.end(); ++ client )
 		{
 		if ( client->second._valid )
-			{
-			try
-				{
-				if ( ! client->second._login.is_empty() )
-					{
-					_out << PROTOCOL::PLAYER << PROTOCOL::SEP << client->second._login;
-					for ( OClientInfo::logics_t::iterator it( client->second._logics.begin() ), end( client->second._logics.end() ); it != end; ++ it )
-						{
-						logics_t::iterator logic( _logics.find( *it ) );
-						if ( logic != _logics.end() )
-							_out << PROTOCOL::SEPP << logic->first;
-						}
-					_out << endl;
-					SENDF( *client_._socket ) << ( _out << _out );
-					}
-				}
-			catch ( HOpenSSLException const& )
-				{
-				drop_client( &client_ );
-				}
-			}
+			send_player_info( client->second, client_ );
 		}
 	return;
 	M_EPILOG

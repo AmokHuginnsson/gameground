@@ -27,7 +27,9 @@ Copyright:
 #ifndef GAMEGROUND_CHATD_HXX_INCLUDED
 #define GAMEGROUND_CHATD_HXX_INCLUDED
 
-#include <yaal/yaal.hxx>
+#include <yaal/hcore/hstring.hxx>
+#include <yaal/hcore/hset.hxx>
+#include <yaal/hcore/hmap.hxx>
 
 #include "logic.hxx"
 
@@ -40,9 +42,12 @@ namespace chat
 class HChat : public HLogic
 	{
 	typedef yaal::hcore::HMap<yaal::hcore::HString, HLogic::ptr_t> chats_t;
+	typedef yaal::hcore::HSet<yaal::hcore::HString> chatter_names_t;
+	typedef yaal::hcore::HPointer<chatter_names_t> chatter_names_ptr_t;
 	yaal::hcore::HString _key;
+	chatter_names_ptr_t _chatterNames;
 public:
-	HChat( HServer*, HLogic::id_t const&, yaal::hcore::HString const& );
+	HChat( HServer*, HLogic::id_t const&, chatter_names_ptr_t, yaal::hcore::HString const& );
 	virtual ~HChat( void );
 	static HLogic::ptr_t get_chat( HServer*, HLogic::id_t const&, yaal::hcore::HString const& );
 	static void cleanup( void );

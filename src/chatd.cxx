@@ -49,8 +49,8 @@ namespace chat
 
 HChat::chats_t HChat::_chats_;
 
-HChat::HChat( HServer* server_, HLogic::id_t const& id_, HString const& comment_ )
-	: HLogic( server_, id_, comment_ ), _key( comment_ )
+HChat::HChat( HServer* server_, HLogic::id_t const& id_, chatter_names_ptr_t chatterNames_, HString const& comment_ )
+	: HLogic( server_, id_, comment_ ), _key( comment_ ), _chatterNames( chatterNames_ )
 	{
 	M_PROLOG
 	_handlers[ "say" ] = static_cast<handler_t>( &HChat::handler_message );
@@ -69,7 +69,7 @@ HChat::~HChat ( void )
 bool HChat::do_accept( OClientInfo* clientInfo_ )
 	{
 	out << "new candidate " << clientInfo_->_login << endl;
-	return ( false );
+	return ( _chatterNames->count( clientInfo_->_login ) != 1 );
 	}
 
 void HChat::do_post_accept( OClientInfo* )
@@ -97,24 +97,19 @@ void HChat::handler_message( OClientInfo* clientInfo_, HString const& message_ )
 	int chattersCount( static_cast<int>( _clients.get_size() ) );
 	if ( chattersCount > 0 )
 		{
-		if ( chattersCount == 1 )
+		if ( chattersCount != _chatterNames->get_size() )
 			{
-			HTokenizer t( _key, ":" );
-			for ( HTokenizer::iterator it( t.begin() ), end( t.end() ); it != end; ++ it )
+			for ( chatter_names_t::iterator it( _chatterNames->begin() ), end( _chatterNames->end() ); it != end; ++ it )
 				{
 				if ( *it != clientInfo_->_login )
 					{
 					OClientInfo* client( _server->get_client( *it ) );
-					if ( client )
-						{
-						client->_logics.insert( _id );
-						_clients.insert( client );
-						}
+					if ( client && _clients.count( client ) == 0 )
+						_server->join_party( *client, _id );
 					}
 				}
 			}
-		else
-			HLogic::handler_message( clientInfo_, message_ );
+		HLogic::handler_message( clientInfo_, message_ );
 		}
 	return;
 	M_EPILOG
@@ -136,9 +131,28 @@ HLogic::ptr_t HChat::get_chat( HServer* server_, HLogic::id_t const& id_, HStrin
 	M_PROLOG
 	HString chatter1( get_token( argv_, ",", 0 ) );
 	HString chatter2( get_token( argv_, ",", 1 ) );
-	if ( chatter1.is_empty() || chatter2.is_empty() || ( chatter1 == chatter2 ) )
-		throw HLogicException( "invalid chatters" );
-	HString key( chatter1 < chatter2 ? chatter1 + ":" + chatter2 : chatter2 + ":" + chatter1 );
+	HTokenizer t( argv_, "," );
+	HChat::chatter_names_ptr_t chatterNames( make_pointer<chatter_names_t>() );
+	int keyBufferSize( 0 );
+	for ( HTokenizer::iterator it( t.begin() ), end( t.end() ); it != end; ++ it )
+		{
+		if ( it->is_empty() )
+			throw HLogicException( "invalid chatters (empty)" );
+		if ( ! chatterNames->insert( *it ).second )
+			throw HLogicException( "invalid chatters (duplicate)" );
+		keyBufferSize += static_cast<int>( it->get_length() );
+		}
+	if ( chatterNames->get_size() < 2 )
+		throw HLogicException( "invalid chatters (bad count)" );
+	keyBufferSize += static_cast<int>( chatterNames->get_size() );
+	++ keyBufferSize;
+	HString key( keyBufferSize, true );
+	for ( chatter_names_t::iterator it( chatterNames->begin() ), end( chatterNames->end() ); it != end; ++ it )
+		{
+		if ( ! key.is_empty() )
+			key += ':';
+		key += *it;
+		}
 	chats_t::iterator it( _chats_.find( key ) );
 	HLogic::ptr_t logic;
 	if ( it != _chats_.end() )
@@ -148,7 +162,7 @@ HLogic::ptr_t HChat::get_chat( HServer* server_, HLogic::id_t const& id_, HStrin
 	else
 		{
 		out << "creating logic: " << argv_ << endl;
-		logic = make_pointer<chat::HChat>( server_, id_, key );
+		logic = make_pointer<chat::HChat>( server_, id_, chatterNames, key );
 		_chats_.insert( make_pair( key, logic ) );
 		}
 	return ( logic );

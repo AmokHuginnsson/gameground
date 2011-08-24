@@ -44,27 +44,44 @@ public abstract class HAbstractLogic {
 		_gui.log( _timestampFormat.format( java.util.Calendar.getInstance().getTime() ) );
 		handleMessage( $message );
 	}
-	public void handleMessage( String $message ) {
-		int index = 0, offset = 0;
+	int findColor( String $message, int $offset ) {
+		int colorStartIndex = -1;
+		int start = $offset;
 		int length = $message.length();
-		String part;
-		while ( index < length ) {
-			offset = $message.indexOf( ';', index );
-			if ( offset < 0 )
-				offset = length;
-			part = $message.substring( index, offset );
-			if ( part.length() == 0 )
+		while ( start < length ) {
+			start = $message.indexOf( '$', start );
+			if ( start < 0 )
 				break;
-			if ( part.charAt( 0 ) == '$' ) { /* color */
+			int color = start + 1;
+			while ( ( color < length ) && Character.isDigit( $message.charAt( color ) ) )
+				++ color;
+			if ( ( color < length ) && ( $message.charAt( color ) == ';' ) ) {
+				colorStartIndex = start;
+				break;
+			}
+			start = color;
+		}
+		return ( colorStartIndex );
+	}
+	public void handleMessage( String $message ) {
+		int index = 0;
+		int length = $message.length();
+		while ( index < length ) {
+			int color = findColor( $message, index );
+			if ( color > index )
+				_gui.log( $message.substring( index, color ) );
+			if ( color >= 0 ) { /* color */
 				try {
-					_gui.log( new Integer( part.substring( 1 ) ).intValue() );
+					int colorEnd = $message.indexOf( ';', color );
+					_gui.log( new Integer( $message.substring( color + 1, colorEnd ) ).intValue() );
+					index = colorEnd + 1;
 				} catch ( NumberFormatException e ) {
 					e.printStackTrace();
 				}
 			}	else { /* text */
-				_gui.log( part );
+				_gui.log( $message.substring( index ) );
+				break;
 			}
-			index = offset + 1;
 		}
 		_gui.log( "\n" );
 		_gui.log( _gui.COLOR_NORMAL );

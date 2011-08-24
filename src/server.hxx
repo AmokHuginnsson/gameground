@@ -38,7 +38,6 @@ namespace gameground
 class HServer
 	{
 protected:
-	/*{*/
 	typedef void ( HServer::* handler_t )( OClientInfo&, yaal::hcore::HString const& );
 	typedef yaal::hcore::HMap<HLogic::id_t, HLogic::ptr_t> logics_t;
 	typedef yaal::hcore::HMap<yaal::hcore::HString, handler_t> handlers_t;
@@ -58,7 +57,7 @@ protected:
 	yaal::tools::HIODispatcher _dispatcher;
 	yaal::hcore::HNumber _idPool;
 	dropouts_t _dropouts;
-	/*}*/
+public:
 	struct PROTOCOL
 		{
 		static char const* const ABANDON;
@@ -90,8 +89,6 @@ protected:
 		static char const* const VERSION_ID;
 		static char const* const WARN;
 		};
-public:
-	/*{*/
 	HServer( int );
 	~HServer( void );
 	int init_server( int );
@@ -99,9 +96,8 @@ public:
 	void drop_client( OClientInfo* );
 	OClientInfo* get_client( yaal::hcore::HString const& );
 	db_accessor_t db( void );
-	/*}*/
+	void join_party( OClientInfo&, yaal::hcore::HString const& );
 protected:
-	/*{*/
 	void handler_connection( int );
 	void handler_message( int );
 	void handler_shutdown( OClientInfo&, yaal::hcore::HString const& );
@@ -116,14 +112,15 @@ protected:
 	void handle_account( OClientInfo&, yaal::hcore::HString const& );
 	void pass_command( OClientInfo&, yaal::hcore::HString const& );
 	void create_party( OClientInfo&, yaal::hcore::HString const& );
-	void join_party( OClientInfo&, yaal::hcore::HString const& );
 	void handle_get_logics( OClientInfo&, yaal::hcore::HString const& );
 	void handle_get_players( OClientInfo&, yaal::hcore::HString const& );
 	void handle_get_partys( OClientInfo&, yaal::hcore::HString const& );
 	void handle_get_account( OClientInfo&, yaal::hcore::HString const& );
 	void send_logics_info( OClientInfo& );
 	void send_players_info( OClientInfo& );
-	void send_player_info( OClientInfo& );
+	void send_player_info( OClientInfo&, OClientInfo& );
+	void broadcast_player_info( OClientInfo& );
+	void broadcast_player_info( OClientInfo&, HLogic& );
 	void send_partys_info( OClientInfo& );
 	void remove_client_from_logic( OClientInfo&, HLogic::ptr_t, char const* const = NULL );
 	void remove_client_from_all_logics( OClientInfo& );
@@ -132,7 +129,6 @@ protected:
 	void flush_droupouts( void );
 	HLogic::id_t create_id( void );
 	void free_id( HLogic::id_t const& );
-	/*}*/
 	};
 
 int main_server( void );
