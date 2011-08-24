@@ -1,5 +1,6 @@
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.Vector;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 
@@ -34,8 +35,15 @@ class Chat extends HAbstractLogic implements Runnable {
 		}
 		public void onMessage() {
 			String msg = _msg.getText();
-			if ( msg.matches( ".*\\S+.*" ) ) {	
-				_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP + PROTOCOL.SAY + PROTOCOL.SEP + msg );
+			if ( msg.matches( ".*\\S+.*" ) ) {
+				if ( online() ) {
+					_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP + PROTOCOL.SAY + PROTOCOL.SEP + msg );
+				} else {
+					if ( _lineBuffer.isEmpty() ) {
+						_client.println( "create:chat:" + _interlocutor + "," + _app.getName() );
+					}
+					_lineBuffer.add( msg );
+				}
 				_msg.setText( "" );
 			}
 		}
@@ -46,16 +54,22 @@ class Chat extends HAbstractLogic implements Runnable {
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
 	public static final String LABEL = "chat";
-	private static final SortedMap<String, HAbstractLogic> _userInfos = java.util.Collections.synchronizedSortedMap( new TreeMap<String, HAbstractLogic>() );
+	private static final SortedMap<String, Chat> _userInfos = java.util.Collections.synchronizedSortedMap( new TreeMap<String, Chat>() );
+	Vector<String> _lineBuffer = new Vector<String>();
+	String _interlocutor;
 	public HGUILocal _gui;
 //--------------------------------------------//
 	public Chat( GameGround $applet, String $configuration ) throws Exception {
 		super( $applet, "0", $configuration );
 		init( _gui = new HGUILocal( LABEL ) );
+		_handlers.put( PROTOCOL.PLAYERQUIT, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
 		String[] info = $configuration.split( ",", 4 );
-		handleMessage( "User: " + info[0] );
+		handleMessage( "User: " + ( _interlocutor = info[0] ) );
 		handleMessage( "Full name: " + Sec.unescape( info[1] ) );
 		handleMessage( "Description:\n" + Sec.unescape( info[2] ) );
+	}
+	boolean online() {
+		return ( ! "0".equals( _id ) );
 	}
 	public void cleanup() {
 		_app.flush( this );
@@ -64,6 +78,9 @@ class Chat extends HAbstractLogic implements Runnable {
 	}
 	void setId( String $id ) {
 		_id = $id;
+		for ( String line : _lineBuffer ) {
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP + PROTOCOL.SAY + PROTOCOL.SEP + line );
+		}
 	}
 	public static Chat showUserInfo( GameGround $app, String $info ) {
 		String[] tokens = $info.split( ",", 2 );
@@ -78,12 +95,14 @@ class Chat extends HAbstractLogic implements Runnable {
 		return ( chat );
 	}
 	static HAbstractLogic create( GameGround $app, String $id, String $configuration ) {
-		HAbstractLogic logic = null;
+		Chat chat = null;
 		String names[] = $configuration.split( ":", 2 );
 		String name = names[0].equals( $app.getName() ) ? names[1] : names[0];
-		logic = _userInfos.get( name );
+		chat = _userInfos.get( name );
+		assert chat != null : "chat should already exist";
 		_userInfos.remove( name );
-		return ( logic );
+		chat.setId( $id );
+		return ( chat );
 	}
 	static boolean registerLogic( GameGround $app ) {
 		try {

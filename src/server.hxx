@@ -97,6 +97,7 @@ public:
 	OClientInfo* get_client( yaal::hcore::HString const& );
 	db_accessor_t db( void );
 	void join_party( OClientInfo&, yaal::hcore::HString const& );
+	void handle_get_account( OClientInfo&, yaal::hcore::HString const& );
 protected:
 	void handler_connection( int );
 	void handler_message( int );
@@ -107,6 +108,7 @@ protected:
 	void kick_client( yaal::hcore::HSocket::ptr_t&, char const* const = NULL );
 	void broadcast( yaal::hcore::HString const& );
 	void broadcast_party( yaal::hcore::HString const&, yaal::hcore::HString const& );
+	void broadcast_private( HLogic&, yaal::hcore::HString const& );
 	void broadcast_all_parties( OClientInfo*, yaal::hcore::HString const& );
 	void handle_login( OClientInfo&, yaal::hcore::HString const& );
 	void handle_account( OClientInfo&, yaal::hcore::HString const& );
@@ -115,7 +117,6 @@ protected:
 	void handle_get_logics( OClientInfo&, yaal::hcore::HString const& );
 	void handle_get_players( OClientInfo&, yaal::hcore::HString const& );
 	void handle_get_partys( OClientInfo&, yaal::hcore::HString const& );
-	void handle_get_account( OClientInfo&, yaal::hcore::HString const& );
 	void send_logics_info( OClientInfo& );
 	void send_players_info( OClientInfo& );
 	void send_player_info( OClientInfo&, OClientInfo& );

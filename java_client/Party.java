@@ -11,7 +11,8 @@ class Party {
 		String[] tokens = $conf.split( ",", 2 );
 		_id = $id;
 		_name = tokens[0];
-		_configuration = tokens[1];
+		if ( tokens.length > 1 )
+			_configuration = tokens[1];
 	}
 	public String toString() {
 		return ( _name + ":" + _id );

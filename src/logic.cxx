@@ -159,7 +159,7 @@ yaal::hcore::HStreamInterface& operator << ( HStreamInterface& stream_, HLogic c
 void HLogic::broadcast( HString const& message_ )
 	{
 	M_PROLOG
-	for ( clients_t::HIterator it = _clients.begin(); it != _clients.end(); ++ it )
+	for ( clients_t::HIterator it( _clients.begin() ), end( _clients.end() ); it != end; ++ it )
 		{
 		try
 			{

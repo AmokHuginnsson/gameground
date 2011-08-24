@@ -46,6 +46,7 @@ class HChat : public HLogic
 	typedef yaal::hcore::HPointer<chatter_names_t> chatter_names_ptr_t;
 	yaal::hcore::HString _key;
 	chatter_names_ptr_t _chatterNames;
+	yaal::hcore::HString _info;
 public:
 	HChat( HServer*, HLogic::id_t const&, chatter_names_ptr_t, yaal::hcore::HString const& );
 	virtual ~HChat( void );

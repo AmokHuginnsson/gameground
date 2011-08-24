@@ -50,7 +50,7 @@ namespace chat
 HChat::chats_t HChat::_chats_;
 
 HChat::HChat( HServer* server_, HLogic::id_t const& id_, chatter_names_ptr_t chatterNames_, HString const& comment_ )
-	: HLogic( server_, id_, comment_ ), _key( comment_ ), _chatterNames( chatterNames_ )
+	: HLogic( server_, id_, comment_ ), _key( comment_ ), _chatterNames( chatterNames_ ), _info( HString( "chat," ) + _key + "," + get_comment() )
 	{
 	M_PROLOG
 	_handlers[ "say" ] = static_cast<handler_t>( &HChat::handler_message );
@@ -105,7 +105,10 @@ void HChat::handler_message( OClientInfo* clientInfo_, HString const& message_ )
 					{
 					OClientInfo* client( _server->get_client( *it ) );
 					if ( client && _clients.count( client ) == 0 )
+						{
+						_server->handle_get_account( *client, clientInfo_->_login );
 						_server->join_party( *client, _id );
+						}
 					}
 				}
 			}
@@ -118,7 +121,7 @@ void HChat::handler_message( OClientInfo* clientInfo_, HString const& message_ )
 yaal::hcore::HString HChat::do_get_info() const
 	{
 	HLock l( _mutex );
-	return ( HString( "chat," ) + get_comment() );
+	return ( _info );
 	}
 
 bool HChat::do_is_private( void ) const

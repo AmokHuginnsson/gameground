@@ -321,6 +321,25 @@ void HServer::broadcast_all_parties( OClientInfo* info_, HString const& message_
 	M_EPILOG
 	}
 
+void HServer::broadcast_private( HLogic& party_, HString const& message_ )
+	{
+	M_PROLOG
+	for ( HLogic::clients_t::HIterator it( party_._clients.begin() ), end( party_._clients.end() ); it != end; ++ it )
+		{
+		try
+			{
+			if ( (*it)->_valid )
+				(*it)->_socket->write_until_eos( message_ );
+			}
+		catch ( HOpenSSLException const& )
+			{
+			drop_client( *it );
+			}
+		}
+	return;
+	M_EPILOG
+	}
+
 void HServer::handler_chat( OClientInfo& client_, HString const& message_ )
 	{
 	M_PROLOG
@@ -580,7 +599,10 @@ void HServer::join_party( OClientInfo& client_, HString const& id_ )
 			if ( ! it->second->is_private() )
 				broadcast_player_info( client_ );
 			else
+				{
+				*client_._socket << PROTOCOL::PARTY_INFO << PROTOCOL::SEP << id_ << PROTOCOL::SEPP << it->second->get_info() << endl;
 				broadcast_player_info( client_, *it->second );
+				}
 			it->second->post_accept_client( &client_ );
 			}
 		else
@@ -764,7 +786,7 @@ void HServer::broadcast_player_info( OClientInfo& client_, HLogic& logic_ )
 		if ( logic != _logics.end() )
 		 _out << PROTOCOL::SEPP << logic->first;
 		}
-	logic_.broadcast( _out << endl << _out );
+	broadcast_private( logic_, _out << endl << _out );
 	return;
 	M_EPILOG
 	}
