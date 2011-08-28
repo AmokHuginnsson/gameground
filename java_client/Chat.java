@@ -4,7 +4,7 @@ import java.util.Vector;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 
-class Chat extends HAbstractLogic implements Runnable {
+class Chat extends HAbstractLogic {
 	public static final class PROTOCOL {
 		public static final String SEP = ":";
 		public static final String SEPP = ",";
@@ -36,10 +36,11 @@ class Chat extends HAbstractLogic implements Runnable {
 		public void onMessage() {
 			String msg = _msg.getText();
 			if ( msg.matches( ".*\\S+.*" ) ) {
-				if ( online() ) {
+				if ( _online ) {
 					_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP + PROTOCOL.SAY + PROTOCOL.SEP + msg );
 				} else {
 					if ( _lineBuffer.isEmpty() ) {
+						_aboutToCreate = true;
 						_client.println( "create:chat:" + _interlocutor + "," + _app.getName() );
 					}
 					_lineBuffer.add( msg );
@@ -48,14 +49,19 @@ class Chat extends HAbstractLogic implements Runnable {
 			}
 		}
 		public void onClose() {
-			_app.closeParty( _id );
+			_app.closeParty( Chat.this );
+			_online = false;
+			_id = "0";
+			_chats.put( _interlocutor, Chat.this );
 		}
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
 	public static final String LABEL = "chat";
-	private static final SortedMap<String, Chat> _userInfos = java.util.Collections.synchronizedSortedMap( new TreeMap<String, Chat>() );
+	private static final SortedMap<String, Chat> _chats = java.util.Collections.synchronizedSortedMap( new TreeMap<String, Chat>() );
 	Vector<String> _lineBuffer = new Vector<String>();
+	boolean _online = false;
+	boolean _aboutToCreate = false;
 	String _interlocutor;
 	public HGUILocal _gui;
 //--------------------------------------------//
@@ -68,45 +74,48 @@ class Chat extends HAbstractLogic implements Runnable {
 		handleMessage( "Full name: " + Sec.unescape( info[1] ) );
 		handleMessage( "Description:\n" + Sec.unescape( info[2] ) );
 	}
-	boolean online() {
-		return ( ! "0".equals( _id ) );
+	synchronized public void cleanup() {
 	}
-	public void cleanup() {
-		_app.flush( this );
-	}
-	public void run() {
-	}
-	void setId( String $id ) {
+	synchronized void setId( String $id ) {
 		_id = $id;
+		_online = true;
+		if ( ! _aboutToCreate )
+			Sound.play( "phone-incoming-call" );
+		_aboutToCreate = false;
 		for ( String line : _lineBuffer ) {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP + PROTOCOL.SAY + PROTOCOL.SEP + line );
 		}
+		_lineBuffer.clear();
 	}
-	public static Chat showUserInfo( GameGround $app, String $info ) {
+	synchronized public static Chat showUserInfo( GameGround $app, String $info ) {
+		System.out.println( "chat info: " + $info );
 		String[] tokens = $info.split( ",", 2 );
 		Chat chat = null;
-		try {
-			chat = new Chat( $app, $info );
-		} catch ( Exception e ) {
-			e.printStackTrace();
-			System.exit( 1 );
+		chat = _chats.get( tokens[0] );
+		if ( chat == null ) {
+			try {
+				chat = new Chat( $app, $info );
+			} catch ( Exception e ) {
+				e.printStackTrace();
+				System.exit( 1 );
+			}
+			_chats.put( tokens[0], chat );
 		}
-		_userInfos.put( tokens[0], chat );
 		return ( chat );
 	}
-	static HAbstractLogic create( GameGround $app, String $id, String $configuration ) {
+	synchronized static HAbstractLogic create( GameGround $app, String $id, String $configuration ) {
 		Chat chat = null;
 		String names[] = $configuration.split( ":", 2 );
 		String name = names[0].equals( $app.getName() ) ? names[1] : names[0];
-		chat = _userInfos.get( name );
+		chat = _chats.get( name );
 		assert chat != null : "chat should already exist";
-		_userInfos.remove( name );
+		_chats.remove( name );
 		chat.setId( $id );
 		return ( chat );
 	}
-	static boolean registerLogic( GameGround $app ) {
+	synchronized static boolean registerLogic( GameGround $app ) {
 		try {
-			$app.registerLogic( "chat", new HLogicInfo( "chat", "chat", "Chat", null, Chat.class.getDeclaredMethod( "create", new Class[] { GameGround.class, String.class, String.class } ) ) );
+			$app.registerLogic( "chat", new HLogicInfo( "chat", "chat", "Chat", null, Chat.class.getDeclaredMethod( "create", new Class[] { GameGround.class, String.class, String.class } ), true ) );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );

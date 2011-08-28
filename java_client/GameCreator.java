@@ -32,7 +32,21 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 			new SwingEngine( this ).insert( AppletJDOMHelper.loadResource( "/res/creator.xml", this ), this );
 			_logics.setModel( new AbstractListModel() {
 				public static final long serialVersionUID = 17l;
-				public int getSize() { return ( $logics.size() ); }
+				public int getSize() {
+					java.util.Set<java.util.Map.Entry<String,HLogicInfo>> entSet = $logics.entrySet();
+					java.util.Map.Entry<String,HLogicInfo> ent = null;
+					java.util.Iterator<java.util.Map.Entry<String,HLogicInfo>> it = entSet.iterator();
+					int i = 0;
+					while ( it.hasNext() ) {
+						ent = it.next();
+						if ( ent != null ) {
+							HLogicInfo li = ent.getValue();
+							if ( ! li._private )
+								++ i;
+						}
+					}
+					return ( i );
+				}
 				public Object getElementAt( int index ) {
 					java.util.Set<java.util.Map.Entry<String,HLogicInfo>> entSet = $logics.entrySet();
 					java.util.Map.Entry<String,HLogicInfo> ent = null;
@@ -41,10 +55,13 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 					while ( it.hasNext() ) {
 						ent = it.next();
 						if ( ent != null ) {
-							if ( i == index ) {
-								break;
+							HLogicInfo li = ent.getValue();
+							if ( ! li._private ) {
+								if ( i == index ) {
+									break;
+								}
+								++ i;
 							}
-							++ i;
 						}
 					}
 					return ( ent.getValue() );

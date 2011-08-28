@@ -165,7 +165,7 @@ class Boggle extends HAbstractLogic implements Runnable {
 			}
 		}
 		public void onExit() {
-			_app.closeParty( _id );
+			_app.closeParty( Boggle.this );
 		}
 	}
 	enum State { INIT, PLAY, WAIT }
@@ -227,6 +227,7 @@ class Boggle extends HAbstractLogic implements Runnable {
 		_gui.add( _gui._wordsLongest, $command + "\n" );
 	}
 	void handlerDeck( String $command ) {
+		Sound.play( "dice-roll" );
 		if ( $command.length() < 16 ) {
 			Con.err( "Bad deck configuration: " + $command );
 			CallStack.print();

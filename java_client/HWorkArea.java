@@ -52,7 +52,8 @@ class HWorkArea extends HAbstractWorkArea {
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
-	private static final String CLIENT_VERSION = "0";
+	static Color COLOR_NOTIFY = Color.CYAN.brighter().brighter().brighter().brighter().brighter();
+	private static final String CLIENT_VERSION = "1";
 	private SortedMap<String, Method> _handlers = java.util.Collections.synchronizedSortedMap( new TreeMap<String, Method>() );
 	private SortedMap<String, HLogicInfo> _logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String, HLogicInfo>() );
 	private SortedMap<String, Player> _players = java.util.Collections.synchronizedSortedMap( new TreeMap<String, Player>() );
@@ -126,7 +127,7 @@ class HWorkArea extends HAbstractWorkArea {
 		if ( lp._party != null ) {
 			if ( lp._party._party.getGUI() != _gui._tabs.getSelectedComponent() ) {
 				int idx = _gui._tabs.indexOfTab( lp._party.toString() );
-				_gui._tabs.setBackgroundAt( idx, Color.CYAN.brighter().brighter().brighter().brighter() );
+				showNotification( idx );
 			}
 			lp._party._party.processMessage( toks[1] );
 		}
@@ -149,9 +150,15 @@ class HWorkArea extends HAbstractWorkArea {
 		} else {
 			if ( _browser.getGUI() != _gui._tabs.getSelectedComponent() ) {
 				int idx = _gui._tabs.indexOfTab( "Browser" );
-				_gui._tabs.setBackgroundAt( idx, Color.CYAN.brighter().brighter().brighter().brighter() );
+				showNotification( idx );
 			}
 			_browser.processMessage( $message );
+		}
+	}
+	void showNotification( int $idx ) {
+		if ( _gui._tabs.getBackgroundAt( $idx ) != COLOR_NOTIFY ) {
+			_gui._tabs.setBackgroundAt( $idx, COLOR_NOTIFY );
+			Sound.play( "message-new-instant" );
 		}
 	}
 	public void handlerDummy( String $msg ) {
@@ -166,14 +173,17 @@ class HWorkArea extends HAbstractWorkArea {
 		}
 		_logics.clear();
 	}
-	public synchronized void closeParty( String $id ) {
-		System.out.println( "Abandoning party: " + $id );
-		LogicParty lp = getPartyById( $id );
-		_client.println( "abandon:" + $id );
-		lp._party.removePlayer( _players.get( _app.getName() ) );
+	public synchronized void closeParty( HAbstractLogic $logic ) {
+		String id = $logic.id();
+		System.out.println( "Abandoning party: " + id );
+		LogicParty lp = getPartyById( id );
+		if ( lp != null ) {
+			_client.println( "abandon:" + id );
+			lp._party.removePlayer( _players.get( _app.getName() ) );
+			lp._party._party = null;
+		}
 		_gui._tabs.setSelectedComponent( _browser.getGUI() );
-		_gui._tabs.remove( lp._party._party.getGUI() );
-		lp._party._party = null;
+		_gui._tabs.remove( $logic.getGUI() );
 		_browser.reload();
 	}
 

@@ -44,6 +44,7 @@ static int const GALAXY_EMPERORS           =   4;
 static int const NEUTRAL_SYSTEM_PER_PLAYER =   4;
 static int const MAX_BOARD_SIZE            =  20;
 static int const MAX_SYSTEM_COUNT          =  36;
+extern char const* const BOGGLE_SCORING_SYSTEM;
 static int const BOGGLE_PLAYERS            =   2;
 static int const BOGGLE_ROUND_TIME         = 180;
 static int const BOGGLE_INTER_ROUND_DELAY  =  15;
@@ -90,6 +91,7 @@ struct OSetup
 	int _byoYomiPeriods;
 	int _byoYomiTime;
 	/* galaxy/boggle specific strings */
+	yaal::hcore::HString _scoringSystem;
 	yaal::hcore::HString _consoleCharset;
 	yaal::hcore::HString _aspellLang;
 	yaal::hcore::HString _databasePath;
@@ -109,7 +111,7 @@ struct OSetup
 		_interRoundDelay( BOGGLE_INTER_ROUND_DELAY ),
 		_gobanSize( GO_GOBAN_SIZE ), _komi( GO_KOMI ), _handicaps( GO_HANDICAPS ),
 		_mainTime( GO_MAINTIME ), _byoYomiPeriods( GO_BYOYOMI_PERIODS ),
-		_byoYomiTime( GO_BYOYOMI_TIME ),
+		_byoYomiTime( GO_BYOYOMI_TIME ), _scoringSystem( BOGGLE_SCORING_SYSTEM ),
 		_consoleCharset(), _aspellLang(), _databasePath( DATABASE_PATH ),
 		_databaseLogin( DATABASE_LOGIN ), _databasePassword( DATABASE_PASSWORD ),
 		_programName( NULL ),

@@ -90,15 +90,21 @@ char const* const HBoggle::PROTOCOL::END_ROUND = "end_round";
 char const* const HBoggle::PROTOCOL::ROUND = "round";
 char const* const HBoggle::PROTOCOL::SCORED = "scored";
 char const* const HBoggle::PROTOCOL::LONGEST = "longest";
-HBoggle::SCORING::ORule HBoggle::RULES[] = { { 3, { 0, 0, 1, 1, 2, 3, 5, 11, 11, 11, 11, 11, 11, 11, 11, 11 } },
-		{ 4, { 0, 0, 0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 } },
-		{ 5, { 0, 0, 0, 0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233 } },
-		{ 5, { 0, 0, 0, 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048 } } };
+int HBoggle::RULES[6][16] =
+	{
+		{ 0, 0, 1, 1, 2, 3,  5, 11, 11,  11,  11,  11,   11,   11,   11,   11 },
+		{ 0, 0, 1, 2, 3, 5,  8, 13, 21,  34,  55,  89,  144,  233,  377,  610 },
+		{ 0, 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192 },
+		{ 0, 0, 0, 1, 2, 3,  5,  8, 13,  21,  34,  55,   89,  144,  233,  377 },
+		{ 0, 0, 0, 1, 2, 4,  8, 16, 32,  64, 128, 256,  512, 1024, 2048, 4096 },
+		{ 0, 0, 1, 1, 1, 1,  1,  1,  1,   1,   1,   1,    1,    1,    1,    1 }
+	};
 
-HBoggle::HBoggle( HServer* server_, id_t const& id_, HString const& comment_, int players_, int roundTime_, int maxRounds_, int interRoundDelay_ )
-	: HLogic( server_, id_, comment_ ), _state( STATE::LOCKED ), _startupPlayers( players_ ),
+HBoggle::HBoggle( HServer* server_, id_t const& id_, HString const& comment_, SCORING::scoring_t scoring_, int players_, int roundTime_, int maxRounds_, int interRoundDelay_ )
+	: HLogic( server_, id_, comment_ ), _state( STATE::LOCKED ),
+	_scoring( scoring_ ), _startupPlayers( players_ ),
 	_roundTime( roundTime_ ), _maxRounds( maxRounds_ ),
-	_interRoundDelay( interRoundDelay_ ), _ruleSet( 0 ), _round( 0 ), _players(),
+	_interRoundDelay( interRoundDelay_ ), _round( 0 ), _players(),
 	_words()
 	{
 	M_PROLOG
@@ -155,9 +161,10 @@ void HBoggle::handler_play( OClientInfo* clientInfo_, HString const& word_ )
 	{
 	M_PROLOG
 	HLock l( _mutex );
+	static int const BOGGLE_REAL_MINIMUM_WORD_LENGTH = 3;
 	int length = static_cast<int>( word_.get_length() );
 	if ( ( _state == STATE::ACCEPTING )
-			&& ( length >= RULES[ _ruleSet ]._minLength )
+			&& ( length >= BOGGLE_REAL_MINIMUM_WORD_LENGTH )
 			&& ( length <= boggle_data::MAXIMUM_WORD_LENGTH ) )
 		{
 		words_t::iterator it = _words.find( word_ );
@@ -197,8 +204,21 @@ void HBoggle::do_post_accept( OClientInfo* clientInfo_ )
 	 */
 	broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
 			<< clientInfo_->_login << PROTOCOL::SEPP << 0 << PROTOCOL::SEPP << 0 << endl << _out );
+	char const* scoringStr = "";
+	switch ( _scoring )
+		{
+		case ( SCORING::ORIGINAL ): scoringStr = "Original Boggle"; break;
+		case ( SCORING::FIBONACCI ): scoringStr = "Fibonacci"; break;
+		case ( SCORING::GEOMETRIC ): scoringStr = "Geometric"; break;
+		case ( SCORING::FIBONACCI_4 ): scoringStr = "Fibonacci 4-based"; break;
+		case ( SCORING::GEOMETRIC_4 ): scoringStr = "Geometric 4-based"; break;
+		case ( SCORING::LONGEST_WORDS ): scoringStr = "Longest Words"; break;
+		default: break;
+		}
 	*clientInfo_->_socket << *this << PROTOCOL::MSG << PROTOCOL::SEP
 		<< "Welcome, this match settings are:" << endl
+		<< *this << PROTOCOL::MSG << PROTOCOL::SEP
+		<< "   scoring system - " << scoringStr << endl
 		<< *this << PROTOCOL::MSG << PROTOCOL::SEP
 		<< "   round time - " << _roundTime << " seconds" << endl
 		<< *this << PROTOCOL::MSG << PROTOCOL::SEP
@@ -318,20 +338,23 @@ void HBoggle::on_end_round( void )
 	else
 		_out << PROTOCOL::MSG << PROTOCOL::SEP << "Game Over!" << endl;
 	broadcast( _out << _out );
-	int* scores = RULES[ _ruleSet ]._score;
+	int* scores = RULES[ _scoring ];
 	typedef HList<words_t::iterator> longest_t;
 	longest_t longest;
 	int longestLength = 0;
-	for ( words_t::iterator it = _words.begin(); it != _words.end(); ++ it )
+	for ( words_t::iterator it = _words.begin(); it != _words.end(); )
 		{
-		int appearance = static_cast<int>( it->second->size() );
+		words_t::iterator del( it );
+		++ it;
+		int appearance = static_cast<int>( del->second->size() );
 		if ( appearance > 1 )
 			{
-			out << appearance << " people found: " << it->first << endl;
+			out << appearance << " people found: " << del->first << endl;
+			_words.erase( del );
 			continue;
 			}
-		int length = static_cast<int>( it->first.get_length() );
-		if ( word_is_good( it->first, length ) )
+		int length = static_cast<int>( del->first.get_length() );
+		if ( ( scores[ length - 1 ] > 0 ) && word_is_good( del->first, length ) )
 			{
 			if ( length > longestLength )
 				{
@@ -339,7 +362,16 @@ void HBoggle::on_end_round( void )
 				longestLength = length;
 				}
 			if ( length == longestLength )
-				longest.push_back( it );
+				longest.push_back( del );
+			}
+		else
+			_words.erase( del );
+		}
+	for ( words_t::iterator it = _words.begin(); it != _words.end(); ++ it )
+		{
+		int length = static_cast<int>( it->first.get_length() );
+		if ( ( _scoring != SCORING::LONGEST_WORDS ) || ( length == longestLength ) )
+			{
 			OClientInfo* clInfo = *it->second->begin();
 			OPlayerInfo& info = *get_player_info( clInfo );
 			*(clInfo->_socket) << *this << PROTOCOL::SCORED << PROTOCOL::SEP << it->first << "[" << scores[ length - 1 ] << "]" << endl;
@@ -443,22 +475,37 @@ HLogic::ptr_t HBoggleCreator::do_new_instance( HServer* server_, HLogic::id_t co
 	out << "creating logic: " << argv_ << endl;
 	HTokenizer t( argv_, "," );
 	HString name = t[ 0 ];
-	int players = lexical_cast<int>( t[ 1 ] );
-	int roundTime = lexical_cast<int>( t[ 2 ] );
-	int maxRounds = lexical_cast<int>( t[ 3 ] );
-	int interRoundDelay = lexical_cast<int>( t[ 4 ] );
+	HString scoringStr = t[ 1 ];
+	int players = lexical_cast<int>( t[ 2 ] );
+	int roundTime = lexical_cast<int>( t[ 3 ] );
+	int maxRounds = lexical_cast<int>( t[ 4 ] );
+	int interRoundDelay = lexical_cast<int>( t[ 5 ] );
+	boggle::HBoggle::SCORING::scoring_t scoring( boggle::HBoggle::SCORING::ORIGINAL );
+	if ( scoringStr == "original" )
+		scoring = boggle::HBoggle::SCORING::ORIGINAL;
+	else if ( scoringStr == "fibonacci" )
+		scoring = boggle::HBoggle::SCORING::FIBONACCI;
+	else if ( scoringStr == "fibonacci4" )
+		scoring = boggle::HBoggle::SCORING::FIBONACCI_4;
+	else if ( scoringStr == "geometric" )
+		scoring = boggle::HBoggle::SCORING::GEOMETRIC;
+	else if ( scoringStr == "geometric4" )
+		scoring = boggle::HBoggle::SCORING::GEOMETRIC_4;
+	else if ( scoringStr == "longestwords" )
+		scoring = boggle::HBoggle::SCORING::LONGEST_WORDS;
 	return ( make_pointer<boggle::HBoggle>( server_, id_, name,
-					players,
-					roundTime,
-					maxRounds,
-					interRoundDelay ) );
+				scoring,
+				players,
+				roundTime,
+				maxRounds,
+				interRoundDelay ) );
 	M_EPILOG
 	}
 
 HString HBoggleCreator::do_get_info( void ) const
 	{
 	HString setupMsg;
-	setupMsg.format( "%s:%d,%d,%d,%d", boggle::HBoggle::PROTOCOL::NAME, setup._players, setup._roundTime, setup._maxRounds, setup._interRoundDelay );
+	setupMsg.format( "%s:%s,%d,%d,%d,%d", boggle::HBoggle::PROTOCOL::NAME, setup._scoringSystem.raw(), setup._players, setup._roundTime, setup._maxRounds, setup._interRoundDelay );
 	out << setupMsg << endl;
 	return ( setupMsg );
 	}

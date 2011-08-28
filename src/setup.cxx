@@ -42,6 +42,7 @@ namespace gameground
 char const* const DATABASE_PATH     = "gameground";
 char const* const DATABASE_LOGIN    = "gameground";
 char const* const DATABASE_PASSWORD = "g4m3gr0und";
+char const* const BOGGLE_SCORING_SYSTEM = "original";
 
 now_t now;
 

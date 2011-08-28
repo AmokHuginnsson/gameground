@@ -90,7 +90,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 			}
 		}
 		public void onExit() {
-			_app.closeParty( _id );
+			_app.closeParty( Gomoku.this );
 		}
 		public void onBlack() {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP

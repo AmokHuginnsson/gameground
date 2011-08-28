@@ -7,16 +7,21 @@ public class HLogicInfo {
 	public String _face;
 	public String _name;
 	public String _defaults;
+	public boolean _private = false;
 	public HAbstractConfigurator _conf = null;
 	private Method _creator = null;
 	private SortedMap<String, Party> _partys = java.util.Collections.synchronizedSortedMap( new TreeMap<String, Party>() );
 
 	public HLogicInfo( String $symbol, String $face, String $name, HAbstractConfigurator $conf, Method $creator ) {
+		this( $symbol, $face, $name, $conf, $creator, false );
+	}
+	public HLogicInfo( String $symbol, String $face, String $name, HAbstractConfigurator $conf, Method $creator, boolean $private ) {
 		_symbol = $symbol;
 		_face = $face;
 		_name = $name;
 		_conf = $conf;
 		_creator = $creator;
+		_private = $private;
 		String res = "/res/" + _face + "-conf.xml";
 		if ( getClass().getResourceAsStream( res ) != null ) {
 			try {

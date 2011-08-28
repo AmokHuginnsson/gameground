@@ -157,8 +157,8 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		return null;
 	} 
 
-	public void closeParty( String $id ) {
-		_workArea.closeParty( $id );
+	public void closeParty( HAbstractLogic $logic ) {
+		_workArea.closeParty( $logic );
 	}
 	public HClient getClient() {
 		return ( _client );

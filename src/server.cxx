@@ -86,7 +86,7 @@ char const* const HServer::PROTOCOL::SEP = ":";
 char const* const HServer::PROTOCOL::SEPP = ",";
 char const* const HServer::PROTOCOL::SHUTDOWN = "shutdown";
 char const* const HServer::PROTOCOL::VERSION = "version";
-char const* const HServer::PROTOCOL::VERSION_ID = "0";
+char const* const HServer::PROTOCOL::VERSION_ID = "1";
 char const* const HServer::PROTOCOL::WARN = "warn";
 
 static const HString NULL_PASS = hash::sha1( "" );
@@ -553,7 +553,7 @@ void HServer::create_party( OClientInfo& client_, HString const& arg_ )
 						free_id( id );
 						out << "reusing old party: " << logic->get_name() << "," << logic->id() << " (" << type << ')' << endl; 
 						}
-					_out << PROTOCOL::PARTY_INFO << PROTOCOL::SEP << id << PROTOCOL::SEPP << logic->get_info() << endl;
+					_out << PROTOCOL::PARTY_INFO << PROTOCOL::SEP << logic->id() << PROTOCOL::SEPP << logic->get_info() << endl;
 					if ( ! logic->is_private() )
 						{
 						broadcast( _out << _out );
@@ -910,15 +910,36 @@ HServer::db_accessor_t HServer::db( void )
 	M_EPILOG
 	}
 
-void HServer::run( void )
+void HServer::cleanup( void )
 	{
 	M_PROLOG
 	HLogicFactory& factory( HLogicFactoryInstance::get_instance() );
-	_dispatcher.run();
 	factory.cleanup_globals();
 	_logins.clear();
-	_logics.clear();
+	for ( clients_t::iterator it( _clients.begin() ), end( _clients.end() ); it != end; )
+		{
+		clients_t::iterator del( it ++ );
+		kick_client( del->second._socket, "Server is being shutdown." );
+		}
+	flush_logics();
 	_clients.clear();
+	return;
+	M_EPILOG
+	}
+
+void HServer::run( void )
+	{
+	M_PROLOG
+	try
+		{
+		_dispatcher.run();
+		}
+	catch ( ... )
+		{
+		cleanup();
+		throw;
+		}
+	cleanup();
 	return;
 	M_EPILOG
 	}

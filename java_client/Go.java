@@ -130,7 +130,7 @@ class Go extends HAbstractLogic implements Runnable {
 			}
 		}
 		public void onExit() {
-			_app.closeParty( _id );
+			_app.closeParty( Go.this );
 		}
 		public void onGobanSize() {
 			if ( _conf.eventsIgnored() )

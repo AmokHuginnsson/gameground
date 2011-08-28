@@ -32,10 +32,27 @@ public class PartysModel implements TreeModel {
 		}
 	}
 	private Vector<TreeModelListener> treeModelListeners = new Vector<TreeModelListener>();
-	private SortedMap<String, HLogicInfo> _logics;
+	private SortedMap<String, HLogicInfo> _logics = null;
+	private int _nonPrivateLogics = 0;
 
 	public PartysModel( SortedMap<String, HLogicInfo> $logics ) {
 		_logics = $logics;
+		updateNonPrivateLogics();
+	}
+	void updateNonPrivateLogics() {
+		java.util.Set<java.util.Map.Entry<String,HLogicInfo>> entSet = _logics.entrySet();
+		java.util.Map.Entry<String,HLogicInfo> ent = null;
+		java.util.Iterator<java.util.Map.Entry<String,HLogicInfo>> it = entSet.iterator();
+		_nonPrivateLogics = 0;
+		while ( it.hasNext() ) {
+			ent = it.next();
+			if ( ent != null ) {
+				HLogicInfo li = ent.getValue();
+				if ( ! li._private ) {
+					++ _nonPrivateLogics;
+				}
+			}
+		}
 	}
 
 	//////////////// Fire events //////////////////////////////////////////////
@@ -45,6 +62,7 @@ public class PartysModel implements TreeModel {
 	 * root as path, i.e. the whole tree has changed.
 	 */
 	protected void reload() {
+		updateNonPrivateLogics();
 		int len = treeModelListeners.size();
 		TreeModelEvent e = new TreeModelEvent(this, 
 				new Object[] {new PartysModelNode()});
@@ -78,11 +96,14 @@ public class PartysModel implements TreeModel {
 			while ( it.hasNext() ) {
 				ent = it.next();
 				if ( ent != null ) {
-					if ( i == index ) {
-						child = new PartysModelNode( ent.getValue() );
-						break;
+					HLogicInfo li = ent.getValue();
+					if ( ! li._private ) {
+						if ( i == index ) {
+							child = new PartysModelNode( li );
+							break;
+						}
+						++ i;
 					}
-					++ i;
 				}
 			}
 		} else if ( level == 1 ) {
@@ -111,7 +132,7 @@ public class PartysModel implements TreeModel {
 		int childCount = 0;
 		int level = p.getLevel();
 		if ( level == 0 )
-			childCount = _logics.size();
+			childCount = _nonPrivateLogics;
 		else if ( level == 1 )
 			childCount = p._logic.getPartysCount();
 		return childCount;

@@ -130,6 +130,7 @@ protected:
 	void flush_droupouts( void );
 	HLogic::id_t create_id( void );
 	void free_id( HLogic::id_t const& );
+	void cleanup( void );
 	};
 
 int main_server( void );
