@@ -255,13 +255,15 @@ class HWorkArea extends HAbstractWorkArea {
 			String[] partys = tokens[1].split( "," );
 			for ( String id : partys ) {
 				LogicParty lp = getPartyById( id );
-				lp._party.addPlayer( p );
-				if ( ( lp._party._party == null ) && ( name.equals( _app.getName() ) ) ) {
-					System.out.println( "Adding new local party: [" + lp._party + "]." );
-					lp._party._party = lp._logicInfo.create( _app, id, lp._party._configuration );
-					java.awt.Component c = lp._party._party.getGUI();
-					_gui._tabs.addTab( lp._party.toString(), c );
-					_gui._tabs.setSelectedComponent( c );
+				if ( lp != null ) {
+					lp._party.addPlayer( p );
+					if ( ( lp._party._party == null ) && ( name.equals( _app.getName() ) ) ) {
+						System.out.println( "Adding new local party: [" + lp._party + "]." );
+						lp._party._party = lp._logicInfo.create( _app, id, lp._party._configuration );
+						java.awt.Component c = lp._party._party.getGUI();
+						_gui._tabs.addTab( lp._party.toString(), c );
+						_gui._tabs.setSelectedComponent( c );
+					}
 				}
 			}
 		}
