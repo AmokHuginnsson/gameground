@@ -76,6 +76,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	}
 	void showLoginScreen() {
 		if ( _client != null ) {
+			Chat.clearAll();
 			_client.disconnect();
 			_client = null;
 		}

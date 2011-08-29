@@ -66,16 +66,10 @@ class Chat extends HAbstractLogic {
 	public HGUILocal _gui;
 //--------------------------------------------//
 	public Chat( GameGround $applet, String $configuration ) throws Exception {
-		super( $applet, "0", $configuration );
+		super( $applet, "0", "" );
 		init( _gui = new HGUILocal( LABEL ) );
 		_handlers.put( PROTOCOL.PLAYERQUIT, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
-		String[] info = $configuration.split( ",", 4 );
-		if ( info.length == 4 ) {
-			handleMessage( "User: " + ( _interlocutor = info[0] ) );
-			handleMessage( "Full name: " + Sec.unescape( info[1] ) );
-			handleMessage( "Description:\n" + Sec.unescape( info[2] ) );
-		} else
-			handleMessage( "User `" + ( _interlocutor = info[0] ) + "' is not registered yet." );
+		updateUserInfo( $configuration );
 	}
 	synchronized public void cleanup() {
 	}
@@ -90,6 +84,18 @@ class Chat extends HAbstractLogic {
 		}
 		_lineBuffer.clear();
 	}
+	synchronized void updateUserInfo( String $info ) {
+		if ( ! $info.equals( _configuration ) ) {
+			String[] info = $info.split( ",", 4 );
+			if ( info.length == 4 ) {
+				handleMessage( "User: " + ( _interlocutor = info[0] ) );
+				handleMessage( "Full name: " + Sec.unescape( info[1] ) );
+				handleMessage( "Description:\n" + Sec.unescape( info[2] ) );
+			} else
+				handleMessage( "User `" + ( _interlocutor = info[0] ) + "' is not registered yet." );
+			_configuration = $info;
+		}
+	}
 	synchronized public static Chat showUserInfo( GameGround $app, String $info ) {
 		System.out.println( "chat info: " + $info );
 		String[] tokens = $info.split( ",", 2 );
@@ -103,7 +109,8 @@ class Chat extends HAbstractLogic {
 				System.exit( 1 );
 			}
 			_chats.put( tokens[0], chat );
-		}
+		} else
+			chat.updateUserInfo( $info );
 		return ( chat );
 	}
 	synchronized static HAbstractLogic create( GameGround $app, String $id, String $configuration ) {
@@ -125,6 +132,9 @@ class Chat extends HAbstractLogic {
 			System.exit( 1 );
 		}
 		return ( true );
+	}
+	public static void clearAll() {
+		_chats.clear();
 	}
 }
 
