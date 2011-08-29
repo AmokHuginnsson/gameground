@@ -52,7 +52,6 @@ class Chat extends HAbstractLogic {
 			_app.closeParty( Chat.this );
 			_online = false;
 			_id = "0";
-			_chats.put( _interlocutor, Chat.this );
 		}
 	}
 //--------------------------------------------//
@@ -120,7 +119,6 @@ class Chat extends HAbstractLogic {
 		chat = _chats.get( name );
 		if ( chat == null )
 			chat = showUserInfo( $app, name );
-		_chats.remove( name );
 		chat.setId( $id );
 		return ( chat );
 	}
