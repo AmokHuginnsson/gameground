@@ -165,13 +165,20 @@ void HServer::handler_message( int fileDescriptor_ )
 	HString command;
 	clients_t::iterator clientIt;
 	HSocket::ptr_t client = _socket.get_client( fileDescriptor_ );
-	bool kick( false );
-	try
+	if ( ( clientIt = _clients.find( fileDescriptor_ ) ) == _clients.end() )
+		kick_client( client );
+	else
 		{
-		int long nRead( 0 );
-		if ( ( clientIt = _clients.find( fileDescriptor_ ) ) == _clients.end() )
-			kick_client( client );
-		else if ( ( nRead = client->read_until( message ) ) > 0 )
+		int long nRead( -1 );
+		try
+			{
+			nRead = client->read_until( message );
+			}
+		catch ( HOpenSSLException& )
+			{
+			drop_client( &clientIt->second );
+			}
+		if ( nRead > 0 )
 			{
 			if ( clientIt->second._login.is_empty() )
 				out << "`unnamed'";
@@ -199,14 +206,6 @@ void HServer::handler_message( int fileDescriptor_ )
 			kick_client( client, "" );
 		/* else nRead < 0 => REPEAT */
 		}
-	catch ( HOpenSSLException& )
-		{
-		kick = true;
-		}
-	if ( kick && !! client
-			&& ( _dropouts.is_empty()
-				|| ! ( find( _dropouts.begin(), _dropouts.end(), &clientIt->second ) != _dropouts.end() ) ) )
-		kick_client( client );
 	if ( ! _dropouts.is_empty() )
 		flush_droupouts();
 	return;
@@ -218,12 +217,12 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& client_, char const* con
 	M_PROLOG
 	M_ASSERT( !! client_ );
 	int fileDescriptor = client_->get_file_descriptor();
-	if ( reason_ && reason_[0] )
+	clients_t::iterator clientIt( _clients.find( fileDescriptor ) );
+	M_ASSERT( clientIt != _clients.end() );
+	if ( clientIt->second._valid && reason_ && reason_[0] )
 		*client_ << PROTOCOL::KCK << PROTOCOL::SEP << reason_ << endl;
 	_socket.shutdown_client( fileDescriptor );
 	_dispatcher.unregister_file_descriptor_handler( fileDescriptor );
-	clients_t::iterator clientIt = _clients.find( fileDescriptor );
-	M_ASSERT( clientIt != _clients.end() );
 	clientIt->second._valid = false;
 	remove_client_from_all_logics( clientIt->second );
 	out << "client ";

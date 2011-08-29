@@ -70,9 +70,12 @@ class Chat extends HAbstractLogic {
 		init( _gui = new HGUILocal( LABEL ) );
 		_handlers.put( PROTOCOL.PLAYERQUIT, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
 		String[] info = $configuration.split( ",", 4 );
-		handleMessage( "User: " + ( _interlocutor = info[0] ) );
-		handleMessage( "Full name: " + Sec.unescape( info[1] ) );
-		handleMessage( "Description:\n" + Sec.unescape( info[2] ) );
+		if ( info.length == 4 ) {
+			handleMessage( "User: " + ( _interlocutor = info[0] ) );
+			handleMessage( "Full name: " + Sec.unescape( info[1] ) );
+			handleMessage( "Description:\n" + Sec.unescape( info[2] ) );
+		} else
+			handleMessage( "User `" + ( _interlocutor = info[0] ) + "' is not registered yet." );
 	}
 	synchronized public void cleanup() {
 	}
@@ -108,7 +111,8 @@ class Chat extends HAbstractLogic {
 		String names[] = $configuration.split( ":", 2 );
 		String name = names[0].equals( $app.getName() ) ? names[1] : names[0];
 		chat = _chats.get( name );
-		assert chat != null : "chat should already exist";
+		if ( chat == null )
+			chat = showUserInfo( $app, name );
 		_chats.remove( name );
 		chat.setId( $id );
 		return ( chat );

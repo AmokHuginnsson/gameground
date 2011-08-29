@@ -84,7 +84,8 @@ void HChat::do_kick( OClientInfo* clientInfo_ )
 	{
 	M_PROLOG
 	HLock l( _mutex );
-	*clientInfo_->_socket << HServer::PROTOCOL::PARTY_CLOSE << PROTOCOL::SEP << _id << endl;
+	if ( clientInfo_->_valid )
+		*clientInfo_->_socket << HServer::PROTOCOL::PARTY_CLOSE << PROTOCOL::SEP << _id << endl;
 	_clients.erase( clientInfo_ );
 	if ( _clients.is_empty() )
 		_chats_.erase( _key );
