@@ -41,25 +41,35 @@ namespace gameground
 
 yaal::hcore::HString escape( yaal::hcore::HString const& evil_ )
 	{
-	HString str( evil_.get_length() * 2, true );
-	str = evil_;
-	str.replace( "\"", "\\Q" ).replace( "'", "\\A" );
+	M_PROLOG
+	HString str;
+	if ( ! evil_.is_empty() )
+		{
+		str.hs_realloc( evil_.get_length() * 2 );
+		str = evil_;
+		str.replace( "\"", "\\Q" ).replace( "'", "\\A" );
+		}
 	return ( str );
+	M_EPILOG
 	}
 
 yaal::hcore::HString unescape( yaal::hcore::HString const& safe_ )
 	{
+	M_PROLOG
 	HString str( safe_ );
 	str.replace( "\\A", "'" ).replace( "\\Q", "\"" );
 	return ( str );
+	M_EPILOG
 	}
 
 bool is_sha1( yaal::hcore::HString const& str_ )
 	{
+	M_PROLOG
 	int len( static_cast<int>( str_.get_length() ) );
 	char const SHA1chars[] = "01234567890aAbBcCdDeEfF";
 	int idx( static_cast<int>( str_.find_other_than( SHA1chars ) ) );
 	return ( ( len == 40 ) && ( idx == HString::npos ) );
+	M_EPILOG
 	}
 
 }
