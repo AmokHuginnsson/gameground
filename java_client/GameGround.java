@@ -78,9 +78,13 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 			 * Additionally give 4 minutes to compensate eventual CodeStation clock skew.
 			 */
 			long freshLastModification = fresh.openConnection().getLastModified() - 5 * 60 * 1000;
+
+			java.text.SimpleDateFormat timeFormat = new java.text.SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
+			System.out.println( "freshLastModification: " + timeFormat.format( freshLastModification ) );
+			System.out.println( "selfLastModification: " + timeFormat.format( selfLastModification ) );
 			if ( freshLastModification > selfLastModification ) {
 				javax.swing.JOptionPane.showMessageDialog( _frame,
-						"The client you are running is outdated.\n"
+						"The client you are running is outdated by " + DurationFormat.toString( freshLastModification - selfLastModification ) + ".\n"
 						+ "Please do the following:\n"
 						+ "1. Close this client.\n"
 						+ "2. Clear all Java related caches.\n"
