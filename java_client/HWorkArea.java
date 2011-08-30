@@ -260,9 +260,10 @@ class HWorkArea extends HAbstractWorkArea {
 					if ( ( lp._party._party == null ) && ( name.equals( _app.getName() ) ) ) {
 						System.out.println( "Adding new local party: [" + lp._party + "]." );
 						lp._party._party = lp._logicInfo.create( _app, id, lp._party._configuration );
-						java.awt.Component c = lp._party._party.getGUI();
-						_gui._tabs.addTab( lp._party.toString(), c );
-						_gui._tabs.setSelectedComponent( c );
+						HGUIface gui = lp._party._party.getGUI();
+						_gui._tabs.addTab( lp._party.toString(), gui );
+						_gui._tabs.setSelectedComponent( gui );
+						gui.onShow();
 					}
 				}
 			}

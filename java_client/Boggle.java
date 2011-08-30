@@ -86,6 +86,7 @@ class Boggle extends HAbstractLogic implements Runnable {
 		public JLabel _letter32;
 		public JLabel _letter33;
 		public JLabel[] _letters = new JLabel[16];
+		boolean _initializedOnce = false;
 		final String[] _header = { "Player", "Score", "Last" };
 		public HGUILocal( String $resource ) {
 			super( $resource );
@@ -145,6 +146,9 @@ class Boggle extends HAbstractLogic implements Runnable {
 			_players.setShowGrid( false );
 			_players.setAutoCreateRowSorter( true );
 			Boggle.this._players.clear();
+		}
+		public void onShow() {
+			_wordInput.requestFocusInWindow();
 		}
 		public JTextPane getLogPad() {
 			return ( _logPad );

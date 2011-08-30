@@ -70,6 +70,7 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 			_logics.addListSelectionListener( this );
 			_name.getDocument().addDocumentListener( this );
 			setVisible( true );
+			_logics.requestFocusInWindow();
 		} catch ( java.lang.Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );

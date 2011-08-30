@@ -80,6 +80,7 @@ abstract class HGUIface extends JPanel {
 	}
 	public abstract void updateTagLib( XUL $se );
 	public void mapMembers( XUL $se ) {}
+	public void onShow() {}
 	public abstract JTextPane getLogPad();
 	public Color color( int $color ) { return ( color( $color, null ) ); }
 	public Color color( int $color, java.awt.Component $on ) {
