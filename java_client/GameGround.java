@@ -70,7 +70,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 			showLoginScreen();
 			resize( res.getRootElement().getAttribute( "size" ).getValue().split( ",", 2 ) );
 			System.out.println( "Title: " + _frameName );
-			URL url = GameGround.class.getResource( "/META-INF/MANIFEST.MF" );
+			URL url = GameGround.class.getResource( "/class.list" );
 			long selfLastModification = url.openConnection().getLastModified();
 			URL fresh = new URL( "http://codestation.org/jar/gameground.jar" );
 			/* 
@@ -85,6 +85,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 			if ( freshLastModification > selfLastModification ) {
 				javax.swing.JOptionPane.showMessageDialog( _frame,
 						"The client you are running is outdated by " + DurationFormat.toString( freshLastModification - selfLastModification ) + ".\n"
+						+ "(Latest version is from: " + timeFormat.format( freshLastModification ) + ")\n"
 						+ "Please do the following:\n"
 						+ "1. Close this client.\n"
 						+ "2. Clear all Java related caches.\n"
