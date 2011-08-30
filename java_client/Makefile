@@ -54,8 +54,11 @@ dist:
 
 deploy: clean $(TARGET)
 	@echo "Enter password for your keystore:" ; \
-	stty -echo; read PASS; stty echo; jarsigner -keystore codestation.jks ./build/gameground.jar -keypass $${PASS} codestation ; \
-	scp build/gameground.jar codestation.org:src/cellar/web/data/codestation/jar/
+	stty -echo; read PASS; stty echo; echo "Signing jar ... " ; \
+	jarsigner -keystore codestation.jks -storepass "$${PASS}" ./build/gameground.jar codestation ; \
+	echo "Uploading jar ... " ; \
+	scp build/gameground.jar codestation.org:src/cellar/web/data/codestation/jar/ ; \
+	echo "Done."
 
 clean:
 	cln .
