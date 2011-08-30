@@ -346,26 +346,50 @@ void HBoggle::on_end_round( void )
 		{
 		words_t::iterator del( it );
 		++ it;
-		int appearance = static_cast<int>( del->second->size() );
-		if ( appearance > 1 )
+		int appearance( static_cast<int>( del->second->size() ) );
+		int length( static_cast<int>( del->first.get_length() ) );
+		if ( _scoring == SCORING::LONGEST_WORDS )
 			{
-			out << appearance << " people found: " << del->first << endl;
-			_words.erase( del );
-			continue;
-			}
-		int length = static_cast<int>( del->first.get_length() );
-		if ( ( scores[ length - 1 ] > 0 ) && word_is_good( del->first, length ) )
-			{
-			if ( length > longestLength )
+			if ( ( scores[ length - 1 ] > 0 ) && word_is_good( del->first, length ) )
 				{
-				longest.clear();
-				longestLength = length;
+				if ( length > longestLength )
+					{
+					longest.clear();
+					longestLength = length;
+					}
+				if ( appearance > 1 )
+					{
+					out << appearance << " people found: " << del->first << endl;
+					_words.erase( del );
+					continue;
+					}
+				if ( length == longestLength )
+					longest.push_back( del );
 				}
-			if ( length == longestLength )
-				longest.push_back( del );
+			else
+				_words.erase( del );
 			}
 		else
-			_words.erase( del );
+			{
+			if ( appearance > 1 )
+				{
+				out << appearance << " people found: " << del->first << endl;
+				_words.erase( del );
+				continue;
+				}
+			if ( ( scores[ length - 1 ] > 0 ) && word_is_good( del->first, length ) )
+				{
+				if ( length > longestLength )
+					{
+					longest.clear();
+					longestLength = length;
+					}
+				if ( length == longestLength )
+					longest.push_back( del );
+				}
+			else
+				_words.erase( del );
+			}
 		}
 	for ( words_t::iterator it = _words.begin(); it != _words.end(); ++ it )
 		{
