@@ -755,6 +755,8 @@ void HServer::handle_get_account( OClientInfo& client_, HString const& login_ )
 				<< ( description ? unescape( *description ) : "" ) << PROTOCOL::SEPP
 				<< ( email ? unescape( *email ) : "" ) << endl;
 			}
+		else
+			SENDF( *client_._socket ) << PROTOCOL::ACCOUNT << PROTOCOL::SEP << login << endl;
 		}
 	return;
 	M_EPILOG

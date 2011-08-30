@@ -19,7 +19,7 @@ build/res:
 build/res/%: res/%
 	cp -au $(<) $(@)
 
-$(ENVIRON): jdom.jar swixml.jar
+$(ENVIRON): jdom.jar swixml.jar commons-cli-1.1.jar forms-1.1.0.jar
 	mkdir -p build ; \
 	cd build; \
 	/bin/rm -rf *; \
