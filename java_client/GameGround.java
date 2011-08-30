@@ -9,6 +9,7 @@ import java.awt.Dimension;
 import javax.swing.JApplet;
 import org.swixml.SwingEngine;
 import org.swixml.TagLibrary;
+import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Executors;
@@ -69,6 +70,23 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 			showLoginScreen();
 			resize( res.getRootElement().getAttribute( "size" ).getValue().split( ",", 2 ) );
 			System.out.println( "Title: " + _frameName );
+			URL url = GameGround.class.getResource( "/META-INF/MANIFEST.MF" );
+			long selfLastModification = url.openConnection().getLastModified();
+			URL fresh = new URL( "http://codestation.org/jar/gameground.jar" );
+			/* 
+			 * Give one minute to upload new GameGround client version to the server.
+			 * Additionally give 4 minutes to compensate eventual CodeStation clock skew.
+			 */
+			long freshLastModification = fresh.openConnection().getLastModified() - 5 * 60 * 1000;
+			if ( freshLastModification > selfLastModification ) {
+				javax.swing.JOptionPane.showMessageDialog( _frame,
+						"The client you are running is outdated.\n"
+						+ "Please do the following:\n"
+						+ "1. Close this client.\n"
+						+ "2. Clear all Java related caches.\n"
+						+ "3. Try to open this client again.",
+						"GameGround - warning ...", javax.swing.JOptionPane.WARNING_MESSAGE );
+			}
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );

@@ -52,6 +52,10 @@ dist:
 	@$(MAKE) clean
 	@mv gameground.jar.keep gameground.jar
 
+deploy: clean $(TARGET)
+	jarsigner -keystore codestation.jks ./build/gameground.jar codestation; \
+	scp build/gameground.jar codestation.org:src/cellar/web/data/codestation/jar/
+
 clean:
 	cln .
 	/bin/rm -rf build *.class
