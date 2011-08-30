@@ -48,7 +48,7 @@ class HBrowser extends HAbstractLogic {
 			java.awt.event.MouseListener usersML = new java.awt.event.MouseAdapter() {
 				public void mousePressed( java.awt.event.MouseEvent e ) {
 					int selectedIndex = _people.getSelectedIndex();
-					if ( ! _people.getCellBounds( selectedIndex, selectedIndex ).contains( e.getPoint() ) )
+					if ( ( selectedIndex >= 0 ) && ! _people.getCellBounds( selectedIndex, selectedIndex ).contains( e.getPoint() ) )
 						_people.clearSelection();
 					int clicks = e.getClickCount();
 					if ( clicks == 2 ) {
@@ -64,7 +64,6 @@ class HBrowser extends HAbstractLogic {
 			_games.setModel( _partysModel );
 			_games.addMouseListener( partysML );
 			_people.addMouseListener( usersML );
-			_msg.requestFocusInWindow();
 		}
 		public JTextPane getLogPad() {
 			return ( _logPad );
@@ -154,6 +153,9 @@ class HBrowser extends HAbstractLogic {
 		((PartysModel)_gui._games.getModel()).reload();
 		if ( path != null )
 			_gui._games.setSelectionPath( path );
+		else
+			_gui._games.setSelectionRow( 0 );
+		_gui._msg.requestFocusInWindow();
 	}
 	public void cleanup() {
 		reload();
