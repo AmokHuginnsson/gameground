@@ -53,10 +53,12 @@ dist:
 	@mv gameground.jar.keep gameground.jar
 
 deploy: clean $(TARGET)
-	jarsigner -keystore codestation.jks ./build/gameground.jar codestation; \
+	@echo "Enter password for your keystore:" ; \
+	stty -echo; read PASS; stty echo; jarsigner -keystore codestation.jks ./build/gameground.jar -keypass $${PASS} codestation ; \
 	scp build/gameground.jar codestation.org:src/cellar/web/data/codestation/jar/
 
 clean:
 	cln .
 	/bin/rm -rf build *.class
 
+ala:
