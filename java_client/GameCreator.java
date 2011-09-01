@@ -6,11 +6,16 @@ import javax.swing.JButton;
 import javax.swing.JTextField;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.SwingUtilities;
+import java.awt.Component;
+import java.awt.event.FocusEvent;
 import javax.swing.Action;
+import javax.swing.JFrame;
 import javax.swing.AbstractAction;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.AbstractListModel;
+import javax.swing.ListModel;
 import java.awt.event.ActionEvent;
 import org.swixml.XDialog;
 import org.swixml.SwingEngine;
@@ -26,7 +31,8 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 	public JList _logics;
 	public JTextField _name;
 	public JButton _ok;
-	public GameCreator( GameGround $app, final SortedMap<String, HLogicInfo> $logics ) {
+	public GameCreator( GameGround $app, final SortedMap<String, HLogicInfo> $logics, String $logic ) {
+		super();
 		_app = $app;
 		try {
 			new SwingEngine( this ).insert( AppletJDOMHelper.loadResource( "/res/creator.xml", this ), this );
@@ -69,12 +75,34 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 			} );
 			_logics.addListSelectionListener( this );
 			_name.getDocument().addDocumentListener( this );
+			getRootPane().setDefaultButton( _ok );
+			if ( $logic != null ) {
+				ListModel lm = _logics.getModel();
+				int logicsCount = lm.getSize();
+				for ( int i = 0; i < logicsCount; ++ i ) {
+					if ( lm.getElementAt( i ).toString().equals( $logic ) ) {
+						_logics.setSelectedIndex( i );
+						_name.setText( _app.getName() + "'s room ..." );
+						changeFocus( _name );
+						_name.selectAll();
+						break;
+					}
+				}
+			} else
+				changeFocus( _logics );
 			setVisible( true );
-			_logics.requestFocusInWindow();
 		} catch ( java.lang.Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );
 		}
+	}
+	private void changeFocus( final Component target ) {
+		SwingUtilities.invokeLater( new Runnable() {
+			public void run() {
+				target.dispatchEvent(
+					new FocusEvent( target, FocusEvent.FOCUS_GAINED ) );
+			}
+		} );
 	}
 	public void changedUpdate( DocumentEvent e ) {
 		setEnabledOk();

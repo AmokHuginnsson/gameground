@@ -1,6 +1,7 @@
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import javax.swing.Action;
@@ -37,16 +38,26 @@ class HBrowser extends HAbstractLogic {
 			_games.getSelectionModel().setSelectionMode( TreeSelectionModel.SINGLE_TREE_SELECTION );
 			_games.addTreeSelectionListener( this );
 			java.awt.event.MouseListener partysML = new java.awt.event.MouseAdapter() {
-				public void mousePressed( java.awt.event.MouseEvent e ) {
+				public void mousePressed( MouseEvent e ) {
 					if ( e.getClickCount() == 2 ) {
-						PartysModel.PartysModelNode node = (PartysModel.PartysModelNode)_games.getLastSelectedPathComponent();
-						if ( _join.isEnabled() )
-							onJoin();
+						int button = e.getButton();
+						if ( button == MouseEvent.BUTTON1 ) {
+							if ( _join.isEnabled() )
+								onJoin();
+						} else {
+							TreePath path = _games.getPathForLocation( e.getX(), e.getY() );
+							if ( path != null ) {
+								PartysModel.PartysModelNode node = (PartysModel.PartysModelNode)path.getLastPathComponent();
+								if ( ( node != null ) && ( node.getLevel() == 1 ) ) {
+									onCreate( node._logic._name );
+								}
+							}
+						}
 					}
 				}
 			};
 			java.awt.event.MouseListener usersML = new java.awt.event.MouseAdapter() {
-				public void mousePressed( java.awt.event.MouseEvent e ) {
+				public void mousePressed( MouseEvent e ) {
 					int selectedIndex = _people.getSelectedIndex();
 					if ( ( selectedIndex >= 0 ) && ! _people.getCellBounds( selectedIndex, selectedIndex ).contains( e.getPoint() ) )
 						_people.clearSelection();
@@ -68,11 +79,14 @@ class HBrowser extends HAbstractLogic {
 		public JTextPane getLogPad() {
 			return ( _logPad );
 		}
-		public void onCreate() {
-			GameCreator gc = new GameCreator( _app, _logics );
+		public void onCreate( String $logic ) {
+			GameCreator gc = new GameCreator( _app, _logics, $logic );
 			if ( gc.confirmed() ) {
 				_client.println( "create:" + gc.getConfiguration() );
 			}
+		}
+		public void onCreate() {
+			onCreate( null );
 		}
 		public void onJoin() {
 			PartysModel.PartysModelNode party = (PartysModel.PartysModelNode)_games.getLastSelectedPathComponent();
