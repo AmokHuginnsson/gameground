@@ -74,14 +74,18 @@ public class GoGoban extends Goban {
 		return ( false );
 	}
 	void removeDead() {
-		for ( int i = 0; i < _size; i++ ) {
-			for ( int j = 0; j < _size; j++ ) {
-				if ( getStone( i, j ) != STONE.NONE ) {
-					if ( Character.isUpperCase( getStone( i, j ) ) )
-						setStone( i, j, STONE.NONE );
-					else
-						setStone( i, j, (byte)Character.toLowerCase( getStone( i, j ) ) );
-				}
+		for ( int i = 0; i < ( _size * _size ); ++ i ) {
+			if ( _stones[i] != STONE.NONE ) {
+				if ( Character.isUpperCase( _stones[ i ] ) )
+					_stones[ i ] = STONE.NONE;
+			}
+		}
+	}
+	void resetAlive() {
+		for ( int i = 0; i < ( _size * _size ); ++ i ) {
+			if ( _stones[i] != STONE.NONE ) {
+				if ( Character.isUpperCase( _stones[ i ] ) )
+					_stones[ i ] = (byte)Character.toLowerCase( _stones[ i ] );
 			}
 		}
 	}
@@ -90,18 +94,28 @@ public class GoGoban extends Goban {
 		byte foeStone = opponent( stone );
 		if ( ( x > 0 ) && ( getStone( x - 1, y ) == foeStone ) && ( ! haveLiberties( x - 1, y, foeStone ) ) ) {
 			killed = true;
+			removeDead();
+		} else {
+			resetAlive();
 		}
 		if ( ( x < ( _size - 1 ) ) && ( getStone( x + 1, y ) == foeStone ) && ( ! haveLiberties( x + 1, y, foeStone ) ) ) {
 			killed = true;
+			removeDead();
+		} else {
+			resetAlive();
 		}
 		if ( ( y > 0 ) && ( getStone( x, y - 1 ) == foeStone ) && ( ! haveLiberties( x, y - 1, foeStone ) ) ) {
 			killed = true;
+			removeDead();
+		} else {
+			resetAlive();
 		}
 		if ( ( y < ( _size - 1 ) ) && ( getStone( x, y + 1 ) == foeStone ) && ( ! haveLiberties( x, y + 1, foeStone ) ) ) {
 			killed = true;
-		}
-		if ( killed )
 			removeDead();
+		} else {
+			resetAlive();
+		}
 		return ( killed );
 	}
 	boolean isKo() {
@@ -141,5 +155,26 @@ public class GoGoban extends Goban {
 		if ( ( _logic != null ) && _logic.isMyMove() && ! breakTheRules( _cursorX, _cursorY, _logic.stone() ) )
 			drawStone( _cursorX, _cursorY, _logic.stone(), true, g );
 	}
+/*
+	void dump( byte[] $stones ) {
+		int i = 0;
+		int size = Math.min( (int)Math.sqrt( $stones.length ), _size );
+		System.out.print( "+" );
+		for ( int c = 0; c < size; ++ c )
+			System.out.print( "-" );
+		System.out.println( "+" );
+		for ( int r = 0; r < size; ++ r ) {
+			System.out.print( "|" );
+			for ( int c = 0; c < size; ++ c, ++ i ) {
+				System.out.print( (char)$stones[i] );
+			}
+			System.out.println( "|" );
+		}
+		System.out.print( "+" );
+		for ( int c = 0; c < size; ++ c )
+			System.out.print( "-" );
+		System.out.println( "+" );
+	}
+*/
 }
 
