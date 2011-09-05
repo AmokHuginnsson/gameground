@@ -14,12 +14,12 @@ public class GomokuGoban extends Goban {
 	}
 	public void mouseClicked( MouseEvent $event ) {
 	}
-	boolean breakTheRules( int x, int y, char stone ) {
+	boolean breakTheRules( int x, int y, byte stone ) {
 		boolean invalid = false;
 		return ( invalid );
 	}
 	void drawByLogic( Graphics g ) {
-		if ( ( _logic != null ) && _logic.isMyMove() && ! breakTheRules( _cursorX, _cursorY, _stone ) )
+		if ( ( _logic != null ) && _logic.isMyMove() && ! breakTheRules( _cursorX, _cursorY, _logic.stone() ) )
 			drawStone( _cursorX, _cursorY, _logic.stone(), true, g );
 	}
 }

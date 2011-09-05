@@ -60,13 +60,13 @@ class Go extends HAbstractLogic implements Runnable {
 		public static final int NORMAL = 19;
 	}
 	public static final class STONE extends Goban.STONE {
-		public static final char MARK = 'm';
-		public static final char DEAD_BLACK = 's';
-		public static final char DEAD_WHITE = 't';
-		public static final char TERITORY_BLACK = 'p';
-		public static final char TERITORY_WHITE = 'q';
-		public static final char DAME = 'x';
-		public static final char WAIT = 'Z';
+		public static final byte MARK = 'm';
+		public static final byte DEAD_BLACK = 's';
+		public static final byte DEAD_WHITE = 't';
+		public static final byte TERITORY_BLACK = 'p';
+		public static final byte TERITORY_WHITE = 'q';
+		public static final byte DAME = 'x';
+		public static final byte WAIT = 'Z';
 	}
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
@@ -173,14 +173,14 @@ class Go extends HAbstractLogic implements Runnable {
 		public void onBlack() {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
-					+ ( ( _stone == Go.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + STONE.BLACK : PROTOCOL.GETUP ) );
+					+ ( ( _stone == Go.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + (char)STONE.BLACK : PROTOCOL.GETUP ) );
 			_blackSit.setEnabled( _stone != Go.STONE.NONE );
 			_whiteSit.setEnabled( _stone != Go.STONE.NONE );
 		}
 		public void onWhite() {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
-					+ ( ( _stone == Go.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + STONE.WHITE : PROTOCOL.GETUP ) );
+					+ ( ( _stone == Go.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + (char)STONE.WHITE : PROTOCOL.GETUP ) );
 			_blackSit.setEnabled( _stone != Go.STONE.NONE );
 			_whiteSit.setEnabled( _stone != Go.STONE.NONE );
 		}
@@ -195,13 +195,13 @@ class Go extends HAbstractLogic implements Runnable {
 	public static final long serialVersionUID = 17l;
 	public static final String LABEL = "go";
 	public HGUILocal _gui;
-	private char _stone = STONE.NONE;
-	private char _toMove = STONE.NONE;
+	private byte _stone = STONE.NONE;
+	private byte _toMove = STONE.NONE;
 	private long _start = 0;
 	private boolean _admin = false;
 	private int _move = 0;
 	private String _stones = null;
-	private SortedMap<Character,GoPlayer> _contestants = java.util.Collections.synchronizedSortedMap( new TreeMap<Character,GoPlayer>() );
+	private SortedMap<Byte, GoPlayer> _contestants = java.util.Collections.synchronizedSortedMap( new TreeMap<Byte, GoPlayer>() );
 //--------------------------------------------//
 	public Go( GameGround $applet, String $id, String $configuration ) throws Exception {
 		super( $applet, $id, $configuration );
@@ -224,7 +224,7 @@ class Go extends HAbstractLogic implements Runnable {
 		black._timeLeftLabel = _gui._blackTimeLeft;
 		black._byoyomi = _gui._blackByoYomiLeft;
 		black._sit = _gui._blackSit;
-		_contestants.put( new Character( STONE.BLACK ), black );
+		_contestants.put( STONE.BLACK, black );
 		GoPlayer white = new GoPlayer();
 		white._name = _gui._whiteName;
 		white._captures = _gui._whiteCaptures;
@@ -232,10 +232,10 @@ class Go extends HAbstractLogic implements Runnable {
 		white._timeLeftLabel = _gui._whiteTimeLeft;
 		white._byoyomi = _gui._whiteByoYomiLeft;
 		white._sit = _gui._whiteSit;
-		_contestants.put( new Character( STONE.WHITE ), white );
+		_contestants.put( STONE.WHITE, white );
 		/* Was in init(). */
-		_contestants.get( new Character( STONE.BLACK ) ).clear();
-		_contestants.get( new Character( STONE.WHITE ) ).clear();
+		_contestants.get( STONE.BLACK ).clear();
+		_contestants.get( STONE.WHITE ).clear();
 		_stone = STONE.NONE;
 		_toMove = STONE.NONE;
 		_admin = false;
@@ -272,8 +272,8 @@ class Go extends HAbstractLogic implements Runnable {
 	}
 	void handlerContestant( String $command ) {
 		String[] tokens = $command.split( ",", 6 );
-		char stone = STONE.NONE;
-		GoPlayer contestant = _contestants.get( new Character( stone = tokens[ 0 ].charAt( 0 ) ) );
+		byte stone = STONE.NONE;
+		GoPlayer contestant = _contestants.get( ( stone = (byte)tokens[ 0 ].charAt( 0 ) ) );
 		contestant._name.setText( tokens[ 1 ] );
 		contestant._captures.setText( tokens[ 2 ] );
 		contestant._score.setText( tokens[ 3 ] );
@@ -283,7 +283,7 @@ class Go extends HAbstractLogic implements Runnable {
 		if ( Integer.parseInt( tokens[ 5 ] ) >= 0 )
 			contestant._byoyomi.setText( tokens[ 5 ] );
 		if ( tokens[ 1 ].equals( _app.getName() ) ) {
-			_gui._board.setStone( _stone = stone );
+			_stone = stone;
 			contestant._sit.setText( HGUILocal.GETUP );
 			contestant._sit.setEnabled( true );
 			GoPlayer foe = _contestants.get( _gui._board.opponent( _stone ) );
@@ -293,7 +293,7 @@ class Go extends HAbstractLogic implements Runnable {
 				contestant._sit.setText( HGUILocal.SIT );
 				GoPlayer foe = _contestants.get( _gui._board.opponent( _stone ) );
 				foe._sit.setEnabled( "".equals( foe._name.getText() ) );
-				_gui._board.setStone( _stone = STONE.NONE );
+				_stone = STONE.NONE;
 				if ( _gui._toolTip != null ) {
 					_gui._pass.setText( _gui._passText );
 					_gui._pass.setToolTipText( _gui._toolTip );
@@ -306,7 +306,7 @@ class Go extends HAbstractLogic implements Runnable {
 	void handlerStone( String $command ) {
 	}
 	void handlerToMove( String $command ) {
-		_toMove = $command.charAt( 0 );
+		_toMove = (byte)$command.charAt( 0 );
 		if ( ( _toMove == STONE.MARK ) && ( _gui._passText.equals( _gui._pass.getText() ) ) )
 			handlerMark();
 		else if ( _toMove != STONE.MARK ) {
@@ -326,7 +326,7 @@ class Go extends HAbstractLogic implements Runnable {
 		}
 	}
 	void handlerMark() {
-		_gui._board.setStones( _stones.getBytes(), true );
+		_gui._board.setStones( _stones.getBytes() );
 		_gui._toMove.setText( STONE.NONE_NAME );
 		_gui._pass.setText( "Accept" );
 		_gui._pass.setEnabled( true );
@@ -343,13 +343,13 @@ class Go extends HAbstractLogic implements Runnable {
 	public boolean isMyMove() {
 		return ( ( _stone != STONE.NONE ) && ( _stone == _toMove ) );
 	}
-	public char stone() {
+	public byte stone() {
 		return ( _stone );
 	}
-	public char stoneDead() {
+	public byte stoneDead() {
 		return ( _stone == STONE.BLACK ? STONE.DEAD_BLACK : STONE.DEAD_WHITE );
 	}
-	public char toMove() {
+	public byte toMove() {
 		return ( _toMove );
 	}
 	public void waitToMove() {

@@ -10,10 +10,10 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 //--------------------------------------------//
 
 	public static class STONE {
-		public static final char BLACK = 'b';
-		public static final char WHITE = 'w';
-		public static final char NONE	= ' ';
-		public static final char INVALID = 'N';
+		public static final byte BLACK = 'b';
+		public static final byte WHITE = 'w';
+		public static final byte NONE	= ' ';
+		public static final byte INVALID = 'N';
 		public static final String NONE_NAME = "None";
 		public static final String BLACK_NAME = "Black";
 		public static final String WHITE_NAME = "White";
@@ -26,10 +26,10 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	int _cursorY = -1;
 	int _virtSize = 0;
 	GoImages _images = null;
-	char _stone;
-	char[] _stones = null;
+	byte[] _stones = new byte[Go.GOBAN_SIZE.NORMAL * Go.GOBAN_SIZE.NORMAL];
 //--------------------------------------------//
 	public Goban() {
+		_stones[0] = STONE.INVALID;
 		addMouseMotionListener( this );
 		addMouseListener( this );
 	}
@@ -57,14 +57,8 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		_cursorY = -1;
 		repaint();
 	}
-	public void setStone( char $stone ) {
-		_stone = $stone;
-	}
 	public void setStones( byte[] $stones ) {
-		if ( _stones == null )
-			_stones = new char[Go.GOBAN_SIZE.NORMAL * Go.GOBAN_SIZE.NORMAL]; 
-		for ( int i = 0; i < $stones.length; ++ i )
-			_stones[ i ] = (char)$stones[ i ];
+		System.arraycopy( $stones, 0, _stones, 0, $stones.length );
 	}
 	public void setImages( GoImages $images ) {
 		_images = $images;
@@ -87,8 +81,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		}
 		return ( new Dimension( size, size ) );
 	}
-	protected void paintComponent( Graphics g ) {
-		super.paintComponent( g );
+	void drawGoban( Graphics g ) {
 		int margin = _virtSize / ( _size + 4 );
 		int inside = _virtSize - 2 * margin;
 		g.drawImage( _images._background, D_MARGIN, D_MARGIN, _virtSize, _virtSize, Color.black, this );
@@ -120,7 +113,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		g.fillOval( D_MARGIN + margin + noffset, D_MARGIN + margin + noffset, hoshi, hoshi );
 		char[] label = new char[2];
 		for ( int i = 0; i < _size; ++ i ) {
-			label[ 0 ] = (char)( 'A' + i );
+			label[ 0 ] = (char)( 'A' + ( i < ( 'i' - 'a' ) ? i : i + 1 ) );
 			g.drawChars( label, 0, 1, D_MARGIN + margin + ( inside * i ) / ( _size - 1 ) - 4, D_MARGIN - 3 );
 			g.drawChars( label, 0, 1, D_MARGIN + margin + ( inside * i ) / ( _size - 1 ) - 4, D_MARGIN + _virtSize + 15 );
 			label[ 1 ] = (char)( '0' + ( ( i + 1 ) % 10 ) );
@@ -131,6 +124,10 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 			g.drawChars( label, 0, 2, D_MARGIN - 18, D_MARGIN + margin + ( inside * ( _size - 1 - i ) ) / ( _size - 1 ) + 5 );
 			g.drawChars( label, 0, 2, D_MARGIN + _virtSize + 2, D_MARGIN + margin + ( inside * ( _size - 1 - i ) ) / ( _size - 1 ) + 5 );
 		}
+	}
+	protected void paintComponent( Graphics g ) {
+		super.paintComponent( g );
+		drawGoban( g );
 		drawStones( g );
 		drawByLogic( g );
 	}
@@ -179,38 +176,26 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 					(int)( _diameter / 2 ), (int)( _diameter / 2 ), this );
 	}
 	private void drawStones( Graphics g ) {
-		if ( _stones != null ) {
+		if ( _stones[0] != STONE.INVALID ) {
 			int size = _size * _size;
 			size = ( size < _stones.length ? size : _stones.length );
 			for ( int i = 0; i < size; ++ i ) {
-				char stone = _stones[ i ];
+				byte stone = _stones[ i ];
 				if ( ( stone != STONE.NONE ) && ( stone != Go.STONE.DAME ) )
 					drawStone( i % _size, i / _size, stone, false, g );
 			}
 		}
 	}
-	void setStone( int $col, int $row, char $stone ) {
+	void setStone( int $col, int $row, byte $stone ) {
 		_stones[ $row * _size + $col ] = $stone;
 	}
-	char getStone( int $col, int $row ) {
-		char stone = STONE.INVALID;
+	byte getStone( int $col, int $row ) {
+		byte stone = STONE.INVALID;
 		if ( validCoords( $col, $row ) )
 			stone = _stones[ $row * _size + $col ];
 		return ( stone );
 	}
-	void clearGoban( boolean removeDead ) {
-		for ( int i = 0; i < _size; i++ ) {
-			for ( int j = 0; j < _size; j++ ) {
-				if ( getStone( i, j ) != STONE.NONE ) {
-					if ( removeDead && Character.isUpperCase( getStone( i, j ) ) )
-						setStone( i, j, STONE.NONE );
-					else
-						setStone( i, j, Character.toLowerCase( getStone( i, j ) ) );
-				}
-			}
-		}
-	}
-	public char opponent( char stone ) {
+	public byte opponent( byte stone ) {
 		return ( stone == STONE.WHITE ? STONE.BLACK : STONE.WHITE );
 	}
 	boolean validCoords( int x, int y ) {

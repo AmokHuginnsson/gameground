@@ -41,9 +41,9 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	}
 	public static final int GOBAN_SIZE = 15;
 	public static final class STONE extends Goban.STONE {
-		public static final char WIN_BLACK = 'p';
-		public static final char WIN_WHITE = 'q';
-		public static final char INVALID = 'N';
+		public static final byte WIN_BLACK = 'p';
+		public static final byte WIN_WHITE = 'q';
+		public static final byte INVALID = 'N';
 	}
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
@@ -111,13 +111,13 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	public static final long serialVersionUID = 17l;
 	public static final String LABEL = "gomoku";
 	public HGUILocal _gui;
-	private char _stone = STONE.NONE;
-	private char _toMove = STONE.NONE;
+	private byte _stone = STONE.NONE;
+	private byte _toMove = STONE.NONE;
 	private long _start = 0;
 	private boolean _admin = false;
 	private int _move = 0;
 	private String _stones = null;
-	private SortedMap<Character,GomokuPlayer> _contestants = java.util.Collections.synchronizedSortedMap( new TreeMap<Character,GomokuPlayer>() );
+	private SortedMap<Byte, GomokuPlayer> _contestants = java.util.Collections.synchronizedSortedMap( new TreeMap<Byte, GomokuPlayer>() );
 //--------------------------------------------//
 	public Gomoku( GameGround $applet, String $id, String $configuration ) throws Exception {
 		super( $applet, $id, $configuration );
@@ -135,16 +135,16 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		GomokuPlayer black = new GomokuPlayer();
 		black._name = _gui._blackName;
 		black._sit = _gui._blackSit;
-		_contestants.put( new Character( STONE.BLACK ), black );
+		_contestants.put( STONE.BLACK, black );
 		GomokuPlayer white = new GomokuPlayer();
 		white._name = _gui._whiteName;
 		white._sit = _gui._whiteSit;
-		_contestants.put( new Character( STONE.WHITE ), white );
+		_contestants.put( STONE.WHITE, white );
 		_gui._board.setSize( GOBAN_SIZE );
 		/* Was in init(). */
 		_client = _app.getClient();
-		_contestants.get( new Character( STONE.BLACK ) ).clear();
-		_contestants.get( new Character( STONE.WHITE ) ).clear();
+		_contestants.get( STONE.BLACK ).clear();
+		_contestants.get( STONE.WHITE ).clear();
 		_stone = STONE.NONE;
 		_toMove = STONE.NONE;
 		_admin = false;
@@ -157,11 +157,11 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	}
 	void handlerContestant( String $command ) {
 		String[] tokens = $command.split( ",", 6 );
-		char stone = STONE.NONE;
-		GomokuPlayer contestant = _contestants.get( new Character( stone = tokens[ 0 ].charAt( 0 ) ) );
+		byte stone = STONE.NONE;
+		GomokuPlayer contestant = _contestants.get( ( stone = (byte)tokens[ 0 ].charAt( 0 ) ) );
 		contestant._name.setText( tokens[ 1 ] );
 		if ( tokens[ 1 ].equals( _app.getName() ) ) {
-			_gui._board.setStone( _stone = stone );
+			_stone = stone;
 			contestant._sit.setText( HGUILocal.GETUP );
 			contestant._sit.setEnabled( true );
 			GomokuPlayer foe = _contestants.get( _gui._board.opponent( _stone ) );
@@ -171,14 +171,14 @@ class Gomoku extends HAbstractLogic implements Runnable {
 				contestant._sit.setText( HGUILocal.SIT );
 				GomokuPlayer foe = _contestants.get( _gui._board.opponent( _stone ) );
 				foe._sit.setEnabled( "".equals( foe._name.getText() ) );
-				_gui._board.setStone( _stone = STONE.NONE );
+				_stone = STONE.NONE;
 			}
 			contestant._sit.setEnabled( "".equals( tokens[ 1 ] ) && ( _stone == STONE.NONE ) );
 		}
 		_start = new Date().getTime();
 	}
 	void handlerToMove( String $command ) {
-		_toMove = $command.charAt( 0 );
+		_toMove = (byte)$command.charAt( 0 );
 		++ _move;
 		String toMove = STONE.NONE_NAME;
 		if ( _toMove == STONE.BLACK )
@@ -201,10 +201,10 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	public boolean isMyMove() {
 		return ( ( _stone != STONE.NONE ) && ( _stone == _toMove ) );
 	}
-	public char stone() {
+	public byte stone() {
 		return ( _stone );
 	}
-	public char toMove() {
+	public byte toMove() {
 		return ( _toMove );
 	}
 	public void cleanup() {
