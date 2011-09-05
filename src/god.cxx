@@ -866,22 +866,12 @@ void HGo::send_contestant( char stone )
 
 int HGo::count_stones( STONE::stone_t stone )
 	{
-	int count = 0;
-	int const size = _gobanSize * _gobanSize;
-	char const* ptr = _game.raw();
-	for ( int i = 0; i < size; ++ i )
-		if ( ptr[ i ] == stone )
-			++ count;
-	return ( count );
+	return ( static_cast<int>( count( _game.raw(), _game.raw() + _gobanSize * _gobanSize, stone ) ) );
 	}
 
 void HGo::replace_stones( STONE::stone_t which, STONE::stone_t with )
 	{
-	int const size = _gobanSize * _gobanSize;
-	char* ptr = _koGame.raw();
-	for ( int i = 0; i < size; ++ i )
-		if ( ptr[ i ] == which )
-			ptr[ i ] = with;
+	replace( _koGame.raw(), _koGame.raw() + _gobanSize * _gobanSize, which, with );
 	return;
 	}
 
