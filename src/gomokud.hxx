@@ -47,6 +47,7 @@ class HGomoku : public HLogic
 		static stone_t const WHITE;
 		};
 	static int const GOBAN_SIZE = 15;
+	static int const FIVE_IN_A_ROW = 5;
 	struct PROTOCOL : public HLogic::PROTOCOL
 		{
 		static char const* const ADMIN;
@@ -59,6 +60,7 @@ class HGomoku : public HLogic
 		static char const* const STONE;
 		static char const* const STONES;
 		static char const* const TOMOVE;
+		static char const* const FIVE_IN_A_ROW;
 		};
 protected:
 	/*{*/
@@ -84,9 +86,9 @@ protected:
 	virtual yaal::hcore::HString do_get_info() const;
 	void handler_play( OClientInfo*, yaal::hcore::HString const& );
 	void reschedule_timeout( void );
-	void put_stone( int, int, STONE::stone_t );
 	void send_goban( void );
 	char& goban( int, int );
+	char goban( int, int ) const;
 	OClientInfo*& contestant( STONE::stone_t );
 	void clear_goban( bool );
 	HGomoku::STONE::stone_t opponent( STONE::stone_t );
@@ -101,6 +103,7 @@ protected:
 	void broadcast_contestants( yaal::hcore::HString const& );
 	void ensure_coordinates_validity( int, int );
 	void revoke_scheduled_tasks( void );
+	int is_winning_stone( int, int ) const;
 	/*}*/
 private:
 	/*{*/

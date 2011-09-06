@@ -61,6 +61,7 @@ char const* const HGomoku::PROTOCOL::TOMOVE = "to_move";
 char const* const HGomoku::PROTOCOL::PUTSTONE = "put_stone";
 char const* const HGomoku::PROTOCOL::SIT = "sit";
 char const* const HGomoku::PROTOCOL::GETUP = "get_up";
+char const* const HGomoku::PROTOCOL::FIVE_IN_A_ROW = "five_in_a_row";
 static int const SECONDS_IN_MINUTE = 60;
 static int const ACCEPTED = -7;
 
@@ -130,6 +131,9 @@ void HGomoku::handler_sit( OClientInfo* clientInfo_, HString const& message_ )
 			contestant( stone ) = clientInfo_;
 			if ( ! ( contestant( STONE::BLACK ) && contestant( STONE::WHITE ) ) )
 				{
+				::memset( _game.raw(), STONE::NONE, GOBAN_SIZE * GOBAN_SIZE );
+				_game.raw()[ GOBAN_SIZE * GOBAN_SIZE ] = 0;
+				send_goban();
 				_start = 0;
 				_move = 0;
 				}
@@ -264,14 +268,6 @@ yaal::hcore::HString HGomoku::do_get_info() const
 	return ( HString( "gomoku," ) + get_comment() + "," + _players.size() );
 	}
 
-void HGomoku::put_stone( int col_, int row_, STONE::stone_t stone_ )
-	{
-	M_PROLOG
-	_game.raw()[ row_ * GOBAN_SIZE + col_ ] = stone_;
-	return;
-	M_EPILOG
-	}
-
 void HGomoku::send_goban( void )
 	{
 	M_PROLOG
@@ -281,6 +277,11 @@ void HGomoku::send_goban( void )
 	}
 
 char& HGomoku::goban( int col_, int row_ )
+	{
+	return ( _game.raw()[ row_ * GOBAN_SIZE + col_ ] );
+	}
+
+char HGomoku::goban( int col_, int row_ ) const
 	{
 	return ( _game.raw()[ row_ * GOBAN_SIZE + col_ ] );
 	}
@@ -314,11 +315,71 @@ void HGomoku::ensure_coordinates_validity( int x, int y )
 		throw HLogicException( "move outside goban" );
 	}
 
+int HGomoku::is_winning_stone( int row_, int col_ ) const
+	{
+	M_PROLOG
+	int line( -1 );
+	do
+		{
+		char stone( goban( row_, col_ ) );
+		int l( 0 );
+		for ( int r( row_ ), c( col_ ); ( r < GOBAN_SIZE ) && ( c < GOBAN_SIZE ) && ( l <= FIVE_IN_A_ROW ) && ( goban( r, c ) == stone ); ++ c, ++ l )
+			;
+		if ( l == FIVE_IN_A_ROW )
+			{
+			line = 0;
+			break;
+			}
+		l = 0;
+		for ( int r( row_ ), c( col_ ); ( r < GOBAN_SIZE ) && ( c < GOBAN_SIZE ) && ( l <= FIVE_IN_A_ROW ) && ( goban( r, c ) == stone ); ++ r, ++ l )
+			;
+		if ( l == FIVE_IN_A_ROW )
+			{
+			line = 1;
+			break;
+			}
+		l = 0;
+		for ( int r( row_ ), c( col_ ); ( r < GOBAN_SIZE ) && ( c < GOBAN_SIZE ) && ( l <= FIVE_IN_A_ROW ) && ( goban( r, c ) == stone ); ++ r, ++ c, ++ l )
+			;
+		if ( l == FIVE_IN_A_ROW )
+			{
+			line = 2;
+			break;
+			}
+		l = 0;
+		for ( int r( row_ ), c( col_ ); ( r < GOBAN_SIZE ) && ( c >= 0 ) && ( l <= FIVE_IN_A_ROW ) && ( goban( r, c ) == stone ); ++ r, -- c, ++ l )
+			;
+		if ( l == FIVE_IN_A_ROW )
+			{
+			line = 3;
+			break;
+			}
+		}
+	while ( false );
+	return ( line );
+	M_EPILOG
+	}
+
 void HGomoku::make_move( int x, int y, STONE::stone_t stone )
 	{
 	M_PROLOG
 	ensure_coordinates_validity( x, y );
 	goban( x, y ) = stone;
+	for ( int r( 0 ); r < GOBAN_SIZE; ++ r )
+		{
+		for ( int c( 0 ); c < GOBAN_SIZE; ++ c )
+			{
+			if ( goban( r, c ) == stone )
+				{
+				int line = is_winning_stone( r, c );
+				if ( line >= 0 )
+					{
+					broadcast( _out << PROTOCOL::FIVE_IN_A_ROW << PROTOCOL::SEP << stone << PROTOCOL::SEPP << r << PROTOCOL::SEPP << c << PROTOCOL::SEPP << line << endl << _out );
+					broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "Bino!" << endl << _out );
+					}
+				}
+			}
+		}
 	return;
 	M_EPILOG
 	}
