@@ -359,7 +359,7 @@ private:
 	/*}*/
 	};
 
-HString HClient::CLIENT_VERSION = "0";
+HString HClient::CLIENT_VERSION = "2";
 
 HSystem::HSystem( void )
 	: _coordinateX( -1 ), _coordinateY( -1 ),
