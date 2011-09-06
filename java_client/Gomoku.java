@@ -37,12 +37,11 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		public static final String STONE = "stone";
 		public static final String TOMOVE = "to_move";
 		public static final String PLAYER = "player";
+		public static final String FIVE_IN_A_ROW = "five_in_a_row";
 		public static final String PLAYERQUIT = "player_quit";
 	}
 	public static final int GOBAN_SIZE = 15;
 	public static final class STONE extends Goban.STONE {
-		public static final byte WIN_BLACK = 'p';
-		public static final byte WIN_WHITE = 'q';
 	}
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
@@ -92,6 +91,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 			_app.closeParty( Gomoku.this );
 		}
 		public void onBlack() {
+			_board.reset();
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
 					+ ( ( _stone == Gomoku.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + (char)STONE.BLACK : PROTOCOL.GETUP ) );
@@ -99,6 +99,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 			_whiteSit.setEnabled( _stone != Gomoku.STONE.NONE );
 		}
 		public void onWhite() {
+			_board.reset();
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
 					+ ( ( _stone == Gomoku.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + (char)STONE.WHITE : PROTOCOL.GETUP ) );
@@ -126,8 +127,9 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		_handlers.put( PROTOCOL.TOMOVE, Gomoku.class.getDeclaredMethod( "handlerToMove", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.CONTESTANT, Gomoku.class.getDeclaredMethod( "handlerContestant", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYERQUIT, Gomoku.class.getDeclaredMethod( "handlerPlayerQuit", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.ADMIN, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
+		_handlers.put( PROTOCOL.FIVE_IN_A_ROW, Gomoku.class.getDeclaredMethod( "handlerFiveInARow", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.SETUP, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
+		_handlers.put( PROTOCOL.ADMIN, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
 		GoImages images = new GoImages();
 		_gui._board.setGui( this );
 		_gui._board.setImages( images );
@@ -148,7 +150,6 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		_toMove = STONE.NONE;
 		_admin = false;
 		_move = 0;
-		_app.registerTask( this, 1 );
 	}
 	void handlerStones( String $command ) {
 		_gui._board.setStones( ( _stones = $command ).getBytes() );
@@ -188,6 +189,19 @@ class Gomoku extends HAbstractLogic implements Runnable {
 			_move = 0;
 		_gui._move.setText( "" + _move );
 		_gui._toMove.setText( toMove );
+	}
+	void handlerFiveInARow( String $command ) {
+		_toMove = STONE.NONE;
+		String[] tokens = $command.split( ",", 4 );
+		try {
+			int row = Integer.parseInt( tokens[1] );
+			int col = Integer.parseInt( tokens[2] );
+			int direction = Integer.parseInt( tokens[3] );
+			_gui._board.fiveInARow( (byte)tokens[0].charAt( 0 ), row, col, direction );
+		} catch ( Exception e ) {
+			CallStack.print();
+			System.exit( 1 );
+		}
 	}
 	void handlerPlayer( String $command ) {
 		DefaultListModel m = (DefaultListModel)_gui._visitors.getModel();

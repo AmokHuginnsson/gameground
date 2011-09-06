@@ -102,7 +102,6 @@ protected:
 	void handler_put_stone( OClientInfo*, yaal::hcore::HString const& );
 	void broadcast_contestants( yaal::hcore::HString const& );
 	void ensure_coordinates_validity( int, int );
-	void revoke_scheduled_tasks( void );
 	int is_winning_stone( int, int ) const;
 	/*}*/
 private:

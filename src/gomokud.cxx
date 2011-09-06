@@ -94,7 +94,6 @@ HGomoku::HGomoku( HServer* server_, HLogic::id_t const& id_, HString const& comm
 HGomoku::~HGomoku ( void )
 	{
 	M_PROLOG
-	revoke_scheduled_tasks();
 	return;
 	M_EPILOG
 	}
@@ -167,7 +166,8 @@ void HGomoku::handler_put_stone( OClientInfo* clientInfo_, HString const& messag
 	int col = lexical_cast<int>( get_token( message_, ",", 1 ) );
 	int row = lexical_cast<int>( get_token( message_, ",", 2 ) );
 	make_move( col, row, _state ); /* TODO implement winning condition test */
-	_state = opponent( _state );
+	if ( _state != STONE::NONE )
+		_state = opponent( _state );
 	send_goban();
 	return;
 	M_EPILOG
@@ -374,8 +374,11 @@ void HGomoku::make_move( int x, int y, STONE::stone_t stone )
 				int line = is_winning_stone( r, c );
 				if ( line >= 0 )
 					{
+					_state = STONE::NONE;
 					broadcast( _out << PROTOCOL::FIVE_IN_A_ROW << PROTOCOL::SEP << stone << PROTOCOL::SEPP << r << PROTOCOL::SEPP << c << PROTOCOL::SEPP << line << endl << _out );
-					broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "Bino!" << endl << _out );
+					OClientInfo* winner( contestant( stone ) );
+					broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The match has ended!" << endl << _out );
+					broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The contestant " << winner->_login << " won this match." << endl << _out );
 					}
 				}
 			}
@@ -422,15 +425,6 @@ void HGomoku::send_contestant( char stone )
 	broadcast( _out << PROTOCOL::CONTESTANT << PROTOCOL::SEP
 			<< stone << PROTOCOL::SEPP
 			<< name << PROTOCOL::SEPP << endl << _out );
-	return;
-	M_EPILOG
-	}
-
-void HGomoku::revoke_scheduled_tasks( void )
-	{
-	M_PROLOG
-	HAsyncCaller::get_instance().flush( this );
-	HScheduledAsyncCaller::get_instance().flush( this );
 	return;
 	M_EPILOG
 	}
