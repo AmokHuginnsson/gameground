@@ -66,7 +66,6 @@ class Go extends HAbstractLogic implements Runnable {
 		public static final byte TERITORY_BLACK = 'p';
 		public static final byte TERITORY_WHITE = 'q';
 		public static final byte DAME = 'x';
-		public static final byte WAIT = 'Z';
 	}
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;

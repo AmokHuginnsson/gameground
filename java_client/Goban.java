@@ -14,6 +14,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		public static final byte WHITE = 'w';
 		public static final byte NONE	= ' ';
 		public static final byte INVALID = 'N';
+		public static final byte WAIT = 'Z';
 		public static final String NONE_NAME = "None";
 		public static final String BLACK_NAME = "Black";
 		public static final String WHITE_NAME = "White";

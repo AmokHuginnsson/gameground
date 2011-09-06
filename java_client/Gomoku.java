@@ -43,7 +43,6 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	public static final class STONE extends Goban.STONE {
 		public static final byte WIN_BLACK = 'p';
 		public static final byte WIN_WHITE = 'q';
-		public static final byte INVALID = 'N';
 	}
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
@@ -95,14 +94,14 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		public void onBlack() {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
-					+ ( ( _stone == Gomoku.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + STONE.BLACK : PROTOCOL.GETUP ) );
+					+ ( ( _stone == Gomoku.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + (char)STONE.BLACK : PROTOCOL.GETUP ) );
 			_blackSit.setEnabled( _stone != Gomoku.STONE.NONE );
 			_whiteSit.setEnabled( _stone != Gomoku.STONE.NONE );
 		}
 		public void onWhite() {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
-					+ ( ( _stone == Gomoku.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + STONE.WHITE : PROTOCOL.GETUP ) );
+					+ ( ( _stone == Gomoku.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + (char)STONE.WHITE : PROTOCOL.GETUP ) );
 			_blackSit.setEnabled( _stone != Gomoku.STONE.NONE );
 			_whiteSit.setEnabled( _stone != Gomoku.STONE.NONE );
 		}
@@ -130,7 +129,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		_handlers.put( PROTOCOL.ADMIN, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.SETUP, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
 		GoImages images = new GoImages();
-		//_gui._board.setGui( this );
+		_gui._board.setGui( this );
 		_gui._board.setImages( images );
 		GomokuPlayer black = new GomokuPlayer();
 		black._name = _gui._blackName;
@@ -206,6 +205,9 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	}
 	public byte toMove() {
 		return ( _toMove );
+	}
+	public void waitToMove() {
+		_toMove = STONE.WAIT;
 	}
 	public void cleanup() {
 		_app.flush( this );

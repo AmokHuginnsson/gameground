@@ -134,7 +134,10 @@ void HGomoku::handler_sit( OClientInfo* clientInfo_, HString const& message_ )
 				_move = 0;
 				}
 			else
+				{
+				_state = STONE::BLACK;
 				broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The Gomoku match started." << endl << _out );
+				}
 			}
 		}
 	return;
