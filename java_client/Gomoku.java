@@ -1,5 +1,8 @@
+import java.util.Vector;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.Comparator;
+import javax.swing.table.TableRowSorter;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -7,14 +10,44 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.DefaultListModel;
+import javax.swing.table.AbstractTableModel;
 import java.util.Date;
 
-class GomokuPlayer {
+class GomokuContestant {
 	public JLabel _name;
 	public JButton _sit;
 	public void clear() {
 		_name.setText( "" );
 		_sit.setText( Gomoku.HGUILocal.SIT );
+	}
+}
+
+class GomokuPlayer {
+	String _name;
+	int _score = 0;
+	GomokuPlayer( String $name ) { this( $name, 0 ); }
+	GomokuPlayer( String $name, int $score ) {
+		_name = $name;
+		_score = $score;
+	}
+	void set( String $name, int $score ) {
+		_name = $name;
+		_score = $score;
+	}
+	String getName() {
+		return ( _name );
+	}
+	String get( int $field ) {
+		String field = "";
+		switch ( $field ) {
+			case ( 0 ):
+				field = _name;
+			break;
+			case ( 1 ):
+				field += _score;
+			break;
+		}
+		return ( field );
 	}
 }
 
@@ -27,8 +60,6 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		public static final String NAME = "gomoku";
 		public static final String PLAY = "play";
 		public static final String PASS = "pass";
-		public static final String SETUP = "setup";
-		public static final String ADMIN = "admin";
 		public static final String CONTESTANT = "contestant";
 		public static final String SIT = "sit";
 		public static final String GETUP = "get_up";
@@ -37,6 +68,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		public static final String STONE = "stone";
 		public static final String TOMOVE = "to_move";
 		public static final String PLAYER = "player";
+		public static final String SPECTATOR = "spectator";
 		public static final String FIVE_IN_A_ROW = "five_in_a_row";
 		public static final String PLAYERQUIT = "player_quit";
 	}
@@ -45,8 +77,8 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	}
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
-		public static final String SIT = "Sit !";
-		public static final String GETUP = "Get up !";
+		public static final String SIT = "Sit!";
+		public static final String GETUP = "Get up!";
 		public JTextField _messageInput;
 		public JTextField _wordInput;
 		public JTextPane _logPad;
@@ -64,15 +96,42 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		public JLabel _move;
 		public String _toolTip;
 		public String _passText;
+		final String[] _header = { "Player", "Score" };
 		public HGUILocal( String $resource ) {
 			super( $resource );
 		}
 		public void updateTagLib( XUL $xul ) {
 			$xul.getTaglib().registerTag( "goban", GomokuGoban.class );
-			$xul.getTaglib().registerTag( "setup", DummyConfigurator.class );
 		}
 		public void init() {
 			super.init();
+			AbstractTableModel model = new AbstractTableModel() {
+				public static final long serialVersionUID = 17l;
+				public String getColumnName(int col) {
+					return ( _header[ col ] );
+				}
+				public int getRowCount() { return Gomoku.this._players.size(); }
+				public int getColumnCount() { return _header.length; }
+				public Object getValueAt(int row, int col) {
+					return Gomoku.this._players.get( row ).get( col );
+				}
+				public boolean isCellEditable(int row, int col)
+					{ return false; }
+				public void setValueAt(Object value, int row, int col) {
+				}
+			};
+			Comparator<String> comparator = new Comparator<String>() {
+				public int compare( String s1, String s2 ) {
+					return ( Integer.parseInt( s2 ) - Integer.parseInt( s1 ) );
+				}
+			};
+			TableRowSorter<AbstractTableModel> rs = new TableRowSorter<AbstractTableModel>();
+			_champions.setModel( model );
+			rs.setModel( model );
+			rs.setComparator( 1, comparator );
+			_champions.setRowSorter( rs );
+			_champions.setShowGrid( false );
+			_champions.setAutoCreateRowSorter( true );
 		}
 		public JTextPane getLogPad() {
 			return ( _logPad );
@@ -117,27 +176,27 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	private boolean _admin = false;
 	private int _move = 0;
 	private String _stones = null;
-	private SortedMap<Byte, GomokuPlayer> _contestants = java.util.Collections.synchronizedSortedMap( new TreeMap<Byte, GomokuPlayer>() );
+	private Vector<GomokuPlayer> _players = new Vector<GomokuPlayer>();
+	private SortedMap<Byte, GomokuContestant> _contestants = java.util.Collections.synchronizedSortedMap( new TreeMap<Byte, GomokuContestant>() );
 //--------------------------------------------//
 	public Gomoku( GameGround $applet, String $id, String $configuration ) throws Exception {
 		super( $applet, $id, $configuration );
 		init( _gui = new HGUILocal( LABEL ) );
 		_handlers.put( PROTOCOL.STONES, Gomoku.class.getDeclaredMethod( "handlerStones", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYER, Gomoku.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
+		_handlers.put( PROTOCOL.SPECTATOR, Gomoku.class.getDeclaredMethod( "handlerSpectator", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.TOMOVE, Gomoku.class.getDeclaredMethod( "handlerToMove", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.CONTESTANT, Gomoku.class.getDeclaredMethod( "handlerContestant", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYERQUIT, Gomoku.class.getDeclaredMethod( "handlerPlayerQuit", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.FIVE_IN_A_ROW, Gomoku.class.getDeclaredMethod( "handlerFiveInARow", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.SETUP, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.ADMIN, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
 		GoImages images = new GoImages();
 		_gui._board.setGui( this );
 		_gui._board.setImages( images );
-		GomokuPlayer black = new GomokuPlayer();
+		GomokuContestant black = new GomokuContestant();
 		black._name = _gui._blackName;
 		black._sit = _gui._blackSit;
 		_contestants.put( STONE.BLACK, black );
-		GomokuPlayer white = new GomokuPlayer();
+		GomokuContestant white = new GomokuContestant();
 		white._name = _gui._whiteName;
 		white._sit = _gui._whiteSit;
 		_contestants.put( STONE.WHITE, white );
@@ -158,18 +217,18 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	void handlerContestant( String $command ) {
 		String[] tokens = $command.split( ",", 6 );
 		byte stone = STONE.NONE;
-		GomokuPlayer contestant = _contestants.get( ( stone = (byte)tokens[ 0 ].charAt( 0 ) ) );
+		GomokuContestant contestant = _contestants.get( ( stone = (byte)tokens[ 0 ].charAt( 0 ) ) );
 		contestant._name.setText( tokens[ 1 ] );
 		if ( tokens[ 1 ].equals( _app.getName() ) ) {
 			_stone = stone;
 			contestant._sit.setText( HGUILocal.GETUP );
 			contestant._sit.setEnabled( true );
-			GomokuPlayer foe = _contestants.get( _gui._board.opponent( _stone ) );
+			GomokuContestant foe = _contestants.get( _gui._board.opponent( _stone ) );
 			foe._sit.setEnabled( false );
 		} else {
 			if ( ( stone == _stone ) && ( _stone != STONE.NONE ) ) {
 				contestant._sit.setText( HGUILocal.SIT );
-				GomokuPlayer foe = _contestants.get( _gui._board.opponent( _stone ) );
+				GomokuContestant foe = _contestants.get( _gui._board.opponent( _stone ) );
 				foe._sit.setEnabled( "".equals( foe._name.getText() ) );
 				_stone = STONE.NONE;
 			}
@@ -204,6 +263,22 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		}
 	}
 	void handlerPlayer( String $command ) {
+		String[] tokens = $command.split( ",", 2 );
+		GomokuPlayer p = null;
+		for ( int i = 0; i < _players.size(); ++ i ) {
+			if ( _players.get( i ).get( 0 ).compareToIgnoreCase( tokens[ 0 ] ) == 0 ) {
+				p = _players.get( i );
+				break;
+			}
+		}
+		if ( p == null ) {
+			p = new GomokuPlayer( tokens[ 0 ] );
+			_players.add( p );
+		}
+		p.set( tokens[0], Integer.parseInt( tokens[ 1 ] ) );
+		((AbstractTableModel)_gui._champions.getModel()).fireTableDataChanged();
+	}
+	void handlerSpectator( String $command ) {
 		DefaultListModel m = (DefaultListModel)_gui._visitors.getModel();
 		m.addElement( $command );
 	}

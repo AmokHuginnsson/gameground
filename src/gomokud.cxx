@@ -51,8 +51,7 @@ HGomoku::STONE::stone_t const HGomoku::STONE::BLACK = 'b';
 HGomoku::STONE::stone_t const HGomoku::STONE::WHITE = 'w';
 HGomoku::STONE::stone_t const HGomoku::STONE::NONE = ' ';
 
-char const* const HGomoku::PROTOCOL::SETUP = "setup";
-char const* const HGomoku::PROTOCOL::ADMIN = "admin";
+char const* const HGomoku::PROTOCOL::SPECTATOR = "spectator";
 char const* const HGomoku::PROTOCOL::PLAY = "play";
 char const* const HGomoku::PROTOCOL::CONTESTANT = "contestant";
 char const* const HGomoku::PROTOCOL::STONES = "stones";
@@ -62,8 +61,6 @@ char const* const HGomoku::PROTOCOL::PUTSTONE = "put_stone";
 char const* const HGomoku::PROTOCOL::SIT = "sit";
 char const* const HGomoku::PROTOCOL::GETUP = "get_up";
 char const* const HGomoku::PROTOCOL::FIVE_IN_A_ROW = "five_in_a_row";
-static int const SECONDS_IN_MINUTE = 60;
-static int const ACCEPTED = -7;
 
 int const GO_MSG_NOT_YOUR_TURN = 0;
 int const GO_MSG_YOU_CANT_DO_IT_NOW = 1;
@@ -128,7 +125,9 @@ void HGomoku::handler_sit( OClientInfo* clientInfo_, HString const& message_ )
 		else
 			{
 			contestant( stone ) = clientInfo_;
-			if ( ! ( contestant( STONE::BLACK ) && contestant( STONE::WHITE ) ) )
+			OClientInfo* black( contestant( STONE::BLACK ) );
+			OClientInfo* white( contestant( STONE::WHITE ) );
+			if ( ! ( black && white ) )
 				{
 				::memset( _game.raw(), STONE::NONE, GOBAN_SIZE * GOBAN_SIZE );
 				_game.raw()[ GOBAN_SIZE * GOBAN_SIZE ] = 0;
@@ -139,6 +138,10 @@ void HGomoku::handler_sit( OClientInfo* clientInfo_, HString const& message_ )
 			else
 				{
 				_state = STONE::BLACK;
+				players_t::iterator blackIt( _players.insert( make_pair( black, 0 ) ).first );
+				players_t::iterator whiteIt( _players.insert( make_pair( white, 0 ) ).first );
+				broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << black->_login << PROTOCOL::SEPP << blackIt->second << endl << _out );
+				broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << white->_login << PROTOCOL::SEPP << whiteIt->second << endl << _out );
 				broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The Gomoku match started." << endl << _out );
 				}
 			}
@@ -207,26 +210,30 @@ void HGomoku::do_post_accept( OClientInfo* clientInfo_ )
 	{
 	M_PROLOG
 	HLock l( _mutex );
-	if ( _players.size() == 0 )
-		*clientInfo_->_socket << *this
-			<< PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::ADMIN << endl;
-	_players.push_back( clientInfo_ );
+	broadcast( _out << PROTOCOL::SPECTATOR << PROTOCOL::SEP << clientInfo_->_login << endl << _out );
 	for ( clients_t::HIterator it = _clients.begin(); it != _clients.end(); ++ it )
 		{
 		if ( *it != clientInfo_ )
 			{
 			*clientInfo_->_socket << *this
-					<< PROTOCOL::PLAYER << PROTOCOL::SEP
+					<< PROTOCOL::SPECTATOR << PROTOCOL::SEP
 					<< (*it)->_login << endl;
 			*clientInfo_->_socket << *this
 					<< PROTOCOL::MSG << PROTOCOL::SEP
-					<< "Player " << (*it)->_login << " approched this table." << endl;
+					<< "Spectator " << (*it)->_login << " approached this table." << endl;
 			}
 		}
-	broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
-			<< clientInfo_->_login << endl << _out );
+	for ( players_t::iterator it = _players.begin(); it != _players.end(); ++ it )
+		{
+		if ( it->first != clientInfo_ )
+			{
+			*clientInfo_->_socket << *this
+					<< PROTOCOL::PLAYER << PROTOCOL::SEP
+					<< it->first->_login << PROTOCOL::SEPP << it->second << endl;
+			}
+		}
 	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
-			<< "Player " << clientInfo_->_login << " approched this table." << endl << _out );
+			<< "Spectator " << clientInfo_->_login << " approched this table." << endl << _out );
 	send_contestants();
 	send_goban();
 	return;
@@ -237,18 +244,7 @@ void HGomoku::do_kick( OClientInfo* clientInfo_ )
 	{
 	M_PROLOG
 	HLock l( _mutex );
-	bool newadmin = false;
-	
-	if ( ! _players.is_empty() && ( clientInfo_ == *_players.begin() ) )
-		newadmin = true;
-	_players.pop_front();
-	if ( newadmin )
-		{
-		players_t::iterator it = _players.begin();
-		if ( it != _players.end() )
-			*(*it)->_socket << *this
-				<< PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::ADMIN << endl;
-		}
+	_players.erase( clientInfo_ );
 	if ( ( contestant( STONE::BLACK ) == clientInfo_ )
 			|| ( contestant( STONE::WHITE ) == clientInfo_ ) )
 		{
@@ -377,6 +373,8 @@ void HGomoku::make_move( int x, int y, STONE::stone_t stone )
 					_state = STONE::NONE;
 					broadcast( _out << PROTOCOL::FIVE_IN_A_ROW << PROTOCOL::SEP << stone << PROTOCOL::SEPP << r << PROTOCOL::SEPP << c << PROTOCOL::SEPP << line << endl << _out );
 					OClientInfo* winner( contestant( stone ) );
+					int score( ++ _players[ winner ] );
+					broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << winner->_login << PROTOCOL::SEPP << score << endl << _out );
 					broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The match has ended!" << endl << _out );
 					broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The contestant " << winner->_login << " won this match." << endl << _out );
 					}
@@ -397,10 +395,13 @@ void HGomoku::contestant_gotup( OClientInfo* clientInfo_ )
 	{
 	STONE::stone_t stone = ( contestant( STONE::BLACK ) == clientInfo_ ? STONE::BLACK : STONE::WHITE );
 	OClientInfo* foe = NULL;
-	if ( ( _state != STONE::NONE )
-			&& ( ( foe = contestant( STONE::BLACK ) ) || ( foe = contestant( STONE::WHITE ) ) ) )
+	if ( ( _state != STONE::NONE ) && ( foe = contestant( opponent( stone ) ) ) )
+		{
+		int score( ++ _players[ foe ] );
+		broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << foe->_login << PROTOCOL::SEPP << score << endl << _out );
 		broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
 				<< clientInfo_->_login << " resigned - therefore " << foe->_login << " wins." << endl << _out );
+		}
 	contestant( stone ) = NULL;
 	_state = STONE::NONE;
 	return;

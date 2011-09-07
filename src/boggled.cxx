@@ -529,7 +529,9 @@ HLogic::ptr_t HBoggleCreator::do_new_instance( HServer* server_, HLogic::id_t co
 HString HBoggleCreator::do_get_info( void ) const
 	{
 	HString setupMsg;
-	setupMsg.format( "%s:%s,%d,%d,%d,%d", boggle::HBoggle::PROTOCOL::NAME, setup._scoringSystem.raw(), setup._players, setup._roundTime, setup._maxRounds, setup._interRoundDelay );
+	setupMsg.format( "%s:%s,%d,%d,%d,%d", boggle::HBoggle::PROTOCOL::NAME,
+			setup._scoringSystem.raw(), setup._boggleStarupPlayers,
+			setup._roundTime, setup._maxRounds, setup._interRoundDelay );
 	out << setupMsg << endl;
 	return ( setupMsg );
 	}

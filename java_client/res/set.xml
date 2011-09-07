@@ -2,38 +2,12 @@
 <!DOCTYPE panel SYSTEM "res/gameground.dtd">
 <panel layout="BorderLayout" border="EmptyBorder(4,4,4,4)"><!--{{{-->
 	<hbox>
-		<panel layout="GridBagLayout">
-			<gridbagconstraints fill="GridBagConstraints.BOTH" />
-			<goban id="_board" opaque="true" />
+		<panel background="green">
 		</panel>
 		<vbox minimumsize="&v_sidebar_width_galaxy;,1" preferredsize="&v_sidebar_width_galaxy;,&v_height;" maximumsize="&v_sidebar_width_galaxy;,2000">
 			<scrollpane maximumsize="2000,300" autoscrolls="true" tooltiptext="Current highscores.">
 				<table id="_champions" />
 			</scrollpane>
-			<panel maximumsize="2000,40" border="EmptyBorder(0,4,4,4)">
-				<layout type="FormLayout" columns="p,8px,p,8px,p" rows="p" />
-				<label id="_toMove" constraints="1,1">None</label>
-				<label constraints="3,1">to move, move </label>
-				<label id="_move" constraints="5,1">0</label>
-			</panel>
-			<vbox maximumsize="2000,120">
-				<panel border="EtchedBorder" layout="BorderLayout">
-					<panel border="EmptyBorder(4,4,4,4)">
-						<layout type="FormLayout" columns="52px,p:grow,88px" rows="p" />
-						<label text="Black:" constraints="1,1" />
-						<label id="_blackName" constraints="2,1" />
-						<button id="_blackSit" text="Sit!" action="onBlack" constraints="3,1" />
-					</panel>
-				</panel>
-				<panel border="EtchedBorder" layout="BorderLayout">
-					<panel border="EmptyBorder(4,4,4,4)">
-						<layout type="FormLayout" columns="52px,p:grow,88px" rows="p" />
-						<label text="White:" constraints="1,1" />
-						<label id="_whiteName" constraints="2,1" />
-						<button id="_whiteSit" text="Sit!" action="onWhite" constraints="3,1" />
-					</panel>
-				</panel>
-			</vbox>
 			<scrollpane autoscrolls="true" maximumsize="2000,300">
 				<list id="_visitors" initclass="javax.swing.DefaultListModel" focusable="false" tooltiptext="People that are visiting this table." />
 			</scrollpane>

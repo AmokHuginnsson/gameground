@@ -27,7 +27,8 @@ Copyright:
 #ifndef GAMEGROUND_GOMOKUD_HXX_INCLUDED
 #define GAMEGROUND_GOMOKUD_HXX_INCLUDED
 
-#include <yaal/yaal.hxx>
+#include <yaal/hcore/hmap.hxx>
+#include <yaal/hcore/hstring.hxx>
 
 #include "logic.hxx"
 
@@ -50,12 +51,11 @@ class HGomoku : public HLogic
 	static int const FIVE_IN_A_ROW = 5;
 	struct PROTOCOL : public HLogic::PROTOCOL
 		{
-		static char const* const ADMIN;
+		static char const* const SPECTATOR;
 		static char const* const CONTESTANT;
 		static char const* const GETUP;
 		static char const* const PLAY;
 		static char const* const PUTSTONE;
-		static char const* const SETUP;
 		static char const* const SIT;
 		static char const* const STONE;
 		static char const* const STONES;
@@ -64,7 +64,7 @@ class HGomoku : public HLogic
 		};
 protected:
 	/*{*/
-	typedef yaal::hcore::HList<OClientInfo*> players_t;
+	typedef yaal::hcore::HMap<OClientInfo*, int> players_t;
 	OClientInfo* _contestants[ 2 ];
 	STONE::stone_t _state;
 	int _move;

@@ -55,6 +55,7 @@ static int const GO_HANDICAPS              =   0;
 static int const GO_MAINTIME               =  30;
 static int const GO_BYOYOMI_PERIODS        =   5;
 static int const GO_BYOYOMI_TIME           =   1;
+static int const SET_STARTUP_PLAYERS       =   2;
 #define out ( clog << now << " " << __FILE__ + OSetup::PATH_OFFSET << ":" << __LINE__ << ": " )
 
 #ifndef NDEBUG
@@ -80,7 +81,8 @@ struct OSetup
 	int _port;
 	int _systems;
 	int _boardSize;
-	int _players;
+	int _boggleStarupPlayers;
+	int _setStartupPlayers;
 	int _roundTime;
 	int _maxRounds;
 	int _interRoundDelay;
@@ -106,7 +108,8 @@ struct OSetup
 		_maxConnections( DEFAULT_MAX_CONNECTIONS ),
 		_emperors( GALAXY_EMPERORS ), _port( 7777 ),
 		_systems( GALAXY_EMPERORS * NEUTRAL_SYSTEM_PER_PLAYER ),
-		_boardSize( GALAXY_BOARD_SIZE ), _players( BOGGLE_PLAYERS ),
+		_boardSize( GALAXY_BOARD_SIZE ), _boggleStarupPlayers( BOGGLE_PLAYERS ),
+		_setStartupPlayers( SET_STARTUP_PLAYERS ),
 		_roundTime( BOGGLE_ROUND_TIME ), _maxRounds( BOGGLE_MAX_ROUNDS ),
 		_interRoundDelay( BOGGLE_INTER_ROUND_DELAY ),
 		_gobanSize( GO_GOBAN_SIZE ), _komi( GO_KOMI ), _handicaps( GO_HANDICAPS ),
