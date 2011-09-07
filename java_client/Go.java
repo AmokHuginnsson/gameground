@@ -99,7 +99,6 @@ class Go extends HAbstractLogic implements Runnable {
 		}
 		public void updateTagLib( XUL $xul ) {
 			$xul.getTaglib().registerTag( "goban", GoGoban.class );
-			$xul.getTaglib().registerTag( "panel", GoConfigurator.class );
 		}
 		public void mapMembers( XUL $se ) {
 			$se.mapMembers( _conf );

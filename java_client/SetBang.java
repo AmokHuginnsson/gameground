@@ -67,6 +67,7 @@ class SetBang extends HAbstractLogic implements Runnable {
 			super( $resource );
 		}
 		public void updateTagLib( XUL $xul ) {
+			$xul.getTaglib().registerTag( "setbangtable", SetBangTable.class );
 		}
 		public void init() {
 			super.init();

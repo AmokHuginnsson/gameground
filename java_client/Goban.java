@@ -72,7 +72,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	}
 	public Dimension getPreferredSize() {
 		java.awt.Dimension pd = getParent().getSize();
-		int size = pd.getWidth() < pd.getHeight() ? (int)pd.getWidth() : (int)pd.getHeight();;
+		int size = pd.getWidth() < pd.getHeight() ? (int)pd.getWidth() : (int)pd.getHeight();
 		if ( ( _virtSize != size ) && ( _images != null ) && ( size > 0 ) ) {
 			_virtSize = size - 2 * D_MARGIN;
 			int margin = _virtSize / ( _size + 4 );
