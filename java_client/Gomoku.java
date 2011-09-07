@@ -88,8 +88,8 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		public JLabel _whiteName;
 		public JLabel _whiteScore;
 		public JButton _whiteSit;
-		public JTable _champions;
-		public JList _visitors;
+		public JTable _players;
+		public JList _spectators;
 		public GomokuGoban _board;
 		public DummyConfigurator _conf;
 		public JLabel _toMove;
@@ -126,12 +126,12 @@ class Gomoku extends HAbstractLogic implements Runnable {
 				}
 			};
 			TableRowSorter<AbstractTableModel> rs = new TableRowSorter<AbstractTableModel>();
-			_champions.setModel( model );
+			_players.setModel( model );
 			rs.setModel( model );
 			rs.setComparator( 1, comparator );
-			_champions.setRowSorter( rs );
-			_champions.setShowGrid( false );
-			_champions.setAutoCreateRowSorter( true );
+			_players.setRowSorter( rs );
+			_players.setShowGrid( false );
+			_players.setAutoCreateRowSorter( true );
 		}
 		public JTextPane getLogPad() {
 			return ( _logPad );
@@ -276,14 +276,14 @@ class Gomoku extends HAbstractLogic implements Runnable {
 			_players.add( p );
 		}
 		p.set( tokens[0], Integer.parseInt( tokens[ 1 ] ) );
-		((AbstractTableModel)_gui._champions.getModel()).fireTableDataChanged();
+		((AbstractTableModel)_gui._players.getModel()).fireTableDataChanged();
 	}
 	void handlerSpectator( String $command ) {
-		DefaultListModel m = (DefaultListModel)_gui._visitors.getModel();
+		DefaultListModel m = (DefaultListModel)_gui._spectators.getModel();
 		m.addElement( $command );
 	}
 	void handlerPlayerQuit( String $command ) {
-		DefaultListModel m = (DefaultListModel)_gui._visitors.getModel();
+		DefaultListModel m = (DefaultListModel)_gui._spectators.getModel();
 		m.removeElement( $command );
 	}
 	public boolean isMyMove() {

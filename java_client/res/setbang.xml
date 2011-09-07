@@ -5,11 +5,8 @@
 		<panel background="green">
 		</panel>
 		<vbox minimumsize="&v_sidebar_width_galaxy;,1" preferredsize="&v_sidebar_width_galaxy;,&v_height;" maximumsize="&v_sidebar_width_galaxy;,2000">
-			<scrollpane maximumsize="2000,300" autoscrolls="true" tooltiptext="Current highscores.">
-				<table id="_champions" />
-			</scrollpane>
-			<scrollpane autoscrolls="true" maximumsize="2000,300">
-				<list id="_visitors" initclass="javax.swing.DefaultListModel" focusable="false" tooltiptext="People that are visiting this table." />
+			<scrollpane maximumsize="2000,400" autoscrolls="true" tooltiptext="Current highscores.">
+				<table id="_players" />
 			</scrollpane>
 			<scrollpane autoscrolls="true" maximumsize="2000,400" minimumsize="1,400">
 				<textpane id="_logPad" editable="false" focusable="true" />

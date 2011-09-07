@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="iso8859-2"?>
+<!DOCTYPE panel SYSTEM "res/gameground.dtd">
+<panel layout="FlowLayout"><!--{{{-->
+	<label>Players:</label><spinner id="_playerCount" tooltiptext="Minimum number of players to start the match."><textfield horizontalalignment="RIGHT" /></spinner>
+</panel>

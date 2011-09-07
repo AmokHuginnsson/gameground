@@ -8,7 +8,7 @@
 		</panel>
 		<vbox minimumsize="&v_sidebar_width_galaxy;,1" preferredsize="&v_sidebar_width_galaxy;,&v_height;" maximumsize="&v_sidebar_width_galaxy;,2000">
 			<scrollpane maximumsize="2000,300" autoscrolls="true" tooltiptext="Current highscores.">
-				<table id="_champions" />
+				<table id="_players" />
 			</scrollpane>
 			<panel maximumsize="2000,40" border="EmptyBorder(0,4,4,4)">
 				<layout type="FormLayout" columns="p,8px,p,8px,p" rows="p" />
@@ -35,7 +35,7 @@
 				</panel>
 			</vbox>
 			<scrollpane autoscrolls="true" maximumsize="2000,300">
-				<list id="_visitors" initclass="javax.swing.DefaultListModel" focusable="false" tooltiptext="People that are visiting this table." />
+				<list id="_spectators" initclass="javax.swing.DefaultListModel" focusable="false" tooltiptext="People that are visiting this table." />
 			</scrollpane>
 			<scrollpane autoscrolls="true" maximumsize="2000,400" minimumsize="1,400">
 				<textpane id="_logPad" editable="false" focusable="true" />
