@@ -67,7 +67,6 @@ class SetBang extends HAbstractLogic implements Runnable {
 			super( $resource );
 		}
 		public void updateTagLib( XUL $xul ) {
-			$xul.getTaglib().registerTag( "bogglebox", BoggleBox.class );
 		}
 		public void init() {
 			super.init();
@@ -119,7 +118,7 @@ class SetBang extends HAbstractLogic implements Runnable {
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
-	public static final String LABEL = "boggle";
+	public static final String LABEL = "setbang";
 	public HGUILocal _gui;
 	private Vector<SetBangPlayer> _players = new Vector<SetBangPlayer>();
 //--------------------------------------------//

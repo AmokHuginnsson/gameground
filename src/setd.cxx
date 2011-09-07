@@ -136,7 +136,7 @@ HLogic::ptr_t HSetBangCreator::do_new_instance( HServer* server_, HLogic::id_t c
 	out << "creating logic: " << argv_ << endl;
 	HTokenizer t( argv_, "," );
 	HString name = t[ 0 ];
-	int players = lexical_cast<int>( t[ 2 ] );
+	int players = lexical_cast<int>( t[ 1 ] );
 	return ( make_pointer<set_bang::HSetBang>( server_, id_, name, players ) );
 	M_EPILOG
 	}
