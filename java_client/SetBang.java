@@ -57,6 +57,7 @@ class SetBang extends HAbstractLogic implements Runnable {
 	}
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
+		public SetBangTable _table;
 		public JTextField _messageInput;
 		public JTextPane _logPad;
 		public JTable _players;
@@ -118,6 +119,7 @@ class SetBang extends HAbstractLogic implements Runnable {
 		}
 	}
 //--------------------------------------------//
+	public static final int CARDS_ON_TABLE = 12;
 	public static final long serialVersionUID = 17l;
 	public static final String LABEL = "setbang";
 	public HGUILocal _gui;
@@ -152,11 +154,20 @@ class SetBang extends HAbstractLogic implements Runnable {
 	void handlerRound( String $command ) {
 	}
 	void handlerDeck( String $command ) {
-		if ( $command.length() < 16 ) {
+		String[] cardsStr = $command.split( ",", CARDS_ON_TABLE );
+		if ( cardsStr.length != CARDS_ON_TABLE ) {
 			Con.err( "Bad deck configuration: " + $command );
 			CallStack.print();
 			System.exit( 1 );
 		}
+		int[] cards = new int[CARDS_ON_TABLE];
+		for ( int i = 0; i < CARDS_ON_TABLE; ++ i ) {
+			if ( ( cardsStr[i].length() > 0 ) && ! cardsStr[i].equals( "n" ) ) {
+				cards[i] = Integer.parseInt( cardsStr[i] );
+			} else
+				cards[i] = -1;
+		}
+		_gui._table.setCards( cards );
 	}
 	public void cleanup() {
 		_app.flush( this );
