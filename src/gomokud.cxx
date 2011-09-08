@@ -233,7 +233,7 @@ void HGomoku::do_post_accept( OClientInfo* clientInfo_ )
 			}
 		}
 	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
-			<< "Spectator " << clientInfo_->_login << " approched this table." << endl << _out );
+			<< "Spectator " << clientInfo_->_login << " approached this table." << endl << _out );
 	send_contestants();
 	send_goban();
 	return;
