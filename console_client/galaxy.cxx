@@ -801,7 +801,7 @@ int HGalaxyWindow::handler_enter( int code_, void const* )
 	HMove* move( NULL );
 	if ( (*_focusedChild) == _messageInput )
 		{
-		if ( _messageInput->get().get<HString const&>().find_other_than( _whiteSpace_ ) >= 0 )
+		if ( _messageInput->get().get<HString const&>().find_other_than( _whiteSpace_.data() ) >= 0 )
 			{
 			_varTmpBuffer = "cmd:";
 			_varTmpBuffer += _client->id();
