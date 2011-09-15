@@ -27,6 +27,7 @@ Copyright:
 #include <cstring>
 
 #include <yaal/yaal.hxx>
+
 M_VCSID( "$Id: "__ID__" $" )
 #include "god.hxx"
 
@@ -39,6 +40,7 @@ using namespace yaal;
 using namespace yaal::hcore;
 using namespace yaal::tools;
 using namespace yaal::tools::util;
+using namespace sgf;
 
 namespace gameground
 {
@@ -97,6 +99,7 @@ HGo::HGo( HServer* server_, HLogic::id_t const& id_, HString const& comment_ )
 	_game( GOBAN_SIZE::NORMAL * GOBAN_SIZE::NORMAL + sizeof ( '\0' ) ),
 	_koGame( GOBAN_SIZE::NORMAL * GOBAN_SIZE::NORMAL + sizeof ( '\0' ) ),
 	_oldGame( GOBAN_SIZE::NORMAL * GOBAN_SIZE::NORMAL + sizeof ( '\0' ) ),
+	_sgf( SGF::GAME_TYPE::GO, "gameground" ),
 	_players(), _varTmpBuffer()
 	{
 	M_PROLOG
@@ -196,6 +199,11 @@ void HGo::handler_sit( OClientInfo* clientInfo_, HString const& message_ )
 				foe._byoYomiPeriods = info._byoYomiPeriods;
 				_state = ( _handicaps > 1 ? STONE::WHITE : STONE::BLACK );
 				_pass = 0;
+				_sgf.clear();
+				/*
+				_sgf._game._blackName = contestant( STONE::BLACK )._login;
+				_sgf._game._whiteName = contestant( STONE::WHITE )._login;
+				*/
 				broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The Go match started." << endl << _out );
 				}
 			}

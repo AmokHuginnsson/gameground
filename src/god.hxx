@@ -28,6 +28,7 @@ Copyright:
 #define GAMEGROUND_GOD_HXX_INCLUDED
 
 #include <yaal/yaal.hxx>
+#include <sgf/sgf.hxx>
 
 #include "logic.hxx"
 
@@ -106,6 +107,7 @@ protected:
 	yaal::hcore::HChunk _game;
 	yaal::hcore::HChunk _koGame;
 	yaal::hcore::HChunk _oldGame;
+	sgf::SGF _sgf;
 	players_t _players;
 	yaal::hcore::HString _varTmpBuffer;
 	/*}*/

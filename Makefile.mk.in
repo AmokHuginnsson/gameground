@@ -31,7 +31,7 @@ SUBVERSION   = 0
 EXTRAVERSION = 0
 include $(DIR_ROOT)/_aux/mk/1_basic.mk
 LIBS         = hcore$(LIB_INFIX) tools$(LIB_INFIX) dbwrapper$(LIB_INFIX) hconsole$(LIB_INFIX) \
-               hdata$(LIB_INFIX) \
+               hdata$(LIB_INFIX) sgf$(LIB_INFIX) hdata$(LIB_INFIX) \
                hconsole$(LIB_INFIX) dbwrapper$(LIB_INFIX) tools$(LIB_INFIX) hcore$(LIB_INFIX) \
                aspell pthread
 $(eval $(call NEW_TARGET,gameground,src,-D__GAMEGROUND_SERVER__))
