@@ -29,8 +29,7 @@ Copyright:
 
 #include <yaal/hcore/hstring.hxx>
 
-namespace gameground
-{
+namespace gameground {
 
 yaal::hcore::HString escape( yaal::hcore::HString const& );
 yaal::hcore::HString unescape( yaal::hcore::HString const& );

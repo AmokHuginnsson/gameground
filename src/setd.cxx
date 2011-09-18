@@ -41,48 +41,41 @@ using namespace yaal::hconsole;
 using namespace yaal::tools;
 using namespace yaal::tools::util;
 
-namespace gameground
-{
+namespace gameground {
 
-namespace set_bang
-{
+namespace set_bang {
 
 char const* const HSetBang::PROTOCOL::PLAY = "play";
 
 HSetBang::HSetBang( HServer* server_, HLogic::id_t const& id_, HString const& comment_, int startupPlayers_ )
 	: HLogic( server_, id_, comment_ ), _startupPlayers( startupPlayers_ ),
-	_players(), _varTmpBuffer()
-	{
+	_players(), _varTmpBuffer() {
 	M_PROLOG
 	_handlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HSetBang::handler_play );
 	return;
 	M_EPILOG
-	}
+}
 
-HSetBang::~HSetBang ( void )
-	{
+HSetBang::~HSetBang ( void ) {
 	M_PROLOG
 	return;
 	M_EPILOG
-	}
+}
 
-void HSetBang::handler_play( OClientInfo* clientInfo_, HString const& message_ )
-	{
+void HSetBang::handler_play( OClientInfo* clientInfo_, HString const& message_ ) {
 	M_PROLOG
 	HLock l( _mutex );
 	*clientInfo_->_socket << PROTOCOL::MSG << PROTOCOL::SEP << message_ << endl;
 	return;
 	M_EPILOG
-	}
+}
 
-bool HSetBang::do_accept( OClientInfo* clientInfo_ )
-	{
+bool HSetBang::do_accept( OClientInfo* clientInfo_ ) {
 	out << "new candidate " << clientInfo_->_login << endl;
 	return ( false );
-	}
+}
 
-void HSetBang::do_post_accept( OClientInfo* clientInfo_ )
-	{
+void HSetBang::do_post_accept( OClientInfo* clientInfo_ ) {
 	M_PROLOG
 	out << "conditions: _players.size() = " << _players.size() << ", _startupPlayers = " << _startupPlayers << endl;
 	OPlayerInfo info;
@@ -99,10 +92,9 @@ void HSetBang::do_post_accept( OClientInfo* clientInfo_ )
 	out << "player [" << clientInfo_->_login << "] accepted" << endl;
 	return;
 	M_EPILOG
-	}
+}
 
-void HSetBang::do_kick( OClientInfo* clientInfo_ )
-	{
+void HSetBang::do_kick( OClientInfo* clientInfo_ ) {
 	M_PROLOG
 	HLock l( _mutex );
 	_players.erase( clientInfo_ );
@@ -110,28 +102,24 @@ void HSetBang::do_kick( OClientInfo* clientInfo_ )
 			<< "Player " << clientInfo_->_login << " left this match." << endl << _out );
 	return;
 	M_EPILOG
-	}
+}
 
-yaal::hcore::HString HSetBang::do_get_info() const
-	{
+yaal::hcore::HString HSetBang::do_get_info() const {
 	HLock l( _mutex );
 	return ( HString( "set_bang," ) + get_comment() + "," + _players.size() );
-	}
+}
 
 }
 
-namespace logic_factory
-{
+namespace logic_factory {
 
-class HSetBangCreator : public HLogicCreatorInterface
-	{
+class HSetBangCreator : public HLogicCreatorInterface {
 protected:
 	virtual HLogic::ptr_t do_new_instance( HServer*, HLogic::id_t const&, HString const& );
 	virtual HString do_get_info( void ) const;
-	} setBangCreator;
+} setBangCreator;
 
-HLogic::ptr_t HSetBangCreator::do_new_instance( HServer* server_, HLogic::id_t const& id_, HString const& argv_ )
-	{
+HLogic::ptr_t HSetBangCreator::do_new_instance( HServer* server_, HLogic::id_t const& id_, HString const& argv_ ) {
 	M_PROLOG
 	out << "creating logic: " << argv_ << endl;
 	HTokenizer t( argv_, "," );
@@ -139,30 +127,27 @@ HLogic::ptr_t HSetBangCreator::do_new_instance( HServer* server_, HLogic::id_t c
 	int players = lexical_cast<int>( t[ 1 ] );
 	return ( make_pointer<set_bang::HSetBang>( server_, id_, name, players ) );
 	M_EPILOG
-	}
+}
 
-HString HSetBangCreator::do_get_info( void ) const
-	{
+HString HSetBangCreator::do_get_info( void ) const {
 	M_PROLOG
 	HString setupMsg;
 	setupMsg.format( "set_bang:%d", setup._setStartupPlayers );
 	out << setupMsg << endl;
 	return ( setupMsg );
 	M_EPILOG
-	}
+}
 
-namespace
-{
+namespace {
 
-bool registrar( void )
-	{
+bool registrar( void ) {
 	M_PROLOG
 	bool volatile failed = false;
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 	factory.register_logic_creator( HTokenizer( setBangCreator.get_info(), ":"  )[0], &setBangCreator );
 	return ( failed );
 	M_EPILOG
-	}
+}
 
 bool volatile registered = registrar();
 

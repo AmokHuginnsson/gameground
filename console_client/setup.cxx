@@ -36,13 +36,11 @@ using namespace yaal::tools;
 using namespace yaal::tools::util;
 using namespace yaal::dbwrapper;
 
-namespace gameground
-{
+namespace gameground {
 
 now_t now;
 
-HStreamInterface& operator << ( HStreamInterface& stream, now_t const& )
-	{
+HStreamInterface& operator << ( HStreamInterface& stream, now_t const& ) {
 	static int const TIMESTAMP_SIZE = 16;
 	time_t currentTime = ::time( NULL );
 	tm* brokenTime = ::localtime( &currentTime );
@@ -51,10 +49,9 @@ HStreamInterface& operator << ( HStreamInterface& stream, now_t const& )
 	::strftime( buffer, TIMESTAMP_SIZE, "%b %d %H:%M:%S", brokenTime );
 	stream << buffer;
 	return ( stream );
-	}
+}
 
-void OSetup::test_setup( void )
-	{
+void OSetup::test_setup( void ) {
 	M_PROLOG
 	if ( _quiet && _verbose )
 		yaal::tools::util::failure( 1,
@@ -63,11 +60,10 @@ void OSetup::test_setup( void )
 		clog.reset( make_pointer<HFile>( stdout ) );
 	else
 		std::clog.rdbuf( NULL );
-	if ( _quiet )
-		{
+	if ( _quiet ) {
 		cout.reset();
 		std::cout.rdbuf( NULL );
-		}
+	}
 	if ( _host.is_empty() )
 		yaal::tools::util::failure( 6,
 				_( "as a client you must specify server host\n" ) );
@@ -87,42 +83,37 @@ void OSetup::test_setup( void )
 		yaal::tools::util::failure ( 10, message );
 	if ( ! ( _gameType.is_empty() || _game.is_empty() ) )
 		yaal::tools::util::failure ( 12, _( "creating new game is enought, you do not have to join it explicite\n" ) );
-	if ( ! _gameType.is_empty() )
-		{
+	if ( ! _gameType.is_empty() ) {
 		HString type = get_token( _gameType, ",", 0 );
 		_game = get_token( _gameType, ",", 1 );
 		_gameType = type;
 		if ( _gameType.is_empty() || _game.is_empty() || ( _gameType == "" ) || ( _game == "" ) )
 			yaal::tools::util::failure ( 13, _( "when creating new game, you have specify both type and name of new game\n" ) );
-		}
+	}
 	return;
 	M_EPILOG
-	}
+}
 
-bool OSetup::test_glx_emperors( int emperors_, char*& message_ )
-	{
+bool OSetup::test_glx_emperors( int emperors_, char*& message_ ) {
 	return ( ( emperors_ < 2 )
 			&& ( message_ = _( "galaxy is multiplayer game and makes sense"
 					" only for at least two players\n" ) ) );
-	}
+}
 
-bool OSetup::test_glx_emperors_systems( int emperors_, int systems_, char*& message_ )
-	{
+bool OSetup::test_glx_emperors_systems( int emperors_, int systems_, char*& message_ ) {
 	return ( ( ( emperors_ + systems_ ) > MAX_SYSTEM_COUNT )
 			&& ( message_ = _( "bad total system count\n" ) ) );
-	}
+}
 
-bool OSetup::test_glx_systems( int systems_, char*& message_ )
-	{
+bool OSetup::test_glx_systems( int systems_, char*& message_ ) {
 	return ( ( systems_ < 0 )
 			&& ( message_ = _( "neutral system count has to be nonnegative number\n" ) ) );
-	}
+}
 
-bool OSetup::test_glx_board_size( int boardSize_, char*& message_ )
-	{
+bool OSetup::test_glx_board_size( int boardSize_, char*& message_ ) {
 	return ( ( ( boardSize_ < 6 ) || ( boardSize_ > MAX_BOARD_SIZE ) )
 			&& ( message_ = _( "bad board size specified\n" ) ) );
-	}
+}
 
 }
 

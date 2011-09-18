@@ -32,24 +32,19 @@ Copyright:
 
 #include "logic.hxx"
 
-namespace gameground
-{
+namespace gameground {
 
-namespace go
-{
+namespace go {
 
-class HGo : public HLogic
-	{
-	struct OPlayerInfo
-		{
+class HGo : public HLogic {
+	struct OPlayerInfo {
 		int long _timeLeft;
 		int _byoYomiPeriods;
 		int _stonesCaptured;
 		int _score;
 		OPlayerInfo( void ) : _timeLeft( 0 ), _byoYomiPeriods( 0 ), _stonesCaptured( 0 ), _score( 0 ) {}
-		};
-	struct STONE
-		{
+	};
+	struct STONE {
 		typedef char stone_t;
 		static stone_t const BLACK;
 		static stone_t const WHITE;
@@ -60,15 +55,13 @@ class HGo : public HLogic
 		static stone_t const TERITORY_BLACK;
 		static stone_t const TERITORY_WHITE;
 		static stone_t const TERITORY_NONE;
-		};
-	struct GOBAN_SIZE
-		{
+	};
+	struct GOBAN_SIZE {
 		static int const NORMAL = 19;
 		static int const SMALL = 13;
 		static int const TINY = 9;
-		};
-	struct PROTOCOL : public HLogic::PROTOCOL
-		{
+	};
+	struct PROTOCOL : public HLogic::PROTOCOL {
 		static char const* const ADMIN;
 		static char const* const BYOYOMIPERIODS;
 		static char const* const BYOYOMITIME;
@@ -88,7 +81,7 @@ class HGo : public HLogic
 		static char const* const TOMOVE;
 		static char const* const DEAD;
 		static char const* const ACCEPT;
-		};
+	};
 protected:
 	/*{*/
 	typedef yaal::hcore::HPair<OClientInfo*, OPlayerInfo> player_t;
@@ -168,7 +161,7 @@ private:
 	HGo& operator = ( HGo const& );
 	/*}*/
 	friend class HServer;
-	};
+};
 
 }
 

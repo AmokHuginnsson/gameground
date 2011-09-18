@@ -29,11 +29,9 @@ Copyright:
 
 #include <yaal/yaal.hxx>
 
-namespace gameground
-{
+namespace gameground {
 
-class HSpellChecker : public yaal::hcore::HSingletonInterface
-	{
+class HSpellChecker : public yaal::hcore::HSingletonInterface {
 	void* _spellChecker; /* AspellSpeller */
 	void* _spellConfig; /* AspellConfig */
 public:
@@ -46,7 +44,7 @@ private:
 	HSpellChecker& operator = ( HSpellChecker const& );
 	friend class yaal::hcore::HSingleton<HSpellChecker>;
 	friend class yaal::hcore::HDestructor<HSpellChecker>;
-	};
+};
 
 typedef yaal::hcore::HSingleton<HSpellChecker> HSpellCheckerService;
 

@@ -29,8 +29,7 @@ Copyright:
 
 #include <yaal/yaal.hxx>
 
-namespace gameground
-{
+namespace gameground {
 
 struct OClientInfo;
 class HServer;
@@ -38,8 +37,7 @@ class HLogic;
 
 yaal::hcore::HStreamInterface& operator << ( yaal::hcore::HStreamInterface&, HLogic const* );
 
-class HLogic
-	{
+class HLogic {
 public:
 	typedef yaal::hcore::HString id_t;
 	typedef yaal::hcore::HPointer<HLogic> ptr_t;
@@ -57,8 +55,7 @@ protected:
 	yaal::tools::HStringStream _out;
 	mutable yaal::hcore::HMutex _mutex;
 	/*}*/
-	struct PROTOCOL
-		{
+	struct PROTOCOL {
 		static char const* const SEP;
 		static char const* const SEPP;
 		static char const* const SAY;
@@ -67,7 +64,7 @@ protected:
 		static char const* const PLAYER;
 		static char const* const PLAYER_QUIT;
 		virtual ~PROTOCOL(){}
-		};
+	};
 public:
 	/*{*/
 	HLogic( HServer*, id_t const&, yaal::hcore::HString const& );
@@ -103,12 +100,11 @@ private:
 	HLogic& operator = ( HLogic const& );
 	/*}*/
 	friend class HServer;
-	};
+};
 
 typedef yaal::hcore::HExceptionT<HLogic> HLogicException;
 
-class HLogicCreatorInterface
-	{
+class HLogicCreatorInterface {
 protected:
 	virtual void do_initialize_globals( void ){};
 	virtual void do_cleanup_globals( void ){};
@@ -120,7 +116,7 @@ public:
 	void cleanup_globals( void );
 	yaal::hcore::HString get_info( void ) const;
 	HLogic::ptr_t new_instance( HServer*, HLogic::id_t const&, yaal::hcore::HString const& );
-	};
+};
 
 }
 

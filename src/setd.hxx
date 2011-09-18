@@ -31,24 +31,19 @@ Copyright:
 
 #include "logic.hxx"
 
-namespace gameground
-{
+namespace gameground {
 
-namespace set_bang
-{
+namespace set_bang {
 
-class HSetBang : public HLogic
-	{
-	struct OPlayerInfo
-		{
+class HSetBang : public HLogic {
+	struct OPlayerInfo {
 		int _score;
 		int _last;
 		OPlayerInfo( void ) : _score( 0 ), _last( 0 ) {}
-		};
-	struct PROTOCOL : public HLogic::PROTOCOL
-		{
+	};
+	struct PROTOCOL : public HLogic::PROTOCOL {
 		static char const* const PLAY;
-		};
+	};
 protected:
 	/*{*/
 	typedef yaal::hcore::HMap<OClientInfo*, OPlayerInfo> players_t;
@@ -75,7 +70,7 @@ private:
 	HSetBang& operator = ( HSetBang const& );
 	/*}*/
 	friend class HServer;
-	};
+};
 
 }
 

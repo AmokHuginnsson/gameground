@@ -32,11 +32,9 @@ Copyright:
 #include "clientinfo.hxx"
 #include "logic.hxx"
 
-namespace gameground
-{
+namespace gameground {
 
-class HServer
-	{
+class HServer {
 protected:
 	typedef void ( HServer::* handler_t )( OClientInfo&, yaal::hcore::HString const& );
 	typedef yaal::hcore::HMap<HLogic::id_t, HLogic::ptr_t> logics_t;
@@ -58,8 +56,7 @@ protected:
 	yaal::hcore::HNumber _idPool;
 	dropouts_t _dropouts;
 public:
-	struct PROTOCOL
-		{
+	struct PROTOCOL {
 		static char const* const ABANDON;
 		static char const* const ACCOUNT;
 		static char const* const CMD;
@@ -88,7 +85,7 @@ public:
 		static char const* const VERSION;
 		static char const* const VERSION_ID;
 		static char const* const WARN;
-		};
+	};
 	HServer( int );
 	~HServer( void );
 	int init_server( int );
@@ -131,7 +128,7 @@ protected:
 	HLogic::id_t create_id( void );
 	void free_id( HLogic::id_t const& );
 	void cleanup( void );
-	};
+};
 
 int main_server( void );
 

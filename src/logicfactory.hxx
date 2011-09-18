@@ -33,20 +33,17 @@ Copyright:
 
 #include "logic.hxx"
 
-namespace gameground
-{
+namespace gameground {
 
-class HLogicFactory
-	{
+class HLogicFactory {
 public:
-	struct OCreator
-		{
+	struct OCreator {
 		OCreator( void ) : _instantiator( NULL ) {}
 		OCreator( OCreator const& c ) : _instantiator( c._instantiator ) {}
 		OCreator& operator = ( OCreator const& c ) { _instantiator = c._instantiator; return ( *this ); }
 		HLogicCreatorInterface* _instantiator;
 		yaal::hcore::HString get_info( void ) const { return ( _instantiator->get_info() ); }
-		};
+	};
 	typedef yaal::hcore::HMap<yaal::hcore::HString, OCreator> creators_t;
 private:
 	creators_t _creators;
@@ -64,7 +61,7 @@ private:
 	static int life_time( int );
 	friend class yaal::hcore::HSingleton<HLogicFactory>;
 	friend class yaal::hcore::HDestructor<HLogicFactory>;
-	};
+};
 
 typedef yaal::hcore::HSingleton<HLogicFactory> HLogicFactoryInstance;
 

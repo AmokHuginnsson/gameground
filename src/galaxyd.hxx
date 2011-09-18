@@ -31,16 +31,13 @@ Copyright:
 
 #include "logic.hxx"
 
-namespace gameground
-{
+namespace gameground {
 
-namespace galaxy
-{
+namespace galaxy {
 
 class HSystem;
 class HGalaxy;
-class HFleet
-	{
+class HFleet {
 protected:
 	/*{*/
 	int _size;
@@ -55,11 +52,10 @@ protected:
 	/*}*/
 	friend class HSystem;
 	friend class HGalaxy;
-	};
+};
 
 class HGalaxy;
-class HSystem
-	{
+class HSystem {
 protected:
 	/*{*/
 	typedef yaal::hcore::HList<HFleet> attackers_t;
@@ -82,19 +78,17 @@ public:
 	/*}*/
 protected:
 	friend class HGalaxy;
-	};
+};
 
 inline void swap( HSystem& a, HSystem& b )
 	{ a.swap( b ); }
 
-class HGalaxy : public HLogic
-	{
-	struct OEmperorInfo
-		{
+class HGalaxy : public HLogic {
+	struct OEmperorInfo {
 		int _color;
 		int _systems;
 		OEmperorInfo( void ) : _color( -1 ), _systems( -1 ) {}
-		};
+	};
 	typedef yaal::hcore::HMap<OClientInfo*, OEmperorInfo> emperors_t;
 protected:
 	/*{*/
@@ -131,7 +125,7 @@ private:
 	HGalaxy& operator = ( HGalaxy const& );
 	/*}*/
 	friend class HServer;
-	};
+};
 
 }
 

@@ -32,25 +32,20 @@ Copyright:
 
 #include "logic.hxx"
 
-namespace gameground
-{
+namespace gameground {
 
-namespace gomoku
-{
+namespace gomoku {
 
-class HGomoku : public HLogic
-	{
-	struct STONE
-		{
+class HGomoku : public HLogic {
+	struct STONE {
 		typedef char stone_t;
 		static stone_t const NONE;
 		static stone_t const BLACK;
 		static stone_t const WHITE;
-		};
+	};
 	static int const GOBAN_SIZE = 15;
 	static int const FIVE_IN_A_ROW = 5;
-	struct PROTOCOL : public HLogic::PROTOCOL
-		{
+	struct PROTOCOL : public HLogic::PROTOCOL {
 		static char const* const SPECTATOR;
 		static char const* const CONTESTANT;
 		static char const* const GETUP;
@@ -61,7 +56,7 @@ class HGomoku : public HLogic
 		static char const* const STONES;
 		static char const* const TOMOVE;
 		static char const* const FIVE_IN_A_ROW;
-		};
+	};
 protected:
 	/*{*/
 	typedef yaal::hcore::HMap<OClientInfo*, int> players_t;
@@ -110,7 +105,7 @@ private:
 	HGomoku& operator = ( HGomoku const& );
 	/*}*/
 	friend class HServer;
-	};
+};
 
 }
 

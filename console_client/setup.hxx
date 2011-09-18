@@ -32,8 +32,7 @@ Copyright:
 
 #include "config.hxx"
 
-namespace gameground
-{
+namespace gameground {
 
 static int const GALAXY_BOARD_SIZE         =  16;
 static int const DEFAULT_MAX_CONNECTIONS   =  64;
@@ -55,8 +54,7 @@ typedef double long ( *now_t )( bool, double, char, int, bool, double, void*, vo
 extern now_t now;
 yaal::hcore::HStreamInterface& operator << ( yaal::hcore::HStreamInterface&, now_t const& );
 
-struct OSetup
-	{
+struct OSetup {
 	bool _quiet;			/* --quiet, --silent */
 	bool _verbose;		/* --verbose */
 	bool _debug;
@@ -90,7 +88,7 @@ struct OSetup
 private:
 	OSetup ( OSetup const & );
 	OSetup & operator = ( OSetup const & );
-	};
+};
 
 extern OSetup setup;
 

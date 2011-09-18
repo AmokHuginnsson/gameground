@@ -32,8 +32,7 @@ Copyright:
 
 #include "config.hxx"
 
-namespace gameground
-{
+namespace gameground {
 
 extern char const* const DATABASE_PATH;
 extern char const* const DATABASE_LOGIN;
@@ -70,8 +69,7 @@ typedef double long ( *now_t )( bool, double, char, int, bool, double, void*, vo
 extern now_t now;
 yaal::hcore::HStreamInterface& operator << ( yaal::hcore::HStreamInterface&, now_t const& );
 
-struct OSetup
-	{
+struct OSetup {
 	bool _quiet;			/* --quiet, --silent */
 	bool _verbose;		/* --verbose */
 	bool _debug;
@@ -127,7 +125,7 @@ struct OSetup
 private:
 	OSetup ( OSetup const & );
 	OSetup & operator = ( OSetup const & );
-	};
+};
 
 extern OSetup setup;
 

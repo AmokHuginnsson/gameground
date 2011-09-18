@@ -31,11 +31,9 @@ Copyright:
 
 #include "logic.hxx"
 
-namespace gameground
-{
+namespace gameground {
 
-struct OClientInfo
-	{
+struct OClientInfo {
 	bool _valid;
 	bool _anonymous;
 	typedef yaal::hcore::HSet<HLogic::id_t> logics_t;
@@ -43,14 +41,13 @@ struct OClientInfo
 	yaal::hcore::HSocket::ptr_t _socket;
 	logics_t _logics;
 	OClientInfo( void ) : _valid( true ), _anonymous( false ), _login(), _socket(), _logics() {}
-	~OClientInfo( void )
-		{
+	~OClientInfo( void ) {
 		M_PROLOG
 		M_ASSERT( _logics.is_empty() );
 		return;
 		M_EPILOG
-		};
 	};
+};
 
 }
 

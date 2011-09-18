@@ -42,11 +42,9 @@ using namespace yaal::tools;
 using namespace yaal::tools::util;
 using namespace sgf;
 
-namespace gameground
-{
+namespace gameground {
 
-namespace go
-{
+namespace go {
 
 HGo::STONE::stone_t const HGo::STONE::BLACK = 'b';
 HGo::STONE::stone_t const HGo::STONE::WHITE = 'w';
@@ -83,12 +81,11 @@ static int const ACCEPTED = -7;
 int const GO_MSG_NOT_YOUR_TURN = 0;
 int const GO_MSG_YOU_CANT_DO_IT_NOW = 1;
 int const GO_MSG_MALFORMED = 2;
-char const* const GO_MSG[] =
-	{
+char const* const GO_MSG[] = {
 	"not your turn",
 	"you cannot do it now",
 	"malformed packet"
-	};
+};
 
 HGo::HGo( HServer* server_, HLogic::id_t const& id_, HString const& comment_ )
 	: HLogic( server_, id_, comment_ ),
@@ -100,8 +97,7 @@ HGo::HGo( HServer* server_, HLogic::id_t const& id_, HString const& comment_ )
 	_koGame( GOBAN_SIZE::NORMAL * GOBAN_SIZE::NORMAL + sizeof ( '\0' ) ),
 	_oldGame( GOBAN_SIZE::NORMAL * GOBAN_SIZE::NORMAL + sizeof ( '\0' ) ),
 	_sgf( SGF::GAME_TYPE::GO, "gameground" ),
-	_players(), _varTmpBuffer()
-	{
+	_players(), _varTmpBuffer() {
 	M_PROLOG
 	_contestants[ 0 ] = _contestants[ 1 ] = NULL;
 	_handlers[ PROTOCOL::SETUP ] = static_cast<handler_t>( &HGo::handler_setup );
@@ -109,28 +105,25 @@ HGo::HGo( HServer* server_, HLogic::id_t const& id_, HString const& comment_ )
 	set_handicaps( _handicaps );
 	return;
 	M_EPILOG
-	}
+}
 
-HGo::~HGo ( void )
-	{
+HGo::~HGo ( void ) {
 	M_PROLOG
 	revoke_scheduled_tasks();
 	return;
 	M_EPILOG
-	}
+}
 
-void HGo::broadcast_contestants( yaal::hcore::HString const& message_ )
-	{
+void HGo::broadcast_contestants( yaal::hcore::HString const& message_ ) {
 	M_PROLOG
 	M_ASSERT( _contestants[ 0 ] && _contestants[ 1 ] );
 	_contestants[ 0 ]->_socket->write_until_eos( message_ );
 	_contestants[ 1 ]->_socket->write_until_eos( message_ );
 	return;
 	M_EPILOG
-	}
+}
 
-void HGo::handler_setup( OClientInfo* clientInfo_, HString const& message_ )
-	{
+void HGo::handler_setup( OClientInfo* clientInfo_, HString const& message_ ) {
 	M_PROLOG
 	HLock l( _mutex );
 	if ( *_clients.begin() != clientInfo_ )
@@ -139,12 +132,10 @@ void HGo::handler_setup( OClientInfo* clientInfo_, HString const& message_ )
 		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
 	HString item = get_token( message_, ",", 0 );
 	int value = lexical_cast<int>( get_token( message_, ",", 1 ) );
-	if ( item == PROTOCOL::GOBAN )
-		{
+	if ( item == PROTOCOL::GOBAN ) {
 		_gobanSize = value;
 		set_handicaps( _handicaps );
-		}
-	else if ( item == PROTOCOL::KOMI )
+	} else if ( item == PROTOCOL::KOMI )
 		_komi = value;
 	else if ( item == PROTOCOL::HANDICAPS )
 		set_handicaps( value );
@@ -159,16 +150,14 @@ void HGo::handler_setup( OClientInfo* clientInfo_, HString const& message_ )
 	broadcast( _out << PROTOCOL::SETUP << PROTOCOL::SEP << message_ << endl << _out );
 	return;
 	M_EPILOG
-	}
+}
 
-void HGo::handler_sit( OClientInfo* clientInfo_, HString const& message_ )
-	{
+void HGo::handler_sit( OClientInfo* clientInfo_, HString const& message_ ) {
 	M_PROLOG
 	HString place = get_token( message_, ",", 1 );
 	if ( place.get_length() < 1 )
 		throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
-	else
-		{
+	else {
 		char stone = place[ 0 ];
 		if ( ( stone != STONE::BLACK ) && ( stone != STONE::WHITE ) )
 			throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
@@ -178,22 +167,18 @@ void HGo::handler_sit( OClientInfo* clientInfo_, HString const& message_ )
 		else if ( contestant( stone ) != NULL )
 			*clientInfo_->_socket << *this
 				<< PROTOCOL::MSG << PROTOCOL::SEP << "Some one was faster." << endl;
-		else
-			{
+		else {
 			contestant( stone ) = clientInfo_;
 			OPlayerInfo& info = *get_player_info( clientInfo_ );
 			info._timeLeft = _mainTime * SECONDS_IN_MINUTE;
 			info._byoYomiPeriods = _byoYomiPeriods;
 			info._stonesCaptured = 0;
 			info._score = ( stone == STONE::WHITE ? _komi : 0 );
-			if ( ! ( contestant( STONE::BLACK ) && contestant( STONE::WHITE ) ) )
-				{
+			if ( ! ( contestant( STONE::BLACK ) && contestant( STONE::WHITE ) ) ) {
 				_start = 0;
 				_move = 0;
 				set_handicaps( _handicaps );
-				}
-			else
-				{
+			} else {
 				OPlayerInfo& foe = *get_player_info( contestant( opponent( stone ) ) );
 				foe._timeLeft = info._timeLeft;
 				foe._byoYomiPeriods = info._byoYomiPeriods;
@@ -205,24 +190,22 @@ void HGo::handler_sit( OClientInfo* clientInfo_, HString const& message_ )
 				_sgf._game._whiteName = contestant( STONE::WHITE )._login;
 				*/
 				broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The Go match started." << endl << _out );
-				}
 			}
 		}
+	}
 	return;
 	M_EPILOG
-	}
+}
 
-void HGo::handler_getup( OClientInfo* clientInfo_, HString const& /*message_*/ )
-	{
+void HGo::handler_getup( OClientInfo* clientInfo_, HString const& /*message_*/ ) {
 	M_PROLOG
 	contestant_gotup( clientInfo_ );
 	_state = STONE::NONE;
 	return;
 	M_EPILOG
-	}
+}
 
-void HGo::handler_put_stone( OClientInfo* clientInfo_, HString const& message_ )
-	{
+void HGo::handler_put_stone( OClientInfo* clientInfo_, HString const& message_ ) {
 	M_PROLOG
 	if ( ( _state != STONE::BLACK ) && ( _state != STONE::WHITE ) )
 		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
@@ -239,10 +222,9 @@ void HGo::handler_put_stone( OClientInfo* clientInfo_, HString const& message_ )
 	send_goban();
 	return;
 	M_EPILOG
-	}
+}
 
-void HGo::handler_pass( OClientInfo* clientInfo_, HString const& /*message_*/ )
-	{
+void HGo::handler_pass( OClientInfo* clientInfo_, HString const& /*message_*/ ) {
 	M_PROLOG
 	if ( ( _state != STONE::BLACK ) && ( _state != STONE::WHITE ) )
 		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
@@ -250,24 +232,21 @@ void HGo::handler_pass( OClientInfo* clientInfo_, HString const& /*message_*/ )
 		throw HLogicException( GO_MSG[ GO_MSG_NOT_YOUR_TURN ] );
 	_state = opponent( _state );
 	++ _pass;
-	if ( _pass == 3 )
-		{
+	if ( _pass == 3 ) {
 		_state = STONE::MARK;
 		broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The match has ended." << endl << _out );
 		broadcast_contestants( _out << *this << PROTOCOL::MSG << PROTOCOL::SEP << "Select your dead stones." << endl << _out );
-		}
+	}
 	return;
 	M_EPILOG
-	}
+}
 
-void HGo::handler_dead( OClientInfo* clientInfo_, HString const& message_ )
-	{
+void HGo::handler_dead( OClientInfo* clientInfo_, HString const& message_ ) {
 	M_PROLOG
 	if ( _state != STONE::MARK )
 		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
 	HString str;
-	for ( int i = 1; ! ( str = get_token( message_, ",", i ) ).is_empty() ; i += 2 )
-		{
+	for ( int i = 1; ! ( str = get_token( message_, ",", i ) ).is_empty() ; i += 2 ) {
 		int col = lexical_cast<int>( str );
 		int row = lexical_cast<int>( get_token( message_, ",", i + 1 ) );
 		out << "dead: " << col << "," << row << endl;
@@ -279,14 +258,13 @@ void HGo::handler_dead( OClientInfo* clientInfo_, HString const& message_ )
 		if ( contestant( goban( col, row ) ) != clientInfo_ )
 			throw HLogicException( "not your stone" );
 		mark_stone_dead( col, row );
-		}
+	}
 	send_goban();
 	return;
 	M_EPILOG
-	}
+}
 
-void HGo::handler_accept( OClientInfo* clientInfo_ )
-	{
+void HGo::handler_accept( OClientInfo* clientInfo_ ) {
 	M_PROLOG
 	if ( _state != STONE::MARK )
 		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
@@ -295,38 +273,33 @@ void HGo::handler_accept( OClientInfo* clientInfo_ )
 		throw HLogicException( "you already accepted stones" );
 	info._byoYomiPeriods = ACCEPTED;
 	if ( ( get_player_info( _contestants[ 0 ] )->_byoYomiPeriods == ACCEPTED )
-			&& ( get_player_info( _contestants[ 1 ] )->_byoYomiPeriods == ACCEPTED ) )
-		{
+			&& ( get_player_info( _contestants[ 1 ] )->_byoYomiPeriods == ACCEPTED ) ) {
 		count_score();
 		_state = STONE::NONE;
-		}
+	}
 	return;
 	M_EPILOG
-	}
+}
 
-void HGo::count_score( void )
-	{
+void HGo::count_score( void ) {
 	M_PROLOG
-	for ( int i = 0; i < ( _gobanSize * _gobanSize ); ++ i )
-		{
+	for ( int i = 0; i < ( _gobanSize * _gobanSize ); ++ i ) {
 		int x = i / _gobanSize;
 		int y = i % _gobanSize;
-		if ( goban( x, y ) == STONE::NONE )
-			{
+		if ( goban( x, y ) == STONE::NONE ) {
 			STONE::stone_t teritory = mark_teritory( x, y );
 			STONE::stone_t mark = STONE::TERITORY_NONE;
-			switch ( teritory )
-				{
+			switch ( teritory ) {
 				case ( STONE::BLACK ): mark = STONE::TERITORY_BLACK; break;
 				case ( STONE::WHITE ): mark = STONE::TERITORY_WHITE; break;
 				case ( STONE::TERITORY_NONE ): mark = STONE::TERITORY_NONE; break;
 				default:
 					out << "teritory: '" << teritory << "'" << endl;
 					M_ASSERT( ! "bug in count_score switch" );
-				}
-			replace_stones( static_cast<char>( toupper( STONE::TERITORY_NONE ) ), mark );
 			}
+			replace_stones( static_cast<char>( toupper( STONE::TERITORY_NONE ) ), mark );
 		}
+	}
 	replace_stones( static_cast<char>( toupper( STONE::DEAD_BLACK ) ), STONE::DEAD_BLACK );
 	replace_stones( static_cast<char>( toupper( STONE::DEAD_WHITE ) ), STONE::DEAD_WHITE );
 	commit();
@@ -358,14 +331,12 @@ void HGo::count_score( void )
 	send_goban();
 	return;
 	M_EPILOG
-	}
+}
 
-HGo::STONE::stone_t HGo::mark_teritory( int x, int y )
-	{
+HGo::STONE::stone_t HGo::mark_teritory( int x, int y ) {
 	STONE::stone_t teritory = static_cast<char>( toupper( STONE::TERITORY_NONE ) );
 	STONE::stone_t stone = goban( x, y );
-	if ( ( stone == STONE::NONE ) || ( stone == STONE::DEAD_BLACK ) || ( stone == STONE::DEAD_WHITE ) )
-		{
+	if ( ( stone == STONE::NONE ) || ( stone == STONE::DEAD_BLACK ) || ( stone == STONE::DEAD_WHITE ) ) {
 		if ( stone == STONE::NONE )
 			goban( x, y ) = teritory;
 		else
@@ -374,18 +345,15 @@ HGo::STONE::stone_t HGo::mark_teritory( int x, int y )
 		int whiteNeighbour = 0;
 		int bothNeighbour = 0;
 		int directs[][2] = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
-		for ( int i = 0; i < 4; ++ i )
-			{
+		for ( int i = 0; i < 4; ++ i ) {
 			int nx = x + directs[ i ][ 0 ];
 			int ny = y + directs[ i ][ 1 ];
 			if ( ( nx >= 0 ) && ( nx < _gobanSize )
-				&& ( ny >= 0 ) && ( ny < _gobanSize ) )
-				{
+				&& ( ny >= 0 ) && ( ny < _gobanSize ) ) {
 				STONE::stone_t neighbour = goban( nx, ny );
 				if ( ( neighbour != teritory )
 						&& ( neighbour != toupper( STONE::DEAD_BLACK ) )
-						&& ( neighbour != toupper( STONE::DEAD_WHITE ) ) )
-					{
+						&& ( neighbour != toupper( STONE::DEAD_WHITE ) ) ) {
 					STONE::stone_t NewTeritory = mark_teritory( nx, ny );
 					if ( NewTeritory == STONE::BLACK )
 						++ blackNeighbour;
@@ -393,25 +361,23 @@ HGo::STONE::stone_t HGo::mark_teritory( int x, int y )
 						++ whiteNeighbour;
 					else
 						++ bothNeighbour;
-					}
 				}
 			}
+		}
 		if ( bothNeighbour || ( blackNeighbour && whiteNeighbour ) )
 			teritory = STONE::TERITORY_NONE;
 		else if ( blackNeighbour )
 			teritory = STONE::BLACK;
 		else
 			teritory = STONE::WHITE;
-		}
-	else if ( ( stone == STONE::BLACK ) || ( stone == STONE::WHITE ) || ( stone == toupper ( STONE::TERITORY_NONE ) ) )
+	} else if ( ( stone == STONE::BLACK ) || ( stone == STONE::WHITE ) || ( stone == toupper ( STONE::TERITORY_NONE ) ) )
 		teritory = stone;
 	else
 		M_ASSERT( ( stone == toupper( STONE::DEAD_BLACK ) ) || ( stone == toupper( STONE::DEAD_WHITE ) ) );
 	return ( teritory );
-	}
+}
 
-void HGo::handler_play( OClientInfo* clientInfo_, HString const& message_ )
-	{
+void HGo::handler_play( OClientInfo* clientInfo_, HString const& message_ ) {
 	M_PROLOG
 	HLock l( _mutex );
 	HString item = get_token( message_, ",", 0 );
@@ -440,10 +406,9 @@ void HGo::handler_play( OClientInfo* clientInfo_, HString const& message_ )
 	send_contestants();
 	return;
 	M_EPILOG
-	}
+}
 
-HGo::players_t::iterator HGo::find_player( OClientInfo* clientInfo_ )
-	{
+HGo::players_t::iterator HGo::find_player( OClientInfo* clientInfo_ ) {
 	M_PROLOG
 	players_t::iterator it;
 	for ( it = _players.begin(); it != _players.end(); ++ it )
@@ -451,25 +416,22 @@ HGo::players_t::iterator HGo::find_player( OClientInfo* clientInfo_ )
 			break;
 	return ( it );
 	M_EPILOG
-	}
+}
 
-HGo::OPlayerInfo* HGo::get_player_info( OClientInfo* clientInfo_ )
-	{
+HGo::OPlayerInfo* HGo::get_player_info( OClientInfo* clientInfo_ ) {
 	M_PROLOG
 	players_t::iterator it = find_player( clientInfo_ );
 	M_ASSERT( it != _players.end() );
 	return ( &it->second );
 	M_EPILOG
-	}
+}
 
-bool HGo::do_accept( OClientInfo* clientInfo_ )
-	{
+bool HGo::do_accept( OClientInfo* clientInfo_ ) {
 	out << "new candidate " << clientInfo_->_login << endl;
 	return ( false );
-	}
+}
 
-void HGo::do_post_accept( OClientInfo* clientInfo_ )
-	{
+void HGo::do_post_accept( OClientInfo* clientInfo_ ) {
 	M_PROLOG
 	HLock l( _mutex );
 	if ( _players.size() == 0 )
@@ -491,18 +453,16 @@ void HGo::do_post_accept( OClientInfo* clientInfo_ )
 	player_t info;
 	info.first = clientInfo_;
 	_players.push_back( info );
-	for ( clients_t::HIterator it = _clients.begin(); it != _clients.end(); ++ it )
-		{
-		if ( *it != clientInfo_ )
-			{
+	for ( clients_t::HIterator it = _clients.begin(); it != _clients.end(); ++ it ) {
+		if ( *it != clientInfo_ ) {
 			*clientInfo_->_socket << *this
 					<< PROTOCOL::PLAYER << PROTOCOL::SEP
 					<< (*it)->_login << endl;
 			*clientInfo_->_socket << *this
 					<< PROTOCOL::MSG << PROTOCOL::SEP
 					<< "Player " << (*it)->_login << " approached this table." << endl;
-			}
 		}
+	}
 	broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
 			<< clientInfo_->_login << endl << _out );
 	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
@@ -511,10 +471,9 @@ void HGo::do_post_accept( OClientInfo* clientInfo_ )
 	send_goban();
 	return;
 	M_EPILOG
-	}
+}
 
-void HGo::do_kick( OClientInfo* clientInfo_ )
-	{
+void HGo::do_kick( OClientInfo* clientInfo_ ) {
 	M_PROLOG
 	HLock l( _mutex );
 	bool newadmin = false;
@@ -522,42 +481,37 @@ void HGo::do_kick( OClientInfo* clientInfo_ )
 	if ( it == _players.begin() )
 		newadmin = true;
 	_players.erase( it );
-	if ( newadmin )
-		{
+	if ( newadmin ) {
 		it = _players.begin();
 		if ( it != _players.end() )
 			*it->first->_socket << *this
 				<< PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::ADMIN << endl;
-		}
+	}
 	if ( ( contestant( STONE::BLACK ) == clientInfo_ )
-			|| ( contestant( STONE::WHITE ) == clientInfo_ ) )
-		{
+			|| ( contestant( STONE::WHITE ) == clientInfo_ ) ) {
 		STONE::stone_t stone = ( contestant( STONE::BLACK ) == clientInfo_ ? STONE::BLACK : STONE::WHITE );
 		contestant_gotup( contestant( stone ) );
 		send_contestants();
-		}
+	}
 	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< "Player " << clientInfo_->_login << " left this match." << endl << _out );
 	return;
 	M_EPILOG
-	}
+}
 
-yaal::hcore::HString HGo::do_get_info() const
-	{
+yaal::hcore::HString HGo::do_get_info() const {
 	HLock l( _mutex );
 	return ( HString( "go," ) + get_comment() + "," + _gobanSize + "," + _komi + "," + _handicaps + "," + _mainTime + "," + _byoYomiPeriods + "," + _byoYomiTime );
-	}
+}
 
-void HGo::reschedule_timeout( void )
-	{
+void HGo::reschedule_timeout( void ) {
 	M_PROLOG
 	HAsyncCaller::get_instance().register_call( 0, call( &HGo::schedule_timeout, this ) );
 	return;
 	M_EPILOG
-	}
+}
 
-void HGo::schedule_timeout( void )
-	{
+void HGo::schedule_timeout( void ) {
 	M_PROLOG
 	++ _move;
 	OPlayerInfo& p = *get_player_info( contestant( _state ) );
@@ -566,33 +520,28 @@ void HGo::schedule_timeout( void )
 	HScheduledAsyncCaller::get_instance().register_call( time( NULL ) + p._timeLeft, call( &HGo::on_timeout, this ) );
 	return;
 	M_EPILOG
-	}
+}
 
-void HGo::on_timeout( void )
-	{
+void HGo::on_timeout( void ) {
 	M_PROLOG
 	HLock l( _mutex );
 	OPlayerInfo& p = *get_player_info( contestant( _state ) );
 	-- p._byoYomiPeriods;
-	if ( p._byoYomiPeriods < 0 )
-		{
+	if ( p._byoYomiPeriods < 0 ) {
 		_state = STONE::NONE;
 		broadcast( _out << PROTOCOL::TOMOVE << PROTOCOL::SEP
 				<< static_cast<char>( _state ) << endl << _out );
 		broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "End of time." << endl << _out );
-		}
-	else
-		{
+	} else {
 		p._timeLeft = _byoYomiTime * SECONDS_IN_MINUTE;
 		reschedule_timeout();
 		send_contestants();
-		}
+	}
 	return;
 	M_EPILOG
-	}
+}
 
-void HGo::set_handicaps( int handicaps_ )
-	{
+void HGo::set_handicaps( int handicaps_ ) {
 	M_PROLOG
 	if ( ( handicaps_ > 9 ) || ( handicaps_ < 0 ) )
 		throw HLogicException( _out << "bad handicap value: " << handicaps_ << _out );
@@ -600,13 +549,12 @@ void HGo::set_handicaps( int handicaps_ )
 	_game.raw()[ _gobanSize * _gobanSize ] = 0;
 	::memset( _koGame.raw(), STONE::NONE, _gobanSize * _gobanSize );
 	_koGame.raw()[ _gobanSize * _gobanSize ] = 0;
-	if ( handicaps_ != _handicaps )
-		{
+	if ( handicaps_ != _handicaps ) {
 		if ( handicaps_ > 0 )
 			_komi = 0;
 		else
 			_komi = setup._komi;
-		}
+	}
 	_handicaps = handicaps_;
 	if ( _handicaps > 1 )
 		set_handi( _handicaps );
@@ -615,14 +563,12 @@ void HGo::set_handicaps( int handicaps_ )
 	send_goban();
 	return;
 	M_EPILOG
-	}
+}
 
-void HGo::set_handi( int handi_ )
-	{
+void HGo::set_handi( int handi_ ) {
 	M_PROLOG
 	int hoshi = 3 - ( _gobanSize == GOBAN_SIZE::TINY ? 1 : 0 );
-	switch ( handi_ )
-		{
+	switch ( handi_ ) {
 		case ( 9 ):
 			put_stone( _gobanSize / 2, _gobanSize / 2, STONE::BLACK );
 		case ( 8 ):
@@ -649,74 +595,63 @@ void HGo::set_handi( int handi_ )
 		break;
 		default:
 			M_ASSERT( ! "unhandled case" );
-		}
+	}
 	return;
 	M_EPILOG
-	}
+}
 
-void HGo::put_stone( int col_, int row_, STONE::stone_t stone_ )
-	{
+void HGo::put_stone( int col_, int row_, STONE::stone_t stone_ ) {
 	M_PROLOG
 	_game.raw()[ row_ * _gobanSize + col_ ] = stone_;
 	return;
 	M_EPILOG
-	}
+}
 
-void HGo::send_goban( void )
-	{
+void HGo::send_goban( void ) {
 	M_PROLOG
 	broadcast( _out << PROTOCOL::STONES << PROTOCOL::SEP << _game.raw() << endl << _out );
 	return;
 	M_EPILOG
-	}
+}
 
-char& HGo::goban( int col_, int row_ )
-	{
+char& HGo::goban( int col_, int row_ ) {
 	return ( _koGame.raw()[ row_ * _gobanSize + col_ ] );
-	}
+}
 
-bool HGo::have_liberties( int col_, int row_, STONE::stone_t stone )
-	{
+bool HGo::have_liberties( int col_, int row_, STONE::stone_t stone ) {
 	if ( ( col_ < 0 ) || ( col_ > ( _gobanSize - 1 ) )
 			|| ( row_ < 0 ) || ( row_ > ( _gobanSize - 1 ) ) )
 		return ( false );
 	if ( goban( col_, row_ ) == STONE::NONE )
 		return ( true );
-	if ( goban( col_, row_ ) == stone )
-		{
+	if ( goban( col_, row_ ) == stone ) {
 		goban( col_, row_ ) = static_cast<char>( toupper( stone ) );
 		return ( have_liberties( col_, row_ - 1, stone )
 				|| have_liberties( col_, row_ + 1, stone )
 				|| have_liberties( col_ - 1, row_, stone )
 				|| have_liberties( col_ + 1, row_, stone ) );
-		}
-	return ( false );
 	}
+	return ( false );
+}
 
-void HGo::clear_goban( bool removeDead )
-	{
-	for ( int i = 0; i < _gobanSize; i++ )
-		{
-		for ( int j = 0; j < _gobanSize; j++ )
-			{
-			if ( goban( i, j ) != STONE::NONE )
-				{
+void HGo::clear_goban( bool removeDead ) {
+	for ( int i = 0; i < _gobanSize; i++ ) {
+		for ( int j = 0; j < _gobanSize; j++ ) {
+			if ( goban( i, j ) != STONE::NONE ) {
 				if ( removeDead && isupper( goban( i, j ) ) )
 					goban( i, j ) = STONE::NONE;
 				else
 					goban( i, j ) = static_cast<char>( tolower( goban( i, j ) ) );
-				}
 			}
 		}
 	}
+}
 
-HGo::STONE::stone_t HGo::opponent( STONE::stone_t stone )
-	{
+HGo::STONE::stone_t HGo::opponent( STONE::stone_t stone ) {
 	return ( stone == STONE::WHITE ? STONE::BLACK : STONE::WHITE );
-	}
+}
 
-bool HGo::have_killed( int x, int y, STONE::stone_t stone )
-	{
+bool HGo::have_killed( int x, int y, STONE::stone_t stone ) {
 	bool killed = false;
 	STONE::stone_t foeStone = opponent( stone );
 	goban( x, y ) = stone;
@@ -738,15 +673,13 @@ bool HGo::have_killed( int x, int y, STONE::stone_t stone )
 		clear_goban( false );
 	goban( x, y ) = STONE::NONE;
 	return ( killed );
-	}
+}
 
-bool HGo::is_ko( void )
-	{
+bool HGo::is_ko( void ) {
 	return ( ::memcmp( _koGame.raw(), _oldGame.raw(), _gobanSize * _gobanSize ) == 0 );
-	}
+}
 
-bool HGo::is_suicide( int x, int y, STONE::stone_t stone )
-	{
+bool HGo::is_suicide( int x, int y, STONE::stone_t stone ) {
 	bool suicide = false;
 	goban( x, y ) = stone;
 	if ( ! have_liberties( x, y, stone ) )
@@ -754,30 +687,26 @@ bool HGo::is_suicide( int x, int y, STONE::stone_t stone )
 	clear_goban( false );
 	goban( x, y ) = STONE::NONE;
 	return ( suicide );
-	}	
+}	
 
-void HGo::ensure_coordinates_validity( int x, int y )
-	{
+void HGo::ensure_coordinates_validity( int x, int y ) {
 	if ( ( x < 0 ) || ( x > ( _gobanSize - 1 ) )
 			|| ( y < 0 ) || ( y > ( _gobanSize - 1 ) ) )
 		throw HLogicException( "move outside goban" );
-	}
+}
 
-void HGo::make_move( int x, int y, STONE::stone_t stone )
-	{
+void HGo::make_move( int x, int y, STONE::stone_t stone ) {
 	M_PROLOG
 	ensure_coordinates_validity( x, y );
 	::memcpy( _koGame.raw(), _game.raw(), _gobanSize * _gobanSize );
 	if ( goban( x, y ) != STONE::NONE )
 		throw HLogicException( "position already occupied" );
-	if ( ! have_killed( x, y, stone ) )
-		{
-		if ( is_suicide( x, y, stone ) )
-			{
+	if ( ! have_killed( x, y, stone ) ) {
+		if ( is_suicide( x, y, stone ) ) {
 			clear_goban( false );
 			throw HLogicException( "suicides forbidden" );
-			}
-		}	
+		}
+	}	
 	goban( x, y ) = stone;
 	if ( is_ko() )
 		throw HLogicException( "forbidden by ko rule" );
@@ -785,44 +714,39 @@ void HGo::make_move( int x, int y, STONE::stone_t stone )
 	commit();
 	return;
 	M_EPILOG
-	}
+}
 
-void HGo::commit( void )
-	{
+void HGo::commit( void ) {
 	M_PROLOG
 	::memcpy( _game.raw(), _koGame.raw(), _gobanSize * _gobanSize );
 	return;
 	M_EPILOG
-	}
+}
 
-void HGo::mark_stone_dead( int col, int row )
-	{
+void HGo::mark_stone_dead( int col, int row ) {
 	M_PROLOG
 	STONE::stone_t stone = goban( col, row );
-	switch ( stone )
-		{
+	switch ( stone ) {
 		case ( STONE::BLACK ) : stone = STONE::DEAD_BLACK; break;
 		case ( STONE::WHITE ) : stone = STONE::DEAD_WHITE; break;
 		case ( STONE::DEAD_BLACK ) : stone = STONE::BLACK; break;
 		case ( STONE::DEAD_WHITE ) : stone = STONE::WHITE; break;
 		default:
 			M_ASSERT( ! "predicate error for switch( stone )" );
-		}
+	}
 	goban( col, row ) = stone;
 	commit();
 	return;
 	M_EPILOG
-	}
+}
 
-OClientInfo*& HGo::contestant( STONE::stone_t stone )
-	{
+OClientInfo*& HGo::contestant( STONE::stone_t stone ) {
 	M_ASSERT( ( stone == STONE::BLACK ) || ( stone == STONE::WHITE )
 			|| ( stone == STONE::DEAD_BLACK ) || ( stone == STONE::DEAD_WHITE ) );
 	return ( ( stone == STONE::BLACK ) || ( stone == STONE::DEAD_BLACK ) ? _contestants[ 0 ] : _contestants[ 1 ] );
-	}
+}
 
-void HGo::contestant_gotup( OClientInfo* clientInfo_ )
-	{
+void HGo::contestant_gotup( OClientInfo* clientInfo_ ) {
 	STONE::stone_t stone = ( contestant( STONE::BLACK ) == clientInfo_ ? STONE::BLACK : STONE::WHITE );
 	OClientInfo* foe = NULL;
 	if ( ( _state != STONE::NONE )
@@ -832,19 +756,17 @@ void HGo::contestant_gotup( OClientInfo* clientInfo_ )
 	contestant( stone ) = NULL;
 	_state = STONE::NONE;
 	return;
-	}
+}
 
-void HGo::send_contestants( void )
-	{
+void HGo::send_contestants( void ) {
 	M_PROLOG
 	send_contestant( STONE::BLACK );
 	send_contestant( STONE::WHITE );
 	return;
 	M_EPILOG
-	}
+}
 
-void HGo::send_contestant( char stone )
-	{
+void HGo::send_contestant( char stone ) {
 	M_PROLOG
 	OClientInfo* cinfo = contestant( stone );
 	char const* name = "";
@@ -852,15 +774,14 @@ void HGo::send_contestant( char stone )
 	int time = 0;
 	int byoyomi = 0;
 	int score = 0;
-	if ( cinfo )
-		{
+	if ( cinfo ) {
 		OPlayerInfo& info = *get_player_info( cinfo );
 		name = cinfo->_login.raw();
 		captured = info._stonesCaptured;
 		time = static_cast<int>( info._timeLeft );
 		byoyomi = info._byoYomiPeriods;
 		score = info._score;
-		}
+	}
 	broadcast( _out << PROTOCOL::CONTESTANT << PROTOCOL::SEP
 			<< stone << PROTOCOL::SEPP
 			<< name << PROTOCOL::SEPP
@@ -870,21 +791,18 @@ void HGo::send_contestant( char stone )
 			<< byoyomi << endl << _out );
 	return;
 	M_EPILOG
-	}
+}
 
-int HGo::count_stones( STONE::stone_t stone )
-	{
+int HGo::count_stones( STONE::stone_t stone ) {
 	return ( static_cast<int>( count( _game.raw(), _game.raw() + _gobanSize * _gobanSize, stone ) ) );
-	}
+}
 
-void HGo::replace_stones( STONE::stone_t which, STONE::stone_t with )
-	{
+void HGo::replace_stones( STONE::stone_t which, STONE::stone_t with ) {
 	replace( _koGame.raw(), _koGame.raw() + _gobanSize * _gobanSize, which, with );
 	return;
-	}
+}
 
-void HGo::update_clocks( void )
-	{
+void HGo::update_clocks( void ) {
 	M_PROLOG
 	revoke_scheduled_tasks();
 	int long now = time( NULL );
@@ -895,40 +813,35 @@ void HGo::update_clocks( void )
 	_start = now;
 	return;
 	M_EPILOG
-	}
+}
 
-void HGo::revoke_scheduled_tasks( void )
-	{
+void HGo::revoke_scheduled_tasks( void ) {
 	M_PROLOG
 	HAsyncCaller::get_instance().flush( this );
 	HScheduledAsyncCaller::get_instance().flush( this );
 	return;
 	M_EPILOG
-	}
+}
 
 }
 
-namespace logic_factory
-{
+namespace logic_factory {
 
-class HGoCreator : public HLogicCreatorInterface
-	{
+class HGoCreator : public HLogicCreatorInterface {
 protected:
 	virtual HLogic::ptr_t do_new_instance( HServer*, HLogic::id_t const&, HString const& );
 	virtual HString do_get_info( void ) const;
-	} goCreator;
+} goCreator;
 
-HLogic::ptr_t HGoCreator::do_new_instance( HServer* server_, HLogic::id_t const& id_, HString const& argv_ )
-	{
+HLogic::ptr_t HGoCreator::do_new_instance( HServer* server_, HLogic::id_t const& id_, HString const& argv_ ) {
 	M_PROLOG
 	out << "creating logic: " << argv_ << endl;
 	HString name = get_token( argv_, ",", 0 );
 	return ( make_pointer<go::HGo>( server_, id_, name ) );
 	M_EPILOG
-	}
+}
 
-HString HGoCreator::do_get_info( void ) const
-	{
+HString HGoCreator::do_get_info( void ) const {
 	M_PROLOG
 	HString setupMsg;
 	setupMsg.format( "go:%d,%d,%d,%d,%d,%d", setup._gobanSize, setup._komi, setup._handicaps,
@@ -936,20 +849,18 @@ HString HGoCreator::do_get_info( void ) const
 	out << setupMsg << endl;
 	return ( setupMsg );
 	M_EPILOG
-	}
+}
 
-namespace
-{
+namespace {
 
-bool registrar( void )
-	{
+bool registrar( void ) {
 	M_PROLOG
 	bool volatile failed = false;
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 	factory.register_logic_creator( HTokenizer( goCreator.get_info(), ":" )[0], &goCreator );
 	return ( failed );
 	M_EPILOG
-	}
+}
 
 bool volatile registered = registrar();
 

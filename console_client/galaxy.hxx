@@ -27,8 +27,7 @@ Copyright:
 #ifndef GALAXY_HXX_INCLUDED
 #define GALAXY_HXX_INCLUDED
 
-namespace gameground
-{
+namespace gameground {
 
 int main_client( void );
 

@@ -31,51 +31,40 @@ Copyright:
 
 #include "logic.hxx"
 
-namespace gameground
-{
+namespace gameground {
 
-namespace boggle
-{
+namespace boggle {
 
-class HBoggle : public HLogic
-	{
-	struct OPlayerInfo
-		{
+class HBoggle : public HLogic {
+	struct OPlayerInfo {
 		int _score;
 		int _last;
 		OPlayerInfo( void ) : _score( 0 ), _last( 0 ) {}
-		};
-	struct STATE
-		{
-		typedef enum
-			{
+	};
+	struct STATE {
+		typedef enum {
 			LOCKED,
 			ACCEPTING
-			} state_t;
-		};
-	struct EVENT
-		{
-		typedef enum
-			{
+		} state_t;
+	};
+	struct EVENT {
+		typedef enum {
 			BEGIN_ROUND,
 			END_ROUND
-			} event_t;
-		};
+		} event_t;
+	};
 public:
-	struct SCORING
-		{
-		typedef enum
-			{
+	struct SCORING {
+		typedef enum {
 			ORIGINAL = 0,
 			FIBONACCI = 1,
 			GEOMETRIC = 2,
 			FIBONACCI_4 = 3,
 			GEOMETRIC_4 = 4,
 			LONGEST_WORDS = 5
-			} scoring_t;
-		};
-	struct PROTOCOL : public HLogic::PROTOCOL
-		{
+		} scoring_t;
+	};
+	struct PROTOCOL : public HLogic::PROTOCOL {
 		static char const* const NAME;
 		static char const* const PLAY;
 		static char const* const DECK;
@@ -84,7 +73,7 @@ public:
 		static char const* const END_ROUND;
 		static char const* const SCORED;
 		static char const* const LONGEST;
-		};
+	};
 protected:
 	/*{*/
 	typedef yaal::hcore::HSet<OClientInfo*> client_set_t;
@@ -131,7 +120,7 @@ private:
 	HBoggle& operator = ( HBoggle const& );
 	/*}*/
 	friend class HServer;
-	};
+};
 
 }
 
