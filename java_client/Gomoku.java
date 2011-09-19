@@ -1,4 +1,4 @@
-import java.util.Vector;
+import java.util.ArrayList;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Comparator;
@@ -176,7 +176,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	private boolean _admin = false;
 	private int _move = 0;
 	private String _stones = null;
-	private Vector<GomokuPlayer> _players = new Vector<GomokuPlayer>();
+	private ArrayList<GomokuPlayer> _players = new ArrayList<GomokuPlayer>();
 	private SortedMap<Byte, GomokuContestant> _contestants = java.util.Collections.synchronizedSortedMap( new TreeMap<Byte, GomokuContestant>() );
 //--------------------------------------------//
 	public Gomoku( GameGround $applet, String $id, String $configuration ) throws Exception {

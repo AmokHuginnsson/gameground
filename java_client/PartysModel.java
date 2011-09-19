@@ -1,5 +1,5 @@
 import java.util.SortedMap;
-import java.util.Vector;
+import java.util.ArrayList;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
@@ -31,7 +31,7 @@ public class PartysModel implements TreeModel {
 			return ( level );
 		}
 	}
-	private Vector<TreeModelListener> treeModelListeners = new Vector<TreeModelListener>();
+	private ArrayList<TreeModelListener> treeModelListeners = new ArrayList<TreeModelListener>();
 	private SortedMap<String, HLogicInfo> _logics = null;
 	private int _nonPrivateLogics = 0;
 
@@ -78,7 +78,7 @@ public class PartysModel implements TreeModel {
 	 * Adds a listener for the TreeModelEvent posted after the tree changes.
 	 */
 	public void addTreeModelListener(TreeModelListener l) {
-		treeModelListeners.addElement(l);
+		treeModelListeners.add(l);
 	}
 
 	/**
@@ -172,7 +172,7 @@ public class PartysModel implements TreeModel {
 	 * Removes a listener previously added with addTreeModelListener().
 	 */
 	public void removeTreeModelListener(TreeModelListener l) {
-		treeModelListeners.removeElement(l);
+		treeModelListeners.remove(l);
 	}
 
 	/**

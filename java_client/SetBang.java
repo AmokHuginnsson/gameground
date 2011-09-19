@@ -1,4 +1,4 @@
-import java.util.Vector;
+import java.util.ArrayList;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -123,7 +123,7 @@ class SetBang extends HAbstractLogic implements Runnable {
 	public static final long serialVersionUID = 17l;
 	public static final String LABEL = "setbang";
 	public HGUILocal _gui;
-	private Vector<SetBangPlayer> _players = new Vector<SetBangPlayer>();
+	private ArrayList<SetBangPlayer> _players = new ArrayList<SetBangPlayer>();
 //--------------------------------------------//
 	public SetBang( GameGround $applet, String $id, String $configuration ) throws Exception {
 		super( $applet, $id, $configuration );

@@ -1,4 +1,4 @@
-import java.util.Vector;
+import java.util.ArrayList;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -181,7 +181,7 @@ class Boggle extends HAbstractLogic implements Runnable {
 	private long _roundTime = 0;
 	private long _pauseTime = 0;
 	private State _state = State.INIT;
-	private Vector<BogglePlayer> _players = new Vector<BogglePlayer>();
+	private ArrayList<BogglePlayer> _players = new ArrayList<BogglePlayer>();
 //--------------------------------------------//
 	public Boggle( GameGround $applet, String $id, String $configuration ) throws Exception {
 		super( $applet, $id, $configuration );

@@ -18,7 +18,6 @@ import javax.swing.tree.TreePath;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.TreeSelectionModel;
-import java.util.Vector;
 import javax.swing.DefaultListModel;
 
 class HBrowser extends HAbstractLogic {

@@ -1,6 +1,6 @@
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.Vector;
+import java.util.ArrayList;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 
@@ -58,7 +58,7 @@ class Chat extends HAbstractLogic {
 	public static final long serialVersionUID = 17l;
 	public static final String LABEL = "chat";
 	private static final SortedMap<String, Chat> _chats = java.util.Collections.synchronizedSortedMap( new TreeMap<String, Chat>() );
-	Vector<String> _lineBuffer = new Vector<String>();
+	ArrayList<String> _lineBuffer = new ArrayList<String>();
 	boolean _online = false;
 	boolean _aboutToCreate = false;
 	String _interlocutor;
