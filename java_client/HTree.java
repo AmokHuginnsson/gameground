@@ -10,6 +10,12 @@ public class HTree<Element> implements TreeModel {
 	public class HNode<Element> implements Iterable<HNode<Element>> {
 		ArrayList<HNode<Element>> _children = null;
 		Element _value = null;
+		public HNode() {
+			_value = null;
+		}
+		public HNode( Element $value ) {
+			_value = $value;
+		}
 		HNode<Element> getChildAt( int $index ) {
 			return ( _children != null ? _children.get( $index ) : null );
 		}
@@ -19,10 +25,18 @@ public class HTree<Element> implements TreeModel {
 		public Iterator<HNode<Element>> iterator() {
 			return ( _children != null ? _children.iterator() : null );
 		}
-		public void addNode() {
+		public HNode<Element> addNode() {
+			return ( addNode( null ) );
+		}
+		public HNode<Element> addNode( Element $value ) {
 			if ( _children == null )
 				_children = new ArrayList<HNode<Element>>();
-			_children.add( new HNode<Element>() );
+			HNode<Element> node = null;
+			_children.add( node = new HNode<Element>( $value ) );
+			return ( node );
+		}
+		public Element value() {
+			return ( _value );
 		}
 	}
 	HNode<Element> _root;
@@ -32,6 +46,13 @@ public class HTree<Element> implements TreeModel {
 	}
 	public HNode<Element> createNewRoot() {
 		return ( _root = new HNode<Element>() );
+	}
+
+	/**
+	 * Returns the root of the tree.
+	 */
+	public HNode<Element> getRoot() {
+		return ( _root );
 	}
 	public void clear() {
 		_root = null;
@@ -87,13 +108,6 @@ public class HTree<Element> implements TreeModel {
 		@SuppressWarnings("unchecked")
 		HNode<Element> node = (HNode<Element>)parent;
 		return ( node._children != null ? node._children.indexOf( child ) : -1 );
-	}
-
-	/**
-	 * Returns the root of the tree.
-	 */
-	public Object getRoot() {
-		return ( _root );
 	}
 
 	/**

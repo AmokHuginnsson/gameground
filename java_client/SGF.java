@@ -3,32 +3,40 @@ import java.io.BufferedReader;
 import java.io.PrintStream;
 
 class SGFException extends Exception {
+	public static final long serialVersionUID = 17l;
 	int _code;
 	public SGFException( String $message, int $code ) {
 		super( $message );
 		_code = $code;
 	}
-	public String toString() {
-		return ( super.toString + ": " + _code );
+	public String getMessage() {
+		return ( super.getMessage() + ": " + _code );
 	}
 }
 
 public class SGF {
 	public enum GAME_TYPE {
 		GO( 1 ),
-		GOMOKU( 4 )
+		GOMOKU( 4 );
+		private final int _gameType;
+		GAME_TYPE( int gameType_ ) {
+			_gameType = gameType_;
+		}
+		int value() {
+			return ( _gameType );
+		}
 	}
-	public enum ERROR {
-		UNEXPECTED_EOF( 0 ),
-		UNEXPECTED_DATA( 1 ),
-		GT_OPEN_EXPECTED( 2 ),
-		GT_CLOSE_EXPECTED( 3 ),
-		PROP_IDENT_EXPECTED( 4 ),
-		PROP_VAL_OPEN_EXPECTED( 5 ),
-		PROP_VAL_CLOSE_EXPECTED( 6 ),
-		NODE_MARK_EXPECTED( 7 ),
-		BAD_GAME_TYPE( 8 ),
-		BAD_FILE_FORMAT( 9 )
+	public static class ERROR {
+		public static final int UNEXPECTED_EOF = 0;
+		public static final int UNEXPECTED_DATA = 1;
+		public static final int GT_OPEN_EXPECTED = 2;
+		public static final int GT_CLOSE_EXPECTED = 3;
+		public static final int PROP_IDENT_EXPECTED = 4;
+		public static final int PROP_VAL_OPEN_EXPECTED = 5;
+		public static final int PROP_VAL_CLOSE_EXPECTED = 6;
+		public static final int NODE_MARK_EXPECTED = 7;
+		public static final int BAD_GAME_TYPE = 8;
+		public static final int BAD_FILE_FORMAT = 9;
 	}
 	private class TERM {
 		static final char GT_OPEN = '(';
@@ -38,32 +46,32 @@ public class SGF {
 		static final char NODE_MARK = ';';
 		static final char ESCAPE = '\\';
 	}
-	private class Game {
-		class Move {
-			enum Player {
-				BLACK,
-				WHITE,
-				UNSET
-			}
+	private static class Game {
+		enum Player {
+			BLACK,
+			WHITE,
+			UNSET
+		}
+		static class Move {
 			char[] _coord = { 0, 0, 0 };
 			String _comment = "";
 			Move() { }
-			Move( int col_, int row_ )
+			Move( int $col, int $row )
 				{
-				_coord[0] = (char)( col_ + 'a' );
-				_coord[1] = (char)( row_ + 'a' );
+				_coord[0] = (char)( $col + 'a' );
+				_coord[1] = (char)( $row + 'a' );
 				}
-			Move( final String coord_ ) {
-				coord( coord_ );
+			Move( final String $coord ) {
+				coord( $coord );
 			}
 			String coord() {
-				return ( _coord );
+				return ( new String( _coord ) );
 			}
-			void coord( final String coord_ ) {
-				if ( coord_.length() >= 2 )
+			void coord( final String $coord ) {
+				if ( $coord.length() >= 2 )
 					{
-					_coord[0] = coord_[0];
-					_coord[1] = coord_[1];
+					_coord[0] = $coord.charAt( 0 );
+					_coord[1] = $coord.charAt( 1 );
 					}
 				else
 					_coord[0] = _coord[1] = 0;
@@ -81,10 +89,10 @@ public class SGF {
 		String _whiteName = "";
 		String _blackRank = "30k";
 		String _whiteRank = "30k";
-		ArrayList<Move> _blackPreset = new ArrayList<Move>();
-		ArrayList<Move> _whitePreset = new ArrayList<move>();
-		HTree<Move> _tree = new HTree<Move>();
-		Player.player_t _firstToMove = Player.UNSET;
+		ArrayList<Game.Move> _blackPreset = new ArrayList<Game.Move>();
+		ArrayList<Game.Move> _whitePreset = new ArrayList<Game.Move>();
+		HTree<Game.Move> _tree = new HTree<Game.Move>();
+		Player _firstToMove = Player.UNSET;
 		int _gobanSize = 19;
 		int _time = 0;
 		int _handicap = 0;
@@ -93,26 +101,22 @@ public class SGF {
 		String _place = "";
 		String _comment = "";
 		Game() { }
-		HNode<Move> move( HTree<Move>.HNove<Move> node_, Player.player_t player_, int col_, int row_ )
-			{
-			return ( _game.move( node_, player_, col_, row_ ) );
-			}
 
-		void addStone( Player.player_t player_, int col_, int row_ ) {
-			addStone( player_, Move( col_, row_ ) );
+		void addStone( Player $player, int $col, int $row ) {
+			addStone( $player, new Move( $col, $row ) );
 			return;
 		}
 
-		void addStone( Player.player_t player_, final Move move_ ) {
-			if ( player_ == Player.BLACK )
-				_blackPreset.push_back( move_ );
+		void addStone( Player $player, final Move move_ ) {
+			if ( $player == Player.BLACK )
+				_blackPreset.add( move_ );
 			else
-				_whitePreset.push_back( move_ );
+				_whitePreset.add( move_ );
 			return;
 		}
 
-		HTree<Move>.HNode<Move> move( HTree<Move>.HNode<Move> node_, Player p, int col_, int row_ ) {
-			return ( node_.addNode( Move( col_, row_ ) ) );
+		HTree<Game.Move>.HNode<Game.Move> move( HTree<Game.Move>.HNode<Game.Move> $node, int $col, int $row ) {
+			return ( $node.addNode( new Move( $col, $row ) ) );
 		}
 
 		void clear() {
@@ -120,28 +124,28 @@ public class SGF {
 			_whitePreset.clear();
 			_tree.clear();
 			_firstToMove = Player.UNSET;
-			_blackName.clear();
-			_blackRank.clear();
-			_whiteName.clear();
-			_whiteRank.clear();
+			_blackName = "";
+			_blackRank = "";
+			_whiteName = "";
+			_whiteRank = "";
 			_komi = 5.5;
 			_handicap = 0;
 			_gobanSize = 19;
 			_result = 0;
-			_place.clear();
-			_comment.clear();
+			_place = "";
+			_comment = "";
 			return;
 		}
 	}
 	GAME_TYPE _gameType;
-	String _rawData = "";
+	String _rawData = null;
 	int _cur = 0;
 	int _end = 0;
-	String _cache;
-	String _cachePropIdent;
+	String _cache = null;
+	String _cachePropIdent = null;
 	ArrayList<String> _cachePropValue = new ArrayList<String>();
 	Game _game = new Game();
-	HTree<Move>.HNode<Move> _currentMove = null;
+	HTree<Game.Move>.HNode<Game.Move> _currentMove = null;
 	String _app = null;
 
 	SGF( GAME_TYPE $type ) {
@@ -154,6 +158,10 @@ public class SGF {
 	/*
 		_cache(), _cachePropIdent()
 	*/
+	}
+
+	HTree<Game.Move>.HNode<Game.Move> move( HTree<Game.Move>.HNode<Game.Move> $node, int $col, int $row ) {
+		return ( _game.move( $node, $col, $row ) );
 	}
 
 	final String[] _errMsg_ = {
@@ -178,11 +186,15 @@ public class SGF {
 		return ( first );
 	}
 
-	void load( BufferedReader $stream ) {
+	void load( BufferedReader $stream ) throws SGFException {
 		clear();
 		String message = null;
-		while ( ( message = $stream.readLine() ) != null )
-			_rawData += message;
+		try {
+			while ( ( message = $stream.readLine() ) != null )
+				_rawData += message;
+		} catch ( java.io.IOException ioe ) {
+			Con.err( "java.io.IOException: " + ioe.getMessage() );
+		}
 		_end = _rawData.length();
 		_cur = nonSpace( _cur, _end );
 		try {
@@ -191,7 +203,8 @@ public class SGF {
 				parseGameTree();
 		} catch ( final SGFException e ) {
 			if ( _cur != _end )
-				System.out.prinntln( "Failed at byte: `" + _rawData.charAt( _cur ) + "'" );
+				System.out.println( "Failed at byte: `" + _rawData.charAt( _cur ) + "'" );
+			Con.err( "SGFException: " + e.getMessage() );
 			throw e;
 		}
 		return;
@@ -200,27 +213,27 @@ public class SGF {
 	void clear() {
 		_cur = _end = 0;
 		_currentMove = null;
-		_rawData.clear();
+		_rawData = "";
 		_game.clear();
 		return;
 	}
 
-	void notEof() {
+	void notEof() throws SGFException {
 		if ( _cur == _end )
 			throw new SGFException( _errMsg_[ERROR.UNEXPECTED_EOF], _cur );
 		return;
 	}
 
-	void parseGameTree() {
+	void parseGameTree() throws SGFException {
 		notEof();
 		if ( _rawData.charAt( _cur ) != TERM.GT_OPEN )
 			throw new SGFException( _errMsg_[ERROR.GT_OPEN_EXPECTED], _cur );
 		_cur = nonSpace( ++ _cur, _end );
 		notEof();
-		if ( ! _currentMove )
-			_currentMove = _game._tree.create_new_root();
+		if ( _currentMove == null )
+			_currentMove = _game._tree.createNewRoot();
 		parseSequence();
-		HTree<Move>.HNode<Move> preVariationMove = _currentMove;
+		HTree<Game.Move>.HNode<Game.Move> preVariationMove = _currentMove;
 		while ( ( _cur != _end ) && ( _rawData.charAt( _cur ) != TERM.GT_CLOSE ) ) {
 			_currentMove = preVariationMove.addNode();
 			parseGameTree();
@@ -232,7 +245,7 @@ public class SGF {
 		return;
 	}
 
-	void parseSequence() {
+	void parseSequence() throws SGFException {
 		parseNode();
 		_cur = nonSpace( _cur, _end );
 		notEof();
@@ -245,7 +258,7 @@ public class SGF {
 		return;
 	}
 
-	void parseNode() {
+	void parseNode() throws SGFException {
 		if ( _rawData.charAt( _cur ) != TERM.NODE_MARK )
 			throw new SGFException( _errMsg_[ERROR.NODE_MARK_EXPECTED], _cur );
 		_cur = nonSpace( ++ _cur, _end );
@@ -258,9 +271,9 @@ public class SGF {
 		return;
 	}
 
-	void parseProperty() {
+	void parseProperty() throws SGFException {
 		_cachePropIdent = parsePropertyIdent();
-		if ( _cachePropIdent.is_empty() )
+		if ( "".equals( _cachePropIdent ) )
 			throw new SGFException( _errMsg_[ERROR.PROP_IDENT_EXPECTED], _cur );
 		_cur = nonSpace( _cur, _end );
 		notEof();
@@ -268,14 +281,15 @@ public class SGF {
 		parsePropertyValue( _cachePropValue );
 		while ( _rawData.charAt( _cur ) == TERM.PROP_VAL_OPEN )
 			parsePropertyValue( _cachePropValue );
-		final String singleValue = _cachePropValue[0];
+		final String singleValue = _cachePropValue.get( 0 );
 		if ( "GM".equals( _cachePropIdent ) ) {
-			if ( lexical_cast<int>( singleValue ) != _gameType )
-				throw SGFException( _errMsg_[ERROR.BAD_GAME_TYPE], static_cast<int>( _cur - _beg ) );
+			int val = Integer.parseInt( singleValue );
+			if ( val != _gameType.value() )
+				throw new SGFException( _errMsg_[ERROR.BAD_GAME_TYPE], _cur );
 		} else if ( "FF".equals( _cachePropIdent ) ) {
-			int ff( lexical_cast<int>( singleValue ) );
+			int ff = Integer.parseInt( singleValue );
 			if ( ( ff < 1 ) || ( ff > 4 ) )
-				throw SGFException( _errMsg_[ERROR.BAD_FILE_FORMAT], static_cast<int>( _cur - _beg ) );
+				throw new SGFException( _errMsg_[ERROR.BAD_FILE_FORMAT], _cur );
 		} else if ( "PB".equals( _cachePropIdent ) )
 			_game._blackName = singleValue;
 		else if ( "PW".equals( _cachePropIdent ) )
@@ -285,45 +299,45 @@ public class SGF {
 		else if ( "WR".equals( _cachePropIdent ) )
 			_game._whiteRank = singleValue;
 		else if ( "KM".equals( _cachePropIdent ) )
-			_game._komi = lexical_cast<double>( singleValue );
+			_game._komi = Double.parseDouble( singleValue );
 		else if ( "HA".equals( _cachePropIdent ) )
-			_game._handicap = lexical_cast<int>( singleValue );
+			_game._handicap = Integer.parseInt( singleValue );
 		else if ( "SZ".equals( _cachePropIdent ) )
-			_game._gobanSize = lexical_cast<int>( singleValue );
+			_game._gobanSize = Integer.parseInt( singleValue );
 		else if ( "TM".equals( _cachePropIdent ) )
-			_game._time = lexical_cast<int>( singleValue );
+			_game._time = Integer.parseInt( singleValue );
 		else if ( "PC".equals( _cachePropIdent ) )
 			_game._place = singleValue;
 		else if ( "RE".equals( _cachePropIdent ) ) {
-			if ( isdigit( singleValue[2] ) )
-				_game._result = lexical_cast<int>( singleValue.raw() + 2 );
+			if ( Character.isDigit( singleValue.charAt( 2 ) ) )
+				_game._result = Integer.parseInt( singleValue.substring( 2 ) );
 			else {
-				char r( static_cast<char>( toupper( singleValue[2] ) ) );
+				char r = Character.toUpperCase( singleValue.charAt( 2 ) );
 				if ( r == 'R' )
 					_game._result = Game.RESIGN;
 				else if ( r == 'T' )
 					_game._result = Game.TIME;
 			}
-			char player( static_cast<char>( toupper( singleValue[0] ) ) );
+			char player = Character.toUpperCase( singleValue.charAt( 0 ) );
 			if ( player == 'W' )
 				_game._result = -_game._result;
 		} else if ( "AB".equals( _cachePropIdent ) ) {
 			for ( String s : _cachePropValue )
-				_game.addStone( Player.BLACK, new Move( s ) );
+				_game.addStone( Game.Player.BLACK, new Game.Move( s ) );
 		} else if ( "AW".equals( _cachePropIdent ) ) {
 			for ( String s : _cachePropValue )
-				_game.addStone( Player.WHITE, new Move( s ) );
+				_game.addStone( Game.Player.WHITE, new Game.Move( s ) );
 		} else if ( "B".equals( _cachePropIdent ) ) {
-			if ( _game._firstToMove == Player.UNSET )
-				_game._firstToMove = Player.BLACK;
-			_currentMove.coord( singleValue );
+			if ( _game._firstToMove == Game.Player.UNSET )
+				_game._firstToMove = Game.Player.BLACK;
+			_currentMove.value().coord( singleValue );
 		} else if ( "W".equals( _cachePropIdent ) ) {
-			if ( _game._firstToMove == Player.UNSET )
-				_game._firstToMove = Player.WHITE;
-			_currentMove.coord( singleValue );
+			if ( _game._firstToMove == Game.Player.UNSET )
+				_game._firstToMove = Game.Player.WHITE;
+			_currentMove.value().coord( singleValue );
 		} else if ( "C".equals( _cachePropIdent ) ) {
-			if ( _game._firstToMove != Player.UNSET )
-				_currentMove._comment = singleValue;
+			if ( _game._firstToMove != Game.Player.UNSET )
+				_currentMove.value()._comment = singleValue;
 			else
 				_game._comment += singleValue;
 		} else
@@ -332,22 +346,22 @@ public class SGF {
 	}
 
 	String parsePropertyIdent() {
-		_cache.clear();
-		while ( ( _cur != _end ) && isupper( _rawData.charAt( _cur ) ) ) {
+		_cache = "";
+		while ( ( _cur != _end ) && Character.isUpperCase( _rawData.charAt( _cur ) ) ) {
 			_cache += _rawData.charAt( _cur );
 			++ _cur;
 		}
 		return ( _cache );
 	}
 
-	void parsePropertyValue( ArrayList<String> values_ ) {
+	void parsePropertyValue( ArrayList<String> values_ ) throws SGFException {
 		notEof();
 		if ( _rawData.charAt( _cur ) != TERM.PROP_VAL_OPEN )
 			throw new SGFException( _errMsg_[ERROR.PROP_VAL_OPEN_EXPECTED], _cur );
 		_cur = nonSpace( ++ _cur, _end );
 		notEof();
-		_cache.clear();
-		bool escaped( false );
+		_cache = "";
+		boolean escaped = false;
 		while ( ( _cur != _end ) && ( escaped || ( _rawData.charAt( _cur ) != TERM.PROP_VAL_CLOSE ) ) ) {
 			escaped = ( _rawData.charAt( _cur ) == TERM.ESCAPE );
 			if ( ! escaped )
@@ -358,64 +372,64 @@ public class SGF {
 		if ( _rawData.charAt( _cur ) != TERM.PROP_VAL_CLOSE )
 			throw new SGFException( _errMsg_[ERROR.PROP_VAL_CLOSE_EXPECTED], _cur );
 		_cur = nonSpace( ++ _cur, _end );
-		values_.push_back( _cache );
+		values_.add( _cache );
 	}
 
 	void save( PrintStream $stream ) {
-		$stream.write( "(;GM[" + _gameType + "]FF[4]AP[" + _app + "]\n"
-			+ "SZ[" + _game._gobanSize + "]KM[" + setw( 1 ) + _game._komi + "]TM[" + _game._time + "]\n"
+		$stream.print( "(;GM[" + _gameType + "]FF[4]AP[" + _app + "]\n"
+			+ "SZ[" + _game._gobanSize + "]KM[" + _game._komi + "]TM[" + _game._time + "]\n"
 			+ "PB[" + _game._blackName + "]PW[" + _game._whiteName + "]\n"
 			+ "BR[" + _game._blackRank + "]WR[" + _game._whiteRank + "]\n" );
 		if ( ! "".equals( _game._comment ) ) {
 			_cache = _game._comment;
 			_cache.replace( "[", "\\[" ).replace( "]", "\\]" );
-			$stream << "C[" << _cache << "]";
+			$stream.print( "C[" + _cache + "]" );
 		}
-		if ( ! _game._blackPreset.empty() ) {
-			$stream << "AB";
-			for ( Move m : _game._blackPreset )
-				$stream << '[' << m.coord() << ']';
+		if ( ! _game._blackPreset.isEmpty() ) {
+			$stream.print( "AB" );
+			for ( Game.Move m : _game._blackPreset )
+				$stream.print( "[" + m.coord() + "]" );
 		}
-		if ( ! _game._whitePreset.empty() ) {
-			$stream << "AW";
-			for ( Move m : _game._whitePreset )
-				$stream << '[' << m.coord() << ']';
+		if ( ! _game._whitePreset.isEmpty() ) {
+			$stream.print( "AW" );
+			for ( Game.Move m : _game._whitePreset )
+				$stream.print( "[" + m.coord() + "]" );
 		}
-		saveVariations( _game._firstToMove, _game._tree.get_root(), $stream );
-		$stream << ")" << endl;
+		saveVariations( _game._firstToMove, _game._tree.getRoot(), $stream );
+		$stream.println( ")" );
 		return;
 	}
 
-	void saveMove( Player of_, HTree<Move>.HNode<Move> node_, PrintStream $stream ) {
-		$stream << ';' << ( of_ == Player.BLACK ? 'B' : 'W' ) << '[' << (**node_).coord() << ']';
-		if ( ! (**node_)._comment.is_empty() ) {
-			_cache = (**node_)._comment;
+	void saveMove( Game.Player of_, HTree<Game.Move>.HNode<Game.Move> $node, PrintStream $stream ) {
+		$stream.print( ";" + ( of_ == Game.Player.BLACK ? "B" : "W" ) + "[" + $node.value().coord() + "]" );
+		if ( ! "".equals( $node.value()._comment ) ) {
+			_cache = $node.value()._comment;
 			_cache.replace( "[", "\\[" ).replace( "]", "\\]" );
-			$stream << "C[" << _cache << "]";
+			$stream.print( "C[" + _cache + "]" );
 		}
 		return;
 	}
 
-	void saveVariations( Player from_, HTree<Move>.HNode<Move> node_, PrintStream $stream ) {
-		int childCount( 0 );
-		while ( ( childCount = static_cast<int>( node_.child_count() ) ) == 1 ) {
-			node_ = &*node_.begin();
-			saveMove( from_, node_, $stream );
-			from_ = ( from_ == Player.BLACK ? Player.WHITE : Player.BLACK );
+	void saveVariations( Game.Player from_, HTree<Game.Move>.HNode<Game.Move> $node, PrintStream $stream ) {
+		int childCount = 0;
+		while ( ( childCount = $node.getChildCount() ) == 1 ) {
+			$node = $node.getChildAt( 0 );
+			saveMove( from_, $node, $stream );
+			from_ = ( from_ == Game.Player.BLACK ? Game.Player.WHITE : Game.Player.BLACK );
 		}
 		if ( childCount > 1 ) /* We have variations. */ {
-			for ( HTree<Move>.HNode<Move> it : node_ ) {
-				$stream << endl << '(';
+			for ( HTree<Game.Move>.HNode<Game.Move> it : $node ) {
+				$stream.print( "\n(" );
 				saveMove( from_, it, $stream );
-				saveVariations( ( from_ == Player.BLACK ? Player.WHITE : Player.BLACK ), it, $stream );
-				$stream << ')' << endl;
+				saveVariations( ( from_ == Game.Player.BLACK ? Game.Player.WHITE : Game.Player.BLACK ), it, $stream );
+				$stream.print( ")\n" );
 			}
 		}
 		return;
 	}
 
-	void addStone( Player.player_t player_, int col_, int row_ ) {
-		_game.addStone( player_, col_, row_ );
+	void addStone( Game.Player $player, int $col, int $row ) {
+		_game.addStone( $player, $col, $row );
 		return;
 	}
 
