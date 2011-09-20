@@ -53,7 +53,7 @@ public class SGF {
 			UNSET
 		}
 		static class Move {
-			char[] _coord = { 0, 0, 0 };
+			char[] _coord = { 0, 0 };
 			String _comment = "";
 			Move() { }
 			Move( int $col, int $row )
@@ -191,7 +191,7 @@ public class SGF {
 		String message = null;
 		try {
 			while ( ( message = $stream.readLine() ) != null )
-				_rawData += message;
+				_rawData += ( message + "\n" );
 		} catch ( java.io.IOException ioe ) {
 			Con.err( "java.io.IOException: " + ioe.getMessage() );
 		}
@@ -231,11 +231,11 @@ public class SGF {
 		_cur = nonSpace( ++ _cur, _end );
 		notEof();
 		if ( _currentMove == null )
-			_currentMove = _game._tree.createNewRoot();
+			_currentMove = _game._tree.createNewRoot( new Game.Move() );
 		parseSequence();
 		HTree<Game.Move>.HNode<Game.Move> preVariationMove = _currentMove;
 		while ( ( _cur != _end ) && ( _rawData.charAt( _cur ) != TERM.GT_CLOSE ) ) {
-			_currentMove = preVariationMove.addNode();
+			_currentMove = preVariationMove.addNode( new Game.Move() );
 			parseGameTree();
 			notEof();
 		}
@@ -250,7 +250,7 @@ public class SGF {
 		_cur = nonSpace( _cur, _end );
 		notEof();
 		while ( _rawData.charAt( _cur ) == TERM.NODE_MARK ) {
-			_currentMove = _currentMove.addNode();
+			_currentMove = _currentMove.addNode( new Game.Move() );
 			parseNode();
 			_cur = nonSpace( _cur, _end );
 			notEof();
@@ -376,14 +376,13 @@ public class SGF {
 	}
 
 	void save( PrintStream $stream ) {
-		$stream.print( "(;GM[" + _gameType + "]FF[4]AP[" + _app + "]\n"
+		$stream.print( "(;GM[" + _gameType.value() + "]FF[4]AP[" + _app + "]\n"
 			+ "SZ[" + _game._gobanSize + "]KM[" + _game._komi + "]TM[" + _game._time + "]\n"
 			+ "PB[" + _game._blackName + "]PW[" + _game._whiteName + "]\n"
 			+ "BR[" + _game._blackRank + "]WR[" + _game._whiteRank + "]\n" );
 		if ( ! "".equals( _game._comment ) ) {
 			_cache = _game._comment;
-			_cache.replace( "[", "\\[" ).replace( "]", "\\]" );
-			$stream.print( "C[" + _cache + "]" );
+			$stream.print( "C[" + _cache.replace( "[", "\\[" ).replace( "]", "\\]" ) + "]" );
 		}
 		if ( ! _game._blackPreset.isEmpty() ) {
 			$stream.print( "AB" );
@@ -404,8 +403,7 @@ public class SGF {
 		$stream.print( ";" + ( of_ == Game.Player.BLACK ? "B" : "W" ) + "[" + $node.value().coord() + "]" );
 		if ( ! "".equals( $node.value()._comment ) ) {
 			_cache = $node.value()._comment;
-			_cache.replace( "[", "\\[" ).replace( "]", "\\]" );
-			$stream.print( "C[" + _cache + "]" );
+			$stream.print( "C[" + _cache.replace( "[", "\\[" ).replace( "]", "\\]" ) + "]" );
 		}
 		return;
 	}

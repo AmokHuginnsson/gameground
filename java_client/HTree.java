@@ -1,3 +1,4 @@
+import java.lang.reflect.ParameterizedType;
 import java.lang.Iterable;
 import java.util.Iterator;
 import java.util.ArrayList;
@@ -6,13 +7,12 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
+abstract class TypeReference<T> {}
+
 public class HTree<Element> implements TreeModel {
 	public class HNode<Element> implements Iterable<HNode<Element>> {
 		ArrayList<HNode<Element>> _children = null;
 		Element _value = null;
-		public HNode() {
-			_value = null;
-		}
 		public HNode( Element $value ) {
 			_value = $value;
 		}
@@ -24,9 +24,6 @@ public class HTree<Element> implements TreeModel {
 		}
 		public Iterator<HNode<Element>> iterator() {
 			return ( _children != null ? _children.iterator() : null );
-		}
-		public HNode<Element> addNode() {
-			return ( addNode( null ) );
 		}
 		public HNode<Element> addNode( Element $value ) {
 			if ( _children == null )
@@ -44,8 +41,8 @@ public class HTree<Element> implements TreeModel {
 
 	public HTree() {
 	}
-	public HNode<Element> createNewRoot() {
-		return ( _root = new HNode<Element>() );
+	public HNode<Element> createNewRoot( Element $value ) {
+		return ( _root = new HNode<Element>( $value ) );
 	}
 
 	/**
@@ -66,8 +63,7 @@ public class HTree<Element> implements TreeModel {
 	 */
 	protected void reload() {
 		int len = treeModelListeners.size();
-		TreeModelEvent e = new TreeModelEvent(this, 
-				new Object[] {new HNode<Element>()});
+		TreeModelEvent e = new TreeModelEvent( this, new Object[] { _root } );
 		for (TreeModelListener tml : treeModelListeners) {
 			tml.treeStructureChanged( e );
 		}
