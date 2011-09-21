@@ -55,7 +55,6 @@ class HGomoku : public HLogic {
 		static char const* const SGF;
 		static char const* const SIT;
 		static char const* const STONE;
-		static char const* const STONES;
 		static char const* const TOMOVE;
 		static char const* const FIVE_IN_A_ROW;
 	};

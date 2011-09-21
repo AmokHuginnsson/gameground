@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.awt.Image;
@@ -36,7 +37,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	byte[] _stones = new byte[Go.GOBAN_SIZE.NORMAL * Go.GOBAN_SIZE.NORMAL];
 //--------------------------------------------//
 	public Goban() {
-		_stones[0] = STONE.INVALID;
+		Arrays.fill( _stones, STONE.NONE );
 		addMouseMotionListener( this );
 		addMouseListener( this );
 	}
@@ -65,7 +66,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		repaint();
 	}
 	public void setStones( byte[] $stones ) {
-		System.arraycopy( $stones, 0, _stones, 0, $stones.length );
+		// System.arraycopy( $stones, 0, _stones, 0, $stones.length );
 	}
 	public void setImages( GoImages $images ) {
 		_images = $images;
@@ -82,6 +83,18 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		try {
 			_sgf.load( br );
 			_lastMove = _sgf.lastMove();
+			Arrays.fill( _stones, STONE.NONE );
+			for ( SGF.Game.Move m : _sgf._game._blackPreset ) {
+				move( m.col(), m.row(), STONE.BLACK );
+			}
+			for ( SGF.Game.Move m : _sgf._game._whitePreset ) {
+				move( m.col(), m.row(), STONE.WHITE );
+			}
+			byte stone = _sgf._game._firstToMove == SGF.Game.Player.BLACK ? STONE.BLACK : STONE.WHITE;
+			for ( SGF.Game.Move m : _sgf._game._tree ) {
+				move( m.col(), m.row(), stone );
+				stone = opponent( stone );
+			}
 		} catch ( SGFException se ) {
 			Con.err( "SGFException: " + se.getMessage() );
 			System.exit( 1 );
@@ -152,10 +165,10 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 			int margin = _virtSize / ( _size + 4 );
 			int inside = _virtSize - 2 * margin;
 			Graphics2D g2D = (Graphics2D)g;      
-			g2D.setStroke( new BasicStroke(4F) );
+			g2D.setStroke( new BasicStroke(3F) );
 			g.setColor( getStone( _lastMove.col(), _lastMove.row() ) == STONE.BLACK ? Color.WHITE : Color.BLACK );
-			g.drawOval(  D_MARGIN + margin + ( inside * _lastMove.col() ) / ( _size - 1 ) - (int)( _diameter / 4),
-					D_MARGIN + margin + ( inside * _lastMove.row() ) / ( _size - 1 ) - (int)( _diameter / 4), (int)( _diameter / 2 ), (int)( _diameter / 2 ) );
+			g.drawOval(  D_MARGIN + margin + ( inside * _lastMove.col() ) / ( _size - 1 ) - (int)( _diameter / 4 ) - 1,
+					D_MARGIN + margin + ( inside * _lastMove.row() ) / ( _size - 1 ) - (int)( _diameter / 4 ) - 1, (int)( _diameter / 2 ), (int)( _diameter / 2 ) );
 		}
 	}
 	protected void drawStone( int $xx, int $yy, int $color, boolean $alpha, Graphics $gc ) {
@@ -230,5 +243,6 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 				&& ( y >= 0 ) && ( y < _size ) );
 	}
 	abstract void drawByLogic( Graphics g );
+	abstract void move( int $col, int $row, byte $stone );
 }
 

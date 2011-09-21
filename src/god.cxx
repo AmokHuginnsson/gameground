@@ -66,11 +66,11 @@ char const* const HGo::PROTOCOL::HANDICAPS = "handicaps";
 char const* const HGo::PROTOCOL::MAINTIME = "maintime";
 char const* const HGo::PROTOCOL::BYOYOMIPERIODS = "byoyomiperiods";
 char const* const HGo::PROTOCOL::BYOYOMITIME = "byoyomitime";
-char const* const HGo::PROTOCOL::STONES = "stones";
 char const* const HGo::PROTOCOL::STONE = "stone";
 char const* const HGo::PROTOCOL::TOMOVE = "to_move";
 char const* const HGo::PROTOCOL::PUTSTONE = "put_stone";
 char const* const HGo::PROTOCOL::PASS = "pass";
+char const* const HGo::PROTOCOL::SGF = "sgf";
 char const* const HGo::PROTOCOL::SIT = "sit";
 char const* const HGo::PROTOCOL::GETUP = "get_up";
 char const* const HGo::PROTOCOL::DEAD = "dead";
@@ -220,6 +220,7 @@ void HGo::handler_put_stone( OClientInfo* clientInfo_, HString const& message_ )
 	int after = count_stones( opponent( _state ) );
 	get_player_info( contestant( _state ) )->_stonesCaptured += ( before - after );
 	_state = opponent( _state );
+	_sgf.move( col, row );
 	send_goban();
 	return;
 	M_EPILOG
@@ -610,7 +611,9 @@ void HGo::put_stone( int col_, int row_, STONE::stone_t stone_ ) {
 
 void HGo::send_goban( void ) {
 	M_PROLOG
-	broadcast( _out << PROTOCOL::STONES << PROTOCOL::SEP << _game.raw() << endl << _out );
+	_out << PROTOCOL::SGF << PROTOCOL::SEP;
+	_sgf.save( _out, true );
+	broadcast( _out << endl << _out );
 	return;
 	M_EPILOG
 }

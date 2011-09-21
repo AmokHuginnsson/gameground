@@ -87,5 +87,8 @@ public class GomokuGoban extends Goban {
 			}
 		}
 	}
+	void move( int $col, int $row, byte $stone ) {
+		setStone( $col, $row, $stone );
+	}
 }
 

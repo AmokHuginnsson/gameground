@@ -1,6 +1,6 @@
+import java.util.Arrays;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
-import java.util.Arrays;
 
 public class GoGoban extends Goban {
 //--------------------------------------------//
@@ -55,9 +55,9 @@ public class GoGoban extends Goban {
 		setStone( x, y, stone );
 		return ( group );
 	}
-	public void setStones( byte[] $stones ) {
+	public void updateSGF( String $sgfData ) {
 		System.arraycopy( _stones, 0, _oldStones, 0, _size * _size );
-		super.setStones( $stones );
+		super.updateSGF( $sgfData );
 	}
 	boolean haveLiberties( int a_iCol, int a_iRow, byte stone ) {
 		if ( ( a_iCol < 0 ) || ( a_iCol > ( _size - 1 ) )
@@ -155,6 +155,11 @@ public class GoGoban extends Goban {
 	void drawByLogic( Graphics g ) {
 		if ( ( _logic != null ) && _logic.isMyMove() && ! breakTheRules( _cursorX, _cursorY, _logic.stone() ) )
 			drawStone( _cursorX, _cursorY, _logic.stone(), true, g );
+	}
+	void move( int $col, int $row, byte $stone ) {
+		setStone( $col, $row, $stone );
+		haveKilled( $col, $row, $stone );
+		resetAlive();
 	}
 /*
 	void dump( byte[] $stones ) {

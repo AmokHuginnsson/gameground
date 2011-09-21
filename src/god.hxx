@@ -75,9 +75,9 @@ class HGo : public HLogic {
 		static char const* const PLAY;
 		static char const* const PUTSTONE;
 		static char const* const SETUP;
+		static char const* const SGF;
 		static char const* const SIT;
 		static char const* const STONE;
-		static char const* const STONES;
 		static char const* const TOMOVE;
 		static char const* const DEAD;
 		static char const* const ACCEPT;

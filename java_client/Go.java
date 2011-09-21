@@ -49,7 +49,6 @@ class Go extends HAbstractLogic implements Runnable {
 		public static final String BYOYOMITIME = "byoyomitime";
 		public static final String BYOYOMIPERIODS = "byoyomiperiods";
 		public static final String PUTSTONE = "put_stone";
-		public static final String STONES = "stones";
 		public static final String STONE = "stone";
 		public static final String TOMOVE = "to_move";
 		public static final String PLAYER = "player";
@@ -207,13 +206,12 @@ class Go extends HAbstractLogic implements Runnable {
 		init( _gui = new HGUILocal( LABEL ) );
 		_gui._conf.setDefaults( $configuration );
 		_handlers.put( PROTOCOL.SETUP, Go.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.STONES, Go.class.getDeclaredMethod( "handlerStones", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYER, Go.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.TOMOVE, Go.class.getDeclaredMethod( "handlerToMove", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.STONE, Go.class.getDeclaredMethod( "handlerStone", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.CONTESTANT, Go.class.getDeclaredMethod( "handlerContestant", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYERQUIT, Go.class.getDeclaredMethod( "handlerPlayerQuit", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.SGF, Gomoku.class.getDeclaredMethod( "handlerSGF", new Class[]{ String.class } ) );
+		_handlers.put( PROTOCOL.SGF, Go.class.getDeclaredMethod( "handlerSGF", new Class[]{ String.class } ) );
 		GoImages images = new GoImages();
 		_gui._board.setGui( this );
 		_gui._board.setImages( images );
@@ -264,12 +262,6 @@ class Go extends HAbstractLogic implements Runnable {
 			}
 		}
 	}
-	void handlerStones( String $command ) {
-		if ( ( _toMove == STONE.BLACK ) || ( _toMove == STONE.WHITE ) )
-			Sound.play( "stone" );
-		_gui._board.setStones( ( _stones = $command ).getBytes() );
-		_gui._board.repaint();
-	}
 	void handlerContestant( String $command ) {
 		String[] tokens = $command.split( ",", 6 );
 		byte stone = STONE.NONE;
@@ -304,7 +296,10 @@ class Go extends HAbstractLogic implements Runnable {
 		_start = new Date().getTime();
 	}
 	void handlerSGF( String $command ) {
+		if ( ( _toMove == STONE.BLACK ) || ( _toMove == STONE.WHITE ) )
+			Sound.play( "stone" );
 		_gui._board.updateSGF( $command );
+		_gui._board.repaint();
 	}
 	void handlerStone( String $command ) {
 	}

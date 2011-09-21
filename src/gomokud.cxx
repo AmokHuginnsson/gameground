@@ -54,7 +54,6 @@ char const* const HGomoku::PROTOCOL::SPECTATOR = "spectator";
 char const* const HGomoku::PROTOCOL::PLAY = "play";
 char const* const HGomoku::PROTOCOL::SGF = "sgf";
 char const* const HGomoku::PROTOCOL::CONTESTANT = "contestant";
-char const* const HGomoku::PROTOCOL::STONES = "stones";
 char const* const HGomoku::PROTOCOL::STONE = "stone";
 char const* const HGomoku::PROTOCOL::TOMOVE = "to_move";
 char const* const HGomoku::PROTOCOL::PUTSTONE = "put_stone";
@@ -161,13 +160,10 @@ void HGomoku::handler_put_stone( OClientInfo* clientInfo_, HString const& messag
 		throw HLogicException( GO_MSG[ GO_MSG_NOT_YOUR_TURN ] );
 	int col = lexical_cast<int>( get_token( message_, ",", 1 ) );
 	int row = lexical_cast<int>( get_token( message_, ",", 2 ) );
-	_sgf.move( col, row );
-	_out << PROTOCOL::SGF << PROTOCOL::SEP;
-	_sgf.save( _out, true );
-	broadcast( _out << endl << _out );
-	make_move( col, row, _state ); /* TODO implement winning condition test */
+	make_move( col, row, _state );
 	if ( _state != STONE::NONE )
 		_state = opponent( _state );
+	_sgf.move( col, row );
 	send_goban();
 	return;
 	M_EPILOG
@@ -253,7 +249,9 @@ yaal::hcore::HString HGomoku::do_get_info() const {
 
 void HGomoku::send_goban( void ) {
 	M_PROLOG
-	broadcast( _out << PROTOCOL::STONES << PROTOCOL::SEP << _game.raw() << endl << _out );
+	_out << PROTOCOL::SGF << PROTOCOL::SEP;
+	_sgf.save( _out, true );
+	broadcast( _out << endl << _out );
 	return;
 	M_EPILOG
 }

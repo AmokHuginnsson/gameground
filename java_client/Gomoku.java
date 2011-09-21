@@ -65,7 +65,6 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		public static final String SGF = "sgf";
 		public static final String GETUP = "get_up";
 		public static final String PUTSTONE = "put_stone";
-		public static final String STONES = "stones";
 		public static final String STONE = "stone";
 		public static final String TOMOVE = "to_move";
 		public static final String PLAYER = "player";
@@ -183,7 +182,6 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	public Gomoku( GameGround $applet, String $id, String $configuration ) throws Exception {
 		super( $applet, $id, $configuration );
 		init( _gui = new HGUILocal( LABEL ) );
-		_handlers.put( PROTOCOL.STONES, Gomoku.class.getDeclaredMethod( "handlerStones", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYER, Gomoku.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.SPECTATOR, Gomoku.class.getDeclaredMethod( "handlerSpectator", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.TOMOVE, Gomoku.class.getDeclaredMethod( "handlerToMove", new Class[]{ String.class } ) );
@@ -211,10 +209,6 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		_toMove = STONE.NONE;
 		_admin = false;
 		_move = 0;
-	}
-	void handlerStones( String $command ) {
-		_gui._board.setStones( ( _stones = $command ).getBytes() );
-		_gui._board.repaint();
 	}
 	void handlerContestant( String $command ) {
 		String[] tokens = $command.split( ",", 6 );
@@ -281,7 +275,10 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		((AbstractTableModel)_gui._players.getModel()).fireTableDataChanged();
 	}
 	void handlerSGF( String $command ) {
+		if ( ( _toMove == STONE.BLACK ) || ( _toMove == STONE.WHITE ) )
+			Sound.play( "stone" );
 		_gui._board.updateSGF( $command );
+		_gui._board.repaint();
 	}
 	void handlerSpectator( String $command ) {
 		DefaultListModel m = (DefaultListModel)_gui._spectators.getModel();

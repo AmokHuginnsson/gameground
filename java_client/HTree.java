@@ -9,7 +9,7 @@ import javax.swing.tree.TreePath;
 
 abstract class TypeReference<T> {}
 
-public class HTree<Element> implements TreeModel {
+public class HTree<Element> implements TreeModel, Iterable<Element> {
 	public class HNode<Element> implements Iterable<HNode<Element>> {
 		ArrayList<HNode<Element>> _children = null;
 		Element _value = null;
@@ -22,7 +22,7 @@ public class HTree<Element> implements TreeModel {
 		int getChildCount() {
 			return ( _children != null ? _children.size() : 0 );
 		}
-		public Iterator<HNode<Element>> iterator() {
+		public java.util.Iterator<HNode<Element>> iterator() {
 			return ( _children != null ? _children.iterator() : null );
 		}
 		public HNode<Element> addNode( Element $value ) {
@@ -34,6 +34,23 @@ public class HTree<Element> implements TreeModel {
 		}
 		public Element value() {
 			return ( _value );
+		}
+	}
+	public class Iterator implements java.util.Iterator<Element> {
+		HNode<Element> _node = null;
+		public Iterator( HNode<Element> $node ) {
+			_node = $node;
+		}
+		public boolean hasNext() {
+			return ( _node != null );
+		}
+		public Element next() {
+			HNode<Element> node = _node;
+			if ( _node != null )
+				_node = _node.getChildAt( 0 );
+			return ( node != null ? node.value() : null );
+		}
+		public void remove() {
 		}
 	}
 	HNode<Element> _root;
@@ -53,6 +70,10 @@ public class HTree<Element> implements TreeModel {
 	}
 	public void clear() {
 		_root = null;
+	}
+
+	public Iterator iterator() {
+		return ( new Iterator( ( _root != null ) && ( _root.getChildCount() > 0 ) ? _root.getChildAt( 0 ) : null ) );
 	}
 
 	//////////////// Fire events //////////////////////////////////////////////

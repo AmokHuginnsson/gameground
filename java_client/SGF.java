@@ -394,7 +394,8 @@ public class SGF {
 			for ( Game.Move m : _game._whitePreset )
 				$stream.print( "[" + m.coord() + "]" );
 		}
-		saveVariations( _game._firstToMove, _game._tree.getRoot(), $stream );
+		if ( _game._tree.getRoot() != null )
+			saveVariations( _game._firstToMove, _game._tree.getRoot(), $stream );
 		$stream.println( ")" );
 		return;
 	}
