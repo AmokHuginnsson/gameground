@@ -29,6 +29,7 @@ Copyright:
 
 #include <yaal/hcore/hmap.hxx>
 #include <yaal/hcore/hstring.hxx>
+#include <sgf/sgf.hxx>
 
 #include "logic.hxx"
 
@@ -51,6 +52,7 @@ class HGomoku : public HLogic {
 		static char const* const GETUP;
 		static char const* const PLAY;
 		static char const* const PUTSTONE;
+		static char const* const SGF;
 		static char const* const SIT;
 		static char const* const STONE;
 		static char const* const STONES;
@@ -65,6 +67,7 @@ protected:
 	int _move;
 	int long _start;
 	yaal::hcore::HChunk _game;
+	sgf::SGF _sgf;
 	players_t _players;
 	yaal::hcore::HString _varTmpBuffer;
 	/*}*/

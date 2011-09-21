@@ -174,7 +174,9 @@ void HGo::handler_sit( OClientInfo* clientInfo_, HString const& message_ ) {
 			info._byoYomiPeriods = _byoYomiPeriods;
 			info._stonesCaptured = 0;
 			info._score = ( stone == STONE::WHITE ? _komi : 0 );
-			if ( ! ( contestant( STONE::BLACK ) && contestant( STONE::WHITE ) ) ) {
+			OClientInfo* black( contestant( STONE::BLACK ) );
+			OClientInfo* white( contestant( STONE::WHITE ) );
+			if ( ! ( black && white ) ) {
 				_start = 0;
 				_move = 0;
 				set_handicaps( _handicaps );
@@ -185,10 +187,9 @@ void HGo::handler_sit( OClientInfo* clientInfo_, HString const& message_ ) {
 				_state = ( _handicaps > 1 ? STONE::WHITE : STONE::BLACK );
 				_pass = 0;
 				_sgf.clear();
-				/*
-				_sgf._game._blackName = contestant( STONE::BLACK )._login;
-				_sgf._game._whiteName = contestant( STONE::WHITE )._login;
-				*/
+				_sgf.set_player( SGF::Player::BLACK, black->_login );
+				_sgf.set_player( SGF::Player::WHITE, white->_login );
+				_sgf.set_info( SGF::Player::BLACK, _gobanSize, _handicaps, _komi, _mainTime );
 				broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The Go match started." << endl << _out );
 			}
 		}

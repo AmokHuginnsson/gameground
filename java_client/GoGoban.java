@@ -11,6 +11,7 @@ public class GoGoban extends Goban {
 //--------------------------------------------//
 	public GoGoban() {
 		super();
+		_sgf = new SGF( SGF.GAME_TYPE.GO, "gameground-client" );
 	}
 	void setGui( Go $go ) {
 		_logic = $go;

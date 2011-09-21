@@ -43,6 +43,7 @@ class Go extends HAbstractLogic implements Runnable {
 		public static final String CONTESTANT = "contestant";
 		public static final String MAINTIME = "maintime";
 		public static final String GOBAN = "goban";
+		public static final String SGF = "sgf";
 		public static final String SIT = "sit";
 		public static final String GETUP = "get_up";
 		public static final String BYOYOMITIME = "byoyomitime";
@@ -212,6 +213,7 @@ class Go extends HAbstractLogic implements Runnable {
 		_handlers.put( PROTOCOL.STONE, Go.class.getDeclaredMethod( "handlerStone", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.CONTESTANT, Go.class.getDeclaredMethod( "handlerContestant", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYERQUIT, Go.class.getDeclaredMethod( "handlerPlayerQuit", new Class[]{ String.class } ) );
+		_handlers.put( PROTOCOL.SGF, Gomoku.class.getDeclaredMethod( "handlerSGF", new Class[]{ String.class } ) );
 		GoImages images = new GoImages();
 		_gui._board.setGui( this );
 		_gui._board.setImages( images );
@@ -300,6 +302,9 @@ class Go extends HAbstractLogic implements Runnable {
 			contestant._sit.setEnabled( "".equals( tokens[ 1 ] ) && ( _stone == STONE.NONE ) );
 		}
 		_start = new Date().getTime();
+	}
+	void handlerSGF( String $command ) {
+		_gui._board.updateSGF( $command );
 	}
 	void handlerStone( String $command ) {
 	}

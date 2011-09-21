@@ -1,5 +1,9 @@
+import java.io.BufferedReader;
+import java.io.StringReader;
 import java.awt.Image;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.BasicStroke;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.Color;
@@ -27,6 +31,8 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	int _cursorY = -1;
 	int _virtSize = 0;
 	GoImages _images = null;
+	SGF _sgf = null;
+	SGF.Game.Move _lastMove = null;
 	byte[] _stones = new byte[Go.GOBAN_SIZE.NORMAL * Go.GOBAN_SIZE.NORMAL];
 //--------------------------------------------//
 	public Goban() {
@@ -69,6 +75,17 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		_virtSize = 0;
 		getPreferredSize();
 		repaint();
+	}
+	void updateSGF( String $sgfData ) {
+		BufferedReader br = new BufferedReader( new StringReader( $sgfData ) );
+		_sgf.clear();
+		try {
+			_sgf.load( br );
+			_lastMove = _sgf.lastMove();
+		} catch ( SGFException se ) {
+			Con.err( "SGFException: " + se.getMessage() );
+			System.exit( 1 );
+		}
 	}
 	public Dimension getPreferredSize() {
 		java.awt.Dimension pd = getParent().getSize();
@@ -131,6 +148,15 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		drawGoban( g );
 		drawStones( g );
 		drawByLogic( g );
+		if ( _lastMove != null ) {
+			int margin = _virtSize / ( _size + 4 );
+			int inside = _virtSize - 2 * margin;
+			Graphics2D g2D = (Graphics2D)g;      
+			g2D.setStroke( new BasicStroke(4F) );
+			g.setColor( getStone( _lastMove.col(), _lastMove.row() ) == STONE.BLACK ? Color.WHITE : Color.BLACK );
+			g.drawOval(  D_MARGIN + margin + ( inside * _lastMove.col() ) / ( _size - 1 ) - (int)( _diameter / 4),
+					D_MARGIN + margin + ( inside * _lastMove.row() ) / ( _size - 1 ) - (int)( _diameter / 4), (int)( _diameter / 2 ), (int)( _diameter / 2 ) );
+		}
 	}
 	protected void drawStone( int $xx, int $yy, int $color, boolean $alpha, Graphics $gc ) {
 		Image img = null;

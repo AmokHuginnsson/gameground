@@ -46,7 +46,7 @@ public class SGF {
 		static final char NODE_MARK = ';';
 		static final char ESCAPE = '\\';
 	}
-	private static class Game {
+	static class Game {
 		enum Player {
 			BLACK,
 			WHITE,
@@ -424,6 +424,13 @@ public class SGF {
 			}
 		}
 		return;
+	}
+
+	public Game.Move lastMove() {
+		HTree<Game.Move>.HNode<Game.Move> m = _game._tree.getRoot();
+		while ( ( m != null ) && m.getChildAt( 0 ) != null )
+			m = m.getChildAt( 0 );
+		return ( m.value() );
 	}
 
 	void addStone( Game.Player $player, int $col, int $row ) {

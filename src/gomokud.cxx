@@ -40,6 +40,7 @@ using namespace yaal::hcore;
 using namespace yaal::hconsole;
 using namespace yaal::tools;
 using namespace yaal::tools::util;
+using namespace sgf;
 
 namespace gameground {
 
@@ -51,6 +52,7 @@ HGomoku::STONE::stone_t const HGomoku::STONE::NONE = ' ';
 
 char const* const HGomoku::PROTOCOL::SPECTATOR = "spectator";
 char const* const HGomoku::PROTOCOL::PLAY = "play";
+char const* const HGomoku::PROTOCOL::SGF = "sgf";
 char const* const HGomoku::PROTOCOL::CONTESTANT = "contestant";
 char const* const HGomoku::PROTOCOL::STONES = "stones";
 char const* const HGomoku::PROTOCOL::STONE = "stone";
@@ -74,6 +76,7 @@ HGomoku::HGomoku( HServer* server_, HLogic::id_t const& id_, HString const& comm
 	_state( STONE::NONE ),
 	_move( 0 ), _start( 0 ),
 	_game( GOBAN_SIZE * GOBAN_SIZE + sizeof ( '\0' ) ),
+	_sgf( SGF::GAME_TYPE::GOMOKU, "gameground" ),
 	_players(), _varTmpBuffer() {
 	M_PROLOG
 	_contestants[ 0 ] = _contestants[ 1 ] = NULL;
@@ -128,6 +131,10 @@ void HGomoku::handler_sit( OClientInfo* clientInfo_, HString const& message_ ) {
 				_state = STONE::BLACK;
 				players_t::iterator blackIt( _players.insert( make_pair( black, 0 ) ).first );
 				players_t::iterator whiteIt( _players.insert( make_pair( white, 0 ) ).first );
+				_sgf.clear();
+				_sgf.set_player( SGF::Player::BLACK, black->_login );
+				_sgf.set_player( SGF::Player::WHITE, white->_login );
+				_sgf.set_info( SGF::Player::BLACK, 15 );
 				broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << black->_login << PROTOCOL::SEPP << blackIt->second << endl << _out );
 				broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << white->_login << PROTOCOL::SEPP << whiteIt->second << endl << _out );
 				broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The Gomoku match started." << endl << _out );
@@ -154,6 +161,10 @@ void HGomoku::handler_put_stone( OClientInfo* clientInfo_, HString const& messag
 		throw HLogicException( GO_MSG[ GO_MSG_NOT_YOUR_TURN ] );
 	int col = lexical_cast<int>( get_token( message_, ",", 1 ) );
 	int row = lexical_cast<int>( get_token( message_, ",", 2 ) );
+	_sgf.move( col, row );
+	_out << PROTOCOL::SGF << PROTOCOL::SEP;
+	_sgf.save( _out, true );
+	broadcast( _out << endl << _out );
 	make_move( col, row, _state ); /* TODO implement winning condition test */
 	if ( _state != STONE::NONE )
 		_state = opponent( _state );

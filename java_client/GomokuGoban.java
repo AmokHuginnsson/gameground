@@ -15,6 +15,7 @@ public class GomokuGoban extends Goban {
 //--------------------------------------------//
 	public GomokuGoban() {
 		super();
+		_sgf = new SGF( SGF.GAME_TYPE.GOMOKU, "gameground-client" );
 	}
 	void setGui( Gomoku $gomoku ) {
 		_logic = $gomoku;

@@ -62,6 +62,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		public static final String PASS = "pass";
 		public static final String CONTESTANT = "contestant";
 		public static final String SIT = "sit";
+		public static final String SGF = "sgf";
 		public static final String GETUP = "get_up";
 		public static final String PUTSTONE = "put_stone";
 		public static final String STONES = "stones";
@@ -189,6 +190,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		_handlers.put( PROTOCOL.CONTESTANT, Gomoku.class.getDeclaredMethod( "handlerContestant", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYERQUIT, Gomoku.class.getDeclaredMethod( "handlerPlayerQuit", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.FIVE_IN_A_ROW, Gomoku.class.getDeclaredMethod( "handlerFiveInARow", new Class[]{ String.class } ) );
+		_handlers.put( PROTOCOL.SGF, Gomoku.class.getDeclaredMethod( "handlerSGF", new Class[]{ String.class } ) );
 		GoImages images = new GoImages();
 		_gui._board.setGui( this );
 		_gui._board.setImages( images );
@@ -277,6 +279,9 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		}
 		p.set( tokens[0], Integer.parseInt( tokens[ 1 ] ) );
 		((AbstractTableModel)_gui._players.getModel()).fireTableDataChanged();
+	}
+	void handlerSGF( String $command ) {
+		_gui._board.updateSGF( $command );
 	}
 	void handlerSpectator( String $command ) {
 		DefaultListModel m = (DefaultListModel)_gui._spectators.getModel();

@@ -27,7 +27,7 @@ Copyright:
 #ifndef GAMEGROUND_GOD_HXX_INCLUDED
 #define GAMEGROUND_GOD_HXX_INCLUDED
 
-#include <yaal/yaal.hxx>
+#include <yaal/hcore/hmap.hxx>
 #include <sgf/sgf.hxx>
 
 #include "logic.hxx"
@@ -91,7 +91,7 @@ protected:
 	int _gobanSize;
 	int _komi;
 	int _handicaps;
-	int long _mainTime;
+	int _mainTime;
 	int _byoYomiPeriods;
 	int _byoYomiTime;
 	int _move;
