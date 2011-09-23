@@ -132,14 +132,17 @@ void HGo::handler_setup( OClientInfo* clientInfo_, HString const& message_ ) {
 		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
 	HString item = get_token( message_, ",", 0 );
 	int value = lexical_cast<int>( get_token( message_, ",", 1 ) );
+	bool regenGoban( false );
+	int handicaps( _handicaps );
 	if ( item == PROTOCOL::GOBAN ) {
 		_gobanSize = value;
-		set_handicaps( _handicaps );
+		regenGoban = true;
 	} else if ( item == PROTOCOL::KOMI )
 		_komi = value;
-	else if ( item == PROTOCOL::HANDICAPS )
-		set_handicaps( value );
-	else if ( item == PROTOCOL::MAINTIME )
+	else if ( item == PROTOCOL::HANDICAPS ) {
+		handicaps = value;
+		regenGoban = true;
+	} else if ( item == PROTOCOL::MAINTIME )
 		_mainTime = value;
 	else if ( item == PROTOCOL::BYOYOMIPERIODS )
 		_byoYomiPeriods = value;
@@ -148,6 +151,8 @@ void HGo::handler_setup( OClientInfo* clientInfo_, HString const& message_ ) {
 	else
 		throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
 	broadcast( _out << PROTOCOL::SETUP << PROTOCOL::SEP << message_ << endl << _out );
+	if ( regenGoban )
+		set_handicaps( handicaps );
 	return;
 	M_EPILOG
 }
@@ -547,6 +552,7 @@ void HGo::set_handicaps( int handicaps_ ) {
 	M_PROLOG
 	if ( ( handicaps_ > 9 ) || ( handicaps_ < 0 ) )
 		throw HLogicException( _out << "bad handicap value: " << handicaps_ << _out );
+	_sgf.clear();
 	::memset( _game.raw(), STONE::NONE, _gobanSize * _gobanSize );
 	_game.raw()[ _gobanSize * _gobanSize ] = 0;
 	::memset( _koGame.raw(), STONE::NONE, _gobanSize * _gobanSize );
@@ -556,8 +562,8 @@ void HGo::set_handicaps( int handicaps_ ) {
 			_komi = 0;
 		else
 			_komi = setup._komi;
+		_handicaps = handicaps_;
 	}
-	_handicaps = handicaps_;
 	if ( _handicaps > 1 )
 		set_handi( _handicaps );
 	broadcast( _out << PROTOCOL::SETUP << PROTOCOL::SEP
@@ -569,31 +575,44 @@ void HGo::set_handicaps( int handicaps_ ) {
 
 void HGo::set_handi( int handi_ ) {
 	M_PROLOG
-	int hoshi = 3 - ( _gobanSize == GOBAN_SIZE::TINY ? 1 : 0 );
+	int hoshi( 3 - ( _gobanSize == GOBAN_SIZE::TINY ? 1 : 0 ) );
+	int col( 0 );
+	int row( 0 );
 	switch ( handi_ ) {
 		case ( 9 ):
-			put_stone( _gobanSize / 2, _gobanSize / 2, STONE::BLACK );
+			put_stone( col = _gobanSize / 2, row = _gobanSize / 2, STONE::BLACK );
+			_sgf.add_stone( SGF::Player::BLACK, col, row );
 		case ( 8 ):
 			set_handi( 6 );
-			put_stone( _gobanSize / 2, hoshi, STONE::BLACK );
-			put_stone( _gobanSize / 2, ( _gobanSize - hoshi ) - 1, STONE::BLACK );
+			put_stone( col = _gobanSize / 2, row = hoshi, STONE::BLACK );
+			_sgf.add_stone( SGF::Player::BLACK, col, row );
+			put_stone( col = _gobanSize / 2, row = ( _gobanSize - hoshi ) - 1, STONE::BLACK );
+			_sgf.add_stone( SGF::Player::BLACK, col, row );
 		break;
 		case ( 7 ):
-			put_stone( _gobanSize / 2, _gobanSize / 2, STONE::BLACK );
+			put_stone( col = _gobanSize / 2, row = _gobanSize / 2, STONE::BLACK );
+			_sgf.add_stone( SGF::Player::BLACK, col, row );
 		case ( 6 ):
 			set_handi( 4 );
-			put_stone( hoshi, _gobanSize / 2, STONE::BLACK );
-			put_stone( ( _gobanSize - hoshi ) - 1, _gobanSize / 2, STONE::BLACK );
+			put_stone( col = hoshi, row = _gobanSize / 2, STONE::BLACK );
+			_sgf.add_stone( SGF::Player::BLACK, col, row );
+			put_stone( col = ( _gobanSize - hoshi ) - 1, row = _gobanSize / 2, STONE::BLACK );
+			_sgf.add_stone( SGF::Player::BLACK, col, row );
 		break;
 		case ( 5 ):
-			put_stone( _gobanSize / 2, _gobanSize / 2, STONE::BLACK );
+			put_stone( col = _gobanSize / 2, row = _gobanSize / 2, STONE::BLACK );
+			_sgf.add_stone( SGF::Player::BLACK, col, row );
 		case ( 4 ):
-			put_stone( ( _gobanSize - hoshi ) - 1, ( _gobanSize - hoshi ) - 1, STONE::BLACK );
+			put_stone( col = ( _gobanSize - hoshi ) - 1, row = ( _gobanSize - hoshi ) - 1, STONE::BLACK );
+			_sgf.add_stone( SGF::Player::BLACK, col, row );
 		case ( 3 ):
-			put_stone( hoshi, hoshi, STONE::BLACK );
+			put_stone( col = hoshi, row = hoshi, STONE::BLACK );
+			_sgf.add_stone( SGF::Player::BLACK, col, row );
 		case ( 2 ):
-			put_stone( hoshi, ( _gobanSize - hoshi ) - 1, STONE::BLACK );
-			put_stone( ( _gobanSize - hoshi ) - 1, hoshi, STONE::BLACK );
+			put_stone( col = hoshi, row = ( _gobanSize - hoshi ) - 1, STONE::BLACK );
+			_sgf.add_stone( SGF::Player::BLACK, col, row );
+			put_stone( col = ( _gobanSize - hoshi ) - 1, row = hoshi, STONE::BLACK );
+			_sgf.add_stone( SGF::Player::BLACK, col, row );
 		break;
 		default:
 			M_ASSERT( ! "unhandled case" );
