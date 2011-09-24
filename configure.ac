@@ -5,5 +5,9 @@ dnl This macro has to be here due to primitivism of libtoolize.
 AC_CONFIG_AUX_DIR([_aux])
 m4_include([_aux/client-configure.m4])
 YAAL_CONFIGURE_CLIENT_INIT(gameground,MY_PACKAGE_VERSION)
+AC_CHECK_LIB([sgf${LIB_INFIX}],[sgf_sgf_main],
+							[],[AC_MSG_ERROR([Can not continue without SGF library.])])
+AC_CHECK_HEADERS([sgf/sgf.hxx],,
+			[AC_MSG_ERROR([[Can not continue without SGF devel!]])])
 YAAL_CONFIGURE_CLIENT_FINALIZE
 
