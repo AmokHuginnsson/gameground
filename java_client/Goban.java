@@ -79,9 +79,12 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	}
 	void updateSGF( String $sgfData ) {
 		BufferedReader br = new BufferedReader( new StringReader( $sgfData ) );
+		updateSGF( br );
+	}
+	void updateSGF( BufferedReader $reader ) {
 		_sgf.clear();
 		try {
-			_sgf.load( br );
+			_sgf.load( $reader );
 			_lastMove = _sgf.lastMove();
 			Arrays.fill( _stones, STONE.NONE );
 			for ( SGF.Game.Move m : _sgf._game._blackPreset ) {

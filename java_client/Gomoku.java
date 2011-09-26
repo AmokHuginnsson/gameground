@@ -3,6 +3,9 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Comparator;
 import java.util.Date;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
 import javax.swing.table.TableRowSorter;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -172,6 +175,15 @@ class Gomoku extends HAbstractLogic implements Runnable {
 			fc.setAcceptAllFileFilterUsed( false );
 			fc.setFileFilter( new FileNameExtensionFilter( "Smart Game Format", "sgf" ) );
 			fc.showOpenDialog( this );
+			if ( fc.showOpenDialog( this ) == JFileChooser.APPROVE_OPTION ) {
+				try {
+					FileInputStream fis = new FileInputStream( fc.getSelectedFile() );
+					BufferedReader inStream = new BufferedReader( new InputStreamReader( fis ) ); 
+					_board.updateSGF( inStream );
+				} catch ( java.io.FileNotFoundException fnfe ) {
+					Con.err( "java.io.FileNotFoundException: " + fnfe.getMessage() );
+				}
+			}
 		}
 	}
 //--------------------------------------------//
