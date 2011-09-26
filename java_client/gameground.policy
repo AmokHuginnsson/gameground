@@ -5,4 +5,10 @@ grant {
 	permission java.net.SocketPermission "codestation.org:7777", "resolve,connect";
 	permission java.net.SocketPermission "codestation.org:80", "resolve,connect";
   permission java.awt.AWTPermission "showWindowWithoutWarningBanner";
+	permission java.util.PropertyPermission "user.home", "read";
+	permission java.util.PropertyPermission "user.dir", "read";
+	permission java.io.FilePermission "${user.home}/../..", "read";
+	permission java.io.FilePermission "${user.home}/..", "read";
+	permission java.io.FilePermission "${user.home}", "read";
+	permission java.io.FilePermission "${user.home}/-", "read,write";
 };

@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Comparator;
+import java.util.Date;
 import javax.swing.table.TableRowSorter;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -11,7 +12,8 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.DefaultListModel;
 import javax.swing.table.AbstractTableModel;
-import java.util.Date;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 class GomokuContestant {
 	public JLabel _name;
@@ -164,6 +166,12 @@ class Gomoku extends HAbstractLogic implements Runnable {
 					+ ( ( _stone == Gomoku.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + (char)STONE.WHITE : PROTOCOL.GETUP ) );
 			_blackSit.setEnabled( _stone != Gomoku.STONE.NONE );
 			_whiteSit.setEnabled( _stone != Gomoku.STONE.NONE );
+		}
+		public void onLoad() {
+			JFileChooser fc = new JFileChooser();
+			fc.setAcceptAllFileFilterUsed( false );
+			fc.setFileFilter( new FileNameExtensionFilter( "Smart Game Format", "sgf" ) );
+			fc.showOpenDialog( this );
 		}
 	}
 //--------------------------------------------//

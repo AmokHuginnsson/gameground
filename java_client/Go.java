@@ -1,13 +1,15 @@
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.DefaultListModel;
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 class GoPlayer {
 	public JLabel _name;
@@ -187,6 +189,12 @@ class Go extends HAbstractLogic implements Runnable {
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
 					+ ( Go.this._toMove != STONE.MARK ? PROTOCOL.PASS : PROTOCOL.ACCEPT ) );
 			_pass.setEnabled( false );
+		}
+		public void onLoad() {
+			JFileChooser fc = new JFileChooser();
+			fc.setAcceptAllFileFilterUsed( false );
+			fc.setFileFilter( new FileNameExtensionFilter( "Smart Game Format", "sgf" ) );
+			fc.showOpenDialog( this );
 		}
 	}
 //--------------------------------------------//
