@@ -2,17 +2,12 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Date;
 import java.text.SimpleDateFormat;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.DefaultListModel;
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 class GoPlayer {
 	public JLabel _name;
@@ -194,18 +189,10 @@ class Go extends HAbstractLogic implements Runnable {
 			_pass.setEnabled( false );
 		}
 		public void onLoad() {
-			JFileChooser fc = new JFileChooser();
-			fc.setAcceptAllFileFilterUsed( false );
-			fc.setFileFilter( new FileNameExtensionFilter( "Smart Game Format", "sgf" ) );
-			if ( fc.showOpenDialog( this ) == JFileChooser.APPROVE_OPTION ) {
-				try {
-					FileInputStream fis = new FileInputStream( fc.getSelectedFile() );
-					BufferedReader inStream = new BufferedReader( new InputStreamReader( fis ) ); 
-					_board.updateSGF( inStream );
-				} catch ( java.io.FileNotFoundException fnfe ) {
-					Con.err( "java.io.FileNotFoundException: " + fnfe.getMessage() );
-				}
-			}
+			_board.load();
+		}
+		public void onSave() {
+			_board.save();
 		}
 	}
 //--------------------------------------------//

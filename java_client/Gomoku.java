@@ -3,9 +3,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Comparator;
 import java.util.Date;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
 import javax.swing.table.TableRowSorter;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -15,8 +12,6 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.DefaultListModel;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 class GomokuContestant {
 	public JLabel _name;
@@ -171,19 +166,10 @@ class Gomoku extends HAbstractLogic implements Runnable {
 			_whiteSit.setEnabled( _stone != Gomoku.STONE.NONE );
 		}
 		public void onLoad() {
-			JFileChooser fc = new JFileChooser();
-			fc.setAcceptAllFileFilterUsed( false );
-			fc.setFileFilter( new FileNameExtensionFilter( "Smart Game Format", "sgf" ) );
-			fc.showOpenDialog( this );
-			if ( fc.showOpenDialog( this ) == JFileChooser.APPROVE_OPTION ) {
-				try {
-					FileInputStream fis = new FileInputStream( fc.getSelectedFile() );
-					BufferedReader inStream = new BufferedReader( new InputStreamReader( fis ) ); 
-					_board.updateSGF( inStream );
-				} catch ( java.io.FileNotFoundException fnfe ) {
-					Con.err( "java.io.FileNotFoundException: " + fnfe.getMessage() );
-				}
-			}
+			_board.load();
+		}
+		public void onSave() {
+			_board.save();
 		}
 	}
 //--------------------------------------------//

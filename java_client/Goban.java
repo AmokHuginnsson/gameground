@@ -1,6 +1,10 @@
 import java.util.Arrays;
 import java.io.BufferedReader;
 import java.io.StringReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.awt.Image;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -8,6 +12,8 @@ import java.awt.BasicStroke;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.Color;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
 
@@ -102,6 +108,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 			Con.err( "SGFException: " + se.getMessage() );
 			System.exit( 1 );
 		}
+		repaint();
 	}
 	public Dimension getPreferredSize() {
 		java.awt.Dimension pd = getParent().getSize();
@@ -247,5 +254,36 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	}
 	abstract void drawByLogic( Graphics g );
 	abstract void move( int $col, int $row, byte $stone );
+	void load() {
+		JFileChooser fc = new JFileChooser();
+		fc.setAcceptAllFileFilterUsed( false );
+		fc.setFileFilter( new FileNameExtensionFilter( "Smart Game Format", "sgf" ) );
+		if ( fc.showOpenDialog( this ) == JFileChooser.APPROVE_OPTION ) {
+			try {
+				FileInputStream fis = new FileInputStream( fc.getSelectedFile() );
+				BufferedReader inStream = new BufferedReader( new InputStreamReader( fis ) ); 
+				updateSGF( inStream );
+			} catch ( java.io.FileNotFoundException fnfe ) {
+				Con.err( "java.io.FileNotFoundException: " + fnfe.getMessage() );
+			}
+		}
+	}
+	void save() {
+		JFileChooser fc = new JFileChooser();
+		fc.setAcceptAllFileFilterUsed( false );
+		fc.setFileFilter( new FileNameExtensionFilter( "Smart Game Format", "sgf" ) );
+		if ( fc.showSaveDialog( this ) == JFileChooser.APPROVE_OPTION ) {
+			try {
+				String path = fc.getSelectedFile().getPath();
+				if ( path.indexOf( ".sgf" ) != ( path.length() - 4 ) )
+					path += ".sgf";
+				FileOutputStream fos = new FileOutputStream( path );
+				PrintStream outStream = new PrintStream( fos );
+				_sgf.save( outStream );
+			} catch ( java.io.FileNotFoundException fnfe ) {
+				Con.err( "java.io.FileNotFoundException: " + fnfe.getMessage() );
+			}
+		}
+	}
 }
 
