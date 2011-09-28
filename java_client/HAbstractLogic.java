@@ -3,6 +3,12 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 public abstract class HAbstractLogic {
+	public static class PROTOCOL {
+		public static final String SEP = ":";
+		public static final String SEPP = ",";
+		public static final String CMD = "cmd";
+		public static final String SAY = "say";
+	}
 	public HGUIface _gui;
 	GameGround _app = null;
 	HClient _client = null;

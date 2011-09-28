@@ -28,11 +28,7 @@ class GoPlayer {
 }
 
 class Go extends HAbstractLogic implements Runnable {
-	public static final class PROTOCOL {
-		public static final String SEP = ":";
-		public static final String SEPP = ",";
-		public static final String CMD = "cmd";
-		public static final String SAY = "say";
+	public static final class PROTOCOL extends HAbstractLogic.PROTOCOL {
 		public static final String NAME = "go";
 		public static final String PLAY = "play";
 		public static final String PASS = "pass";
@@ -219,7 +215,7 @@ class Go extends HAbstractLogic implements Runnable {
 		_handlers.put( PROTOCOL.PLAYERQUIT, Go.class.getDeclaredMethod( "handlerPlayerQuit", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.SGF, Go.class.getDeclaredMethod( "handlerSGF", new Class[]{ String.class } ) );
 		GoImages images = new GoImages();
-		_gui._board.setGui( this );
+		_gui._board.setLogic( this );
 		_gui._board.setImages( images );
 		GoPlayer black = new GoPlayer();
 		black._name = _gui._blackName;

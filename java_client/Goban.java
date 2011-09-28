@@ -19,6 +19,9 @@ import javax.swing.event.MouseInputListener;
 
 public abstract class Goban extends JPanel implements MouseInputListener {
 //--------------------------------------------//
+	public static class PROTOCOL {
+		public static final String SGF = "sgf";
+	}
 
 	public static class STONE {
 		public static final byte BLACK = 'b';
@@ -32,6 +35,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	}
 	public static final long serialVersionUID = 7l;
 	public static final int D_MARGIN = 20;
+	HAbstractLogic _logic= null;
 	int _size = Go.GOBAN_SIZE.NORMAL;
 	double _diameter = -1;
 	int _cursorX = -1;
@@ -46,6 +50,9 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		Arrays.fill( _stones, STONE.NONE );
 		addMouseMotionListener( this );
 		addMouseListener( this );
+	}
+	void setLogic( HAbstractLogic $logic ) {
+		_logic = $logic;
 	}
 	public void mouseMoved( MouseEvent $event ) {
 		int margin = _virtSize / ( _size + 4 );
@@ -262,7 +269,15 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 			try {
 				FileInputStream fis = new FileInputStream( fc.getSelectedFile() );
 				BufferedReader inStream = new BufferedReader( new InputStreamReader( fis ) ); 
-				updateSGF( inStream );
+				try {
+					String message;
+					String data = "";
+					while ( ( message = inStream.readLine() ) != null )
+						data += ( message + "\n" );
+					_logic._client.println( HAbstractLogic.PROTOCOL.CMD + HAbstractLogic.PROTOCOL.SEP + _logic.id() + HAbstractLogic.PROTOCOL.SEP + PROTOCOL.SGF + HAbstractLogic.PROTOCOL.SEP + Sec.escape( data ) );
+				} catch ( java.io.IOException ioe ) {
+					Con.err( "java.io.IOException: " + ioe.getMessage() );
+				}
 			} catch ( java.io.FileNotFoundException fnfe ) {
 				Con.err( "java.io.FileNotFoundException: " + fnfe.getMessage() );
 			}

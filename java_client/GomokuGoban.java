@@ -17,8 +17,8 @@ public class GomokuGoban extends Goban {
 		super();
 		_sgf = new SGF( SGF.GAME_TYPE.GOMOKU, "gameground-client" );
 	}
-	void setGui( Gomoku $gomoku ) {
-		_logic = $gomoku;
+	void setLogic( Gomoku $gomoku ) {
+		super.setLogic( _logic = $gomoku );
 	}
 	public void mouseClicked( MouseEvent $event ) {
 		if ( _logic.isMyMove() && ! breakTheRules( _cursorX, _cursorY, _logic.stone() ) ) {

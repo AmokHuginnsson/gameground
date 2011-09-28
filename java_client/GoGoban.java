@@ -13,8 +13,8 @@ public class GoGoban extends Goban {
 		super();
 		_sgf = new SGF( SGF.GAME_TYPE.GO, "gameground-client" );
 	}
-	void setGui( Go $go ) {
-		_logic = $go;
+	void setLogic( Go $go ) {
+		super.setLogic( _logic = $go );
 	}
 	public void mouseClicked( MouseEvent $event ) {
 		if ( _logic.isMyMove() && ! breakTheRules( _cursorX, _cursorY, _logic.stone() ) ) {

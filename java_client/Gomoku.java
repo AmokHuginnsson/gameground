@@ -196,7 +196,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		_handlers.put( PROTOCOL.FIVE_IN_A_ROW, Gomoku.class.getDeclaredMethod( "handlerFiveInARow", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.SGF, Gomoku.class.getDeclaredMethod( "handlerSGF", new Class[]{ String.class } ) );
 		GoImages images = new GoImages();
-		_gui._board.setGui( this );
+		_gui._board.setLogic( this );
 		_gui._board.setImages( images );
 		GomokuContestant black = new GomokuContestant();
 		black._name = _gui._blackName;
