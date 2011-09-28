@@ -59,6 +59,7 @@ HLogic::~HLogic( void ) {
 
 void HLogic::kick_client( OClientInfo* clientInfo_, char const* const reason_ ) {
 	M_PROLOG
+	out << "kicking player `" << clientInfo_->_login << "' from " << _name << "," << _id << endl;
 	clientInfo_->_logics.erase( _id );
 	_clients.erase( clientInfo_ );
 	if ( reason_ )
