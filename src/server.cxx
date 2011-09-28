@@ -434,8 +434,16 @@ void HServer::pass_command( OClientInfo& client_, HString const& command_ ) {
 			else {
 				HString msg;
 				try {
-					if ( logic->second->process_command( &client_, command_.mid( id.get_length() + 1 ) ) )
-						msg = "Game logic could not comprehend your message: ";
+					msg = command_.mid( id.get_length() + 1 );
+					if ( logic->second->process_command( &client_, msg ) ) {
+						static int const MAX_MSG_LEN( 100 );
+						char const err[] = "Game logic could not comprehend your message: ";
+						if ( ( msg.get_length() + ( sizeof ( err ) - 1 ) ) > MAX_MSG_LEN ) {
+							msg.erase( MAX_MSG_LEN - ( sizeof ( err ) - 1 ) );
+						}
+						msg.insert( 0, sizeof ( err ) - 1, err );
+					} else
+						msg.clear();
 				} catch ( HLogicException& e ) {
 					msg = e.what();
 				}

@@ -93,6 +93,7 @@ bool HLogic::accept_client( OClientInfo* clientInfo_ ) {
 void HLogic::post_accept_client( OClientInfo* clientInfo_ ) {
 	M_PROLOG
 	do_post_accept( clientInfo_ );
+	return;
 	M_EPILOG
 }
 
@@ -123,7 +124,7 @@ bool HLogic::process_command( OClientInfo* clientInfo_, HString const& command_ 
 	if ( it != _handlers.end() )
 		( this->*(it->second) )( clientInfo_, argument );
 	else {
-		failure = true, kick_client( clientInfo_ );
+		failure = true;
 		out << "mnemo: " << mnemonic << ", arg: " << argument << ", cmd: " << command_ << endl;
 	}
 	return ( failure );
