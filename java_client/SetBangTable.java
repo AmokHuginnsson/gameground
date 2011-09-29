@@ -260,7 +260,7 @@ public class SetBangTable extends JPanel implements MouseInputListener {
 			maxCardHeight = relCardMaxHeight;
 		int leftMargin = (int)( ( pd.getWidth() - ( maxCardWidth * 4 + D_MARGIN * 3 ) ) / 2 );
 		int topMargin = (int)( ( pd.getHeight() - ( maxCardHeight * 3 + D_MARGIN * 2 ) ) / 2 );
-		drawCard( g, $no, leftMargin + cardCol * ( D_MARGIN + maxCardWidth ), D_MARGIN + cardRow * ( D_MARGIN + maxCardHeight ), maxCardWidth, $type );
+		drawCard( g, $no, leftMargin + cardCol * ( D_MARGIN + maxCardWidth ), topMargin + cardRow * ( D_MARGIN + maxCardHeight ), maxCardWidth, $type );
 	}
 	boolean isHovered( int $no, Point $point ) {
 		java.awt.Dimension pd = getSize();
