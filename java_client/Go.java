@@ -300,7 +300,7 @@ class Go extends HAbstractLogic implements Runnable {
 	void handlerSGF( String $command ) {
 		if ( ( _toMove == STONE.BLACK ) || ( _toMove == STONE.WHITE ) )
 			Sound.play( "stone" );
-		_gui._board.updateSGF( $command );
+		_gui._board.updateSGF( Sec.unescape( $command ) );
 		_gui._board.repaint();
 	}
 	void handlerStone( String $command ) {

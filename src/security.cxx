@@ -44,7 +44,7 @@ yaal::hcore::HString escape( yaal::hcore::HString const& evil_ ) {
 	if ( ! evil_.is_empty() ) {
 		str.hs_realloc( evil_.get_length() * 2 );
 		str = evil_;
-		str.replace( "\"", "\\Q" ).replace( "'", "\\A" );
+		str.replace( "\\", "\\E" ).replace( "\n", "\\n" ).replace( "\"", "\\Q" ).replace( "'", "\\A" ).replace( ":", "\\C" ).replace( ",", "\\K" );
 	}
 	return ( str );
 	M_EPILOG
@@ -53,7 +53,7 @@ yaal::hcore::HString escape( yaal::hcore::HString const& evil_ ) {
 yaal::hcore::HString unescape( yaal::hcore::HString const& safe_ ) {
 	M_PROLOG
 	HString str( safe_ );
-	str.replace( "\\A", "'" ).replace( "\\Q", "\"" );
+	str.replace( "\\K", "," ).replace( "\\C", ":" ).replace( "\\A", "'" ).replace( "\\Q", "\"" ).replace( "\\n", "\n" ).replace( "\\E", "\\" );
 	return ( str );
 	M_EPILOG
 }

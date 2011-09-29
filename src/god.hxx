@@ -143,6 +143,7 @@ protected:
 	void handler_getup( OClientInfo*, yaal::hcore::HString const& );
 	void handler_put_stone( OClientInfo*, yaal::hcore::HString const& );
 	void handler_pass( OClientInfo*, yaal::hcore::HString const& );
+	void handler_sgf( OClientInfo*, yaal::hcore::HString const& );
 	void handler_dead( OClientInfo*, yaal::hcore::HString const& );
 	void handler_accept( OClientInfo* );
 	void broadcast_contestants( yaal::hcore::HString const& );

@@ -98,6 +98,11 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		_sgf.clear();
 		try {
 			_sgf.load( $reader );
+			int gameCommentLength = _sgf._game._comment.length();
+			if ( gameCommentLength > 0 ) {
+				_logic._gui.log( "Game Started\n", HGUIface.Colors.OTHERGRAY, HGUIface.Style.BOLD );
+				_logic._gui.log( _sgf._game._comment + ( _sgf._game._comment.charAt( gameCommentLength - 1 ) != '\n' ? "\n" : "" ), HGUIface.Colors.OTHERGRAY );
+			}
 			_lastMove = _sgf.lastMove();
 			Arrays.fill( _stones, STONE.NONE );
 			for ( SGF.Game.Move m : _sgf._game._blackPreset ) {
@@ -107,9 +112,16 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 				move( m.col(), m.row(), STONE.WHITE );
 			}
 			byte stone = _sgf._game._firstToMove == SGF.Game.Player.BLACK ? STONE.BLACK : STONE.WHITE;
+			int moveNumber = 1;
 			for ( SGF.Game.Move m : _sgf._game._tree ) {
 				move( m.col(), m.row(), stone );
+				int commentLength = m._comment.length();
+				if ( commentLength > 0 ) {
+					_logic._gui.log( "Move: " + moveNumber + "\n", HGUIface.Colors.OTHERGRAY, HGUIface.Style.BOLD );
+					_logic._gui.log( m._comment + ( m._comment.charAt( commentLength - 1 ) != '\n' ? "\n" : "" ), HGUIface.Colors.OTHERGRAY );
+				}
 				stone = opponent( stone );
+				++ moveNumber;
 			}
 		} catch ( SGFException se ) {
 			Con.err( "SGFException: " + se.getMessage() );

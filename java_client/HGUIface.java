@@ -13,6 +13,11 @@ abstract class HGUIface extends JPanel {
 	public SimpleAttributeSet _attribute;
 	public int _color;
 	public String _resource;
+	public static final class Style {
+		public static final int NORMAL = 0;
+		public static final int BOLD = 1;
+		public static final int ITALIC = 2;
+	}
 	public static final class Colors {
 		public static final int BLACK = 0;
 		public static final int RED = 1;
@@ -104,12 +109,24 @@ abstract class HGUIface extends JPanel {
 	public int lcolor( int $color ) {
 		return ( $color );
 	}
+	void log( String $message, int $color, int $style ) {
+		StyleConstants.setForeground( _attribute, color( lcolor( $color ) ) );
+		if ( ( $style & Style.BOLD ) != 0 )
+			StyleConstants.setBold( _attribute, true );
+		if ( ( $style & Style.ITALIC ) != 0 )
+			StyleConstants.setItalic( _attribute, true );
+		add( _logPad, $message, _attribute );
+	}
 	void log( String $message, int $color ) {
 		StyleConstants.setForeground( _attribute, color( lcolor( $color ) ) );
+		StyleConstants.setBold( _attribute, false );
+		StyleConstants.setItalic( _attribute, false );
 		add( _logPad, $message, _attribute );
 	}
 	void log( String $message ) {
 		StyleConstants.setForeground( _attribute, color( lcolor( _color ) ) );
+		StyleConstants.setBold( _attribute, false );
+		StyleConstants.setItalic( _attribute, false );
 		add( _logPad, $message, _attribute );
 	}
 	void log( int $color ) {

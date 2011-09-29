@@ -35,6 +35,7 @@ M_VCSID( "$Id: "__ID__" $" )
 #include "clientinfo.hxx"
 #include "logicfactory.hxx"
 #include "spellchecker.hxx"
+#include "security.hxx"
 
 using namespace yaal;
 using namespace yaal::hcore;
@@ -102,6 +103,7 @@ HGo::HGo( HServer* server_, HLogic::id_t const& id_, HString const& comment_ )
 	_contestants[ 0 ] = _contestants[ 1 ] = NULL;
 	_handlers[ PROTOCOL::SETUP ] = static_cast<handler_t>( &HGo::handler_setup );
 	_handlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HGo::handler_play );
+	_handlers[ PROTOCOL::SGF ] = static_cast<handler_t>( &HGo::handler_sgf );
 	set_handicaps( _handicaps );
 	return;
 	M_EPILOG
@@ -153,6 +155,23 @@ void HGo::handler_setup( OClientInfo* clientInfo_, HString const& message_ ) {
 	broadcast( _out << PROTOCOL::SETUP << PROTOCOL::SEP << message_ << endl << _out );
 	if ( regenGoban )
 		set_handicaps( handicaps );
+	return;
+	M_EPILOG
+}
+
+void HGo::handler_sgf( OClientInfo*, HString const& message_ ) {
+	M_PROLOG
+	try {
+		SGF sgf( SGF::GAME_TYPE::GO, "gameground" );
+		HString m( unescape( message_ ) );
+		out << message_ << endl;
+		out << m << endl;
+		sgf.load( m );
+		_sgf.swap( sgf );
+		broadcast( _out << PROTOCOL::SGF << PROTOCOL::SEP << message_ << endl << _out );
+	} catch ( SGFException const& ) {
+		throw HLogicException( "provided SGF has unexpected content" );
+	}
 	return;
 	M_EPILOG
 }
