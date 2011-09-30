@@ -50,7 +50,7 @@
 		<vbox minimumsize="&v_sidebar_width_galaxy;,1" preferredsize="&v_sidebar_width_galaxy;,&v_height;" maximumsize="&v_sidebar_width_galaxy;,2000">
 			<panel layout="GridLayout(2,1)">
 				<scrollpane autoscrolls="true" tooltiptext="Current highscores.">
-					<table id="_players" />
+					<scoretable id="_players" />
 				</scrollpane>
 				<scrollpane autoscrolls="true">
 					<textpane id="_logPad" editable="false" focusable="true" />

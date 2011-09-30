@@ -5,7 +5,7 @@
 		<setbangtable id="_table" background="009000" />
 		<vbox minimumsize="&v_sidebar_width_galaxy;,1" preferredsize="&v_sidebar_width_galaxy;,&v_height;" maximumsize="&v_sidebar_width_galaxy;,2000">
 			<scrollpane maximumsize="2000,400" autoscrolls="true" tooltiptext="Current highscores.">
-				<table id="_players" />
+				<scoretable id="_players" />
 			</scrollpane>
 			<scrollpane autoscrolls="true" maximumsize="2000,400" minimumsize="1,400">
 				<textpane id="_logPad" editable="false" focusable="true" />

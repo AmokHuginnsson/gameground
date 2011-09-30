@@ -8,7 +8,7 @@
 		</panel>
 		<vbox minimumsize="&v_sidebar_width_galaxy;,1" preferredsize="&v_sidebar_width_galaxy;,&v_height;" maximumsize="&v_sidebar_width_galaxy;,2000">
 			<scrollpane maximumsize="2000,300" autoscrolls="true" tooltiptext="Current highscores.">
-				<table id="_players" />
+				<scoretable id="_players" />
 			</scrollpane>
 			<panel layout="FlowLayout(FlowLayout.RIGHT,4,0)" maximumsize="&v_sidebar_width_galaxy;,40">
 				<button text="New" action="onNew" margin="(2,2,2,2)" tooltiptext="Start new game." />

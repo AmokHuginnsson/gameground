@@ -1,17 +1,12 @@
-import java.util.ArrayList;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.Comparator;
 import java.util.Date;
-import javax.swing.table.TableRowSorter;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.DefaultListModel;
-import javax.swing.table.AbstractTableModel;
 
 class GomokuContestant {
 	public JLabel _name;
@@ -19,35 +14,6 @@ class GomokuContestant {
 	public void clear() {
 		_name.setText( "" );
 		_sit.setText( Gomoku.HGUILocal.SIT );
-	}
-}
-
-class GomokuPlayer {
-	String _name;
-	int _score = 0;
-	GomokuPlayer( String $name ) { this( $name, 0 ); }
-	GomokuPlayer( String $name, int $score ) {
-		_name = $name;
-		_score = $score;
-	}
-	void set( String $name, int $score ) {
-		_name = $name;
-		_score = $score;
-	}
-	String getName() {
-		return ( _name );
-	}
-	String get( int $field ) {
-		String field = "";
-		switch ( $field ) {
-			case ( 0 ):
-				field = _name;
-			break;
-			case ( 1 ):
-				field += _score;
-			break;
-		}
-		return ( field );
 	}
 }
 
@@ -88,7 +54,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		public JLabel _whiteName;
 		public JLabel _whiteScore;
 		public JButton _whiteSit;
-		public JTable _players;
+		public ScoreTable _players;
 		public JList _spectators;
 		public GomokuGoban _board;
 		public DummyConfigurator _conf;
@@ -96,42 +62,12 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		public JLabel _move;
 		public String _toolTip;
 		public String _passText;
-		final String[] _header = { "Player", "Score" };
 		public HGUILocal( String $resource ) {
 			super( $resource );
 		}
 		public void updateTagLib( XUL $xul ) {
 			$xul.getTaglib().registerTag( "goban", GomokuGoban.class );
-		}
-		public void init() {
-			super.init();
-			AbstractTableModel model = new AbstractTableModel() {
-				public static final long serialVersionUID = 17l;
-				public String getColumnName(int col) {
-					return ( _header[ col ] );
-				}
-				public int getRowCount() { return Gomoku.this._players.size(); }
-				public int getColumnCount() { return _header.length; }
-				public Object getValueAt(int row, int col) {
-					return Gomoku.this._players.get( row ).get( col );
-				}
-				public boolean isCellEditable(int row, int col)
-					{ return false; }
-				public void setValueAt(Object value, int row, int col) {
-				}
-			};
-			Comparator<String> comparator = new Comparator<String>() {
-				public int compare( String s1, String s2 ) {
-					return ( Integer.parseInt( s2 ) - Integer.parseInt( s1 ) );
-				}
-			};
-			TableRowSorter<AbstractTableModel> rs = new TableRowSorter<AbstractTableModel>();
-			_players.setModel( model );
-			rs.setModel( model );
-			rs.setComparator( 1, comparator );
-			_players.setRowSorter( rs );
-			_players.setShowGrid( false );
-			_players.setAutoCreateRowSorter( true );
+			$xul.getTaglib().registerTag( "scoretable", ScoreTable.class );
 		}
 		public JTextPane getLogPad() {
 			return ( _logPad );
@@ -182,12 +118,14 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	private boolean _admin = false;
 	private int _move = 0;
 	private String _stones = null;
-	private ArrayList<GomokuPlayer> _players = new ArrayList<GomokuPlayer>();
+	final String[] _playerScoreColumns = { "Player", "Score" };
+	Scores _players = null;
 	private SortedMap<Byte, GomokuContestant> _contestants = java.util.Collections.synchronizedSortedMap( new TreeMap<Byte, GomokuContestant>() );
 //--------------------------------------------//
 	public Gomoku( GameGround $applet, String $id, String $configuration ) throws Exception {
 		super( $applet, $id, $configuration );
 		init( _gui = new HGUILocal( LABEL ) );
+		_players = _gui._players.setColumns( _playerScoreColumns );
 		_handlers.put( PROTOCOL.PLAYER, Gomoku.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.SPECTATOR, Gomoku.class.getDeclaredMethod( "handlerSpectator", new Class[]{ String.class } ) );
 		_handlers.put( PROTOCOL.TOMOVE, Gomoku.class.getDeclaredMethod( "handlerToMove", new Class[]{ String.class } ) );
@@ -266,7 +204,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	}
 	void handlerPlayer( String $command ) {
 		String[] tokens = $command.split( ",", 2 );
-		GomokuPlayer p = null;
+		PlayerScore p = null;
 		for ( int i = 0; i < _players.size(); ++ i ) {
 			if ( _players.get( i ).get( 0 ).compareToIgnoreCase( tokens[ 0 ] ) == 0 ) {
 				p = _players.get( i );
@@ -274,11 +212,11 @@ class Gomoku extends HAbstractLogic implements Runnable {
 			}
 		}
 		if ( p == null ) {
-			p = new GomokuPlayer( tokens[ 0 ] );
+			p = new PlayerScore( tokens[ 0 ] );
 			_players.add( p );
 		}
 		p.set( tokens[0], Integer.parseInt( tokens[ 1 ] ) );
-		((AbstractTableModel)_gui._players.getModel()).fireTableDataChanged();
+		_players.reload();
 	}
 	void handlerSGF( String $command ) {
 		if ( ( _toMove == STONE.BLACK ) || ( _toMove == STONE.WHITE ) )
