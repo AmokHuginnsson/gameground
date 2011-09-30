@@ -3,8 +3,8 @@
 <!ENTITY v_port "7777">
 <!ENTITY v_bar_height "50">
 <!ENTITY v_login_screen_width "600">
-<!ENTITY v_sidebar_width "300">
-<!ENTITY v_sidebar_width_galaxy "256">
+<!ENTITY v_sidebar_width_browser "330">
+<!ENTITY v_sidebar_width "256">
 <!ENTITY empty "EmptyBorder(0,0,0,0)">
 <!--ENTITY X "MatteBorder(3,3,3,3,"-->
 <!ENTITY X "MatteBorder(0,0,0,0,">

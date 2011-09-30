@@ -6,11 +6,11 @@
 			<gridbagconstraints fill="GridBagConstraints.BOTH" />
 			<goban id="_board" opaque="true" />
 		</panel>
-		<vbox minimumsize="&v_sidebar_width_galaxy;,1" preferredsize="&v_sidebar_width_galaxy;,&v_height;" maximumsize="&v_sidebar_width_galaxy;,2000">
+		<vbox minimumsize="&v_sidebar_width;,1" preferredsize="&v_sidebar_width;,&v_height;" maximumsize="&v_sidebar_width;,2000">
 			<scrollpane maximumsize="2000,300" autoscrolls="true" tooltiptext="Current highscores.">
 				<scoretable id="_players" />
 			</scrollpane>
-			<panel layout="FlowLayout(FlowLayout.RIGHT,4,0)" maximumsize="&v_sidebar_width_galaxy;,40">
+			<panel layout="FlowLayout(FlowLayout.RIGHT,4,0)" maximumsize="&v_sidebar_width;,40">
 				<button text="New" action="onNew" margin="(2,2,2,2)" tooltiptext="Start new game." />
 				<button text="Save" action="onSave" margin="(2,2,2,2)" tooltiptext="Save game state." />
 				<button text="Load" action="onLoad" margin="(2,2,2,2)" tooltiptext="Load previously saved game state." />
@@ -47,7 +47,7 @@
 			<scrollpane autoscrolls="true" maximumsize="2000,400" minimumsize="1,400">
 				<textpane id="_logPad" editable="false" focusable="true" />
 			</scrollpane>
-			<panel maximumsize="&v_sidebar_width_galaxy;,40" layout="BorderLayout">
+			<panel maximumsize="&v_sidebar_width;,40" layout="BorderLayout">
 				<readlineprompt id="_messageInput" focusable="true" editable="true" action="onMessage" constraints="BorderLayout.NORTH" tooltiptext="Enter message You want to send to other players." />
 			</panel>
 			<hbox>

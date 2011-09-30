@@ -47,7 +47,7 @@
 				</panel>
 			</hbox>
 		</vbox>
-		<vbox minimumsize="&v_sidebar_width_galaxy;,1" preferredsize="&v_sidebar_width_galaxy;,&v_height;" maximumsize="&v_sidebar_width_galaxy;,2000">
+		<vbox minimumsize="&v_sidebar_width;,1" preferredsize="&v_sidebar_width;,&v_height;" maximumsize="&v_sidebar_width;,2000">
 			<panel layout="GridLayout(2,1)">
 				<scrollpane autoscrolls="true" tooltiptext="Current highscores.">
 					<scoretable id="_players" />
@@ -56,7 +56,7 @@
 					<textpane id="_logPad" editable="false" focusable="true" />
 				</scrollpane>
 			</panel>
-			<panel maximumsize="&v_sidebar_width_galaxy;,40" layout="BorderLayout">
+			<panel maximumsize="&v_sidebar_width;,40" layout="BorderLayout">
 				<readlineprompt id="_messageInput" focusable="true" editable="true" action="onMessage" constraints="BorderLayout.NORTH" tooltiptext="Enter message You want to send to other players." />
 			</panel>
 			<hbox>

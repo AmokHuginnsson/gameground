@@ -15,7 +15,7 @@
 				</hbox>
 			</vbox>
 		</panel>
-		<panel minimumsize="&v_sidebar_width;,1" preferredsize="&v_sidebar_width;,&v_height;" maximumsize="&v_sidebar_width;,2000" layout="BorderLayout" constraints="BorderLayout.CENTER" border="&X;red)"><!--{{{-->
+		<panel minimumsize="&v_sidebar_width_browser;,1" preferredsize="&v_sidebar_width_browser;,&v_height;" maximumsize="&v_sidebar_width_browser;,2000" layout="BorderLayout" constraints="BorderLayout.CENTER" border="&X;red)"><!--{{{-->
 			<vbox border="&X;blue)">
 				<hbox border="&X;magenta)">
 					<hbox border="TitledBorder(EmptyBorder,Games,TitledBorder.LEFT, TitledBorder.ABOVE_TOP)">
