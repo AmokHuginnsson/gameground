@@ -48,20 +48,18 @@
 			</hbox>
 		</vbox>
 		<vbox minimumsize="&v_sidebar_width;,1" preferredsize="&v_sidebar_width;,&v_height;" maximumsize="&v_sidebar_width;,2000">
-			<panel layout="GridLayout(2,1)">
-				<scrollpane autoscrolls="true" tooltiptext="Current highscores.">
-					<scoretable id="_players" />
-				</scrollpane>
-				<scrollpane autoscrolls="true">
-					<textpane id="_logPad" editable="false" focusable="true" />
-				</scrollpane>
-			</panel>
+			<scrollpane preferredsize="&v_sidebar_width;,240" maximumsize="2000,240" autoscrolls="true" tooltiptext="Current highscores.">
+				<scoretable id="_players" />
+			</scrollpane>
+			<scrollpane autoscrolls="true" minimumsize="1,400">
+				<textpane id="_logPad" editable="false" focusable="true" />
+			</scrollpane>
 			<panel maximumsize="&v_sidebar_width;,40" layout="BorderLayout">
 				<readlineprompt id="_messageInput" focusable="true" editable="true" action="onMessage" constraints="BorderLayout.NORTH" tooltiptext="Enter message You want to send to other players." />
 			</panel>
 			<hbox>
 				<glue maximumsize="1000,1"/>
-				<button id="_exit" text="Exit !" action="onExit" tooltiptext="Abandon this match." />
+				<button text="Exit !" action="onExit" tooltiptext="Abandon this match." />
 			</hbox>
 		</vbox>
 	</hbox>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso8859-2"?>
 <!DOCTYPE panel SYSTEM "res/gameground.dtd">
-<panel layout="BorderLayout" border="EmptyBorder(4,4,4,4)"><!--{{{-->
+<panel layout="BorderLayout"><!--{{{-->
 	<hbox>
 		<setbangtable id="_table" background="009000" />
 		<vbox minimumsize="&v_sidebar_width;,1" preferredsize="&v_sidebar_width;,&v_height;" maximumsize="&v_sidebar_width;,2000">
