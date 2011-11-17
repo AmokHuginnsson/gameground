@@ -35,7 +35,7 @@ using namespace yaal::hcore;
 namespace gameground {
 
 /*! \brief Simple constructor.
- * 
+ *
  * it inializes dictionary
  */
 HSpellChecker::HSpellChecker( void ) : _spellChecker( NULL ), _spellConfig( NULL ) {
@@ -57,7 +57,7 @@ HSpellChecker::HSpellChecker( void ) : _spellChecker( NULL ), _spellConfig( NULL
 
 	int err = 0;
 	if ( ( err = aspell_error_number( possible_err ) ) != 0 ) {
-		HString msg = "Aspell error: "; 
+		HString msg = "Aspell error: ";
 		msg += aspell_error_message( possible_err );
 		cleanup();
 		hcore::log( LOG_TYPE::INFO ) << "failure" << endl;
