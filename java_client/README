@@ -24,6 +24,7 @@ forms-1.1.0.jar:
   notes: version supplied with swixml will suffice
 
 
-Just put those files in the same directory as all *.java files.
+Just put those files into ./lib/ subdirectoy (create it first!) that is relative to the directory with *.java files.
 
 Good luck!
+
