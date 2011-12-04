@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="ISO-8859-2"?>
 <project name="GameGround client" default="build" basedir=".">
+	<property name="project" value="GameGround" />
 	<description>
-		Ant build file for GameGround project java client.
+		Ant build file for ${project} project java client.
 	</description>
 	<!-- set global properties for this build -->
 	<property name="src" location="." />
+	<property name="lib" location="./lib" />
 	<property name="build" location="build" />
 	<property name="target" value="gameground.jar" />
 
 	<target name="libs" unless="LibsAreReady">
-		<unjar src="commons-cli-1.1.jar" dest="${build}" />
-		<unjar src="jdom.jar" dest="${build}" />
-		<unjar src="forms-1.1.0.jar" dest="${build}" />
-		<unjar src="swixml.jar" dest="${build}" />
+		<unjar src="${lib}/commons-cli-1.1.jar" dest="${build}" />
+		<unjar src="${lib}/jdom.jar" dest="${build}" />
+		<unjar src="${lib}/forms-1.1.0.jar" dest="${build}" />
+		<unjar src="${lib}/swixml.jar" dest="${build}" />
 	</target>
 
 	<target name="init">
@@ -31,8 +33,8 @@
 
 	<target name="compile" depends="init" description="Compile the source.">
 		<!-- Compile the java code from ${src} into ${build} -->
-		<javac srcdir="${src}" destdir="${build}" debug="true">
-			<compilerarg line="-Xlint -cp ${src}:${src}/commons-cli-1.1.jar:${src}/jdom.jar:${src}/swixml.jar" />
+		<javac srcdir="${src}" destdir="${build}" debug="true" includeantruntime="false">
+			<compilerarg line="-Xlint -cp ${src}:${lib}/commons-cli-1.1.jar:${lib}/jdom.jar:${lib}/swixml.jar" />
 		</javac>
 	</target>
 
@@ -52,7 +54,11 @@
 			<arg value="find . -maxdepth 1 -name '*.class' -printf '%f\n' > class.list" />
 		</exec>
 		<!-- Put everything in ${build} into the MyProject.jar file -->
-		<jar jarfile="${build}/${target}" basedir="${build}" excludes="${target}" />
+		<jar jarfile="${build}/${target}" basedir="${build}" excludes="${target}">
+			<manifest>
+				<attribute name="Main-Class" value="${project}" />
+			</manifest>
+		</jar>
 	</target>
 
 	<target name="build" depends="compile,libs,uptodatecheck,dist" description="Build the application." />

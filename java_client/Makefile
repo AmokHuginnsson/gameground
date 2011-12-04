@@ -11,7 +11,7 @@ all: $(TARGET)
 
 build/%.class: %.java
 	@echo -n "gcc";
-	javac -g -Xlint -sourcepath . -d build -cp .:commons-cli-1.1.jar:jdom.jar:swixml.jar $(<)
+	javac -g -Xlint -sourcepath . -d build -cp .:lib/commons-cli-1.1.jar:lib/jdom.jar:lib/swixml.jar $(<)
 
 build/res:
 	mkdir -p $(@)
@@ -19,20 +19,20 @@ build/res:
 build/res/%: res/%
 	cp -au $(<) $(@)
 
-$(ENVIRON): jdom.jar swixml.jar commons-cli-1.1.jar forms-1.1.0.jar
+$(ENVIRON): lib/jdom.jar lib/swixml.jar lib/commons-cli-1.1.jar lib/forms-1.1.0.jar
 	mkdir -p build ; \
 	cd build; \
 	/bin/rm -rf *; \
-	jar xf ../commons-cli-1.1.jar; \
-	jar xf ../jdom.jar; \
-	jar xf ../forms-1.1.0.jar; \
-	jar xf ../swixml.jar; \
+	jar xf ../lib/commons-cli-1.1.jar; \
+	jar xf ../lib/jdom.jar; \
+	jar xf ../lib/forms-1.1.0.jar; \
+	jar xf ../lib/swixml.jar; \
 	touch META-INF/info.xml
 
 $(TARGET): $(ENVIRON) $(CLASS) $(RES_DEST)
 	cd build; \
 	ls -1 *.class > class.list; \
-	jar cf ../$(TARGET) res org com *.class class.list;
+	jar cf ../$(TARGET) -m ../manifest.mf res org com *.class class.list;
 
 run: $(TARGET)
 	java -Dcom.sun.management.jmxremote -Djava.security.manager -Djava.security.policy=gameground.policy -ea -cp build/gameground.jar GameGround --host codestation.org --login Amok
