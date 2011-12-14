@@ -1,3 +1,4 @@
+-- Cleanup database. {{{
 DROP TRIGGER IF EXISTS tgg_user_session_update;
 DROP TRIGGER IF EXISTS tgg_user_session_update_id;
 DROP TRIGGER IF EXISTS tgg_user_session_insert;
@@ -22,7 +23,9 @@ DROP TABLE IF EXISTS tbl_session;
 DROP TABLE IF EXISTS tbl_stats;
 DROP TABLE IF EXISTS tbl_game;
 DROP TABLE IF EXISTS tbl_user;
+-- }}}
 
+-- Create tables. {{{
 -- Service user login information. A slow changing table.
 CREATE TABLE tbl_user (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,7 +60,9 @@ CREATE TABLE tbl_session (
 );
 CREATE INDEX idx_stats_id_user ON tbl_stats ( id_user );
 CREATE INDEX idx_stats_id_game ON tbl_stats ( id_game );
+-- }}}
 
+-- Create triggers {{{
 -- Automatically create session information while creating user data.
 CREATE TRIGGER tgg_user_insert AFTER INSERT ON tbl_user FOR EACH ROW
 BEGIN
@@ -173,8 +178,12 @@ BEGIN
 	UPDATE tbl_session SET last_activity = NEW.last_activity WHERE id_user = OLD.id;
 END;
 
+-- }}}
+
+-- Insert data. {{{
 INSERT INTO tbl_game ( name ) VALUES ( 'go' );
 INSERT INTO tbl_game ( name ) VALUES ( 'boggle' );
 INSERT INTO tbl_game ( name ) VALUES ( 'galaxy' );
 INSERT INTO tbl_game ( name ) VALUES ( 'gomoku' );
+-- }}}
 
