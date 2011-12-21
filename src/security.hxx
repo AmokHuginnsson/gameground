@@ -28,11 +28,11 @@ Copyright:
 #define GAMEGROUND_SECURITY_HXX_INCLUDED 1
 
 #include <yaal/hcore/hstring.hxx>
+#include <yaal/tools/util.hxx>
 
 namespace gameground {
 
-yaal::hcore::HString escape( yaal::hcore::HString const& );
-yaal::hcore::HString unescape( yaal::hcore::HString const& );
+extern yaal::tools::util::EscapeTable _escapeTable_;
 bool is_sha1( yaal::hcore::HString const& );
 
 }

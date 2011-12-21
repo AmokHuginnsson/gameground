@@ -163,7 +163,7 @@ void HGo::handler_sgf( OClientInfo*, HString const& message_ ) {
 	M_PROLOG
 	try {
 		SGF sgf( SGF::GAME_TYPE::GO, "gameground" );
-		HString m( unescape( message_ ) );
+		HString m( unescape_copy( message_, _escapeTable_ ) );
 		out << message_ << endl;
 		out << m << endl;
 		sgf.load( m );

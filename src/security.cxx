@@ -24,12 +24,14 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#include <yaal/yaal.hxx>
+#include <yaal/hcore/macro.hxx>
 M_VCSID( "$Id: "__ID__" $" )
 #include "security.hxx"
 
 using namespace yaal;
 using namespace yaal::hcore;
+using namespace yaal::tools;
+using namespace yaal::tools::util;
 
 namespace gameground {
 
@@ -38,25 +40,10 @@ namespace gameground {
  * ' = \A
  */
 
-yaal::hcore::HString escape( yaal::hcore::HString const& evil_ ) {
-	M_PROLOG
-	HString str;
-	if ( ! evil_.is_empty() ) {
-		str.hs_realloc( evil_.get_length() * 2 );
-		str = evil_;
-		str.replace( "\\", "\\E" ).replace( "\n", "\\n" ).replace( "\"", "\\Q" ).replace( "'", "\\A" ).replace( ":", "\\C" ).replace( ",", "\\K" );
-	}
-	return ( str );
-	M_EPILOG
-}
+char const _rawToSafe_[] = "\\\n\"':,";
+char const _safeToRaw_[] = "EnQACK";
 
-yaal::hcore::HString unescape( yaal::hcore::HString const& safe_ ) {
-	M_PROLOG
-	HString str( safe_ );
-	str.replace( "\\K", "," ).replace( "\\C", ":" ).replace( "\\A", "'" ).replace( "\\Q", "\"" ).replace( "\\n", "\n" ).replace( "\\E", "\\" );
-	return ( str );
-	M_EPILOG
-}
+EscapeTable _escapeTable_( _rawToSafe_, sizeof ( _rawToSafe_ ) - 1, _safeToRaw_, sizeof ( _safeToRaw_ ) - 1 );
 
 bool is_sha1( yaal::hcore::HString const& str_ ) {
 	M_PROLOG

@@ -393,7 +393,7 @@ void HServer::handle_account( OClientInfo& client_, HString const& accountInfo_ 
 		bool newPasswordRepeatNull( newPasswordRepeat == NULL_PASS );
 		if ( oldPasswordNull && newPasswordNull && newPasswordRepeatNull ) {
 			HRecordSet::ptr_t rs( _db->query( ( HFormat( "UPDATE tbl_user SET name = '%s', email = '%s', description = '%s' WHERE login = LOWER('%s');" )
-							% escape( name ) % escape( email ) % escape( description ) % client_._login ).string() ) );
+							% escape_copy( name, _escapeTable_ ) % escape_copy( email, _escapeTable_ ) % escape_copy( description, _escapeTable_ ) % client_._login ).string() ) );
 			M_ENSURE( !! rs );
 		} else {
 			if ( ! ( oldPasswordNull || newPasswordNull || newPasswordRepeatNull ) ) {
@@ -402,7 +402,7 @@ void HServer::handle_account( OClientInfo& client_, HString const& accountInfo_ 
 						kick_client( client_._socket, _msgYourClientIsTainted_ );
 					else {
 						HRecordSet::ptr_t rs( _db->query( ( HFormat( "UPDATE tbl_user SET name = '%s', email = '%s', description = '%s', password = '%s' WHERE login = LOWER('%s') AND password = LOWER('%s');" )
-										% escape( name ) % escape( email ) % escape( description ) % newPassword % client_._login % oldPassword ).string() ) );
+										% escape_copy( name, _escapeTable_ ) % escape_copy( email, _escapeTable_ ) % escape_copy( description, _escapeTable_ ) % newPassword % client_._login % oldPassword ).string() ) );
 						M_ENSURE( !! rs );
 						if ( rs->get_size() != 1 )
 							client_._socket->write_until_eos( "warn:Password not changed - old password do not match.\n" );
@@ -647,9 +647,9 @@ void HServer::handle_get_account( OClientInfo& client_, HString const& login_ ) 
 				email = row[2];
 			SENDF( *client_._socket ) << PROTOCOL::ACCOUNT << PROTOCOL::SEP
 				<< login << PROTOCOL::SEPP
-				<< ( name ? unescape( *name ) : "" ) << PROTOCOL::SEPP
-				<< ( description ? unescape( *description ) : "" ) << PROTOCOL::SEPP
-				<< ( email ? unescape( *email ) : "" ) << endl;
+				<< ( name ? unescape_copy( *name, _escapeTable_ ) : "" ) << PROTOCOL::SEPP
+				<< ( description ? unescape_copy( *description, _escapeTable_ ) : "" ) << PROTOCOL::SEPP
+				<< ( email ? unescape_copy( *email, _escapeTable_ ) : "" ) << endl;
 		} else
 			SENDF( *client_._socket ) << PROTOCOL::ACCOUNT << PROTOCOL::SEP << login << endl;
 	}
