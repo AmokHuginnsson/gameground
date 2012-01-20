@@ -792,9 +792,9 @@ int HGalaxyWindow::handler_space( int, void const* ) {
 	M_EPILOG
 }
 
-void HGalaxyWindow::msg( int attr_, char const * const msg_ ) {
+void HGalaxyWindow::msg( int attr_, char const* const msg_ ) {
 	M_PROLOG
-	_statusBar->message( attr_, msg_ );
+	_statusBar->message( attr_, "%s", msg_ );
 	M_EPILOG
 }
 
