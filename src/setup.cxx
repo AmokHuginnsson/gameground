@@ -77,13 +77,13 @@ void OSetup::test_setup( void ) {
 				_( "galaxy cannot run on restricted ports\n" ) );
 	char* message( NULL );
 	if ( test_glx_emperors( _emperors, message ) )
-		yaal::tools::util::failure ( 4, message );
+		yaal::tools::util::failure( 4, "%s", message );
 	if ( test_glx_board_size( _boardSize, message ) )
-		yaal::tools::util::failure ( 8, message );
+		yaal::tools::util::failure( 8, "%s", message );
 	if ( test_glx_emperors_systems( _emperors, _systems, message ) )
-		yaal::tools::util::failure ( 9, message );
+		yaal::tools::util::failure( 9, "%s", message );
 	if ( test_glx_systems( _systems, message ) )
-		yaal::tools::util::failure ( 10, message );
+		yaal::tools::util::failure( 10, "%s", message );
 	HDataBase::ptr_t db = HDataBase::get_connector();
 	db->connect( setup._databasePath, setup._databaseLogin, setup._databasePassword );
 	return;

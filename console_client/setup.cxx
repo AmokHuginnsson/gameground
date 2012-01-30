@@ -72,17 +72,17 @@ void OSetup::test_setup( void ) {
 				_( "as a player you must specify Your name\n" ) );
 	if ( _gameType.is_empty() && _game.is_empty() )
 		yaal::tools::util::failure( 11, _( "as client you have to specify game to play\n" ) );
-	char* message = NULL;
-	if ( test_glx_emperors( _emperors, message ) )
-		yaal::tools::util::failure ( 4, message );
-	if ( test_glx_board_size( _boardSize, message ) )
-		yaal::tools::util::failure ( 8, message );
-	if ( test_glx_emperors_systems( _emperors, _systems, message ) )
-		yaal::tools::util::failure ( 9, message );
-	if ( test_glx_systems( _systems, message ) )
-		yaal::tools::util::failure ( 10, message );
+	if ( _emperors < 2 ) 
+		yaal::tools::util::failure( 4, _( "galaxy is multiplayer game and makes sense"
+					" only for at least two players\n" ) );
+	if ( ( _boardSize < 6 ) || ( _boardSize > MAX_BOARD_SIZE ) )
+		yaal::tools::util::failure( 8, _( "bad board size specified\n" ) );
+	if ( ( _emperors + _systems ) > MAX_SYSTEM_COUNT )
+		yaal::tools::util::failure( 9, _( "bad total system count\n" ) );
+	if ( _systems < 0 )
+		yaal::tools::util::failure( 10, _( "neutral system count has to be nonnegative number\n" ) );
 	if ( ! ( _gameType.is_empty() || _game.is_empty() ) )
-		yaal::tools::util::failure ( 12, _( "creating new game is enought, you do not have to join it explicite\n" ) );
+		yaal::tools::util::failure( 12, _( "creating new game is enought, you do not have to join it explicite\n" ) );
 	if ( ! _gameType.is_empty() ) {
 		HString type = get_token( _gameType, ",", 0 );
 		_game = get_token( _gameType, ",", 1 );
@@ -92,27 +92,6 @@ void OSetup::test_setup( void ) {
 	}
 	return;
 	M_EPILOG
-}
-
-bool OSetup::test_glx_emperors( int emperors_, char*& message_ ) {
-	return ( ( emperors_ < 2 )
-			&& ( message_ = _( "galaxy is multiplayer game and makes sense"
-					" only for at least two players\n" ) ) );
-}
-
-bool OSetup::test_glx_emperors_systems( int emperors_, int systems_, char*& message_ ) {
-	return ( ( ( emperors_ + systems_ ) > MAX_SYSTEM_COUNT )
-			&& ( message_ = _( "bad total system count\n" ) ) );
-}
-
-bool OSetup::test_glx_systems( int systems_, char*& message_ ) {
-	return ( ( systems_ < 0 )
-			&& ( message_ = _( "neutral system count has to be nonnegative number\n" ) ) );
-}
-
-bool OSetup::test_glx_board_size( int boardSize_, char*& message_ ) {
-	return ( ( ( boardSize_ < 6 ) || ( boardSize_ > MAX_BOARD_SIZE ) )
-			&& ( message_ = _( "bad board size specified\n" ) ) );
 }
 
 }

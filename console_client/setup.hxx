@@ -81,10 +81,6 @@ struct OSetup {
 		_login(), _password(), _host(), _gameType(), _game(),
 		_programName( NULL ), _logPath() {}
 	void test_setup( void );
-	static bool test_glx_emperors( int, char*& );
-	static bool test_glx_emperors_systems( int, int, char*& );
-	static bool test_glx_systems( int, char*& );
-	static bool test_glx_board_size( int, char*& );
 private:
 	OSetup ( OSetup const & );
 	OSetup & operator = ( OSetup const & );
