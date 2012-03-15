@@ -80,7 +80,7 @@ HGomoku::HGomoku( HServer* server_, HLogic::id_t const& id_, HString const& comm
 	M_PROLOG
 	_contestants[ 0 ] = _contestants[ 1 ] = NULL;
 	::memset( _game.raw(), STONE::NONE, GOBAN_SIZE * GOBAN_SIZE );
-	_game.raw()[ GOBAN_SIZE * GOBAN_SIZE ] = 0;
+	_game.get<char>()[ GOBAN_SIZE * GOBAN_SIZE ] = 0;
 	_handlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HGomoku::handler_play );
 	return;
 	M_EPILOG
@@ -122,7 +122,7 @@ void HGomoku::handler_sit( OClientInfo* clientInfo_, HString const& message_ ) {
 			OClientInfo* white( contestant( STONE::WHITE ) );
 			if ( ! ( black && white ) ) {
 				::memset( _game.raw(), STONE::NONE, GOBAN_SIZE * GOBAN_SIZE );
-				_game.raw()[ GOBAN_SIZE * GOBAN_SIZE ] = 0;
+				_game.get<char>()[ GOBAN_SIZE * GOBAN_SIZE ] = 0;
 				send_goban();
 				_start = 0;
 				_move = 0;
@@ -257,11 +257,11 @@ void HGomoku::send_goban( void ) {
 }
 
 char& HGomoku::goban( int col_, int row_ ) {
-	return ( _game.raw()[ row_ * GOBAN_SIZE + col_ ] );
+	return ( _game.get<char>()[ row_ * GOBAN_SIZE + col_ ] );
 }
 
 char HGomoku::goban( int col_, int row_ ) const {
-	return ( _game.raw()[ row_ * GOBAN_SIZE + col_ ] );
+	return ( _game.get<char>()[ row_ * GOBAN_SIZE + col_ ] );
 }
 
 void HGomoku::clear_goban( bool removeDead ) {

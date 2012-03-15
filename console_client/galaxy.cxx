@@ -693,20 +693,20 @@ void HGalaxyWindow::on_show_system_info( int system_ ) {
 	M_PROLOG
 	int color = - 1;
 	HString name;
-	_systemName->set( "" );
-	_emperorName->set( "" );
-	_production->set( "" );
-	_fleet->set( "" );
+	_systemName->set_text( "" );
+	_emperorName->set_text( "" );
+	_production->set_text( "" );
+	_fleet->set_text( "" );
 	if ( system_ >= 0 ) {
-		_systemName->set( _systemNames_[ system_ ] );
+		_systemName->set_text( _systemNames_[ system_ ] );
 		if ( ( *_systems )[ system_ ]._production >= 0 )
-			_production->set( HString( ( *_systems )[ system_ ]._production ) );
+			_production->set_text( ( *_systems )[ system_ ]._production );
 		if ( ( *_systems )[ system_ ]._fleet >= 0 )
-			_fleet->set( HString( ( *_systems )[ system_ ]._fleet ) );
+			_fleet->set_text( ( *_systems )[ system_ ]._fleet );
 		color = ( *_systems )[ system_ ]._color;
 		emperors_t::iterator it( _emperors->find( color ) );
 		if ( ( color >= 0 ) && ( it != _emperors->end() ) )
-			_emperorName->set( it->second );
+			_emperorName->set_text( it->second );
 	}
 	return;
 	M_EPILOG
@@ -730,19 +730,19 @@ int HGalaxyWindow::handler_enter( int code_, void const* ) {
 	M_PROLOG
 	HMove* move( NULL );
 	if ( (*_focusedChild) == _messageInput ) {
-		if ( _messageInput->get().get<HString const&>().find_other_than( _whiteSpace_.data() ) >= 0 ) {
+		if ( _messageInput->get_text().find_other_than( _whiteSpace_.data() ) >= 0 ) {
 			_varTmpBuffer = "cmd:";
 			_varTmpBuffer += _client->id();
 			_varTmpBuffer += ":glx:say:";
-			_varTmpBuffer += _messageInput->get().get<char const*>();
+			_varTmpBuffer += _messageInput->get_text();
 			_varTmpBuffer += "\n";
 			_client->send_message( _varTmpBuffer );
-			_messageInput->set( "" );
+			_messageInput->set_text( "" );
 		}
 		code_ = 0;
 	} else if ( _state == INPUT ) {
 		if ( (*_focusedChild) == _fleet ) {
-			int fleet( lexical_cast<int>( _fleet->get().get<char const*>() ) );
+			int fleet( lexical_cast<int>( _fleet->get_text() ) );
 			if ( ( fleet > 0 )
 					&& ( fleet <= ( * _systems )[ _board->_sourceSystem ]._fleet ) ) {
 				_fleet->enable( false );

@@ -573,9 +573,9 @@ void HGo::set_handicaps( int handicaps_ ) {
 		throw HLogicException( _out << "bad handicap value: " << handicaps_ << _out );
 	_sgf.clear();
 	::memset( _game.raw(), STONE::NONE, _gobanSize * _gobanSize );
-	_game.raw()[ _gobanSize * _gobanSize ] = 0;
+	_game.get<char>()[ _gobanSize * _gobanSize ] = 0;
 	::memset( _koGame.raw(), STONE::NONE, _gobanSize * _gobanSize );
-	_koGame.raw()[ _gobanSize * _gobanSize ] = 0;
+	_koGame.get<char>()[ _gobanSize * _gobanSize ] = 0;
 	if ( handicaps_ != _handicaps ) {
 		if ( handicaps_ > 0 )
 			_komi = 0;
@@ -642,7 +642,7 @@ void HGo::set_handi( int handi_ ) {
 
 void HGo::put_stone( int col_, int row_, STONE::stone_t stone_ ) {
 	M_PROLOG
-	_game.raw()[ row_ * _gobanSize + col_ ] = stone_;
+	_game.get<char>()[ row_ * _gobanSize + col_ ] = stone_;
 	return;
 	M_EPILOG
 }
@@ -657,7 +657,7 @@ void HGo::send_goban( void ) {
 }
 
 char& HGo::goban( int col_, int row_ ) {
-	return ( _koGame.raw()[ row_ * _gobanSize + col_ ] );
+	return ( _koGame.get<char>()[ row_ * _gobanSize + col_ ] );
 }
 
 bool HGo::have_liberties( int col_, int row_, STONE::stone_t stone ) {
@@ -836,11 +836,11 @@ void HGo::send_contestant( char stone ) {
 }
 
 int HGo::count_stones( STONE::stone_t stone ) {
-	return ( static_cast<int>( count( _game.raw(), _game.raw() + _gobanSize * _gobanSize, stone ) ) );
+	return ( static_cast<int>( count( _game.get<char>(), _game.get<char>() + _gobanSize * _gobanSize, stone ) ) );
 }
 
 void HGo::replace_stones( STONE::stone_t which, STONE::stone_t with ) {
-	replace( _koGame.raw(), _koGame.raw() + _gobanSize * _gobanSize, which, with );
+	replace( _koGame.get<char>(), _koGame.get<char>() + _gobanSize * _gobanSize, which, with );
 	return;
 }
 
