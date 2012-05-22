@@ -86,7 +86,7 @@ char const* const HServer::PROTOCOL::VERSION = "version";
 char const* const HServer::PROTOCOL::VERSION_ID = "2";
 char const* const HServer::PROTOCOL::WARN = "warn";
 
-static const HString NULL_PASS = hash::sha1( "" );
+static const HString NULL_PASS = tools::hash::sha1( "" );
 
 char const _msgYourClientIsTainted_[] = "Your client is tainted, go away!";
 

@@ -836,7 +836,7 @@ void HClient::init_client( HString& host_, int port_ ) {
 	if ( setup._password.is_empty() )
 		_socket.write_until_eos( _out << "login:" << CLIENT_VERSION << ":" << setup._login << endl << _out );
 	else
-		_socket.write_until_eos( _out << "login:" << CLIENT_VERSION << ":" << setup._login << ":" << hash::sha1( setup._password ) << endl << _out );
+		_socket.write_until_eos( _out << "login:" << CLIENT_VERSION << ":" << setup._login << ":" << tools::hash::sha1( setup._password ) << endl << _out );
 	_window->set_data( &_systems, &_emperors, &_moves );
 	HTUIProcess::init_tui( "galaxy", _window );
 	_board = _window->get_board();
