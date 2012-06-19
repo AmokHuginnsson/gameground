@@ -172,6 +172,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		g.fillOval( D_MARGIN + margin + offset, D_MARGIN + margin + noffset, hoshi, hoshi );
 		g.fillOval( D_MARGIN + margin + noffset, D_MARGIN + margin + noffset, hoshi, hoshi );
 		char[] label = new char[2];
+		g.setColor( Color.white );
 		for ( int i = 0; i < _size; ++ i ) {
 			label[ 0 ] = (char)( 'A' + ( i < ( 'i' - 'a' ) ? i : i + 1 ) );
 			g.drawChars( label, 0, 1, D_MARGIN + margin + ( inside * i ) / ( _size - 1 ) - 4, D_MARGIN - 3 );

@@ -5,6 +5,8 @@
 <!ENTITY v_login_screen_width "600">
 <!ENTITY v_sidebar_width_browser "330">
 <!ENTITY v_sidebar_width "256">
+<!ENTITY v_font "dialog-bold-10">
 <!ENTITY empty "EmptyBorder(0,0,0,0)">
 <!--ENTITY X "MatteBorder(3,3,3,3,"-->
+<!ENTITY outline "MatteBorder(1,1,1,1,red)">
 <!ENTITY X "MatteBorder(0,0,0,0,">

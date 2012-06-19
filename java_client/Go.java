@@ -18,7 +18,7 @@ class GoPlayer {
 	public JButton _sit;
 	public int _timeLeft = 0;
 	public void clear() {
-		_name.setText( "" );
+		_name.setText( " " );
 		_score.setText( "" );
 		_captures.setText( "" );
 		_timeLeftLabel.setText( "" );
@@ -268,7 +268,7 @@ class Go extends HAbstractLogic implements Runnable {
 		String[] tokens = $command.split( ",", 6 );
 		byte stone = STONE.NONE;
 		GoPlayer contestant = _contestants.get( ( stone = (byte)tokens[ 0 ].charAt( 0 ) ) );
-		contestant._name.setText( tokens[ 1 ] );
+		contestant._name.setText( "".equals( tokens[ 1 ] ) ? " " : tokens[ 1 ] );
 		contestant._captures.setText( tokens[ 2 ] );
 		contestant._score.setText( tokens[ 3 ] );
 		contestant._timeLeft = Integer.parseInt( tokens[ 4 ] );
@@ -286,7 +286,7 @@ class Go extends HAbstractLogic implements Runnable {
 			if ( ( stone == _stone ) && ( _stone != STONE.NONE ) ) {
 				contestant._sit.setText( HGUILocal.SIT );
 				GoPlayer foe = _contestants.get( _gui._board.opponent( _stone ) );
-				foe._sit.setEnabled( "".equals( foe._name.getText() ) );
+				foe._sit.setEnabled( " ".equals( foe._name.getText() ) );
 				_stone = STONE.NONE;
 				if ( _gui._toolTip != null ) {
 					_gui._pass.setText( _gui._passText );
