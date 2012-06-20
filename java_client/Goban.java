@@ -35,7 +35,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	}
 	public static final long serialVersionUID = 7l;
 	public static final int D_MARGIN = 20;
-	HAbstractLogic _logic= null;
+	HAbstractLogic _logic = null;
 	int _size = Go.GOBAN_SIZE.NORMAL;
 	double _diameter = -1;
 	int _cursorX = -1;

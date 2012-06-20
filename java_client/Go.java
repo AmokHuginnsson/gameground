@@ -7,6 +7,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.JSlider;
 import javax.swing.DefaultListModel;
 
 class GoPlayer {
@@ -84,7 +85,9 @@ class Go extends HAbstractLogic implements Runnable {
 		public JButton _whiteSit;
 		public JButton _pass;
 		public JList _visitors;
+		public JSlider _jumpToMove;
 		public GoGoban _board;
+		public SGFTree _sgftree;
 		public GoConfigurator _conf = new GoConfigurator();
 		public JLabel _toMove;
 		public JLabel _move;
@@ -95,6 +98,7 @@ class Go extends HAbstractLogic implements Runnable {
 		}
 		public void updateTagLib( XUL $xul ) {
 			$xul.getTaglib().registerTag( "goban", GoGoban.class );
+			$xul.getTaglib().registerTag( "sgftree", SGFTree.class );
 		}
 		public void mapMembers( XUL $se ) {
 			$se.mapMembers( _conf );

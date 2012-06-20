@@ -15,8 +15,8 @@
 				<button text="Undo" action="onUndo" margin="(2,2,2,2)" tooltiptext="Ask your opponent to accept undoing your last move." />
 			</panel>
 			<hbox>
-				<panel maximumsize="240,180" border="EmptyBorder(4,4,4,4)">
-					<layout type="FormLayout" columns="p,10px,p" rows="p,4px,p,4px,p,4px,p,4px,p,4px,p,4px,p" />
+				<panel maximumsize="160,180" border="EmptyBorder(4,4,4,4)">
+					<layout type="FormLayout" columns="p,6px,p" rows="p,4px,p,4px,p,4px,p,4px,p,4px,p,4px,p" />
 					<label constraints="1,1" font="&v_font;">Goban:</label>
 					<combobox id="_confGoban" action="onGobanSize" constraints="3,1" tooltiptext="Goban size." enabled="false" font="&v_font;" />
 					<label constraints="1,3" font="&v_font;">Main time:</label>
@@ -56,7 +56,7 @@
 			<hbox maximumsize="2000,240">
 				<panel border="EtchedBorder" layout="BorderLayout">
 					<panel border="EmptyBorder(4,4,4,4)">
-						<layout type="FormLayout" columns="p,10px,p" rows="p,4px,p,4px,p,4px,p,4px,p,4px,p,4px,p" />
+						<layout type="FormLayout" columns="p,10px,p" rows="p,4px,p,4px,p,2px,p,2px,p,2px,p,4px,p" />
 						<label text="Player Black:" constraints="1,1,3,1" font="&v_font;" />
 						<label id="_blackName" constraints="1,3,3,1" text="Name Huge Enormously" />
 						<label text="Score:" constraints="1,5" font="&v_font;" />
@@ -72,7 +72,7 @@
 				</panel>
 				<panel border="EtchedBorder" layout="BorderLayout">
 					<panel border="EmptyBorder(4,4,4,4)">
-						<layout type="FormLayout" columns="p,10px,p" rows="p,4px,p,4px,p,4px,p,4px,p,4px,p,4px,p,4px,p,4px,p" />
+						<layout type="FormLayout" columns="p,10px,p" rows="p,4px,p,4px,p,2px,p,2px,p,2px,p,4px,p" />
 						<label text="Player White:" constraints="1,1,3,1" font="&v_font;" />
 						<label id="_whiteName" constraints="1,3,3,1" text="Name Huge Enormously" />
 						<label text="Score:" constraints="1,5" font="&v_font;" />
@@ -87,11 +87,29 @@
 					</panel>
 				</panel>
 			</hbox>
-			<scrollpane autoscrolls="true">
-				<textpane id="_logPad" editable="false" focusable="true" />
-			</scrollpane>
-			<panel maximumsize="&v_sidebar_width;,40" layout="BorderLayout">
-				<readlineprompt id="_messageInput" focusable="true" editable="true" action="onMessage" constraints="BorderLayout.NORTH" tooltiptext="Enter message You want to send to other players." />
+			<panel layout="BorderLayout">
+				<splitpane orientation="JSplitPane.VERTICAL_SPLIT" dividerlocation="220" resizeweight="1">
+					<vbox>
+						<scrollpane autoscrolls="true">
+							<textpane id="_logPad" editable="false" focusable="true" />
+						</scrollpane>
+						<panel maximumsize="&v_sidebar_width;,40" layout="BorderLayout">
+							<readlineprompt id="_messageInput" focusable="true" editable="true" action="onMessage" constraints="BorderLayout.NORTH" tooltiptext="Enter message You want to send to other players." />
+						</panel>
+					</vbox>
+					<vbox>
+						<scrollpane autoscrolls="true">
+							<sgftree id="_sgftree" opaque="true" background="b07040" />
+						</scrollpane>
+						<hbox>
+							<button icon="res/first.png" action="onGoToFirst" margin="(2,2,2,2)" tooltiptext="Go to first move." />
+							<button icon="res/previous.png" action="onGoToPrevious" margin="(2,2,2,2)" tooltiptext="Go to previous move." />
+							<slider id="_jumpToMove" orientation="HORIZONTAL" snaptotick="true" maximum="0" />
+							<button icon="res/next.png" action="onGoToNext" margin="(2,2,2,2)" tooltiptext="Go to next move." />
+							<button icon="res/last.png" action="onGoToLast" margin="(2,2,2,2)" tooltiptext="Go to last move." />
+						</hbox>
+					</vbox>
+				</splitpane>
 			</panel>
 			<hbox>
 				<glue maximumsize="1000,1"/>
