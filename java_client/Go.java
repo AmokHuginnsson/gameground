@@ -221,6 +221,9 @@ class Go extends HAbstractLogic implements Runnable {
 		GoImages images = new GoImages();
 		_gui._board.setLogic( this );
 		_gui._board.setImages( images );
+		_gui._sgftree.setLogic( this );
+		_gui._sgftree.setImages( images );
+		_gui._sgftree.setSGF( _gui._board.getSGF() );
 		GoPlayer black = new GoPlayer();
 		black._name = _gui._blackName;
 		black._captures = _gui._blackCaptures;
@@ -306,6 +309,7 @@ class Go extends HAbstractLogic implements Runnable {
 			Sound.play( "stone" );
 		_gui._board.updateSGF( Sec.unescape( $command ) );
 		_gui._board.repaint();
+		_gui._sgftree.repaint();
 	}
 	void handlerStone( String $command ) {
 	}

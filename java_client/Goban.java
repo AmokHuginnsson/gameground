@@ -65,6 +65,9 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 			repaint();
 		}
 	}
+	public SGF getSGF() {
+		return ( _sgf );
+	}
 	public void mouseDragged( MouseEvent $event ) {
 	}
 	public void mouseEntered( MouseEvent $event ) {
@@ -265,7 +268,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 			stone = _stones[ $row * _size + $col ];
 		return ( stone );
 	}
-	public byte opponent( byte stone ) {
+	public static byte opponent( byte stone ) {
 		return ( stone == STONE.WHITE ? STONE.BLACK : STONE.WHITE );
 	}
 	boolean validCoords( int x, int y ) {

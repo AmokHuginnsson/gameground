@@ -88,7 +88,7 @@
 				</panel>
 			</hbox>
 			<panel layout="BorderLayout">
-				<splitpane orientation="JSplitPane.VERTICAL_SPLIT" dividerlocation="220" resizeweight="1">
+				<splitpane orientation="JSplitPane.VERTICAL_SPLIT" dividerlocation="200" resizeweight="1" dividersize="3">
 					<vbox>
 						<scrollpane autoscrolls="true">
 							<textpane id="_logPad" editable="false" focusable="true" />

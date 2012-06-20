@@ -15,12 +15,14 @@ class GoImages {
 	public Image _blackAlpha;
 	public Image[] _whites;
 	public Image[] _whitesAlpha;
+	private int _stoneSize;
 //--------------------------------------------//
 	public GoImages() {
 		_whites = new Image[D_WHITE_LOOKS];
 		_whitesAlpha = new Image[D_WHITE_LOOKS];
 	}
 	public void regenerate( int $gobanSize, int $stoneSize ) {
+		_stoneSize = $stoneSize;
 		_background = background( $gobanSize );
 		_black = black( $stoneSize, false );
 		_blackAlpha = black( $stoneSize, true );
@@ -29,6 +31,9 @@ class GoImages {
 			_whites[ i ] = white( $stoneSize, false );
 			_whitesAlpha[ i ] = white( $stoneSize, true );
 		}
+	}
+	public int getStoneSize() {
+		return ( _stoneSize );
 	}
 	private Image background( int $size ) {
 		final int D_WIDTH = $size;
