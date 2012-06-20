@@ -9,6 +9,7 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.JSlider;
 import javax.swing.DefaultListModel;
+import javax.swing.event.ChangeEvent;
 
 class GoPlayer {
 	public JLabel _name;
@@ -64,7 +65,7 @@ class Go extends HAbstractLogic implements Runnable {
 		public static final byte TERITORY_WHITE = 'q';
 		public static final byte DAME = 'x';
 	}
-	public class HGUILocal extends HGUIface {
+	public class HGUILocal extends HGUIface implements javax.swing.event.ChangeListener {
 		public static final long serialVersionUID = 17l;
 		public static final String SIT = "Sit !";
 		public static final String GETUP = "Get up !";
@@ -113,6 +114,10 @@ class Go extends HAbstractLogic implements Runnable {
 			_conf.setEnabled( false );
 			_pass.setText( _passText );
 			_pass.setToolTipText( _toolTip );
+			_jumpToMove.addChangeListener( this );
+		}
+		public void stateChanged(ChangeEvent e) {
+			_board.placeStones( _jumpToMove.getValue() );
 		}
 		public JTextPane getLogPad() {
 			return ( _logPad );
@@ -193,6 +198,18 @@ class Go extends HAbstractLogic implements Runnable {
 		}
 		public void onSave() {
 			_board.save();
+		}
+		public void onGoToFirst() {
+			_board.goToFirst();
+		}
+		public void onGoToPrevious() {
+			_board.goToPrevious();
+		}
+		public void onGoToNext() {
+			_board.goToNext();
+		}
+		public void onGoToLast() {
+			_board.goToLast();
 		}
 	}
 //--------------------------------------------//

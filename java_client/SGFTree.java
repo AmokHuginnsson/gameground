@@ -69,10 +69,10 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		for ( SGF.Game.Move m : _sgf._game._tree ) {
 			int x = margin + ( diameter + margin ) * ( moveNumber - 1 );
 			int y = margin;
-			if ( ( x + margin ) > maxW )
-				maxW = x + margin;
-			if ( ( y + margin ) > maxH )
-				maxH = y + margin;
+			if ( ( x + margin + diameter ) > maxW )
+				maxW = x + margin + diameter;
+			if ( ( y + margin + diameter ) > maxH )
+				maxH = y + margin + diameter;
 			drawStone( g, x, y, stone, moveNumber );
 			stone = Goban.opponent( stone );
 			++ moveNumber;

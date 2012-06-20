@@ -35,12 +35,14 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	}
 	public static final long serialVersionUID = 7l;
 	public static final int D_MARGIN = 20;
+	static final int ALL = 30000;
 	HAbstractLogic _logic = null;
 	int _size = Go.GOBAN_SIZE.NORMAL;
 	double _diameter = -1;
 	int _cursorX = -1;
 	int _cursorY = -1;
 	int _virtSize = 0;
+	int _viewMove = 0;
 	GoImages _images = null;
 	SGF _sgf = null;
 	SGF.Game.Move _lastMove = null;
@@ -97,40 +99,65 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		BufferedReader br = new BufferedReader( new StringReader( $sgfData ) );
 		updateSGF( br );
 	}
+	void placeStones( int $to ) {
+		int gameCommentLength = _sgf._game._comment.length();
+		if ( ( gameCommentLength > 0 ) && ( $to == ALL ) ) {
+			_logic._gui.log( "Game Started\n", HGUIface.Colors.OTHERGRAY, HGUIface.Style.BOLD );
+			_logic._gui.log( _sgf._game._comment + ( _sgf._game._comment.charAt( gameCommentLength - 1 ) != '\n' ? "\n" : "" ), HGUIface.Colors.OTHERGRAY );
+		}
+		Arrays.fill( _stones, STONE.NONE );
+		for ( SGF.Game.Move m : _sgf._game._blackPreset ) {
+			move( m.col(), m.row(), STONE.BLACK );
+		}
+		for ( SGF.Game.Move m : _sgf._game._whitePreset ) {
+			move( m.col(), m.row(), STONE.WHITE );
+		}
+		byte stone = _sgf._game._firstToMove == SGF.Game.Player.BLACK ? STONE.BLACK : STONE.WHITE;
+		int moveNumber = 0;
+		_lastMove = null;
+		for ( SGF.Game.Move m : _sgf._game._tree ) {
+			if ( moveNumber >= $to )
+				break;
+			_lastMove = m;
+			move( m.col(), m.row(), stone );
+			int commentLength = m._comment.length();
+			if ( ( commentLength > 0 ) && ( moveNumber > _viewMove ) ) {
+				_logic._gui.log( "Move: " + ( moveNumber + 1 ) + "\n", HGUIface.Colors.OTHERGRAY, HGUIface.Style.BOLD );
+				_logic._gui.log( m._comment + ( m._comment.charAt( commentLength - 1 ) != '\n' ? "\n" : "" ), HGUIface.Colors.OTHERGRAY );
+			}
+			stone = opponent( stone );
+			++ moveNumber;
+		}
+		_viewMove = moveNumber;
+		if ( $to != ALL )
+			((Go.HGUILocal)_logic._gui)._jumpToMove.setValue( _viewMove );
+		repaint();
+	}
+	void placeStones() {
+		placeStones( ALL );
+	}
 	void updateSGF( BufferedReader $reader ) {
 		_sgf.clear();
 		try {
 			_sgf.load( $reader );
-			int gameCommentLength = _sgf._game._comment.length();
-			if ( gameCommentLength > 0 ) {
-				_logic._gui.log( "Game Started\n", HGUIface.Colors.OTHERGRAY, HGUIface.Style.BOLD );
-				_logic._gui.log( _sgf._game._comment + ( _sgf._game._comment.charAt( gameCommentLength - 1 ) != '\n' ? "\n" : "" ), HGUIface.Colors.OTHERGRAY );
-			}
-			_lastMove = _sgf.lastMove();
-			Arrays.fill( _stones, STONE.NONE );
-			for ( SGF.Game.Move m : _sgf._game._blackPreset ) {
-				move( m.col(), m.row(), STONE.BLACK );
-			}
-			for ( SGF.Game.Move m : _sgf._game._whitePreset ) {
-				move( m.col(), m.row(), STONE.WHITE );
-			}
-			byte stone = _sgf._game._firstToMove == SGF.Game.Player.BLACK ? STONE.BLACK : STONE.WHITE;
-			int moveNumber = 1;
-			for ( SGF.Game.Move m : _sgf._game._tree ) {
-				move( m.col(), m.row(), stone );
-				int commentLength = m._comment.length();
-				if ( commentLength > 0 ) {
-					_logic._gui.log( "Move: " + moveNumber + "\n", HGUIface.Colors.OTHERGRAY, HGUIface.Style.BOLD );
-					_logic._gui.log( m._comment + ( m._comment.charAt( commentLength - 1 ) != '\n' ? "\n" : "" ), HGUIface.Colors.OTHERGRAY );
-				}
-				stone = opponent( stone );
-				++ moveNumber;
-			}
+			placeStones();
+			((Go.HGUILocal)_logic._gui)._jumpToMove.setMaximum( _viewMove );
 		} catch ( SGFException se ) {
 			Con.err( "SGFException: " + se.getMessage() );
 			System.exit( 1 );
 		}
-		repaint();
+	}
+	void goToFirst() {
+		placeStones( 0 );
+	}
+	void goToPrevious() {
+		placeStones( _viewMove - 1 );
+	}
+	void goToNext() {
+		placeStones( _viewMove + 1 );
+	}
+	void goToLast() {
+		placeStones();
 	}
 	public Dimension getPreferredSize() {
 		java.awt.Dimension pd = getParent().getSize();
