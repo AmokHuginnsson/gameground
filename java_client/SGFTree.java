@@ -66,7 +66,11 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		int maxH = 0;
 		int margin = 10;
 		g.setFont( _font );
-		for ( SGF.Game.Move m : _sgf._game._tree ) {
+		HTree<SGF.Game.Move>.HNode<SGF.Game.Move> n = ( _sgf._game._tree._root != null ) ? ( _sgf._game._tree._root.getChildCount() > 0 ? _sgf._game._tree._root.getChildAt( 0 ) : null ) : null;
+		HTree<SGF.Game.Move>.HNode<SGF.Game.Move> last = n;
+		while ( n != null ) {
+			last = n;
+			SGF.Game.Move m = n.value();
 			int x = margin + ( diameter + margin ) * ( moveNumber - 1 );
 			int y = margin;
 			if ( ( x + margin + diameter ) > maxW )
@@ -76,6 +80,10 @@ public class SGFTree extends JPanel implements MouseInputListener {
 			drawStone( g, x, y, stone, moveNumber );
 			stone = Goban.opponent( stone );
 			++ moveNumber;
+			n = n.getChildAt( 0 );
+		}
+		while ( last != null ) {
+			last = last.getParent();
 		}
 		boolean sizeChanged = false;
 		if ( maxW > d.width ) {

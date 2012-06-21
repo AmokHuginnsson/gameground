@@ -8,12 +8,16 @@ abstract class TypeReference<T> {}
 public class HTree<Element> implements Iterable<Element> {
 	public class HNode<Element> implements Iterable<HNode<Element>> {
 		ArrayList<HNode<Element>> _children = null;
+		HNode<Element> _parent = null;
 		Element _value = null;
-		public HNode( Element $value ) {
+		public HNode( Element $value, HNode<Element> $parent ) {
 			_value = $value;
 		}
-		HNode<Element> getChildAt( int $index ) {
+		public HNode<Element> getChildAt( int $index ) {
 			return ( _children != null ? _children.get( $index ) : null );
+		}
+		public HNode<Element> getParent() {
+			return ( _parent );
 		}
 		int getChildCount() {
 			return ( _children != null ? _children.size() : 0 );
@@ -25,11 +29,19 @@ public class HTree<Element> implements Iterable<Element> {
 			if ( _children == null )
 				_children = new ArrayList<HNode<Element>>();
 			HNode<Element> node = null;
-			_children.add( node = new HNode<Element>( $value ) );
+			_children.add( node = new HNode<Element>( $value, this ) );
 			return ( node );
 		}
 		public Element value() {
 			return ( _value );
+		}
+		public void clear() {
+			_parent = null;
+			if ( _children != null ) {
+				for ( HNode<Element> n : _children )
+					n.clear();
+				_children = null;
+			}
 		}
 	}
 	public class Iterator implements java.util.Iterator<Element> {
@@ -54,7 +66,7 @@ public class HTree<Element> implements Iterable<Element> {
 	public HTree() {
 	}
 	public HNode<Element> createNewRoot( Element $value ) {
-		return ( _root = new HNode<Element>( $value ) );
+		return ( _root = new HNode<Element>( $value, null ) );
 	}
 
 	/**
@@ -64,6 +76,8 @@ public class HTree<Element> implements Iterable<Element> {
 		return ( _root );
 	}
 	public void clear() {
+		if ( _root != null )
+			_root.clear();
 		_root = null;
 	}
 
