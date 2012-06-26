@@ -26,6 +26,9 @@ public class SGFTree extends JPanel implements MouseInputListener {
 	GoImages _images = null;
 	SGF _sgf = null;
 	Font _font = new Font( "dialog", Font.BOLD, 10 );
+	int[] _path = null;
+	int _maxTreeSize = 0;
+	static final int margin = 10;
 //--------------------------------------------//
 	public SGFTree() {
 		addMouseMotionListener( this );
@@ -57,6 +60,8 @@ public class SGFTree extends JPanel implements MouseInputListener {
 	protected void paintComponent( Graphics g ) {
 		java.awt.Dimension d = getSize();
 		super.paintComponent( g );
+		Graphics2D g2d = (Graphics2D) g;
+		g2d.setStroke( new BasicStroke( 3 ) );
 		byte stone = _sgf._game._firstToMove == SGF.Game.Player.BLACK ? Goban.STONE.BLACK : Goban.STONE.WHITE;
 		int moveNumber = 1;
 		int diameter = _images.getStoneSize();
@@ -64,26 +69,46 @@ public class SGFTree extends JPanel implements MouseInputListener {
 			diameter = 28;
 		int maxW = 0;
 		int maxH = 0;
-		int margin = 10;
 		g.setFont( _font );
+		int treeSize = _sgf._game._tree.getSize();
+		if ( treeSize > _maxTreeSize ) {
+			_maxTreeSize = treeSize;
+			_path = ( _path != null ) ? Arrays.copyOf( _path, _maxTreeSize ) : new int[_maxTreeSize];
+		}
+		if ( _path != null )
+			Arrays.fill( _path, 0 );
 		HTree<SGF.Game.Move>.HNode<SGF.Game.Move> n = ( _sgf._game._tree._root != null ) ? ( _sgf._game._tree._root.getChildCount() > 0 ? _sgf._game._tree._root.getChildAt( 0 ) : null ) : null;
 		HTree<SGF.Game.Move>.HNode<SGF.Game.Move> last = n;
+		HTree<SGF.Game.Move>.HNode<SGF.Game.Move> first = n;
+		int path = 0;
 		while ( n != null ) {
-			last = n;
-			SGF.Game.Move m = n.value();
-			int x = margin + ( diameter + margin ) * ( moveNumber - 1 );
-			int y = margin;
-			if ( ( x + margin + diameter ) > maxW )
-				maxW = x + margin + diameter;
-			if ( ( y + margin + diameter ) > maxH )
-				maxH = y + margin + diameter;
-			drawStone( g, x, y, stone, moveNumber );
-			stone = Goban.opponent( stone );
-			++ moveNumber;
-			n = n.getChildAt( 0 );
-		}
-		while ( last != null ) {
-			last = last.getParent();
+			while ( n != null ) {
+				last = n;
+				SGF.Game.Move m = n.value();
+				int x = margin + ( diameter + margin ) * ( moveNumber - 1 );
+				int y = margin + ( diameter + margin ) * path;
+				if ( ( x + margin + diameter ) > maxW )
+					maxW = x + margin + diameter;
+				if ( ( y + margin + diameter ) > maxH )
+					maxH = y + margin + diameter;
+				HTree<SGF.Game.Move>.HNode<SGF.Game.Move> next = n.getChildAt( 0 );
+				drawStone( g, x, y, stone, moveNumber, n == first, next == null );
+				stone = Goban.opponent( stone );
+				++ moveNumber;
+				n = next;
+			}
+			while ( last != null ) {
+				-- moveNumber;
+				last = last.getParent();
+				if ( last != null ) {
+					first = n = last.getChildAt( _path[moveNumber - 1] + 1 );
+					if ( n != null ) {
+						Con.debug( "" + _path[moveNumber - 1] );
+						++ _path[moveNumber - 1];
+						++ path;
+					}
+				}
+			}
 		}
 		boolean sizeChanged = false;
 		if ( maxW > d.width ) {
@@ -100,7 +125,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 			((JScrollPane)(getParent().getParent())).revalidate();
 		}
 	}
-	void drawStone( Graphics $gc, int $xx, int $yy, int $color, int $number ) {
+	void drawStone( Graphics $gc, int $xx, int $yy, int $color, int $number, boolean $first, boolean $last ) {
 		Image img = null;
 		int diameter = _images.getStoneSize();
 		if ( diameter > 28 )
@@ -110,6 +135,10 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		} else {
 			img = _images._whites[ ( ( $yy + $xx ) / diameter ) % GoImages.D_WHITE_LOOKS ];
 		}
+		$gc.setColor( Color.black );
+		$gc.drawLine( $xx - margin / 2, $yy + ( ! $first ? diameter / 2 : - margin ), $xx + diameter / 2, $yy + diameter / 2 );
+		if ( ! $last )
+			$gc.drawLine( $xx + diameter / 2, $yy + diameter / 2, $xx + diameter + margin / 2, $yy + diameter / 2 );
 		$gc.drawImage( img, $xx, $yy, diameter, diameter, this );
 		String num = String.valueOf( $number );
 		$gc.setColor( $color == Goban.STONE.BLACK ? Color.WHITE : Color.BLACK );

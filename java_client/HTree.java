@@ -8,13 +8,17 @@ abstract class TypeReference<T> {}
 public class HTree<Element> implements Iterable<Element> {
 	public class HNode<Element> implements Iterable<HNode<Element>> {
 		ArrayList<HNode<Element>> _children = null;
+		HTree<Element> _tree = null;
 		HNode<Element> _parent = null;
 		Element _value = null;
-		public HNode( Element $value, HNode<Element> $parent ) {
+		public HNode( Element $value, HTree<Element> $tree, HNode<Element> $parent ) {
 			_value = $value;
+			_tree = $tree;
+			++ _tree._size;
+			_parent = $parent;
 		}
 		public HNode<Element> getChildAt( int $index ) {
-			return ( _children != null ? _children.get( $index ) : null );
+			return ( _children != null ? ( ( ( $index >= 0 ) && ( $index < _children.size() ) ) ? _children.get( $index ) : null ) : null );
 		}
 		public HNode<Element> getParent() {
 			return ( _parent );
@@ -29,13 +33,15 @@ public class HTree<Element> implements Iterable<Element> {
 			if ( _children == null )
 				_children = new ArrayList<HNode<Element>>();
 			HNode<Element> node = null;
-			_children.add( node = new HNode<Element>( $value, this ) );
+			_children.add( node = new HNode<Element>( $value, _tree, this ) );
 			return ( node );
 		}
 		public Element value() {
 			return ( _value );
 		}
 		public void clear() {
+			-- _tree._size;
+			_tree = null;
 			_parent = null;
 			if ( _children != null ) {
 				for ( HNode<Element> n : _children )
@@ -62,11 +68,12 @@ public class HTree<Element> implements Iterable<Element> {
 		}
 	}
 	HNode<Element> _root;
+	int _size = 0;
 
 	public HTree() {
 	}
 	public HNode<Element> createNewRoot( Element $value ) {
-		return ( _root = new HNode<Element>( $value, null ) );
+		return ( _root = new HNode<Element>( $value, this, null ) );
 	}
 
 	/**
@@ -79,6 +86,10 @@ public class HTree<Element> implements Iterable<Element> {
 		if ( _root != null )
 			_root.clear();
 		_root = null;
+	}
+
+	public int getSize() {
+		return ( _size );
 	}
 
 	public Iterator iterator() {

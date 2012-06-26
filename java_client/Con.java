@@ -23,5 +23,8 @@ public class Con {
 	static public void stack( String $msg ) {
 		System.err.println( yellow + $msg + reset );
 	}
+	static public void debug( String $msg ) {
+		System.err.println( brown + $msg + reset );
+	}
 }
 
