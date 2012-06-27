@@ -56,11 +56,10 @@ public class SGF {
 			char[] _coord = { 0, 0 };
 			String _comment = "";
 			Move() { }
-			Move( int $col, int $row )
-				{
+			Move( int $col, int $row ) {
 				_coord[0] = (char)( $col + 'a' );
 				_coord[1] = (char)( $row + 'a' );
-				}
+			}
 			Move( final String $coord ) {
 				coord( $coord );
 			}
@@ -68,12 +67,10 @@ public class SGF {
 				return ( new String( _coord ) );
 			}
 			void coord( final String $coord ) {
-				if ( $coord.length() >= 2 )
-					{
+				if ( $coord.length() >= 2 ) {
 					_coord[0] = $coord.charAt( 0 );
 					_coord[1] = $coord.charAt( 1 );
-					}
-				else
+				} else
 					_coord[0] = _coord[1] = 0;
 			}
 			int col() {

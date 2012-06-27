@@ -27,7 +27,10 @@ public class SGFTree extends JPanel implements MouseInputListener {
 	SGF _sgf = null;
 	Font _font = new Font( "dialog", Font.BOLD, 10 );
 	int[] _path = null;
+	int[] _maxWidth = null;
 	int _maxTreeSize = 0;
+	int _hoverX = -1;
+	int _hoverY = -1;
 	static final int margin = 10;
 //--------------------------------------------//
 	public SGFTree() {
@@ -40,9 +43,23 @@ public class SGFTree extends JPanel implements MouseInputListener {
 	void setSGF( SGF $sgf ) {
 		_sgf = $sgf;
 	}
+	int getDiameter() {
+		int diameter = _images.getStoneSize();
+		if ( diameter > 28 )
+			diameter = 28;
+		return ( diameter );
+	}
 	public void mouseClicked( MouseEvent $event ) {
 	}
 	public void mouseMoved( MouseEvent $event ) {
+		int diameter = getDiameter();
+		int cursorX = ( ( $event.getX() - margin / 2 ) / ( margin + diameter ) );
+		int cursorY = ( ( $event.getY() - margin / 2 ) / ( margin + diameter ) );
+		if ( ( _hoverX != cursorX ) || ( _hoverY != cursorY ) ) {
+			_hoverX = cursorX;
+			_hoverY = cursorY;
+			repaint();
+		}
 	}
 	public void mouseDragged( MouseEvent $event ) {
 	}
@@ -53,6 +70,9 @@ public class SGFTree extends JPanel implements MouseInputListener {
 	public void mousePressed( MouseEvent $event ) {
 	}
 	public void mouseExited( MouseEvent $event ) {
+		_hoverX = -1;
+		_hoverY = -1;
+		repaint();
 	}
 	public void setImages( GoImages $images ) {
 		_images = $images;
@@ -64,7 +84,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		g2d.setStroke( new BasicStroke( 3 ) );
 		byte stone = _sgf._game._firstToMove == SGF.Game.Player.BLACK ? Goban.STONE.BLACK : Goban.STONE.WHITE;
 		int moveNumber = 1;
-		int diameter = _images.getStoneSize();
+		int diameter = getDiameter();
 		if ( diameter > 28 )
 			diameter = 28;
 		int maxW = 0;
@@ -74,38 +94,50 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		if ( treeSize > _maxTreeSize ) {
 			_maxTreeSize = treeSize;
 			_path = ( _path != null ) ? Arrays.copyOf( _path, _maxTreeSize ) : new int[_maxTreeSize];
+			_maxWidth = ( _maxWidth != null ) ? Arrays.copyOf( _maxWidth, _maxTreeSize ) : new int[_maxTreeSize];
 		}
 		if ( _path != null )
 			Arrays.fill( _path, 0 );
+		if ( _maxWidth != null )
+			Arrays.fill( _maxWidth, 0 );
 		HTree<SGF.Game.Move>.HNode<SGF.Game.Move> n = ( _sgf._game._tree._root != null ) ? ( _sgf._game._tree._root.getChildCount() > 0 ? _sgf._game._tree._root.getChildAt( 0 ) : null ) : null;
 		HTree<SGF.Game.Move>.HNode<SGF.Game.Move> last = n;
 		HTree<SGF.Game.Move>.HNode<SGF.Game.Move> first = n;
 		int path = 0;
 		while ( n != null ) {
 			while ( n != null ) {
+				int jump = path - _maxWidth[moveNumber - 1];
+				_maxWidth[moveNumber] = path;
 				last = n;
 				SGF.Game.Move m = n.value();
-				int x = margin + ( diameter + margin ) * ( moveNumber - 1 );
-				int y = margin + ( diameter + margin ) * path;
-				if ( ( x + margin + diameter ) > maxW )
-					maxW = x + margin + diameter;
-				if ( ( y + margin + diameter ) > maxH )
-					maxH = y + margin + diameter;
+				int x = moveNumber - 1;
+				int y = path;
+				if ( ( x * ( margin + diameter ) + margin ) > maxW )
+					maxW = x * ( margin + diameter ) + margin;
+				if ( ( y * ( margin + diameter ) + margin ) > maxH )
+					maxH = y * ( margin + diameter ) + margin;
 				HTree<SGF.Game.Move>.HNode<SGF.Game.Move> next = n.getChildAt( 0 );
-				drawStone( g, x, y, stone, moveNumber, n == first, next == null );
+				drawStone( g, x, y, stone, moveNumber, n == first, next == null, jump );
 				stone = Goban.opponent( stone );
 				++ moveNumber;
 				n = next;
 			}
 			while ( last != null ) {
 				-- moveNumber;
+				stone = Goban.opponent( stone );
 				last = last.getParent();
 				if ( last != null ) {
-					first = n = last.getChildAt( _path[moveNumber - 1] + 1 );
+					first = n = last.getChildAt( _path[moveNumber] + 1 );
 					if ( n != null ) {
-						Con.debug( "" + _path[moveNumber - 1] );
-						++ _path[moveNumber - 1];
-						++ path;
+						++ _path[moveNumber];
+						int zeroPathLen = getZeroPathLen( n );
+						int maxWidth = 0;
+						for ( int i = moveNumber; i < ( moveNumber + zeroPathLen ); ++ i ) {
+							if ( _maxWidth[i] > maxWidth )
+								maxWidth = _maxWidth[i];
+						}
+						path = maxWidth + 1;
+						break;
 					}
 				}
 			}
@@ -125,9 +157,17 @@ public class SGFTree extends JPanel implements MouseInputListener {
 			((JScrollPane)(getParent().getParent())).revalidate();
 		}
 	}
-	void drawStone( Graphics $gc, int $xx, int $yy, int $color, int $number, boolean $first, boolean $last ) {
+	int getZeroPathLen( HTree<SGF.Game.Move>.HNode<SGF.Game.Move> $node ) {
+		int len = 0;
+		while ( $node != null ) {
+			$node = $node.getChildAt( 0 );
+			++ len;
+		}
+		return ( len );
+	}
+	boolean drawStone( Graphics $gc, int $xx, int $yy, int $color, int $number, boolean $first, boolean $last, int $jump ) {
 		Image img = null;
-		int diameter = _images.getStoneSize();
+		int diameter = getDiameter();
 		if ( diameter > 28 )
 			diameter = 28;
 		if ( $color == Goban.STONE.BLACK ) {
@@ -135,15 +175,31 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		} else {
 			img = _images._whites[ ( ( $yy + $xx ) / diameter ) % GoImages.D_WHITE_LOOKS ];
 		}
+		int x = $xx * ( diameter + margin ) + margin;
+		int y = $yy * ( diameter + margin ) + margin;
+		boolean hovered = false;
+		if ( ( _hoverX == $xx ) && ( _hoverY == $yy ) ) {
+			$gc.setColor( Color.gray );
+			$gc.fill3DRect( x - margin / 2, y - margin / 2, diameter + margin, diameter + margin, true );
+			hovered = true;
+		}
 		$gc.setColor( Color.black );
-		$gc.drawLine( $xx - margin / 2, $yy + ( ! $first ? diameter / 2 : - margin ), $xx + diameter / 2, $yy + diameter / 2 );
+		if ( $first ) {
+			if ( $jump > 1 ) {
+				$gc.drawLine( x - margin - diameter / 2, y - margin - diameter / 2, x + diameter / 2, y + diameter / 2 );
+				$gc.drawLine( x - margin - diameter / 2, y - margin - diameter / 2, x - margin - diameter / 2, y - ( margin + diameter ) * ( $jump - 1 ) - diameter / 4 - 4 );
+			} else
+				$gc.drawLine( x - margin - 4, y - margin - 4, x + diameter / 2, y + diameter / 2 );
+		} else
+			$gc.drawLine( x - margin / 2, y + diameter / 2, x + diameter / 2, y + diameter / 2 );
 		if ( ! $last )
-			$gc.drawLine( $xx + diameter / 2, $yy + diameter / 2, $xx + diameter + margin / 2, $yy + diameter / 2 );
-		$gc.drawImage( img, $xx, $yy, diameter, diameter, this );
+			$gc.drawLine( x + diameter / 2, y + diameter / 2, x + diameter + margin / 2, y + diameter / 2 );
+		$gc.drawImage( img, x, y, diameter, diameter, this );
 		String num = String.valueOf( $number );
 		$gc.setColor( $color == Goban.STONE.BLACK ? Color.WHITE : Color.BLACK );
 		int len = num.length();
-		$gc.drawChars( num.toCharArray(), 0, len, $xx + diameter / 2 - len * 7 / 2, $yy + diameter / 2 + 4 );
+		$gc.drawChars( num.toCharArray(), 0, len, x + diameter / 2 - len * 7 / 2, y + diameter / 2 + 4 );
+		return ( hovered );
 	}
 }
 
