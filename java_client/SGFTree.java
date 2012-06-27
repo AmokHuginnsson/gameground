@@ -26,11 +26,13 @@ public class SGFTree extends JPanel implements MouseInputListener {
 	GoImages _images = null;
 	SGF _sgf = null;
 	Font _font = new Font( "dialog", Font.BOLD, 10 );
+	BasicStroke _stroke = new BasicStroke( 2 );
 	int[] _path = null;
 	int[] _maxWidth = null;
 	int _maxTreeSize = 0;
 	int _hoverX = -1;
 	int _hoverY = -1;
+	int _hovered = -1;
 	static final int margin = 10;
 //--------------------------------------------//
 	public SGFTree() {
@@ -50,6 +52,8 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		return ( diameter );
 	}
 	public void mouseClicked( MouseEvent $event ) {
+		if ( _hovered > 0 )
+			((Go.HGUILocal)_logic._gui)._jumpToMove.setValue( _hovered );
 	}
 	public void mouseMoved( MouseEvent $event ) {
 		int diameter = getDiameter();
@@ -58,6 +62,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		if ( ( _hoverX != cursorX ) || ( _hoverY != cursorY ) ) {
 			_hoverX = cursorX;
 			_hoverY = cursorY;
+			_hovered = -1;
 			repaint();
 		}
 	}
@@ -72,6 +77,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 	public void mouseExited( MouseEvent $event ) {
 		_hoverX = -1;
 		_hoverY = -1;
+		_hovered = -1;
 		repaint();
 	}
 	public void setImages( GoImages $images ) {
@@ -81,7 +87,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		java.awt.Dimension d = getSize();
 		super.paintComponent( g );
 		Graphics2D g2d = (Graphics2D) g;
-		g2d.setStroke( new BasicStroke( 3 ) );
+		g2d.setStroke( _stroke );
 		byte stone = _sgf._game._firstToMove == SGF.Game.Player.BLACK ? Goban.STONE.BLACK : Goban.STONE.WHITE;
 		int moveNumber = 1;
 		int diameter = getDiameter();
@@ -91,6 +97,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		int maxH = 0;
 		g.setFont( _font );
 		int treeSize = _sgf._game._tree.getSize();
+		int currentMove = ((Go.HGUILocal)_logic._gui)._jumpToMove.getValue();
 		if ( treeSize > _maxTreeSize ) {
 			_maxTreeSize = treeSize;
 			_path = ( _path != null ) ? Arrays.copyOf( _path, _maxTreeSize ) : new int[_maxTreeSize];
@@ -112,12 +119,13 @@ public class SGFTree extends JPanel implements MouseInputListener {
 				SGF.Game.Move m = n.value();
 				int x = moveNumber - 1;
 				int y = path;
-				if ( ( x * ( margin + diameter ) + margin ) > maxW )
-					maxW = x * ( margin + diameter ) + margin;
-				if ( ( y * ( margin + diameter ) + margin ) > maxH )
-					maxH = y * ( margin + diameter ) + margin;
+				if ( ( ( x + 1 ) * ( margin + diameter ) ) > maxW )
+					maxW = ( x + 1 ) * ( margin + diameter ) + margin;
+				if ( ( ( y + 1 ) * ( margin + diameter ) + margin ) > maxH )
+					maxH = ( y + 1 ) * ( margin + diameter ) + margin;
 				HTree<SGF.Game.Move>.HNode<SGF.Game.Move> next = n.getChildAt( 0 );
-				drawStone( g, x, y, stone, moveNumber, n == first, next == null, jump );
+				if ( drawStone( g, x, y, stone, moveNumber, n == first, next == null, jump, moveNumber == currentMove ) )
+					_hovered = moveNumber;
 				stone = Goban.opponent( stone );
 				++ moveNumber;
 				n = next;
@@ -165,7 +173,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		}
 		return ( len );
 	}
-	boolean drawStone( Graphics $gc, int $xx, int $yy, int $color, int $number, boolean $first, boolean $last, int $jump ) {
+	boolean drawStone( Graphics $gc, int $xx, int $yy, int $color, int $number, boolean $first, boolean $last, int $jump, boolean $current ) {
 		Image img = null;
 		int diameter = getDiameter();
 		if ( diameter > 28 )
@@ -178,7 +186,10 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		int x = $xx * ( diameter + margin ) + margin;
 		int y = $yy * ( diameter + margin ) + margin;
 		boolean hovered = false;
-		if ( ( _hoverX == $xx ) && ( _hoverY == $yy ) ) {
+		if ( $current ) {
+			$gc.setColor( Color.red );
+			$gc.fill3DRect( x - margin / 2, y - margin / 2, diameter + margin, diameter + margin, true );
+		} else if ( ( _hoverX == $xx ) && ( _hoverY == $yy ) ) {
 			$gc.setColor( Color.gray );
 			$gc.fill3DRect( x - margin / 2, y - margin / 2, diameter + margin, diameter + margin, true );
 			hovered = true;
