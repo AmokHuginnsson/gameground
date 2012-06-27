@@ -141,7 +141,9 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		try {
 			_sgf.load( $reader );
 			placeStones();
+			int lastMove = _viewMove;
 			((Go.HGUILocal)_logic._gui)._jumpToMove.setMaximum( _viewMove );
+			((Go.HGUILocal)_logic._gui)._jumpToMove.setValue( lastMove );
 		} catch ( SGFException se ) {
 			Con.err( "SGFException: " + se.getMessage() );
 			System.exit( 1 );
