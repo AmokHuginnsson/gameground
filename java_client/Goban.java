@@ -17,6 +17,11 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
 
+abstract interface GobanHolderInterface {
+	abstract public void jumpToMove( int $viewMove );
+	abstract public void jumpToMove( int $viewMove, int $lastMove );
+}
+
 public abstract class Goban extends JPanel implements MouseInputListener {
 //--------------------------------------------//
 	public static class PROTOCOL {
@@ -130,7 +135,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		}
 		_viewMove = moveNumber;
 		if ( $to != ALL )
-			((Go.HGUILocal)_logic._gui)._jumpToMove.setValue( _viewMove );
+			((GobanHolderInterface)_logic._gui).jumpToMove( _viewMove );
 		_logic._gui.repaint();
 	}
 	void placeStones() {
@@ -142,8 +147,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 			_sgf.load( $reader );
 			placeStones();
 			int lastMove = _viewMove;
-			((Go.HGUILocal)_logic._gui)._jumpToMove.setMaximum( _viewMove );
-			((Go.HGUILocal)_logic._gui)._jumpToMove.setValue( lastMove );
+			((GobanHolderInterface)_logic._gui).jumpToMove( _viewMove, lastMove );
 		} catch ( SGFException se ) {
 			Con.err( "SGFException: " + se.getMessage() );
 			System.exit( 1 );

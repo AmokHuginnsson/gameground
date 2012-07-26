@@ -65,7 +65,7 @@ class Go extends HAbstractLogic implements Runnable {
 		public static final byte TERITORY_WHITE = 'q';
 		public static final byte DAME = 'x';
 	}
-	public class HGUILocal extends HGUIface implements javax.swing.event.ChangeListener {
+	public class HGUILocal extends HGUIface implements javax.swing.event.ChangeListener, GobanHolderInterface {
 		public static final long serialVersionUID = 17l;
 		public static final String SIT = "Sit !";
 		public static final String GETUP = "Get up !";
@@ -210,6 +210,13 @@ class Go extends HAbstractLogic implements Runnable {
 		}
 		public void onGoToLast() {
 			_board.goToLast();
+		}
+		public void jumpToMove( int $viewMove ) {
+			_jumpToMove.setValue( $viewMove );
+		}
+		public void jumpToMove( int $viewMove, int $lastMove ) {
+			_jumpToMove.setMaximum( $lastMove );
+			_jumpToMove.setValue( $viewMove );
 		}
 	}
 //--------------------------------------------//

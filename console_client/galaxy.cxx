@@ -1106,7 +1106,7 @@ void HClient::handler_dummy( HString& ) {
 }
 
 int main_client( void ) {
-	if ( HTime().get_hour( ) % 2 )
+	if ( now_utc().get_hour() % 2 )
 		_systemNames_ = _systemNamesNorse_;
 	else
 		_systemNames_ = _systemNamesLatin_;

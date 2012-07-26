@@ -41,7 +41,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	public static final int GOBAN_SIZE = 15;
 	public static final class STONE extends Goban.STONE {
 	}
-	public class HGUILocal extends HGUIface {
+	public class HGUILocal extends HGUIface implements GobanHolderInterface {
 		public static final long serialVersionUID = 17l;
 		public static final String SIT = "Sit!";
 		public static final String GETUP = "Get up!";
@@ -106,6 +106,13 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		}
 		public void onSave() {
 			_board.save();
+		}
+		public void jumpToMove( int $viewMove ) {
+			/* _jumpToMove.setValue( $viewMove ); */
+		}
+		public void jumpToMove( int $viewMove, int $lastMove ) {
+			/* _jumpToMove.setMaximum( $lastMove );
+			_jumpToMove.setValue( $viewMove ); */
 		}
 	}
 //--------------------------------------------//
