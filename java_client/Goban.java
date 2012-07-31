@@ -166,7 +166,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		}
 		_viewMove = moveNumber;
 		if ( $to != ALL )
-			((GobanHolderInterface)_logic._gui).jumpToMove( _viewMove );
+			((GobanHolderInterface)_logic._gui).jumpToMove( _viewMove, _branch.size() );
 		_logic._gui.repaint();
 	}
 	void placeStones() {
