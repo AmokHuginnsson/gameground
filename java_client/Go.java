@@ -218,6 +218,12 @@ class Go extends HAbstractLogic implements Runnable {
 			_jumpToMove.setMaximum( $lastMove );
 			_jumpToMove.setValue( $viewMove );
 		}
+		public void jumpToMove( HTree<SGF.Game.Move>.HNode<SGF.Game.Move> $node ) {
+			_gui._board.selectBranch( $node );
+		}
+		public HTree<SGF.Game.Move>.HNode<SGF.Game.Move> currentMove() {
+			return ( _gui._board._lastMove );
+		}
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;

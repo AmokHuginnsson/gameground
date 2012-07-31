@@ -32,7 +32,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 	int _maxTreeSize = 0;
 	int _hoverX = -1;
 	int _hoverY = -1;
-	int _hovered = -1;
+	HTree<SGF.Game.Move>.HNode<SGF.Game.Move> _hovered = null;
 	static final int margin = 10;
 //--------------------------------------------//
 	public SGFTree() {
@@ -52,8 +52,8 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		return ( diameter );
 	}
 	public void mouseClicked( MouseEvent $event ) {
-		if ( _hovered > 0 )
-			((Go.HGUILocal)_logic._gui)._jumpToMove.setValue( _hovered );
+		if ( _hovered != null )
+			((Go.HGUILocal)_logic._gui).jumpToMove( _hovered );
 	}
 	public void mouseMoved( MouseEvent $event ) {
 		int diameter = getDiameter();
@@ -62,7 +62,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		if ( ( _hoverX != cursorX ) || ( _hoverY != cursorY ) ) {
 			_hoverX = cursorX;
 			_hoverY = cursorY;
-			_hovered = -1;
+			_hovered = null;
 			repaint();
 		}
 	}
@@ -77,7 +77,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 	public void mouseExited( MouseEvent $event ) {
 		_hoverX = -1;
 		_hoverY = -1;
-		_hovered = -1;
+		_hovered = null;
 		repaint();
 	}
 	public void setImages( GoImages $images ) {
@@ -97,7 +97,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		int maxH = 0;
 		g.setFont( _font );
 		int treeSize = _sgf._game._tree.getSize();
-		int currentMove = ((Go.HGUILocal)_logic._gui)._jumpToMove.getValue();
+		HTree<SGF.Game.Move>.HNode<SGF.Game.Move> currentMove = ((Go.HGUILocal)_logic._gui).currentMove();
 		if ( treeSize > _maxTreeSize ) {
 			_maxTreeSize = treeSize;
 			_path = ( _path != null ) ? Arrays.copyOf( _path, _maxTreeSize ) : new int[_maxTreeSize];
@@ -124,8 +124,8 @@ public class SGFTree extends JPanel implements MouseInputListener {
 				if ( ( ( y + 1 ) * ( margin + diameter ) + margin ) > maxH )
 					maxH = ( y + 1 ) * ( margin + diameter ) + margin;
 				HTree<SGF.Game.Move>.HNode<SGF.Game.Move> next = n.getChildAt( 0 );
-				if ( drawStone( g, x, y, stone, moveNumber, n == first, next == null, jump, moveNumber == currentMove ) )
-					_hovered = moveNumber;
+				if ( drawStone( g, x, y, stone, moveNumber, n == first, next == null, jump, n == currentMove ) )
+					_hovered = n;
 				stone = Goban.opponent( stone );
 				++ moveNumber;
 				n = next;

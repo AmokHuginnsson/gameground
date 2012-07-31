@@ -157,6 +157,7 @@ public class GoGoban extends Goban {
 			drawStone( _cursorX, _cursorY, _logic.stone(), true, g );
 	}
 	void move( int $col, int $row, byte $stone ) {
+/*		Con.debug( "col = " + $col + ", row = " + $row ); */
 		setStone( $col, $row, $stone );
 		haveKilled( $col, $row, $stone );
 		resetAlive();

@@ -114,6 +114,11 @@ class Gomoku extends HAbstractLogic implements Runnable {
 			/* _jumpToMove.setMaximum( $lastMove );
 			_jumpToMove.setValue( $viewMove ); */
 		}
+		public void jumpToMove( HTree<SGF.Game.Move>.HNode<SGF.Game.Move> $node ) {
+		}
+		public HTree<SGF.Game.Move>.HNode<SGF.Game.Move> currentMove() {
+			return ( null );
+		}
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
