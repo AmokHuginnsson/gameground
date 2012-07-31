@@ -19,13 +19,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
 
-abstract interface GobanHolderInterface {
-	abstract public void jumpToMove( int $viewMove );
-	abstract public void jumpToMove( int $viewMove, int $lastMove );
-	abstract public void jumpToMove( HTree<SGF.Game.Move>.HNode<SGF.Game.Move> $node );
-	abstract public HTree<SGF.Game.Move>.HNode<SGF.Game.Move> currentMove();
-}
-
 public abstract class Goban extends JPanel implements MouseInputListener {
 //--------------------------------------------//
 	public static class PROTOCOL {
@@ -110,6 +103,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		updateSGF( br );
 	}
 	void selectBranch( HTree<SGF.Game.Move>.HNode<SGF.Game.Move> $node ) {
+		int moveNo = 0;
 		if ( ! _branch.contains( $node ) ) {
 			int toEnd = 0;
 			while ( $node.getChildAt( 0 ) != null ) {
@@ -117,22 +111,20 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 				++ toEnd;
 			}
 			_branch.clear();
-			int moveNo = 0;
 			while ( $node.getParent() != null ) {
 				_branch.add( $node );
 				$node = $node.getParent();
 				++ moveNo;
 			}
 			Collections.reverse( _branch );
-			placeStones( moveNo - toEnd );
+			moveNo -= toEnd;
 		} else {
-			int moveNo = 0;
 			while ( $node.getParent() != null ) {
 				$node = $node.getParent();
 				++ moveNo;
 			}
-			placeStones( moveNo );
 		}
+		placeStones( moveNo );
 	}
 	void placeStones( int $to ) {
 		int gameCommentLength = _sgf._game._comment.length();
@@ -165,8 +157,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 			++ moveNumber;
 		}
 		_viewMove = moveNumber;
-		if ( $to != ALL )
-			((GobanHolderInterface)_logic._gui).jumpToMove( _viewMove, _branch.size() );
+		((GobanHolderInterface)_logic._gui).jumpToMove( _viewMove, _branch.size() );
 		_logic._gui.repaint();
 	}
 	void placeStones() {
@@ -184,7 +175,6 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 				}
 				selectBranch( n );
 			}
-			((GobanHolderInterface)_logic._gui).jumpToMove( _viewMove, _viewMove );
 		} catch ( SGFException se ) {
 			Con.err( "SGFException: " + se.getMessage() );
 			System.exit( 1 );

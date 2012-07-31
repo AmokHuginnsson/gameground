@@ -13,6 +13,7 @@ import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Rectangle;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JPanel;
@@ -32,7 +33,9 @@ public class SGFTree extends JPanel implements MouseInputListener {
 	int _maxTreeSize = 0;
 	int _hoverX = -1;
 	int _hoverY = -1;
+	boolean _valid = false;
 	HTree<SGF.Game.Move>.HNode<SGF.Game.Move> _hovered = null;
+	Rectangle _currentRect = new Rectangle();
 	static final int margin = 10;
 //--------------------------------------------//
 	public SGFTree() {
@@ -164,6 +167,10 @@ public class SGFTree extends JPanel implements MouseInputListener {
 			setPreferredSize( d );
 			((JScrollPane)(getParent().getParent())).revalidate();
 		}
+		if ( ! sizeChanged && ! _valid ) {
+			scrollRectToVisible( _currentRect );
+			_valid = true;
+		}
 	}
 	int getZeroPathLen( HTree<SGF.Game.Move>.HNode<SGF.Game.Move> $node ) {
 		int len = 0;
@@ -188,7 +195,12 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		boolean hovered = false;
 		if ( $current ) {
 			$gc.setColor( Color.red );
-			$gc.fill3DRect( x - margin / 2, y - margin / 2, diameter + margin, diameter + margin, true );
+			int x0 = x - margin / 2;
+			int y0 = y - margin / 2;
+			int w = diameter + margin;
+			int h = diameter + margin;
+			_currentRect.setBounds( x0, y0, w, h );
+			$gc.fill3DRect( x0, y0, w, h, true );
 		} else if ( ( _hoverX == $xx ) && ( _hoverY == $yy ) ) {
 			$gc.setColor( Color.gray );
 			$gc.fill3DRect( x - margin / 2, y - margin / 2, diameter + margin, diameter + margin, true );

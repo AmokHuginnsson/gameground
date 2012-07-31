@@ -60,6 +60,7 @@ HGo::STONE::stone_t const HGo::STONE::TERITORY_NONE = 'x';
 char const* const HGo::PROTOCOL::SETUP = "setup";
 char const* const HGo::PROTOCOL::ADMIN = "admin";
 char const* const HGo::PROTOCOL::PLAY = "play";
+char const* const HGo::PROTOCOL::UNDO = "undo";
 char const* const HGo::PROTOCOL::CONTESTANT = "contestant";
 char const* const HGo::PROTOCOL::GOBAN = "goban";
 char const* const HGo::PROTOCOL::KOMI = "komi";
@@ -307,6 +308,12 @@ void HGo::handler_accept( OClientInfo* clientInfo_ ) {
 	M_EPILOG
 }
 
+void HGo::handler_undo( OClientInfo* /* clientInfo_ */ ) {
+	M_PROLOG
+	return;
+	M_EPILOG
+}
+
 void HGo::count_score( void ) {
 	M_PROLOG
 	for ( int i = 0; i < ( _gobanSize * _gobanSize ); ++ i ) {
@@ -423,6 +430,8 @@ void HGo::handler_play( OClientInfo* clientInfo_, HString const& message_ ) {
 		handler_dead( clientInfo_, message_ );
 	else if ( item == PROTOCOL::ACCEPT )
 		handler_accept( clientInfo_ );
+	else if ( item == PROTOCOL::UNDO )
+		handler_undo( clientInfo_ );
 	else
 		throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
 	broadcast( _out << PROTOCOL::TOMOVE << PROTOCOL::SEP

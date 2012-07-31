@@ -34,6 +34,7 @@ class Go extends HAbstractLogic implements Runnable {
 		public static final String NAME = "go";
 		public static final String PLAY = "play";
 		public static final String PASS = "pass";
+		public static final String UNDO = "undo";
 		public static final String SETUP = "setup";
 		public static final String ADMIN = "admin";
 		public static final String KOMI = "komi";
@@ -94,6 +95,7 @@ class Go extends HAbstractLogic implements Runnable {
 		public JLabel _move;
 		public String _toolTip;
 		public String _passText;
+		boolean _internalUpdate = false;
 		public HGUILocal( String $resource ) {
 			super( $resource );
 		}
@@ -117,7 +119,8 @@ class Go extends HAbstractLogic implements Runnable {
 			_jumpToMove.addChangeListener( this );
 		}
 		public void stateChanged(ChangeEvent e) {
-			_board.placeStones( _jumpToMove.getValue() );
+			if ( ! _internalUpdate )
+				_board.placeStones( _jumpToMove.getValue() );
 		}
 		public JTextPane getLogPad() {
 			return ( _logPad );
@@ -193,6 +196,12 @@ class Go extends HAbstractLogic implements Runnable {
 					+ ( Go.this._toMove != STONE.MARK ? PROTOCOL.PASS : PROTOCOL.ACCEPT ) );
 			_pass.setEnabled( false );
 		}
+		public void onNew() {
+		}
+		public void onUndo() {
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
+					+ PROTOCOL.PLAY + PROTOCOL.SEP + PROTOCOL.UNDO );
+		}
 		public void onLoad() {
 			_board.load();
 		}
@@ -211,12 +220,12 @@ class Go extends HAbstractLogic implements Runnable {
 		public void onGoToLast() {
 			_board.goToLast();
 		}
-		public void jumpToMove( int $viewMove ) {
-			_jumpToMove.setValue( $viewMove );
-		}
 		public void jumpToMove( int $viewMove, int $lastMove ) {
+			_internalUpdate = true;
 			_jumpToMove.setMaximum( $lastMove );
 			_jumpToMove.setValue( $viewMove );
+			_gui._sgftree._valid = false;
+			_internalUpdate = false;
 		}
 		public void jumpToMove( HTree<SGF.Game.Move>.HNode<SGF.Game.Move> $node ) {
 			_gui._board.selectBranch( $node );
