@@ -33,6 +33,7 @@ class Go extends HAbstractLogic implements Runnable {
 	public static final class PROTOCOL extends HAbstractLogic.PROTOCOL {
 		public static final String NAME = "go";
 		public static final String PLAY = "play";
+		public static final String NEWGAME = "newgame";
 		public static final String PASS = "pass";
 		public static final String UNDO = "undo";
 		public static final String SETUP = "setup";
@@ -85,7 +86,9 @@ class Go extends HAbstractLogic implements Runnable {
 		public JLabel _whiteTimeLeft;
 		public JLabel _whiteByoYomiLeft;
 		public JButton _whiteSit;
+		public JButton _newgame;
 		public JButton _pass;
+		public JButton _undo;
 		public JList _visitors;
 		public JSlider _jumpToMove;
 		public GoGoban _board;
@@ -197,6 +200,8 @@ class Go extends HAbstractLogic implements Runnable {
 			_pass.setEnabled( false );
 		}
 		public void onNew() {
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
+					+ PROTOCOL.PLAY + PROTOCOL.SEP + PROTOCOL.NEWGAME );
 		}
 		public void onUndo() {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP

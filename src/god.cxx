@@ -60,6 +60,7 @@ HGo::STONE::stone_t const HGo::STONE::TERITORY_NONE = 'x';
 char const* const HGo::PROTOCOL::SETUP = "setup";
 char const* const HGo::PROTOCOL::ADMIN = "admin";
 char const* const HGo::PROTOCOL::PLAY = "play";
+char const* const HGo::PROTOCOL::NEWGAME = "newgame";
 char const* const HGo::PROTOCOL::UNDO = "undo";
 char const* const HGo::PROTOCOL::CONTESTANT = "contestant";
 char const* const HGo::PROTOCOL::GOBAN = "goban";
@@ -308,6 +309,12 @@ void HGo::handler_accept( OClientInfo* clientInfo_ ) {
 	M_EPILOG
 }
 
+void HGo::handler_newgame( OClientInfo* /* clientInfo_ */ ) {
+	M_PROLOG
+	return;
+	M_EPILOG
+}
+
 void HGo::handler_undo( OClientInfo* /* clientInfo_ */ ) {
 	M_PROLOG
 	return;
@@ -430,6 +437,8 @@ void HGo::handler_play( OClientInfo* clientInfo_, HString const& message_ ) {
 		handler_dead( clientInfo_, message_ );
 	else if ( item == PROTOCOL::ACCEPT )
 		handler_accept( clientInfo_ );
+	else if ( item == PROTOCOL::NEWGAME )
+		handler_newgame( clientInfo_ );
 	else if ( item == PROTOCOL::UNDO )
 		handler_undo( clientInfo_ );
 	else

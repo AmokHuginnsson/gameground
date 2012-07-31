@@ -73,6 +73,7 @@ class HGo : public HLogic {
 		static char const* const MAINTIME;
 		static char const* const PASS;
 		static char const* const PLAY;
+		static char const* const NEWGAME;
 		static char const* const UNDO;
 		static char const* const PUTSTONE;
 		static char const* const SETUP;
@@ -147,6 +148,7 @@ protected:
 	void handler_sgf( OClientInfo*, yaal::hcore::HString const& );
 	void handler_dead( OClientInfo*, yaal::hcore::HString const& );
 	void handler_accept( OClientInfo* );
+	void handler_newgame( OClientInfo* );
 	void handler_undo( OClientInfo* );
 	void broadcast_contestants( yaal::hcore::HString const& );
 	void ensure_coordinates_validity( int, int );
