@@ -52,6 +52,7 @@ public class TabbedPaneX extends XTabbedPane implements MouseInputListener {
 	public void mouseClicked( MouseEvent $event ) {
 		int idx = getSelectedIndex();
 		if ( idx != 0 ) {
+			mouseMoved( $event );
 			if ( _hovered ) {
 				HGUIface f = (HGUIface)getSelectedComponent();
 				if ( f != null )
