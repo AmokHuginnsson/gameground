@@ -134,6 +134,7 @@ abstract class HGUIface extends JPanel {
 			$color = 15;
 		_color = $color;
 	}
+	abstract public void onClose();
 	public void clearLog() {
 		clear( _logPad );
 		_log = ( DefaultStyledDocument )_logPad.getStyledDocument();

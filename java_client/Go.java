@@ -138,7 +138,7 @@ class Go extends HAbstractLogic implements Runnable {
 				_messageInput.setText( "" );
 			}
 		}
-		public void onExit() {
+		public void onClose() {
 			_app.closeParty( Go.this );
 		}
 		public void onGobanSize() {

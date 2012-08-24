@@ -98,7 +98,7 @@ class Boggle extends HAbstractLogic implements Runnable {
 				add( _wordsSent, msg + "\n" );
 			}
 		}
-		public void onExit() {
+		public void onClose() {
 			_app.closeParty( Boggle.this );
 		}
 	}

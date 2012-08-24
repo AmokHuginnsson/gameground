@@ -75,10 +75,6 @@
 					Wait for match to begin ...
 				</textpane>
 			</scrollpane>
-			<hbox>
-				<glue maximumsize="1000,1"/>
-				<button id="_exit" text="Exit !" action="onExit" tooltiptext="Abandon this match." />
-			</hbox>
 		</vbox>
 	</hbox>
 </panel><!--}}}-->

@@ -9,7 +9,6 @@
 		</hbox>
 		<hbox border="TitledBorder(EmptyBorder,Type your message,TitledBorder.LEFT, TitledBorder.ABOVE_TOP)">
 			<readlineprompt id="_msg" maximumsize="2000,20" columns="16" focusable="true" action="onMessage" tooltiptext="Send message to all people in this private chat room." />
-			<button text="Close" action="onClose" tooltiptext="Click me to leave this private chat room." />
 		</hbox>
 	</vbox>
 </panel><!--}}}-->

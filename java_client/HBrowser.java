@@ -84,6 +84,8 @@ class HBrowser extends HAbstractLogic {
 				_client.println( "create:" + gc.getConfiguration() );
 			}
 		}
+		public void onClose() {
+		}
 		public void onCreate() {
 			onCreate( null );
 		}

@@ -111,10 +111,6 @@
 					</vbox>
 				</splitpane>
 			</panel>
-			<hbox>
-				<glue maximumsize="1000,1"/>
-				<button text="Exit !" action="onExit" tooltiptext="Abandon this match." />
-			</hbox>
 		</vbox>
 	</hbox>
 </panel><!--}}}-->

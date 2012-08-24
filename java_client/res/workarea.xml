@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso8859-2"?>
 <!DOCTYPE panel SYSTEM "res/gameground.dtd">
 <panel layout="BorderLayout"><!--{{{-->
-<tabbedpane id="_tabs" focuscycleroot="true">
-</tabbedpane>
+<tabbedpanex id="_tabs" focuscycleroot="true">
+</tabbedpanex>
 </panel><!--}}}-->

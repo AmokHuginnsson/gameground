@@ -38,7 +38,7 @@
 		<glue preferredsize="1,20"/>
 		<panel>
 			<button text="Connect !" action="onConnectClick" tooltiptext="Click me to join the GameGround server." />
-			<button text="Exit !" action="onExit" mnemonic="VK_X" tooltiptext="Click me to exit this application." />
+			<button text="Exit !" action="onClose" mnemonic="VK_X" tooltiptext="Click me to exit this application." />
 		</panel>
 	</vbox>
 </panel><!--}}}-->

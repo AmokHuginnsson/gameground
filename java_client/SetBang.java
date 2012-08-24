@@ -45,7 +45,7 @@ class SetBang extends HAbstractLogic implements Runnable {
 				_messageInput.setText( "" );
 			}
 		}
-		public void onExit() {
+		public void onClose() {
 			_app.closeParty( SetBang.this );
 		}
 	}

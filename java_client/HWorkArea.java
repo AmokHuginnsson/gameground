@@ -10,7 +10,6 @@ import javax.swing.AbstractAction;
 import javax.swing.JTextField;
 import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
-import org.swixml.XTabbedPane;
 
 class LogicParty {
 	public HLogicInfo _logicInfo;
@@ -26,7 +25,7 @@ class HWorkArea extends HAbstractWorkArea {
 	static boolean once = true;
 	public class HGUILocal extends HGUIface {
 		public static final long serialVersionUID = 17l;
-		public XTabbedPane _tabs = null;
+		public TabbedPaneX _tabs = null;
 		int _previouslySelectedTab = 0;
 		public HGUILocal( String $resource ) {
 			super( $resource );
@@ -44,11 +43,13 @@ class HWorkArea extends HAbstractWorkArea {
 			});
 			_tabs.addTab( "Browser", _browser.getGUI() );
 		}
-		public void onExit() {
+		public void onClose() {
 			_app.shutdown();
 		}
 		public JTextPane getLogPad() { return ( null ); }
-		public void updateTagLib( XUL $xul ) { }
+		public void updateTagLib( XUL $xul ) {
+			$xul.getTaglib().registerTag( "tabbedpanex", TabbedPaneX.class );
+		}
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;

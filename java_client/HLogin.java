@@ -44,7 +44,7 @@ class HLogin extends HAbstractWorkArea {
 		public void onConnectClick() {
 			HLogin.this.onConnectClick();
 		}
-		public void onExit() {
+		public void onClose() {
 			_app.shutdown();
 		}
 		public Action onEnter = new AbstractAction() {

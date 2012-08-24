@@ -204,7 +204,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		public void onEndRound() {
 			HGalaxy.this.onEndRound();
 		}
-		public void onExit() {
+		public void onClose() {
 			_app.closeParty( HGalaxy.this );
 		}
 	}

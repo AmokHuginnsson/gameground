@@ -82,7 +82,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 				_messageInput.setText( "" );
 			}
 		}
-		public void onExit() {
+		public void onClose() {
 			_app.closeParty( Gomoku.this );
 		}
 		public void onBlack() {

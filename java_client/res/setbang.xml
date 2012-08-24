@@ -13,10 +13,6 @@
 			<panel maximumsize="&v_sidebar_width;,40" layout="BorderLayout">
 				<readlineprompt id="_messageInput" focusable="true" editable="true" action="onMessage" constraints="BorderLayout.NORTH" tooltiptext="Enter message You want to send to other players." />
 			</panel>
-			<hbox>
-				<glue maximumsize="1000,1"/>
-				<button text="Exit !" action="onExit" tooltiptext="Abandon this match." />
-			</hbox>
 		</vbox>
 	</hbox>
 </panel><!--}}}-->
