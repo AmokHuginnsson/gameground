@@ -32,7 +32,7 @@ $(ENVIRON): lib/jdom.jar lib/swixml.jar lib/commons-cli-1.1.jar lib/forms-1.1.0.
 $(TARGET): $(ENVIRON) $(CLASS) $(RES_DEST)
 	cd build; \
 	ls -1 *.class > class.list; \
-	jar cf ../$(TARGET) -m ../manifest.mf res org com *.class class.list;
+	jar cfm ../$(TARGET) ../manifest.mf res org com *.class class.list;
 
 run: $(TARGET)
 	java -Dcom.sun.management.jmxremote -Djava.security.manager -Djava.security.policy=gameground.policy -ea -cp build/gameground.jar GameGround --host codestation.org --login Amok

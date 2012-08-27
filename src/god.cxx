@@ -234,7 +234,9 @@ void HGo::handler_getup( OClientInfo* clientInfo_, HString const& /*message_*/ )
 
 void HGo::handler_put_stone( OClientInfo* clientInfo_, HString const& message_ ) {
 	M_PROLOG
-	if ( ( _state != STONE::BLACK ) && ( _state != STONE::WHITE ) )
+	if ( ( ( *_clients.begin() != clientInfo_ ) || ( _state != STONE::NONE ) )
+			&& ( _state != STONE::BLACK )
+			&& ( _state != STONE::WHITE ) )
 		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
 	if ( contestant( _state ) != clientInfo_ )
 		throw HLogicException( GO_MSG[ GO_MSG_NOT_YOUR_TURN ] );

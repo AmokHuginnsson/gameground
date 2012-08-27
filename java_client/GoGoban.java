@@ -17,7 +17,7 @@ public class GoGoban extends Goban {
 		super.setLogic( _logic = $go );
 	}
 	public void mouseClicked( MouseEvent $event ) {
-		if ( _logic.isMyMove() && ! breakTheRules( _cursorX, _cursorY, _logic.stone() ) ) {
+		if ( _logic.isMyMove() && ! breakTheRules( _cursorX, _cursorY, _logic.playerColor() ) ) {
 			Sound.play( "stone" );
 			_logic._client.println( Go.PROTOCOL.CMD + Go.PROTOCOL.SEP + _logic.id() + Go.PROTOCOL.SEP
 					+ Go.PROTOCOL.PLAY + Go.PROTOCOL.SEP
@@ -25,7 +25,7 @@ public class GoGoban extends Goban {
 			_logic.waitToMove();
 		} else if ( validCoords( _cursorX, _cursorY ) && ( _logic.toMove() == Go.STONE.MARK ) ) {
 			byte stone = getStone( _cursorX, _cursorY );
-			if ( ( _logic.stone() == stone ) || ( _logic.stoneDead() == stone ) ) {
+			if ( ( _logic.playerColor() == stone ) || ( _logic.stoneDead() == stone ) ) {
 				System.out.println( "dead mark" );
 				_logic._client.println( Go.PROTOCOL.CMD + Go.PROTOCOL.SEP + _logic.id() + Go.PROTOCOL.SEP
 						+ Go.PROTOCOL.PLAY + Go.PROTOCOL.SEP
@@ -34,7 +34,7 @@ public class GoGoban extends Goban {
 		}
 	}
 	private String stoneGroup( int x, int y ) {
-		byte stone = _logic.stone();
+		byte stone = _logic.playerColor();
 		byte stoneDead = _logic.stoneDead();
 		String group = "";
 		setStone( x, y, Go.STONE.NONE );
@@ -153,8 +153,8 @@ public class GoGoban extends Goban {
 		return ( invalid );
 	}
 	void drawByLogic( Graphics g ) {
-		if ( ( _logic != null ) && _logic.isMyMove() && ! breakTheRules( _cursorX, _cursorY, _logic.stone() ) )
-			drawStone( _cursorX, _cursorY, _logic.stone(), true, g );
+		if ( ( _logic != null ) && _logic.isMyMove() && ! breakTheRules( _cursorX, _cursorY, _logic.playerColor() ) )
+			drawStone( _cursorX, _cursorY, _logic.playerColor(), true, g );
 	}
 	void move( int $col, int $row, byte $stone ) {
 /*		Con.debug( "col = " + $col + ", row = " + $row ); */

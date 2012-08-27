@@ -182,16 +182,16 @@ class Go extends HAbstractLogic implements Runnable {
 		public void onBlack() {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
-					+ ( ( _stone == Go.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + (char)STONE.BLACK : PROTOCOL.GETUP ) );
-			_blackSit.setEnabled( _stone != Go.STONE.NONE );
-			_whiteSit.setEnabled( _stone != Go.STONE.NONE );
+					+ ( ( _playerColor == Go.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + (char)STONE.BLACK : PROTOCOL.GETUP ) );
+			_blackSit.setEnabled( _playerColor != Go.STONE.NONE );
+			_whiteSit.setEnabled( _playerColor != Go.STONE.NONE );
 		}
 		public void onWhite() {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
 					+ PROTOCOL.PLAY + PROTOCOL.SEP
-					+ ( ( _stone == Go.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + (char)STONE.WHITE : PROTOCOL.GETUP ) );
-			_blackSit.setEnabled( _stone != Go.STONE.NONE );
-			_whiteSit.setEnabled( _stone != Go.STONE.NONE );
+					+ ( ( _playerColor == Go.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + (char)STONE.WHITE : PROTOCOL.GETUP ) );
+			_blackSit.setEnabled( _playerColor != Go.STONE.NONE );
+			_whiteSit.setEnabled( _playerColor != Go.STONE.NONE );
 		}
 		public void onPass() {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
@@ -243,7 +243,7 @@ class Go extends HAbstractLogic implements Runnable {
 	public static final long serialVersionUID = 17l;
 	public static final String LABEL = "go";
 	public HGUILocal _gui;
-	private byte _stone = STONE.NONE;
+	private byte _playerColor = STONE.NONE;
 	private byte _toMove = STONE.NONE;
 	private long _start = 0;
 	private boolean _admin = false;
@@ -287,7 +287,7 @@ class Go extends HAbstractLogic implements Runnable {
 		/* Was in init(). */
 		_contestants.get( STONE.BLACK ).clear();
 		_contestants.get( STONE.WHITE ).clear();
-		_stone = STONE.NONE;
+		_playerColor = STONE.NONE;
 		_toMove = STONE.NONE;
 		_admin = false;
 		_move = 0;
@@ -328,23 +328,23 @@ class Go extends HAbstractLogic implements Runnable {
 		if ( Integer.parseInt( tokens[ 5 ] ) >= 0 )
 			contestant._byoyomi.setText( tokens[ 5 ] );
 		if ( tokens[ 1 ].equals( _app.getName() ) ) {
-			_stone = stone;
+			_playerColor = stone;
 			contestant._sit.setText( HGUILocal.GETUP );
 			contestant._sit.setEnabled( true );
-			GoPlayer foe = _contestants.get( _gui._board.opponent( _stone ) );
+			GoPlayer foe = _contestants.get( _gui._board.opponent( _playerColor ) );
 			foe._sit.setEnabled( false );
 		} else {
-			if ( ( stone == _stone ) && ( _stone != STONE.NONE ) ) {
+			if ( ( stone == _playerColor ) && ( _playerColor != STONE.NONE ) ) {
 				contestant._sit.setText( HGUILocal.SIT );
-				GoPlayer foe = _contestants.get( _gui._board.opponent( _stone ) );
+				GoPlayer foe = _contestants.get( _gui._board.opponent( _playerColor ) );
 				foe._sit.setEnabled( " ".equals( foe._name.getText() ) );
-				_stone = STONE.NONE;
+				_playerColor = STONE.NONE;
 				if ( _gui._toolTip != null ) {
 					_gui._pass.setText( _gui._passText );
 					_gui._pass.setToolTipText( _gui._toolTip );
 				}
 			}
-			contestant._sit.setEnabled( "".equals( tokens[ 1 ] ) && ( _stone == STONE.NONE ) );
+			contestant._sit.setEnabled( "".equals( tokens[ 1 ] ) && ( _playerColor == STONE.NONE ) );
 		}
 		_start = new Date().getTime();
 	}
@@ -362,7 +362,7 @@ class Go extends HAbstractLogic implements Runnable {
 		if ( ( _toMove == STONE.MARK ) && ( _gui._passText.equals( _gui._pass.getText() ) ) )
 			handlerMark();
 		else if ( _toMove != STONE.MARK ) {
-			_gui._pass.setEnabled( ( _toMove == _stone ) && ( _stone != STONE.NONE ) );
+			_gui._pass.setEnabled( ( _toMove == _playerColor ) && ( _playerColor != STONE.NONE ) );
 			_gui._conf.setEnabled( _admin && ( _toMove == STONE.NONE ) );
 			++ _move;
 			String toMove = STONE.NONE_NAME;
@@ -393,13 +393,13 @@ class Go extends HAbstractLogic implements Runnable {
 		m.removeElement( $command );
 	}
 	public boolean isMyMove() {
-		return ( ( _stone != STONE.NONE ) && ( _stone == _toMove ) );
+		return ( ( ( _playerColor == STONE.NONE ) && _admin ) || ( ( _playerColor != STONE.NONE ) && ( _playerColor == _toMove ) ) );
 	}
-	public byte stone() {
-		return ( _stone );
+	public byte playerColor() {
+		return ( _playerColor );
 	}
 	public byte stoneDead() {
-		return ( _stone == STONE.BLACK ? STONE.DEAD_BLACK : STONE.DEAD_WHITE );
+		return ( _playerColor == STONE.BLACK ? STONE.DEAD_BLACK : STONE.DEAD_WHITE );
 	}
 	public byte toMove() {
 		return ( _toMove );
