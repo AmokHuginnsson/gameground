@@ -231,10 +231,10 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		super( $applet, $id, $configuration );
 		init( _gui = new HGUILocal( LABEL ) );
 		_emperors = Collections.synchronizedMap( new HashMap<Integer,String>() );
-		_handlers.put( "setup", HGalaxy.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
-		_handlers.put( "play", HGalaxy.class.getDeclaredMethod( "handlerPlay", new Class[]{ String.class } ) );
-		_handlers.put( "player", HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
-		_handlers.put( "player_quit", HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
+		_handlers.put( "setup", HGalaxy.class.getDeclaredMethod( "handlerSetup", new Class<?>[]{ String.class } ) );
+		_handlers.put( "play", HGalaxy.class.getDeclaredMethod( "handlerPlay", new Class<?>[]{ String.class } ) );
+		_handlers.put( "player", HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class<?>[]{ String.class } ) );
+		_handlers.put( "player_quit", HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class<?>[]{ String.class } ) );
 		if ( ( java.util.Calendar.getInstance().get( java.util.Calendar.HOUR_OF_DAY ) % 2 ) == 1 )
 			_systemNames = HSystemNames.getNames( HSystemNames.NORSE );
 		else
@@ -438,8 +438,8 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 	}
 	void endRound( java.util.List<HMove> $moves ) {
 		setState( State.LOCKED );
-		for ( java.util.ListIterator i = $moves.listIterator(); i.hasNext(); ) {
-			HMove move = (HMove)i.next();
+		for ( java.util.ListIterator<HMove> i = $moves.listIterator(); i.hasNext(); ) {
+			HMove move = i.next();
 			String message = "cmd:" + _id + ":play:move=" + move._sourceSystem + "," + move._destinationSystem + "," + move._fleet;
 			_client.println( message );
 		}
@@ -459,7 +459,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 	}
 	static boolean registerLogic( GameGround $app ) {
 		try {
-			$app.registerLogic( "glx", new HLogicInfo( "glx", "galaxy", "Galaxy", new HGalaxyConfigurator(), HGalaxy.class.getDeclaredMethod( "create", new Class[] { GameGround.class, String.class, String.class } ) ) );
+			$app.registerLogic( "glx", new HLogicInfo( "glx", "galaxy", "Galaxy", new HGalaxyConfigurator(), HGalaxy.class.getDeclaredMethod( "create", new Class<?>[] { GameGround.class, String.class, String.class } ) ) );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );

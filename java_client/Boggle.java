@@ -119,14 +119,14 @@ class Boggle extends HAbstractLogic implements Runnable {
 		super( $applet, $id, $configuration );
 		init( _gui = new HGUILocal( LABEL ) );
 		_players = _gui._players.setColumns( _playerScoreColumns );
-		_handlers.put( PROTOCOL.PLAYER, Boggle.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.PLAYERQUIT, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.DECK, Boggle.class.getDeclaredMethod( "handlerDeck", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.SCORED, Boggle.class.getDeclaredMethod( "handlerScored", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.LONGEST, Boggle.class.getDeclaredMethod( "handlerLongest", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.ROUND, Boggle.class.getDeclaredMethod( "handlerRound", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.ENDROUND, Boggle.class.getDeclaredMethod( "handlerEndRound", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.SETUP, Boggle.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
+		_handlers.put( PROTOCOL.PLAYER, Boggle.class.getDeclaredMethod( "handlerPlayer", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.PLAYERQUIT, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.DECK, Boggle.class.getDeclaredMethod( "handlerDeck", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.SCORED, Boggle.class.getDeclaredMethod( "handlerScored", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.LONGEST, Boggle.class.getDeclaredMethod( "handlerLongest", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.ROUND, Boggle.class.getDeclaredMethod( "handlerRound", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.ENDROUND, Boggle.class.getDeclaredMethod( "handlerEndRound", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.SETUP, Boggle.class.getDeclaredMethod( "handlerSetup", new Class<?>[]{ String.class } ) );
 		_state = State.INIT;
 		_app.registerTask( this, 1 );
 	}
@@ -205,7 +205,7 @@ class Boggle extends HAbstractLogic implements Runnable {
 	}
 	static boolean registerLogic( GameGround $app ) {
 		try {
-			$app.registerLogic( "bgl", new HLogicInfo( "bgl", "boggle", "Boggle", new BoggleConfigurator(), Boggle.class.getDeclaredMethod( "create", new Class[] { GameGround.class, String.class, String.class } ) ) );
+			$app.registerLogic( "bgl", new HLogicInfo( "bgl", "boggle", "Boggle", new BoggleConfigurator(), Boggle.class.getDeclaredMethod( "create", new Class<?>[] { GameGround.class, String.class, String.class } ) ) );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );

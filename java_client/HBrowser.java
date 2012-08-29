@@ -27,7 +27,7 @@ class HBrowser extends HAbstractLogic {
 		public JTextField _msg;
 		public JTextPane _logPad;
 		public JTree _games;
-		public JList _people;
+		public JList<Player> _people;
 		public JButton _join;
 		public HGUILocal( String $resource ) {
 			super( $resource );
@@ -62,7 +62,7 @@ class HBrowser extends HAbstractLogic {
 						_people.clearSelection();
 					int clicks = e.getClickCount();
 					if ( clicks == 2 ) {
-						Player selected = (Player)_people.getSelectedValue();
+						Player selected = _people.getSelectedValue();
 						if ( ( selected != null ) && ! selected.toString().equals( _app.getName() ) ) {
 							_client.println( "get_account:" + selected.toString() );
 						} else {
@@ -110,16 +110,14 @@ class HBrowser extends HAbstractLogic {
 			}
 		};
 		public void updatePlayers( PartysModel.PartysModelNode $node ) {
-			DefaultListModel lm = new DefaultListModel();
+			DefaultListModel<Player> lm = new DefaultListModel<Player>();
 			_people.setModel( lm );
 			if ( $node == null )
 				return;
 			if ( $node.getLevel() == 2 ) {
-				String ent = "";
 				java.util.Iterator<Player> it = $node._party.playerIterator();
 				while ( it.hasNext() ) {
-					ent = it.next().toString();
-					lm.addElement( ent );
+					lm.addElement( it.next() );
 				}
 			} else {
 				java.util.Set<java.util.Map.Entry<String,Player>> entSet = _players.entrySet();

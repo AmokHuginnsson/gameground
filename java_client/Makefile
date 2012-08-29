@@ -11,7 +11,7 @@ all: $(TARGET)
 
 build/%.class: %.java
 	@echo -n "gcc";
-	javac -g -Xlint -sourcepath . -d build -cp .:lib/commons-cli-1.1.jar:lib/jdom.jar:lib/swixml.jar $(<)
+	javac -g -Xlint -Werror -sourcepath . -d build -cp .:lib/commons-cli-1.1.jar:lib/jdom.jar:lib/swixml.jar $(<)
 
 build/res:
 	mkdir -p $(@)

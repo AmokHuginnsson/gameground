@@ -34,7 +34,7 @@
 	<target name="compile" depends="init" description="Compile the source.">
 		<!-- Compile the java code from ${src} into ${build} -->
 		<javac srcdir="${src}" destdir="${build}" classpath="${src}:${lib}/commons-cli-1.1.jar:${lib}/jdom.jar:${lib}/swixml.jar" debug="true" includeantruntime="false">
-			<compilerarg line="-Xlint" />
+			<compilerarg line="-Xlint -Werror" />
 		</javac>
 	</target>
 

@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import javax.swing.JTextField;
+import java.awt.event.KeyEvent;
 
 public class ReadlinePrompt extends JTextField {
 	public static final long serialVersionUID = 17l;
@@ -9,21 +10,21 @@ public class ReadlinePrompt extends JTextField {
 		super();
 		_history.add( "" );
 		addKeyListener( new java.awt.event.KeyAdapter() {
-			public void keyPressed( java.awt.event.KeyEvent e ) {
+			public void keyPressed( KeyEvent e ) {
 				int key = e.getKeyCode();
-				if ( key == e.VK_ENTER ) {
+				if ( key == KeyEvent.VK_ENTER ) {
 					String val = getText();
 					if ( val.length() > 0 ) {
 						_history.add( val );
 						_index = _history.size();
 					}
-				} else if ( key == e.VK_UP ) {
+				} else if ( key == KeyEvent.VK_UP ) {
 					-- _index;
 					if ( _index < 0 )
 						_index = _history.size() - 1;
 					setText( _history.get( _index ) );
 					selectAll();
-				} else if ( key == e.VK_DOWN ) {
+				} else if ( key == KeyEvent.VK_DOWN ) {
 					++ _index;
 					if ( _index >= _history.size() )
 						_index = 0;

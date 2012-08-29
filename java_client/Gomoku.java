@@ -55,7 +55,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		public JLabel _whiteScore;
 		public JButton _whiteSit;
 		public ScoreTable _players;
-		public JList _spectators;
+		public JList<String> _spectators;
 		public GomokuGoban _board;
 		public DummyConfigurator _conf;
 		public JLabel _toMove;
@@ -135,13 +135,13 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		super( $applet, $id, $configuration );
 		init( _gui = new HGUILocal( LABEL ) );
 		_players = _gui._players.setColumns( _playerScoreColumns );
-		_handlers.put( PROTOCOL.PLAYER, Gomoku.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.SPECTATOR, Gomoku.class.getDeclaredMethod( "handlerSpectator", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.TOMOVE, Gomoku.class.getDeclaredMethod( "handlerToMove", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.CONTESTANT, Gomoku.class.getDeclaredMethod( "handlerContestant", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.PLAYERQUIT, Gomoku.class.getDeclaredMethod( "handlerPlayerQuit", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.FIVE_IN_A_ROW, Gomoku.class.getDeclaredMethod( "handlerFiveInARow", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.SGF, Gomoku.class.getDeclaredMethod( "handlerSGF", new Class[]{ String.class } ) );
+		_handlers.put( PROTOCOL.PLAYER, Gomoku.class.getDeclaredMethod( "handlerPlayer", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.SPECTATOR, Gomoku.class.getDeclaredMethod( "handlerSpectator", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.TOMOVE, Gomoku.class.getDeclaredMethod( "handlerToMove", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.CONTESTANT, Gomoku.class.getDeclaredMethod( "handlerContestant", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.PLAYERQUIT, Gomoku.class.getDeclaredMethod( "handlerPlayerQuit", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.FIVE_IN_A_ROW, Gomoku.class.getDeclaredMethod( "handlerFiveInARow", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.SGF, Gomoku.class.getDeclaredMethod( "handlerSGF", new Class<?>[]{ String.class } ) );
 		GoImages images = new GoImages();
 		_gui._board.setLogic( this );
 		_gui._board.setImages( images );
@@ -172,12 +172,12 @@ class Gomoku extends HAbstractLogic implements Runnable {
 			_stone = stone;
 			contestant._sit.setText( HGUILocal.GETUP );
 			contestant._sit.setEnabled( true );
-			GomokuContestant foe = _contestants.get( _gui._board.opponent( _stone ) );
+			GomokuContestant foe = _contestants.get( Goban.opponent( _stone ) );
 			foe._sit.setEnabled( false );
 		} else {
 			if ( ( stone == _stone ) && ( _stone != STONE.NONE ) ) {
 				contestant._sit.setText( HGUILocal.SIT );
-				GomokuContestant foe = _contestants.get( _gui._board.opponent( _stone ) );
+				GomokuContestant foe = _contestants.get( Goban.opponent( _stone ) );
 				foe._sit.setEnabled( "".equals( foe._name.getText() ) );
 				_stone = STONE.NONE;
 			}
@@ -234,11 +234,11 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		_gui._board.repaint();
 	}
 	void handlerSpectator( String $command ) {
-		DefaultListModel m = (DefaultListModel)_gui._spectators.getModel();
+		DefaultListModel<String> m = (DefaultListModel<String>)_gui._spectators.getModel();
 		m.addElement( $command );
 	}
 	void handlerPlayerQuit( String $command ) {
-		DefaultListModel m = (DefaultListModel)_gui._spectators.getModel();
+		DefaultListModel<String> m = (DefaultListModel<String>)_gui._spectators.getModel();
 		m.removeElement( $command );
 	}
 	public boolean isMyMove() {
@@ -270,7 +270,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 	}
 	static boolean registerLogic( GameGround $app ) {
 		try {
-			$app.registerLogic( "gomoku", new HLogicInfo( "gomoku", "gomoku", "Gomoku", null, Gomoku.class.getDeclaredMethod( "create", new Class[] { GameGround.class, String.class, String.class } ) ) );
+			$app.registerLogic( "gomoku", new HLogicInfo( "gomoku", "gomoku", "Gomoku", null, Gomoku.class.getDeclaredMethod( "create", new Class<?>[] { GameGround.class, String.class, String.class } ) ) );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );

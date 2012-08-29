@@ -8,7 +8,7 @@ import javax.swing.event.ChangeEvent;
 public class GoConfigurator extends HAbstractConfigurator implements ChangeListener {
 	public static final long serialVersionUID = 17l;
 	private boolean _ignoreEvents = false;
-	public JComboBox _confGoban;
+	public JComboBox<String> _confGoban;
 	public JSpinner _confKomi;
 	public JSpinner _confHandicaps;
 	public JSpinner _confMainTime;
@@ -54,7 +54,7 @@ public class GoConfigurator extends HAbstractConfigurator implements ChangeListe
 		_confByoYomiTime.addChangeListener( this );
 	}
 	public void gobanModel() {
-		DefaultComboBoxModel model = new DefaultComboBoxModel();
+		DefaultComboBoxModel<String> model = new DefaultComboBoxModel<String>();
 		model.addElement( "19" );
 		model.addElement( "13" );
 		model.addElement( "9" );

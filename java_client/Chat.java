@@ -67,7 +67,7 @@ class Chat extends HAbstractLogic {
 	public Chat( GameGround $applet, String $configuration ) throws Exception {
 		super( $applet, "0", "" );
 		init( _gui = new HGUILocal( LABEL ) );
-		_handlers.put( PROTOCOL.PLAYERQUIT, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
+		_handlers.put( PROTOCOL.PLAYERQUIT, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class<?>[]{ String.class } ) );
 		updateUserInfo( $configuration );
 	}
 	synchronized public void cleanup() {
@@ -124,7 +124,7 @@ class Chat extends HAbstractLogic {
 	}
 	synchronized static boolean registerLogic( GameGround $app ) {
 		try {
-			$app.registerLogic( "chat", new HLogicInfo( "chat", "chat", "Chat", null, Chat.class.getDeclaredMethod( "create", new Class[] { GameGround.class, String.class, String.class } ), true ) );
+			$app.registerLogic( "chat", new HLogicInfo( "chat", "chat", "Chat", null, Chat.class.getDeclaredMethod( "create", new Class<?>[] { GameGround.class, String.class, String.class } ), true ) );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );

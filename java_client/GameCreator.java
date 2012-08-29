@@ -28,7 +28,7 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 	HLogicInfo _info;
 	HAbstractConfigurator _conf;
 	public JPanel _confHolder;
-	public JList _logics;
+	public JList<HLogicInfo> _logics;
 	public JTextField _name;
 	public JButton _ok;
 	public GameCreator( GameGround $app, final SortedMap<String, HLogicInfo> $logics, String $logic ) {
@@ -36,7 +36,7 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 		_app = $app;
 		try {
 			new SwingEngine( this ).insert( AppletJDOMHelper.loadResource( "/res/creator.xml", this ), this );
-			_logics.setModel( new AbstractListModel() {
+			_logics.setModel( new AbstractListModel<HLogicInfo>() {
 				public static final long serialVersionUID = 17l;
 				public int getSize() {
 					java.util.Set<java.util.Map.Entry<String,HLogicInfo>> entSet = $logics.entrySet();
@@ -53,7 +53,7 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 					}
 					return ( i );
 				}
-				public Object getElementAt( int index ) {
+				public HLogicInfo getElementAt( int index ) {
 					java.util.Set<java.util.Map.Entry<String,HLogicInfo>> entSet = $logics.entrySet();
 					java.util.Map.Entry<String,HLogicInfo> ent = null;
 					java.util.Iterator<java.util.Map.Entry<String,HLogicInfo>> it = entSet.iterator();
@@ -77,7 +77,7 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 			_name.getDocument().addDocumentListener( this );
 			getRootPane().setDefaultButton( _ok );
 			if ( $logic != null ) {
-				ListModel lm = _logics.getModel();
+				ListModel<HLogicInfo> lm = _logics.getModel();
 				int logicsCount = lm.getSize();
 				for ( int i = 0; i < logicsCount; ++ i ) {
 					if ( lm.getElementAt( i ).toString().equals( $logic ) ) {
@@ -122,7 +122,7 @@ public class GameCreator extends XDialog implements ListSelectionListener, Docum
 			}
 			_confHolder.removeAll();
 			if ( idx >= 0 ) {
-				_info = (HLogicInfo)_logics.getModel().getElementAt( idx );
+				_info = _logics.getModel().getElementAt( idx );
 				_conf = _info._conf;
 				if ( _conf != null ) {
 					_conf.setVisible( false );

@@ -15,7 +15,7 @@ class EagerStaticInitializer {
 						Class<?> dynamic = Class.forName( line.substring( 0, line.indexOf( ".class" ) ) );
 						if ( $method != null ) {
 							try {
-								Method method = dynamic.getDeclaredMethod( $method, new Class[]{ GameGround.class } );
+								Method method = dynamic.getDeclaredMethod( $method, new Class<?>[]{ GameGround.class } );
 								method.invoke( dynamic, $for );
 							} catch ( java.lang.reflect.InvocationTargetException e ) {
 							} catch ( java.lang.IllegalAccessException e ) {

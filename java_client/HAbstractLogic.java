@@ -31,9 +31,9 @@ public abstract class HAbstractLogic {
 		_gui.init();
 		_handlers = java.util.Collections.synchronizedSortedMap( new TreeMap<String,Method>() );
 		try {
-			_handlers.put( "msg", HAbstractLogic.class.getDeclaredMethod( "handleMessage", new Class[]{ String.class } ) );
-			_handlers.put( "say", HAbstractLogic.class.getDeclaredMethod( "handleSay", new Class[]{ String.class } ) );
-			_handlers.put( "err", HAbstractLogic.class.getDeclaredMethod( "handleError", new Class[]{ String.class } ) );
+			_handlers.put( "msg", HAbstractLogic.class.getDeclaredMethod( "handleMessage", new Class<?>[]{ String.class } ) );
+			_handlers.put( "say", HAbstractLogic.class.getDeclaredMethod( "handleSay", new Class<?>[]{ String.class } ) );
+			_handlers.put( "err", HAbstractLogic.class.getDeclaredMethod( "handleError", new Class<?>[]{ String.class } ) );
 		} catch ( java.lang.NoSuchMethodException e ) {
 			e.printStackTrace();
 			System.exit( 1 );

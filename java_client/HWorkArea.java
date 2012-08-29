@@ -66,15 +66,15 @@ class HWorkArea extends HAbstractWorkArea {
 		super( $applet );
 		init( _gui = new HGUILocal( LABEL ) );
 		try {
-			_handlers.put( "err", HWorkArea.class.getDeclaredMethod( "handleError", new Class[]{ String.class } ) );
-			_handlers.put( "warn", HWorkArea.class.getDeclaredMethod( "handleWarning", new Class[]{ String.class } ) );
-			_handlers.put( "party", HWorkArea.class.getDeclaredMethod( "handleParty", new Class[]{ String.class } ) );
-			_handlers.put( "logic", HWorkArea.class.getDeclaredMethod( "handleLogic", new Class[]{ String.class } ) );
-			_handlers.put( "account", HWorkArea.class.getDeclaredMethod( "handleAccount", new Class[]{ String.class } ) );
-			_handlers.put( "party_info", HWorkArea.class.getDeclaredMethod( "handlePartyInfo", new Class[]{ String.class } ) );
-			_handlers.put( "party_close", HWorkArea.class.getDeclaredMethod( "handlePartyClose", new Class[]{ String.class } ) );
-			_handlers.put( "player", HWorkArea.class.getDeclaredMethod( "handlePlayer", new Class[]{ String.class } ) );
-			_handlers.put( "player_quit", HWorkArea.class.getDeclaredMethod( "handlePlayerQuit", new Class[]{ String.class } ) );
+			_handlers.put( "err", HWorkArea.class.getDeclaredMethod( "handleError", new Class<?>[]{ String.class } ) );
+			_handlers.put( "warn", HWorkArea.class.getDeclaredMethod( "handleWarning", new Class<?>[]{ String.class } ) );
+			_handlers.put( "party", HWorkArea.class.getDeclaredMethod( "handleParty", new Class<?>[]{ String.class } ) );
+			_handlers.put( "logic", HWorkArea.class.getDeclaredMethod( "handleLogic", new Class<?>[]{ String.class } ) );
+			_handlers.put( "account", HWorkArea.class.getDeclaredMethod( "handleAccount", new Class<?>[]{ String.class } ) );
+			_handlers.put( "party_info", HWorkArea.class.getDeclaredMethod( "handlePartyInfo", new Class<?>[]{ String.class } ) );
+			_handlers.put( "party_close", HWorkArea.class.getDeclaredMethod( "handlePartyClose", new Class<?>[]{ String.class } ) );
+			_handlers.put( "player", HWorkArea.class.getDeclaredMethod( "handlePlayer", new Class<?>[]{ String.class } ) );
+			_handlers.put( "player_quit", HWorkArea.class.getDeclaredMethod( "handlePlayerQuit", new Class<?>[]{ String.class } ) );
 		} catch ( java.lang.NoSuchMethodException e ) {
 			e.printStackTrace();
 			System.exit( 1 );

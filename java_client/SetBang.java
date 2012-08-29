@@ -61,9 +61,9 @@ class SetBang extends HAbstractLogic implements Runnable {
 		super( $applet, $id, $configuration );
 		init( _gui = new HGUILocal( LABEL ) );
 		_players = _gui._players.setColumns( _playerScoreColumns );
-		_handlers.put( PROTOCOL.PLAYER, SetBang.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.PLAYERQUIT, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.DECK, SetBang.class.getDeclaredMethod( "handlerDeck", new Class[]{ String.class } ) );
+		_handlers.put( PROTOCOL.PLAYER, SetBang.class.getDeclaredMethod( "handlerPlayer", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.PLAYERQUIT, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.DECK, SetBang.class.getDeclaredMethod( "handlerDeck", new Class<?>[]{ String.class } ) );
 		_app.registerTask( this, 1 );
 	}
 	void handlerPlayer( String $command ) {
@@ -119,7 +119,7 @@ class SetBang extends HAbstractLogic implements Runnable {
 	}
 	static boolean registerLogic( GameGround $app ) {
 		try {
-			$app.registerLogic( "set_bang", new HLogicInfo( "set_bang", "setbang", "Set!", new SetBangConfigurator(), SetBang.class.getDeclaredMethod( "create", new Class[] { GameGround.class, String.class, String.class } ) ) );
+			$app.registerLogic( "set_bang", new HLogicInfo( "set_bang", "setbang", "Set!", new SetBangConfigurator(), SetBang.class.getDeclaredMethod( "create", new Class<?>[] { GameGround.class, String.class, String.class } ) ) );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );

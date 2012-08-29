@@ -15,7 +15,7 @@ public class BoggleConfigurator extends HAbstractConfigurator {
 		}
 	}
 	public static final long serialVersionUID = 17l;
-	public JComboBox _scoringSystem;
+	public JComboBox<BoggleScoringSystem> _scoringSystem;
 	public JSpinner _playerCount;
 	public JSpinner _roundTime;
 	public JSpinner _maxRounds;

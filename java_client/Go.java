@@ -89,7 +89,7 @@ class Go extends HAbstractLogic implements Runnable {
 		public JButton _newgame;
 		public JButton _pass;
 		public JButton _undo;
-		public JList _visitors;
+		public JList<String> _visitors;
 		public JSlider _jumpToMove;
 		public GoGoban _board;
 		public SGFTree _sgftree;
@@ -115,7 +115,7 @@ class Go extends HAbstractLogic implements Runnable {
 			_passText = _pass.getText();
 			_conf.setOwner( this );
 			_conf.gobanModel();
-			((DefaultListModel)_visitors.getModel()).clear();
+			((DefaultListModel<String>)_visitors.getModel()).clear();
 			_conf.setEnabled( false );
 			_pass.setText( _passText );
 			_pass.setToolTipText( _toolTip );
@@ -255,13 +255,13 @@ class Go extends HAbstractLogic implements Runnable {
 		super( $applet, $id, $configuration );
 		init( _gui = new HGUILocal( LABEL ) );
 		_gui._conf.setDefaults( $configuration );
-		_handlers.put( PROTOCOL.SETUP, Go.class.getDeclaredMethod( "handlerSetup", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.PLAYER, Go.class.getDeclaredMethod( "handlerPlayer", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.TOMOVE, Go.class.getDeclaredMethod( "handlerToMove", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.STONE, Go.class.getDeclaredMethod( "handlerStone", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.CONTESTANT, Go.class.getDeclaredMethod( "handlerContestant", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.PLAYERQUIT, Go.class.getDeclaredMethod( "handlerPlayerQuit", new Class[]{ String.class } ) );
-		_handlers.put( PROTOCOL.SGF, Go.class.getDeclaredMethod( "handlerSGF", new Class[]{ String.class } ) );
+		_handlers.put( PROTOCOL.SETUP, Go.class.getDeclaredMethod( "handlerSetup", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.PLAYER, Go.class.getDeclaredMethod( "handlerPlayer", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.TOMOVE, Go.class.getDeclaredMethod( "handlerToMove", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.STONE, Go.class.getDeclaredMethod( "handlerStone", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.CONTESTANT, Go.class.getDeclaredMethod( "handlerContestant", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.PLAYERQUIT, Go.class.getDeclaredMethod( "handlerPlayerQuit", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.SGF, Go.class.getDeclaredMethod( "handlerSGF", new Class<?>[]{ String.class } ) );
 		GoImages images = new GoImages();
 		_gui._board.setLogic( this );
 		_gui._board.setImages( images );
@@ -331,12 +331,12 @@ class Go extends HAbstractLogic implements Runnable {
 			_playerColor = stone;
 			contestant._sit.setText( HGUILocal.GETUP );
 			contestant._sit.setEnabled( true );
-			GoPlayer foe = _contestants.get( _gui._board.opponent( _playerColor ) );
+			GoPlayer foe = _contestants.get( Goban.opponent( _playerColor ) );
 			foe._sit.setEnabled( false );
 		} else {
 			if ( ( stone == _playerColor ) && ( _playerColor != STONE.NONE ) ) {
 				contestant._sit.setText( HGUILocal.SIT );
-				GoPlayer foe = _contestants.get( _gui._board.opponent( _playerColor ) );
+				GoPlayer foe = _contestants.get( Goban.opponent( _playerColor ) );
 				foe._sit.setEnabled( " ".equals( foe._name.getText() ) );
 				_playerColor = STONE.NONE;
 				if ( _gui._toolTip != null ) {
@@ -385,11 +385,11 @@ class Go extends HAbstractLogic implements Runnable {
 		_gui.setToolTipText( "You are accepting opponents markings, not your own." );
 	}
 	void handlerPlayer( String $command ) {
-		DefaultListModel m = (DefaultListModel)_gui._visitors.getModel();
+		DefaultListModel<String> m = (DefaultListModel<String>)_gui._visitors.getModel();
 		m.addElement( $command );
 	}
 	void handlerPlayerQuit( String $command ) {
-		DefaultListModel m = (DefaultListModel)_gui._visitors.getModel();
+		DefaultListModel<String> m = (DefaultListModel<String>)_gui._visitors.getModel();
 		m.removeElement( $command );
 	}
 	public boolean isMyMove() {
@@ -433,7 +433,7 @@ class Go extends HAbstractLogic implements Runnable {
 	}
 	static boolean registerLogic( GameGround $app ) {
 		try {
-			$app.registerLogic( "go", new HLogicInfo( "go", "go", "Go", null, Go.class.getDeclaredMethod( "create", new Class[] { GameGround.class, String.class, String.class } ) ) );
+			$app.registerLogic( "go", new HLogicInfo( "go", "go", "Go", null, Go.class.getDeclaredMethod( "create", new Class<?>[] { GameGround.class, String.class, String.class } ) ) );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			System.exit( 1 );

@@ -232,12 +232,32 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		}
 		if ( $argv != null ) {
 			Options opts = new Options();
-			opts.addOption( OptionBuilder.withLongOpt( "help" ).withDescription( "provide this help message and exit" ).create( 'h' ) );
-			opts.addOption( OptionBuilder.withLongOpt( "auto-connect" ).withDescription( "automatically connect to the server" ).create( 'A' ) );
-			opts.addOption( OptionBuilder.withLongOpt( "login" ).withArgName( "name" ).hasArg().withDescription( "your preferred nick name" ).create( 'L' ) );
-			opts.addOption( OptionBuilder.withLongOpt( "password" ).withArgName( "pass" ).hasArg().withDescription( "your password" ).create( 'p' ) );
-			opts.addOption( OptionBuilder.withLongOpt( "port" ).withArgName( "number" ).hasArg().withDescription( "port number where GameGround is running" ).create( 'P' ) );
-			opts.addOption( OptionBuilder.withLongOpt( "host" ).withArgName( "address" ).hasArg().withDescription( "Host address to connect to." ).create( 'H' ) );
+			OptionBuilder.withLongOpt( "help" );
+			OptionBuilder.withDescription( "provide this help message and exit" );
+			opts.addOption( OptionBuilder.create( 'h' ) );
+			OptionBuilder.withLongOpt( "auto-connect" );
+			OptionBuilder.withDescription( "automatically connect to the server" );
+			opts.addOption( OptionBuilder.create( 'A' ) );
+			OptionBuilder.withLongOpt( "login" );
+			OptionBuilder.withArgName( "name" );
+			OptionBuilder.hasArg();
+			OptionBuilder.withDescription( "your preferred nick name" );
+			opts.addOption( OptionBuilder.create( 'L' ) );
+			OptionBuilder.withLongOpt( "password" );
+			OptionBuilder.withArgName( "pass" );
+			OptionBuilder.hasArg();
+			OptionBuilder.withDescription( "your password" );
+			opts.addOption( OptionBuilder.create( 'p' ) );
+			OptionBuilder.withLongOpt( "port" );
+			OptionBuilder.withArgName( "number" );
+			OptionBuilder.hasArg();
+			OptionBuilder.withDescription( "port number where GameGround is running" );
+			opts.addOption( OptionBuilder.create( 'P' ) );
+			OptionBuilder.withLongOpt( "host" );
+			OptionBuilder.withArgName( "address" );
+			OptionBuilder.hasArg();
+			OptionBuilder.withDescription( "Host address to connect to." );
+			opts.addOption( OptionBuilder.create( 'H' ) );
 			Parser p = new PosixParser();
 			try {
 				System.out.println( "Command line:" );
