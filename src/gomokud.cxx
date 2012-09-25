@@ -163,7 +163,7 @@ void HGomoku::handler_put_stone( OClientInfo* clientInfo_, HString const& messag
 	make_move( col, row, _state );
 	if ( _state != STONE::NONE )
 		_state = opponent( _state );
-	_sgf.move( col, row );
+	_sgf.move( SGF::Coord( col, row ) );
 	send_goban();
 	return;
 	M_EPILOG

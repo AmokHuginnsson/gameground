@@ -248,7 +248,7 @@ void HGo::handler_put_stone( OClientInfo* clientInfo_, HString const& message_ )
 	int after = count_stones( opponent( _state ) );
 	get_player_info( contestant( _state ) )->_stonesCaptured += ( before - after );
 	_state = opponent( _state );
-	_sgf.move( col, row );
+	_sgf.move( SGF::Coord( col, row ) );
 	send_goban();
 	return;
 	M_EPILOG
@@ -620,38 +620,38 @@ void HGo::set_handi( int handi_ ) {
 	switch ( handi_ ) {
 		case ( 9 ):
 			put_stone( col = _gobanSize / 2, row = _gobanSize / 2, STONE::BLACK );
-			_sgf.add_stone( SGF::Player::BLACK, col, row );
+			_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 		case ( 8 ):
 			set_handi( 6 );
 			put_stone( col = _gobanSize / 2, row = hoshi, STONE::BLACK );
-			_sgf.add_stone( SGF::Player::BLACK, col, row );
+			_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 			put_stone( col = _gobanSize / 2, row = ( _gobanSize - hoshi ) - 1, STONE::BLACK );
-			_sgf.add_stone( SGF::Player::BLACK, col, row );
+			_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 		break;
 		case ( 7 ):
 			put_stone( col = _gobanSize / 2, row = _gobanSize / 2, STONE::BLACK );
-			_sgf.add_stone( SGF::Player::BLACK, col, row );
+			_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 		case ( 6 ):
 			set_handi( 4 );
 			put_stone( col = hoshi, row = _gobanSize / 2, STONE::BLACK );
-			_sgf.add_stone( SGF::Player::BLACK, col, row );
+			_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 			put_stone( col = ( _gobanSize - hoshi ) - 1, row = _gobanSize / 2, STONE::BLACK );
-			_sgf.add_stone( SGF::Player::BLACK, col, row );
+			_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 		break;
 		case ( 5 ):
 			put_stone( col = _gobanSize / 2, row = _gobanSize / 2, STONE::BLACK );
-			_sgf.add_stone( SGF::Player::BLACK, col, row );
+			_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 		case ( 4 ):
 			put_stone( col = ( _gobanSize - hoshi ) - 1, row = ( _gobanSize - hoshi ) - 1, STONE::BLACK );
-			_sgf.add_stone( SGF::Player::BLACK, col, row );
+			_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 		case ( 3 ):
 			put_stone( col = hoshi, row = hoshi, STONE::BLACK );
-			_sgf.add_stone( SGF::Player::BLACK, col, row );
+			_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 		case ( 2 ):
 			put_stone( col = hoshi, row = ( _gobanSize - hoshi ) - 1, STONE::BLACK );
-			_sgf.add_stone( SGF::Player::BLACK, col, row );
+			_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 			put_stone( col = ( _gobanSize - hoshi ) - 1, row = hoshi, STONE::BLACK );
-			_sgf.add_stone( SGF::Player::BLACK, col, row );
+			_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 		break;
 		default:
 			M_ASSERT( ! "unhandled case" );
