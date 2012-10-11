@@ -446,25 +446,25 @@ void HBoard::do_refresh( void ) {
 		_height = _boardSize + 1 /* for label */ + 2 /* for borders */;
 		_width = _boardSize * 3 /* for System */ + 2 /* for borders */;
 		if ( _boardSize < 12 ) {
-			cons.c_cmvprintf( _rowRaw, _columnRaw + 35, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, "{" );
-			cons.c_cmvprintf( _rowRaw + 1, _columnRaw + 20, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, "-+--+--+--+--+-'" );
+			cons.cmvprintf( _rowRaw, _columnRaw + 35, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, "{" );
+			cons.cmvprintf( _rowRaw + 1, _columnRaw + 20, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, "-+--+--+--+--+-'" );
 		}
 		pen = ',';
 		for ( int ctr( 0 ); ctr < _boardSize; ctr ++ )
 			pen += "-+-";
 		pen += '.';
-		cons.c_cmvprintf( _rowRaw, _columnRaw, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, pen.raw() );
+		cons.cmvprintf( _rowRaw, _columnRaw, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, pen.raw() );
 		pen = '}';
 		for ( int ctr( 0 ); ctr < _boardSize; ctr ++ )
 			pen += " - ";
 		pen += '{';
 		for ( int ctr( 0 ); ctr < _boardSize; ctr ++ )
-			cons.c_cmvprintf( _rowRaw + ctr + 1, _columnRaw, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, pen.raw() );
+			cons.cmvprintf( _rowRaw + ctr + 1, _columnRaw, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, pen.raw() );
 		pen = '`';
 		for ( int ctr( 0 ); ctr < _boardSize; ctr ++ )
 			pen += "-+-";
 		pen += '\'';
-		cons.c_cmvprintf( _rowRaw + _boardSize + 1, _columnRaw, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, pen.raw() );
+		cons.cmvprintf( _rowRaw + _boardSize + 1, _columnRaw, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, pen.raw() );
 		int systems( static_cast<int>( _systems->get_size() ) );
 		if ( systems > 0 ) {
 			int sysNo( -1 );
@@ -472,7 +472,7 @@ void HBoard::do_refresh( void ) {
 				int coordX( ( * _systems )[ ctr ]._coordinateX );
 				int coordY( ( * _systems )[ ctr ]._coordinateY );
 				int color( ( * _systems )[ ctr ]._color );
-				cons.c_cmvprintf( _rowRaw + 1 + coordY,
+				cons.cmvprintf( _rowRaw + 1 + coordY,
 						_columnRaw + 1 + coordX * 3,
 						( ( color >= 0 ) && _focused ) ? _colors_[ color ] : ATTR_NEUTRAL_SYSTEM, "(%c)",
 						ctr + ( ctr < 26 ? 'A' : ( ctr < 35 ? '1' - 26 : '0' - 35 ) ) );
@@ -481,27 +481,27 @@ void HBoard::do_refresh( void ) {
 			}
 			_listener.on_show_system_info( sysNo );
 		}
-		cons.c_cmvprintf( _rowRaw + 1 + _cursorY,
+		cons.cmvprintf( _rowRaw + 1 + _cursorY,
 				_columnRaw + 1 + _cursorX * 3,
 				_focused ? ATTR_CURSOR : COLORS::ATTR_NORMAL, "{" );
-		cons.c_cmvprintf( _rowRaw + 1 + _cursorY,
+		cons.cmvprintf( _rowRaw + 1 + _cursorY,
 				_columnRaw + 3 + _cursorX * 3,
 				_focused ? ATTR_CURSOR : COLORS::ATTR_NORMAL, "}" );
-		cons.c_cmvprintf( _rowRaw - 1, _columnRaw + 8, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, ",--{" );
+		cons.cmvprintf( _rowRaw - 1, _columnRaw + 8, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, ",--{" );
 		if ( round >= 0 )
-			cons.c_cmvprintf( _rowRaw - 1, _columnRaw + 13, COLORS::ATTR_NORMAL, "%4d", round );
-		cons.c_cmvprintf( _rowRaw - 1, _columnRaw + 17, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, "}--." );
-		cons.c_cmvprintf( _rowRaw - 1, _columnRaw + 23, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, ",--{" );
-		cons.c_cmvprintf( _rowRaw - 1, _columnRaw + 28, _focused ? COLORS::FG_WHITE : COLORS::ATTR_NORMAL, "    " );
+			cons.cmvprintf( _rowRaw - 1, _columnRaw + 13, COLORS::ATTR_NORMAL, "%4d", round );
+		cons.cmvprintf( _rowRaw - 1, _columnRaw + 17, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, "}--." );
+		cons.cmvprintf( _rowRaw - 1, _columnRaw + 23, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, ",--{" );
+		cons.cmvprintf( _rowRaw - 1, _columnRaw + 28, _focused ? COLORS::FG_WHITE : COLORS::ATTR_NORMAL, "    " );
 		if ( ( state == SELECT ) || ( state == INPUT ) ) {
 			int sysNo( get_sys_no( _cursorX, _cursorY ) );
 			if ( sysNo >= 0 ) {
-				cons.c_cmvprintf( _rowRaw - 1, _columnRaw + 28,
+				cons.cmvprintf( _rowRaw - 1, _columnRaw + 28,
 						_focused ? COLORS::FG_WHITE : COLORS::ATTR_NORMAL, "%4d",
 						distance( _sourceSystem, sysNo ) + round );
 			}
 		}
-		cons.c_cmvprintf( _rowRaw - 1, _columnRaw + 32, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, "}--." );
+		cons.cmvprintf( _rowRaw - 1, _columnRaw + 32, _focused ? ATTR_BOARD : COLORS::ATTR_NORMAL, "}--." );
 	}
 	M_EPILOG
 }
