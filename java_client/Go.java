@@ -232,10 +232,10 @@ class Go extends HAbstractLogic implements Runnable {
 			_gui._sgftree._valid = false;
 			_internalUpdate = false;
 		}
-		public void jumpToMove( HTree<SGF.Game.Move>.HNode<SGF.Game.Move> $node ) {
+		public void jumpToMove( HTree<SGF.Move>.HNode<SGF.Move> $node ) {
 			_gui._board.selectBranch( $node );
 		}
-		public HTree<SGF.Game.Move>.HNode<SGF.Game.Move> currentMove() {
+		public HTree<SGF.Move>.HNode<SGF.Move> currentMove() {
 			return ( _gui._board._lastMove );
 		}
 	}

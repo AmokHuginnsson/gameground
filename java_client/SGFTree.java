@@ -34,7 +34,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 	int _hoverX = -1;
 	int _hoverY = -1;
 	boolean _valid = false;
-	HTree<SGF.Game.Move>.HNode<SGF.Game.Move> _hovered = null;
+	HTree<SGF.Move>.HNode<SGF.Move> _hovered = null;
 	Rectangle _currentRect = new Rectangle();
 	static final int margin = 10;
 //--------------------------------------------//
@@ -91,7 +91,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		super.paintComponent( g );
 		Graphics2D g2d = (Graphics2D) g;
 		g2d.setStroke( _stroke );
-		byte stone = _sgf._game._firstToMove == SGF.Game.Player.BLACK ? Goban.STONE.BLACK : Goban.STONE.WHITE;
+		byte stone = _sgf._firstToMove == SGF.Player.BLACK ? Goban.STONE.BLACK : Goban.STONE.WHITE;
 		int moveNumber = 1;
 		int diameter = getDiameter();
 		if ( diameter > 28 )
@@ -99,8 +99,8 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		int maxW = 0;
 		int maxH = 0;
 		g.setFont( _font );
-		int treeSize = _sgf._game._tree.getSize();
-		HTree<SGF.Game.Move>.HNode<SGF.Game.Move> currentMove = ((Go.HGUILocal)_logic._gui).currentMove();
+		int treeSize = _sgf._tree.getSize();
+		HTree<SGF.Move>.HNode<SGF.Move> currentMove = ((Go.HGUILocal)_logic._gui).currentMove();
 		if ( treeSize > _maxTreeSize ) {
 			_maxTreeSize = treeSize;
 			_path = ( _path != null ) ? Arrays.copyOf( _path, _maxTreeSize ) : new int[_maxTreeSize];
@@ -110,23 +110,23 @@ public class SGFTree extends JPanel implements MouseInputListener {
 			Arrays.fill( _path, 0 );
 		if ( _maxWidth != null )
 			Arrays.fill( _maxWidth, 0 );
-		HTree<SGF.Game.Move>.HNode<SGF.Game.Move> n = ( _sgf._game._tree._root != null ) ? ( _sgf._game._tree._root.getChildCount() > 0 ? _sgf._game._tree._root.getChildAt( 0 ) : null ) : null;
-		HTree<SGF.Game.Move>.HNode<SGF.Game.Move> last = n;
-		HTree<SGF.Game.Move>.HNode<SGF.Game.Move> first = n;
+		HTree<SGF.Move>.HNode<SGF.Move> n = ( _sgf._tree._root != null ) ? ( _sgf._tree._root.getChildCount() > 0 ? _sgf._tree._root.getChildAt( 0 ) : null ) : null;
+		HTree<SGF.Move>.HNode<SGF.Move> last = n;
+		HTree<SGF.Move>.HNode<SGF.Move> first = n;
 		int path = 0;
 		while ( n != null ) {
 			while ( n != null ) {
 				int jump = path - _maxWidth[moveNumber - 1];
 				_maxWidth[moveNumber] = path;
 				last = n;
-				SGF.Game.Move m = n.value();
+				SGF.Move m = n.value();
 				int x = moveNumber - 1;
 				int y = path;
 				if ( ( ( x + 1 ) * ( margin + diameter ) ) > maxW )
 					maxW = ( x + 1 ) * ( margin + diameter ) + margin;
 				if ( ( ( y + 1 ) * ( margin + diameter ) + margin ) > maxH )
 					maxH = ( y + 1 ) * ( margin + diameter ) + margin;
-				HTree<SGF.Game.Move>.HNode<SGF.Game.Move> next = n.getChildAt( 0 );
+				HTree<SGF.Move>.HNode<SGF.Move> next = n.getChildAt( 0 );
 				if ( drawStone( g, x, y, stone, moveNumber, n == first, next == null, jump, n == currentMove ) )
 					_hovered = n;
 				stone = Goban.opponent( stone );
@@ -172,7 +172,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 			_valid = true;
 		}
 	}
-	int getZeroPathLen( HTree<SGF.Game.Move>.HNode<SGF.Game.Move> $node ) {
+	int getZeroPathLen( HTree<SGF.Move>.HNode<SGF.Move> $node ) {
 		int len = 0;
 		while ( $node != null ) {
 			$node = $node.getChildAt( 0 );

@@ -47,9 +47,9 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	int _viewMove = 0;
 	GoImages _images = null;
 	SGF _sgf = null;
-	HTree<SGF.Game.Move>.HNode<SGF.Game.Move> _lastMove = null;
+	HTree<SGF.Move>.HNode<SGF.Move> _lastMove = null;
 	byte[] _stones = new byte[Go.GOBAN_SIZE.NORMAL * Go.GOBAN_SIZE.NORMAL];
-	ArrayList<HTree<SGF.Game.Move>.HNode<SGF.Game.Move>> _branch = new ArrayList<HTree<SGF.Game.Move>.HNode<SGF.Game.Move>>();
+	ArrayList<HTree<SGF.Move>.HNode<SGF.Move>> _branch = new ArrayList<HTree<SGF.Move>.HNode<SGF.Move>>();
 //--------------------------------------------//
 	public Goban() {
 		Arrays.fill( _stones, STONE.NONE );
@@ -102,7 +102,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		BufferedReader br = new BufferedReader( new StringReader( $sgfData ) );
 		updateSGF( br );
 	}
-	void selectBranch( HTree<SGF.Game.Move>.HNode<SGF.Game.Move> $node ) {
+	void selectBranch( HTree<SGF.Move>.HNode<SGF.Move> $node ) {
 		int moveNo = 0;
 		if ( ! _branch.contains( $node ) ) {
 			int toEnd = 0;
@@ -127,23 +127,23 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		placeStones( moveNo );
 	}
 	void placeStones( int $to ) {
-		int gameCommentLength = _sgf._game._comment.length();
+		int gameCommentLength = _sgf._comment.length();
 		if ( ( gameCommentLength > 0 ) && ( $to == ALL ) ) {
 			_logic._gui.log( "Game Started\n", HGUIface.Colors.OTHERGRAY, HGUIface.Style.BOLD );
-			_logic._gui.log( _sgf._game._comment + ( _sgf._game._comment.charAt( gameCommentLength - 1 ) != '\n' ? "\n" : "" ), HGUIface.Colors.OTHERGRAY );
+			_logic._gui.log( _sgf._comment + ( _sgf._comment.charAt( gameCommentLength - 1 ) != '\n' ? "\n" : "" ), HGUIface.Colors.OTHERGRAY );
 		}
 		Arrays.fill( _stones, STONE.NONE );
-		for ( SGF.Game.Move m : _sgf._game._blackPreset ) {
+		for ( SGF.Move m : _sgf._blackPreset ) {
 			move( m.col(), m.row(), STONE.BLACK );
 		}
-		for ( SGF.Game.Move m : _sgf._game._whitePreset ) {
+		for ( SGF.Move m : _sgf._whitePreset ) {
 			move( m.col(), m.row(), STONE.WHITE );
 		}
-		byte stone = _sgf._game._firstToMove == SGF.Game.Player.BLACK ? STONE.BLACK : STONE.WHITE;
+		byte stone = _sgf._firstToMove == SGF.Player.BLACK ? STONE.BLACK : STONE.WHITE;
 		int moveNumber = 0;
 		_lastMove = null;
-		for ( HTree<SGF.Game.Move>.HNode<SGF.Game.Move> n : _branch ) {
-			SGF.Game.Move m = n.value();
+		for ( HTree<SGF.Move>.HNode<SGF.Move> n : _branch ) {
+			SGF.Move m = n.value();
 			if ( moveNumber >= $to )
 				break;
 			_lastMove = n;
@@ -168,8 +168,8 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		_branch.clear();
 		try {
 			_sgf.load( $reader );
-			if ( ( _sgf._game._tree._root != null ) && ( _sgf._game._tree._root.getChildCount() > 0 ) ) {
-				HTree<SGF.Game.Move>.HNode<SGF.Game.Move> n = _sgf._game._tree.getRoot().getChildAt( 0 );
+			if ( ( _sgf._tree._root != null ) && ( _sgf._tree._root.getChildCount() > 0 ) ) {
+				HTree<SGF.Move>.HNode<SGF.Move> n = _sgf._tree.getRoot().getChildAt( 0 );
 				while ( n.getChildAt( 0 ) != null ) {
 					n = n.getChildAt( 0 );
 				}
@@ -255,7 +255,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		drawStones( g );
 		drawByLogic( g );
 		if ( _lastMove != null ) {
-			SGF.Game.Move m = _lastMove.value();
+			SGF.Move m = _lastMove.value();
 			int margin = _virtSize / ( _size + 4 );
 			int inside = _virtSize - 2 * margin;
 			Graphics2D g2D = (Graphics2D)g;      
