@@ -3,6 +3,7 @@ import java.io.BufferedReader;
 import java.io.PrintStream;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.Map;
 
 class SGFException extends Exception {
 	public static final long serialVersionUID = 17l;
@@ -28,19 +29,19 @@ public class SGF {
 			return ( _gameType );
 		}
 	}
-	public static class ERROR {
-		public static final int UNEXPECTED_EOF = 0;
-		public static final int UNEXPECTED_DATA = 1;
-		public static final int GT_OPEN_EXPECTED = 2;
-		public static final int GT_CLOSE_EXPECTED = 3;
-		public static final int PROP_IDENT_EXPECTED = 4;
-		public static final int PROP_VAL_OPEN_EXPECTED = 5;
-		public static final int PROP_VAL_CLOSE_EXPECTED = 6;
-		public static final int NODE_MARK_EXPECTED = 7;
-		public static final int BAD_GAME_TYPE = 8;
-		public static final int BAD_FILE_FORMAT = 9;
-		public static final int MIXED_NODE = 10;
-		public static final int DUPLICATED_COORDINATE = 11;
+	public enum ERROR {
+		UNEXPECTED_EOF,
+		UNEXPECTED_DATA,
+		GT_OPEN_EXPECTED,
+		GT_CLOSE_EXPECTED,
+		PROP_IDENT_EXPECTED,
+		PROP_VAL_OPEN_EXPECTED,
+		PROP_VAL_CLOSE_EXPECTED,
+		NODE_MARK_EXPECTED,
+		BAD_GAME_TYPE,
+		BAD_FILE_FORMAT,
+		MIXED_NODE,
+		DUPLICATED_COORDINATE
 	}
 	private class TERM {
 		static final char GT_OPEN = '(';
@@ -55,14 +56,14 @@ public class SGF {
 		WHITE,
 		UNSET
 	}
-	public static class Position {
-		public static final int REMOVE = 0;
-		public static final int BLACK = 1;
-		public static final int WHITE = 2;
-		public static final int TRIANGLE = 3;
-		public static final int SQUARE = 4;
-		public static final int CIRCLE = 5;
-		public static final int MARK = 6;
+	public enum Position {
+		REMOVE,
+		BLACK,
+		WHITE,
+		TRIANGLE,
+		SQUARE,
+		CIRCLE,
+		MARK
 	}
 	static class Coord {
 		char[] _data = { 0, 0 };
@@ -95,29 +96,28 @@ public class SGF {
 		}
 	};
 	static class Setup {
-		private SortedMap<Integer, ArrayList<Coord>> _data = java.util.Collections.synchronizedSortedMap( new TreeMap<Integer, ArrayList<Coord>>() );
-/*
-		private void add_position( Position $positon, Coord $coord ) {
-			if ( $position == Position::REMOVE ) {
-				for ( Setup::setup_t::iterator it( _data.begin() ), end( _data.end() ); it != end; ++ it ) {
-					if ( it->first == Position::REMOVE )
+		private SortedMap<Position, ArrayList<Coord>> _data = java.util.Collections.synchronizedSortedMap( new TreeMap<Position, ArrayList<Coord>>() );
+		private void add_position( Position $position, Coord $coord ) throws SGFException {
+			if ( $position == Position.REMOVE ) {
+				for ( Map.Entry<Position, ArrayList<Coord>> e : _data.entrySet() ) {
+					if ( e.getKey() == Position.REMOVE )
 						continue;
-					it->second.remove( $coord );
+					e.getValue().remove( $coord );
 				}
 			} else {
-				for ( Setup::setup_t::iterator it( _data.begin() ), end( _data.end() ); it != end; ++ it ) {
-					if ( it->first == Position::REMOVE )
+				for ( Map.Entry<Position, ArrayList<Coord>> e : _data.entrySet() ) {
+					if ( e.getKey() == Position.REMOVE )
 						continue;
-					if ( find( it->second.begin(), it->second.end(), coord_ ) != it->second.end() )
-						throw SGFException( _errMsg_[ERROR::DUPLICATED_COORDINATE] );
+					ArrayList<Coord> c = e.getValue();
+					if ( c.contains( $coord ) )
+						throw new SGFException( _errMsg_[ERROR.DUPLICATED_COORDINATE.ordinal()], $coord.row() * 100 + $coord.col() );
 				}
 			}
-			coords_t& c( _data[position_] );
-			if ( ( position_ != Position::REMOVE ) || ( find( c.begin(), c.end(), coord_ ) == c.end() ) )
-				c.push_back( coord_ );
+			ArrayList<Coord> c = _data.get( $position );
+			if ( ( $position != Position.REMOVE ) || ( ! c.contains( $coord ) ) )
+				c.add( $coord );
 			return;
 		}
-	*/
 	}
 	static class Move {
 		Coord _coord = null;
@@ -219,7 +219,7 @@ public class SGF {
 	*/
 	}
 
-	final String[] _errMsg_ = {
+	final static String[] _errMsg_ = {
 		"Unexpected end of file.",
 		"Unexpected data bytes found.",
 		"Expected GameTree opening sequence.",
@@ -269,14 +269,14 @@ public class SGF {
 
 	void notEof() throws SGFException {
 		if ( _cur == _end )
-			throw new SGFException( _errMsg_[ERROR.UNEXPECTED_EOF], _cur );
+			throw new SGFException( _errMsg_[ERROR.UNEXPECTED_EOF.ordinal()], _cur );
 		return;
 	}
 
 	void parseGameTree() throws SGFException {
 		notEof();
 		if ( _rawData.charAt( _cur ) != TERM.GT_OPEN )
-			throw new SGFException( _errMsg_[ERROR.GT_OPEN_EXPECTED], _cur );
+			throw new SGFException( _errMsg_[ERROR.GT_OPEN_EXPECTED.ordinal()], _cur );
 		_cur = nonSpace( ++ _cur, _end );
 		notEof();
 		if ( _currentMove == null )
@@ -289,7 +289,7 @@ public class SGF {
 			notEof();
 		}
 		if ( _rawData.charAt( _cur ) != TERM.GT_CLOSE )
-			throw new SGFException( _errMsg_[ERROR.GT_CLOSE_EXPECTED], _cur );
+			throw new SGFException( _errMsg_[ERROR.GT_CLOSE_EXPECTED.ordinal()], _cur );
 		_cur = nonSpace( ++ _cur, _end );
 		return;
 	}
@@ -309,7 +309,7 @@ public class SGF {
 
 	void parseNode() throws SGFException {
 		if ( _rawData.charAt( _cur ) != TERM.NODE_MARK )
-			throw new SGFException( _errMsg_[ERROR.NODE_MARK_EXPECTED], _cur );
+			throw new SGFException( _errMsg_[ERROR.NODE_MARK_EXPECTED.ordinal()], _cur );
 		_cur = nonSpace( ++ _cur, _end );
 		notEof();
 		while ( ( _rawData.charAt( _cur ) != TERM.GT_CLOSE ) && ( _rawData.charAt( _cur ) != TERM.GT_OPEN ) && ( _rawData.charAt( _cur ) != TERM.NODE_MARK ) ) {
@@ -323,7 +323,7 @@ public class SGF {
 	void parseProperty() throws SGFException {
 		_cachePropIdent = parsePropertyIdent();
 		if ( "".equals( _cachePropIdent ) )
-			throw new SGFException( _errMsg_[ERROR.PROP_IDENT_EXPECTED], _cur );
+			throw new SGFException( _errMsg_[ERROR.PROP_IDENT_EXPECTED.ordinal()], _cur );
 		_cur = nonSpace( _cur, _end );
 		notEof();
 		_cachePropValue.clear();
@@ -334,11 +334,11 @@ public class SGF {
 		if ( "GM".equals( _cachePropIdent ) ) {
 			int val = Integer.parseInt( singleValue );
 			if ( val != _gameType.value() )
-				throw new SGFException( _errMsg_[ERROR.BAD_GAME_TYPE], _cur );
+				throw new SGFException( _errMsg_[ERROR.BAD_GAME_TYPE.ordinal()], _cur );
 		} else if ( "FF".equals( _cachePropIdent ) ) {
 			int ff = Integer.parseInt( singleValue );
 			if ( ( ff < 1 ) || ( ff > 4 ) )
-				throw new SGFException( _errMsg_[ERROR.BAD_FILE_FORMAT], _cur );
+				throw new SGFException( _errMsg_[ERROR.BAD_FILE_FORMAT.ordinal()], _cur );
 		} else if ( "PB".equals( _cachePropIdent ) )
 			_blackName = singleValue;
 		else if ( "PW".equals( _cachePropIdent ) )
@@ -406,7 +406,7 @@ public class SGF {
 	void parsePropertyValue( ArrayList<String> values_ ) throws SGFException {
 		notEof();
 		if ( _rawData.charAt( _cur ) != TERM.PROP_VAL_OPEN )
-			throw new SGFException( _errMsg_[ERROR.PROP_VAL_OPEN_EXPECTED], _cur );
+			throw new SGFException( _errMsg_[ERROR.PROP_VAL_OPEN_EXPECTED.ordinal()], _cur );
 		_cur = nonSpace( ++ _cur, _end );
 		notEof();
 		_cache = "";
@@ -419,7 +419,7 @@ public class SGF {
 		}
 		notEof();
 		if ( _rawData.charAt( _cur ) != TERM.PROP_VAL_CLOSE )
-			throw new SGFException( _errMsg_[ERROR.PROP_VAL_CLOSE_EXPECTED], _cur );
+			throw new SGFException( _errMsg_[ERROR.PROP_VAL_CLOSE_EXPECTED.ordinal()], _cur );
 		_cur = nonSpace( ++ _cur, _end );
 		values_.add( _cache );
 	}
