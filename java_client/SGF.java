@@ -7,10 +7,13 @@ import java.util.Map;
 
 class SGFException extends Exception {
 	public static final long serialVersionUID = 17l;
-	int _code;
+	int _code = 0;
 	public SGFException( String $message, int $code ) {
 		super( $message );
 		_code = $code;
+	}
+	public SGFException( String $message ) {
+		super( $message );
 	}
 	public String getMessage() {
 		return ( super.getMessage() + ": " + _code );
@@ -22,8 +25,8 @@ public class SGF {
 		GO( 1 ),
 		GOMOKU( 4 );
 		private final int _gameType;
-		GAME_TYPE( int gameType_ ) {
-			_gameType = gameType_;
+		GAME_TYPE( int $gameType ) {
+			_gameType = $gameType;
 		}
 		int value() {
 			return ( _gameType );
@@ -97,7 +100,7 @@ public class SGF {
 	};
 	static class Setup {
 		private SortedMap<Position, ArrayList<Coord>> _data = java.util.Collections.synchronizedSortedMap( new TreeMap<Position, ArrayList<Coord>>() );
-		private void add_position( Position $position, Coord $coord ) throws SGFException {
+		private void addPosition( Position $position, Coord $coord ) throws SGFException {
 			if ( $position == Position.REMOVE ) {
 				for ( Map.Entry<Position, ArrayList<Coord>> e : _data.entrySet() ) {
 					if ( e.getKey() == Position.REMOVE )
@@ -120,17 +123,38 @@ public class SGF {
 		}
 	}
 	static class Move {
+		public enum Type {
+			INVALID,
+			MOVE,
+			SETUP
+		}
+		Type _type = Type.INVALID;
 		Coord _coord = null;
+		Setup _setup = null;
 		String _comment = "";
 		Move() { }
 		Move( int $col, int $row ) {
 			_coord = new Coord( $col, $row );
+			_type = Type.MOVE;
 		}
 		Move( final String $coord ) {
 			_coord = new Coord( $coord );
+			_type = Type.MOVE;
 		}
-		void set_coord( Coord $coord ) {
+		void setCoord( Coord $coord ) throws SGFException {
+			if ( _type == Type.SETUP )
+				throw new SGFException( _errMsg_[ERROR.MIXED_NODE.ordinal()] );
 			_coord = $coord;
+		}
+		void addPosition( Position $position, Coord $coord ) throws SGFException {
+			if ( ( $position == Position.REMOVE )
+					|| ( $position == Position.BLACK )
+					|| ( $position == Position.WHITE ) ) {
+				if ( _type == Type.MOVE )
+					throw new SGFException( _errMsg_[ERROR.MIXED_NODE.ordinal()] );
+				_type = Type.SETUP;
+			}
+			_setup.addPosition( $position, $coord );
 		}
 		String coord() {
 			return ( _coord.data() );
@@ -144,6 +168,8 @@ public class SGF {
 	}
 	static final int RESIGN = 0xffff;
 	static final int TIME = 0x7fff;
+	String _app = null;
+	String _rules = "";
 	String _blackName = "";
 	String _whiteName = "";
 	String _blackRank = "30k";
@@ -167,7 +193,6 @@ public class SGF {
 	String _cachePropIdent = null;
 	ArrayList<String> _cachePropValue = new ArrayList<String>();
 	HTree<Move>.HNode<Move> _currentMove = null;
-	String _app = null;
 
 	void addStone( Player $player, int $col, int $row ) {
 		addStone( $player, new Move( $col, $row ) );
@@ -187,20 +212,25 @@ public class SGF {
 	}
 
 	void clear() {
-		_cur = _end = 0;
-		_currentMove = null;
 		_rawData = "";
+		_cur = _end = 0;
+		_cache = null;
+		_cachePropIdent = null;
+		_cachePropValue.clear();
 		_blackPreset.clear();
 		_whitePreset.clear();
-		_tree.clear();
-		_firstToMove = Player.UNSET;
+		_currentMove = null;
+		_app = "";
+		_rules = "";
 		_blackName = "";
 		_blackRank = "";
 		_whiteName = "";
 		_whiteRank = "";
-		_komi = 5.5;
-		_handicap = 0;
+		_tree.clear();
+		_firstToMove = Player.UNSET;
 		_gobanSize = 19;
+		_handicap = 0;
+		_komi = 5.5;
 		_result = 0;
 		_place = "";
 		_comment = "";
@@ -214,9 +244,6 @@ public class SGF {
 	public SGF( GAME_TYPE $gameType, final String $app ) {
 		_app = $app;
 		_gameType = $gameType;
-	/*
-		_cache(), _cachePropIdent()
-	*/
 	}
 
 	final static String[] _errMsg_ = {
@@ -339,7 +366,11 @@ public class SGF {
 			int ff = Integer.parseInt( singleValue );
 			if ( ( ff < 1 ) || ( ff > 4 ) )
 				throw new SGFException( _errMsg_[ERROR.BAD_FILE_FORMAT.ordinal()], _cur );
-		} else if ( "PB".equals( _cachePropIdent ) )
+		} else if ( "AP".equals( _cachePropIdent ) )
+			_app = singleValue;
+		else if ( "RU".equals( _cachePropIdent ) )
+			_rules = singleValue;
+		else if ( "PB".equals( _cachePropIdent ) )
 			_blackName = singleValue;
 		else if ( "PW".equals( _cachePropIdent ) )
 			_whiteName = singleValue;
@@ -379,11 +410,11 @@ public class SGF {
 		} else if ( "B".equals( _cachePropIdent ) ) {
 			if ( _firstToMove == Player.UNSET )
 				_firstToMove = Player.BLACK;
-			_currentMove.value().set_coord( new Coord( singleValue ) );
+			_currentMove.value().setCoord( new Coord( singleValue ) );
 		} else if ( "W".equals( _cachePropIdent ) ) {
 			if ( _firstToMove == Player.UNSET )
 				_firstToMove = Player.WHITE;
-			_currentMove.value().set_coord( new Coord( singleValue ) );
+			_currentMove.value().setCoord( new Coord( singleValue ) );
 		} else if ( "C".equals( _cachePropIdent ) ) {
 			if ( _firstToMove != Player.UNSET )
 				_currentMove.value()._comment = singleValue;
