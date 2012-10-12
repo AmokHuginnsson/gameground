@@ -133,11 +133,19 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 			_logic._gui.log( _sgf._comment + ( _sgf._comment.charAt( gameCommentLength - 1 ) != '\n' ? "\n" : "" ), HGUIface.Colors.OTHERGRAY );
 		}
 		Arrays.fill( _stones, STONE.NONE );
-		for ( SGF.Move m : _sgf._blackPreset ) {
-			move( m.col(), m.row(), STONE.BLACK );
-		}
-		for ( SGF.Move m : _sgf._whitePreset ) {
-			move( m.col(), m.row(), STONE.WHITE );
+		HTree<SGF.Move>.HNode<SGF.Move> root = _sgf._tree.getRoot();
+		SGF.Setup s = root.value().setup();
+		if ( s != null ) {
+			ArrayList<SGF.Coord> coords = s.get( SGF.Position.BLACK );
+			if ( coords != null )
+				for ( SGF.Coord c : coords ) {
+					move( c.col(), c.row(), STONE.BLACK );
+			}
+			coords = s.get( SGF.Position.WHITE );
+			if ( coords != null )
+				for ( SGF.Coord c : coords ) {
+					move( c.col(), c.row(), STONE.WHITE );
+			}
 		}
 		byte stone = _sgf._firstToMove == SGF.Player.BLACK ? STONE.BLACK : STONE.WHITE;
 		int moveNumber = 0;
@@ -148,10 +156,10 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 				break;
 			_lastMove = n;
 			move( m.col(), m.row(), stone );
-			int commentLength = m._comment.length();
+			int commentLength = m.comment().length();
 			if ( ( commentLength > 0 ) && ( moveNumber > _viewMove ) ) {
 				_logic._gui.log( "Move: " + ( moveNumber + 1 ) + "\n", HGUIface.Colors.OTHERGRAY, HGUIface.Style.BOLD );
-				_logic._gui.log( m._comment + ( m._comment.charAt( commentLength - 1 ) != '\n' ? "\n" : "" ), HGUIface.Colors.OTHERGRAY );
+				_logic._gui.log( m.comment() + ( m.comment().charAt( commentLength - 1 ) != '\n' ? "\n" : "" ), HGUIface.Colors.OTHERGRAY );
 			}
 			stone = opponent( stone );
 			++ moveNumber;

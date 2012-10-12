@@ -3,6 +3,8 @@ import java.io.BufferedReader;
 import java.io.PrintStream;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 
 class SGFException extends Exception {
@@ -117,9 +119,14 @@ public class SGF {
 				}
 			}
 			ArrayList<Coord> c = _data.get( $position );
+			if ( c == null )
+				_data.put( $position, c = new ArrayList<Coord>() );
 			if ( ( $position != Position.REMOVE ) || ( ! c.contains( $coord ) ) )
 				c.add( $coord );
 			return;
+		}
+		ArrayList<Coord> get( Position $position ) {
+			return ( _data.get( $position ) );
 		}
 	}
 	static class Move {
@@ -128,10 +135,10 @@ public class SGF {
 			MOVE,
 			SETUP
 		}
-		Type _type = Type.INVALID;
-		Coord _coord = null;
-		Setup _setup = null;
-		String _comment = "";
+		private Type _type = Type.INVALID;
+		private Coord _coord = null;
+		private Setup _setup = null;
+		private String _comment = "";
 		Move() { }
 		Move( int $col, int $row ) {
 			_coord = new Coord( $col, $row );
@@ -141,12 +148,12 @@ public class SGF {
 			_coord = new Coord( $coord );
 			_type = Type.MOVE;
 		}
-		void setCoord( Coord $coord ) throws SGFException {
+		public void setCoord( Coord $coord ) throws SGFException {
 			if ( _type == Type.SETUP )
 				throw new SGFException( _errMsg_[ERROR.MIXED_NODE.ordinal()] );
 			_coord = $coord;
 		}
-		void addPosition( Position $position, Coord $coord ) throws SGFException {
+		public void addPosition( Position $position, Coord $coord ) throws SGFException {
 			if ( ( $position == Position.REMOVE )
 					|| ( $position == Position.BLACK )
 					|| ( $position == Position.WHITE ) ) {
@@ -156,8 +163,23 @@ public class SGF {
 			}
 			_setup.addPosition( $position, $coord );
 		}
+		public void addComment( String $comment ) {
+			_comment = _comment + $comment;
+		}
+		public void setSetup( Setup $setup ) {
+			_setup = $setup;
+		}
 		String coord() {
 			return ( _coord.data() );
+		}
+		String comment() {
+			return ( _comment );
+		}
+		public Type type() {
+			return ( _type );
+		}
+		public Setup setup() {
+			return ( _setup );
 		}
 		int col() {
 			return ( _coord.col() );
@@ -174,8 +196,6 @@ public class SGF {
 	String _whiteName = "";
 	String _blackRank = "30k";
 	String _whiteRank = "30k";
-	ArrayList<Move> _blackPreset = new ArrayList<Move>();
-	ArrayList<Move> _whitePreset = new ArrayList<Move>();
 	HTree<Move> _tree = new HTree<Move>();
 	Player _firstToMove = Player.UNSET;
 	int _gobanSize = 19;
@@ -193,17 +213,26 @@ public class SGF {
 	String _cachePropIdent = null;
 	ArrayList<String> _cachePropValue = new ArrayList<String>();
 	HTree<Move>.HNode<Move> _currentMove = null;
+	static Map<String, Position> _positionTagDict_ = Collections.synchronizedMap( new HashMap<String, Position>() );
 
-	void addStone( Player $player, int $col, int $row ) {
-		addStone( $player, new Move( $col, $row ) );
-		return;
+	static {
+		_positionTagDict_.put( "AE", Position.REMOVE );
+		_positionTagDict_.put( "AB", Position.BLACK );
+		_positionTagDict_.put( "AW", Position.WHITE );
+		_positionTagDict_.put( "TR", Position.TRIANGLE );
+		_positionTagDict_.put( "SQ", Position.SQUARE );
+		_positionTagDict_.put( "CR", Position.CIRCLE );
+		_positionTagDict_.put( "MA", Position.MARK );
 	}
 
-	void addStone( Player $player, final Move move_ ) {
-		if ( $player == Player.BLACK )
-			_blackPreset.add( move_ );
-		else
-			_whitePreset.add( move_ );
+	void addPosition( Position $position, Coord $coord ) throws SGFException {
+		if ( _currentMove == null ) {
+			_currentMove = _tree.createNewRoot( new Move() );
+		}
+		if ( _currentMove.value().setup() == null ) {
+			_currentMove.value().setSetup( new Setup() );
+		}
+		_currentMove.value().addPosition( $position, $coord );
 		return;
 	}
 
@@ -217,8 +246,6 @@ public class SGF {
 		_cache = null;
 		_cachePropIdent = null;
 		_cachePropValue.clear();
-		_blackPreset.clear();
-		_whitePreset.clear();
 		_currentMove = null;
 		_app = "";
 		_rules = "";
@@ -401,12 +428,9 @@ public class SGF {
 			char player = Character.toUpperCase( singleValue.charAt( 0 ) );
 			if ( player == 'W' )
 				_result = -_result;
-		} else if ( "AB".equals( _cachePropIdent ) ) {
+		} else if ( _positionTagDict_.containsKey( _cachePropIdent ) ) {
 			for ( String s : _cachePropValue )
-				addStone( Player.BLACK, new Move( s ) );
-		} else if ( "AW".equals( _cachePropIdent ) ) {
-			for ( String s : _cachePropValue )
-				addStone( Player.WHITE, new Move( s ) );
+				addPosition( _positionTagDict_.get( _cachePropIdent ), new Coord( s ) );
 		} else if ( "B".equals( _cachePropIdent ) ) {
 			if ( _firstToMove == Player.UNSET )
 				_firstToMove = Player.BLACK;
@@ -417,7 +441,7 @@ public class SGF {
 			_currentMove.value().setCoord( new Coord( singleValue ) );
 		} else if ( "C".equals( _cachePropIdent ) ) {
 			if ( _firstToMove != Player.UNSET )
-				_currentMove.value()._comment = singleValue;
+				_currentMove.value().addComment( singleValue );
 			else
 				_comment += singleValue;
 		} else
@@ -455,6 +479,9 @@ public class SGF {
 		values_.add( _cache );
 	}
 
+	void saveSetup( HTree<Move>.HNode<Move> $node, PrintStream $stream ) {
+	}
+
 	void save( PrintStream $stream ) {
 		$stream.print( "(;GM[" + _gameType.value() + "]FF[4]AP[" + _app + "]\n"
 			+ "SZ[" + _gobanSize + "]KM[" + _komi + "]TM[" + _time + "]\n"
@@ -464,26 +491,20 @@ public class SGF {
 			_cache = _comment;
 			$stream.print( "C[" + _cache.replace( "[", "\\[" ).replace( "]", "\\]" ) + "]" );
 		}
-		if ( ! _blackPreset.isEmpty() ) {
-			$stream.print( "AB" );
-			for ( Move m : _blackPreset )
-				$stream.print( "[" + m.coord() + "]" );
+		if ( _tree.getRoot() != null ) {
+			HTree<Move>.HNode<Move> root = _tree.getRoot();
+			if ( root.value().setup() != null )
+				saveSetup( root, $stream );
+			saveVariations( _firstToMove, root, $stream );
 		}
-		if ( ! _whitePreset.isEmpty() ) {
-			$stream.print( "AW" );
-			for ( Move m : _whitePreset )
-				$stream.print( "[" + m.coord() + "]" );
-		}
-		if ( _tree.getRoot() != null )
-			saveVariations( _firstToMove, _tree.getRoot(), $stream );
 		$stream.println( ")" );
 		return;
 	}
 
 	void saveMove( Player of_, HTree<Move>.HNode<Move> $node, PrintStream $stream ) {
 		$stream.print( ";" + ( of_ == Player.BLACK ? "B" : "W" ) + "[" + $node.value().coord() + "]" );
-		if ( ! "".equals( $node.value()._comment ) ) {
-			_cache = $node.value()._comment;
+		if ( ! "".equals( $node.value().comment() ) ) {
+			_cache = $node.value().comment();
 			$stream.print( "C[" + _cache.replace( "[", "\\[" ).replace( "]", "\\]" ) + "]" );
 		}
 		return;
