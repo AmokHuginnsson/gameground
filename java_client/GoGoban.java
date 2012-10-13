@@ -158,6 +158,8 @@ public class GoGoban extends Goban {
 	}
 	void move( int $col, int $row, byte $stone ) {
 /*		Con.debug( "col = " + $col + ", row = " + $row ); */
+		if ( breakTheRules( $col, $row, $stone ) )
+			throw new RuntimeException( "Illegal move!" );
 		setStone( $col, $row, $stone );
 		haveKilled( $col, $row, $stone );
 		resetAlive();

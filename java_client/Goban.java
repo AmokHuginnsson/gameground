@@ -38,6 +38,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	public static final long serialVersionUID = 7l;
 	public static final int D_MARGIN = 20;
 	static final int ALL = 30000;
+	static final SGF.Position[] _markers = new SGF.Position[] { SGF.Position.TRIANGLE, SGF.Position.SQUARE, SGF.Position.CIRCLE, SGF.Position.MARK };
 	HAbstractLogic _logic = null;
 	int _size = Go.GOBAN_SIZE.NORMAL;
 	double _diameter = -1;
@@ -155,18 +156,39 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 			if ( moveNumber >= $to )
 				break;
 			_lastMove = n;
-			move( m.col(), m.row(), stone );
 			int commentLength = m.comment().length();
 			if ( ( commentLength > 0 ) && ( moveNumber > _viewMove ) ) {
 				_logic._gui.log( "Move: " + ( moveNumber + 1 ) + "\n", HGUIface.Colors.OTHERGRAY, HGUIface.Style.BOLD );
 				_logic._gui.log( m.comment() + ( m.comment().charAt( commentLength - 1 ) != '\n' ? "\n" : "" ), HGUIface.Colors.OTHERGRAY );
 			}
-			stone = opponent( stone );
+			if ( m.type() == SGF.Move.Type.MOVE ) {
+				move( m.col(), m.row(), stone );
+				stone = opponent( stone );
+			} else if ( m.type() == SGF.Move.Type.SETUP ) {
+				edit( m.setup() );
+			}
 			++ moveNumber;
 		}
 		_viewMove = moveNumber;
 		((GobanHolderInterface)_logic._gui).jumpToMove( _viewMove, _branch.size() );
 		_logic._gui.repaint();
+	}
+	void edit( SGF.Setup $setup ) {
+		ArrayList<SGF.Coord> coords = $setup.get( SGF.Position.REMOVE );
+		if ( coords != null ) {
+			for ( SGF.Coord c : coords )
+				setStone( c.col(), c.row(), STONE.NONE );
+		}
+		coords = $setup.get( SGF.Position.BLACK );
+		if ( coords != null ) {
+			for ( SGF.Coord c : coords )
+				setStone( c.col(), c.row(), STONE.BLACK );
+		}
+		coords = $setup.get( SGF.Position.WHITE );
+		if ( coords != null ) {
+			for ( SGF.Coord c : coords )
+				setStone( c.col(), c.row(), STONE.WHITE );
+		}
 	}
 	void placeStones() {
 		placeStones( ALL );
@@ -257,6 +279,47 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 			g.drawChars( label, 0, 2, D_MARGIN + _virtSize + 2, D_MARGIN + margin + ( inside * ( _size - 1 - i ) ) / ( _size - 1 ) + 5 );
 		}
 	}
+	void mark( int $col, int $row, SGF.Position $mark, Graphics $gc ) {
+		int margin = _virtSize / ( _size + 4 );
+		int inside = _virtSize - 2 * margin;
+		Graphics2D g2D = (Graphics2D)$gc;
+		g2D.setStroke( new BasicStroke(2.5F) );
+		$gc.setColor( getStone( $col, $row ) == STONE.BLACK ? Color.WHITE : Color.BLACK );
+		switch ( $mark ) {
+			case TRIANGLE: {
+				$gc.drawLine( D_MARGIN + margin + ( inside * $col ) / ( _size - 1 ),
+						D_MARGIN + margin + ( inside * $row ) / ( _size - 1 ) - (int)( _diameter / 4 ) - (int)( _diameter / 8 ), 
+						D_MARGIN + margin + ( inside * $col ) / ( _size - 1 ) + (int)( _diameter / 4 + 1 ),
+						D_MARGIN + margin + ( inside * $row ) / ( _size - 1 ) + (int)( _diameter / 4 ) + 1 - (int)( _diameter / 8 ) );
+				$gc.drawLine( D_MARGIN + margin + ( inside * $col ) / ( _size - 1 ) - (int)( _diameter / 4 ),
+						D_MARGIN + margin + ( inside * $row ) / ( _size - 1 ) + (int)( _diameter / 4 + 1 - (int)( _diameter / 8 ) ), 
+						D_MARGIN + margin + ( inside * $col ) / ( _size - 1 ),
+						D_MARGIN + margin + ( inside * $row ) / ( _size - 1 ) - (int)( _diameter / 4 ) - (int)( _diameter / 8 ) );
+				$gc.drawLine( D_MARGIN + margin + ( inside * $col ) / ( _size - 1 ) - (int)( _diameter / 4 ),
+						D_MARGIN + margin + ( inside * $row ) / ( _size - 1 ) + (int)( _diameter / 4 + 2 - (int)( _diameter / 8 ) ), 
+						D_MARGIN + margin + ( inside * $col ) / ( _size - 1 ) + (int)( _diameter / 4 ),
+						D_MARGIN + margin + ( inside * $row ) / ( _size - 1 ) + (int)( _diameter / 4 ) + 2 - (int)( _diameter / 8 ) );
+			} break;
+			case SQUARE: {
+				$gc.drawRect( D_MARGIN + margin + ( inside * $col ) / ( _size - 1 ) - (int)( _diameter / 4 ),
+						D_MARGIN + margin + ( inside * $row ) / ( _size - 1 ) - (int)( _diameter / 4 ), (int)( _diameter / 2 ), (int)( _diameter / 2 ) );
+			} break;
+			case CIRCLE: {
+				$gc.drawOval( D_MARGIN + margin + ( inside * $col ) / ( _size - 1 ) - (int)( _diameter / 4 ),
+						D_MARGIN + margin + ( inside * $row ) / ( _size - 1 ) - (int)( _diameter / 4 ), (int)( _diameter / 2 ), (int)( _diameter / 2 ) );
+			} break;
+			case MARK: {
+				$gc.drawLine( D_MARGIN + margin + ( inside * $col ) / ( _size - 1 ) - (int)( _diameter / 4 ),
+						D_MARGIN + margin + ( inside * $row ) / ( _size - 1 ) - (int)( _diameter / 4 ), 
+						D_MARGIN + margin + ( inside * $col ) / ( _size - 1 ) + (int)( _diameter / 4 + 1 ),
+						D_MARGIN + margin + ( inside * $row ) / ( _size - 1 ) + (int)( _diameter / 4 ) + 1 );
+				$gc.drawLine( D_MARGIN + margin + ( inside * $col ) / ( _size - 1 ) - (int)( _diameter / 4 ),
+						D_MARGIN + margin + ( inside * $row ) / ( _size - 1 ) + (int)( _diameter / 4 + 1 ), 
+						D_MARGIN + margin + ( inside * $col ) / ( _size - 1 ) + (int)( _diameter / 4 + 1 ),
+						D_MARGIN + margin + ( inside * $row ) / ( _size - 1 ) - (int)( _diameter / 4 ) );
+			} break;
+		}
+	}
 	protected void paintComponent( Graphics g ) {
 		super.paintComponent( g );
 		drawGoban( g );
@@ -264,13 +327,20 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		drawByLogic( g );
 		if ( _lastMove != null ) {
 			SGF.Move m = _lastMove.value();
-			int margin = _virtSize / ( _size + 4 );
-			int inside = _virtSize - 2 * margin;
-			Graphics2D g2D = (Graphics2D)g;      
-			g2D.setStroke( new BasicStroke(3F) );
-			g.setColor( getStone( m.col(), m.row() ) == STONE.BLACK ? Color.WHITE : Color.BLACK );
-			g.drawOval(  D_MARGIN + margin + ( inside * m.col() ) / ( _size - 1 ) - (int)( _diameter / 4 ) - 1,
-					D_MARGIN + margin + ( inside * m.row() ) / ( _size - 1 ) - (int)( _diameter / 4 ) - 1, (int)( _diameter / 2 ), (int)( _diameter / 2 ) );
+			if ( m.type() == SGF.Move.Type.MOVE ) {
+				mark( m.col(), m.row(), SGF.Position.CIRCLE, g );
+			}
+			SGF.Setup setup = m.setup();
+			if ( setup != null ) {
+				for ( SGF.Position p : _markers ) {
+					ArrayList<SGF.Coord> coords = setup.get( p );
+					if ( coords != null ) {
+						for ( SGF.Coord c : coords ) {
+							mark( c.col(), c.row(), p, g );
+						}
+					}
+				}
+			}
 		}
 	}
 	protected void drawStone( int $xx, int $yy, int $color, boolean $alpha, Graphics $gc ) {
