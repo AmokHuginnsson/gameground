@@ -326,11 +326,16 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		drawGoban( g );
 		drawStones( g );
 		drawByLogic( g );
+		SGF.Move m = null;
 		if ( _lastMove != null ) {
-			SGF.Move m = _lastMove.value();
+			m = _lastMove.value();
 			if ( m.type() == SGF.Move.Type.MOVE ) {
 				mark( m.col(), m.row(), SGF.Position.CIRCLE, g );
 			}
+		}
+		if ( ( _lastMove == null ) && ( _sgf._tree.getRoot() != null ) ) 
+			m = _sgf._tree.getRoot().value();
+		if ( m != null ) {
 			SGF.Setup setup = m.setup();
 			if ( setup != null ) {
 				for ( SGF.Position p : _markers ) {

@@ -10,6 +10,9 @@ import javax.swing.JTextPane;
 import javax.swing.JSlider;
 import javax.swing.DefaultListModel;
 import javax.swing.event.ChangeEvent;
+import java.awt.KeyboardFocusManager;
+import java.awt.KeyEventDispatcher;
+import java.awt.event.KeyEvent;
 
 class GoPlayer {
 	public JLabel _name;
@@ -120,6 +123,21 @@ class Go extends HAbstractLogic implements Runnable {
 			_pass.setText( _passText );
 			_pass.setToolTipText( _toolTip );
 			_jumpToMove.addChangeListener( this );
+			KeyboardFocusManager.getCurrentKeyboardFocusManager()
+				.addKeyEventDispatcher( new KeyEventDispatcher() {
+					@Override
+					public boolean dispatchKeyEvent( KeyEvent e ) {
+				if ( ( e.getID() == KeyEvent.KEY_PRESSED ) && ! ( e.getSource() instanceof JTextField ) ) {
+							if ( e.getKeyCode() == KeyEvent.VK_LEFT ) {
+								onGoToPrevious();
+							}
+							if ( e.getKeyCode() == KeyEvent.VK_RIGHT ) {
+								onGoToNext();
+							}
+						}
+						return false;
+					}
+				});
 		}
 		public void stateChanged(ChangeEvent e) {
 			if ( ! _internalUpdate )
