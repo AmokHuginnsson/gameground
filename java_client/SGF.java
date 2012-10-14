@@ -72,6 +72,8 @@ public class SGF {
 	}
 	static class Coord {
 		char[] _data = { 0, 0 };
+		Coord() {
+		}
 		Coord( int $col, int $row ) {
 			_data[0] = (char)( $col + 'a' );
 			_data[1] = (char)( $row + 'a' );
@@ -174,8 +176,8 @@ public class SGF {
 		public void setSetup( Setup $setup ) {
 			_setup = $setup;
 		}
-		String coord() {
-			return ( _coord.data() );
+		public Coord coord() {
+			return ( _coord );
 		}
 		String comment() {
 			return ( _comment );
@@ -552,7 +554,7 @@ public class SGF {
 	}
 
 	void saveMove( Player of_, HTree<Move>.HNode<Move> $node, PrintStream $stream ) {
-		$stream.print( ";" + ( of_ == Player.BLACK ? "B" : "W" ) + "[" + $node.value().coord() + "]" );
+		$stream.print( ";" + ( of_ == Player.BLACK ? "B" : "W" ) + "[" + $node.value().coord().data() + "]" );
 		if ( ! "".equals( $node.value().comment() ) ) {
 			_cache = $node.value().comment();
 			$stream.print( "C[" + _cache.replace( "[", "\\[" ).replace( "]", "\\]" ) + "]" );

@@ -92,7 +92,6 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		Graphics2D g2d = (Graphics2D) g;
 		g2d.setStroke( _stroke );
 		byte stone = _sgf._firstToMove == SGF.Player.BLACK ? Goban.STONE.BLACK : Goban.STONE.WHITE;
-		int moveNumber = 1;
 		int diameter = getDiameter();
 		if ( diameter > 28 )
 			diameter = 28;
@@ -114,36 +113,42 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		HTree<SGF.Move>.HNode<SGF.Move> last = n;
 		HTree<SGF.Move>.HNode<SGF.Move> first = n;
 		int path = 0;
+		int moveNumber = 1;
+		int nodeNumber = moveNumber;
 		while ( n != null ) {
 			while ( n != null ) {
-				int jump = path - _maxWidth[moveNumber - 1];
-				_maxWidth[moveNumber] = path;
+				int jump = path - _maxWidth[nodeNumber - 1];
+				_maxWidth[nodeNumber] = path;
 				last = n;
 				SGF.Move m = n.value();
-				int x = moveNumber - 1;
+				int x = nodeNumber - 1;
 				int y = path;
 				if ( ( ( x + 1 ) * ( margin + diameter ) ) > maxW )
 					maxW = ( x + 1 ) * ( margin + diameter ) + margin;
 				if ( ( ( y + 1 ) * ( margin + diameter ) + margin ) > maxH )
 					maxH = ( y + 1 ) * ( margin + diameter ) + margin;
 				HTree<SGF.Move>.HNode<SGF.Move> next = n.getChildAt( 0 );
-				if ( drawStone( g, x, y, stone, moveNumber, n == first, next == null, jump, n == currentMove ) )
+				boolean isMove = m.type() == SGF.Move.Type.MOVE;
+				if ( drawStone( g, x, y, isMove ? stone : Goban.STONE.NONE, moveNumber, n == first, next == null, jump, n == currentMove ) )
 					_hovered = n;
-				stone = Goban.opponent( stone );
-				++ moveNumber;
+				if ( isMove ) {
+					stone = Goban.opponent( stone );
+					++ moveNumber;
+				}
+				++ nodeNumber;
 				n = next;
 			}
 			while ( last != null ) {
-				-- moveNumber;
+				-- nodeNumber;
 				stone = Goban.opponent( stone );
 				last = last.getParent();
 				if ( last != null ) {
-					first = n = last.getChildAt( _path[moveNumber] + 1 );
+					first = n = last.getChildAt( _path[nodeNumber] + 1 );
 					if ( n != null ) {
-						++ _path[moveNumber];
+						++ _path[nodeNumber];
 						int zeroPathLen = getZeroPathLen( n );
 						int maxWidth = 0;
-						for ( int i = moveNumber; i < ( moveNumber + zeroPathLen ); ++ i ) {
+						for ( int i = nodeNumber; i < ( nodeNumber + zeroPathLen ); ++ i ) {
 							if ( _maxWidth[i] > maxWidth )
 								maxWidth = _maxWidth[i];
 						}
@@ -181,15 +186,9 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		return ( len );
 	}
 	boolean drawStone( Graphics $gc, int $xx, int $yy, int $color, int $number, boolean $first, boolean $last, int $jump, boolean $current ) {
-		Image img = null;
 		int diameter = getDiameter();
 		if ( diameter > 28 )
 			diameter = 28;
-		if ( $color == Goban.STONE.BLACK ) {
-			img = _images._black;
-		} else {
-			img = _images._whites[ ( ( $yy + $xx ) / diameter ) % GoImages.D_WHITE_LOOKS ];
-		}
 		int x = $xx * ( diameter + margin ) + margin;
 		int y = $yy * ( diameter + margin ) + margin;
 		boolean hovered = false;
@@ -217,11 +216,34 @@ public class SGFTree extends JPanel implements MouseInputListener {
 			$gc.drawLine( x - margin / 2, y + diameter / 2, x + diameter / 2, y + diameter / 2 );
 		if ( ! $last )
 			$gc.drawLine( x + diameter / 2, y + diameter / 2, x + diameter + margin / 2, y + diameter / 2 );
-		$gc.drawImage( img, x, y, diameter, diameter, this );
-		String num = String.valueOf( $number );
-		$gc.setColor( $color == Goban.STONE.BLACK ? Color.WHITE : Color.BLACK );
-		int len = num.length();
-		$gc.drawChars( num.toCharArray(), 0, len, x + diameter / 2 - len * 7 / 2, y + diameter / 2 + 4 );
+		if ( $color != Goban.STONE.NONE ) {
+			Image img = null;
+			if ( $color == Goban.STONE.BLACK ) {
+				img = _images._black;
+			} else {
+				img = _images._whites[ ( ( $yy + $xx ) / diameter ) % GoImages.D_WHITE_LOOKS ];
+			}
+			$gc.drawImage( img, x, y, diameter, diameter, this );
+			String num = String.valueOf( $number );
+			$gc.setColor( $color == Goban.STONE.BLACK ? Color.WHITE : Color.BLACK );
+			int len = num.length();
+			$gc.drawChars( num.toCharArray(), 0, len, x + diameter / 2 - len * 7 / 2, y + diameter / 2 + 4 );
+		} else {
+			x += ( diameter / 2 );
+			y += ( diameter / 2 );
+			$gc.drawLine( x,
+					y - ( diameter / 4 ) - ( diameter / 8 ), 
+					x + ( diameter / 4 + 1 ),
+					y + ( diameter / 4 ) + 1 - ( diameter / 8 ) );
+			$gc.drawLine( x - ( diameter / 4 ),
+					y + ( diameter / 4 + 1 - ( diameter / 8 ) ), 
+					x,
+					y - ( diameter / 4 ) - ( diameter / 8 ) );
+			$gc.drawLine( x - ( diameter / 4 ),
+					y + ( diameter / 4 + 2 - ( diameter / 8 ) ), 
+					x + ( diameter / 4 ),
+					y + ( diameter / 4 ) + 2 - ( diameter / 8 ) );
+		}
 		return ( hovered );
 	}
 }

@@ -162,7 +162,8 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 				_logic._gui.log( m.comment() + ( m.comment().charAt( commentLength - 1 ) != '\n' ? "\n" : "" ), HGUIface.Colors.OTHERGRAY );
 			}
 			if ( m.type() == SGF.Move.Type.MOVE ) {
-				move( m.col(), m.row(), stone );
+				if ( m.coord().col() != -97 ) /* Check if not pass. */
+					move( m.col(), m.row(), stone );
 				stone = opponent( stone );
 			} else if ( m.type() == SGF.Move.Type.SETUP ) {
 				edit( m.setup() );
