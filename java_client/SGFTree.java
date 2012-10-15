@@ -109,19 +109,19 @@ public class SGFTree extends JPanel implements MouseInputListener {
 			Arrays.fill( _path, 0 );
 		if ( _maxWidth != null )
 			Arrays.fill( _maxWidth, 0 );
-		HTree<SGF.Move>.HNode<SGF.Move> n = ( _sgf._tree._root != null ) ? ( _sgf._tree._root.getChildCount() > 0 ? _sgf._tree._root.getChildAt( 0 ) : null ) : null;
+		HTree<SGF.Move>.HNode<SGF.Move> n = ( _sgf._tree._root != null ) ? _sgf._tree.getRoot() : null;
 		HTree<SGF.Move>.HNode<SGF.Move> last = n;
 		HTree<SGF.Move>.HNode<SGF.Move> first = n;
 		int path = 0;
 		int moveNumber = 1;
-		int nodeNumber = moveNumber;
+		int nodeNumber = moveNumber - 1;
 		while ( n != null ) {
 			while ( n != null ) {
-				int jump = path - _maxWidth[nodeNumber - 1];
+				int jump = path - _maxWidth[nodeNumber];
 				_maxWidth[nodeNumber] = path;
 				last = n;
 				SGF.Move m = n.value();
-				int x = nodeNumber - 1;
+				int x = nodeNumber;
 				int y = path;
 				if ( ( ( x + 1 ) * ( margin + diameter ) ) > maxW )
 					maxW = ( x + 1 ) * ( margin + diameter ) + margin;
@@ -140,7 +140,10 @@ public class SGFTree extends JPanel implements MouseInputListener {
 			}
 			while ( last != null ) {
 				-- nodeNumber;
-				stone = Goban.opponent( stone );
+				if ( last.value().type() == SGF.Move.Type.MOVE ) {
+					-- moveNumber;
+					stone = Goban.opponent( stone );
+				}
 				last = last.getParent();
 				if ( last != null ) {
 					first = n = last.getChildAt( _path[nodeNumber] + 1 );

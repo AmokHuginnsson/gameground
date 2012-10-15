@@ -104,7 +104,7 @@
 						<hbox>
 							<button icon="res/first.png" action="onGoToFirst" margin="(2,2,2,2)" tooltiptext="Go to first move." />
 							<button icon="res/previous.png" action="onGoToPrevious" margin="(2,2,2,2)" tooltiptext="Go to previous move." />
-							<slider id="_jumpToMove" orientation="HORIZONTAL" snaptotick="true" maximum="0" />
+							<slider id="_jumpToMove" orientation="HORIZONTAL" snaptotick="true" minimum="0" maximum="0" />
 							<button icon="res/next.png" action="onGoToNext" margin="(2,2,2,2)" tooltiptext="Go to next move." />
 							<button icon="res/last.png" action="onGoToLast" margin="(2,2,2,2)" tooltiptext="Go to last move." />
 						</hbox>

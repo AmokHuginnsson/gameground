@@ -112,7 +112,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 				++ toEnd;
 			}
 			_branch.clear();
-			while ( $node.getParent() != null ) {
+			while ( $node != null ) {
 				_branch.add( $node );
 				$node = $node.getParent();
 				++ moveNo;
@@ -120,12 +120,12 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 			Collections.reverse( _branch );
 			moveNo -= toEnd;
 		} else {
-			while ( $node.getParent() != null ) {
+			while ( $node != null ) {
 				$node = $node.getParent();
 				++ moveNo;
 			}
 		}
-		placeStones( moveNo );
+		placeStones( moveNo > 0 ? moveNo - 1 : 0 );
 	}
 	void placeStones( int $to ) {
 		int gameCommentLength = _sgf._comment.length();
@@ -150,11 +150,11 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		}
 		byte stone = _sgf._firstToMove == SGF.Player.BLACK ? STONE.BLACK : STONE.WHITE;
 		int moveNumber = 0;
-		_lastMove = null;
+		_lastMove = _sgf._tree.getRoot();
 		for ( HTree<SGF.Move>.HNode<SGF.Move> n : _branch ) {
-			SGF.Move m = n.value();
-			if ( moveNumber >= $to )
+			if ( moveNumber > $to )
 				break;
+			SGF.Move m = n.value();
 			_lastMove = n;
 			int commentLength = m.comment().length();
 			if ( ( commentLength > 0 ) && ( moveNumber > _viewMove ) ) {
@@ -170,8 +170,8 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 			}
 			++ moveNumber;
 		}
-		_viewMove = moveNumber;
-		((GobanHolderInterface)_logic._gui).jumpToMove( _viewMove, _branch.size() );
+		_viewMove = moveNumber > 0 ? moveNumber - 1 : 0;
+		((GobanHolderInterface)_logic._gui).jumpToMove( _viewMove, _branch.size() > 0 ? _branch.size() - 1 : 0 );
 		_logic._gui.repaint();
 	}
 	void edit( SGF.Setup $setup ) {
@@ -199,8 +199,8 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		_branch.clear();
 		try {
 			_sgf.load( $reader );
-			if ( ( _sgf._tree._root != null ) && ( _sgf._tree._root.getChildCount() > 0 ) ) {
-				HTree<SGF.Move>.HNode<SGF.Move> n = _sgf._tree.getRoot().getChildAt( 0 );
+			if ( _sgf._tree._root != null ) {
+				HTree<SGF.Move>.HNode<SGF.Move> n = _sgf._tree.getRoot();
 				while ( n.getChildAt( 0 ) != null ) {
 					n = n.getChildAt( 0 );
 				}
