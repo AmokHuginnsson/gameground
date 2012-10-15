@@ -187,7 +187,7 @@ void HChatCreator::do_cleanup_globals( void ) {
 HString HChatCreator::do_get_info( void ) const {
 	M_PROLOG
 	HString setup;
-	setup.format( "chat:" );
+	setup.format( "chat" );
 	out << setup << endl;
 	return ( setup );
 	M_EPILOG

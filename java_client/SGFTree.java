@@ -117,7 +117,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		int nodeNumber = moveNumber - 1;
 		while ( n != null ) {
 			while ( n != null ) {
-				int jump = path - _maxWidth[nodeNumber];
+				int jump = ( nodeNumber > 0 ? path - _maxWidth[nodeNumber - 1] : 0 );
 				_maxWidth[nodeNumber] = path;
 				last = n;
 				SGF.Move m = n.value();
@@ -129,7 +129,8 @@ public class SGFTree extends JPanel implements MouseInputListener {
 					maxH = ( y + 1 ) * ( margin + diameter ) + margin;
 				HTree<SGF.Move>.HNode<SGF.Move> next = n.getChildAt( 0 );
 				boolean isMove = m.type() == SGF.Move.Type.MOVE;
-				if ( drawStone( g, x, y, isMove ? stone : Goban.STONE.NONE, moveNumber, n == first, next == null, jump, n == currentMove ) )
+				if ( drawStone( g, x, y, isMove ? stone : Goban.STONE.NONE, moveNumber, n == first, next == null, jump, n == currentMove,
+							( n.getParent() != null ) && ( n.getParent().value().type() != SGF.Move.Type.MOVE ) ) )
 					_hovered = n;
 				if ( isMove ) {
 					stone = Goban.opponent( stone );
@@ -188,7 +189,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		}
 		return ( len );
 	}
-	boolean drawStone( Graphics $gc, int $xx, int $yy, int $color, int $number, boolean $first, boolean $last, int $jump, boolean $current ) {
+	boolean drawStone( Graphics $gc, int $xx, int $yy, int $color, int $number, boolean $first, boolean $last, int $jump, boolean $current, boolean $parentSetup ) {
 		int diameter = getDiameter();
 		if ( diameter > 28 )
 			diameter = 28;
@@ -211,9 +212,14 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		$gc.setColor( Color.black );
 		if ( $first ) {
 			if ( $jump > 1 ) {
+				if ( $parentSetup )
+					$gc.drawLine( x - margin - diameter / 2, y - margin - diameter / 2, x - margin - diameter / 2, y - ( margin + diameter ) * ( $jump - 1 ) - diameter + diameter / 4 );
+				else
+					$gc.drawLine( x - margin - diameter / 2, y - margin - diameter / 2, x - margin - diameter / 2, y - ( margin + diameter ) * ( $jump - 1 ) - diameter / 4 - 4 );
+			}
+			if ( $parentSetup || ( $jump > 1 ) )
 				$gc.drawLine( x - margin - diameter / 2, y - margin - diameter / 2, x + diameter / 2, y + diameter / 2 );
-				$gc.drawLine( x - margin - diameter / 2, y - margin - diameter / 2, x - margin - diameter / 2, y - ( margin + diameter ) * ( $jump - 1 ) - diameter / 4 - 4 );
-			} else
+			else
 				$gc.drawLine( x - margin - 4, y - margin - 4, x + diameter / 2, y + diameter / 2 );
 		} else
 			$gc.drawLine( x - margin / 2, y + diameter / 2, x + diameter / 2, y + diameter / 2 );

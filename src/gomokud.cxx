@@ -410,7 +410,7 @@ HLogic::ptr_t HGomokuCreator::do_new_instance( HServer* server_, HLogic::id_t co
 HString HGomokuCreator::do_get_info( void ) const {
 	M_PROLOG
 	HString setup;
-	setup.format( "gomoku:" );
+	setup.format( "gomoku" );
 	out << setup << endl;
 	return ( setup );
 	M_EPILOG
