@@ -104,6 +104,9 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		updateSGF( br );
 	}
 	void selectBranch( HTree<SGF.Move>.HNode<SGF.Move> $node ) {
+		selectBranch( $node, true );
+	}
+	void selectBranch( HTree<SGF.Move>.HNode<SGF.Move> $node, boolean $jumpToMove ) {
 		int moveNo = 0;
 		if ( ! _branch.contains( $node ) ) {
 			int toEnd = 0;
@@ -125,7 +128,11 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 				++ moveNo;
 			}
 		}
-		placeStones( moveNo > 0 ? moveNo - 1 : 0 );
+		if ( $jumpToMove )
+			placeStones( moveNo > 0 ? moveNo - 1 : 0 );
+	}
+	boolean onBranch( HTree<SGF.Move>.HNode<SGF.Move> $node ) {
+		return ( _branch.contains( $node ) );
 	}
 	void placeStones( int $to ) {
 		int gameCommentLength = _sgf._comment.length();
@@ -222,6 +229,44 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	}
 	void goToLast() {
 		placeStones();
+	}
+	void choosePreviousPath() {
+		if ( ( _lastMove != null ) && ( _lastMove.getChildCount() > 1 ) ) {
+			int idx = _branch.indexOf( _lastMove );
+			if ( ( idx >= 0 ) && ( idx < ( _branch.size() - 1 ) ) ) {
+				HTree<SGF.Move>.HNode<SGF.Move> next = _branch.get( idx + 1 );
+				int childCount = _lastMove.getChildCount();
+				idx = -1;
+				for ( int i = 0; i < childCount; ++ i ) {
+					if ( _lastMove.getChildAt( i ) == next ) {
+						if ( i > 0 ) {
+							selectBranch( _lastMove.getChildAt( i - 1 ), false );
+							_logic.getGUI().repaint();
+						}
+						break;
+					}
+				}
+			}
+		}
+	}
+	void chooseNextPath() {
+		if ( ( _lastMove != null ) && ( _lastMove.getChildCount() > 1 ) ) {
+			int idx = _branch.indexOf( _lastMove );
+			if ( ( idx >= 0 ) && ( idx < ( _branch.size() - 1 ) ) ) {
+				HTree<SGF.Move>.HNode<SGF.Move> next = _branch.get( idx + 1 );
+				int childCount = _lastMove.getChildCount();
+				idx = -1;
+				for ( int i = 0; i < childCount; ++ i ) {
+					if ( _lastMove.getChildAt( i ) == next ) {
+						if ( i < ( childCount - 1 ) ) {
+							selectBranch( _lastMove.getChildAt( i + 1 ), false );
+							_logic.getGUI().repaint();
+						}
+						break;
+					}
+				}
+			}
+		}
 	}
 	public Dimension getPreferredSize() {
 		java.awt.Dimension pd = getParent().getSize();

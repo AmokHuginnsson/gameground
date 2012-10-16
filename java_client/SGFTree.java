@@ -130,7 +130,8 @@ public class SGFTree extends JPanel implements MouseInputListener {
 				HTree<SGF.Move>.HNode<SGF.Move> next = n.getChildAt( 0 );
 				boolean isMove = m.type() == SGF.Move.Type.MOVE;
 				if ( drawStone( g, x, y, isMove ? stone : Goban.STONE.NONE, moveNumber, n == first, next == null, jump, n == currentMove,
-							( n.getParent() != null ) && ( n.getParent().value().type() != SGF.Move.Type.MOVE ) ) )
+							( n.getParent() != null ) && ( n.getParent().value().type() != SGF.Move.Type.MOVE ),
+							((Go.HGUILocal)_logic._gui)._board.onBranch( n ) ) )
 					_hovered = n;
 				if ( isMove ) {
 					stone = Goban.opponent( stone );
@@ -189,7 +190,8 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		}
 		return ( len );
 	}
-	boolean drawStone( Graphics $gc, int $xx, int $yy, int $color, int $number, boolean $first, boolean $last, int $jump, boolean $current, boolean $parentSetup ) {
+	boolean drawStone( Graphics $gc, int $xx, int $yy, int $color, int $number, boolean $first, boolean $last,
+			int $jump, boolean $current, boolean $parentSetup, boolean $onBranch ) {
 		int diameter = getDiameter();
 		if ( diameter > 28 )
 			diameter = 28;
@@ -228,9 +230,15 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		if ( $color != Goban.STONE.NONE ) {
 			Image img = null;
 			if ( $color == Goban.STONE.BLACK ) {
-				img = _images._black;
+				if ( $onBranch )
+					img = _images._black;
+				else
+					img = _images._blackAlpha;
 			} else {
-				img = _images._whites[ ( ( $yy + $xx ) / diameter ) % GoImages.D_WHITE_LOOKS ];
+				if ( $onBranch )
+					img = _images._whites[ ( ( $yy + $xx ) / diameter ) % GoImages.D_WHITE_LOOKS ];
+				else
+					img = _images._whitesAlpha[ ( ( $yy + $xx ) / diameter ) % GoImages.D_WHITE_LOOKS ];
 			}
 			$gc.drawImage( img, x, y, diameter, diameter, this );
 			String num = String.valueOf( $number );

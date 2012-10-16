@@ -134,6 +134,12 @@ class Go extends HAbstractLogic implements Runnable {
 							if ( e.getKeyCode() == KeyEvent.VK_RIGHT ) {
 								onGoToNext();
 							}
+							if ( e.getKeyCode() == KeyEvent.VK_UP ) {
+								_board.choosePreviousPath();
+							}
+							if ( e.getKeyCode() == KeyEvent.VK_DOWN ) {
+								_board.chooseNextPath();
+							}
 						}
 						return false;
 					}
