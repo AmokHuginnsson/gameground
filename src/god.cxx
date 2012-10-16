@@ -102,6 +102,7 @@ HGo::HGo( HServer* server_, HLogic::id_t const& id_, HString const& comment_ )
 	_sgf( SGF::GAME_TYPE::GO, "gameground" ),
 	_players(), _varTmpBuffer() {
 	M_PROLOG
+	_sgf.set_info( SGF::Player::BLACK, _gobanSize, _komi, _handicaps, _mainTime );
 	_contestants[ 0 ] = _contestants[ 1 ] = NULL;
 	_handlers[ PROTOCOL::SETUP ] = static_cast<handler_t>( &HGo::handler_setup );
 	_handlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HGo::handler_play );
@@ -337,6 +338,8 @@ void HGo::handler_accept( OClientInfo* clientInfo_ ) {
 void HGo::handler_newgame( OClientInfo* /* clientInfo_ */, HString const& ) {
 	M_PROLOG
 	_sgf.clear();
+	_sgf.set_info( SGF::Player::BLACK, _gobanSize, _handicaps, _komi, _mainTime );
+	set_handicaps( _handicaps );
 	send_goban();
 	return;
 	M_EPILOG
