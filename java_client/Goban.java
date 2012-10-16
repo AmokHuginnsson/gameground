@@ -206,6 +206,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		_branch.clear();
 		try {
 			_sgf.load( $reader );
+			((GobanHolderInterface)_logic._gui).updateSetup();
 			if ( _sgf._tree._root != null ) {
 				HTree<SGF.Move>.HNode<SGF.Move> n = _sgf._tree.getRoot();
 				while ( n.getChildAt( 0 ) != null ) {

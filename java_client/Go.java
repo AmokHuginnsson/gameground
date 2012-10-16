@@ -259,6 +259,13 @@ class Go extends HAbstractLogic implements Runnable {
 		public HTree<SGF.Move>.HNode<SGF.Move> currentMove() {
 			return ( _gui._board._lastMove );
 		}
+		public void updateSetup() {
+			_conf.selectGobanSize( "" + _board._sgf._gobanSize );
+			_board.setSize( _board._sgf._gobanSize );
+			_conf.setValue( _conf._confKomi, (int)_board._sgf._komi );
+			_conf.setValue( _conf._confHandicaps, _board._sgf._handicap );
+			_conf.setValue( _conf._confMainTime, _board._sgf._time );
+		}
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;

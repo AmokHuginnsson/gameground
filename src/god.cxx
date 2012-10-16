@@ -142,15 +142,15 @@ void HGo::handler_setup( OClientInfo* clientInfo_, HString const& message_ ) {
 	bool regenGoban( false );
 	int handicaps( _handicaps );
 	if ( item == PROTOCOL::GOBAN ) {
-		_gobanSize = value;
+		_sgf.set_board_size( _gobanSize = value );
 		regenGoban = true;
 	} else if ( item == PROTOCOL::KOMI )
-		_komi = value;
+		_sgf.set_komi( _komi = value );
 	else if ( item == PROTOCOL::HANDICAPS ) {
 		handicaps = value;
 		regenGoban = true;
 	} else if ( item == PROTOCOL::MAINTIME )
-		_mainTime = value;
+		_sgf.set_time( _mainTime = value );
 	else if ( item == PROTOCOL::BYOYOMIPERIODS )
 		_byoYomiPeriods = value;
 	else if ( item == PROTOCOL::BYOYOMITIME )
@@ -173,7 +173,23 @@ void HGo::handler_sgf( OClientInfo*, HString const& message_ ) {
 		out << m << endl;
 		sgf.load( m );
 		_sgf.swap( sgf );
+		_gobanSize = _sgf.get_board_size();
+		_komi = static_cast<int>( _sgf.get_komi() );
+		_handicaps = _sgf.get_handicap();
+		_mainTime = _sgf.get_time();
 		broadcast( _out << PROTOCOL::SGF << PROTOCOL::SEP << message_ << endl << _out );
+		broadcast( _out << PROTOCOL::SETUP << PROTOCOL::SEP
+			<< PROTOCOL::GOBAN << PROTOCOL::SEPP << _gobanSize << endl
+			<< *this << PROTOCOL::SETUP << PROTOCOL::SEP
+			<< PROTOCOL::KOMI << PROTOCOL::SEPP << _komi << endl
+			<< *this << PROTOCOL::SETUP << PROTOCOL::SEP
+			<< PROTOCOL::HANDICAPS << PROTOCOL::SEPP << _handicaps << endl
+			<< *this << PROTOCOL::SETUP << PROTOCOL::SEP
+			<< PROTOCOL::MAINTIME << PROTOCOL::SEPP << _mainTime << endl
+			<< *this << PROTOCOL::SETUP << PROTOCOL::SEP
+			<< PROTOCOL::BYOYOMIPERIODS << PROTOCOL::SEPP << _byoYomiPeriods << endl
+			<< *this << PROTOCOL::SETUP << PROTOCOL::SEP
+			<< PROTOCOL::BYOYOMITIME << PROTOCOL::SEPP << _byoYomiTime << endl << _out );
 	} catch ( SGFException const& ) {
 		throw HLogicException( "provided SGF has unexpected content" );
 	}
@@ -600,6 +616,7 @@ void HGo::set_handicaps( int handicaps_ ) {
 	if ( ( handicaps_ > 9 ) || ( handicaps_ < 0 ) )
 		throw HLogicException( _out << "bad handicap value: " << handicaps_ << _out );
 	_sgf.clear();
+	_sgf.set_info( SGF::Player::BLACK, _gobanSize, _handicaps, _komi, _mainTime );
 	::memset( _game.raw(), STONE::NONE, _gobanSize * _gobanSize );
 	_game.get<char>()[ _gobanSize * _gobanSize ] = 0;
 	::memset( _koGame.raw(), STONE::NONE, _gobanSize * _gobanSize );
@@ -609,7 +626,7 @@ void HGo::set_handicaps( int handicaps_ ) {
 			_komi = 0;
 		else
 			_komi = setup._komi;
-		_handicaps = handicaps_;
+		_sgf.set_handicap( _handicaps = handicaps_ );
 	}
 	if ( _handicaps > 1 )
 		set_handi( _handicaps );

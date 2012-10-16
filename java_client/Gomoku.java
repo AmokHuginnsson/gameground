@@ -116,6 +116,8 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		public HTree<SGF.Move>.HNode<SGF.Move> currentMove() {
 			return ( null );
 		}
+		public void updateSetup() {
+		}
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
