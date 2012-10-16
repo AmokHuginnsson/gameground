@@ -8,7 +8,7 @@
 		</panel>
 		<vbox minimumsize="&v_sidebar_width;,1" preferredsize="&v_sidebar_width;,&v_height;" maximumsize="&v_sidebar_width;,2000">
 			<panel layout="FlowLayout(FlowLayout.RIGHT,4,0)" maximumsize="&v_sidebar_width;,40">
-				<button id="_newgame" text="New" action="onNew" margin="(2,2,2,2)" enabled="false" tooltiptext="Start new game." />
+				<button id="_newgame" text="New" action="onNew" margin="(2,2,2,2)" tooltiptext="Start new game." />
 				<button text="Save" action="onSave" margin="(2,2,2,2)" tooltiptext="Save game state." />
 				<button text="Load" action="onLoad" margin="(2,2,2,2)" tooltiptext="Load previously saved game state." />
 				<button text="Resign" action="onResign" margin="(2,2,2,2)" enabled="false" tooltiptext="Forfeit this game." />

@@ -131,6 +131,7 @@ protected:
 	bool have_liberties( int, int, STONE::stone_t );
 	char& goban( int, int );
 	OClientInfo*& contestant( STONE::stone_t );
+	OClientInfo const* contestant( STONE::stone_t ) const;
 	void clear_goban( bool );
 	bool have_killed( int, int, STONE::stone_t );
 	HGo::STONE::stone_t opponent( STONE::stone_t );
@@ -147,18 +148,21 @@ protected:
 	void handler_pass( OClientInfo*, yaal::hcore::HString const& );
 	void handler_sgf( OClientInfo*, yaal::hcore::HString const& );
 	void handler_dead( OClientInfo*, yaal::hcore::HString const& );
+	void handler_newgame( OClientInfo*, yaal::hcore::HString const& );
 	void handler_accept( OClientInfo* );
-	void handler_newgame( OClientInfo* );
 	void handler_undo( OClientInfo* );
 	void broadcast_contestants( yaal::hcore::HString const& );
 	void ensure_coordinates_validity( int, int );
 	void mark_stone_dead( int, int );
 	void commit( void );
 	void count_score( void );
+	void after_move( void );
 	STONE::stone_t mark_teritory( int, int );
 	void replace_stones( STONE::stone_t, STONE::stone_t );
 	void update_clocks( void );
 	void revoke_scheduled_tasks( void );
+	bool can_play( OClientInfo* ) const;
+	bool can_setup( OClientInfo* ) const;
 	/*}*/
 private:
 	/*{*/

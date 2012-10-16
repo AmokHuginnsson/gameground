@@ -205,15 +205,13 @@ class Go extends HAbstractLogic implements Runnable {
 		}
 		public void onBlack() {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
-					+ PROTOCOL.PLAY + PROTOCOL.SEP
-					+ ( ( _playerColor == Go.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + (char)STONE.BLACK : PROTOCOL.GETUP ) );
+					+ ( ( _playerColor == Go.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEP + (char)STONE.BLACK : PROTOCOL.GETUP ) );
 			_blackSit.setEnabled( _playerColor != Go.STONE.NONE );
 			_whiteSit.setEnabled( _playerColor != Go.STONE.NONE );
 		}
 		public void onWhite() {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
-					+ PROTOCOL.PLAY + PROTOCOL.SEP
-					+ ( ( _playerColor == Go.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEPP + (char)STONE.WHITE : PROTOCOL.GETUP ) );
+					+ ( ( _playerColor == Go.STONE.NONE ) ? PROTOCOL.SIT + PROTOCOL.SEP + (char)STONE.WHITE : PROTOCOL.GETUP ) );
 			_blackSit.setEnabled( _playerColor != Go.STONE.NONE );
 			_whiteSit.setEnabled( _playerColor != Go.STONE.NONE );
 		}
@@ -224,8 +222,7 @@ class Go extends HAbstractLogic implements Runnable {
 			_pass.setEnabled( false );
 		}
 		public void onNew() {
-			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
-					+ PROTOCOL.PLAY + PROTOCOL.SEP + PROTOCOL.NEWGAME );
+			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP + PROTOCOL.NEWGAME );
 		}
 		public void onUndo() {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
