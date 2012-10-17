@@ -92,6 +92,7 @@ class Go extends HAbstractLogic implements Runnable {
 		public JLabel _whiteByoYomiLeft;
 		public JButton _whiteSit;
 		public JButton _newgame;
+		public JButton _load;
 		public JButton _pass;
 		public JButton _undo;
 		public JList<String> _visitors;
@@ -121,7 +122,7 @@ class Go extends HAbstractLogic implements Runnable {
 			_conf.setOwner( this );
 			_conf.gobanModel();
 			((DefaultListModel<String>)_visitors.getModel()).clear();
-			_conf.setEnabled( false );
+			setEnabledControls( false );
 			_pass.setText( _passText );
 			_pass.setToolTipText( _toolTip );
 			_jumpToMove.addChangeListener( this );
@@ -276,6 +277,11 @@ class Go extends HAbstractLogic implements Runnable {
 			_conf.setValue( _conf._confHandicaps, _board._sgf._handicap );
 			_conf.setValue( _conf._confMainTime, _board._sgf._time );
 		}
+		void setEnabledControls( boolean $enabled ) {
+			_conf.setEnabled( $enabled );
+			_newgame.setEnabled( $enabled );
+			_load.setEnabled( $enabled );
+		}
 	}
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
@@ -334,7 +340,9 @@ class Go extends HAbstractLogic implements Runnable {
 	void handlerSetup( String $command ) {
 		String[] tokens = $command.split( ",", 2 );
 		if ( PROTOCOL.ADMIN.equals( $command ) ) {
-			_gui._conf.setEnabled( _admin = true );
+			_admin = true;
+			if ( ! ongoingMatch() )
+				_gui.setEnabledControls( true );
 		} else {
 			int value = Integer.parseInt( tokens[ 1 ] );
 			if ( PROTOCOL.GOBAN.equals( tokens[ 0 ] ) ) {
@@ -352,6 +360,9 @@ class Go extends HAbstractLogic implements Runnable {
 				_gui._conf.setValue( _gui._conf._confByoYomiTime, Integer.parseInt( tokens[ 1 ] ) );
 			}
 		}
+	}
+	boolean ongoingMatch() {
+		return ( isPlayerSitting( STONE.BLACK ) && isPlayerSitting( STONE.WHITE ) );
 	}
 	boolean isPlayerSitting( byte $stone ) {
 		GoPlayer p = _contestants.get( $stone );
@@ -392,10 +403,13 @@ class Go extends HAbstractLogic implements Runnable {
 			if ( isPlayerSitting( Goban.opponent( _playerColor ) ) )
 				_contestants.get( _playerColor )._sit.setText( HGUILocal.RESIGN );
 		}
-		if ( ! ( isPlayerSitting( STONE.BLACK ) && isPlayerSitting( STONE.WHITE ) ) ) {
+		if ( ! ongoingMatch() ) {
 			if ( _playerColor != STONE.NONE )
 				_contestants.get( _playerColor )._sit.setText( _playerColor != STONE.NONE ? HGUILocal.GETUP : HGUILocal.SIT );
-		}
+			if ( _admin )
+				_gui.setEnabledControls( true );
+		} else
+			_gui.setEnabledControls( false );
 	}
 	void handlerSGF( String $command ) {
 		if ( ( _toMove == STONE.BLACK ) || ( _toMove == STONE.WHITE ) )

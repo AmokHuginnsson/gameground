@@ -10,7 +10,7 @@
 			<panel layout="FlowLayout(FlowLayout.CENTER,4,0)" maximumsize="&v_sidebar_width;,40">
 				<button id="_newgame" text="New" action="onNew" margin="(2,2,2,2)" tooltiptext="Start new game." />
 				<button text="Save" action="onSave" margin="(2,2,2,2)" tooltiptext="Save game state." />
-				<button text="Load" action="onLoad" margin="(2,2,2,2)" tooltiptext="Load previously saved game state." />
+				<button id="_load" text="Load" action="onLoad" margin="(2,2,2,2)" tooltiptext="Load previously saved game state." />
 			</panel>
 			<hbox>
 				<panel maximumsize="160,180" border="EmptyBorder(4,4,4,4)">
