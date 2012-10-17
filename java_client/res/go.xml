@@ -7,39 +7,45 @@
 			<goban id="_board" opaque="true" background="007000" />
 		</panel>
 		<vbox minimumsize="&v_sidebar_width;,1" preferredsize="&v_sidebar_width;,&v_height;" maximumsize="&v_sidebar_width;,2000">
-			<panel layout="FlowLayout(FlowLayout.RIGHT,4,0)" maximumsize="&v_sidebar_width;,40">
+			<panel layout="FlowLayout(FlowLayout.CENTER,4,0)" maximumsize="&v_sidebar_width;,40">
 				<button id="_newgame" text="New" action="onNew" margin="(2,2,2,2)" tooltiptext="Start new game." />
 				<button text="Save" action="onSave" margin="(2,2,2,2)" tooltiptext="Save game state." />
 				<button text="Load" action="onLoad" margin="(2,2,2,2)" tooltiptext="Load previously saved game state." />
-				<button text="Resign" action="onResign" margin="(2,2,2,2)" enabled="false" tooltiptext="Forfeit this game." />
-				<button id="_undo" text="Undo" action="onUndo" margin="(2,2,2,2)" enabled="false" tooltiptext="Ask your opponent to accept undoing your last move." />
 			</panel>
 			<hbox>
 				<panel maximumsize="160,180" border="EmptyBorder(4,4,4,4)">
-					<layout type="FormLayout" columns="p,6px,p" rows="p,4px,p,4px,p,4px,p,4px,p,4px,p,4px,p" />
-					<label constraints="1,1" font="&v_font;">Goban:</label>
-					<combobox id="_confGoban" action="onGobanSize" constraints="3,1" tooltiptext="Goban size." enabled="false" font="&v_font;" />
-					<label constraints="1,3" font="&v_font;">Main time:</label>
-					<spinner id="_confMainTime" constraints="3,3" tooltiptext="Time for main game." enabled="false" font="&v_font;">
-						<textfield action="onMainTime" horizontalalignment="RIGHT" font="&v_font;" />
-					</spinner>
-					<label constraints="1,5" font="&v_font;">Komi:</label>
-					<spinner id="_confKomi" constraints="3,5" tooltiptext="Komi." enabled="false" font="&v_font;">
-						<textfield action="onKomi" horizontalalignment="RIGHT" font="&v_font;" />
-					</spinner>
-					<label constraints="1,7" font="&v_font;">Handicaps:</label>
-					<spinner id="_confHandicaps" constraints="3,7" tooltiptext="Handicaps." enabled="false" font="&v_font;">
-						<textfield action="onHandicaps" horizontalalignment="RIGHT" font="&v_font;" />
-					</spinner>
-					<label constraints="1,9" font="&v_font;">Byo yomi periods:</label>
-					<spinner id="_confByoYomiPeriods" constraints="3,9" tooltiptext="Number of byo yomi periods." enabled="false" font="&v_font;">
-						<textfield action="onByoyomiPeriods" horizontalalignment="RIGHT" font="&v_font;" />
-					</spinner>
-					<label constraints="1,11" font="&v_font;">Byo yomi time:</label>
-					<spinner id="_confByoYomiTime" constraints="3,11" tooltiptext="Time for single byo yomi period." enabled="false" font="&v_font;">
-						<textfield action="onByoyomiTime" horizontalalignment="RIGHT" font="&v_font;" />
-					</spinner>
-					<button id="_pass" action="onPass" text="Pass !" tooltiptext="Refrain from putting a stone." constraints="1,13" enabled="false" font="&v_font;" />
+					<vbox>
+						<panel>
+							<layout type="FormLayout" columns="p,6px,p" rows="p,4px,p,4px,p,4px,p,4px,p,4px,p,4px,p" />
+							<label constraints="1,1" font="&v_font;">Goban:</label>
+							<combobox id="_confGoban" action="onGobanSize" constraints="3,1" tooltiptext="Goban size." enabled="false" font="&v_font;" />
+							<label constraints="1,3" font="&v_font;">Main time:</label>
+							<spinner id="_confMainTime" constraints="3,3" tooltiptext="Time for main game." enabled="false" font="&v_font;">
+								<textfield action="onMainTime" horizontalalignment="RIGHT" font="&v_font;" />
+							</spinner>
+							<label constraints="1,5" font="&v_font;">Komi:</label>
+							<spinner id="_confKomi" constraints="3,5" tooltiptext="Komi." enabled="false" font="&v_font;">
+								<textfield action="onKomi" horizontalalignment="RIGHT" font="&v_font;" />
+							</spinner>
+							<label constraints="1,7" font="&v_font;">Handicaps:</label>
+							<spinner id="_confHandicaps" constraints="3,7" tooltiptext="Handicaps." enabled="false" font="&v_font;">
+								<textfield action="onHandicaps" horizontalalignment="RIGHT" font="&v_font;" />
+							</spinner>
+							<label constraints="1,9" font="&v_font;">Byo yomi periods:</label>
+							<spinner id="_confByoYomiPeriods" constraints="3,9" tooltiptext="Number of byo yomi periods." enabled="false" font="&v_font;">
+								<textfield action="onByoyomiPeriods" horizontalalignment="RIGHT" font="&v_font;" />
+							</spinner>
+							<label constraints="1,11" font="&v_font;">Byo yomi time:</label>
+							<spinner id="_confByoYomiTime" constraints="3,11" tooltiptext="Time for single byo yomi period." enabled="false" font="&v_font;">
+								<textfield action="onByoyomiTime" horizontalalignment="RIGHT" font="&v_font;" />
+							</spinner>
+						</panel>
+						<hbox>
+							<button id="_pass" text="Pass" action="onPass" tooltiptext="Refrain from putting a stone." enabled="false" font="&v_font;" />
+							<glue />
+							<button id="_undo" text="Undo" action="onUndo" tooltiptext="Ask your opponent to accept undoing your last move." enabled="false" font="&v_font;" />
+						</hbox>
+					</vbox>
 				</panel>
 				<panel layout="BorderLayout" maximumsize="240,180" border="EmptyBorder(4,4,4,4)">
 					<scrollpane autoscrolls="true">
