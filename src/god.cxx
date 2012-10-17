@@ -904,7 +904,7 @@ void HGo::replace_stones( STONE::stone_t which, STONE::stone_t with ) {
 
 bool HGo::can_play( OClientInfo* clientInfo_ ) const {
 	M_PROLOG
-	return ( ( contestant( STONE::BLACK ) == clientInfo_ ) || ( contestant( STONE::WHITE ) != clientInfo_ ) );
+	return ( ( contestant( STONE::BLACK ) == clientInfo_ ) || ( contestant( STONE::WHITE ) == clientInfo_ ) );
 	M_EPILOG
 }
 

@@ -63,8 +63,10 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	public void mouseMoved( MouseEvent $event ) {
 		int margin = _virtSize / ( _size + 4 );
 		int inside = _virtSize - 2 * margin;
-		int cursorX = (int)( ( $event.getX() + ( _diameter / 2 ) - ( D_MARGIN + margin ) ) * ( _size - 1 ) ) / inside;
-		int cursorY = (int)( ( $event.getY() + ( _diameter / 2 ) - ( D_MARGIN + margin ) ) * ( _size - 1 ) ) / inside;
+		int cursorX = (int)( ( $event.getX() + ( _diameter / 2 ) - ( D_MARGIN + margin ) ) * ( _size - 1 ) );
+		int cursorY = (int)( ( $event.getY() + ( _diameter / 2 ) - ( D_MARGIN + margin ) ) * ( _size - 1 ) );
+		cursorX = ( cursorX >= 0 ? cursorX / inside : -1 );
+		cursorY = ( cursorY >= 0 ? cursorY / inside : -1 );
 		if ( ( _cursorX != cursorX ) || ( _cursorY != cursorY ) ) {
 			_cursorX = cursorX;
 			_cursorY = cursorY;

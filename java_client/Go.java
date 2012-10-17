@@ -123,27 +123,35 @@ class Go extends HAbstractLogic implements Runnable {
 			_pass.setText( _passText );
 			_pass.setToolTipText( _toolTip );
 			_jumpToMove.addChangeListener( this );
-			KeyboardFocusManager.getCurrentKeyboardFocusManager()
-				.addKeyEventDispatcher( new KeyEventDispatcher() {
-					@Override
-					public boolean dispatchKeyEvent( KeyEvent e ) {
-				if ( ( e.getID() == KeyEvent.KEY_PRESSED ) && ! ( e.getSource() instanceof JTextField ) ) {
-							if ( e.getKeyCode() == KeyEvent.VK_LEFT ) {
+			KeyEventDispatcher ked = new KeyEventDispatcher() {
+				@Override
+				public boolean dispatchKeyEvent( KeyEvent e ) {
+					if ( ( e.getID() == KeyEvent.KEY_PRESSED ) && ! ( e.getSource() instanceof JTextField ) ) {
+						switch ( e.getKeyCode() ) {
+							case ( KeyEvent.VK_LEFT ): {
 								onGoToPrevious();
-							}
-							if ( e.getKeyCode() == KeyEvent.VK_RIGHT ) {
+							} break;
+							case ( KeyEvent.VK_RIGHT ): {
 								onGoToNext();
-							}
-							if ( e.getKeyCode() == KeyEvent.VK_UP ) {
+							} break;
+							case ( KeyEvent.VK_UP ): {
 								_board.choosePreviousPath();
-							}
-							if ( e.getKeyCode() == KeyEvent.VK_DOWN ) {
+							} break;
+							case ( KeyEvent.VK_DOWN ): {
 								_board.chooseNextPath();
-							}
+							} break;
+							case ( KeyEvent.VK_HOME ): {
+								onGoToFirst();
+							} break;
+							case ( KeyEvent.VK_END ): {
+								onGoToLast();
+							} break;
 						}
-						return false;
 					}
-				});
+					return false;
+				}
+			};
+			KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher( ked );
 		}
 		public void stateChanged(ChangeEvent e) {
 			if ( ! _internalUpdate )
