@@ -6,8 +6,8 @@ public class GoGoban extends Goban {
 //--------------------------------------------//
 	public static final long serialVersionUID = 7l;
 	Go _logic = null;
+	byte[] _tmpStones = new byte[Go.GOBAN_SIZE.NORMAL * Go.GOBAN_SIZE.NORMAL];
 	byte[] _koStones = new byte[Go.GOBAN_SIZE.NORMAL * Go.GOBAN_SIZE.NORMAL];
-	byte[] _oldStones = new byte[Go.GOBAN_SIZE.NORMAL * Go.GOBAN_SIZE.NORMAL];
 //--------------------------------------------//
 	public GoGoban() {
 		super();
@@ -56,21 +56,20 @@ public class GoGoban extends Goban {
 		return ( group );
 	}
 	public void updateSGF( String $sgfData ) {
-		System.arraycopy( _stones, 0, _oldStones, 0, _size * _size );
 		super.updateSGF( $sgfData );
 	}
-	boolean haveLiberties( int a_iCol, int a_iRow, byte stone ) {
-		if ( ( a_iCol < 0 ) || ( a_iCol > ( _size - 1 ) )
-				|| ( a_iRow < 0 ) || ( a_iRow > ( _size - 1 ) ) )
+	boolean haveLiberties( int $col, int $row, byte stone ) {
+		if ( ( $col < 0 ) || ( $col > ( _size - 1 ) )
+				|| ( $row < 0 ) || ( $row > ( _size - 1 ) ) )
 			return ( false );
-		if ( getStone( a_iCol, a_iRow ) == Go.STONE.NONE )
+		if ( getStone( $col, $row ) == Go.STONE.NONE )
 			return ( true );
-		if ( getStone( a_iCol, a_iRow ) == stone ) {
-			setStone( a_iCol, a_iRow, (byte)Character.toUpperCase( stone ) );	
-			return ( haveLiberties( a_iCol, a_iRow - 1, stone )
-					|| haveLiberties( a_iCol, a_iRow + 1, stone )
-					|| haveLiberties( a_iCol - 1, a_iRow, stone )
-					|| haveLiberties( a_iCol + 1, a_iRow, stone ) );
+		if ( getStone( $col, $row ) == stone ) {
+			setStone( $col, $row, (byte)Character.toUpperCase( stone ) );	
+			return ( haveLiberties( $col, $row - 1, stone )
+					|| haveLiberties( $col, $row + 1, stone )
+					|| haveLiberties( $col - 1, $row, stone )
+					|| haveLiberties( $col + 1, $row, stone ) );
 		}
 		return ( false );
 	}
@@ -122,7 +121,7 @@ public class GoGoban extends Goban {
 	boolean isKo() {
 		boolean same = false;
 		for ( int i = 0; ( i < ( _size * _size ) )
-				&& ( same = ( _stones[ i ] == _oldStones[ i ] ) ); ++ i )
+				&& ( same = ( _stones[ i ] == _koStones[ i ] ) ); ++ i )
 			;
 		return ( same );
 	}
@@ -138,16 +137,15 @@ public class GoGoban extends Goban {
 			if ( getStone( x, y ) != Go.STONE.NONE )
 				invalid = true;
 			else {
-				System.arraycopy( _stones, 0, _koStones, 0, _size * _size );
+				System.arraycopy( _stones, 0, _tmpStones, 0, _size * _size );
 				setStone( x, y, stone );
 				if ( ! haveKilled( x, y, stone ) ) {
-					if ( isSuicide( x, y, stone ) )
+					if ( isSuicide( x, y, stone ) ) {
 						invalid = true;
-				}	else {
-					if ( isKo() )
-						invalid = true;
-				}
-				System.arraycopy( _koStones, 0, _stones, 0, _size * _size );
+					}
+				}	else if ( isKo() )
+					invalid = true;
+				System.arraycopy( _tmpStones, 0, _stones, 0, _size * _size );
 			}
 		}
 		return ( invalid );
@@ -157,33 +155,12 @@ public class GoGoban extends Goban {
 			drawStone( _cursorX, _cursorY, _logic.playerColor(), true, g );
 	}
 	void move( int $col, int $row, byte $stone ) {
-/*		Con.debug( "col = " + $col + ", row = " + $row ); */
 		if ( breakTheRules( $col, $row, $stone ) )
 			throw new RuntimeException( "Illegal move!" );
+		System.arraycopy( _stones, 0, _koStones, 0, _size * _size );
 		setStone( $col, $row, $stone );
 		haveKilled( $col, $row, $stone );
 		resetAlive();
 	}
-/*
-	void dump( byte[] $stones ) {
-		int i = 0;
-		int size = Math.min( (int)Math.sqrt( $stones.length ), _size );
-		System.out.print( "+" );
-		for ( int c = 0; c < size; ++ c )
-			System.out.print( "-" );
-		System.out.println( "+" );
-		for ( int r = 0; r < size; ++ r ) {
-			System.out.print( "|" );
-			for ( int c = 0; c < size; ++ c, ++ i ) {
-				System.out.print( (char)$stones[i] );
-			}
-			System.out.println( "|" );
-		}
-		System.out.print( "+" );
-		for ( int c = 0; c < size; ++ c )
-			System.out.print( "-" );
-		System.out.println( "+" );
-	}
-*/
 }
 

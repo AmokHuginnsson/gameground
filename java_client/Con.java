@@ -26,5 +26,11 @@ public class Con {
 	static public void debug( String $msg ) {
 		System.err.println( brown + $msg + reset );
 	}
+	static public void info( String $msg ) {
+		System.err.println( cyan + $msg + reset );
+	}
+	static public void print( String $msg ) {
+		System.out.println( reset + $msg + reset );
+	}
 }
 

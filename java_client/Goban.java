@@ -90,7 +90,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		repaint();
 	}
 	public void setStones( byte[] $stones ) {
-		// System.arraycopy( $stones, 0, _stones, 0, $stones.length );
+		System.arraycopy( $stones, 0, _stones, 0, $stones.length );
 	}
 	public void setImages( GoImages $images ) {
 		_images = $images;
@@ -508,6 +508,25 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 				Con.err( "java.io.FileNotFoundException: " + fnfe.getMessage() );
 			}
 		}
+	}
+	void dump( byte[] $stones ) {
+		int i = 0;
+		int size = Math.min( (int)Math.sqrt( $stones.length ), _size );
+		System.out.print( "+" );
+		for ( int c = 0; c < size; ++ c )
+			System.out.print( "-" );
+		System.out.println( "+" );
+		for ( int r = 0; r < size; ++ r ) {
+			System.out.print( "|" );
+			for ( int c = 0; c < size; ++ c, ++ i ) {
+				System.out.print( (char)$stones[i] );
+			}
+			System.out.println( "|" );
+		}
+		System.out.print( "+" );
+		for ( int c = 0; c < size; ++ c )
+			System.out.print( "-" );
+		System.out.println( "+" );
 	}
 }
 

@@ -134,7 +134,7 @@ void HGo::broadcast_contestants( yaal::hcore::HString const& message_ ) {
 void HGo::handler_setup( OClientInfo* clientInfo_, HString const& message_ ) {
 	M_PROLOG
 	HLock l( _mutex );
-	if ( *_clients.begin() != clientInfo_ )
+	if ( _players.is_empty() || ( _players.begin()->first != clientInfo_ ) )
 		throw HLogicException( "you are not admin" );
 	if ( _state != STONE::NONE )
 		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
