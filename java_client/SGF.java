@@ -68,7 +68,9 @@ public class SGF {
 		TRIANGLE,
 		SQUARE,
 		CIRCLE,
-		MARK
+		MARK,
+		BLACK_TERITORY,
+		WHITE_TERITORY
 	}
 	static class Coord {
 		char[] _data = { 0, 0 };
@@ -230,6 +232,8 @@ public class SGF {
 		_positionTagDict_.put( "SQ", Position.SQUARE );
 		_positionTagDict_.put( "CR", Position.CIRCLE );
 		_positionTagDict_.put( "MA", Position.MARK );
+		_positionTagDict_.put( "TB", Position.BLACK_TERITORY );
+		_positionTagDict_.put( "TW", Position.WHITE_TERITORY );
 	}
 
 	void addPosition( Position $position, Coord $coord ) throws SGFException {
@@ -499,7 +503,7 @@ public class SGF {
 
 	void saveSetup( HTree<Move>.HNode<Move> $node, PrintStream $stream ) {
 		String[] setupTag = new String[] {
-			"AE", "AB", "AW", "TR", "SQ", "CR", "MA"
+			"AE", "AB", "AW", "TR", "SQ", "CR", "MA", "TB", "TW"
 		};
 		Move m = $node.value();
 		Setup setup = m.setup();

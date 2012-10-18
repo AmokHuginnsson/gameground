@@ -38,7 +38,14 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	public static final long serialVersionUID = 7l;
 	public static final int D_MARGIN = 20;
 	static final int ALL = 30000;
-	static final SGF.Position[] _markers = new SGF.Position[] { SGF.Position.TRIANGLE, SGF.Position.SQUARE, SGF.Position.CIRCLE, SGF.Position.MARK };
+	static final SGF.Position[] _markers = new SGF.Position[] {
+			SGF.Position.TRIANGLE,
+			SGF.Position.SQUARE,
+			SGF.Position.CIRCLE,
+			SGF.Position.MARK,
+			SGF.Position.BLACK_TERITORY,
+			SGF.Position.WHITE_TERITORY
+	};
 	HAbstractLogic _logic = null;
 	int _size = Go.GOBAN_SIZE.NORMAL;
 	double _diameter = -1;
@@ -181,6 +188,28 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		}
 		_viewMove = moveNumber > 0 ? moveNumber - 1 : 0;
 		((GobanHolderInterface)_logic._gui).jumpToMove( _viewMove, _branch.size() > 0 ? _branch.size() - 1 : 0 );
+		SGF.Move m = ( _lastMove != null ? _lastMove.value() : null );
+		if ( ( _lastMove == null ) && ( _sgf._tree.getRoot() != null ) ) 
+			m = _sgf._tree.getRoot().value();
+		if ( m != null ) {
+			SGF.Setup setup = m.setup();
+			if ( setup != null ) {
+				ArrayList<SGF.Coord> coords = setup.get( SGF.Position.BLACK_TERITORY );
+				if ( coords != null ) {
+					for ( SGF.Coord c : coords ) {
+						if ( getStone( c.col(), c.row() ) == Go.STONE.WHITE )
+							setStone( c.col(), c.row(), Go.STONE.DEAD_WHITE );
+					}
+				}
+				coords = setup.get( SGF.Position.WHITE_TERITORY );
+				if ( coords != null ) {
+					for ( SGF.Coord c : coords ) {
+						if ( getStone( c.col(), c.row() ) == Go.STONE.BLACK )
+							setStone( c.col(), c.row(), Go.STONE.DEAD_BLACK );
+					}
+				}
+			}
+		}
 		_logic._gui.repaint();
 	}
 	void edit( SGF.Setup $setup ) {
@@ -366,6 +395,16 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 						D_MARGIN + margin + ( inside * $row ) / ( _size - 1 ) + (int)( _diameter / 4 + 1 ), 
 						D_MARGIN + margin + ( inside * $col ) / ( _size - 1 ) + (int)( _diameter / 4 + 1 ),
 						D_MARGIN + margin + ( inside * $row ) / ( _size - 1 ) - (int)( _diameter / 4 ) );
+			} break;
+			case BLACK_TERITORY: {
+				$gc.drawImage( _images._black, D_MARGIN + margin + ( inside * $col ) / ( _size - 1 ) - (int)( _diameter / 4 ),
+						D_MARGIN + margin + ( inside * $row ) / ( _size - 1 ) - (int)( _diameter / 4 ),
+						(int)( _diameter / 2 ), (int)( _diameter / 2 ), this );
+			} break;
+			case WHITE_TERITORY: {
+				$gc.drawImage( _images._whites[( $row * _size + $col ) % GoImages.D_WHITE_LOOKS], D_MARGIN + margin + ( inside * $col ) / ( _size - 1 ) - (int)( _diameter / 4 ),
+						D_MARGIN + margin + ( inside * $row ) / ( _size - 1 ) - (int)( _diameter / 4 ),
+						(int)( _diameter / 2 ), (int)( _diameter / 2 ), this );
 			} break;
 		}
 	}
