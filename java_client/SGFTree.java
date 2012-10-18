@@ -131,7 +131,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 				boolean isMove = m.type() == SGF.Move.Type.MOVE;
 				if ( drawStone( g, x, y, isMove ? stone : Goban.STONE.NONE, moveNumber, n == first, next == null, jump, n == currentMove,
 							( n.getParent() != null ) && ( n.getParent().value().type() != SGF.Move.Type.MOVE ),
-							((Go.HGUILocal)_logic._gui)._board.onBranch( n ) ) )
+							((Go.HGUILocal)_logic._gui)._board.onBranch( n ), isMove && ( ! "".equals( m.comment() ) || ( m.setup() != null ) ) ) )
 					_hovered = n;
 				if ( isMove ) {
 					stone = Goban.opponent( stone );
@@ -191,7 +191,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		return ( len );
 	}
 	boolean drawStone( Graphics $gc, int $xx, int $yy, int $color, int $number, boolean $first, boolean $last,
-			int $jump, boolean $current, boolean $parentSetup, boolean $onBranch ) {
+			int $jump, boolean $current, boolean $parentSetup, boolean $onBranch, boolean $event ) {
 		int diameter = getDiameter();
 		if ( diameter > 28 )
 			diameter = 28;
@@ -245,6 +245,10 @@ public class SGFTree extends JPanel implements MouseInputListener {
 			$gc.setColor( $color == Goban.STONE.BLACK ? Color.WHITE : Color.BLACK );
 			int len = num.length();
 			$gc.drawChars( num.toCharArray(), 0, len, x + diameter / 2 - len * 7 / 2, y + diameter / 2 + 4 );
+			if ( $event ) {
+				$gc.setColor( Color.BLACK );
+				$gc.drawChars( new char[] { '!' }, 0, 1, x + diameter - 4, y + 6 );
+			}
 		} else {
 			x += ( diameter / 2 );
 			y += ( diameter / 2 );
