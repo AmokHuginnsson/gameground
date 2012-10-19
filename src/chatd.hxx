@@ -38,6 +38,10 @@ namespace gameground {
 namespace chat {
 
 class HChat : public HLogic {
+public:
+	typedef HChat this_type;
+	typedef HLogic base_type;
+private:
 	typedef yaal::hcore::HMap<yaal::hcore::HString, HLogic::ptr_t> chats_t;
 	typedef yaal::hcore::HSet<yaal::hcore::HString> chatter_names_t;
 	typedef yaal::hcore::HPointer<chatter_names_t> chatter_names_ptr_t;

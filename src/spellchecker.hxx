@@ -27,11 +27,15 @@ Copyright:
 #ifndef SPELLCHECKER_HXX_INCLUDED
 #define SPELLCHECKER_HXX_INCLUDED
 
-#include <yaal/yaal.hxx>
+#include <yaal/hcore/hstring.hxx>
 
 namespace gameground {
 
 class HSpellChecker : public yaal::hcore::HSingletonInterface {
+public:
+	typedef HSpellChecker this_type;
+	typedef HSingletonInterface base_type;
+private:
 	void* _spellChecker; /* AspellSpeller */
 	void* _spellConfig; /* AspellConfig */
 public:

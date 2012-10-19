@@ -37,6 +37,10 @@ namespace gameground {
 namespace go {
 
 class HGo : public HLogic {
+public:
+	typedef HGo this_type;
+	typedef HLogic base_type;
+private:
 	struct OPlayerInfo {
 		int long _timeLeft;
 		int _byoYomiPeriods;

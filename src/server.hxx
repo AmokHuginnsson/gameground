@@ -27,14 +27,14 @@ Copyright:
 #ifndef GAMEGROUND_SERVER_HXX_INCLUDED
 #define GAMEGROUND_SERVER_HXX_INCLUDED
 
-#include <yaal/yaal.hxx>
-
 #include "clientinfo.hxx"
 #include "logic.hxx"
 
 namespace gameground {
 
 class HServer {
+public:
+	typedef HServer this_type;
 protected:
 	typedef void ( HServer::* handler_t )( OClientInfo&, yaal::hcore::HString const& );
 	typedef yaal::hcore::HMap<HLogic::id_t, HLogic::ptr_t> logics_t;

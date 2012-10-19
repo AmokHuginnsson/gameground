@@ -27,8 +27,6 @@ Copyright:
 #ifndef GAMEGROUND_SETD_HXX_INCLUDED
 #define GAMEGROUND_SETD_HXX_INCLUDED
 
-#include <yaal/yaal.hxx>
-
 #include "logic.hxx"
 
 namespace gameground {
@@ -36,6 +34,10 @@ namespace gameground {
 namespace set_bang {
 
 class HSetBang : public HLogic {
+public:
+	typedef HSetBang this_type;
+	typedef HLogic base_type;
+private:
 	struct OPlayerInfo {
 		int _score;
 		int _last;

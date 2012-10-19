@@ -27,8 +27,6 @@ Copyright:
 #ifndef GAMEGROUND_LOGIC_HXX_INCLUDED
 #define GAMEGROUND_LOGIC_HXX_INCLUDED
 
-#include <yaal/yaal.hxx>
-
 namespace gameground {
 
 struct OClientInfo;
@@ -39,6 +37,7 @@ yaal::hcore::HStreamInterface& operator << ( yaal::hcore::HStreamInterface&, HLo
 
 class HLogic {
 public:
+	typedef HLogic this_type;
 	typedef yaal::hcore::HString id_t;
 	typedef yaal::hcore::HPointer<HLogic> ptr_t;
 	typedef yaal::hcore::HSet<OClientInfo*> clients_t;

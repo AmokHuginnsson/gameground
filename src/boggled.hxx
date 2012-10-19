@@ -27,8 +27,6 @@ Copyright:
 #ifndef GAMEGROUND_BOGGLED_HXX_INCLUDED
 #define GAMEGROUND_BOGGLED_HXX_INCLUDED
 
-#include <yaal/yaal.hxx>
-
 #include "logic.hxx"
 
 namespace gameground {
@@ -36,6 +34,10 @@ namespace gameground {
 namespace boggle {
 
 class HBoggle : public HLogic {
+public:
+	typedef HBoggle this_type;
+	typedef HLogic base_type;
+private:
 	struct OPlayerInfo {
 		int _score;
 		int _last;

@@ -38,6 +38,10 @@ namespace gameground {
 namespace gomoku {
 
 class HGomoku : public HLogic {
+public:
+	typedef HGomoku this_type;
+	typedef HLogic base_type;
+private:
 	struct STONE {
 		typedef char stone_t;
 		static stone_t const NONE;

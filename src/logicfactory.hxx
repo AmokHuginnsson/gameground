@@ -37,6 +37,7 @@ namespace gameground {
 
 class HLogicFactory {
 public:
+	typedef HLogicFactory this_type;
 	struct OCreator {
 		OCreator( void ) : _instantiator( NULL ) {}
 		OCreator( OCreator const& c ) : _instantiator( c._instantiator ) {}

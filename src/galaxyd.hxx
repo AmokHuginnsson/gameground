@@ -27,8 +27,6 @@ Copyright:
 #ifndef GALAXYD_HXX_INCLUDED
 #define GALAXYD_HXX_INCLUDED
 
-#include <yaal/yaal.hxx>
-
 #include "logic.hxx"
 
 namespace gameground {
@@ -84,6 +82,10 @@ inline void swap( HSystem& a, HSystem& b )
 	{ a.swap( b ); }
 
 class HGalaxy : public HLogic {
+public:
+	typedef HGalaxy this_type;
+	typedef HLogic base_type;
+private:
 	struct OEmperorInfo {
 		int _color;
 		int _systems;
