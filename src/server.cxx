@@ -647,9 +647,9 @@ void HServer::handle_get_account( OClientInfo& client_, HString const& login_ ) 
 				email = row[2];
 			SENDF( *client_._socket ) << PROTOCOL::ACCOUNT << PROTOCOL::SEP
 				<< login << PROTOCOL::SEPP
-				<< ( name ? unescape_copy( *name, _escapeTable_ ) : "" ) << PROTOCOL::SEPP
-				<< ( description ? unescape_copy( *description, _escapeTable_ ) : "" ) << PROTOCOL::SEPP
-				<< ( email ? unescape_copy( *email, _escapeTable_ ) : "" ) << endl;
+				<< ( name ? *name : "" ) << PROTOCOL::SEPP
+				<< ( description ? *description : "" ) << PROTOCOL::SEPP
+				<< ( email ? *email : "" ) << endl;
 		} else
 			SENDF( *client_._socket ) << PROTOCOL::ACCOUNT << PROTOCOL::SEP << login << endl;
 	}
