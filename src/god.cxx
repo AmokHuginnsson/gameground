@@ -556,9 +556,16 @@ void HGo::do_kick( OClientInfo* clientInfo_ ) {
 	_players.erase( it );
 	if ( newadmin ) {
 		it = _players.begin();
-		if ( it != _players.end() )
-			*it->first->_socket << *this
-				<< PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::ADMIN << endl;
+		while ( ( it != _players.end() ) && ! it->first->_valid )
+			++ it;
+		if ( it != _players.end() ) {
+			try {
+				*it->first->_socket << *this
+					<< PROTOCOL::SETUP << PROTOCOL::SEP << PROTOCOL::ADMIN << endl;
+			} catch ( HOpenSSLException const& ) {
+				drop_client( it->first );
+			}
+		}
 	}
 	if ( ( contestant( STONE::BLACK ) == clientInfo_ )
 			|| ( contestant( STONE::WHITE ) == clientInfo_ ) ) {

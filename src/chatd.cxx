@@ -77,8 +77,13 @@ void HChat::do_post_accept( OClientInfo* ) {
 void HChat::do_kick( OClientInfo* clientInfo_ ) {
 	M_PROLOG
 	HLock l( _mutex );
-	if ( clientInfo_->_valid )
-		*clientInfo_->_socket << HServer::PROTOCOL::PARTY_CLOSE << PROTOCOL::SEP << _id << endl;
+	if ( clientInfo_->_valid ) {
+		try {
+			*clientInfo_->_socket << HServer::PROTOCOL::PARTY_CLOSE << PROTOCOL::SEP << _id << endl;
+		} catch ( HOpenSSLException const& ) {
+			drop_client( clientInfo_ );
+		}
+	}
 	_clients.erase( clientInfo_ );
 	if ( _clients.is_empty() )
 		_chats_.erase( _key );
