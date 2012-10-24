@@ -161,6 +161,7 @@ protected:
 	void commit( void );
 	void count_score( void );
 	void after_move( void );
+	void mark_teritory( void );
 	STONE::stone_t mark_teritory( int, int );
 	void replace_stones( STONE::stone_t, STONE::stone_t );
 	void update_clocks( void );

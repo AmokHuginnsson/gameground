@@ -290,6 +290,16 @@ void HGo::handler_pass( OClientInfo* clientInfo_, HString const& /*message_*/ ) 
 		_state = STONE::MARK;
 		broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The match has ended." << endl << _out );
 		broadcast_contestants( _out << *this << PROTOCOL::MSG << PROTOCOL::SEP << "Select your dead stones." << endl << _out );
+		mark_teritory();
+		for ( int i = 0; i < ( _gobanSize * _gobanSize ); ++ i ) {
+			int x = i / _gobanSize;
+			int y = i % _gobanSize;
+			if ( goban( x, y ) == STONE::TERITORY_BLACK )
+				_sgf.add_position( SGF::Position::BLACK_TERITORY, SGF::Coord( x, y ) );
+			else if ( goban( x, y ) == STONE::TERITORY_WHITE )
+				_sgf.add_position( SGF::Position::WHITE_TERITORY, SGF::Coord( x, y ) );
+		}
+		send_goban();
 	}
 	return;
 	M_EPILOG
@@ -351,7 +361,7 @@ void HGo::handler_undo( OClientInfo* /* clientInfo_ */ ) {
 	M_EPILOG
 }
 
-void HGo::count_score( void ) {
+void HGo::mark_teritory( void ) {
 	M_PROLOG
 	for ( int i = 0; i < ( _gobanSize * _gobanSize ); ++ i ) {
 		int x = i / _gobanSize;
@@ -370,6 +380,12 @@ void HGo::count_score( void ) {
 			replace_stones( static_cast<char>( toupper( STONE::TERITORY_NONE ) ), mark );
 		}
 	}
+	M_EPILOG
+}
+
+void HGo::count_score( void ) {
+	M_PROLOG
+	mark_teritory();
 	replace_stones( static_cast<char>( toupper( STONE::DEAD_BLACK ) ), STONE::DEAD_BLACK );
 	replace_stones( static_cast<char>( toupper( STONE::DEAD_WHITE ) ), STONE::DEAD_WHITE );
 	commit();

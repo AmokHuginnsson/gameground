@@ -441,7 +441,6 @@ class Go extends HAbstractLogic implements Runnable {
 		}
 	}
 	void handlerMark() {
-		_gui._board.setStones( _stones.getBytes() );
 		_gui._toMove.setText( STONE.NONE_NAME );
 		_gui._pass.setText( "Accept" );
 		_gui._pass.setEnabled( true );

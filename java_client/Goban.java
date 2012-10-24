@@ -96,9 +96,6 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		_cursorY = -1;
 		repaint();
 	}
-	public void setStones( byte[] $stones ) {
-		System.arraycopy( $stones, 0, _stones, 0, $stones.length );
-	}
 	public void setImages( GoImages $images ) {
 		_images = $images;
 	}
