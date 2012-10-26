@@ -645,11 +645,13 @@ void HServer::handle_get_account( OClientInfo& client_, HString const& login_ ) 
 			HRecordSet::value_t email;
 			if ( accountSelf )
 				email = row[2];
+			/* Account information is escaped twice,
+			 * once for network transfer and once for database storage. */
 			SENDF( *client_._socket ) << PROTOCOL::ACCOUNT << PROTOCOL::SEP
 				<< login << PROTOCOL::SEPP
-				<< ( name ? *name : "" ) << PROTOCOL::SEPP
-				<< ( description ? *description : "" ) << PROTOCOL::SEPP
-				<< ( email ? *email : "" ) << endl;
+				<< ( name ? unescape_copy( *name, _escapeTable_ ) : "" ) << PROTOCOL::SEPP
+				<< ( description ? unescape_copy( *description, _escapeTable_ ) : "" ) << PROTOCOL::SEPP
+				<< ( email ? unescape_copy( *email, _escapeTable_ ) : "" ) << endl;
 		} else
 			SENDF( *client_._socket ) << PROTOCOL::ACCOUNT << PROTOCOL::SEP << login << endl;
 	}
