@@ -78,7 +78,6 @@ char const* const HGo::PROTOCOL::SIT = "sit";
 char const* const HGo::PROTOCOL::GETUP = "get_up";
 char const* const HGo::PROTOCOL::DEAD = "dead";
 char const* const HGo::PROTOCOL::ACCEPT = "accept";
-static int const SECONDS_IN_MINUTE = 60;
 static int const ACCEPTED = -7;
 
 int const GO_MSG_NOT_YOUR_TURN = 0;
@@ -139,7 +138,12 @@ void HGo::handler_setup( OClientInfo* clientInfo_, HString const& message_ ) {
 	if ( _state != STONE::NONE )
 		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
 	HString item = get_token( message_, ",", 0 );
-	int value = lexical_cast<int>( get_token( message_, ",", 1 ) );
+	int value( 0 );
+	try {
+		value = lexical_cast<int>( get_token( message_, ",", 1 ) );
+	} catch ( HLexicalCastException const& ) {
+		throw HLogicException( GO_MSG[GO_MSG_MALFORMED] );
+	}
 	bool regenGoban( false );
 	int handicaps( _handicaps );
 	if ( item == PROTOCOL::GOBAN ) {
@@ -216,7 +220,7 @@ void HGo::handler_sit( OClientInfo* clientInfo_, HString const& message_ ) {
 			M_ASSERT( _state == STONE::NONE );
 			contestant( stone ) = clientInfo_;
 			OPlayerInfo& info = *get_player_info( clientInfo_ );
-			info._timeLeft = _mainTime * SECONDS_IN_MINUTE;
+			info._timeLeft = _mainTime;
 			info._byoYomiPeriods = _byoYomiPeriods;
 			info._stonesCaptured = 0;
 			info._score = ( stone == STONE::WHITE ? _komi : 0 );
@@ -265,8 +269,14 @@ void HGo::handler_put_stone( OClientInfo* clientInfo_, HString const& message_ )
 	if ( contestant( _state ) != clientInfo_ )
 		throw HLogicException( GO_MSG[ GO_MSG_NOT_YOUR_TURN ] );
 	_pass = 0;
-	int col = lexical_cast<int>( get_token( message_, ",", 1 ) );
-	int row = lexical_cast<int>( get_token( message_, ",", 2 ) );
+	int col( 0 );
+	int row( 0 );
+	try {
+		col = lexical_cast<int>( get_token( message_, ",", 1 ) );
+		row = lexical_cast<int>( get_token( message_, ",", 2 ) );
+	} catch ( HLexicalCastException const& ) {
+		throw HLogicException( GO_MSG[GO_MSG_MALFORMED] );
+	}
 	int before = count_stones( opponent( _state ) );
 	make_move( col, row, _state );
 	int after = count_stones( opponent( _state ) );
@@ -311,8 +321,14 @@ void HGo::handler_dead( OClientInfo* clientInfo_, HString const& message_ ) {
 		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
 	HString str;
 	for ( int i = 1; ! ( str = get_token( message_, ",", i ) ).is_empty() ; i += 2 ) {
-		int col = lexical_cast<int>( str );
-		int row = lexical_cast<int>( get_token( message_, ",", i + 1 ) );
+		int col( 0 );
+		int row( 0 );
+		try {
+			col = lexical_cast<int>( str );
+			row = lexical_cast<int>( get_token( message_, ",", i + 1 ) );
+		} catch ( HLexicalCastException const& ) {
+			throw HLogicException( GO_MSG[GO_MSG_MALFORMED] );
+		}
 		out << "dead: " << col << "," << row << endl;
 		ensure_coordinates_validity( col, row );
 		STONE::stone_t stone = goban( col, row );
@@ -612,7 +628,7 @@ void HGo::schedule_timeout( void ) {
 	++ _move;
 	OPlayerInfo& p = *get_player_info( contestant( _state ) );
 	if ( p._byoYomiPeriods < _byoYomiPeriods )
-		p._timeLeft = _byoYomiTime * SECONDS_IN_MINUTE;
+		p._timeLeft = _byoYomiTime;
 	HScheduledAsyncCaller::get_instance().register_call( time( NULL ) + p._timeLeft, call( &HGo::on_timeout, this ) );
 	return;
 	M_EPILOG
@@ -629,7 +645,7 @@ void HGo::on_timeout( void ) {
 				<< static_cast<char>( _state ) << endl << _out );
 		broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "End of time." << endl << _out );
 	} else {
-		p._timeLeft = _byoYomiTime * SECONDS_IN_MINUTE;
+		p._timeLeft = _byoYomiTime;
 		reschedule_timeout();
 		send_contestants();
 	}

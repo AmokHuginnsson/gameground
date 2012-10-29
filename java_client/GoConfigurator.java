@@ -11,47 +11,39 @@ public class GoConfigurator extends HAbstractConfigurator implements ChangeListe
 	public JComboBox<String> _confGoban;
 	public JSpinner _confKomi;
 	public JSpinner _confHandicaps;
-	public JSpinner _confMainTime;
+	public DateSpinner _confMainTime;
 	public JSpinner _confByoYomiPeriods;
-	public JSpinner _confByoYomiTime;
+	public DateSpinner _confByoYomiTime;
 	private Go.HGUILocal _owner;
 	String getConfigurationString() {
 		return ( (String)_confGoban.getSelectedItem() + "," + _confKomi.getValue() + "," + _confHandicaps.getValue() + "," + _confMainTime.getValue() + "," + _confByoYomiPeriods.getValue() + "," + _confByoYomiTime.getValue() );
+	}
+	void init() {
+		SpinnerNumberModel m = (SpinnerNumberModel)_confKomi.getModel();
+		m.setMinimum( 0 );
+		m.setMaximum( 180 );
+		m = (SpinnerNumberModel)_confHandicaps.getModel();
+		m.setMinimum( 0 );
+		m.setMaximum( 9 );
+		m = (SpinnerNumberModel)_confByoYomiPeriods.getModel();
+		m.setMinimum( 0 );
+		m.setMaximum( 99 );
+		_confKomi.addChangeListener( this );
+		_confHandicaps.addChangeListener( this );
+		_confMainTime.addChangeListener( this );
+		_confByoYomiPeriods.addChangeListener( this );
+		_confByoYomiTime.addChangeListener( this );
 	}
 	void setDefaults( String $defaults ) {
 		String[] tokens = $defaults.split( ",", 6 );
 		gobanModel();
 		selectGobanSize( tokens[ 0 ] );
 
-		SpinnerNumberModel m = (SpinnerNumberModel)_confKomi.getModel();
-		m.setMinimum( 0 );
-		m.setMaximum( 6 );
 		_confKomi.setValue( Integer.parseInt( tokens[ 1 ] ) );
-
-		m = (SpinnerNumberModel)_confHandicaps.getModel();
-		m.setMinimum( 0 );
-		m.setMaximum( 9 );
 		_confHandicaps.setValue( Integer.parseInt( tokens[ 2 ] ) );
-
-		m = (SpinnerNumberModel)_confMainTime.getModel();
-		m.setMinimum( 2 );
-		m.setMaximum( 60 );
 		_confMainTime.setValue( Integer.parseInt( tokens[ 3 ] ) );
-
-		m = (SpinnerNumberModel)_confByoYomiPeriods.getModel();
-		m.setMinimum( 0 );
-		m.setMaximum( 20 );
 		_confByoYomiPeriods.setValue( Integer.parseInt( tokens[ 4 ] ) );
-
-		m = (SpinnerNumberModel)_confByoYomiTime.getModel();
-		m.setMinimum( 0 );
-		m.setMaximum( 5 );
 		_confByoYomiTime.setValue( Integer.parseInt( tokens[ 5 ] ) );
-		_confKomi.addChangeListener( this );
-		_confHandicaps.addChangeListener( this );
-		_confMainTime.addChangeListener( this );
-		_confByoYomiPeriods.addChangeListener( this );
-		_confByoYomiTime.addChangeListener( this );
 	}
 	public void gobanModel() {
 		DefaultComboBoxModel<String> model = new DefaultComboBoxModel<String>();

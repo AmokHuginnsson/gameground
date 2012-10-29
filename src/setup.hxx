@@ -51,9 +51,9 @@ static int const BOGGLE_MAX_ROUNDS         =   5;
 static int const GO_GOBAN_SIZE             =  19;
 static int const GO_KOMI                   =   5;
 static int const GO_HANDICAPS              =   0;
-static int const GO_MAINTIME               =  30;
+static int const GO_MAINTIME               = 30 * 60;
 static int const GO_BYOYOMI_PERIODS        =   5;
-static int const GO_BYOYOMI_TIME           =   1;
+static int const GO_BYOYOMI_TIME           =  30;
 static int const SET_STARTUP_PLAYERS       =   2;
 #define out ( clog << now << " " << __FILE__ + OSetup::PATH_OFFSET << ":" << __LINE__ << ": " )
 

@@ -19,10 +19,12 @@
 							<layout type="FormLayout" columns="p,6px,p" rows="p,4px,p,4px,p,4px,p,4px,p,4px,p,4px,p" />
 							<label constraints="1,1" font="&v_font;">Goban:</label>
 							<combobox id="_confGoban" action="onGobanSize" constraints="3,1" tooltiptext="Goban size." enabled="false" font="&v_font;" />
-							<label constraints="1,3" font="&v_font;">Main time:</label>
-							<spinner id="_confMainTime" constraints="3,3" tooltiptext="Time for main game." enabled="false" font="&v_font;">
-								<textfield action="onMainTime" horizontalalignment="RIGHT" font="&v_font;" />
-							</spinner>
+							<panel layout="BorderLayout" constraints="1,3,3,1">
+								<label constraints="BorderLayout.WEST" font="&v_font;">Main time:</label>
+								<datespinner id="_confMainTime" initclass="InitClass(HH:mm:ss|36000)" constraints="BorderLayout.EAST" tooltiptext="Time for main game." enabled="false" font="&v_font;">
+									<formattedtextfield action="onMainTime" horizontalalignment="CENTER" font="&v_font;" />
+								</datespinner>
+							</panel>
 							<label constraints="1,5" font="&v_font;">Komi:</label>
 							<spinner id="_confKomi" constraints="3,5" tooltiptext="Komi." enabled="false" font="&v_font;">
 								<textfield action="onKomi" horizontalalignment="RIGHT" font="&v_font;" />
@@ -35,10 +37,12 @@
 							<spinner id="_confByoYomiPeriods" constraints="3,9" tooltiptext="Number of byo yomi periods." enabled="false" font="&v_font;">
 								<textfield action="onByoyomiPeriods" horizontalalignment="RIGHT" font="&v_font;" />
 							</spinner>
-							<label constraints="1,11" font="&v_font;">Byo yomi time:</label>
-							<spinner id="_confByoYomiTime" constraints="3,11" tooltiptext="Time for single byo yomi period." enabled="false" font="&v_font;">
-								<textfield action="onByoyomiTime" horizontalalignment="RIGHT" font="&v_font;" />
-							</spinner>
+							<panel layout="BorderLayout" constraints="1,11,3,1">
+								<label constraints="BorderLayout.WEST" font="&v_font;">Byo yomi time:</label>
+								<datespinner id="_confByoYomiTime" initclass="InitClass(mm:ss|600)" constraints="BorderLayout.EAST" tooltiptext="Time for single byo yomi period." enabled="false" font="&v_font;">
+									<textfield action="onByoyomiTime" horizontalalignment="RIGHT" font="&v_font;" />
+								</datespinner>
+							</panel>
 						</panel>
 						<hbox>
 							<button id="_pass" text="Pass" action="onPass" tooltiptext="Refrain from putting a stone." enabled="false" font="&v_font;" />
@@ -110,7 +114,7 @@
 						<hbox>
 							<button icon="res/first.png" action="onGoToFirst" margin="(2,2,2,2)" tooltiptext="Go to first move." />
 							<button icon="res/previous.png" action="onGoToPrevious" margin="(2,2,2,2)" tooltiptext="Go to previous move." />
-							<slider id="_jumpToMove" orientation="HORIZONTAL" snaptotick="true" minimum="0" maximum="0" />
+							<slider id="_jumpToMove" orientation="HORIZONTAL" snaptoticks="true" minimum="0" maximum="0" />
 							<button icon="res/next.png" action="onGoToNext" margin="(2,2,2,2)" tooltiptext="Go to next move." />
 							<button icon="res/last.png" action="onGoToLast" margin="(2,2,2,2)" tooltiptext="Go to last move." />
 						</hbox>

@@ -110,10 +110,12 @@ class Go extends HAbstractLogic implements Runnable {
 		}
 		public void updateTagLib( XUL $xul ) {
 			$xul.getTaglib().registerTag( "goban", GoGoban.class );
+			$xul.getTaglib().registerTag( "datespinner", DateSpinner.class );
 			$xul.getTaglib().registerTag( "sgftree", SGFTree.class );
 		}
 		public void mapMembers( XUL $se ) {
 			$se.mapMembers( _conf );
+			_conf.init();
 		}
 		public void init() {
 			super.init();
@@ -200,7 +202,7 @@ class Go extends HAbstractLogic implements Runnable {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
 					+ PROTOCOL.SETUP + PROTOCOL.SEP
 					+ PROTOCOL.MAINTIME + PROTOCOL.SEPP
-					+ _conf._confMainTime.getValue() );
+					+ _conf._confMainTime.getValueInt() );
 		}
 		public void onByoyomiPeriods() {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
@@ -212,7 +214,7 @@ class Go extends HAbstractLogic implements Runnable {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
 					+ PROTOCOL.SETUP + PROTOCOL.SEP
 					+ PROTOCOL.BYOYOMITIME + PROTOCOL.SEPP
-					+ _conf._confByoYomiTime.getValue() );
+					+ _conf._confByoYomiTime.getValueInt() );
 		}
 		public void onBlack() {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
