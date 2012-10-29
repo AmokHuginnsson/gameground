@@ -23,13 +23,27 @@ class GoPlayer {
 	public JButton _sit;
 	public int _timeLeft = 0;
 	public static final String EMPTY = " ";
-	public void clear() {
+	public void clear( int $komi ) {
 		_name.setText( EMPTY );
-		_score.setText( "" );
+		_score.setText( "" + $komi );
 		_captures.setText( "" );
 		_timeLeftLabel.setText( "" );
 		_byoyomi.setText( "" );
 		_sit.setText( Go.HGUILocal.SIT );
+	}
+	public void clearScore( int $komi ) {
+		_score.setText( "" + $komi );
+		_captures.setText( "" + 0 );
+	}
+	void capture( int $captures ) {
+		int current = Integer.parseInt( _captures.getText() );
+		_captures.setText( "" + ( current + $captures ) );
+		current = Integer.parseInt( _score.getText() );
+		_score.setText( "" + ( current + $captures ) );
+	}
+	void score( int $score ) {
+		int current = Integer.parseInt( _score.getText() );
+		_score.setText( "" + ( current + $score ) );
 	}
 }
 
@@ -278,6 +292,10 @@ class Go extends HAbstractLogic implements Runnable {
 			_conf.setValue( _conf._confKomi, (int)_board._sgf._komi );
 			_conf.setValue( _conf._confHandicaps, _board._sgf._handicap );
 			_conf.setValue( _conf._confMainTime, _board._sgf._time );
+			GoPlayer contestant = _contestants.get( STONE.BLACK );
+			contestant._name.setText( _board._sgf._blackName + "[" + _board._sgf._blackRank + "]" );
+			contestant = _contestants.get( STONE.WHITE );
+			contestant._name.setText( _board._sgf._whiteName + "[" + _board._sgf._whiteRank + "]" );
 		}
 		void setEnabledControls( boolean $enabled ) {
 			_conf.setEnabled( $enabled );
@@ -331,8 +349,8 @@ class Go extends HAbstractLogic implements Runnable {
 		white._sit = _gui._whiteSit;
 		_contestants.put( STONE.WHITE, white );
 		/* Was in init(). */
-		_contestants.get( STONE.BLACK ).clear();
-		_contestants.get( STONE.WHITE ).clear();
+		_contestants.get( STONE.BLACK ).clear( 0 );
+		_contestants.get( STONE.WHITE ).clear( ((Integer)_gui._conf._confKomi.getValue()).intValue() );
 		_playerColor = STONE.NONE;
 		_toMove = STONE.NONE;
 		_admin = false;
@@ -412,6 +430,28 @@ class Go extends HAbstractLogic implements Runnable {
 				_gui.setEnabledControls( true );
 		} else
 			_gui.setEnabledControls( false );
+	}
+	void captures( byte $stone, int $captures ) {
+		GoPlayer contestant = _contestants.get( $stone );
+		if ( contestant != null ) {
+			contestant.capture( $captures );
+		}
+	}
+	void score( byte $stone, int $score ) {
+		GoPlayer contestant = _contestants.get( $stone );
+		if ( contestant != null ) {
+			contestant.score( $score );
+		}
+	}
+	void clearScore() {
+		GoPlayer contestant = _contestants.get( STONE.BLACK );
+		if ( contestant != null ) {
+			contestant.clearScore( 0 );
+		}
+		contestant = _contestants.get( STONE.WHITE );
+		if ( contestant != null ) {
+			contestant.clearScore( ((Integer)_gui._conf._confKomi.getValue()).intValue() );
+		}
 	}
 	void handlerSGF( String $command ) {
 		if ( ( _toMove == STONE.BLACK ) || ( _toMove == STONE.WHITE ) )

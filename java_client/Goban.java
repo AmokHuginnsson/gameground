@@ -141,6 +141,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		return ( _branch.contains( $node ) );
 	}
 	void placeStones( int $to ) {
+		clear();
 		int gameCommentLength = _sgf._comment.length();
 		if ( ( gameCommentLength > 0 ) && ( $to == ALL ) ) {
 			_logic._gui.log( "Game Started\n", HGUIface.Colors.OTHERGRAY, HGUIface.Style.BOLD );
@@ -208,7 +209,9 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 			}
 		}
 		_logic._gui.repaint();
+		placeByLogic();
 	}
+	abstract void placeByLogic();
 	void edit( SGF.Setup $setup ) {
 		ArrayList<SGF.Coord> coords = $setup.get( SGF.Position.REMOVE );
 		if ( coords != null ) {
@@ -229,6 +232,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	void placeStones() {
 		placeStones( ALL );
 	}
+	abstract void clear();
 	void updateSGF( BufferedReader $reader ) {
 		_sgf.clear();
 		_branch.clear();

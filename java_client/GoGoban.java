@@ -1,4 +1,5 @@
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 
@@ -12,6 +13,9 @@ public class GoGoban extends Goban {
 	public GoGoban() {
 		super();
 		_sgf = new SGF( SGF.GAME_TYPE.GO, "gameground-client" );
+	}
+	void clear() {
+		_logic.clearScore();
 	}
 	void setLogic( Go $go ) {
 		super.setLogic( _logic = $go );
@@ -73,13 +77,17 @@ public class GoGoban extends Goban {
 		}
 		return ( false );
 	}
-	void removeDead() {
+	int removeDead() {
+		int killed = 0;
 		for ( int i = 0; i < ( _size * _size ); ++ i ) {
 			if ( _stones[i] != STONE.NONE ) {
-				if ( Character.isUpperCase( _stones[ i ] ) )
+				if ( Character.isUpperCase( _stones[ i ] ) ) {
 					_stones[ i ] = STONE.NONE;
+					++ killed;
+				}
 			}
 		}
+		return ( killed );
 	}
 	void resetAlive() {
 		for ( int i = 0; i < ( _size * _size ); ++ i ) {
@@ -89,30 +97,26 @@ public class GoGoban extends Goban {
 			}
 		}
 	}
-	boolean haveKilled( int x, int y, byte stone ) {
-		boolean killed = false;
+	int haveKilled( int x, int y, byte stone ) {
+		int killed = 0;
 		byte foeStone = opponent( stone );
 		if ( ( x > 0 ) && ( getStone( x - 1, y ) == foeStone ) && ( ! haveLiberties( x - 1, y, foeStone ) ) ) {
-			killed = true;
-			removeDead();
+			killed += removeDead();
 		} else {
 			resetAlive();
 		}
 		if ( ( x < ( _size - 1 ) ) && ( getStone( x + 1, y ) == foeStone ) && ( ! haveLiberties( x + 1, y, foeStone ) ) ) {
-			killed = true;
-			removeDead();
+			killed += removeDead();
 		} else {
 			resetAlive();
 		}
 		if ( ( y > 0 ) && ( getStone( x, y - 1 ) == foeStone ) && ( ! haveLiberties( x, y - 1, foeStone ) ) ) {
-			killed = true;
-			removeDead();
+			killed += removeDead();
 		} else {
 			resetAlive();
 		}
 		if ( ( y < ( _size - 1 ) ) && ( getStone( x, y + 1 ) == foeStone ) && ( ! haveLiberties( x, y + 1, foeStone ) ) ) {
-			killed = true;
-			removeDead();
+			killed += removeDead();
 		} else {
 			resetAlive();
 		}
@@ -139,7 +143,7 @@ public class GoGoban extends Goban {
 			else {
 				System.arraycopy( _stones, 0, _tmpStones, 0, _size * _size );
 				setStone( x, y, stone );
-				if ( ! haveKilled( x, y, stone ) ) {
+				if ( haveKilled( x, y, stone ) == 0 ) {
 					if ( isSuicide( x, y, stone ) ) {
 						invalid = true;
 					}
@@ -159,8 +163,33 @@ public class GoGoban extends Goban {
 			throw new RuntimeException( "Illegal move!" );
 		System.arraycopy( _stones, 0, _koStones, 0, _size * _size );
 		setStone( $col, $row, $stone );
-		haveKilled( $col, $row, $stone );
+		_logic.captures( $stone, haveKilled( $col, $row, $stone ) );
 		resetAlive();
+	}
+	void placeByLogic() {
+		int blackTeritory = 0;
+		int whiteTeritory = 0;
+		int blackDead = 0;
+		int whiteDead = 0;
+		for ( int i = 0; i < ( _size * _size ); ++ i ) {
+			switch ( _stones[i] ) {
+				case ( Go.STONE.DEAD_BLACK ): ++ blackDead; break;
+				case ( Go.STONE.DEAD_WHITE ): ++ whiteDead; break;
+				case ( Go.STONE.TERITORY_BLACK ): ++ blackTeritory; break;
+				case ( Go.STONE.TERITORY_WHITE ): ++ whiteTeritory; break;
+			}
+		}
+		SGF.Setup setup = _lastMove.value().setup();
+		if ( setup != null ) {
+			ArrayList<SGF.Coord> c = setup.get( SGF.Position.BLACK_TERITORY );
+			if ( c != null )
+				blackTeritory += c.size();
+			c = setup.get( SGF.Position.WHITE_TERITORY );
+			if ( c != null )
+				whiteTeritory += c.size();
+		}
+		_logic.score( STONE.BLACK, blackTeritory + whiteDead );
+		_logic.score( STONE.WHITE, whiteTeritory + blackDead );
 	}
 }
 
