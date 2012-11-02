@@ -226,11 +226,7 @@ void HGo::handler_sit( OClientInfo* clientInfo_, HString const& message_ ) {
 			info._score = ( stone == STONE::WHITE ? _komi : 0 );
 			OClientInfo* black( contestant( STONE::BLACK ) );
 			OClientInfo* white( contestant( STONE::WHITE ) );
-			if ( ! ( black && white ) ) {
-				_start = 0;
-				_move = 0;
-				set_handicaps( _handicaps );
-			} else {
+			if ( black && white ) {
 				OPlayerInfo& foe = *get_player_info( contestant( opponent( stone ) ) );
 				foe._timeLeft = info._timeLeft;
 				foe._byoYomiPeriods = info._byoYomiPeriods;
@@ -363,9 +359,10 @@ void HGo::handler_accept( OClientInfo* clientInfo_ ) {
 
 void HGo::handler_newgame( OClientInfo* /* clientInfo_ */, HString const& ) {
 	M_PROLOG
-	_sgf.clear();
+	_start = 0;
+	_move = 0;
+	set_handicaps( _handicaps ); /* calls _sgf.clear() */
 	_sgf.set_info( SGF::Player::BLACK, _gobanSize, _handicaps, _komi, _mainTime );
-	set_handicaps( _handicaps );
 	send_goban();
 	return;
 	M_EPILOG
