@@ -72,6 +72,7 @@ char const* const HGo::PROTOCOL::BYOYOMITIME = "byoyomitime";
 char const* const HGo::PROTOCOL::STONE = "stone";
 char const* const HGo::PROTOCOL::TOMOVE = "to_move";
 char const* const HGo::PROTOCOL::PUTSTONE = "put_stone";
+char const* const HGo::PROTOCOL::SELECT = "select";
 char const* const HGo::PROTOCOL::PASS = "pass";
 char const* const HGo::PROTOCOL::SGF = "sgf";
 char const* const HGo::PROTOCOL::SIT = "sit";

@@ -107,7 +107,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		public void onSave() {
 			_board.save();
 		}
-		public void jumpToMove( int $viewMove, int $lastMove ) {
+		public void setMoveSlider( int $viewMove, int $lastMove ) {
 			/* _jumpToMove.setMaximum( $lastMove );
 			_jumpToMove.setValue( $viewMove ); */
 		}

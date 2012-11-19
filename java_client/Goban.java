@@ -58,6 +58,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	HTree<SGF.Move>.HNode<SGF.Move> _lastMove = null;
 	byte[] _stones = new byte[Go.GOBAN_SIZE.NORMAL * Go.GOBAN_SIZE.NORMAL];
 	ArrayList<HTree<SGF.Move>.HNode<SGF.Move>> _branch = new ArrayList<HTree<SGF.Move>.HNode<SGF.Move>>();
+	ArrayList<Integer> _selection = new ArrayList<Integer>();
 //--------------------------------------------//
 	public Goban() {
 		Arrays.fill( _stones, STONE.NONE );
@@ -113,29 +114,31 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		selectBranch( $node, true );
 	}
 	void selectBranch( HTree<SGF.Move>.HNode<SGF.Move> $node, boolean $jumpToMove ) {
-		int moveNo = 0;
-		if ( ! _branch.contains( $node ) ) {
-			int toEnd = 0;
-			while ( $node.getChildAt( 0 ) != null ) {
-				$node = $node.getChildAt( 0 );
-				++ toEnd;
+		if ( $node != _lastMove ) {
+			int moveNo = 0;
+			if ( ! _branch.contains( $node ) ) {
+				int toEnd = 0;
+				while ( $node.getChildAt( 0 ) != null ) {
+					$node = $node.getChildAt( 0 );
+					++ toEnd;
+				}
+				_branch.clear();
+				while ( $node != null ) {
+					_branch.add( $node );
+					$node = $node.getParent();
+					++ moveNo;
+				}
+				Collections.reverse( _branch );
+				moveNo -= toEnd;
+			} else {
+				while ( $node != null ) {
+					$node = $node.getParent();
+					++ moveNo;
+				}
 			}
-			_branch.clear();
-			while ( $node != null ) {
-				_branch.add( $node );
-				$node = $node.getParent();
-				++ moveNo;
-			}
-			Collections.reverse( _branch );
-			moveNo -= toEnd;
-		} else {
-			while ( $node != null ) {
-				$node = $node.getParent();
-				++ moveNo;
-			}
+			if ( $jumpToMove )
+				placeStones( moveNo > 0 ? moveNo - 1 : 0 );
 		}
-		if ( $jumpToMove )
-			placeStones( moveNo > 0 ? moveNo - 1 : 0 );
 	}
 	boolean onBranch( HTree<SGF.Move>.HNode<SGF.Move> $node ) {
 		return ( _branch.contains( $node ) );
@@ -185,7 +188,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 			++ moveNumber;
 		}
 		_viewMove = moveNumber > 0 ? moveNumber - 1 : 0;
-		((GobanHolderInterface)_logic._gui).jumpToMove( _viewMove, _branch.size() > 0 ? _branch.size() - 1 : 0 );
+		((GobanHolderInterface)_logic._gui).setMoveSlider( _viewMove, _branch.size() > 0 ? _branch.size() - 1 : 0 );
 		SGF.Move m = ( _lastMove != null ? _lastMove.value() : null );
 		if ( ( _lastMove == null ) && ( _sgf._tree.getRoot() != null ) ) 
 			m = _sgf._tree.getRoot().value();
@@ -210,6 +213,31 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		}
 		_logic._gui.repaint();
 		placeByLogic();
+
+		/* Find _lastMove address in tree. */
+		_selection.clear();
+		if ( _lastMove != null ) {
+			for ( int i = 0; i < _branch.size(); ++ i ) {
+				HTree<SGF.Move>.HNode<SGF.Move> n = _branch.get( i );
+				if ( n == _lastMove ) {
+					_selection.add( i );
+					break;
+				}
+				if ( n.getChildCount() > 1 ) {
+					HTree<SGF.Move>.HNode<SGF.Move> c = _branch.get( i + 1 );
+					for ( int j = 0; j < n.getChildCount(); ++ j ) {
+						if ( c == n.getChildAt( j ) ) {
+							if ( _selection.size() == 0 )
+								_selection.add( i );
+							_selection.add( j );
+						}
+					}
+				}
+			}
+			_logic._client.println( Go.PROTOCOL.CMD + Go.PROTOCOL.SEP + _logic.id() + Go.PROTOCOL.SEP
+					+ Go.PROTOCOL.SELECT + Go.PROTOCOL.SEP + _selection );
+			Con.debug( "" + _selection );
+		}
 	}
 	abstract void placeByLogic();
 	void edit( SGF.Setup $setup ) {

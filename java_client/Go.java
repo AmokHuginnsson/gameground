@@ -67,6 +67,7 @@ class Go extends HAbstractLogic implements Runnable {
 		public static final String BYOYOMITIME = "byoyomitime";
 		public static final String BYOYOMIPERIODS = "byoyomiperiods";
 		public static final String PUTSTONE = "put_stone";
+		public static final String SELECT = "select";
 		public static final String STONE = "stone";
 		public static final String TOMOVE = "to_move";
 		public static final String PLAYER = "player";
@@ -273,7 +274,7 @@ class Go extends HAbstractLogic implements Runnable {
 		public void onGoToLast() {
 			_board.goToLast();
 		}
-		public void jumpToMove( int $viewMove, int $lastMove ) {
+		public void setMoveSlider( int $viewMove, int $lastMove ) {
 			_internalUpdate = true;
 			_jumpToMove.setMaximum( $lastMove );
 			_jumpToMove.setValue( $viewMove );

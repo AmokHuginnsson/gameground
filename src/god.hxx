@@ -80,6 +80,7 @@ private:
 		static char const* const NEWGAME;
 		static char const* const UNDO;
 		static char const* const PUTSTONE;
+		static char const* const SELECT;
 		static char const* const SETUP;
 		static char const* const SGF;
 		static char const* const SIT;
