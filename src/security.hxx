@@ -28,7 +28,7 @@ Copyright:
 #define GAMEGROUND_SECURITY_HXX_INCLUDED 1
 
 #include <yaal/hcore/hstring.hxx>
-#include <yaal/tools/util.hxx>
+#include <yaal/tools/escape.hxx>
 
 namespace gameground {
 
