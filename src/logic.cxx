@@ -146,13 +146,12 @@ yaal::hcore::HStreamInterface& operator << ( HStreamInterface& stream_, HLogic c
 
 void HLogic::broadcast( HString const& message_ ) {
 	M_PROLOG
+	_bcastBuffer.erase( _partyIdPrefixLen );
+	_bcastBuffer += message_;
 	for ( clients_t::HIterator it( _clients.begin() ), end( _clients.end() ); it != end; ++ it ) {
 		try {
-			if ( (*it)->_valid ) {
-				_bcastBuffer.erase( _partyIdPrefixLen );
-				_bcastBuffer += message_;
+			if ( (*it)->_valid )
 				(*it)->_socket->write_until_eos( _bcastBuffer );
-			}
 		} catch ( HOpenSSLException const& ) {
 			drop_client( *it );
 		}
