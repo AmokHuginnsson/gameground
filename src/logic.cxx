@@ -49,8 +49,12 @@ char const* const HLogic::PROTOCOL::PLAYER_QUIT = "player_quit";
 
 HLogic::HLogic( HServer* server_, id_t const& id_, HString const& comment_ )
 	: _server( server_ ), _id( id_ ), _name( get_token( comment_, ",", 0 ) ), _handlers( setup._maxConnections ),
-	_clients(), _comment( comment_ ), _out(), _mutex() {
+	_clients(), _comment( comment_ ), _out(), _mutex(),
+	_bcastBuffer(), _partyIdPrefixLen( 0 ) {
 	_handlers[ PROTOCOL::SAY ] = static_cast<handler_t>( &HLogic::handler_message );
+	_out << PROTOCOL::PARTY << PROTOCOL::SEP << _id << PROTOCOL::SEPP;
+	_bcastBuffer = _out.consume();
+	_partyIdPrefixLen = static_cast<int>( _bcastBuffer.get_length() );
 }
 
 HLogic::~HLogic( void ) {
@@ -132,7 +136,7 @@ bool HLogic::process_command( OClientInfo* clientInfo_, HString const& command_ 
 }
 
 void HLogic::party( HStreamInterface& stream_ ) const {
-	stream_ << PROTOCOL::PARTY << PROTOCOL::SEP << _id << PROTOCOL::SEPP;
+	stream_.write( _bcastBuffer.raw(), _partyIdPrefixLen );
 }
 
 yaal::hcore::HStreamInterface& operator << ( HStreamInterface& stream_, HLogic const& party_ ) {
@@ -144,8 +148,11 @@ void HLogic::broadcast( HString const& message_ ) {
 	M_PROLOG
 	for ( clients_t::HIterator it( _clients.begin() ), end( _clients.end() ); it != end; ++ it ) {
 		try {
-			if ( (*it)->_valid )
-				(*it)->_socket->write_until_eos( _out << PROTOCOL::PARTY << PROTOCOL::SEP << _id << PROTOCOL::SEPP << message_ << _out );
+			if ( (*it)->_valid ) {
+				_bcastBuffer.erase( _partyIdPrefixLen );
+				_bcastBuffer += message_;
+				(*it)->_socket->write_until_eos( _bcastBuffer );
+			}
 		} catch ( HOpenSSLException const& ) {
 			drop_client( *it );
 		}

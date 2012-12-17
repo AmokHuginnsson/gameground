@@ -781,11 +781,10 @@ void HGo::send_goban( OClientInfo* clientInfo_ ) {
 	_out << PROTOCOL::SGF << PROTOCOL::SEP;
 	_sgf.save( _out, true );
 	_out << endl;
-	_out.use();
 	if ( clientInfo_ )
-		*clientInfo_->_socket << *this << _out.string();
+		*clientInfo_->_socket << *this << _out.consume();
 	else
-		broadcast( _out.string() );
+		broadcast( _out.consume() );
 	_path.clear();
 	SGF::game_tree_t::const_node_t n( _sgf.get_current_move() );
 	int moveNo( 0 );
@@ -806,11 +805,10 @@ void HGo::send_goban( OClientInfo* clientInfo_ ) {
 	for ( int i( static_cast<int>( _path.get_size() - 1 ) ); i >= 0; -- i )
 		_out << ',' << _path[i];
 	_out << endl;
-	_out.use();
 	if ( clientInfo_ )
-		*clientInfo_->_socket << *this << _out.string();
+		*clientInfo_->_socket << *this << _out.consume();
 	else
-		broadcast( _out.string() );
+		broadcast( _out.consume() );
 	return;
 	M_EPILOG
 }
@@ -996,11 +994,10 @@ void HGo::send_contestant( char stone, OClientInfo* clientInfo_ ) {
 			<< score << PROTOCOL::SEPP
 			<< time << PROTOCOL::SEPP
 			<< byoyomi << endl;
-	_out.use();
 	if ( clientInfo_ )
-		*clientInfo_->_socket << *this << _out.string();
+		*clientInfo_->_socket << *this << _out.consume();
 	else
-		broadcast( _out.string() );
+		broadcast( _out.consume() );
 	return;
 	M_EPILOG
 }

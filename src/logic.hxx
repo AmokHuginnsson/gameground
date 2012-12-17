@@ -53,6 +53,8 @@ protected:
 	yaal::hcore::HString _comment;
 	yaal::tools::HStringStream _out;
 	mutable yaal::hcore::HMutex _mutex;
+	yaal::hcore::HString _bcastBuffer;
+	int _partyIdPrefixLen;
 	/*}*/
 	struct PROTOCOL {
 		static char const* const SEP;

@@ -482,10 +482,10 @@ void HServer::create_party( OClientInfo& client_, HString const& arg_ ) {
 					}
 					_out << PROTOCOL::PARTY_INFO << PROTOCOL::SEP << logic->id() << PROTOCOL::SEPP << logic->get_info() << endl;
 					if ( ! logic->is_private() ) {
-						broadcast( _out << _out );
+						broadcast( _out.consume() );
 						broadcast_player_info( client_ );
 					} else {
-						*client_._socket << ( _out << _out );
+						*client_._socket << _out.consume();
 						broadcast_player_info( client_, *logic );
 					}
 					logic->post_accept_client( &client_ );
@@ -697,7 +697,7 @@ void HServer::send_player_info( OClientInfo& about_, OClientInfo& to_ ) {
 					_out << PROTOCOL::SEPP << logic->first;
 			}
 			_out << endl;
-			SENDF( *to_._socket ) << ( _out << _out );
+			SENDF( *to_._socket ) << _out.consume();
 		}
 	} catch ( HOpenSSLException const& ) {
 		drop_client( &to_ );
