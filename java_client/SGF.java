@@ -501,14 +501,14 @@ public class SGF {
 		values_.add( _cache );
 	}
 
-	void saveSetup( HTree<Move>.HNode<Move> $node, PrintStream $stream ) {
+	void saveSetup( HTree<Move>.HNode<Move> $node, PrintStream $stream, boolean $noNl ) {
 		String[] setupTag = new String[] {
 			"AE", "AB", "AW", "TR", "SQ", "CR", "MA", "TB", "TW"
 		};
 		Move m = $node.value();
 		Setup setup = m.setup();
 		if ( ( m.type() == Move.Type.SETUP ) && ( $node != _tree.getRoot() ) )
-			$stream.print( "\n;" );
+			$stream.print( $noNl ? ";" : "\n;" );
 		ArrayList<Coord> toRemove = setup.get( Position.REMOVE );
 		if ( toRemove != null ) {
 			$stream.print( "AE" );
@@ -527,21 +527,23 @@ public class SGF {
 		}
 		return;
 	}
-
 	void save( PrintStream $stream ) {
-		$stream.print( "(;GM[" + _gameType.value() + "]FF[4]AP[" + _app + "]\n"
-			+ "RU[" + _rules + "]SZ[" + _gobanSize + "]KM[" + _komi + "]TM[" + _time + "]\n"
-			+ "PB[" + _blackName + "]PW[" + _whiteName + "]\n" );
+		save( $stream, false );
+	}
+	void save( PrintStream $stream, boolean $noNl ) {
+		$stream.print( "(;GM[" + _gameType.value() + "]FF[4]AP[" + _app + ( $noNl ? "]" : "]\n" )
+			+ "RU[" + _rules + "]SZ[" + _gobanSize + "]KM[" + _komi + "]TM[" + _time + ( $noNl ? "]" : "]\n" )
+			+ "PB[" + _blackName + "]PW[" + _whiteName + ( $noNl ? "]" : "]\n" ) );
 		boolean rankShown = false;
 		if ( ( _blackRank != null ) && ! "".equals( _blackRank ) ) {
-			$stream.print( "BR[" + _blackRank );
+			$stream.print( "BR[" + _blackRank + "]" );
 			rankShown = true;
 		}
 		if ( ( _whiteRank != null ) && ! "".equals( _whiteRank ) ) {
-			$stream.print( "WR[" + _whiteRank );
+			$stream.print( "WR[" + _whiteRank + "]" );
 			rankShown = true;
 		}
-		if ( rankShown )
+		if ( rankShown && ! $noNl )
 			$stream.print( "\n" );
 		if ( ! "".equals( _comment ) ) {
 			_cache = _comment;
@@ -550,10 +552,10 @@ public class SGF {
 		if ( _tree.getRoot() != null ) {
 			HTree<Move>.HNode<Move> root = _tree.getRoot();
 			if ( root.value().setup() != null )
-				saveSetup( root, $stream );
-			saveVariations( _firstToMove, root, $stream );
+				saveSetup( root, $stream, $noNl );
+			saveVariations( _firstToMove, root, $stream, $noNl );
 		}
-		$stream.println( ")" );
+		$stream.print( $noNl ? ")" : ")\n" );
 		return;
 	}
 
@@ -566,7 +568,7 @@ public class SGF {
 		return;
 	}
 
-	void saveVariations( Player $from, HTree<Move>.HNode<Move> $node, PrintStream $stream ) {
+	void saveVariations( Player $from, HTree<Move>.HNode<Move> $node, PrintStream $stream, boolean $noNl ) {
 		int childCount = 0;
 		while ( ( childCount = $node.getChildCount() ) == 1 ) {
 			$node = $node.getChildAt( 0 );
@@ -575,20 +577,20 @@ public class SGF {
 				$from = ( $from == Player.BLACK ? Player.WHITE : Player.BLACK );
 			}
 			if ( $node.value().setup() != null )
-				saveSetup( $node, $stream );
+				saveSetup( $node, $stream, $noNl );
 		}
 		if ( childCount > 1 ) /* We have variations. */ {
 			for ( HTree<Move>.HNode<Move> it : $node ) {
-				$stream.print( "\n(" );
+				$stream.print( $noNl ? "(" : "\n(" );
 				Player p = $from;
 				if ( it.value().type() == Move.Type.MOVE ) {
 					saveMove( $from, it, $stream );
 					p = ( p == Player.BLACK ? Player.WHITE : Player.BLACK );
 				}
 				if ( it.value().setup() != null )
-					saveSetup( it, $stream );
-				saveVariations( p, it, $stream );
-				$stream.print( ")\n" );
+					saveSetup( it, $stream, $noNl );
+				saveVariations( p, it, $stream, $noNl );
+				$stream.print( $noNl ? ")" : ")\n" );
 			}
 		}
 		return;

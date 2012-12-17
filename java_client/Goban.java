@@ -1,11 +1,13 @@
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.awt.Image;
 import java.awt.Graphics;
@@ -58,7 +60,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	HTree<SGF.Move>.HNode<SGF.Move> _lastMove = null;
 	byte[] _stones = new byte[Go.GOBAN_SIZE.NORMAL * Go.GOBAN_SIZE.NORMAL];
 	ArrayList<HTree<SGF.Move>.HNode<SGF.Move>> _branch = new ArrayList<HTree<SGF.Move>.HNode<SGF.Move>>();
-	ArrayList<Integer> _selection = new ArrayList<Integer>();
+	StringBuilder _selection = new StringBuilder();
 //--------------------------------------------//
 	public Goban() {
 		Arrays.fill( _stones, STONE.NONE );
@@ -214,30 +216,44 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		_logic._gui.repaint();
 		placeByLogic();
 
-		/* Find _lastMove address in tree. */
-		_selection.clear();
-		if ( _lastMove != null ) {
-			for ( int i = 0; i < _branch.size(); ++ i ) {
-				HTree<SGF.Move>.HNode<SGF.Move> n = _branch.get( i );
-				if ( n == _lastMove ) {
-					_selection.add( i );
-					break;
-				}
-				if ( n.getChildCount() > 1 ) {
-					HTree<SGF.Move>.HNode<SGF.Move> c = _branch.get( i + 1 );
-					for ( int j = 0; j < n.getChildCount(); ++ j ) {
-						if ( c == n.getChildAt( j ) ) {
-							if ( _selection.size() == 0 )
-								_selection.add( i );
-							_selection.add( j );
+		if ( isAdmin() ) {
+			/* Find _lastMove address in tree. */
+			_selection.delete( 0, _selection.length() );
+			if ( _lastMove != null ) {
+				for ( int i = 0; i < _branch.size(); ++ i ) {
+					HTree<SGF.Move>.HNode<SGF.Move> n = _branch.get( i );
+					if ( n == _lastMove ) {
+						_selection.insert( 0, i );
+						break;
+					}
+					if ( n.getChildCount() > 1 ) {
+						HTree<SGF.Move>.HNode<SGF.Move> c = _branch.get( i + 1 );
+						for ( int j = 0; j < n.getChildCount(); ++ j ) {
+							if ( c == n.getChildAt( j ) ) {
+								_selection.append( ',' );
+								_selection.append( j );
+							}
 						}
 					}
 				}
+				_logic._client.println( Go.PROTOCOL.CMD + Go.PROTOCOL.SEP + _logic.id() + Go.PROTOCOL.SEP
+						+ Go.PROTOCOL.SELECT + Go.PROTOCOL.SEP + _selection );
 			}
-			_logic._client.println( Go.PROTOCOL.CMD + Go.PROTOCOL.SEP + _logic.id() + Go.PROTOCOL.SEP
-					+ Go.PROTOCOL.SELECT + Go.PROTOCOL.SEP + _selection );
-			Con.debug( "" + _selection );
 		}
+	}
+	abstract boolean isAdmin();
+	void select( String $path ) {
+		StringTokenizer t = new StringTokenizer( $path, "," );
+		int moveNo = Integer.parseInt( t.nextToken() );
+		HTree<SGF.Move>.HNode<SGF.Move> m = _sgf._tree.getRoot();
+		for ( int i = 0; i < moveNo; ++ i ) {
+			int cc = m.getChildCount();
+			int child = 0;
+			if ( cc > 1 )
+				child = Integer.parseInt( t.nextToken() );
+			m = m.getChildAt( child );
+		}
+		selectBranch( m );
 	}
 	abstract void placeByLogic();
 	void edit( SGF.Setup $setup ) {
@@ -545,15 +561,18 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		if ( fc.showOpenDialog( this ) == JFileChooser.APPROVE_OPTION ) {
 			try {
 				FileInputStream fis = new FileInputStream( fc.getSelectedFile() );
-				BufferedReader inStream = new BufferedReader( new InputStreamReader( fis ) ); 
+				BufferedReader inStream = new BufferedReader( new InputStreamReader( fis ) );
+				SGF sgf = new SGF( SGF.GAME_TYPE.GO, "gameground-client" );
 				try {
-					String message;
-					String data = "";
-					while ( ( message = inStream.readLine() ) != null )
-						data += ( message + "\n" );
-					_logic._client.println( HAbstractLogic.PROTOCOL.CMD + HAbstractLogic.PROTOCOL.SEP + _logic.id() + HAbstractLogic.PROTOCOL.SEP + PROTOCOL.SGF + HAbstractLogic.PROTOCOL.SEP + Sec.escape( data ) );
-				} catch ( java.io.IOException ioe ) {
-					Con.err( "java.io.IOException: " + ioe.getMessage() );
+					sgf.load( inStream );
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					PrintStream ps = new PrintStream( baos );
+					sgf.save( ps, true );
+					_logic._client.println( HAbstractLogic.PROTOCOL.CMD + HAbstractLogic.PROTOCOL.SEP + _logic.id() + HAbstractLogic.PROTOCOL.SEP + PROTOCOL.SGF + HAbstractLogic.PROTOCOL.SEP + baos.toString( "ISO-8859-2" ).replace( "\n", "\\n" ) );
+				} catch ( java.io.UnsupportedEncodingException uee ) {
+					Con.err( "java.io.UnsupportedEncodingException: " + uee.getMessage() );
+				} catch ( SGFException se ) {
+					Con.err( "SGFException: " + se.getMessage() );
 				}
 			} catch ( java.io.FileNotFoundException fnfe ) {
 				Con.err( "java.io.FileNotFoundException: " + fnfe.getMessage() );

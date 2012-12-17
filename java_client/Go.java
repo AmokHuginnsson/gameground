@@ -327,6 +327,7 @@ class Go extends HAbstractLogic implements Runnable {
 		_handlers.put( PROTOCOL.CONTESTANT, Go.class.getDeclaredMethod( "handlerContestant", new Class<?>[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYERQUIT, Go.class.getDeclaredMethod( "handlerPlayerQuit", new Class<?>[]{ String.class } ) );
 		_handlers.put( PROTOCOL.SGF, Go.class.getDeclaredMethod( "handlerSGF", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.SELECT, Go.class.getDeclaredMethod( "handlerSelect", new Class<?>[]{ String.class } ) );
 		GoImages images = new GoImages();
 		_gui._board.setLogic( this );
 		_gui._board.setImages( images );
@@ -388,6 +389,9 @@ class Go extends HAbstractLogic implements Runnable {
 	boolean isPlayerSitting( byte $stone ) {
 		GoPlayer p = _contestants.get( $stone );
 		return ( ( p != null ) && ! GoPlayer.EMPTY.equals( p._name.getText() ) );
+	}
+	public boolean isAdmin() {
+		return ( _admin );
 	}
 	void handlerContestant( String $command ) {
 		String[] tokens = $command.split( ",", 6 );
@@ -457,9 +461,13 @@ class Go extends HAbstractLogic implements Runnable {
 	void handlerSGF( String $command ) {
 		if ( ( _toMove == STONE.BLACK ) || ( _toMove == STONE.WHITE ) )
 			Sound.play( "stone" );
-		_gui._board.updateSGF( Sec.unescape( $command ) );
+		_gui._board.updateSGF( $command.replace( "\\n", "\n" ) );
 		_gui._board.repaint();
 		_gui._sgftree.repaint();
+	}
+	void handlerSelect( String $command ) {
+		if ( ! _admin )
+			_gui._board.select( $command );
 	}
 	void handlerStone( String $command ) {
 	}

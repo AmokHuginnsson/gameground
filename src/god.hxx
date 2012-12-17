@@ -93,6 +93,7 @@ protected:
 	/*{*/
 	typedef yaal::hcore::HPair<OClientInfo*, OPlayerInfo> player_t;
 	typedef yaal::hcore::HList<player_t> players_t;
+	typedef yaal::hcore::HArray<int> path_t;
 	OClientInfo* _contestants[ 2 ];
 	STONE::stone_t _state;
 	int _gobanSize;
@@ -109,6 +110,7 @@ protected:
 	yaal::hcore::HChunk _oldGame;
 	sgf::SGF _sgf;
 	players_t _players;
+	path_t _path;
 	yaal::hcore::HString _varTmpBuffer;
 	/*}*/
 public:
@@ -132,7 +134,7 @@ protected:
 	void set_handicaps( int );
 	void set_handi( int );
 	void put_stone( int, int, STONE::stone_t );
-	void send_goban( void );
+	void send_goban( OClientInfo* = NULL );
 	bool have_liberties( int, int, STONE::stone_t );
 	char& goban( int, int );
 	OClientInfo*& contestant( STONE::stone_t );
@@ -144,8 +146,8 @@ protected:
 	bool is_ko( void );
 	void make_move( int, int, STONE::stone_t );
 	void contestant_gotup( OClientInfo* );
-	void send_contestants( void );
-	void send_contestant( char );
+	void send_contestants( OClientInfo* = NULL );
+	void send_contestant( char, OClientInfo* );
 	int count_stones( STONE::stone_t );
 	void handler_sit( OClientInfo*, yaal::hcore::HString const& );
 	void handler_getup( OClientInfo*, yaal::hcore::HString const& );
@@ -154,6 +156,7 @@ protected:
 	void handler_sgf( OClientInfo*, yaal::hcore::HString const& );
 	void handler_dead( OClientInfo*, yaal::hcore::HString const& );
 	void handler_newgame( OClientInfo*, yaal::hcore::HString const& );
+	void handler_select( OClientInfo*, yaal::hcore::HString const& );
 	void handler_accept( OClientInfo* );
 	void handler_undo( OClientInfo* );
 	void broadcast_contestants( yaal::hcore::HString const& );

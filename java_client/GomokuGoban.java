@@ -94,5 +94,8 @@ public class GomokuGoban extends Goban {
 	}
 	void placeByLogic() {
 	}
+	boolean isAdmin() {
+		return ( false );
+	}
 }
 

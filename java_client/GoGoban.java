@@ -191,5 +191,8 @@ public class GoGoban extends Goban {
 		_logic.score( STONE.BLACK, blackTeritory + whiteDead );
 		_logic.score( STONE.WHITE, whiteTeritory + blackDead );
 	}
+	boolean isAdmin() {
+		return ( _logic.isAdmin() );
+	}
 }
 

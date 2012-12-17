@@ -36,14 +36,18 @@ public class GoConfigurator extends HAbstractConfigurator implements ChangeListe
 	}
 	void setDefaults( String $defaults ) {
 		String[] tokens = $defaults.split( ",", 6 );
+		_ignoreEvents = true;
 		gobanModel();
+		_ignoreEvents = true;
 		selectGobanSize( tokens[ 0 ] );
 
+		_ignoreEvents = true;
 		_confKomi.setValue( Integer.parseInt( tokens[ 1 ] ) );
 		_confHandicaps.setValue( Integer.parseInt( tokens[ 2 ] ) );
 		_confMainTime.setValue( Integer.parseInt( tokens[ 3 ] ) );
 		_confByoYomiPeriods.setValue( Integer.parseInt( tokens[ 4 ] ) );
 		_confByoYomiTime.setValue( Integer.parseInt( tokens[ 5 ] ) );
+		_ignoreEvents = false;
 	}
 	public void gobanModel() {
 		DefaultComboBoxModel<String> model = new DefaultComboBoxModel<String>();
