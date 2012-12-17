@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.io.BufferedReader;
 import java.io.StringReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.FileOutputStream;
@@ -39,6 +40,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	}
 	public static final long serialVersionUID = 7l;
 	public static final int D_MARGIN = 20;
+	static final String SGF_DIR_PROP = "sgf-dir";
 	static final int ALL = 30000;
 	static final SGF.Position[] _markers = new SGF.Position[] {
 			SGF.Position.TRIANGLE,
@@ -555,7 +557,11 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	abstract void drawByLogic( Graphics g );
 	abstract void move( int $col, int $row, byte $stone );
 	void load() {
+		Ini ini = _logic._app.ini();
+		String startDir = ini.getProperty( SGF_DIR_PROP );
 		JFileChooser fc = new JFileChooser();
+		if ( startDir != null )
+			fc.setCurrentDirectory( new File( startDir ) );
 		fc.setAcceptAllFileFilterUsed( false );
 		fc.setFileFilter( new FileNameExtensionFilter( "Smart Game Format", "sgf" ) );
 		if ( fc.showOpenDialog( this ) == JFileChooser.APPROVE_OPTION ) {
@@ -565,6 +571,8 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 				SGF sgf = new SGF( SGF.GAME_TYPE.GO, "gameground-client" );
 				try {
 					sgf.load( inStream );
+					ini.setProperty( SGF_DIR_PROP, fc.getCurrentDirectory().getPath() );
+					ini.save();
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					PrintStream ps = new PrintStream( baos );
 					sgf.save( ps, true );
@@ -580,12 +588,18 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		}
 	}
 	void save() {
+		Ini ini = _logic._app.ini();
+		String startDir = ini.getProperty( SGF_DIR_PROP );
 		JFileChooser fc = new JFileChooser();
+		if ( startDir != null )
+			fc.setCurrentDirectory( new File( startDir ) );
 		fc.setAcceptAllFileFilterUsed( false );
 		fc.setFileFilter( new FileNameExtensionFilter( "Smart Game Format", "sgf" ) );
 		if ( fc.showSaveDialog( this ) == JFileChooser.APPROVE_OPTION ) {
 			try {
 				String path = fc.getSelectedFile().getPath();
+				ini.setProperty( SGF_DIR_PROP, fc.getCurrentDirectory().getPath() );
+				ini.save();
 				if ( path.indexOf( ".sgf" ) != ( path.length() - 4 ) )
 					path += ".sgf";
 				FileOutputStream fos = new FileOutputStream( path );

@@ -110,6 +110,7 @@ class HWorkArea extends HAbstractWorkArea {
 		_client.println( "get_partys" );
 		_client.println( "get_players" );
 		Sound.play( "service-login" );
+		_app.ini().save();
 	}
 	public void handleError( String $message ) {
 		javax.swing.JOptionPane.showMessageDialog( _gui,

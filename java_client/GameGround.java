@@ -15,8 +15,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.Properties;
-import java.io.FileReader;
 
 public class /* Application or applet name: */ GameGround extends JApplet {
 	public static final long serialVersionUID = 13l;
@@ -30,7 +28,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	private HLogin _loginScreen = null;
 	private HWorkArea _workArea = null;
 	boolean _applet = false;
-	Properties _ini;
+	Ini _ini = new Ini();
 	CommandLine _cmd;
 
 	public GameGround() { this( null ); }
@@ -211,25 +209,13 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 			val = super.getParameter( $name );
 		else 
 			val = _cmd.getOptionValue( $name );
-		if ( ( _ini != null ) && ( val == null ) )
+		if ( val == null )
 			val = _ini.getProperty( $name );
 		System.out.println( "Getting parameter: " + $name + ", of value: " + val + "." );
 		return ( val );
 	}
 	void handleProgramOptions( String[] $argv ) {
-		try {
-			/* System.getProperties().list( System.out ); */
-			_ini = new Properties();
-			_ini.load( new FileReader( System.getenv( "HOME" ) + "/etc/conf/gameground-clientrc" ) );
-		} catch ( java.io.FileNotFoundException e ) {
-			Con.err( e.getMessage() );
-		} catch ( java.io.IOException e ) {
-			Con.err( "FATAL ERROR: " + e.getMessage() );
-			e.printStackTrace();
-			System.exit( 1 );
-		} catch ( java.security.AccessControlException e ) {
-			Con.err( "Insufficient privileges to guess home directory: " + e.getMessage() );
-		}
+		_ini.load();
 		if ( $argv != null ) {
 			Options opts = new Options();
 			OptionBuilder.withLongOpt( "help" );
@@ -273,9 +259,12 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 				formatter.printHelp( "GameGround", opts );
 				System.exit( 0 );
 			}
-			if ( _cmd.hasOption( "auto-connect" ) && ( _ini != null ) )
+			if ( _cmd.hasOption( "auto-connect" ) )
 				_ini.setProperty( "auto-connect", "true" );
 		}
+	}
+	public Ini ini() {
+		return ( _ini );
 	}
 	public String getName() {
 		return ( _name );
