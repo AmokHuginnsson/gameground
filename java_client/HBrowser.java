@@ -2,6 +2,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
+import java.awt.Font;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import javax.swing.Action;
@@ -77,6 +78,9 @@ class HBrowser extends HAbstractLogic {
 			_app.setup().prepareFonts( _logPad.getFont() );
 		}
 		public JTextPane getLogPad() {
+			Font f = _app.setup().getFont();
+			if ( f != null )
+				_logPad.setFont( f );
 			return ( _logPad );
 		}
 		public void onCreate( String $logic ) {

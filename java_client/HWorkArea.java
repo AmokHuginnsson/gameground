@@ -298,6 +298,10 @@ class HWorkArea extends HAbstractWorkArea {
 			if ( acc.confirmed() ) {
 				// System.out.println( "account:" + acc.getConfiguration() );
 				_client.println( "account:" + acc.getConfiguration() );
+				for ( int i = 0, COUNT = _gui._tabs.getTabCount(); i < COUNT; ++ i ) {
+					HGUIface f = (HGUIface)_gui._tabs.getComponentAt( i );
+					f.getLogPad();
+				}
 			}
 		} else {
 			Chat chat = Chat.showUserInfo( _app, $message );

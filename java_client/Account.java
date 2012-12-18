@@ -45,6 +45,7 @@ public class Account extends XDialog implements DocumentListener {
 				} catch ( Exception e ) {
 				}
 			}
+			_description.setFont( _app.setup().getFont() );
 			setVisible( true );
 		} catch ( java.lang.Exception e ) {
 			e.printStackTrace();
