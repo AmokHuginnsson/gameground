@@ -70,6 +70,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 			$xul.getTaglib().registerTag( "scoretable", ScoreTable.class );
 		}
 		public JTextPane getLogPad() {
+			_logPad.setFont( _app.setup().getFont() );
 			return ( _logPad );
 		}
 		public HAbstractConfigurator getConfigurator() {

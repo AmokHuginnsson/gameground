@@ -74,6 +74,7 @@ class HBrowser extends HAbstractLogic {
 			_games.setModel( _partysModel );
 			_games.addMouseListener( partysML );
 			_people.addMouseListener( usersML );
+			_app.setup().prepareFonts( _logPad.getFont() );
 		}
 		public JTextPane getLogPad() {
 			return ( _logPad );

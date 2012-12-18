@@ -81,6 +81,7 @@ class Boggle extends HAbstractLogic implements Runnable {
 			_wordInput.requestFocusInWindow();
 		}
 		public JTextPane getLogPad() {
+			_logPad.setFont( _app.setup().getFont() );
 			return ( _logPad );
 		}
 		public void onMessage() {

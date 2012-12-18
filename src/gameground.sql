@@ -34,6 +34,7 @@ CREATE TABLE tbl_user (
 	name VARCHAR(255),
 	email VARCHAR(255),
 	description VARCHAR(255),
+	setup VARCHAR(255),
 	registered DATETIME
 );
 

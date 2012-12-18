@@ -36,6 +36,7 @@ class SetBang extends HAbstractLogic implements Runnable {
 			SetBang.this.handlerRound( "" );
 		}
 		public JTextPane getLogPad() {
+			_logPad.setFont( _app.setup().getFont() );
 			return ( _logPad );
 		}
 		public void onMessage() {

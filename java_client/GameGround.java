@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.awt.Container;
 import java.awt.Frame;
 import java.awt.Dimension;
+import java.awt.Font;
 import javax.swing.JApplet;
 import org.swixml.SwingEngine;
 import org.swixml.TagLibrary;
@@ -17,6 +18,25 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class /* Application or applet name: */ GameGround extends JApplet {
+	static public class Setup {
+		int _fontSize;
+		Font[] _font = new Font[2];
+		void prepareFonts( Font $font ) {
+			if ( _font[0] == null ) {
+				_font[0] = $font;
+				_font[1] = $font.deriveFont( (float)($font.getSize() + 4 ) );
+			}
+		}
+		void setFontSize( int $fontSize ) {
+			_fontSize = $fontSize;
+		}
+		Font getFont() {
+			return ( _font[_fontSize] );
+		}
+		void setSound( boolean $enabled ) {
+			Sound.setEnabled( $enabled );
+		}
+	};
 	public static final long serialVersionUID = 13l;
 	public Frame _frame;
 	private final ScheduledExecutorService _scheduler = Executors.newScheduledThreadPool( 1 );
@@ -29,6 +49,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	private HWorkArea _workArea = null;
 	boolean _applet = false;
 	Ini _ini = new Ini();
+	Setup _setup = new Setup();
 	CommandLine _cmd;
 
 	public GameGround() { this( null ); }
@@ -265,6 +286,9 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	}
 	public Ini ini() {
 		return ( _ini );
+	}
+	public Setup setup() {
+		return ( _setup );
 	}
 	public String getName() {
 		return ( _name );

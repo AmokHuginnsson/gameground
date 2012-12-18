@@ -59,6 +59,7 @@ public:
 	struct PROTOCOL {
 		static char const* const ABANDON;
 		static char const* const ACCOUNT;
+		static char const* const CLIENT_SETUP;
 		static char const* const CMD;
 		static char const* const CREATE;
 		static char const* const ERR;

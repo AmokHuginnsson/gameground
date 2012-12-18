@@ -74,6 +74,7 @@ class HWorkArea extends HAbstractWorkArea {
 			_handlers.put( "party_info", HWorkArea.class.getDeclaredMethod( "handlePartyInfo", new Class<?>[]{ String.class } ) );
 			_handlers.put( "party_close", HWorkArea.class.getDeclaredMethod( "handlePartyClose", new Class<?>[]{ String.class } ) );
 			_handlers.put( "player", HWorkArea.class.getDeclaredMethod( "handlePlayer", new Class<?>[]{ String.class } ) );
+			_handlers.put( "client_setup", HWorkArea.class.getDeclaredMethod( "handleClientSetup", new Class<?>[]{ String.class } ) );
 			_handlers.put( "player_quit", HWorkArea.class.getDeclaredMethod( "handlePlayerQuit", new Class<?>[]{ String.class } ) );
 		} catch ( java.lang.NoSuchMethodException e ) {
 			e.printStackTrace();
@@ -109,7 +110,6 @@ class HWorkArea extends HAbstractWorkArea {
 		_client.println( "get_logics" );
 		_client.println( "get_partys" );
 		_client.println( "get_players" );
-		Sound.play( "service-login" );
 		_app.ini().save();
 	}
 	public void handleError( String $message ) {
@@ -133,6 +133,15 @@ class HWorkArea extends HAbstractWorkArea {
 			}
 			lp._party._party.processMessage( toks[1] );
 		}
+	}
+	public void handleClientSetup( String $message ) {
+		String[] tokens = $message.split( ";", 2 );
+		if ( tokens.length == 2 ) {
+			_app.setup().setSound( Boolean.parseBoolean( tokens[0] ) );
+			_app.setup().setFontSize( Integer.parseInt( tokens[1] ) );
+		}
+		_browser._gui._logPad.setFont( _app.setup().getFont() );
+		Sound.play( "service-login" );
 	}
 	public synchronized void processMessage( String $message ) {
 		String[] tokens = $message.split( ":", 2 );

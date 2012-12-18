@@ -1,6 +1,8 @@
 import javax.swing.JTextField;
 import javax.swing.JTextArea;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JCheckBox;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
 import org.swixml.XDialog;
@@ -17,10 +19,12 @@ public class Account extends XDialog implements DocumentListener {
 	public JTextField _newPassword;
 	public JTextField _newPasswordRepeat;
 	public JTextArea _description;
+	public JCheckBox _sound;
+	public JComboBox<String> _fontSize;
 	public JButton _ok;
 	public Account( GameGround $app, String $conf ) {
 		_app = $app;
-		String[] tokens = $conf.split( ",", 4 );
+		String[] tokens = $conf.split( ",", 5 );
 		try {
 			new SwingEngine( this ).insert( AppletJDOMHelper.loadResource( "/res/account.xml", this ), this );
 			_oldPassword.getDocument().addDocumentListener( this );
@@ -29,6 +33,18 @@ public class Account extends XDialog implements DocumentListener {
 			_name.setText( Sec.unescape( tokens[1] ) );
 			_email.setText( Sec.unescape( tokens[3] ) );
 			_description.setText( Sec.unescape( tokens[2] ) );
+			String[] conf = tokens[4].split( ";", 2 );
+			_fontSize.addItem( "Normal" );
+			_fontSize.addItem( "Large" );
+			_sound.setSelected( true );
+			_fontSize.setSelectedIndex( 0 );
+			if ( conf.length == 2 ) {
+				try {
+					_sound.setSelected( Boolean.parseBoolean( conf[0] ) );
+					_fontSize.setSelectedIndex( Integer.parseInt( conf[1] ) );
+				} catch ( Exception e ) {
+				}
+			}
 			setVisible( true );
 		} catch ( java.lang.Exception e ) {
 			e.printStackTrace();
@@ -68,11 +84,14 @@ public class Account extends XDialog implements DocumentListener {
 		_confirmed = true;
 		_configuration =
 			Sec.escape( _name.getText() ) + ","
-			+ Sec.escape( _email.getText() )+ ","
+			+ Sec.escape( _email.getText() ) + ","
 			+ Sec.escape( _description.getText() ) + ","
+			+ Sec.escape( "" + _sound.isSelected() + ";" + _fontSize.getSelectedIndex() ) + ","
 			+ Crypt.SHA1( _oldPassword.getText() ) + ","
 			+ Crypt.SHA1( _newPassword.getText() ) + ","
 			+ Crypt.SHA1( _newPasswordRepeat.getText() );
+		_app.setup().setSound( _sound.isSelected() );
+		_app.setup().setFontSize( _fontSize.getSelectedIndex() );
 		dispose();
 	}
 	public void onCancel() {

@@ -61,6 +61,7 @@ static int const CONSTR_CHAR_SET_GAME_NAME = 1;
 char const* const LEGEAL_CHARACTER_SET[] = { LEGEAL_CHARACTER_SET_BASE, " "LEGEAL_CHARACTER_SET_BASE };
 char const* const HServer::PROTOCOL::ABANDON = "abandon";
 char const* const HServer::PROTOCOL::ACCOUNT = "account";
+char const* const HServer::PROTOCOL::CLIENT_SETUP = "client_setup";
 char const* const HServer::PROTOCOL::CMD = "cmd";
 char const* const HServer::PROTOCOL::CREATE = "create";
 char const* const HServer::PROTOCOL::ERR = "err";
@@ -329,7 +330,8 @@ void HServer::handle_login( OClientInfo& client_, HString const& loginInfo_ ) {
 			*client_._socket << "err:" << login << " already logged in." << endl;
 		else {
 			HRecordSet::ptr_t rs( _db->query( ( HFormat( "SELECT ( SELECT COUNT(*) FROM v_user_session WHERE login = LOWER('%s') AND password = LOWER('%s') )"
-							" + ( SELECT COUNT(*) FROM v_user_session WHERE login = LOWER('%s') );" ) % login % password % login ).string() ) );
+							" + ( SELECT COUNT(*) FROM v_user_session WHERE login = LOWER('%s') ), ( SELECT setup FROM v_user_session WHERE login = LOWER('%s') );" )
+							% login % password % login % login ).string() ) );
 			M_ENSURE( !! rs );
 			HRecordSet::iterator row = rs->begin();
 			if ( row == rs->end() ) {
@@ -340,9 +342,12 @@ void HServer::handle_login( OClientInfo& client_, HString const& loginInfo_ ) {
 			if ( ( result == 2 ) || ( result == 0 ) ) {
 				client_._login = login;
 				_logins.insert( make_pair( login, &client_ ) );
-				if ( result ) /* user exists and supplied password was correct */
+				if ( result ) { /* user exists and supplied password was correct */
 					update_last_activity( client_ );
-				else if ( password != NULL_PASS ) {
+					HRecordSet::value_t clientSetup( row[1] );
+					if ( clientSetup && ! clientSetup->is_empty() )
+						*client_._socket << PROTOCOL::CLIENT_SETUP << PROTOCOL::SEP << *clientSetup << endl;
+				} else if ( password != NULL_PASS ) {
 					rs = _db->query( ( HFormat( "INSERT INTO v_user_session ( login, password ) VALUES ( LOWER('%s'), LOWER('%s') );" ) % login % password ).string() );
 					M_ENSURE( !! rs );
 				} else {
@@ -378,14 +383,16 @@ void HServer::handle_account( OClientInfo& client_, HString const& accountInfo_ 
 		HString oldPassword;
 		HString newPassword;
 		HString newPasswordRepeat;
+		HString clientSetup;
 		for ( HTokenizer::HIterator it( t.begin() ), end( t.end() ); it != end; ++ it, ++ item ) {
 			switch ( item ) {
 				case ( 0 ): name = *it; break;
 				case ( 1 ): email = *it; break;
 				case ( 2 ): description = *it; break;
-				case ( 3 ): oldPassword = *it; break;
-				case ( 4 ): newPassword = *it; break;
-				case ( 5 ): newPasswordRepeat = *it; break;
+				case ( 3 ): clientSetup = *it; break;
+				case ( 4 ): oldPassword = *it; break;
+				case ( 5 ): newPassword = *it; break;
+				case ( 6 ): newPasswordRepeat = *it; break;
 				default: break;
 			}
 		}
@@ -393,8 +400,9 @@ void HServer::handle_account( OClientInfo& client_, HString const& accountInfo_ 
 		bool newPasswordNull( newPassword == NULL_PASS );
 		bool newPasswordRepeatNull( newPasswordRepeat == NULL_PASS );
 		if ( oldPasswordNull && newPasswordNull && newPasswordRepeatNull ) {
-			HRecordSet::ptr_t rs( _db->query( ( HFormat( "UPDATE tbl_user SET name = '%s', email = '%s', description = '%s' WHERE login = LOWER('%s');" )
-							% escape_copy( name, _escapeTable_ ) % escape_copy( email, _escapeTable_ ) % escape_copy( description, _escapeTable_ ) % client_._login ).string() ) );
+			HRecordSet::ptr_t rs( _db->query( ( HFormat( "UPDATE tbl_user SET name = '%s', email = '%s', description = '%s', setup = '%s' WHERE login = LOWER('%s');" )
+							% escape_copy( name, _escapeTable_ ) % escape_copy( email, _escapeTable_ ) % escape_copy( description, _escapeTable_ )
+							% escape_copy( clientSetup, _escapeTable_ ) % client_._login ).string() ) );
 			M_ENSURE( !! rs );
 		} else {
 			if ( ! ( oldPasswordNull || newPasswordNull || newPasswordRepeatNull ) ) {
@@ -402,8 +410,10 @@ void HServer::handle_account( OClientInfo& client_, HString const& accountInfo_ 
 					if ( ! ( is_sha1( newPassword ) && is_sha1( oldPassword ) ) )
 						kick_client( client_._socket, _msgYourClientIsTainted_ );
 					else {
-						HRecordSet::ptr_t rs( _db->query( ( HFormat( "UPDATE tbl_user SET name = '%s', email = '%s', description = '%s', password = '%s' WHERE login = LOWER('%s') AND password = LOWER('%s');" )
-										% escape_copy( name, _escapeTable_ ) % escape_copy( email, _escapeTable_ ) % escape_copy( description, _escapeTable_ ) % newPassword % client_._login % oldPassword ).string() ) );
+						HRecordSet::ptr_t rs( _db->query( ( HFormat( "UPDATE tbl_user SET name = '%s', email = '%s', description = '%s', setup = '%s', password = '%s'"
+											" WHERE login = LOWER('%s') AND password = LOWER('%s');" )
+										% escape_copy( name, _escapeTable_ ) % escape_copy( email, _escapeTable_ ) % escape_copy( description, _escapeTable_ )
+										% escape_copy( clientSetup, _escapeTable_ ) % newPassword % client_._login % oldPassword ).string() ) );
 						M_ENSURE( !! rs );
 						if ( rs->get_size() != 1 )
 							client_._socket->write_until_eos( "warn:Password not changed - old password do not match.\n" );
@@ -635,7 +645,7 @@ void HServer::handle_get_account( OClientInfo& client_, HString const& login_ ) 
 	else {
 		bool accountSelf( login_.is_empty() || ( login_ == client_._login ) );
 		HString const& login( accountSelf ? client_._login : login_ );
-		char const accountQuerySelf[] = "SELECT name, description, email FROM tbl_user WHERE login = LOWER('";
+		char const accountQuerySelf[] = "SELECT name, description, email, setup FROM tbl_user WHERE login = LOWER('";
 		char const accountQueryOther[] = "SELECT name, description FROM tbl_user WHERE login = LOWER('";
 		HRecordSet::ptr_t rs( _db->query( _out << ( accountSelf ? accountQuerySelf : accountQueryOther ) << login << "');" << _out ) );
 		M_ENSURE( !! rs );
@@ -644,15 +654,19 @@ void HServer::handle_get_account( OClientInfo& client_, HString const& login_ ) 
 			HRecordSet::value_t name( row[0] );
 			HRecordSet::value_t description( row[1] );
 			HRecordSet::value_t email;
-			if ( accountSelf )
+			HRecordSet::value_t clientSetup;
+			if ( accountSelf ) {
 				email = row[2];
+				clientSetup = row[3];
+			}
 			/* Account information is escaped twice,
 			 * once for network transfer and once for database storage. */
 			SENDF( *client_._socket ) << PROTOCOL::ACCOUNT << PROTOCOL::SEP
 				<< login << PROTOCOL::SEPP
 				<< ( name ? unescape_copy( *name, _escapeTable_ ) : "" ) << PROTOCOL::SEPP
 				<< ( description ? unescape_copy( *description, _escapeTable_ ) : "" ) << PROTOCOL::SEPP
-				<< ( email ? unescape_copy( *email, _escapeTable_ ) : "" ) << endl;
+				<< ( email ? unescape_copy( *email, _escapeTable_ ) : "" ) << PROTOCOL::SEPP
+				<< ( clientSetup ? unescape_copy( *clientSetup, _escapeTable_ ) : "" ) << endl;
 		} else
 			SENDF( *client_._socket ) << PROTOCOL::ACCOUNT << PROTOCOL::SEP << login << endl;
 	}

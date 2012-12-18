@@ -178,6 +178,7 @@ class Go extends HAbstractLogic implements Runnable {
 				_board.placeStones( _jumpToMove.getValue() );
 		}
 		public JTextPane getLogPad() {
+			_logPad.setFont( _app.setup().getFont() );
 			return ( _logPad );
 		}
 		public HAbstractConfigurator getConfigurator() {

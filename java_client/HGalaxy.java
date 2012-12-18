@@ -156,6 +156,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 			log( "##", 12 );log( " ##", 13 );log( " ##\n", 14 );
 		}
 		public JTextPane getLogPad() {
+			_logPad.setFont( _app.setup().getFont() );
 			return ( _logPad );
 		}
 		public HAbstractConfigurator getConfigurator() {
