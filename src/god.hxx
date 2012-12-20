@@ -46,7 +46,14 @@ private:
 		int _byoYomiPeriods;
 		int _stonesCaptured;
 		int _score;
-		OPlayerInfo( void ) : _timeLeft( 0 ), _byoYomiPeriods( 0 ), _stonesCaptured( 0 ), _score( 0 ) {}
+		OClientInfo* _client;
+		OPlayerInfo( void ) : _timeLeft( 0 ), _byoYomiPeriods( 0 ), _stonesCaptured( 0 ), _score( 0 ), _client( NULL ) {}
+		void reset( int long time_, int score_, int byo_ ) {
+			_timeLeft = time_;
+			_byoYomiPeriods = byo_;
+			_stonesCaptured = 0;
+			_score = score_;
+		}
 	};
 	struct STONE {
 		typedef char stone_t;
@@ -91,11 +98,10 @@ private:
 	};
 protected:
 	/*{*/
-	typedef yaal::hcore::HPair<OClientInfo*, OPlayerInfo> player_t;
-	typedef yaal::hcore::HList<player_t> players_t;
+	typedef yaal::hcore::HList<OClientInfo*> admin_queue_t;
 	typedef yaal::hcore::HArray<int> path_t;
 	typedef yaal::hcore::HArray<sgf::SGF::game_tree_t::const_node_t> branch_t;
-	OClientInfo* _contestants[ 2 ];
+	OPlayerInfo _contestants[ 2 ];
 	STONE::stone_t _state;
 	int _gobanSize;
 	int _komi;
@@ -110,7 +116,7 @@ protected:
 	yaal::hcore::HChunk _koGame;
 	yaal::hcore::HChunk _oldGame;
 	sgf::SGF _sgf;
-	players_t _players;
+	admin_queue_t _adminQueue;
 	path_t _path;
 	branch_t _branch;
 	yaal::hcore::HString _varTmpBuffer;
@@ -123,7 +129,6 @@ public:
 protected:
 	/*{*/
 	OPlayerInfo* get_player_info( OClientInfo* );
-	players_t::iterator find_player( OClientInfo* );
 	virtual bool do_accept( OClientInfo* );
 	virtual void do_post_accept( OClientInfo* );
 	virtual void do_kick( OClientInfo* );
@@ -141,14 +146,16 @@ protected:
 	void send_goban( OClientInfo* = NULL );
 	bool have_liberties( int, int, STONE::stone_t );
 	char& goban( int, int );
-	OClientInfo*& contestant( STONE::stone_t );
-	OClientInfo const* contestant( STONE::stone_t ) const;
+	OPlayerInfo& contestant( STONE::stone_t );
+	OPlayerInfo const& contestant( STONE::stone_t ) const;
+	OPlayerInfo* contestant( OClientInfo const* );
+	OPlayerInfo const* contestant( OClientInfo const* ) const;
 	void clear_goban( bool );
 	bool have_killed( int, int, STONE::stone_t );
 	HGo::STONE::stone_t opponent( STONE::stone_t );
 	bool is_suicide( int, int, STONE::stone_t );
 	bool is_ko( void );
-	void make_move( int, int, STONE::stone_t );
+	void make_move( int, int );
 	void contestant_gotup( OClientInfo* );
 	void send_contestants( OClientInfo* = NULL );
 	void send_contestant( char, OClientInfo* );
@@ -176,6 +183,7 @@ protected:
 	void revoke_scheduled_tasks( void );
 	bool can_play( OClientInfo* ) const;
 	bool can_setup( OClientInfo* ) const;
+	bool ongoing_match( void ) const;
 	/*}*/
 private:
 	/*{*/
