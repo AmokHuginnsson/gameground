@@ -46,7 +46,8 @@ public class SGF {
 		BAD_GAME_TYPE,
 		BAD_FILE_FORMAT,
 		MIXED_NODE,
-		DUPLICATED_COORDINATE
+		DUPLICATED_COORDINATE,
+		MALFORMED_LABEL
 	}
 	private class TERM {
 		static final char GT_OPEN = '(';
@@ -105,7 +106,16 @@ public class SGF {
 		}
 	};
 	static class Setup {
+		static class Label {
+			Coord _coord;
+			String _label;
+			Label( Coord $coord, String $label ) {
+				_coord = $coord;
+				_label = $label;
+			}
+		}
 		private SortedMap<Position, ArrayList<Coord>> _data = java.util.Collections.synchronizedSortedMap( new TreeMap<Position, ArrayList<Coord>>() );
+		private ArrayList<Label> _labels = new ArrayList<Label>();
 		private void addPosition( Position $position, Coord $coord ) throws SGFException {
 			if ( $position == Position.REMOVE ) {
 				for ( Map.Entry<Position, ArrayList<Coord>> e : _data.entrySet() ) {
@@ -129,8 +139,14 @@ public class SGF {
 				c.add( $coord );
 			return;
 		}
+		void addLabel( Label $label ) {
+			_labels.add( $label );
+		}
 		ArrayList<Coord> get( Position $position ) {
 			return ( _data.get( $position ) );
+		}
+		final ArrayList<Label> labels() {
+			return ( _labels );
 		}
 	}
 	static class Move {
@@ -172,6 +188,9 @@ public class SGF {
 			}
 			_setup.addPosition( $position, $coord );
 		}
+		public void addLabel( Setup.Label $label ) {
+			_setup.addLabel( $label );
+		}
 		public void addComment( String $comment ) {
 			_comment = _comment + $comment;
 		}
@@ -200,6 +219,12 @@ public class SGF {
 	static final int RESIGN = 0xffff;
 	static final int TIME = 0x7fff;
 	String _app = null;
+	String _gameName = "";
+	String _date = "";
+	String _event = "";
+	String _round = "";
+	String _source = "";
+	String _author = "";
 	String _rules = "";
 	String _blackName = "";
 	String _whiteName = "";
@@ -247,6 +272,17 @@ public class SGF {
 		return;
 	}
 
+	void addLabel( Setup.Label $label ) throws SGFException {
+		if ( _currentMove == null ) {
+			_currentMove = _tree.createNewRoot( new Move( new Setup() ) );
+		}
+		if ( _currentMove.value().setup() == null ) {
+			_currentMove.value().setSetup( new Setup() );
+		}
+		_currentMove.value().addLabel( $label );
+		return;
+	}
+
 	HTree<Move>.HNode<Move> move( HTree<Move>.HNode<Move> $node, int $col, int $row ) {
 		return ( $node.addNode( new Move( $col, $row ) ) );
 	}
@@ -259,6 +295,12 @@ public class SGF {
 		_cachePropValue.clear();
 		_currentMove = null;
 		_app = "";
+		_gameName = "";
+		_date = "";
+		_event = "";
+		_round = "";
+		_source = "";
+		_author = "";
 		_rules = "";
 		_blackName = "";
 		_blackRank = "";
@@ -296,7 +338,8 @@ public class SGF {
 		"Bad game type.",
 		"Bad file format.",
 		"Cannot mix `move' with `setup' nodes.",
-		"Duplicated coordinate in setup."
+		"Duplicated coordinate in setup.",
+		"Malformed label."
 	};
 
 	int nonSpace( int first, int last ) {
@@ -413,6 +456,18 @@ public class SGF {
 				throw new SGFException( _errMsg_[ERROR.BAD_FILE_FORMAT.ordinal()], _cur );
 		} else if ( "AP".equals( _cachePropIdent ) )
 			_app = singleValue;
+		else if ( "GN".equals( _cachePropIdent ) )
+			_gameName = singleValue;
+		else if ( "DT".equals( _cachePropIdent ) )
+			_date = singleValue;
+		else if ( "EV".equals( _cachePropIdent ) )
+			_event = singleValue;
+		else if ( "RO".equals( _cachePropIdent ) )
+			_round = singleValue;
+		else if ( "SO".equals( _cachePropIdent ) )
+			_source = singleValue;
+		else if ( "AN".equals( _cachePropIdent ) )
+			_author = singleValue;
 		else if ( "RU".equals( _cachePropIdent ) )
 			_rules = singleValue;
 		else if ( "PB".equals( _cachePropIdent ) )
@@ -449,6 +504,13 @@ public class SGF {
 		} else if ( _positionTagDict_.containsKey( _cachePropIdent ) ) {
 			for ( String s : _cachePropValue )
 				addPosition( _positionTagDict_.get( _cachePropIdent ), new Coord( s ) );
+		} else if ( "LB".equals( _cachePropIdent ) ) {
+			for ( String s : _cachePropValue ) {
+				String[] tok = s.split( ":", 2 );
+				if ( ( tok.length != 2 ) || ( tok[0].length() != 2 ) )
+					throw new SGFException( _errMsg_[ERROR.MALFORMED_LABEL.ordinal()], _cur );
+				addLabel( new Setup.Label( new Coord( tok[0] ), tok[1] ) );
+			}
 		} else if ( "B".equals( _cachePropIdent ) ) {
 			if ( _firstToMove == Player.UNSET )
 				_firstToMove = Player.BLACK;
@@ -501,28 +563,35 @@ public class SGF {
 		values_.add( _cache );
 	}
 
-	void saveSetup( HTree<Move>.HNode<Move> $node, PrintStream $stream, boolean $noNl ) {
+	void saveSetup( HTree<Move>.HNode<Move> $node, StringBuilder $stream, boolean $noNl ) {
 		String[] setupTag = new String[] {
 			"AE", "AB", "AW", "TR", "SQ", "CR", "MA", "TB", "TW"
 		};
 		Move m = $node.value();
 		Setup setup = m.setup();
 		if ( ( m.type() == Move.Type.SETUP ) && ( $node != _tree.getRoot() ) )
-			$stream.print( $noNl ? ";" : "\n;" );
+			$stream.append( $noNl ? ";" : "\n;" );
 		ArrayList<Coord> toRemove = setup.get( Position.REMOVE );
 		if ( toRemove != null ) {
-			$stream.print( "AE" );
+			$stream.append( "AE" );
 			for ( Coord c : toRemove )
-				$stream.print( "[" + c.data() + "]" );
+				$stream.append( "[" ).append( c.data() ).append( "]" );
 		}
 
 		for ( Map.Entry<Position, ArrayList<Coord>> e : setup._data.entrySet() ) {
 			if ( e.getKey() == Position.REMOVE ) {
 				continue;
 			} else {
-				$stream.print( setupTag[e.getKey().ordinal()] );
+				$stream.append( setupTag[e.getKey().ordinal()] );
 				for ( Coord c : e.getValue() )
-					$stream.print( "[" + c.data() + "]" );
+					$stream.append( "[" ).append( c.data() ).append( "]" );
+			}
+		}
+		final ArrayList<Setup.Label> labels = setup.labels();
+		if ( labels.size() > 0 ) {
+			$stream.append( "LB" );
+			for ( Setup.Label l : labels ) {
+				$stream.append( "[" ).append( l._coord.data() ).append( ":" ).append( l._label ).append( "]" );
 			}
 		}
 		return;
@@ -531,44 +600,60 @@ public class SGF {
 		save( $stream, false );
 	}
 	void save( PrintStream $stream, boolean $noNl ) {
-		$stream.print( "(;GM[" + _gameType.value() + "]FF[4]AP[" + _app + ( $noNl ? "]" : "]\n" )
-			+ "RU[" + _rules + "]SZ[" + _gobanSize + "]KM[" + _komi + "]TM[" + _time + ( $noNl ? "]" : "]\n" )
-			+ "PB[" + _blackName + "]PW[" + _whiteName + ( $noNl ? "]" : "]\n" ) );
+		StringBuilder sb = new StringBuilder();
+		sb.append( "(;GM[" ).append( _gameType.value() ).append( "]FF[4]AP[" ).append( _app )
+			.append( $noNl ? "]" : "]\n" ).append( "RU[" ).append( _rules ).append( "]SZ[" )
+			.append( _gobanSize ).append( "]KM[" ).append( _komi ).append( "]" );
+		if ( ! "".equals( _gameName ) )
+			sb.append( "GN[" ).append( _gameName ).append( "]" );
+		if ( ! "".equals( _date ) )
+			sb.append( "DT[" ).append( _date ).append( "]" );
+		if ( ! "".equals( _event ) )
+			sb.append( "EV[" ).append( _event ).append( "]" );
+		if ( ! "".equals( _round ) )
+			sb.append( "RO[" ).append( _round ).append( "]" );
+		if ( ! "".equals( _source ) )
+			sb.append( "SO[" ).append( _source ).append( "]" );
+		if ( ! "".equals( _author ) )
+			sb.append( "AN[" ).append( _author ).append( "]" );
+		sb.append( "TM[" ).append( _time ).append(  $noNl ? "]" : "]\n" ).append( "PB[" )
+			.append( _blackName ).append( "]PW[" ).append( _whiteName ).append( $noNl ? "]" : "]\n" );
 		boolean rankShown = false;
 		if ( ( _blackRank != null ) && ! "".equals( _blackRank ) ) {
-			$stream.print( "BR[" + _blackRank + "]" );
+			sb.append( "BR[" ).append( _blackRank ).append( "]" );
 			rankShown = true;
 		}
 		if ( ( _whiteRank != null ) && ! "".equals( _whiteRank ) ) {
-			$stream.print( "WR[" + _whiteRank + "]" );
+			sb.append( "WR[" ).append( _whiteRank ).append( "]" );
 			rankShown = true;
 		}
 		if ( rankShown && ! $noNl )
-			$stream.print( "\n" );
+			sb.append( "\n" );
 		if ( ! "".equals( _comment ) ) {
 			_cache = _comment;
-			$stream.print( "C[" + _cache.replace( "[", "\\[" ).replace( "]", "\\]" ) + "]" );
+			sb.append( "C[" ).append( _cache.replace( "[", "\\[" ).replace( "]", "\\]" ) ).append( "]" );
 		}
 		if ( _tree.getRoot() != null ) {
 			HTree<Move>.HNode<Move> root = _tree.getRoot();
 			if ( root.value().setup() != null )
-				saveSetup( root, $stream, $noNl );
-			saveVariations( _firstToMove, root, $stream, $noNl );
+				saveSetup( root, sb, $noNl );
+			saveVariations( _firstToMove, root, sb, $noNl );
 		}
-		$stream.print( $noNl ? ")" : ")\n" );
+		sb.append( $noNl ? ")" : ")\n" );
+		$stream.print( sb );
 		return;
 	}
 
-	void saveMove( Player of_, HTree<Move>.HNode<Move> $node, PrintStream $stream ) {
-		$stream.print( ";" + ( of_ == Player.BLACK ? "B" : "W" ) + "[" + $node.value().coord().data() + "]" );
+	void saveMove( Player of_, HTree<Move>.HNode<Move> $node, StringBuilder $stream ) {
+		$stream.append( ";" ).append( of_ == Player.BLACK ? "B" : "W" ).append( "[" ).append( $node.value().coord().data() ).append( "]" );
 		if ( ! "".equals( $node.value().comment() ) ) {
 			_cache = $node.value().comment();
-			$stream.print( "C[" + _cache.replace( "[", "\\[" ).replace( "]", "\\]" ) + "]" );
+			$stream.append( "C[" ).append( _cache.replace( "[", "\\[" ).replace( "]", "\\]" ) ).append( "]" );
 		}
 		return;
 	}
 
-	void saveVariations( Player $from, HTree<Move>.HNode<Move> $node, PrintStream $stream, boolean $noNl ) {
+	void saveVariations( Player $from, HTree<Move>.HNode<Move> $node, StringBuilder $stream, boolean $noNl ) {
 		int childCount = 0;
 		while ( ( childCount = $node.getChildCount() ) == 1 ) {
 			$node = $node.getChildAt( 0 );
@@ -581,7 +666,7 @@ public class SGF {
 		}
 		if ( childCount > 1 ) /* We have variations. */ {
 			for ( HTree<Move>.HNode<Move> it : $node ) {
-				$stream.print( $noNl ? "(" : "\n(" );
+				$stream.append( $noNl ? "(" : "\n(" );
 				Player p = $from;
 				if ( it.value().type() == Move.Type.MOVE ) {
 					saveMove( $from, it, $stream );
@@ -590,7 +675,7 @@ public class SGF {
 				if ( it.value().setup() != null )
 					saveSetup( it, $stream, $noNl );
 				saveVariations( p, it, $stream, $noNl );
-				$stream.print( $noNl ? ")" : ")\n" );
+				$stream.append( $noNl ? ")" : ")\n" );
 			}
 		}
 		return;
