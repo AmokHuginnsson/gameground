@@ -22,8 +22,10 @@ class GoPlayer {
 	public JLabel _byoyomi;
 	public JButton _sit;
 	public int _timeLeft = 0;
+	public boolean _sitting = false;
 	public static final String EMPTY = " ";
 	public void clear( int $komi ) {
+		_sitting = false;
 		_name.setText( EMPTY );
 		_score.setText( "" + $komi );
 		_captures.setText( "" );
@@ -389,7 +391,7 @@ class Go extends HAbstractLogic implements Runnable {
 	}
 	boolean isPlayerSitting( byte $stone ) {
 		GoPlayer p = _contestants.get( $stone );
-		return ( ( p != null ) && ! GoPlayer.EMPTY.equals( p._name.getText() ) );
+		return ( p._sitting );
 	}
 	public boolean isAdmin() {
 		return ( _admin );
@@ -398,7 +400,8 @@ class Go extends HAbstractLogic implements Runnable {
 		String[] tokens = $command.split( ",", 6 );
 		byte stone = STONE.NONE;
 		GoPlayer contestant = _contestants.get( ( stone = (byte)tokens[ 0 ].charAt( 0 ) ) );
-		contestant._name.setText( "".equals( tokens[ 1 ] ) ? GoPlayer.EMPTY : tokens[ 1 ] );
+		contestant._sitting = ! "".equals( tokens[ 1 ] );
+		contestant._name.setText( contestant._sitting ? tokens[ 1 ] : GoPlayer.EMPTY );
 		contestant._captures.setText( tokens[ 2 ] );
 		contestant._score.setText( tokens[ 3 ] );
 		contestant._timeLeft = Integer.parseInt( tokens[ 4 ] );
@@ -415,7 +418,7 @@ class Go extends HAbstractLogic implements Runnable {
 			if ( ( stone == _playerColor ) && ( _playerColor != STONE.NONE ) ) {
 				contestant._sit.setText( HGUILocal.SIT );
 				GoPlayer foe = _contestants.get( Goban.opponent( _playerColor ) );
-				foe._sit.setEnabled( GoPlayer.EMPTY.equals( foe._name.getText() ) );
+				foe._sit.setEnabled( ! foe._sitting );
 				_playerColor = STONE.NONE;
 				if ( _gui._toolTip != null ) {
 					_gui._pass.setText( _gui._passText );

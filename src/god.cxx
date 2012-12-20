@@ -100,7 +100,7 @@ HGo::HGo( HServer* server_, HLogic::id_t const& id_, HString const& comment_ )
 	_koGame( GOBAN_SIZE::NORMAL * GOBAN_SIZE::NORMAL + sizeof ( '\0' ) ),
 	_oldGame( GOBAN_SIZE::NORMAL * GOBAN_SIZE::NORMAL + sizeof ( '\0' ) ),
 	_sgf( SGF::GAME_TYPE::GO, "gameground" ),
-	_players(), _path(), _varTmpBuffer() {
+	_players(), _path(), _branch(), _varTmpBuffer() {
 	M_PROLOG
 	_sgf.set_info( SGF::Player::BLACK, _gobanSize, _komi, _handicaps, _mainTime );
 	_contestants[ 0 ] = _contestants[ 1 ] = NULL;

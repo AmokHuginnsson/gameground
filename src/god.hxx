@@ -94,6 +94,7 @@ protected:
 	typedef yaal::hcore::HPair<OClientInfo*, OPlayerInfo> player_t;
 	typedef yaal::hcore::HList<player_t> players_t;
 	typedef yaal::hcore::HArray<int> path_t;
+	typedef yaal::hcore::HArray<sgf::SGF::game_tree_t::const_node_t> branch_t;
 	OClientInfo* _contestants[ 2 ];
 	STONE::stone_t _state;
 	int _gobanSize;
@@ -111,6 +112,7 @@ protected:
 	sgf::SGF _sgf;
 	players_t _players;
 	path_t _path;
+	branch_t _branch;
 	yaal::hcore::HString _varTmpBuffer;
 	/*}*/
 public:
