@@ -133,8 +133,10 @@ protected:
 	void on_timeout( void );
 	void schedule_timeout( void );
 	void reschedule_timeout( void );
+	void reset_goban( bool );
 	void set_handicaps( int );
-	void set_handi( int );
+	void put_handicap_stones( int, bool );
+	void apply_move( sgf::SGF::game_tree_t::const_node_t );
 	void put_stone( int, int, STONE::stone_t );
 	void send_goban( OClientInfo* = NULL );
 	bool have_liberties( int, int, STONE::stone_t );

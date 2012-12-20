@@ -102,7 +102,6 @@ HGo::HGo( HServer* server_, HLogic::id_t const& id_, HString const& comment_ )
 	_sgf( SGF::GAME_TYPE::GO, "gameground" ),
 	_players(), _path(), _branch(), _varTmpBuffer() {
 	M_PROLOG
-	_sgf.set_info( SGF::Player::BLACK, _gobanSize, _komi, _handicaps, _mainTime );
 	_contestants[ 0 ] = _contestants[ 1 ] = NULL;
 	_handlers[ PROTOCOL::SETUP ] = static_cast<handler_t>( &HGo::handler_setup );
 	_handlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HGo::handler_play );
@@ -111,7 +110,7 @@ HGo::HGo( HServer* server_, HLogic::id_t const& id_, HString const& comment_ )
 	_handlers[ PROTOCOL::GETUP ] = static_cast<handler_t>( &HGo::handler_getup );
 	_handlers[ PROTOCOL::SELECT ] = static_cast<handler_t>( &HGo::handler_select );
 	_handlers[ PROTOCOL::NEWGAME ] = static_cast<handler_t>( &HGo::handler_newgame );
-	set_handicaps( _handicaps );
+	reset_goban( true );
 	return;
 	M_EPILOG
 }
@@ -145,14 +144,13 @@ void HGo::handler_setup( OClientInfo* clientInfo_, HString const& message_ ) {
 		throw HLogicException( GO_MSG[GO_MSG_MALFORMED] );
 	}
 	bool regenGoban( false );
-	int handicaps( _handicaps );
 	if ( item == PROTOCOL::GOBAN ) {
 		_sgf.set_board_size( _gobanSize = value );
 		regenGoban = true;
 	} else if ( item == PROTOCOL::KOMI )
 		_sgf.set_komi( _komi = value );
 	else if ( item == PROTOCOL::HANDICAPS ) {
-		handicaps = value;
+		set_handicaps( value );
 		regenGoban = true;
 	} else if ( item == PROTOCOL::MAINTIME )
 		_sgf.set_time( _mainTime = value );
@@ -164,7 +162,8 @@ void HGo::handler_setup( OClientInfo* clientInfo_, HString const& message_ ) {
 		throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
 	broadcast( _out << PROTOCOL::SETUP << PROTOCOL::SEP << message_ << endl << _out );
 	if ( regenGoban )
-		set_handicaps( handicaps );
+		reset_goban( true );
+	send_goban();
 	return;
 	M_EPILOG
 }
@@ -273,6 +272,7 @@ void HGo::handler_select( OClientInfo* clientInfo_, yaal::hcore::HString const& 
 	}
 	++ it;
 	SGF::game_tree_t::const_node_t currentMove( _sgf.game_tree().get_root() );
+	_branch.clear();
 	if ( currentMove ) {
 		for ( int i( 0 ); i < moveNo; ++ i ) {
 			int childCount( static_cast<int>( currentMove->child_count() ) );
@@ -290,8 +290,15 @@ void HGo::handler_select( OClientInfo* clientInfo_, yaal::hcore::HString const& 
 				++ it;
 			}
 			currentMove = currentMove->get_child_at( child );
+			_branch.push_back( currentMove );
 		}
 		_sgf.set_current_move( currentMove );
+		STONE::stone_t state( _state );
+		_state = STONE::BLACK;
+		reset_goban( false );
+		for ( branch_t::const_iterator i( _branch.begin() ), e( _branch.end() ); i != e; ++ i )
+			apply_move( *i );
+		_state = state;
 	} else if ( moveNo > 0 )
 		throw HLogicException( GO_MSG[GO_MSG_MALFORMED] );
 	broadcast( _out << PROTOCOL::SELECT << PROTOCOL::SEP << message_ << endl << _out );
@@ -301,11 +308,9 @@ void HGo::handler_select( OClientInfo* clientInfo_, yaal::hcore::HString const& 
 
 void HGo::handler_put_stone( OClientInfo* clientInfo_, HString const& message_ ) {
 	M_PROLOG
-	if ( ( ( *_clients.begin() != clientInfo_ ) || ( _state != STONE::NONE ) )
-			&& ( _state != STONE::BLACK )
-			&& ( _state != STONE::WHITE ) )
+	if ( ! can_setup( clientInfo_ ) )
 		throw HLogicException( GO_MSG[ GO_MSG_INSUFFICIENT_PRIVILEGES ] );
-	if ( contestant( _state ) != clientInfo_ )
+	if ( ( ( _state != STONE::BLACK ) && ( _state != STONE::WHITE ) ) || ( contestant( _state ) != clientInfo_ ) )
 		throw HLogicException( GO_MSG[ GO_MSG_NOT_YOUR_TURN ] );
 	_pass = 0;
 	int col( 0 );
@@ -406,8 +411,7 @@ void HGo::handler_newgame( OClientInfo* clientInfo_, HString const& ) {
 		throw HLogicException( GO_MSG[ GO_MSG_INSUFFICIENT_PRIVILEGES ] );
 	_start = 0;
 	_move = 0;
-	set_handicaps( _handicaps ); /* calls _sgf.clear() */
-	_sgf.set_info( SGF::Player::BLACK, _gobanSize, _handicaps, _komi, _mainTime );
+	reset_goban( true );
 	send_goban();
 	return;
 	M_EPILOG
@@ -695,33 +699,69 @@ void HGo::on_timeout( void ) {
 	M_EPILOG
 }
 
-void HGo::set_handicaps( int handicaps_ ) {
+void HGo::reset_goban( bool sgf_ ) {
 	M_PROLOG
-	if ( ( handicaps_ > 9 ) || ( handicaps_ < 0 ) )
-		throw HLogicException( _out << "bad handicap value: " << handicaps_ << _out );
-	_sgf.clear();
-	_sgf.set_info( SGF::Player::BLACK, _gobanSize, _handicaps, _komi, _mainTime );
+	if ( sgf_ ) {
+		_sgf.clear();
+		_sgf.set_info( SGF::Player::BLACK, _gobanSize, _handicaps, _komi, _mainTime );
+	}
 	::memset( _game.raw(), STONE::NONE, _gobanSize * _gobanSize );
 	_game.get<char>()[ _gobanSize * _gobanSize ] = 0;
 	::memset( _koGame.raw(), STONE::NONE, _gobanSize * _gobanSize );
 	_koGame.get<char>()[ _gobanSize * _gobanSize ] = 0;
+	::memset( _oldGame.raw(), STONE::NONE, _gobanSize * _gobanSize );
+	_oldGame.get<char>()[ _gobanSize * _gobanSize ] = 0;
+	if ( _handicaps > 1 )
+		put_handicap_stones( _handicaps, sgf_ );
+	return;
+	M_EPILOG
+}
+
+void HGo::apply_move( sgf::SGF::game_tree_t::const_node_t node_ ) {
+	M_PROLOG
+	if ( (*node_)->type() == SGF::Move::TYPE::SETUP ) {
+		SGF::Setup const* s( (*node_)->setup() );
+		SGF::Setup::setup_t::const_iterator remove( s->_data.find( SGF::Position::REMOVE ) );
+		if ( remove != s->_data.end() ) {
+			for ( SGF::Setup::coords_t::const_iterator it( remove->second.begin() ), end( remove->second.end() ); it != end; ++ it )
+				put_stone( it->col(), it->row(), STONE::NONE );
+		}
+		SGF::Setup::setup_t::const_iterator black( s->_data.find( SGF::Position::BLACK ) );
+		if ( black != s->_data.end() ) {
+			for ( SGF::Setup::coords_t::const_iterator it( black->second.begin() ), end( black->second.end() ); it != end; ++ it )
+				put_stone( it->col(), it->row(), STONE::BLACK );
+		}
+		SGF::Setup::setup_t::const_iterator white( s->_data.find( SGF::Position::WHITE ) );
+		if ( white != s->_data.end() ) {
+			for ( SGF::Setup::coords_t::const_iterator it( white->second.begin() ), end( white->second.end() ); it != end; ++ it )
+				put_stone( it->col(), it->row(), STONE::BLACK );
+		}
+	} else {
+		make_move( (*node_)->col(), (*node_)->row(), _state );
+		_state = opponent( _state );
+	}
+	return;
+	M_EPILOG
+}
+
+void HGo::set_handicaps( int handicaps_ ) {
+	M_PROLOG
+	if ( ( handicaps_ > 9 ) || ( handicaps_ < 0 ) )
+		throw HLogicException( _out << "bad handicap value: " << handicaps_ << _out );
 	if ( handicaps_ != _handicaps ) {
 		if ( handicaps_ > 0 )
 			_komi = 0;
 		else
 			_komi = setup._komi;
-		_sgf.set_handicap( _handicaps = handicaps_ );
+		_handicaps = handicaps_;
+		broadcast( _out << PROTOCOL::SETUP << PROTOCOL::SEP
+				<< PROTOCOL::KOMI << PROTOCOL::SEPP << _komi << endl << _out );
 	}
-	if ( _handicaps > 1 )
-		set_handi( _handicaps );
-	broadcast( _out << PROTOCOL::SETUP << PROTOCOL::SEP
-			<< PROTOCOL::KOMI << PROTOCOL::SEPP << _komi << endl << _out );
-	send_goban();
 	return;
 	M_EPILOG
 }
 
-void HGo::set_handi( int handi_ ) {
+void HGo::put_handicap_stones( int handi_, bool sgf_ ) {
 	M_PROLOG
 	int hoshi( 3 - ( _gobanSize == GOBAN_SIZE::TINY ? 1 : 0 ) );
 	int col( 0 );
@@ -729,38 +769,49 @@ void HGo::set_handi( int handi_ ) {
 	switch ( handi_ ) {
 		case ( 9 ):
 			put_stone( col = _gobanSize / 2, row = _gobanSize / 2, STONE::BLACK );
-			_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
+			if ( sgf_ )
+				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 		case ( 8 ):
-			set_handi( 6 );
+			put_handicap_stones( 6, sgf_ );
 			put_stone( col = _gobanSize / 2, row = hoshi, STONE::BLACK );
-			_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 			put_stone( col = _gobanSize / 2, row = ( _gobanSize - hoshi ) - 1, STONE::BLACK );
-			_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
+			if ( sgf_ ) {
+				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
+				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
+			}
 		break;
 		case ( 7 ):
 			put_stone( col = _gobanSize / 2, row = _gobanSize / 2, STONE::BLACK );
-			_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
+			if ( sgf_ )
+				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 		case ( 6 ):
-			set_handi( 4 );
+			put_handicap_stones( 4, sgf_ );
 			put_stone( col = hoshi, row = _gobanSize / 2, STONE::BLACK );
-			_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 			put_stone( col = ( _gobanSize - hoshi ) - 1, row = _gobanSize / 2, STONE::BLACK );
-			_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
+			if ( sgf_ ) {
+				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
+				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
+			}
 		break;
 		case ( 5 ):
 			put_stone( col = _gobanSize / 2, row = _gobanSize / 2, STONE::BLACK );
-			_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
+			if ( sgf_ )
+				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 		case ( 4 ):
 			put_stone( col = ( _gobanSize - hoshi ) - 1, row = ( _gobanSize - hoshi ) - 1, STONE::BLACK );
-			_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
+			if ( sgf_ )
+				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 		case ( 3 ):
 			put_stone( col = hoshi, row = hoshi, STONE::BLACK );
-			_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
+			if ( sgf_ )
+				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 		case ( 2 ):
 			put_stone( col = hoshi, row = ( _gobanSize - hoshi ) - 1, STONE::BLACK );
-			_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 			put_stone( col = ( _gobanSize - hoshi ) - 1, row = hoshi, STONE::BLACK );
-			_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
+			if ( sgf_ ) {
+				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
+				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
+			}
 		break;
 		default:
 			M_ASSERT( ! "unhandled case" );
