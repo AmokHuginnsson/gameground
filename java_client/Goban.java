@@ -17,6 +17,7 @@ import java.awt.BasicStroke;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.Color;
+import java.awt.Font;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JPanel;
@@ -58,6 +59,8 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	int _virtSize = 0;
 	int _viewMove = 0;
 	GoImages _images = null;
+	Font _font = null;
+	int _fontSize = -1;
 	SGF _sgf = null;
 	HTree<SGF.Move>.HNode<SGF.Move> _lastMove = null;
 	byte[] _stones = new byte[Go.GOBAN_SIZE.NORMAL * Go.GOBAN_SIZE.NORMAL];
@@ -458,9 +461,22 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	void label( int $col, int $row, String $label, Graphics $gc ) {
 		int margin = _virtSize / ( _size + 4 );
 		int inside = _virtSize - 2 * margin;
-		$gc.drawChars( new char[] { $label.charAt( 0 ), 0 }, 0, 1,
-				D_MARGIN + margin + ( inside * $col ) / ( _size - 1 ) - (int)( ( _diameter / 2 ) + ( _diameter / 10 ) ),
-				D_MARGIN + margin + ( inside * $row ) / ( _size - 1 ) + (int)( _diameter / 10 ) - (int)( _diameter / 2 ) );
+		byte stone = getStone( $col, $row );
+		$gc.setColor( stone == STONE.BLACK ? Color.WHITE : Color.BLACK );
+		if ( stone == STONE.NONE ) {
+			int x1 = margin + ( inside * $col ) / ( _size - 1 ) - (int)( _diameter / 2 );
+			int x2 = margin + ( inside * ( $col + 1 ) ) / ( _size - 1 ) - (int)( _diameter / 2 );
+			int y1 = margin + ( inside * $row ) / ( _size - 1 ) - (int)( _diameter / 2 );
+			int y2 = margin + ( inside * ( $row + 1 ) ) / ( _size - 1 ) - (int)( _diameter / 2 );
+			$gc.drawImage( _images._background,
+					D_MARGIN + x1 + 4, D_MARGIN + y1 + 4, D_MARGIN + x2 - 4, D_MARGIN + y2 - 4,
+					x1 + 4, y1 + 4, x2 - 4, y2 - 4,
+					this );
+		}
+
+		$gc.drawString( $label,
+				D_MARGIN + margin + ( inside * $col ) / ( _size - 1 ) - (int)( ( _diameter - 2 ) / 3.52 ),
+				D_MARGIN + margin + ( inside * $row ) / ( _size - 1 ) + (int)( _diameter / 10 ) + (int)( ( _diameter - 4 ) / 3.3 ) );
 	}
 	protected void paintComponent( Graphics g ) {
 		super.paintComponent( g );
@@ -487,9 +503,18 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 						}
 					}
 				}
+				int fontSize = (int)( _diameter - 4 );
+				if ( fontSize != _fontSize ) {
+					_fontSize = fontSize;
+					String fn = Font.MONOSPACED + "-" + _fontSize;
+					_font = Font.decode( fn );
+				}
+				Font f = g.getFont();
+				g.setFont( _font );
 				for ( SGF.Setup.Label l : setup.labels() ) {
 					label( l._coord.col(), l._coord.row(), l._label, g );
 				}
+				g.setFont( f );
 			}
 		}
 	}
