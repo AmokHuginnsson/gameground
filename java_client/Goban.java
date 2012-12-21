@@ -455,6 +455,13 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 			} break;
 		}
 	}
+	void label( int $col, int $row, String $label, Graphics $gc ) {
+		int margin = _virtSize / ( _size + 4 );
+		int inside = _virtSize - 2 * margin;
+		$gc.drawChars( new char[] { $label.charAt( 0 ), 0 }, 0, 1,
+				D_MARGIN + margin + ( inside * $col ) / ( _size - 1 ) - (int)( ( _diameter / 2 ) + ( _diameter / 10 ) ),
+				D_MARGIN + margin + ( inside * $row ) / ( _size - 1 ) + (int)( _diameter / 10 ) - (int)( _diameter / 2 ) );
+	}
 	protected void paintComponent( Graphics g ) {
 		super.paintComponent( g );
 		drawGoban( g );
@@ -479,6 +486,9 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 							mark( c.col(), c.row(), p, g );
 						}
 					}
+				}
+				for ( SGF.Setup.Label l : setup.labels() ) {
+					label( l._coord.col(), l._coord.row(), l._label, g );
 				}
 			}
 		}
