@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso8859-2"?>
 <!DOCTYPE panel SYSTEM "res/gameground.dtd">
 <panel layout="BorderLayout" border="EmptyBorder(4,4,4,4)"><!--{{{-->
-	<hbox>
+	<splitpane orientation="JSplitPane.HORIZONTAL_SPLIT" dividerlocation="-1" resizeweight="1" dividersize="3">
 		<panel layout="GridBagLayout" background="007000">
 			<gridbagconstraints fill="GridBagConstraints.BOTH" />
 			<goban id="_board" opaque="true" background="007000" />
@@ -103,7 +103,7 @@
 						<scrollpane autoscrolls="true">
 							<textpane id="_logPad" editable="false" focusable="true" />
 						</scrollpane>
-						<panel maximumsize="&v_sidebar_width;,40" layout="BorderLayout">
+						<panel maximumsize="2000,40" layout="BorderLayout">
 							<readlineprompt id="_messageInput" focusable="true" editable="true" action="onMessage" constraints="BorderLayout.NORTH" tooltiptext="Enter message You want to send to other players." />
 						</panel>
 					</vbox>
@@ -122,5 +122,5 @@
 				</splitpane>
 			</panel>
 		</vbox>
-	</hbox>
+	</splitpane>
 </panel><!--}}}-->
