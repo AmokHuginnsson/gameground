@@ -57,12 +57,13 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	int _cursorX = -1;
 	int _cursorY = -1;
 	int _virtSize = 0;
-	int _viewMove = 0;
+	int _viewMoveNo = 0;
 	GoImages _images = null;
 	Font _font = null;
 	int _fontSize = -1;
 	SGF _sgf = null;
-	HTree<SGF.Move>.HNode<SGF.Move> _lastMove = null;
+	HTree<SGF.Move>.HNode<SGF.Move> _viewMove = null;
+	HTree<SGF.Move>.HNode<SGF.Move> _currentMove = null;
 	byte[] _stones = new byte[Go.GOBAN_SIZE.NORMAL * Go.GOBAN_SIZE.NORMAL];
 	ArrayList<HTree<SGF.Move>.HNode<SGF.Move>> _branch = new ArrayList<HTree<SGF.Move>.HNode<SGF.Move>>();
 	StringBuilder _selection = new StringBuilder();
@@ -121,7 +122,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		selectBranch( $node, true );
 	}
 	void selectBranch( HTree<SGF.Move>.HNode<SGF.Move> $node, boolean $jumpToMove ) {
-		if ( $node != _lastMove ) {
+		if ( $node != _viewMove ) {
 			int moveNo = 0;
 			if ( ! _branch.contains( $node ) ) {
 				int toEnd = 0;
@@ -174,14 +175,14 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		}
 		byte stone = _sgf._firstToMove == SGF.Player.BLACK ? STONE.BLACK : STONE.WHITE;
 		int moveNumber = 0;
-		_lastMove = _sgf._tree.getRoot();
+		_viewMove = _sgf._tree.getRoot();
 		for ( HTree<SGF.Move>.HNode<SGF.Move> n : _branch ) {
 			if ( moveNumber > $to )
 				break;
 			SGF.Move m = n.value();
-			_lastMove = n;
+			_viewMove = n;
 			int commentLength = m.comment().length();
-			if ( ( commentLength > 0 ) && ( moveNumber > _viewMove ) ) {
+			if ( ( commentLength > 0 ) && ( moveNumber > _viewMoveNo ) ) {
 				_logic._gui.log( "Move: " + ( moveNumber + 1 ) + "\n", HGUIface.Colors.OTHERGRAY, HGUIface.Style.BOLD );
 				_logic._gui.log( m.comment() + ( m.comment().charAt( commentLength - 1 ) != '\n' ? "\n" : "" ), HGUIface.Colors.OTHERGRAY );
 			}
@@ -194,10 +195,10 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 			}
 			++ moveNumber;
 		}
-		_viewMove = moveNumber > 0 ? moveNumber - 1 : 0;
-		((GobanHolderInterface)_logic._gui).setMoveSlider( _viewMove, _branch.size() > 0 ? _branch.size() - 1 : 0 );
-		SGF.Move m = ( _lastMove != null ? _lastMove.value() : null );
-		if ( ( _lastMove == null ) && ( _sgf._tree.getRoot() != null ) ) 
+		_viewMoveNo = moveNumber > 0 ? moveNumber - 1 : 0;
+		((GobanHolderInterface)_logic._gui).setMoveSlider( _viewMoveNo, _branch.size() > 0 ? _branch.size() - 1 : 0 );
+		SGF.Move m = ( _viewMove != null ? _viewMove.value() : null );
+		if ( ( _viewMove == null ) && ( _sgf._tree.getRoot() != null ) ) 
 			m = _sgf._tree.getRoot().value();
 		if ( m != null ) {
 			SGF.Setup setup = m.setup();
@@ -222,12 +223,12 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		placeByLogic();
 
 		if ( isAdmin() ) {
-			/* Find _lastMove address in tree. */
+			/* Find _viewMove address in tree. */
 			_selection.delete( 0, _selection.length() );
-			if ( _lastMove != null ) {
+			if ( _viewMove != null ) {
 				for ( int i = 0; i < _branch.size(); ++ i ) {
 					HTree<SGF.Move>.HNode<SGF.Move> n = _branch.get( i );
-					if ( n == _lastMove ) {
+					if ( n == _viewMove ) {
 						_selection.insert( 0, i );
 						break;
 					}
@@ -258,7 +259,10 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 				child = Integer.parseInt( t.nextToken() );
 			m = m.getChildAt( child );
 		}
-		selectBranch( m );
+		if ( ( _viewMove == null ) || ( _viewMove == _currentMove ) )
+			selectBranch( m );
+		_currentMove = m;
+		_logic._gui.repaint();
 	}
 	abstract void placeByLogic();
 	void edit( SGF.Setup $setup ) {
@@ -304,25 +308,25 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		placeStones( 0 );
 	}
 	void goToPrevious() {
-		placeStones( _viewMove - 1 );
+		placeStones( _viewMoveNo - 1 );
 	}
 	void goToNext() {
-		placeStones( _viewMove + 1 );
+		placeStones( _viewMoveNo + 1 );
 	}
 	void goToLast() {
 		placeStones();
 	}
 	void choosePreviousPath() {
-		if ( ( _lastMove != null ) && ( _lastMove.getChildCount() > 1 ) ) {
-			int idx = _branch.indexOf( _lastMove );
+		if ( ( _viewMove != null ) && ( _viewMove.getChildCount() > 1 ) ) {
+			int idx = _branch.indexOf( _viewMove );
 			if ( ( idx >= 0 ) && ( idx < ( _branch.size() - 1 ) ) ) {
 				HTree<SGF.Move>.HNode<SGF.Move> next = _branch.get( idx + 1 );
-				int childCount = _lastMove.getChildCount();
+				int childCount = _viewMove.getChildCount();
 				idx = -1;
 				for ( int i = 0; i < childCount; ++ i ) {
-					if ( _lastMove.getChildAt( i ) == next ) {
+					if ( _viewMove.getChildAt( i ) == next ) {
 						if ( i > 0 ) {
-							selectBranch( _lastMove.getChildAt( i - 1 ), false );
+							selectBranch( _viewMove.getChildAt( i - 1 ), false );
 							_logic.getGUI().repaint();
 						}
 						break;
@@ -332,16 +336,16 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		}
 	}
 	void chooseNextPath() {
-		if ( ( _lastMove != null ) && ( _lastMove.getChildCount() > 1 ) ) {
-			int idx = _branch.indexOf( _lastMove );
+		if ( ( _viewMove != null ) && ( _viewMove.getChildCount() > 1 ) ) {
+			int idx = _branch.indexOf( _viewMove );
 			if ( ( idx >= 0 ) && ( idx < ( _branch.size() - 1 ) ) ) {
 				HTree<SGF.Move>.HNode<SGF.Move> next = _branch.get( idx + 1 );
-				int childCount = _lastMove.getChildCount();
+				int childCount = _viewMove.getChildCount();
 				idx = -1;
 				for ( int i = 0; i < childCount; ++ i ) {
-					if ( _lastMove.getChildAt( i ) == next ) {
+					if ( _viewMove.getChildAt( i ) == next ) {
 						if ( i < ( childCount - 1 ) ) {
-							selectBranch( _lastMove.getChildAt( i + 1 ), false );
+							selectBranch( _viewMove.getChildAt( i + 1 ), false );
 							_logic.getGUI().repaint();
 						}
 						break;
@@ -484,13 +488,13 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		drawStones( g );
 		drawByLogic( g );
 		SGF.Move m = null;
-		if ( _lastMove != null ) {
-			m = _lastMove.value();
+		if ( _viewMove != null ) {
+			m = _viewMove.value();
 			if ( m.type() == SGF.Move.Type.MOVE ) {
 				mark( m.col(), m.row(), SGF.Position.CIRCLE, g );
 			}
 		}
-		if ( ( _lastMove == null ) && ( _sgf._tree.getRoot() != null ) ) 
+		if ( ( _viewMove == null ) && ( _sgf._tree.getRoot() != null ) ) 
 			m = _sgf._tree.getRoot().value();
 		if ( m != null ) {
 			SGF.Setup setup = m.setup();

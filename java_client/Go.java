@@ -292,8 +292,11 @@ class Go extends HAbstractLogic implements Runnable {
 		public void jumpToMove( HTree<SGF.Move>.HNode<SGF.Move> $node ) {
 			_gui._board.selectBranch( $node );
 		}
+		public HTree<SGF.Move>.HNode<SGF.Move> viewMove() {
+			return ( _gui._board._viewMove );
+		}
 		public HTree<SGF.Move>.HNode<SGF.Move> currentMove() {
-			return ( _gui._board._lastMove );
+			return ( _gui._board._currentMove );
 		}
 		public void updateSetup() {
 			_conf.selectGobanSize( "" + _board._sgf._gobanSize );

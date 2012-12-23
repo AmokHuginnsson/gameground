@@ -35,7 +35,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 	int _hoverY = -1;
 	boolean _valid = false;
 	HTree<SGF.Move>.HNode<SGF.Move> _hovered = null;
-	Rectangle _currentRect = new Rectangle();
+	Rectangle _viewRect = new Rectangle();
 	static final int margin = 10;
 //--------------------------------------------//
 	public SGFTree() {
@@ -99,6 +99,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		int maxH = 0;
 		g.setFont( _font );
 		int treeSize = _sgf._tree.getSize();
+		HTree<SGF.Move>.HNode<SGF.Move> viewMove = ((Go.HGUILocal)_logic._gui).viewMove();
 		HTree<SGF.Move>.HNode<SGF.Move> currentMove = ((Go.HGUILocal)_logic._gui).currentMove();
 		if ( treeSize > _maxTreeSize ) {
 			_maxTreeSize = treeSize;
@@ -129,7 +130,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 					maxH = ( y + 1 ) * ( margin + diameter ) + margin;
 				HTree<SGF.Move>.HNode<SGF.Move> next = n.getChildAt( 0 );
 				boolean isMove = m.type() == SGF.Move.Type.MOVE;
-				if ( drawStone( g, x, y, isMove ? stone : Goban.STONE.NONE, moveNumber, n == first, next == null, jump, n == currentMove,
+				if ( drawStone( g, x, y, isMove ? stone : Goban.STONE.NONE, moveNumber, n == first, next == null, jump, n == viewMove, n == currentMove,
 							( n.getParent() != null ) && ( n.getParent().value().type() != SGF.Move.Type.MOVE ),
 							((Go.HGUILocal)_logic._gui)._board.onBranch( n ), isMove && ( ! "".equals( m.comment() ) || ( m.setup() != null ) ) ) )
 					_hovered = n;
@@ -178,7 +179,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 			((JScrollPane)(getParent().getParent())).revalidate();
 		}
 		if ( ! sizeChanged && ! _valid ) {
-			scrollRectToVisible( _currentRect );
+			scrollRectToVisible( _viewRect );
 			_valid = true;
 		}
 	}
@@ -191,25 +192,28 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		return ( len );
 	}
 	boolean drawStone( Graphics $gc, int $xx, int $yy, int $color, int $number, boolean $first, boolean $last,
-			int $jump, boolean $current, boolean $parentSetup, boolean $onBranch, boolean $event ) {
+			int $jump, boolean $view, boolean $current, boolean $parentSetup, boolean $onBranch, boolean $event ) {
 		int diameter = getDiameter();
 		if ( diameter > 28 )
 			diameter = 28;
 		int x = $xx * ( diameter + margin ) + margin;
 		int y = $yy * ( diameter + margin ) + margin;
 		boolean hovered = false;
-		if ( $current ) {
+		if ( $view ) {
 			$gc.setColor( Color.red );
 			int x0 = x - margin / 2;
 			int y0 = y - margin / 2;
 			int w = diameter + margin;
 			int h = diameter + margin;
-			_currentRect.setBounds( x0, y0, w, h );
+			_viewRect.setBounds( x0, y0, w, h );
 			$gc.fill3DRect( x0, y0, w, h, true );
 		} else if ( ( _hoverX == $xx ) && ( _hoverY == $yy ) ) {
 			$gc.setColor( Color.gray );
 			$gc.fill3DRect( x - margin / 2, y - margin / 2, diameter + margin, diameter + margin, true );
 			hovered = true;
+		} else if ( $current ) {
+			$gc.setColor( Color.blue );
+			$gc.fill3DRect( x - margin / 2, y - margin / 2, diameter + margin, diameter + margin, true );
 		}
 		$gc.setColor( Color.black );
 		if ( $first ) {

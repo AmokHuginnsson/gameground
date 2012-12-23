@@ -179,7 +179,7 @@ public class GoGoban extends Goban {
 				case ( Go.STONE.TERITORY_WHITE ): ++ whiteTeritory; break;
 			}
 		}
-		SGF.Setup setup = _lastMove.value().setup();
+		SGF.Setup setup = _viewMove.value().setup();
 		if ( setup != null ) {
 			ArrayList<SGF.Coord> c = setup.get( SGF.Position.BLACK_TERITORY );
 			if ( c != null )

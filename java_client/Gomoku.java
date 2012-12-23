@@ -114,6 +114,9 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		}
 		public void jumpToMove( HTree<SGF.Move>.HNode<SGF.Move> $node ) {
 		}
+		public HTree<SGF.Move>.HNode<SGF.Move> viewMove() {
+			return ( null );
+		}
 		public HTree<SGF.Move>.HNode<SGF.Move> currentMove() {
 			return ( null );
 		}
