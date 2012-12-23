@@ -259,7 +259,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 				child = Integer.parseInt( t.nextToken() );
 			m = m.getChildAt( child );
 		}
-		if ( ( _viewMove == null ) || ( _viewMove == _currentMove ) )
+		if ( ( _currentMove == null ) || ( _viewMove == null ) || ( _viewMove == _currentMove ) )
 			selectBranch( m );
 		_currentMove = m;
 		_logic._gui.repaint();
@@ -290,6 +290,8 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		_sgf.clear();
 		_branch.clear();
 		try {
+			_viewMove = null;
+			_currentMove = null;
 			_sgf.load( $reader );
 			((GobanHolderInterface)_logic._gui).updateSetup();
 			if ( _sgf._tree._root != null ) {
