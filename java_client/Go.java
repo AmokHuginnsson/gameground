@@ -484,24 +484,29 @@ class Go extends HAbstractLogic implements Runnable {
 	void handlerStone( String $command ) {
 	}
 	void handlerToMove( String $command ) {
-		_toMove = (byte)$command.charAt( 0 );
-		if ( ( _toMove == STONE.MARK ) && ( _gui._passText.equals( _gui._pass.getText() ) ) )
+		byte toMove = (byte)$command.charAt( 0 );
+		if ( ( toMove == STONE.MARK ) && ( _gui._passText.equals( _gui._pass.getText() ) ) ) {
 			handlerMark();
-		else if ( _toMove != STONE.MARK ) {
-			_gui._pass.setEnabled( ( _toMove == _playerColor ) && ( _playerColor != STONE.NONE ) );
-			_gui._conf.setEnabled( _admin && ( _toMove == STONE.NONE ) );
+			_toMove = toMove;
+		} else if ( toMove != STONE.MARK ) {
+			_gui._pass.setEnabled( ( toMove == _playerColor ) && ( _playerColor != STONE.NONE ) );
+			_gui._conf.setEnabled( _admin && ( toMove == STONE.NONE ) );
 			++ _move;
-			String toMove = STONE.NONE_NAME;
-			if ( _toMove == STONE.BLACK )
-				toMove = STONE.BLACK_NAME;
-			else if ( _toMove == STONE.WHITE )
-				toMove = STONE.WHITE_NAME;
-			else
-				_move = 0;
-			_gui._move.setText( "" + _move );
-			_gui._toMove.setText( toMove );
+			toMove( toMove, _move );
 			_start = new Date().getTime();
 		}
+	}
+	void toMove( byte $stone, int $moveNo ) {
+		_toMove = $stone;
+		String toMove = STONE.NONE_NAME;
+		if ( _toMove == STONE.BLACK )
+			toMove = STONE.BLACK_NAME;
+		else if ( _toMove == STONE.WHITE )
+			toMove = STONE.WHITE_NAME;
+		else
+			_move = 0;
+		_gui._move.setText( "" + $moveNo );
+		_gui._toMove.setText( toMove );
 	}
 	void handlerMark() {
 		_gui._toMove.setText( STONE.NONE_NAME );
@@ -518,7 +523,7 @@ class Go extends HAbstractLogic implements Runnable {
 		m.removeElement( $command );
 	}
 	public boolean isMyMove() {
-		return ( ( ( _playerColor == STONE.NONE ) && _admin ) || ( ( _playerColor != STONE.NONE ) && ( _playerColor == _toMove ) ) );
+		return ( ( _playerColor != STONE.NONE ) && ( _playerColor == _toMove ) );
 	}
 	public byte playerColor() {
 		return ( _playerColor );

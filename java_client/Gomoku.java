@@ -192,8 +192,11 @@ class Gomoku extends HAbstractLogic implements Runnable {
 		_start = new Date().getTime();
 	}
 	void handlerToMove( String $command ) {
-		_toMove = (byte)$command.charAt( 0 );
 		++ _move;
+		toMove( (byte)$command.charAt( 0 ), _move );
+	}
+	void toMove( byte $stone, int $moveNo ) {
+		_toMove = $stone;
 		String toMove = STONE.NONE_NAME;
 		if ( _toMove == STONE.BLACK )
 			toMove = STONE.BLACK_NAME;
@@ -201,7 +204,7 @@ class Gomoku extends HAbstractLogic implements Runnable {
 			toMove = STONE.WHITE_NAME;
 		else
 			_move = 0;
-		_gui._move.setText( "" + _move );
+		_gui._move.setText( "" + $moveNo );
 		_gui._toMove.setText( toMove );
 	}
 	void handlerFiveInARow( String $command ) {

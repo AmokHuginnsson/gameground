@@ -232,10 +232,8 @@ void HGo::handler_sit( OClientInfo* clientInfo_, HString const& message_ ) {
 				foe._timeLeft = info._timeLeft;
 				foe._byoYomiPeriods = info._byoYomiPeriods;
 				_pass = 0;
-				_sgf.clear();
 				_sgf.set_player( SGF::Player::BLACK, black._client->_login );
 				_sgf.set_player( SGF::Player::WHITE, white._client->_login );
-				_sgf.set_info( SGF::Player::BLACK, _gobanSize, _handicaps, _komi, _mainTime );
 				broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The Go match started." << endl << _out );
 			}
 			after_move();

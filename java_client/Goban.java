@@ -211,6 +211,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		SGF.Move m = ( _viewMove != null ? _viewMove.value() : null );
 		if ( ( _viewMove == null ) && ( _sgf._tree.getRoot() != null ) ) 
 			m = _sgf._tree.getRoot().value();
+		toMove( ( moveNumber % 2 ) == 1 ? Go.STONE.BLACK : Go.STONE.WHITE, moveNumber - 1 );
 		if ( m != null ) {
 			SGF.Setup setup = m.setup();
 			if ( setup != null ) {
@@ -271,6 +272,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 			}
 		}
 	}
+	abstract void toMove( byte $stone, int $moveNo );
 	abstract boolean isAdmin();
 	void select( String $path ) {
 		StringTokenizer t = new StringTokenizer( $path, "," );

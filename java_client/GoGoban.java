@@ -155,8 +155,8 @@ public class GoGoban extends Goban {
 		return ( invalid );
 	}
 	void drawByLogic( Graphics g ) {
-		if ( ( _logic != null ) && _logic.isMyMove() && ! breakTheRules( _cursorX, _cursorY, _logic.playerColor() ) )
-			drawStone( _cursorX, _cursorY, _logic.playerColor(), true, g );
+		if ( ( _logic != null ) && ( _logic.isMyMove() || isAdmin() ) && ! breakTheRules( _cursorX, _cursorY, _logic.toMove() ) )
+			drawStone( _cursorX, _cursorY, _logic.toMove(), true, g );
 	}
 	void move( int $col, int $row, byte $stone ) {
 		if ( breakTheRules( $col, $row, $stone ) )
@@ -193,6 +193,9 @@ public class GoGoban extends Goban {
 	}
 	boolean isAdmin() {
 		return ( _logic.isAdmin() );
+	}
+	void toMove( byte $stone, int $moveNo ) {
+		_logic.toMove( $stone, $moveNo );
 	}
 }
 
