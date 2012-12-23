@@ -22,6 +22,8 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
+import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.BadLocationException;
 
 public abstract class Goban extends JPanel implements MouseInputListener {
 //--------------------------------------------//
@@ -58,6 +60,8 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	int _cursorY = -1;
 	int _virtSize = 0;
 	int _viewMoveNo = 0;
+	int _commentStart = 0;
+	int _commentLength = 0;
 	GoImages _images = null;
 	Font _font = null;
 	int _fontSize = -1;
@@ -153,10 +157,22 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	}
 	void placeStones( int $to ) {
 		clear();
-		int gameCommentLength = _sgf._comment.length();
-		if ( ( gameCommentLength > 0 ) && ( $to == ALL ) ) {
+		DefaultStyledDocument log = (DefaultStyledDocument)_logic._gui._logPad.getStyledDocument();
+		if ( _commentLength > 0 ) {
+			try {
+				log.remove( _commentStart, _commentLength );
+			} catch ( BadLocationException ble ) {
+			}
+		}
+		_commentLength = _sgf._comment.length();
+		if ( ( _commentLength > 0 ) && ( $to == 0 ) ) {
+			_commentStart = log.getLength();
 			_logic._gui.log( "Game Started\n", HGUIface.Colors.OTHERGRAY, HGUIface.Style.BOLD );
-			_logic._gui.log( _sgf._comment + ( _sgf._comment.charAt( gameCommentLength - 1 ) != '\n' ? "\n" : "" ), HGUIface.Colors.OTHERGRAY );
+			boolean needNL = _sgf._comment.charAt( _commentLength - 1 ) != '\n';
+			_logic._gui.log( _sgf._comment + ( needNL ? "\n" : "" ), HGUIface.Colors.OTHERGRAY );
+			_commentLength += 13;
+			if ( needNL )
+				++ _commentLength;
 		}
 		Arrays.fill( _stones, STONE.NONE );
 		HTree<SGF.Move>.HNode<SGF.Move> root = _sgf._tree.getRoot();
@@ -181,11 +197,6 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 				break;
 			SGF.Move m = n.value();
 			_viewMove = n;
-			int commentLength = m.comment().length();
-			if ( ( commentLength > 0 ) && ( moveNumber > _viewMoveNo ) ) {
-				_logic._gui.log( "Move: " + ( moveNumber + 1 ) + "\n", HGUIface.Colors.OTHERGRAY, HGUIface.Style.BOLD );
-				_logic._gui.log( m.comment() + ( m.comment().charAt( commentLength - 1 ) != '\n' ? "\n" : "" ), HGUIface.Colors.OTHERGRAY );
-			}
 			if ( m.type() == SGF.Move.Type.MOVE ) {
 				if ( m.coord().col() != -97 ) /* Check if not pass. */
 					move( m.col(), m.row(), stone );
@@ -216,6 +227,19 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 						if ( getStone( c.col(), c.row() ) == Go.STONE.BLACK )
 							setStone( c.col(), c.row(), Go.STONE.DEAD_BLACK );
 					}
+				}
+			}
+			if ( moveNumber > 1 ) {
+				_commentLength = m.comment().length();
+				if ( _commentLength > 0 ) {
+					_commentStart = log.getLength();
+					String prefix = "Move: " + ( moveNumber - 1 ) + "\n";
+					_logic._gui.log( prefix, HGUIface.Colors.OTHERGRAY, HGUIface.Style.BOLD );
+					boolean needNL = m.comment().charAt( _commentLength - 1 ) != '\n';
+					_logic._gui.log( m.comment() + ( needNL ? "\n" : "" ), HGUIface.Colors.OTHERGRAY );
+					_commentLength += prefix.length();
+					if ( needNL )
+						++ _commentLength;
 				}
 			}
 		}
@@ -290,9 +314,9 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		_sgf.clear();
 		_branch.clear();
 		try {
+			_sgf.load( $reader );
 			_viewMove = null;
 			_currentMove = null;
-			_sgf.load( $reader );
 			((GobanHolderInterface)_logic._gui).updateSetup();
 			if ( _sgf._tree._root != null ) {
 				HTree<SGF.Move>.HNode<SGF.Move> n = _sgf._tree.getRoot();
