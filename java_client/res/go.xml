@@ -109,7 +109,7 @@
 					</vbox>
 					<vbox>
 						<scrollpane autoscrolls="true">
-							<sgftree id="_sgftree" opaque="true" background="d09050" />
+							<sgftree id="_sgftree" focusable="true" opaque="true" background="d09050" />
 						</scrollpane>
 						<hbox>
 							<button icon="res/first.png" action="onGoToFirst" margin="(2,2,2,2)" tooltiptext="Go to first move." />

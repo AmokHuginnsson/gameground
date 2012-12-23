@@ -13,6 +13,8 @@ import javax.swing.event.ChangeEvent;
 import java.awt.KeyboardFocusManager;
 import java.awt.KeyEventDispatcher;
 import java.awt.event.KeyEvent;
+import java.awt.Component;
+import javax.swing.SwingUtilities;
 
 class GoPlayer {
 	public JLabel _name;
@@ -148,7 +150,9 @@ class Go extends HAbstractLogic implements Runnable {
 			KeyEventDispatcher ked = new KeyEventDispatcher() {
 				@Override
 				public boolean dispatchKeyEvent( KeyEvent e ) {
-					if ( ( e.getID() == KeyEvent.KEY_PRESSED ) && ! ( e.getSource() instanceof JTextField ) ) {
+					Object src = e.getSource();
+					boolean isComp = src instanceof Component;
+					if ( isComp && SwingUtilities.isDescendingFrom( (Component)src, HGUILocal.this ) && ( e.getID() == KeyEvent.KEY_PRESSED ) && ! ( src instanceof JTextField ) ) {
 						switch ( e.getKeyCode() ) {
 							case ( KeyEvent.VK_LEFT ): {
 								onGoToPrevious();
@@ -174,6 +178,7 @@ class Go extends HAbstractLogic implements Runnable {
 				}
 			};
 			KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher( ked );
+			_sgftree.requestFocusInWindow();
 		}
 		public void stateChanged(ChangeEvent e) {
 			if ( ! _internalUpdate )
