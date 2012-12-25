@@ -1008,7 +1008,7 @@ void HGo::contestant_gotup( OClientInfo* clientInfo_ ) {
 		OPlayerInfo& foe( contestant( opponent( stone ) ) );
 		broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
 				<< clientInfo_->_login << ( stone == STONE::BLACK ? " (black)" : " (white)" )
-				<< " resigned - therefore " << foe._client->_login << ( stone == STONE::BLACK ? " (black)" : " (white)" )
+				<< " resigned - therefore " << foe._client->_login << ( stone == STONE::BLACK ? " (white)" : " (black)" )
 				<< " wins." << endl << _out );
 	}
 	contestant( stone )._client = NULL;

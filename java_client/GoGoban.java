@@ -155,7 +155,7 @@ public class GoGoban extends Goban {
 		return ( invalid );
 	}
 	void drawByLogic( Graphics g ) {
-		if ( ( _logic != null ) && ( _logic.isMyMove() || isAdmin() ) && ! breakTheRules( _cursorX, _cursorY, _logic.toMove() ) )
+		if ( ( _logic != null ) && ( _logic.isMyMove() || _logic.canSetup() ) && ! breakTheRules( _cursorX, _cursorY, _logic.toMove() ) )
 			drawStone( _cursorX, _cursorY, _logic.toMove(), true, g );
 	}
 	void move( int $col, int $row, byte $stone ) {

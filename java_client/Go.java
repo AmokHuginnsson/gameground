@@ -404,6 +404,9 @@ class Go extends HAbstractLogic implements Runnable {
 	public boolean isAdmin() {
 		return ( _admin );
 	}
+	public boolean canSetup() {
+		return ( isAdmin() && ! ongoingMatch() );
+	}
 	void handlerContestant( String $command ) {
 		String[] tokens = $command.split( ",", 6 );
 		byte stone = STONE.NONE;
