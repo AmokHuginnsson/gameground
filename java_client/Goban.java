@@ -122,10 +122,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		BufferedReader br = new BufferedReader( new StringReader( $sgfData ) );
 		updateSGF( br );
 	}
-	void selectBranch( HTree<SGF.Move>.HNode<SGF.Move> $node ) {
-		selectBranch( $node, true );
-	}
-	void selectBranch( HTree<SGF.Move>.HNode<SGF.Move> $node, boolean $jumpToMove ) {
+	void selectBranch( HTree<SGF.Move>.HNode<SGF.Move> $node, boolean $jumpToMove, boolean $sendSelect ) {
 		if ( $node != _viewMove ) {
 			int moveNo = 0;
 			if ( ! _branch.contains( $node ) ) {
@@ -149,13 +146,19 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 				}
 			}
 			if ( $jumpToMove )
-				placeStones( moveNo > 0 ? moveNo - 1 : 0 );
+				placeStones( moveNo > 0 ? moveNo - 1 : 0, $sendSelect );
 		}
+	}
+	void selectBranch( HTree<SGF.Move>.HNode<SGF.Move> $node, boolean $jumpToMove ) {
+		selectBranch( $node, $jumpToMove, true );
+	}
+	void selectBranch( HTree<SGF.Move>.HNode<SGF.Move> $node ) {
+		selectBranch( $node, true );
 	}
 	boolean onBranch( HTree<SGF.Move>.HNode<SGF.Move> $node ) {
 		return ( _branch.contains( $node ) );
 	}
-	void placeStones( int $to ) {
+	void placeStones( int $to, boolean $sendSelect ) {
 		clear();
 		DefaultStyledDocument log = (DefaultStyledDocument)_logic._gui._logPad.getStyledDocument();
 		if ( _commentLength > 0 ) {
@@ -247,7 +250,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		_logic._gui.repaint();
 		placeByLogic();
 
-		if ( isAdmin() ) {
+		if ( $sendSelect && isAdmin() ) {
 			/* Find _viewMove address in tree. */
 			_selection.delete( 0, _selection.length() );
 			if ( _viewMove != null ) {
@@ -271,6 +274,12 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 						+ Go.PROTOCOL.SELECT + Go.PROTOCOL.SEP + _selection );
 			}
 		}
+	}
+	void placeStones( int $to ) {
+		placeStones( $to, true );
+	}
+	void placeStones() {
+		placeStones( ALL );
 	}
 	abstract void toMove( byte $stone, int $moveNo );
 	abstract boolean isAdmin();
@@ -308,9 +317,6 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 				setStone( c.col(), c.row(), STONE.WHITE );
 		}
 	}
-	void placeStones() {
-		placeStones( ALL );
-	}
 	abstract void clear();
 	void updateSGF( BufferedReader $reader ) {
 		_sgf.clear();
@@ -325,7 +331,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 				while ( n.getChildAt( 0 ) != null ) {
 					n = n.getChildAt( 0 );
 				}
-				selectBranch( n );
+				selectBranch( n, true, false );
 			}
 		} catch ( SGFException se ) {
 			Con.err( "SGFException: " + se.getMessage() );

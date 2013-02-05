@@ -492,7 +492,7 @@ class Go extends HAbstractLogic implements Runnable {
 			handlerMark();
 			_toMove = toMove;
 		} else if ( toMove != STONE.MARK ) {
-			_gui._pass.setEnabled( ( toMove == _playerColor ) && ( _playerColor != STONE.NONE ) );
+			_gui._pass.setEnabled( ( toMove == _playerColor ) && ongoingMatch() );
 			_gui._conf.setEnabled( _admin && ( toMove == STONE.NONE ) );
 			++ _move;
 			toMove( toMove, _move );

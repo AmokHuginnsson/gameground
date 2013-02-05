@@ -102,7 +102,8 @@ protected:
 	typedef yaal::hcore::HArray<int> path_t;
 	typedef yaal::hcore::HArray<sgf::SGF::game_tree_t::const_node_t> branch_t;
 	OPlayerInfo _contestants[ 2 ];
-	STONE::stone_t _state;
+	STONE::stone_t _toMove;
+	bool _marking;
 	int _gobanSize;
 	int _komi;
 	int _handicaps;
@@ -177,10 +178,13 @@ protected:
 	void count_score( void );
 	void after_move( void );
 	void mark_teritory( void );
+	void apply_teritory_marker( void );
+	void end_match( void );
 	STONE::stone_t mark_teritory( int, int );
 	void replace_stones( STONE::stone_t, STONE::stone_t );
 	void update_clocks( void );
 	void revoke_scheduled_tasks( void );
+	bool is_admin( OClientInfo* ) const;
 	bool can_play( OClientInfo* ) const;
 	bool can_setup( OClientInfo* ) const;
 	bool ongoing_match( void ) const;
