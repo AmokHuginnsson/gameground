@@ -24,11 +24,25 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
+#include <cmath>
 #include <iostream>
 
-#include <yaal/yaal.hxx>
-M_VCSID( "$Id: "__ID__" $" )
+#include <yaal/hcore/harray.hxx>
+#include <yaal/hcore/hhashmap.hxx>
+#include <yaal/hcore/hsocket.hxx>
+#include <yaal/hcore/htokenizer.hxx>
+#include <yaal/hcore/hlog.hxx>
+#include <yaal/tools/hiodispatcher.hxx>
+#include <yaal/tools/hstringstream.hxx>
+#include <yaal/tools/hash.hxx>
+#include <yaal/tools/util.hxx>
+#include <yaal/hconsole/console.hxx>
+#include <yaal/hconsole/htuiprocess.hxx>
+#include <yaal/hconsole/hwindow.hxx>
+#include <yaal/hconsole/heditcontrol.hxx>
+#include <yaal/hconsole/hlogpad.hxx>
 
+M_VCSID( "$Id: "__ID__" $" )
 #include "galaxy.hxx"
 
 #include "setup.hxx"

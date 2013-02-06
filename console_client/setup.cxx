@@ -27,14 +27,15 @@ Copyright:
 #include <cstring>
 #include <cstdio>
 
-#include <yaal/yaal.hxx>
+#include <yaal/hcore/hfile.hxx>
+#include <yaal/tools/util.hxx>
+
 M_VCSID( "$Id: "__ID__" $" )
 #include "setup.hxx"
 
 using namespace yaal::hcore;
 using namespace yaal::tools;
 using namespace yaal::tools::util;
-using namespace yaal::dbwrapper;
 
 namespace gameground {
 

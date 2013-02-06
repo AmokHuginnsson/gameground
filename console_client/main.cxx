@@ -26,9 +26,11 @@ Copyright:
 
 #include <cstdlib>
 
-#include <yaal/yaal.hxx> /* all hAPI headers */
-M_VCSID( "$Id: "__ID__" $" )
+#include <yaal/hcore/hfile.hxx>
+#include <yaal/hcore/hlog.hxx>
+#include <yaal/hconsole/console.hxx>
 
+M_VCSID( "$Id: "__ID__" $" )
 #include "setup.hxx"
 #include "options.hxx"
 #include "galaxy.hxx"
@@ -37,7 +39,6 @@ using namespace yaal;
 using namespace yaal::hcore;
 using namespace yaal::hconsole;
 using namespace yaal::tools;
-using namespace yaal::tools::util;
 using namespace gameground;
 
 namespace gameground {
