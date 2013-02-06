@@ -28,6 +28,7 @@ Copyright:
 #define SPELLCHECKER_HXX_INCLUDED
 
 #include <yaal/hcore/hstring.hxx>
+#include <yaal/hcore/hsingleton.hxx>
 
 namespace gameground {
 

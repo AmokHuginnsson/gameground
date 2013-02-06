@@ -26,7 +26,12 @@ Copyright:
 
 #include <cstring>
 
-#include <yaal/yaal.hxx>
+#include <yaal/hcore/macro.hxx>
+#include <yaal/hcore/hfile.hxx>
+#include <yaal/hcore/htokenizer.hxx>
+#include <yaal/tools/util.hxx>
+#include <yaal/tools/hasynccaller.hxx>
+#include <yaal/tools/hscheduledasynccaller.hxx>
 
 M_VCSID( "$Id: "__ID__" $" )
 #include "god.hxx"
@@ -281,7 +286,7 @@ void HGo::handler_getup( OClientInfo* clientInfo_, HString const& /*message_*/ )
 void HGo::handler_select( OClientInfo* clientInfo_, yaal::hcore::HString const& message_ ) {
 	M_PROLOG
 	if ( ! can_setup( clientInfo_ ) )
-		throw HLogicException( GO_MSG[ GO_MSG_INSUFFICIENT_PRIVILEGES ] );
+		throw HLogicException( GO_MSG[ is_admin( clientInfo_ ) ? GO_MSG_YOU_CANNOT_DO_IT_NOW : GO_MSG_INSUFFICIENT_PRIVILEGES ] );
 	HTokenizer t( message_, "," );
 	HTokenizer::HIterator it( t.begin() );
 	HTokenizer::HIterator end( t.end() );

@@ -26,7 +26,11 @@ Copyright:
 
 #include <cstring>
 
-#include <yaal/yaal.hxx>
+#include <yaal/hcore/macro.hxx>
+#include <yaal/hcore/hfile.hxx>
+#include <yaal/hcore/htokenizer.hxx>
+#include <yaal/tools/util.hxx>
+
 M_VCSID( "$Id: "__ID__" $" )
 #include "setd.hxx"
 
@@ -37,7 +41,6 @@ M_VCSID( "$Id: "__ID__" $" )
 
 using namespace yaal;
 using namespace yaal::hcore;
-using namespace yaal::hconsole;
 using namespace yaal::tools;
 using namespace yaal::tools::util;
 

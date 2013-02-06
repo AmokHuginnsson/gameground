@@ -26,6 +26,7 @@ Copyright:
 
 #include <yaal/hcore/macro.hxx>
 #include <yaal/hcore/hexception.hxx>
+
 M_VCSID( "$Id: "__ID__" $" )
 #include "security.hxx"
 

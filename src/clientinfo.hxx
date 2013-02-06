@@ -28,6 +28,7 @@ Copyright:
 #define CLIENTINFO_HXX_INCLUDED
 
 #include <yaal/hcore/hset.hxx>
+#include <yaal/hcore/hsocket.hxx>
 
 #include "logic.hxx"
 

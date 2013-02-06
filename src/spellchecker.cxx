@@ -1,9 +1,10 @@
 #include <string.h>
 #include <aspell.h>
 
-#include <yaal/yaal.hxx>
-M_VCSID( "$Id: "__ID__" $" )
+#include <yaal/hcore/macro.hxx>
+#include <yaal/hcore/hlog.hxx>
 
+M_VCSID( "$Id: "__ID__" $" )
 #include "spellchecker.hxx"
 
 #include "setup.hxx"

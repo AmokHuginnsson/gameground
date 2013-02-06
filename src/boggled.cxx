@@ -24,7 +24,12 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#include <yaal/yaal.hxx>
+#include <yaal/hcore/macro.hxx>
+#include <yaal/hcore/hfile.hxx>
+#include <yaal/hcore/htokenizer.hxx>
+#include <yaal/tools/hasynccaller.hxx>
+#include <yaal/tools/hscheduledasynccaller.hxx>
+
 M_VCSID( "$Id: "__ID__" $" )
 #include "boggled.hxx"
 
@@ -35,9 +40,7 @@ M_VCSID( "$Id: "__ID__" $" )
 
 using namespace yaal;
 using namespace yaal::hcore;
-using namespace yaal::hconsole;
 using namespace yaal::tools;
-using namespace yaal::tools::util;
 
 namespace gameground {
 

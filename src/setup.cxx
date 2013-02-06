@@ -27,7 +27,11 @@ Copyright:
 #include <cstring>
 #include <cstdio>
 
-#include <yaal/yaal.hxx>
+#include <yaal/hcore/macro.hxx>
+#include <yaal/hcore/hfile.hxx>
+#include <yaal/tools/util.hxx>
+#include <yaal/dbwrapper/hdatabase.hxx>
+
 M_VCSID( "$Id: "__ID__" $" )
 #include "setup.hxx"
 

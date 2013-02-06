@@ -27,6 +27,12 @@ Copyright:
 #ifndef GAMEGROUND_LOGIC_HXX_INCLUDED
 #define GAMEGROUND_LOGIC_HXX_INCLUDED
 
+#include <yaal/hcore/hset.hxx>
+#include <yaal/hcore/hhashmap.hxx>
+#include <yaal/hcore/hthread.hxx>
+#include <yaal/hcore/hstreaminterface.hxx>
+#include <yaal/tools/hstringstream.hxx>
+
 namespace gameground {
 
 struct OClientInfo;

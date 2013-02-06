@@ -27,6 +27,11 @@ Copyright:
 #ifndef GAMEGROUND_SERVER_HXX_INCLUDED
 #define GAMEGROUND_SERVER_HXX_INCLUDED
 
+#include <yaal/hcore/hnumber.hxx>
+#include <yaal/tools/hiodispatcher.hxx>
+#include <yaal/tools/hexclusiveaccessor.hxx>
+#include <yaal/dbwrapper/hdatabase.hxx>
+
 #include "clientinfo.hxx"
 #include "logic.hxx"
 

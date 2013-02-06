@@ -24,7 +24,16 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#include <yaal/yaal.hxx>
+#include <yaal/hcore/macro.hxx>
+#include <yaal/hcore/hfile.hxx>
+#include <yaal/hcore/hformat.hxx>
+#include <yaal/hcore/htokenizer.hxx>
+#include <yaal/tools/hash.hxx>
+#include <yaal/tools/util.hxx>
+#include <yaal/tools/streamtools.hxx>
+#include <yaal/hconsole/ansi.hxx>
+#include <yaal/hconsole/console.hxx>
+
 M_VCSID( "$Id: "__ID__" $" )
 #include "server.hxx"
 

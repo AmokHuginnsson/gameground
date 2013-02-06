@@ -27,6 +27,8 @@ Copyright:
 #ifndef GAMEGROUND_SETD_HXX_INCLUDED
 #define GAMEGROUND_SETD_HXX_INCLUDED
 
+#include <yaal/hcore/hmap.hxx>
+
 #include "logic.hxx"
 
 namespace gameground {

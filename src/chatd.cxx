@@ -26,7 +26,11 @@ Copyright:
 
 #include <cstring>
 
-#include <yaal/yaal.hxx>
+#include <yaal/hcore/macro.hxx>
+#include <yaal/hcore/hfile.hxx>
+#include <yaal/hcore/htokenizer.hxx>
+#include <yaal/tools/util.hxx>
+
 M_VCSID( "$Id: "__ID__" $" )
 #include "chatd.hxx"
 

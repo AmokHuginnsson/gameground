@@ -24,7 +24,11 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#include <yaal/yaal.hxx>
+#include <yaal/hcore/macro.hxx>
+#include <yaal/hcore/hfile.hxx>
+#include <yaal/hcore/htokenizer.hxx>
+#include <yaal/tools/util.hxx>
+
 M_VCSID( "$Id: "__ID__" $" )
 #include "logic.hxx"
 #include "server.hxx"
@@ -33,7 +37,6 @@ M_VCSID( "$Id: "__ID__" $" )
 
 using namespace yaal;
 using namespace yaal::hcore;
-using namespace yaal::hconsole;
 using namespace yaal::tools;
 using namespace yaal::tools::util;
 

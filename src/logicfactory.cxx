@@ -26,7 +26,7 @@ Copyright:
 
 #include <libintl.h>
 
-#include <yaal/yaal.hxx>
+#include <yaal/hcore/macro.hxx>
 
 M_VCSID( "$Id: "__ID__" $" )
 #include "logicfactory.hxx"
@@ -35,9 +35,7 @@ M_VCSID( "$Id: "__ID__" $" )
 
 using namespace yaal;
 using namespace yaal::hcore;
-using namespace yaal::hconsole;
 using namespace yaal::tools;
-using namespace yaal::tools::util;
 
 namespace gameground {
 

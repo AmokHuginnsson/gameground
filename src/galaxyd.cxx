@@ -24,7 +24,14 @@ Copyright:
  FITNESS FOR A PARTICULAR PURPOSE. Use it at your own risk.
 */
 
-#include <yaal/yaal.hxx>
+#include <cmath>
+
+#include <yaal/hcore/macro.hxx>
+#include <yaal/hcore/hfile.hxx>
+#include <yaal/hcore/htokenizer.hxx>
+#include <yaal/tools/util.hxx>
+#include <yaal/hconsole/console.hxx>
+
 M_VCSID( "$Id: "__ID__" $" )
 #include "galaxyd.hxx"
 
@@ -34,9 +41,9 @@ M_VCSID( "$Id: "__ID__" $" )
 
 using namespace yaal;
 using namespace yaal::hcore;
-using namespace yaal::hconsole;
 using namespace yaal::tools;
 using namespace yaal::tools::util;
+using namespace yaal::hconsole;
 
 namespace gameground {
 
@@ -142,7 +149,6 @@ void HSystem::do_round( HGalaxy& galaxy_ ) {
 				}
 				attackers_t::iterator done = it;
 				++ it;
-				log_trace << "ec: " << ec << endl;
 				M_ASSERT( _attackers.size() > 0 );
 				_attackers.erase( done );
 				++ ec;

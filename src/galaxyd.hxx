@@ -27,6 +27,10 @@ Copyright:
 #ifndef GALAXYD_HXX_INCLUDED
 #define GALAXYD_HXX_INCLUDED
 
+#include <yaal/hcore/harray.hxx>
+#include <yaal/hcore/hlist.hxx>
+#include <yaal/hcore/hmap.hxx>
+
 #include "logic.hxx"
 
 namespace gameground {
