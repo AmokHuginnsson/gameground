@@ -21,19 +21,21 @@ public class GoGoban extends Goban {
 		super.setLogic( _logic = $go );
 	}
 	public void mouseClicked( MouseEvent $event ) {
-		if ( _logic.isMyMove() && ! breakTheRules( _cursorX, _cursorY, _logic.playerColor() ) ) {
-			Sound.play( "stone" );
-			_logic._client.println( Go.PROTOCOL.CMD + Go.PROTOCOL.SEP + _logic.id() + Go.PROTOCOL.SEP
-					+ Go.PROTOCOL.PLAY + Go.PROTOCOL.SEP
-					+ Go.PROTOCOL.PUTSTONE + Go.PROTOCOL.SEPP + _cursorX + Go.PROTOCOL.SEPP + _cursorY );
-			_logic.waitToMove();
-		} else if ( validCoords( _cursorX, _cursorY ) && ( _logic.toMove() == Go.STONE.MARK ) ) {
-			byte stone = getStone( _cursorX, _cursorY );
-			if ( ( _logic.playerColor() == stone ) || ( _logic.stoneDead() == stone ) ) {
-				System.out.println( "dead mark" );
+		if ( _viewMove == _currentMove ) {
+			if ( _logic.isMyMove() && ! breakTheRules( _cursorX, _cursorY, _logic.playerColor() ) ) {
+				Sound.play( "stone" );
 				_logic._client.println( Go.PROTOCOL.CMD + Go.PROTOCOL.SEP + _logic.id() + Go.PROTOCOL.SEP
 						+ Go.PROTOCOL.PLAY + Go.PROTOCOL.SEP
-						+ Go.PROTOCOL.DEAD + stoneGroup( _cursorX, _cursorY ) );
+						+ Go.PROTOCOL.PUTSTONE + Go.PROTOCOL.SEPP + _cursorX + Go.PROTOCOL.SEPP + _cursorY );
+				_logic.waitToMove();
+			} else if ( validCoords( _cursorX, _cursorY ) && ( _logic.toMove() == Go.STONE.MARK ) ) {
+				byte stone = getStone( _cursorX, _cursorY );
+				if ( ( _logic.playerColor() == stone ) || ( _logic.stoneDead() == stone ) ) {
+					System.out.println( "dead mark" );
+					_logic._client.println( Go.PROTOCOL.CMD + Go.PROTOCOL.SEP + _logic.id() + Go.PROTOCOL.SEP
+							+ Go.PROTOCOL.PLAY + Go.PROTOCOL.SEP
+							+ Go.PROTOCOL.DEAD + stoneGroup( _cursorX, _cursorY ) );
+				}
 			}
 		}
 	}
@@ -155,7 +157,7 @@ public class GoGoban extends Goban {
 		return ( invalid );
 	}
 	void drawByLogic( Graphics g ) {
-		if ( ( _logic != null ) && ( _logic.isMyMove() || _logic.canSetup() ) && ! breakTheRules( _cursorX, _cursorY, _logic.toMove() ) )
+		if ( ( _logic != null ) && ( _viewMove == _currentMove ) && ( _logic.isMyMove() || _logic.canSetup() ) && ! breakTheRules( _cursorX, _cursorY, _logic.toMove() ) )
 			drawStone( _cursorX, _cursorY, _logic.toMove(), true, g );
 	}
 	void move( int $col, int $row, byte $stone ) {
