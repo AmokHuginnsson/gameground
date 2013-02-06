@@ -5,7 +5,7 @@ RES_DEST=$(patsubst %,./build/%,$(RESOURCES))
 ENVIRON=./build/META-INF/info.xml
 TARGET=./build/gameground.jar
 
-.PHONY: all run dist clean
+.PHONY: all run debug test test2 dist clean
 
 all: $(TARGET)
 
@@ -36,6 +36,9 @@ $(TARGET): $(ENVIRON) $(CLASS) $(RES_DEST)
 
 run: $(TARGET)
 	java -Dcom.sun.management.jmxremote -Djava.security.manager -Djava.security.policy=gameground.policy -ea -cp build/gameground.jar GameGround --host codestation.org --login Amok
+
+debug: $(TARGET)
+	java -Xdebug -Xrunjdwp:transport=dt_socket,address=127.0.0.1:8008,server=y,suspend=n -Dcom.sun.management.jmxremote -Djava.security.manager -Djava.security.policy=gameground.policy -ea -cp build/gameground.jar GameGround
 
 test: $(TARGET)
 	java -Dcom.sun.management.jmxremote -Djava.security.manager -Djava.security.policy=gameground.policy -ea -cp build/gameground.jar GameGround

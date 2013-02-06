@@ -97,6 +97,9 @@ public class GomokuGoban extends Goban {
 	boolean isAdmin() {
 		return ( false );
 	}
+	boolean ongoingMatch() {
+		return ( false );
+	}
 	void toMove( byte $stone, int $moveNo ) {
 		_logic.toMove( $stone, $moveNo );
 	}

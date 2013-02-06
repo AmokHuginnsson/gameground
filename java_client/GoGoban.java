@@ -194,6 +194,9 @@ public class GoGoban extends Goban {
 	boolean isAdmin() {
 		return ( _logic.isAdmin() );
 	}
+	boolean ongoingMatch() {
+		return ( _logic.ongoingMatch() );
+	}
 	void toMove( byte $stone, int $moveNo ) {
 		if ( _logic.toMove() != Go.STONE.MARK )
 			_logic.toMove( $stone, $moveNo );
