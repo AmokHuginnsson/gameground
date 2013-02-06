@@ -448,6 +448,9 @@ class Go extends HAbstractLogic implements Runnable {
 				_contestants.get( _playerColor )._sit.setText( _playerColor != STONE.NONE ? HGUILocal.GETUP : HGUILocal.SIT );
 			if ( _admin )
 				_gui.setEnabledControls( true );
+			_gui._pass.setEnabled( false );
+			_gui._pass.setText( _gui._passText );
+			_gui._pass.setToolTipText( _gui._toolTip );
 		} else
 			_gui.setEnabledControls( false );
 	}
@@ -515,7 +518,7 @@ class Go extends HAbstractLogic implements Runnable {
 		_gui._toMove.setText( STONE.NONE_NAME );
 		_gui._pass.setText( "Accept" );
 		_gui._pass.setEnabled( true );
-		_gui.setToolTipText( "You are accepting opponents markings, not your own." );
+		_gui._pass.setToolTipText( "You are accepting opponents markings, not your own." );
 	}
 	void handlerPlayer( String $command ) {
 		DefaultListModel<String> m = (DefaultListModel<String>)_gui._visitors.getModel();

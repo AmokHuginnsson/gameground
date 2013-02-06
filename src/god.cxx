@@ -257,6 +257,8 @@ void HGo::handler_sit( OClientInfo* clientInfo_, HString const& message_ ) {
 				_pass = 0;
 				_sgf.set_player( SGF::Player::BLACK, black._client->_login );
 				_sgf.set_player( SGF::Player::WHITE, white._client->_login );
+				clear_markers();
+				send_goban();
 				broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The Go match started." << endl << _out );
 			}
 			after_move();
@@ -371,6 +373,20 @@ void HGo::apply_teritory_marker( void ) {
 	M_EPILOG
 }
 
+void HGo::clear_markers( void ) {
+	M_PROLOG
+	if ( _sgf.get_current_move() ) {
+		_sgf.clear_markers( _sgf.get_current_move() );
+		replace_stones( STONE::DEAD_BLACK, STONE::BLACK );
+		replace_stones( STONE::DEAD_WHITE, STONE::WHITE );
+		replace_stones( STONE::TERITORY_BLACK, STONE::NONE );
+		replace_stones( STONE::TERITORY_WHITE, STONE::NONE );
+		replace_stones( STONE::TERITORY_NONE, STONE::NONE );
+		commit();
+	}
+	M_EPILOG
+}
+
 void HGo::handler_pass( OClientInfo* clientInfo_, HString const& /*message_*/ ) {
 	M_PROLOG
 	if ( _marking )
@@ -378,6 +394,7 @@ void HGo::handler_pass( OClientInfo* clientInfo_, HString const& /*message_*/ ) 
 	if ( contestant( _toMove )._client != clientInfo_ )
 		throw HLogicException( GO_MSG[ GO_MSG_NOT_YOUR_TURN ] );
 	++ _pass;
+	_sgf.move( SGF::PASS );
 	if ( _pass == 3 ) {
 		_marking = true;
 		revoke_scheduled_tasks();
@@ -385,9 +402,16 @@ void HGo::handler_pass( OClientInfo* clientInfo_, HString const& /*message_*/ ) 
 		broadcast_contestants( _out << *this << PROTOCOL::MSG << PROTOCOL::SEP << "Select your dead stones." << endl << _out );
 		mark_teritory();
 		apply_teritory_marker();
-		send_goban();
 	} else
-		_toMove = opponent( _toMove );
+		pass();
+	send_goban();
+	return;
+	M_EPILOG
+}
+
+void HGo::pass( void ) {
+	M_PROLOG
+	_toMove = opponent( _toMove );
 	return;
 	M_EPILOG
 }
@@ -416,6 +440,7 @@ void HGo::handler_dead( OClientInfo* clientInfo_, HString const& message_ ) {
 			throw HLogicException( "not your stone" );
 		mark_stone_dead( col, row );
 	}
+	mark_teritory();
 	apply_teritory_marker();
 	send_goban();
 	return;
@@ -434,6 +459,7 @@ void HGo::handler_accept( OClientInfo* clientInfo_ ) {
 			&& ( _contestants[ 1 ]._byoYomiPeriods == ACCEPTED ) ) {
 		count_score();
 		end_match();
+		send_contestants();
 	}
 	return;
 	M_EPILOG
@@ -457,8 +483,68 @@ void HGo::handler_undo( OClientInfo* /* clientInfo_ */ ) {
 	M_EPILOG
 }
 
+HGo::STONE::stone_t HGo::mark_teritory( int x, int y ) {
+	STONE::stone_t teritory = static_cast<char>( toupper( STONE::TERITORY_NONE ) );
+	STONE::stone_t stone = goban( x, y );
+	if ( ( stone == STONE::NONE ) || ( stone == STONE::DEAD_BLACK ) || ( stone == STONE::DEAD_WHITE ) ) {
+		if ( stone == STONE::NONE )
+			goban( x, y ) = teritory;
+		else
+			goban( x, y ) = static_cast<char>( toupper( stone ) );
+		int blackNeighbour = 0;
+		int whiteNeighbour = 0;
+		int bothNeighbour = 0;
+		int directs[][2] = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
+		for ( int i = 0; i < 4; ++ i ) {
+			int nx = x + directs[ i ][ 0 ];
+			int ny = y + directs[ i ][ 1 ];
+			if ( ( nx >= 0 ) && ( nx < _gobanSize )
+				&& ( ny >= 0 ) && ( ny < _gobanSize ) ) {
+				STONE::stone_t neighbour = goban( nx, ny );
+				if ( ( neighbour != teritory )
+						&& ( neighbour != toupper( STONE::DEAD_BLACK ) )
+						&& ( neighbour != toupper( STONE::DEAD_WHITE ) ) ) {
+					STONE::stone_t newTeritory = mark_teritory( nx, ny );
+					if ( newTeritory == STONE::BLACK )
+						++ blackNeighbour;
+					else  if ( newTeritory == STONE::WHITE )
+						++ whiteNeighbour;
+					else if ( ( newTeritory == STONE::TERITORY_NONE ) || ( newTeritory == toupper( STONE::TERITORY_NONE ) ) )
+						++ bothNeighbour;
+					else {
+						M_ASSERT( newTeritory == STONE::NONE );
+					}
+				}
+			}
+		}
+		if ( blackNeighbour || whiteNeighbour || bothNeighbour ) {
+			if ( blackNeighbour && ! ( whiteNeighbour || bothNeighbour ) )
+				teritory = STONE::BLACK;
+			else if ( whiteNeighbour && ! ( blackNeighbour || bothNeighbour ) )
+				teritory = STONE::WHITE;
+			else
+				teritory = STONE::TERITORY_NONE;
+		} else {
+			if ( stone == STONE::DEAD_BLACK )
+				teritory = STONE::WHITE;
+			else if ( stone == STONE::DEAD_WHITE )
+				teritory = STONE::BLACK;
+			else
+				teritory = STONE::NONE;
+		}
+	} else if ( ( stone == STONE::BLACK ) || ( stone == STONE::WHITE ) || ( stone == toupper( STONE::TERITORY_NONE ) ) )
+		teritory = stone;
+	else {
+		M_ASSERT( ! "bad code path" );
+	}
+	return ( teritory );
+}
+
 void HGo::mark_teritory( void ) {
 	M_PROLOG
+	replace_stones( STONE::TERITORY_BLACK, STONE::NONE );
+	replace_stones( STONE::TERITORY_WHITE, STONE::NONE );
+	replace_stones( STONE::TERITORY_NONE, STONE::NONE );
 	for ( int i = 0; i < ( _gobanSize * _gobanSize ); ++ i ) {
 		int x = i / _gobanSize;
 		int y = i % _gobanSize;
@@ -470,20 +556,21 @@ void HGo::mark_teritory( void ) {
 				case ( STONE::WHITE ): mark = STONE::TERITORY_WHITE; break;
 				case ( STONE::TERITORY_NONE ): mark = STONE::TERITORY_NONE; break;
 				default:
-					out << "teritory: '" << teritory << "'" << endl;
-					M_ASSERT( ! "bug in count_score switch" );
+					out << "teritory: '" << teritory << "', at: " << x << "," << y << endl;
+					M_ASSERT( ! "bug in mark_teritory switch" );
 			}
 			replace_stones( static_cast<char>( toupper( STONE::TERITORY_NONE ) ), mark );
 		}
 	}
+	replace_stones( static_cast<char>( toupper( STONE::DEAD_BLACK ) ), STONE::DEAD_BLACK );
+	replace_stones( static_cast<char>( toupper( STONE::DEAD_WHITE ) ), STONE::DEAD_WHITE );
+	return;
 	M_EPILOG
 }
 
 void HGo::count_score( void ) {
 	M_PROLOG
 	mark_teritory();
-	replace_stones( static_cast<char>( toupper( STONE::DEAD_BLACK ) ), STONE::DEAD_BLACK );
-	replace_stones( static_cast<char>( toupper( STONE::DEAD_WHITE ) ), STONE::DEAD_WHITE );
 	commit();
 	int blackTeritory = count_stones( STONE::TERITORY_BLACK );
 	int whiteTeritory = count_stones( STONE::TERITORY_WHITE );
@@ -515,50 +602,6 @@ void HGo::count_score( void ) {
 	M_EPILOG
 }
 
-HGo::STONE::stone_t HGo::mark_teritory( int x, int y ) {
-	STONE::stone_t teritory = static_cast<char>( toupper( STONE::TERITORY_NONE ) );
-	STONE::stone_t stone = goban( x, y );
-	if ( ( stone == STONE::NONE ) || ( stone == STONE::DEAD_BLACK ) || ( stone == STONE::DEAD_WHITE ) ) {
-		if ( stone == STONE::NONE )
-			goban( x, y ) = teritory;
-		else
-			goban( x, y ) = static_cast<char>( toupper( stone ) );
-		int blackNeighbour = 0;
-		int whiteNeighbour = 0;
-		int bothNeighbour = 0;
-		int directs[][2] = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
-		for ( int i = 0; i < 4; ++ i ) {
-			int nx = x + directs[ i ][ 0 ];
-			int ny = y + directs[ i ][ 1 ];
-			if ( ( nx >= 0 ) && ( nx < _gobanSize )
-				&& ( ny >= 0 ) && ( ny < _gobanSize ) ) {
-				STONE::stone_t neighbour = goban( nx, ny );
-				if ( ( neighbour != teritory )
-						&& ( neighbour != toupper( STONE::DEAD_BLACK ) )
-						&& ( neighbour != toupper( STONE::DEAD_WHITE ) ) ) {
-					STONE::stone_t NewTeritory = mark_teritory( nx, ny );
-					if ( NewTeritory == STONE::BLACK )
-						++ blackNeighbour;
-					else  if ( NewTeritory == STONE::WHITE )
-						++ whiteNeighbour;
-					else
-						++ bothNeighbour;
-				}
-			}
-		}
-		if ( bothNeighbour || ( blackNeighbour && whiteNeighbour ) )
-			teritory = STONE::TERITORY_NONE;
-		else if ( blackNeighbour )
-			teritory = STONE::BLACK;
-		else
-			teritory = STONE::WHITE;
-	} else if ( ( stone == STONE::BLACK ) || ( stone == STONE::WHITE ) || ( stone == toupper ( STONE::TERITORY_NONE ) ) )
-		teritory = stone;
-	else
-		M_ASSERT( ( stone == toupper( STONE::DEAD_BLACK ) ) || ( stone == toupper( STONE::DEAD_WHITE ) ) );
-	return ( teritory );
-}
-
 void HGo::handler_play( OClientInfo* clientInfo_, HString const& message_ ) {
 	M_PROLOG
 	HLock l( _mutex );
@@ -570,11 +613,14 @@ void HGo::handler_play( OClientInfo* clientInfo_, HString const& message_ ) {
 		} else
 			throw HLogicException( GO_MSG[GO_MSG_YOU_ARE_NOT_PLAYING] );
 	}
-	if ( item == PROTOCOL::PUTSTONE )
+	bool callAfterMove( false );
+	if ( item == PROTOCOL::PUTSTONE ) {
 		handler_put_stone( clientInfo_, message_ );
-	else if ( item == PROTOCOL::PASS )
+		callAfterMove = true;
+	} else if ( item == PROTOCOL::PASS ) {
 		handler_pass( clientInfo_, message_ );
-	else if ( item == PROTOCOL::DEAD )
+		callAfterMove = true;
+	} else if ( item == PROTOCOL::DEAD )
 		handler_dead( clientInfo_, message_ );
 	else if ( item == PROTOCOL::ACCEPT )
 		handler_accept( clientInfo_ );
@@ -582,7 +628,8 @@ void HGo::handler_play( OClientInfo* clientInfo_, HString const& message_ ) {
 		handler_undo( clientInfo_ );
 	else
 		throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
-	after_move();
+	if ( callAfterMove )
+		after_move();
 	return;
 	M_EPILOG
 }
@@ -788,8 +835,12 @@ void HGo::apply_move( sgf::SGF::game_tree_t::const_node_t node_ ) {
 			for ( SGF::Setup::coords_t::const_iterator it( white->second.begin() ), end( white->second.end() ); it != end; ++ it )
 				put_stone( it->col(), it->row(), STONE::BLACK );
 		}
-	} else
-		make_move( (*node_)->col(), (*node_)->row() );
+	} else {
+		if ( (*node_)->coord() != SGF::PASS )
+			make_move( (*node_)->col(), (*node_)->row() );
+		else
+			pass();
+	}
 	return;
 	M_EPILOG
 }
@@ -1066,6 +1117,7 @@ void HGo::contestant_gotup( OClientInfo* clientInfo_ ) {
 				<< " wins." << endl << _out );
 	}
 	contestant( stone )._client = NULL;
+	_marking = false;
 	return;
 }
 

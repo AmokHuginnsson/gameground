@@ -175,10 +175,12 @@ protected:
 	void ensure_coordinates_validity( int, int );
 	void mark_stone_dead( int, int );
 	void commit( void );
+	void pass( void );
 	void count_score( void );
 	void after_move( void );
 	void mark_teritory( void );
 	void apply_teritory_marker( void );
+	void clear_markers( void );
 	void end_match( void );
 	STONE::stone_t mark_teritory( int, int );
 	void replace_stones( STONE::stone_t, STONE::stone_t );

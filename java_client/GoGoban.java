@@ -195,7 +195,8 @@ public class GoGoban extends Goban {
 		return ( _logic.isAdmin() );
 	}
 	void toMove( byte $stone, int $moveNo ) {
-		_logic.toMove( $stone, $moveNo );
+		if ( _logic.toMove() != Go.STONE.MARK )
+			_logic.toMove( $stone, $moveNo );
 	}
 }
 
