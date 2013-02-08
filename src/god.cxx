@@ -84,6 +84,9 @@ char const* const HGo::PROTOCOL::SIT = "sit";
 char const* const HGo::PROTOCOL::GETUP = "get_up";
 char const* const HGo::PROTOCOL::DEAD = "dead";
 char const* const HGo::PROTOCOL::ACCEPT = "accept";
+char const* const HGo::PROTOCOL::REQUEST = "request";
+char const* const HGo::PROTOCOL::REJECT = "reject";
+char const* const HGo::PROTOCOL::IGNORE = "ignore";
 static int const ACCEPTED = -7;
 
 int const GO_MSG_MALFORMED = 0;
@@ -109,7 +112,7 @@ HGo::HGo( HServer* server_, HLogic::id_t const& id_, HString const& comment_ )
 	_koGame( GOBAN_SIZE::NORMAL * GOBAN_SIZE::NORMAL + sizeof ( '\0' ) ),
 	_oldGame( GOBAN_SIZE::NORMAL * GOBAN_SIZE::NORMAL + sizeof ( '\0' ) ),
 	_sgf( SGF::GAME_TYPE::GO, "gameground" ),
-	_adminQueue(), _path(), _branch(), _varTmpBuffer() {
+	_adminQueue(), _path(), _branch(), _varTmpBuffer(), _pendingUndoRequest( NULL ) {
 	M_PROLOG
 	_handlers[ PROTOCOL::SETUP ] = static_cast<handler_t>( &HGo::handler_setup );
 	_handlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HGo::handler_play );
@@ -343,8 +346,8 @@ void HGo::handler_put_stone( OClientInfo* clientInfo_, HString const& message_ )
 	int col( 0 );
 	int row( 0 );
 	try {
-		col = lexical_cast<int>( get_token( message_, ",", 1 ) );
-		row = lexical_cast<int>( get_token( message_, ",", 2 ) );
+		col = lexical_cast<int>( get_token( message_, ",", 0 ) );
+		row = lexical_cast<int>( get_token( message_, ",", 1 ) );
 	} catch ( HLexicalCastException const& ) {
 		throw HLogicException( GO_MSG[GO_MSG_MALFORMED] );
 	}
@@ -392,7 +395,7 @@ void HGo::clear_markers( void ) {
 	M_EPILOG
 }
 
-void HGo::handler_pass( OClientInfo* clientInfo_, HString const& /*message_*/ ) {
+void HGo::handler_pass( OClientInfo* clientInfo_ ) {
 	M_PROLOG
 	if ( _marking )
 		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANNOT_DO_IT_NOW ] );
@@ -426,7 +429,7 @@ void HGo::handler_dead( OClientInfo* clientInfo_, HString const& message_ ) {
 	if ( ! _marking )
 		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANNOT_DO_IT_NOW ] );
 	HString str;
-	for ( int i = 1; ! ( str = get_token( message_, ",", i ) ).is_empty() ; i += 2 ) {
+	for ( int i( 0 ); ! ( str = get_token( message_, ",", i ) ).is_empty() ; i += 2 ) {
 		int col( 0 );
 		int row( 0 );
 		try {
@@ -482,8 +485,55 @@ void HGo::handler_newgame( OClientInfo* clientInfo_, HString const& ) {
 	M_EPILOG
 }
 
-void HGo::handler_undo( OClientInfo* /* clientInfo_ */ ) {
+void HGo::handler_undo( OClientInfo* clientInfo_, HString const& message_ ) {
 	M_PROLOG
+	int const opponentIdx( _contestants[0]._client == clientInfo_ ? 1 : 0 );
+	if ( message_ == PROTOCOL::REQUEST ) {
+		cout << "undo request" << endl;
+		if ( ! _contestants[opponentIdx]._ignoreUndo ) {
+			if ( _pendingUndoRequest ) {
+				if ( _pendingUndoRequest == _contestants[opponentIdx]._client ) {
+					_out << PROTOCOL::MSG << PROTOCOL::SEP << "Your opponent requested undo before you did." << endl;
+					*clientInfo_->_socket << *this << _out.consume();
+				}
+			} else {
+				_pendingUndoRequest = clientInfo_;
+				OClientInfo* opp( _contestants[opponentIdx]._client );
+				_out << PROTOCOL::UNDO << endl;
+				*opp->_socket << *this << _out.consume();
+			}
+		} else {
+			_out << PROTOCOL::MSG << PROTOCOL::SEP << "Your opponent ignores all your undo requests." << endl;
+			*clientInfo_->_socket << *this << _out.consume();
+		}
+	} else {
+		if ( ! _pendingUndoRequest || ( _pendingUndoRequest != _contestants[opponentIdx]._client ) )
+			throw HLogicException( GO_MSG[ GO_MSG_YOU_CANNOT_DO_IT_NOW ] );
+		if ( message_ == PROTOCOL::ACCEPT ) {
+			SGF::game_tree_t::const_node_t currentMove( _sgf.get_current_move() );
+			if ( currentMove ) {
+				int skip( _toMove == ( opponentIdx == 0 ? STONE::BLACK : STONE::WHITE ) ? 2 : 1 );
+				for ( int i( 0 ); currentMove->get_parent() && ( i < skip ); ++ i )
+					currentMove = currentMove->get_parent();
+				_sgf.set_current_move( currentMove );
+				reset_goban( false );
+				branch_t::const_iterator m( _branch.begin() );
+				for ( int i( 0 ), SIZE( static_cast<int>( _branch.get_size() - skip ) ); i < SIZE; ++ i, ++ m )
+					apply_move( *m );
+				send_path();
+			}
+		} else if ( message_ == PROTOCOL::REJECT ) {
+			_out << PROTOCOL::MSG << PROTOCOL::SEP << "Your opponent rejected your undo request." << endl;
+			*_pendingUndoRequest->_socket << *this << _out.consume();
+		} else if ( message_ == PROTOCOL::IGNORE ) {
+			_contestants[1 - opponentIdx]._ignoreUndo = true;
+			_out << PROTOCOL::MSG << PROTOCOL::SEP << "Your opponent rejected your undo request and will ignore all future undo requests." << endl;
+			*_pendingUndoRequest->_socket << *this << _out.consume();
+		} else {
+			throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
+		}
+		_pendingUndoRequest = NULL;
+	}
 	return;
 	M_EPILOG
 }
@@ -610,7 +660,7 @@ void HGo::count_score( void ) {
 void HGo::handler_play( OClientInfo* clientInfo_, HString const& message_ ) {
 	M_PROLOG
 	HLock l( _mutex );
-	HString item = get_token( message_, ",", 0 );
+	HString item( get_token( message_, ",", 0 ) );
 	if ( ! can_play( clientInfo_ ) ) {
 		if ( can_setup( clientInfo_ ) ) {
 			if ( item != PROTOCOL::PUTSTONE )
@@ -618,19 +668,20 @@ void HGo::handler_play( OClientInfo* clientInfo_, HString const& message_ ) {
 		} else
 			throw HLogicException( GO_MSG[GO_MSG_YOU_ARE_NOT_PLAYING] );
 	}
+	HString param( message_.mid( item.get_length() + 1 ) );
 	bool callAfterMove( false );
 	if ( item == PROTOCOL::PUTSTONE ) {
-		handler_put_stone( clientInfo_, message_ );
+		handler_put_stone( clientInfo_, param );
 		callAfterMove = true;
 	} else if ( item == PROTOCOL::PASS ) {
-		handler_pass( clientInfo_, message_ );
+		handler_pass( clientInfo_ );
 		callAfterMove = true;
 	} else if ( item == PROTOCOL::DEAD )
-		handler_dead( clientInfo_, message_ );
+		handler_dead( clientInfo_, param );
 	else if ( item == PROTOCOL::ACCEPT )
 		handler_accept( clientInfo_ );
 	else if ( item == PROTOCOL::UNDO )
-		handler_undo( clientInfo_ );
+		handler_undo( clientInfo_, param );
 	else
 		throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
 	if ( callAfterMove )
@@ -654,6 +705,7 @@ void HGo::end_match( void ) {
 	M_PROLOG
 	_contestants[0]._client = _contestants[1]._client = NULL;
 	_marking = false;
+	_pendingUndoRequest = NULL;
 	return;
 	M_EPILOG
 }
@@ -817,6 +869,7 @@ void HGo::reset_goban( bool sgf_ ) {
 		put_handicap_stones( _handicaps, sgf_ );
 	_toMove = _handicaps <= 1 ? STONE::BLACK : STONE::WHITE;
 	_marking = false;
+	_pendingUndoRequest = NULL;
 	return;
 	M_EPILOG
 }
@@ -933,15 +986,8 @@ void HGo::put_stone( int col_, int row_, STONE::stone_t stone_ ) {
 	M_EPILOG
 }
 
-void HGo::send_goban( OClientInfo* clientInfo_ ) {
+void HGo::send_path( OClientInfo* clientInfo_ ) {
 	M_PROLOG
-	_out << PROTOCOL::SGF << PROTOCOL::SEP;
-	_sgf.save( _out, true );
-	_out << endl;
-	if ( clientInfo_ )
-		*clientInfo_->_socket << *this << _out.consume();
-	else
-		broadcast( _out.consume() );
 	_path.clear();
 	SGF::game_tree_t::const_node_t n( _sgf.get_current_move() );
 	int moveNo( 0 );
@@ -966,6 +1012,20 @@ void HGo::send_goban( OClientInfo* clientInfo_ ) {
 		*clientInfo_->_socket << *this << _out.consume();
 	else
 		broadcast( _out.consume() );
+	return;
+	M_EPILOG
+}
+
+void HGo::send_goban( OClientInfo* clientInfo_ ) {
+	M_PROLOG
+	_out << PROTOCOL::SGF << PROTOCOL::SEP;
+	_sgf.save( _out, true );
+	_out << endl;
+	if ( clientInfo_ )
+		*clientInfo_->_socket << *this << _out.consume();
+	else
+		broadcast( _out.consume() );
+	send_path( clientInfo_ );
 	return;
 	M_EPILOG
 }
@@ -1123,6 +1183,7 @@ void HGo::contestant_gotup( OClientInfo* clientInfo_ ) {
 	}
 	contestant( stone )._client = NULL;
 	_marking = false;
+	_pendingUndoRequest = NULL;
 	return;
 }
 

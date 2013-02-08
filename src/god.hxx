@@ -46,13 +46,15 @@ private:
 		int _byoYomiPeriods;
 		int _stonesCaptured;
 		int _score;
+		bool _ignoreUndo;
 		OClientInfo* _client;
-		OPlayerInfo( void ) : _timeLeft( 0 ), _byoYomiPeriods( 0 ), _stonesCaptured( 0 ), _score( 0 ), _client( NULL ) {}
+		OPlayerInfo( void ) : _timeLeft( 0 ), _byoYomiPeriods( 0 ), _stonesCaptured( 0 ), _score( 0 ), _ignoreUndo( false ), _client( NULL ) {}
 		void reset( int long time_, int score_, int byo_ ) {
 			_timeLeft = time_;
 			_byoYomiPeriods = byo_;
 			_stonesCaptured = 0;
 			_score = score_;
+			_ignoreUndo = false;
 		}
 	};
 	struct STONE {
@@ -95,6 +97,9 @@ private:
 		static char const* const TOMOVE;
 		static char const* const DEAD;
 		static char const* const ACCEPT;
+		static char const* const REQUEST;
+		static char const* const REJECT;
+		static char const* const IGNORE;
 	};
 protected:
 	/*{*/
@@ -121,6 +126,7 @@ protected:
 	path_t _path;
 	branch_t _branch;
 	yaal::hcore::HString _varTmpBuffer;
+	OClientInfo* _pendingUndoRequest;
 	/*}*/
 public:
 	/*{*/
@@ -145,6 +151,7 @@ protected:
 	void apply_move( sgf::SGF::game_tree_t::const_node_t );
 	void put_stone( int, int, STONE::stone_t );
 	void send_goban( OClientInfo* = NULL );
+	void send_path( OClientInfo* = NULL );
 	bool have_liberties( int, int, STONE::stone_t );
 	char& goban( int, int );
 	OPlayerInfo& contestant( STONE::stone_t );
@@ -164,13 +171,13 @@ protected:
 	void handler_sit( OClientInfo*, yaal::hcore::HString const& );
 	void handler_getup( OClientInfo*, yaal::hcore::HString const& );
 	void handler_put_stone( OClientInfo*, yaal::hcore::HString const& );
-	void handler_pass( OClientInfo*, yaal::hcore::HString const& );
+	void handler_pass( OClientInfo* );
 	void handler_sgf( OClientInfo*, yaal::hcore::HString const& );
 	void handler_dead( OClientInfo*, yaal::hcore::HString const& );
 	void handler_newgame( OClientInfo*, yaal::hcore::HString const& );
 	void handler_select( OClientInfo*, yaal::hcore::HString const& );
 	void handler_accept( OClientInfo* );
-	void handler_undo( OClientInfo* );
+	void handler_undo( OClientInfo*, yaal::hcore::HString const& );
 	void broadcast_contestants( yaal::hcore::HString const& );
 	void ensure_coordinates_validity( int, int );
 	void mark_stone_dead( int, int );

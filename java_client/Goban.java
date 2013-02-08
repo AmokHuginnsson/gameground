@@ -150,7 +150,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		}
 	}
 	void selectBranch( HTree<SGF.Move>.HNode<SGF.Move> $node, boolean $jumpToMove ) {
-		selectBranch( $node, $jumpToMove, true );
+		selectBranch( $node, $jumpToMove, ! ongoingMatch() );
 	}
 	void selectBranch( HTree<SGF.Move>.HNode<SGF.Move> $node ) {
 		selectBranch( $node, true );
@@ -249,37 +249,34 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 		}
 		placeByLogic();
 
-		if ( isAdmin() && ! ongoingMatch() ) {
-			_currentMove = _viewMove;
-			if ( $sendSelect ) {
-				/* Find _viewMove address in tree. */
-				_selection.delete( 0, _selection.length() );
-				if ( _viewMove != null ) {
-					for ( int i = 0; i < _branch.size(); ++ i ) {
-						HTree<SGF.Move>.HNode<SGF.Move> n = _branch.get( i );
-						if ( n == _viewMove ) {
-							_selection.insert( 0, i );
-							break;
-						}
-						if ( n.getChildCount() > 1 ) {
-							HTree<SGF.Move>.HNode<SGF.Move> c = _branch.get( i + 1 );
-							for ( int j = 0; j < n.getChildCount(); ++ j ) {
-								if ( c == n.getChildAt( j ) ) {
-									_selection.append( ',' );
-									_selection.append( j );
-								}
+		if ( $sendSelect && isAdmin() ) {
+			/* Find _viewMove address in tree. */
+			_selection.delete( 0, _selection.length() );
+			if ( _viewMove != null ) {
+				for ( int i = 0; i < _branch.size(); ++ i ) {
+					HTree<SGF.Move>.HNode<SGF.Move> n = _branch.get( i );
+					if ( n == _viewMove ) {
+						_selection.insert( 0, i );
+						break;
+					}
+					if ( n.getChildCount() > 1 ) {
+						HTree<SGF.Move>.HNode<SGF.Move> c = _branch.get( i + 1 );
+						for ( int j = 0; j < n.getChildCount(); ++ j ) {
+							if ( c == n.getChildAt( j ) ) {
+								_selection.append( ',' );
+								_selection.append( j );
 							}
 						}
 					}
-					_logic._client.println( Go.PROTOCOL.CMD + Go.PROTOCOL.SEP + _logic.id() + Go.PROTOCOL.SEP
-							+ Go.PROTOCOL.SELECT + Go.PROTOCOL.SEP + _selection );
 				}
+				_logic._client.println( Go.PROTOCOL.CMD + Go.PROTOCOL.SEP + _logic.id() + Go.PROTOCOL.SEP
+						+ Go.PROTOCOL.SELECT + Go.PROTOCOL.SEP + _selection );
 			}
 		}
 		_logic._gui.repaint();
 	}
 	void placeStones( int $to ) {
-		placeStones( $to, true );
+		placeStones( $to, ! ongoingMatch() );
 	}
 	void placeStones() {
 		placeStones( ALL );
@@ -298,7 +295,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 				child = Integer.parseInt( t.nextToken() );
 			m = m.getChildAt( child );
 		}
-		if ( ( _currentMove == null ) || ( _viewMove == null ) || ( _viewMove == _currentMove ) )
+		if ( ( ! isAdmin() || ongoingMatch() ) && ( ( _currentMove == null ) || ( _viewMove == null ) || ( _viewMove == _currentMove ) ) )
 			selectBranch( m );
 		_currentMove = m;
 		_logic._gui.repaint();

@@ -3,6 +3,7 @@ import java.util.TreeMap;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JTextField;
@@ -58,6 +59,9 @@ class Go extends HAbstractLogic implements Runnable {
 		public static final String NEWGAME = "newgame";
 		public static final String PASS = "pass";
 		public static final String UNDO = "undo";
+		public static final String REQUEST = "request";
+		public static final String REJECT = "reject";
+		public static final String IGNORE = "ignore";
 		public static final String SETUP = "setup";
 		public static final String ADMIN = "admin";
 		public static final String KOMI = "komi";
@@ -262,7 +266,7 @@ class Go extends HAbstractLogic implements Runnable {
 		}
 		public void onUndo() {
 			_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
-					+ PROTOCOL.PLAY + PROTOCOL.SEP + PROTOCOL.UNDO );
+					+ PROTOCOL.PLAY + PROTOCOL.SEP + PROTOCOL.UNDO + PROTOCOL.SEPP + PROTOCOL.REQUEST );
 		}
 		public void onLoad() {
 			_board.load();
@@ -334,6 +338,7 @@ class Go extends HAbstractLogic implements Runnable {
 		_handlers.put( PROTOCOL.SETUP, Go.class.getDeclaredMethod( "handlerSetup", new Class<?>[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYER, Go.class.getDeclaredMethod( "handlerPlayer", new Class<?>[]{ String.class } ) );
 		_handlers.put( PROTOCOL.TOMOVE, Go.class.getDeclaredMethod( "handlerToMove", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.UNDO, Go.class.getDeclaredMethod( "handlerUndo", new Class<?>[]{ String.class } ) );
 		_handlers.put( PROTOCOL.STONE, Go.class.getDeclaredMethod( "handlerStone", new Class<?>[]{ String.class } ) );
 		_handlers.put( PROTOCOL.CONTESTANT, Go.class.getDeclaredMethod( "handlerContestant", new Class<?>[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYERQUIT, Go.class.getDeclaredMethod( "handlerPlayerQuit", new Class<?>[]{ String.class } ) );
@@ -449,10 +454,13 @@ class Go extends HAbstractLogic implements Runnable {
 			if ( _admin )
 				_gui.setEnabledControls( true );
 			_gui._pass.setEnabled( false );
+			_gui._undo.setEnabled( false );
 			_gui._pass.setText( _gui._passText );
 			_gui._pass.setToolTipText( _gui._toolTip );
-		} else
+		} else {
 			_gui.setEnabledControls( false );
+			_gui._undo.setEnabled( true );
+		}
 	}
 	void captures( byte $stone, int $captures ) {
 		GoPlayer contestant = _contestants.get( $stone );
@@ -484,10 +492,24 @@ class Go extends HAbstractLogic implements Runnable {
 		_gui._sgftree.repaint();
 	}
 	void handlerSelect( String $command ) {
-		if ( ! _admin )
-			_gui._board.select( $command );
+		_gui._board.select( $command );
 	}
 	void handlerStone( String $command ) {
+	}
+	void handlerUndo( String $command ) {
+		Object[] options = { "Accept", "Reject", "Reject and ignore future requests" };
+		int n = JOptionPane.showOptionDialog( _app._frame,
+				"Your opponent requested to undo his/her last move, do you comply?",
+				"Undo request.",
+				JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE,
+				null, options, options[2] );
+		String answer = PROTOCOL.REJECT;
+		if ( n == 0 )
+			answer = PROTOCOL.ACCEPT;
+		else if ( n == 2 )
+			answer = PROTOCOL.IGNORE;
+		_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP
+				+ PROTOCOL.PLAY + PROTOCOL.SEP + PROTOCOL.UNDO + PROTOCOL.SEPP + answer );
 	}
 	void handlerToMove( String $command ) {
 		byte toMove = (byte)$command.charAt( 0 );
@@ -518,6 +540,7 @@ class Go extends HAbstractLogic implements Runnable {
 		_gui._toMove.setText( STONE.NONE_NAME );
 		_gui._pass.setText( "Accept" );
 		_gui._pass.setEnabled( true );
+		_gui._undo.setEnabled( true );
 		_gui._pass.setToolTipText( "You are accepting opponents markings, not your own." );
 	}
 	void handlerPlayer( String $command ) {
