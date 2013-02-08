@@ -128,57 +128,30 @@ public class SetBangTable extends JPanel implements MouseInputListener {
 				}
 			} break;
 			case ( 2 ): {
-				int ox = w / 20;
-				int oz = w / 18;
-				int oy = w / 28;
-				int r = w / 6;
+				int px[] = new int[] { -149, -229, -309, -391, -473, -556, -638, -720, -794, -859, -914, -956, -986, -1000, -998, -963, -894, -794, -668, -520, -354, -175, 0, 72, 149, 229, 309, 391, 473, 556, 638, 720, 794, 859, 914, 956, 986, 1000, 998, 963, 894, 794, 668, 520, 354, 175, 0 };
+				int py[] = new int[] { 317, 311, 316, 333, 360, 399, 448, 492, 512, 508, 482, 435, 367, 280, 176, 11, -130, -246, -333, -390, -415, -405, -361, -334, -317, -311, -316, -333, -360, -399, -448, -492, -512, -508, -482, -435, -367, -280, -176, -11, 130, 246, 333, 390, 415, 405, 361 };
+				x += w / 2;
+				y += h / 2;
+				for ( int i = 0; i < px.length; ++ i ) {
+					px[i] = x + ( px[i] * w ) / 2000;
+					py[i] = y + ( py[i] * w ) / 2000;
+				}
 				switch ( $fill ) {
 					case ( 0 ): {
-						g.drawArc( x, y, w / 2, h, 40, 175 );
-						g.drawArc( x + w / 2, y, w / 2, h, 220, 175 );
-						g.drawArc( x + ox, y + h - r - oy, r, r, 200, 120 );
-						g.drawArc( x + ( w - r ) - oz, y + oy, r, r, 20, 120 );
-						g.drawArc( x + r + oy, y + h / 2 + ox * 2, ( w * 20 ) / 55, h / 3, 27, 136 );
-						g.drawArc( x + w / 2 - ( oy * 2 ), y - oz / 2, ( w * 20 ) / 55, h / 3, 207, 136 );
+						g.drawPolygon( px, py, px.length );
 					} break;
 					case ( 1 ): {
-						g.fillArc( x, y, w / 2, h, 30, 195 );
-						g.fillArc( x + w / 2, y, w / 2, h, 210, 195 );
-						g.fillArc( x + ox, y + h - r - oy, r, r, 200, 120 );
-						g.fillArc( x + ( w - r ) - oz, y + oy, r, r, 20, 120 );
-						g.fillRoundRect( x + oz, y + oy * 2, w - 2 * oz, h - 4 * oy, r, r );
-						Color c = g.getColor();
-						g.setColor( Color.WHITE );
-						g.fillOval( x + r + oy, y + h / 2 + ox * 2, ( w * 20 ) / 55, h / 3 );
-						g.fillOval( x + w / 2 - ( oy * 2 ), y - oz / 2, ( w * 20 ) / 55, h / 3 );
-						g.setColor( c );
-						g.drawArc( x, y, w / 2, h, 40, 175 );
-						g.drawArc( x + w / 2, y, w / 2, h, 220, 175 );
-						g.drawArc( x + ox, y + h - r - oy, r, r, 200, 120 );
-						g.drawArc( x + ( w - r ) - oz, y + oy, r, r, 20, 120 );
-						g.drawArc( x + r + oy, y + h / 2 + ox * 2, ( w * 20 ) / 55, h / 3, 27, 136 );
-						g.drawArc( x + w / 2 - ( oy * 2 ), y - oz / 2, ( w * 20 ) / 55, h / 3, 207, 136 );
+						g.drawPolygon( px, py, px.length );
+						g.fillPolygon( px, py, px.length );
 					} break;
 					case ( 2 ): {
 						Color c = g.getColor();
 						g.setColor( new Color( c.getRed() + ( ( 255 - c.getRed() ) * 3 ) / 5,
 									c.getGreen() + ( ( 255 - c.getGreen() ) * 3 ) / 5,
 									c.getBlue() + ( ( 255 - c.getBlue() ) * 3 ) / 5 ) );
-						g.fillArc( x, y, w / 2, h, 30, 195 );
-						g.fillArc( x + w / 2, y, w / 2, h, 210, 195 );
-						g.fillArc( x + ox, y + h - r - oy, r, r, 200, 120 );
-						g.fillArc( x + ( w - r ) - oz, y + oy, r, r, 20, 120 );
-						g.fillRoundRect( x + oz, y + oy * 2, w - 2 * oz, h - 4 * oy, r, r );
-						g.setColor( Color.WHITE );
-						g.fillOval( x + r + oy, y + h / 2 + ox * 2, ( w * 20 ) / 55, h / 3 );
-						g.fillOval( x + w / 2 - ( oy * 2 ), y - oz / 2, ( w * 20 ) / 55, h / 3 );
+						g.fillPolygon( px, py, px.length );
 						g.setColor( c );
-						g.drawArc( x, y, w / 2, h, 40, 175 );
-						g.drawArc( x + w / 2, y, w / 2, h, 220, 175 );
-						g.drawArc( x + ox, y + h - r - oy, r, r, 200, 120 );
-						g.drawArc( x + ( w - r ) - oz, y + oy, r, r, 20, 120 );
-						g.drawArc( x + r + oy, y + h / 2 + ox * 2, ( w * 20 ) / 55, h / 3, 27, 136 );
-						g.drawArc( x + w / 2 - ( oy * 2 ), y - oz / 2, ( w * 20 ) / 55, h / 3, 207, 136 );
+						g.drawPolygon( px, py, px.length );
 					} break;
 				}
 			} break;
