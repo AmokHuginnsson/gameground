@@ -122,13 +122,11 @@ void HGomoku::handler_sit( OClientInfo* clientInfo_, HString const& message_ ) {
 			contestant( stone ) = clientInfo_;
 			OClientInfo* black( contestant( STONE::BLACK ) );
 			OClientInfo* white( contestant( STONE::WHITE ) );
-			if ( ! ( black && white ) ) {
+			if ( black && white ) {
 				::memset( _game.raw(), STONE::NONE, GOBAN_SIZE * GOBAN_SIZE );
 				_game.get<char>()[ GOBAN_SIZE * GOBAN_SIZE ] = 0;
-				send_goban();
 				_start = 0;
 				_move = 0;
-			} else {
 				_state = STONE::BLACK;
 				players_t::iterator blackIt( _players.insert( make_pair( black, 0 ) ).first );
 				players_t::iterator whiteIt( _players.insert( make_pair( white, 0 ) ).first );
@@ -136,6 +134,7 @@ void HGomoku::handler_sit( OClientInfo* clientInfo_, HString const& message_ ) {
 				_sgf.set_player( SGF::Player::BLACK, black->_login );
 				_sgf.set_player( SGF::Player::WHITE, white->_login );
 				_sgf.set_info( SGF::Player::BLACK, 15 );
+				send_goban();
 				broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << black->_login << PROTOCOL::SEPP << blackIt->second << endl << _out );
 				broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << white->_login << PROTOCOL::SEPP << whiteIt->second << endl << _out );
 				broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The Gomoku match started." << endl << _out );
@@ -343,6 +342,8 @@ void HGomoku::make_move( int x, int y, STONE::stone_t stone ) {
 					broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << winner->_login << PROTOCOL::SEPP << score << endl << _out );
 					broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The match has ended!" << endl << _out );
 					broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The contestant " << winner->_login << " won this match." << endl << _out );
+					contestant( STONE::BLACK ) = NULL;
+					contestant( STONE::WHITE ) = NULL;
 				}
 			}
 		}
