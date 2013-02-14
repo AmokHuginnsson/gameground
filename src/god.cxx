@@ -94,12 +94,14 @@ int const GO_MSG_INSUFFICIENT_PRIVILEGES = 1;
 int const GO_MSG_YOU_CANNOT_DO_IT_NOW = 2;
 int const GO_MSG_YOU_ARE_NOT_PLAYING = 3;
 int const GO_MSG_NOT_YOUR_TURN = 4;
+int const GO_MSG_BAD_SGF = 5;
 char const* const GO_MSG[] = {
 	"malformed packet",
 	"insifficient privileges",
 	"you cannot do it now",
 	"you are not playing",
-	"not your turn"
+	"not your turn",
+	"provided SGF has unexpected content"
 };
 
 HGo::HGo( HServer* server_, HLogic::id_t const& id_, HString const& comment_ )
@@ -155,24 +157,28 @@ void HGo::handler_setup( OClientInfo* clientInfo_, HString const& message_ ) {
 		throw HLogicException( GO_MSG[GO_MSG_MALFORMED] );
 	}
 	bool regenGoban( false );
-	if ( item == PROTOCOL::GOBAN ) {
-		_sgf.set_board_size( _gobanSize = value );
-		regenGoban = true;
-	} else if ( item == PROTOCOL::KOMI )
-		_sgf.set_komi( _komi = value );
-	else if ( item == PROTOCOL::HANDICAPS ) {
-		set_handicaps( value );
-		regenGoban = true;
-	} else if ( item == PROTOCOL::MAINTIME )
-		_sgf.set_time( _mainTime = value );
-	else if ( item == PROTOCOL::BYOYOMIPERIODS ) {
-		SGF::byoyomi_t byoyomi( _sgf.get_byoyomi() );
-		_sgf.set_overtime( _byoYomiPeriods = value, byoyomi.second );
-	} else if ( item == PROTOCOL::BYOYOMITIME ) {
-		SGF::byoyomi_t byoyomi( _sgf.get_byoyomi() );
-		_sgf.set_overtime( byoyomi.first, _byoYomiTime = value );
-	} else
-		throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
+	try {
+		if ( item == PROTOCOL::GOBAN ) {
+			_sgf.set_board_size( _gobanSize = value );
+			regenGoban = true;
+		} else if ( item == PROTOCOL::KOMI )
+			_sgf.set_komi( _komi = value );
+		else if ( item == PROTOCOL::HANDICAPS ) {
+			set_handicaps( value );
+			regenGoban = true;
+		} else if ( item == PROTOCOL::MAINTIME )
+			_sgf.set_time( _mainTime = value );
+		else if ( item == PROTOCOL::BYOYOMIPERIODS ) {
+			SGF::byoyomi_t byoyomi( _sgf.get_byoyomi() );
+			_sgf.set_overtime( _byoYomiPeriods = value, byoyomi.second );
+		} else if ( item == PROTOCOL::BYOYOMITIME ) {
+			SGF::byoyomi_t byoyomi( _sgf.get_byoyomi() );
+			_sgf.set_overtime( byoyomi.first, _byoYomiTime = value );
+		} else
+			throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
+	} catch ( SGFException const& ) {
+		throw HLogicException( GO_MSG[ GO_MSG_BAD_SGF ] );
+	}
 	broadcast( _out << PROTOCOL::SETUP << PROTOCOL::SEP << message_ << endl << _out );
 	if ( regenGoban )
 		reset_goban( true );
@@ -234,7 +240,7 @@ void HGo::handler_sgf( OClientInfo* clientInfo_, HString const& message_ ) {
 			<< *this << PROTOCOL::SETUP << PROTOCOL::SEP
 			<< PROTOCOL::BYOYOMITIME << PROTOCOL::SEPP << _byoYomiTime << endl << _out );
 	} catch ( SGFException const& ) {
-		throw HLogicException( "provided SGF has unexpected content" );
+		throw HLogicException( GO_MSG[ GO_MSG_BAD_SGF ] );
 	}
 	return;
 	M_EPILOG
@@ -507,6 +513,7 @@ void HGo::handler_undo( OClientInfo* clientInfo_, HString const& message_ ) {
 				OClientInfo* opp( _contestants[opponentIdx]._client );
 				_out << PROTOCOL::UNDO << endl;
 				*opp->_socket << *this << _out.consume();
+				_toMove = opponent( _toMove );
 			}
 		} else {
 			_out << PROTOCOL::MSG << PROTOCOL::SEP << "Your opponent ignores all your undo requests." << endl;
@@ -538,6 +545,7 @@ void HGo::handler_undo( OClientInfo* clientInfo_, HString const& message_ ) {
 		} else {
 			throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
 		}
+		_toMove = opponent( _toMove );
 		_pendingUndoRequest = NULL;
 	}
 	return;
@@ -687,9 +695,10 @@ void HGo::handler_play( OClientInfo* clientInfo_, HString const& message_ ) {
 		handler_dead( clientInfo_, param );
 	else if ( item == PROTOCOL::ACCEPT )
 		handler_accept( clientInfo_ );
-	else if ( item == PROTOCOL::UNDO )
+	else if ( item == PROTOCOL::UNDO ) {
 		handler_undo( clientInfo_, param );
-	else
+		callAfterMove = true;
+	} else
 		throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
 	if ( callAfterMove )
 		after_move();
@@ -906,6 +915,13 @@ void HGo::apply_move( sgf::SGF::game_tree_t::const_node_t node_ ) {
 				put_stone( it->col(), it->row(), STONE::BLACK );
 		}
 	} else {
+		int time( (*node_)->time() );
+		if ( time ) {
+			if ( time > 0 )
+				contestant( _toMove )._timeLeft = time;
+			else
+				contestant( _toMove )._byoYomiPeriods = -time;
+		}
 		if ( (*node_)->coord() != SGF::PASS )
 			make_move( (*node_)->col(), (*node_)->row() );
 		else
