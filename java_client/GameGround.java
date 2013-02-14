@@ -16,6 +16,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 public class /* Application or applet name: */ GameGround extends JApplet {
 	static public class Setup {
@@ -37,6 +39,18 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 			Sound.setEnabled( $enabled );
 		}
 	};
+	static public class Geometry {
+		int _width;
+		int _height;
+		int _xPos;
+		int _yPos;
+		Geometry( int $width, int $height, int $xPos, int $yPos ) {
+			_width = $width;
+			_height = $height;
+			_xPos = $xPos;
+			_yPos = $yPos;
+		}
+	}
 	public static final long serialVersionUID = 13l;
 	public Frame _frame;
 	private final ScheduledExecutorService _scheduler = Executors.newScheduledThreadPool( 1 );
@@ -50,6 +64,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	boolean _applet = false;
 	Ini _ini = new Ini();
 	Setup _setup = new Setup();
+	Geometry _geometry = null;
 	CommandLine _cmd;
 
 	public GameGround() { this( null ); }
@@ -151,7 +166,10 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		_frame.setVisible( true );
 		Dimension real = getContentPane().getSize();
 		Dimension withJunk = _frame.getSize();
-		_frame.setSize( preferred.width + withJunk.width - real.width, preferred.height + withJunk.height - real.height );
+		if ( _geometry != null )
+			_frame.setBounds( _geometry._xPos, _geometry._yPos, _geometry._width, _geometry._height );
+		else 
+			_frame.setSize( preferred.width + withJunk.width - real.width, preferred.height + withJunk.height - real.height );
 		_frame.validate();
 	}
 
@@ -265,6 +283,11 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 			OptionBuilder.hasArg();
 			OptionBuilder.withDescription( "Host address to connect to." );
 			opts.addOption( OptionBuilder.create( 'H' ) );
+			OptionBuilder.withLongOpt( "geometry" );
+			OptionBuilder.withArgName( "geom" );
+			OptionBuilder.hasArg();
+			OptionBuilder.withDescription( "This option specifies the initial size and location of the window." );
+			opts.addOption( OptionBuilder.create( 'g' ) );
 			Parser p = new PosixParser();
 			try {
 				System.out.println( "Command line:" );
@@ -282,6 +305,16 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 			}
 			if ( _cmd.hasOption( "auto-connect" ) )
 				_ini.setProperty( "auto-connect", "true" );
+			if ( _cmd.hasOption( "geometry" ) ) {
+				Pattern pattern = Pattern.compile( "(\\d+)x(\\d+)\\+(\\d+)\\+(\\d+)" );
+				String g = _cmd.getOptionValue( "geometry" );
+				Matcher m = pattern.matcher( g );
+				if ( ! m.matches() || ( m.groupCount() != 4 ) ) {
+					Con.err( "Application failed to start. Reaseon: Invalid geometry specificaton: " + g );
+					System.exit( 1 );
+				}
+				_geometry = new Geometry( Integer.parseInt( m.group( 1 ) ), Integer.parseInt( m.group( 2 ) ), Integer.parseInt( m.group( 3 ) ), Integer.parseInt( m.group( 4 ) ) );
+			}
 		}
 	}
 	public Ini ini() {

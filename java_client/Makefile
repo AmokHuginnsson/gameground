@@ -4,8 +4,9 @@ RESOURCES=$(shell find res -maxdepth 1 ! -name .svn -a ! -name '*~' -a ! -name '
 RES_DEST=$(patsubst %,./build/%,$(RESOURCES))
 ENVIRON=./build/META-INF/info.xml
 TARGET=./build/gameground.jar
+EXEC=java -Dcom.sun.management.jmxremote -Djava.security.manager -Djava.security.policy=gameground.policy -ea -cp build/gameground.jar GameGround
 
-.PHONY: all run debug test test2 dist clean
+.PHONY: all run debug test test2 test3 dist clean
 
 all: $(TARGET)
 
@@ -35,19 +36,19 @@ $(TARGET): $(ENVIRON) $(CLASS) $(RES_DEST)
 	jar cfm ../$(TARGET) ../manifest.mf res org com *.class class.list;
 
 run: $(TARGET)
-	java -Dcom.sun.management.jmxremote -Djava.security.manager -Djava.security.policy=gameground.policy -ea -cp build/gameground.jar GameGround --host codestation.org --login Amok
+	$(EXEC) --host codestation.org --login Amok
 
 debug: $(TARGET)
 	java -Xdebug -Xrunjdwp:transport=dt_socket,address=127.0.0.1:8008,server=y,suspend=n -Dcom.sun.management.jmxremote -Djava.security.manager -Djava.security.policy=gameground.policy -ea -cp build/gameground.jar GameGround
 
 test: $(TARGET)
-	java -Dcom.sun.management.jmxremote -Djava.security.manager -Djava.security.policy=gameground.policy -ea -cp build/gameground.jar GameGround
+	$(EXEC)
 
 test2: $(TARGET)
-	java -Dcom.sun.management.jmxremote -Djava.security.manager -Djava.security.policy=gameground.policy -ea -cp build/gameground.jar GameGround --login Ktos
+	$(EXEC) --login Ktos
 
 test3: $(TARGET)
-	java -Dcom.sun.management.jmxremote -Djava.security.manager -Djava.security.policy=gameground.policy -ea -cp build/gameground.jar GameGround --login User --password ""
+	$(EXEC) --login User --password ""
 
 dist:
 	$(MAKE)
