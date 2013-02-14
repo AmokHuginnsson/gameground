@@ -165,11 +165,13 @@ void HGo::handler_setup( OClientInfo* clientInfo_, HString const& message_ ) {
 		regenGoban = true;
 	} else if ( item == PROTOCOL::MAINTIME )
 		_sgf.set_time( _mainTime = value );
-	else if ( item == PROTOCOL::BYOYOMIPERIODS )
-		_byoYomiPeriods = value;
-	else if ( item == PROTOCOL::BYOYOMITIME )
-		_byoYomiTime = value;
-	else
+	else if ( item == PROTOCOL::BYOYOMIPERIODS ) {
+		SGF::byoyomi_t byoyomi( _sgf.get_byoyomi() );
+		_sgf.set_overtime( _byoYomiPeriods = value, byoyomi.second );
+	} else if ( item == PROTOCOL::BYOYOMITIME ) {
+		SGF::byoyomi_t byoyomi( _sgf.get_byoyomi() );
+		_sgf.set_overtime( byoyomi.first, _byoYomiTime = value );
+	} else
 		throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
 	broadcast( _out << PROTOCOL::SETUP << PROTOCOL::SEP << message_ << endl << _out );
 	if ( regenGoban )
@@ -203,6 +205,9 @@ void HGo::handler_sgf( OClientInfo* clientInfo_, HString const& message_ ) {
 		_komi = static_cast<int>( _sgf.get_komi() );
 		_handicaps = _sgf.get_handicap();
 		_mainTime = _sgf.get_time();
+		SGF::byoyomi_t byoyomi( _sgf.get_byoyomi() );
+		_byoYomiPeriods = byoyomi.first;
+		_byoYomiTime = byoyomi.second;
 		reset_goban( false );
 		SGF::game_tree_t::const_node_t currentMove( _sgf.game_tree().get_root() );
 		_branch.clear();
@@ -336,10 +341,11 @@ void HGo::handler_select( OClientInfo* clientInfo_, yaal::hcore::HString const& 
 
 void HGo::handler_put_stone( OClientInfo* clientInfo_, HString const& message_ ) {
 	M_PROLOG
+	OPlayerInfo& player( contestant( _toMove ) );
 	if ( ! can_setup( clientInfo_ ) ) {
 		if ( _marking )
 			throw HLogicException( GO_MSG[ GO_MSG_YOU_CANNOT_DO_IT_NOW ] );
-		if ( contestant( _toMove )._client != clientInfo_ )
+		if ( player._client != clientInfo_ )
 			throw HLogicException( GO_MSG[ GO_MSG_NOT_YOUR_TURN ] );
 	}
 	_pass = 0;
@@ -352,7 +358,7 @@ void HGo::handler_put_stone( OClientInfo* clientInfo_, HString const& message_ )
 		throw HLogicException( GO_MSG[GO_MSG_MALFORMED] );
 	}
 	make_move( col, row );
-	_sgf.move( SGF::Coord( col, row ) );
+	_sgf.move( SGF::Coord( col, row ), player._timeLeft - static_cast<int>( time( NULL ) - _start ) );
 	send_goban();
 	return;
 	M_EPILOG
@@ -642,14 +648,15 @@ void HGo::count_score( void ) {
 	b._score = b._stonesCaptured + blackTeritory;
 	w._score += ( w._stonesCaptured + whiteTeritory );
 	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
-			<< "Black teritory: " << blackTeritory
+			<< "Black's (" << b._client->_login << ") teritory: " << blackTeritory
 			<< ", captutes: " << b._stonesCaptured << "." << endl << _out );
 	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
-			<< "White teritory: " << whiteTeritory
+			<< "White's (" << w._client->_login << ") teritory: " << whiteTeritory
 			<< ", captutes: " << w._stonesCaptured
 			<< ", and " << _komi << " of komi." << endl << _out );
 	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
-			<< ( b._score > w._score ? "Black" : "White" )
+			<< ( b._score > w._score ? b._client->_login : w._client->_login )
+			<< ( b._score > w._score ? " (black)" : " (white)" )
 			<< " wins by " << ( b._score > w._score ? b._score - w._score : w._score - b._score ) + .5
 			<< endl << _out );
 	send_goban();
@@ -839,7 +846,12 @@ void HGo::on_timeout( void ) {
 	OPlayerInfo& p( contestant( _toMove ) );
 	-- p._byoYomiPeriods;
 	if ( p._byoYomiPeriods < 0 ) {
-		broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "End of time." << endl << _out );
+		OPlayerInfo& lost( _contestants[_toMove == STONE::BLACK ? 0 : 1 ] );
+		OPlayerInfo& won( _contestants[_toMove == STONE::BLACK ? 1 : 0 ] );
+		broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
+				<< lost._client->_login << ( _toMove == STONE::BLACK ? " (black)" : " (white)" )
+				<< " has run out of time - therefore " << won._client->_login << ( _toMove == STONE::BLACK ? " (white)" : " (black)" )
+				<< " wins." << endl << _out );
 		end_match();
 		after_move();
 	} else {
@@ -855,7 +867,7 @@ void HGo::reset_goban( bool sgf_ ) {
 	M_PROLOG
 	if ( sgf_ ) {
 		_sgf.clear();
-		_sgf.set_info( SGF::Player::BLACK, _gobanSize, _handicaps, _komi, _mainTime );
+		_sgf.set_info( SGF::Player::BLACK, _gobanSize, _handicaps, _komi, _mainTime, _byoYomiPeriods, _byoYomiTime );
 	}
 	_contestants[0].reset( _mainTime, 0, _byoYomiPeriods );
 	_contestants[1].reset( _mainTime, _komi, _byoYomiPeriods );
@@ -1267,10 +1279,10 @@ bool HGo::ongoing_match( void ) const {
 void HGo::update_clocks( void ) {
 	M_PROLOG
 	revoke_scheduled_tasks();
-	int long now = time( NULL );
+	int long now( time( NULL ) );
 	OPlayerInfo& p( contestant( opponent( _toMove ) ) );
 	if ( _start )
-		p._timeLeft -= ( now - _start );
+		p._timeLeft -= static_cast<int>( now - _start );
 	schedule_timeout();
 	_start = now;
 	return;

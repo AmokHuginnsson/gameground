@@ -159,6 +159,7 @@ public class SGF {
 		private Coord _coord = null;
 		private Setup _setup = null;
 		private String _comment = "";
+		private int _time = 0;
 		Move() { }
 		Move( int $col, int $row ) {
 			_coord = new Coord( $col, $row );
@@ -194,6 +195,12 @@ public class SGF {
 		public void addComment( String $comment ) {
 			_comment = _comment + $comment;
 		}
+		public void setTime( int $time ) {
+			_time = $time;
+		}
+		public int time() {
+			return ( _time );
+		}
 		public void setSetup( Setup $setup ) {
 			_setup = $setup;
 		}
@@ -226,6 +233,7 @@ public class SGF {
 	String _source = "";
 	String _author = "";
 	String _rules = "";
+	String _overTime = "";
 	String _blackName = "";
 	String _whiteName = "";
 	String _blackRank = "30k";
@@ -302,6 +310,7 @@ public class SGF {
 		_source = "";
 		_author = "";
 		_rules = "";
+		_overTime = "";
 		_blackName = "";
 		_blackRank = "";
 		_whiteName = "";
@@ -486,6 +495,8 @@ public class SGF {
 			_gobanSize = Integer.parseInt( singleValue );
 		else if ( "TM".equals( _cachePropIdent ) )
 			_time = Integer.parseInt( singleValue );
+		else if ( "OT".equals( _cachePropIdent ) )
+			_overTime = singleValue;
 		else if ( "PC".equals( _cachePropIdent ) )
 			_place = singleValue;
 		else if ( "RE".equals( _cachePropIdent ) ) {
@@ -524,7 +535,11 @@ public class SGF {
 				_currentMove.value().addComment( singleValue );
 			else
 				_comment += singleValue;
-		} else
+		} else if ( ( _firstToMove != Player.UNSET ) && ( "BL".equals( _cachePropIdent ) || "WL".equals( _cachePropIdent ) ) )
+			_currentMove.value().setTime( Integer.parseInt( singleValue ) );
+		else if ( ( _firstToMove != Player.UNSET ) && ( "OB".equals( _cachePropIdent ) || "OW".equals( _cachePropIdent ) ) )
+			_currentMove.value().setTime( -Integer.parseInt( singleValue ) );
+		else
 			System.out.println( "property: `" + _cachePropIdent + "' = `" + singleValue + "'" );
 		return;
 	}
@@ -603,20 +618,23 @@ public class SGF {
 		StringBuilder sb = new StringBuilder();
 		sb.append( "(;GM[" ).append( _gameType.value() ).append( "]FF[4]AP[" ).append( _app )
 			.append( $noNl ? "]" : "]\n" ).append( "RU[" ).append( _rules ).append( "]SZ[" )
-			.append( _gobanSize ).append( "]KM[" ).append( _komi ).append( "]" );
+			.append( _gobanSize ).append( "]KM[" ).append( _komi );
 		if ( ! "".equals( _gameName ) )
-			sb.append( "GN[" ).append( _gameName ).append( "]" );
+			sb.append( "]GN[" ).append( _gameName );
 		if ( ! "".equals( _date ) )
-			sb.append( "DT[" ).append( _date ).append( "]" );
+			sb.append( "]DT[" ).append( _date );
 		if ( ! "".equals( _event ) )
-			sb.append( "EV[" ).append( _event ).append( "]" );
+			sb.append( "]EV[" ).append( _event );
 		if ( ! "".equals( _round ) )
-			sb.append( "RO[" ).append( _round ).append( "]" );
+			sb.append( "]RO[" ).append( _round );
 		if ( ! "".equals( _source ) )
-			sb.append( "SO[" ).append( _source ).append( "]" );
+			sb.append( "]SO[" ).append( _source );
 		if ( ! "".equals( _author ) )
-			sb.append( "AN[" ).append( _author ).append( "]" );
-		sb.append( "TM[" ).append( _time ).append(  $noNl ? "]" : "]\n" ).append( "PB[" )
+			sb.append( "]AN[" ).append( _author );
+		sb.append( "]TM[" ).append( _time );
+		if ( ! "".equals( _overTime ) )
+			sb.append( "]OT[" ).append( _overTime );
+		sb.append(  $noNl ? "]PB[" : "]\nPB[" )
 			.append( _blackName ).append( "]PW[" ).append( _whiteName ).append( $noNl ? "]" : "]\n" );
 		boolean rankShown = false;
 		if ( ( _blackRank != null ) && ! "".equals( _blackRank ) ) {
@@ -645,7 +663,14 @@ public class SGF {
 	}
 
 	void saveMove( Player of_, HTree<Move>.HNode<Move> $node, StringBuilder $stream ) {
-		$stream.append( ";" ).append( of_ == Player.BLACK ? "B" : "W" ).append( "[" ).append( $node.value().coord().data() ).append( "]" );
+		$stream.append( ";" ).append( of_ == Player.BLACK ? "B[" : "W[" ).append( $node.value().coord().data() ).append( "]" );
+		int time = $node.value().time();
+		if ( time != 0 ) {
+			if ( time > 0 )
+				$stream.append( of_ == Player.BLACK ? "BL[" : "WL[" ).append( time ).append( "]" );
+			else
+				$stream.append( of_ == Player.BLACK ? "OB[" : "OW[" ).append( -time ).append( "]" );
+		}
 		if ( ! "".equals( $node.value().comment() ) ) {
 			_cache = $node.value().comment();
 			$stream.append( "C[" ).append( _cache.replace( "[", "\\[" ).replace( "]", "\\]" ) ).append( "]" );

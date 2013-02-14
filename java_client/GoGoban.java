@@ -192,6 +192,10 @@ public class GoGoban extends Goban {
 		}
 		_logic.score( STONE.BLACK, blackTeritory + whiteDead );
 		_logic.score( STONE.WHITE, whiteTeritory + blackDead );
+		_logic.time( opponent( _logic.toMove() ), _viewMove.value().time() );
+		HTree<SGF.Move>.HNode<SGF.Move> p = _viewMove.getParent();
+		if ( p != null )
+			_logic.time( _logic.toMove(), p.value().time() );
 	}
 	boolean isAdmin() {
 		return ( _logic.isAdmin() );

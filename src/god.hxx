@@ -42,14 +42,14 @@ public:
 	typedef HLogic base_type;
 private:
 	struct OPlayerInfo {
-		int long _timeLeft;
+		int _timeLeft;
 		int _byoYomiPeriods;
 		int _stonesCaptured;
 		int _score;
 		bool _ignoreUndo;
 		OClientInfo* _client;
 		OPlayerInfo( void ) : _timeLeft( 0 ), _byoYomiPeriods( 0 ), _stonesCaptured( 0 ), _score( 0 ), _ignoreUndo( false ), _client( NULL ) {}
-		void reset( int long time_, int score_, int byo_ ) {
+		void reset( int time_, int score_, int byo_ ) {
 			_timeLeft = time_;
 			_byoYomiPeriods = byo_;
 			_stonesCaptured = 0;

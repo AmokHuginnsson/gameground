@@ -50,6 +50,10 @@ class GoPlayer {
 		int current = Integer.parseInt( _score.getText() );
 		_score.setText( "" + ( current + $score ) );
 	}
+	void time( int $time ) {
+		Date d = new Date( ( _timeLeft = $time ) * 1000 );
+		_timeLeftLabel.setText( new SimpleDateFormat( "mm:ss" ).format( d ) );
+	}
 }
 
 class Go extends HAbstractLogic implements Runnable {
@@ -474,6 +478,12 @@ class Go extends HAbstractLogic implements Runnable {
 			contestant.score( $score );
 		}
 	}
+	void time( byte $stone, int $time ) {
+		GoPlayer contestant = _contestants.get( $stone );
+		if ( contestant != null ) {
+			contestant.time( $time );
+		}
+	}
 	void clearScore() {
 		GoPlayer contestant = _contestants.get( STONE.BLACK );
 		if ( contestant != null ) {
@@ -518,7 +528,7 @@ class Go extends HAbstractLogic implements Runnable {
 			_toMove = toMove;
 		} else if ( toMove != STONE.MARK ) {
 			_gui._pass.setEnabled( ( toMove == _playerColor ) && ongoingMatch() );
-			_gui._conf.setEnabled( _admin && ( toMove == STONE.NONE ) );
+			_gui._conf.setEnabled( _admin && ! ongoingMatch() );
 			++ _move;
 			toMove( toMove, _move );
 			_start = new Date().getTime();
@@ -570,7 +580,7 @@ class Go extends HAbstractLogic implements Runnable {
 		_app.flush( this );
 	}
 	public void run() {
-		if ( ( _toMove == STONE.BLACK ) || ( _toMove == STONE.WHITE ) ) {
+		if ( ongoingMatch() ) {
 			long now = new Date().getTime();
 			GoPlayer p = _contestants.get( _toMove );
 			long left = p._timeLeft * 1000 + _start - now;
