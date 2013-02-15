@@ -1,0 +1,6 @@
+login:2:testuser:206c80413b9a96c1312cc346b7d2517b84463edd
+get_logics
+get_account
+get_players
+get_partys
+quit
