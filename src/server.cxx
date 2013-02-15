@@ -190,7 +190,11 @@ void HServer::handler_message( int fileDescriptor_ ) {
 			else {
 				handlers_t::iterator handler = _handlers.find( command );
 				if ( handler != _handlers.end() ) {
-					( this->*handler->second )( clientIt->second, argument );
+					try {
+						( this->*handler->second )( clientIt->second, argument );
+					} catch ( HOpenSSLException const& ) {
+						drop_client( &clientIt->second );
+					}
 					flush_logics();
 				} else
 					kick_client( client, "Unknown command." );
@@ -211,8 +215,13 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& client_, char const* con
 	int fileDescriptor = client_->get_file_descriptor();
 	clients_t::iterator clientIt( _clients.find( fileDescriptor ) );
 	M_ASSERT( clientIt != _clients.end() );
-	if ( clientIt->second._valid && reason_ && reason_[0] )
-		*client_ << PROTOCOL::KCK << PROTOCOL::SEP << reason_ << endl;
+	if ( clientIt->second._valid && reason_ && reason_[0] ) {
+		try {
+			*client_ << PROTOCOL::KCK << PROTOCOL::SEP << reason_ << endl;
+		} catch ( HOpenSSLException const& ) {
+			/* Kicked client is no longer valid but we cannot do anything about it. */
+		}
+	}
 	_socket.shutdown_client( fileDescriptor );
 	_dispatcher.unregister_file_descriptor_handler( fileDescriptor );
 	clientIt->second._valid = false;
