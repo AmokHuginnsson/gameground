@@ -4,7 +4,7 @@ RESOURCES=$(shell find res -maxdepth 1 ! -name .svn -a ! -name '*~' -a ! -name '
 RES_DEST=$(patsubst %,./build/%,$(RESOURCES))
 ENVIRON=./build/META-INF/info.xml
 TARGET=./build/gameground.jar
-EXEC=java -Dcom.sun.management.jmxremote -Djava.security.manager -Djava.security.policy=gameground.policy -ea -cp build/gameground.jar GameGround
+EXEC=java -Dcom.sun.management.jmxremote -Djava.security.manager -Djava.security.policy=gameground.policy -ea -jar build/gameground.jar
 
 .PHONY: all run debug test test2 test3 dist clean
 
@@ -39,7 +39,7 @@ run: $(TARGET)
 	$(EXEC) --host codestation.org --login Amok
 
 debug: $(TARGET)
-	java -Xdebug -Xrunjdwp:transport=dt_socket,address=127.0.0.1:8008,server=y,suspend=n -Dcom.sun.management.jmxremote -Djava.security.manager -Djava.security.policy=gameground.policy -ea -cp build/gameground.jar GameGround
+	java -Xdebug -Xrunjdwp:transport=dt_socket,address=127.0.0.1:8008,server=y,suspend=n -Dcom.sun.management.jmxremote -Djava.security.manager -Djava.security.policy=gameground.policy -ea -jar build/gameground.jar
 
 test: $(TARGET)
 	$(EXEC)

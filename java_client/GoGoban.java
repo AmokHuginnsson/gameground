@@ -203,6 +203,9 @@ public class GoGoban extends Goban {
 	boolean ongoingMatch() {
 		return ( _logic.ongoingMatch() );
 	}
+	boolean amIPlaying() {
+		return ( _logic.amIPlaying() );
+	}
 	void toMove( byte $stone, int $moveNo ) {
 		if ( _logic.toMove() != Go.STONE.MARK )
 			_logic.toMove( $stone, $moveNo );

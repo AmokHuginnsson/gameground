@@ -100,6 +100,9 @@ public class GomokuGoban extends Goban {
 	boolean ongoingMatch() {
 		return ( false );
 	}
+	boolean amIPlaying() {
+		return ( false );
+	}
 	void toMove( byte $stone, int $moveNo ) {
 		_logic.toMove( $stone, $moveNo );
 	}

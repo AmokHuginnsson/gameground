@@ -80,7 +80,7 @@ class Go extends HAbstractLogic implements Runnable {
 		public static final String BYOYOMIPERIODS = "byoyomiperiods";
 		public static final String PUTSTONE = "put_stone";
 		public static final String SELECT = "select";
-		public static final String STONE = "stone";
+		public static final String MOVE = "move";
 		public static final String TOMOVE = "to_move";
 		public static final String PLAYER = "player";
 		public static final String PLAYERQUIT = "player_quit";
@@ -343,7 +343,7 @@ class Go extends HAbstractLogic implements Runnable {
 		_handlers.put( PROTOCOL.PLAYER, Go.class.getDeclaredMethod( "handlerPlayer", new Class<?>[]{ String.class } ) );
 		_handlers.put( PROTOCOL.TOMOVE, Go.class.getDeclaredMethod( "handlerToMove", new Class<?>[]{ String.class } ) );
 		_handlers.put( PROTOCOL.UNDO, Go.class.getDeclaredMethod( "handlerUndo", new Class<?>[]{ String.class } ) );
-		_handlers.put( PROTOCOL.STONE, Go.class.getDeclaredMethod( "handlerStone", new Class<?>[]{ String.class } ) );
+		_handlers.put( PROTOCOL.MOVE, Go.class.getDeclaredMethod( "handlerMove", new Class<?>[]{ String.class } ) );
 		_handlers.put( PROTOCOL.CONTESTANT, Go.class.getDeclaredMethod( "handlerContestant", new Class<?>[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYERQUIT, Go.class.getDeclaredMethod( "handlerPlayerQuit", new Class<?>[]{ String.class } ) );
 		_handlers.put( PROTOCOL.SGF, Go.class.getDeclaredMethod( "handlerSGF", new Class<?>[]{ String.class } ) );
@@ -409,6 +409,9 @@ class Go extends HAbstractLogic implements Runnable {
 	boolean isPlayerSitting( byte $stone ) {
 		GoPlayer p = _contestants.get( $stone );
 		return ( p._sitting );
+	}
+	boolean amIPlaying() {
+		return ( _playerColor != STONE.NONE );
 	}
 	public boolean isAdmin() {
 		return ( _admin );
@@ -504,7 +507,12 @@ class Go extends HAbstractLogic implements Runnable {
 	void handlerSelect( String $command ) {
 		_gui._board.select( $command );
 	}
-	void handlerStone( String $command ) {
+	void handlerMove( String $command ) {
+		if ( ( _toMove == STONE.BLACK ) || ( _toMove == STONE.WHITE ) )
+			Sound.play( "stone" );
+		_gui._board.move( $command );
+		_gui._board.repaint();
+		_gui._sgftree.repaint();
 	}
 	void handlerUndo( String $command ) {
 		Object[] options = { "Accept", "Reject", "Reject and ignore future requests" };

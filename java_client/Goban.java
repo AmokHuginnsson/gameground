@@ -192,7 +192,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 					move( c.col(), c.row(), STONE.WHITE );
 			}
 		}
-		byte stone = _sgf._firstToMove == SGF.Player.BLACK ? STONE.BLACK : STONE.WHITE;
+		byte stone = _sgf.firstToMove() == SGF.Player.BLACK ? STONE.BLACK : STONE.WHITE;
 		int moveNumber = 0;
 		_viewMove = _sgf._tree.getRoot();
 		for ( HTree<SGF.Move>.HNode<SGF.Move> n : _branch ) {
@@ -284,6 +284,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	abstract void toMove( byte $stone, int $moveNo );
 	abstract boolean isAdmin();
 	abstract boolean ongoingMatch();
+	abstract boolean amIPlaying();
 	void select( String $path ) {
 		StringTokenizer t = new StringTokenizer( $path, "," );
 		int moveNo = Integer.parseInt( t.nextToken() );
@@ -295,7 +296,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 				child = Integer.parseInt( t.nextToken() );
 			m = m.getChildAt( child );
 		}
-		if ( ( ! isAdmin() || ongoingMatch() ) && ( ( _currentMove == null ) || ( _viewMove == null ) || ( _viewMove == _currentMove ) ) )
+		if ( ( ongoingMatch() && amIPlaying() ) || ( _currentMove == null ) || ( _viewMove == null ) || ( _viewMove == _currentMove ) )
 			selectBranch( m );
 		_currentMove = m;
 		_logic._gui.repaint();
@@ -338,6 +339,14 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 			Con.err( "SGFException: " + se.getMessage() );
 			System.exit( 1 );
 		}
+	}
+	void move( String $move ) {
+		String[] tokens = $move.split( ",", 2 );
+		HTree<SGF.Move>.HNode<SGF.Move> m = _currentMove.addNode( new SGF.Move( Integer.parseInt( tokens[0] ), Integer.parseInt( tokens[1] ) ) );
+		_branch.add( m );
+		if ( ( ongoingMatch() && amIPlaying() ) || ( _currentMove == null ) || ( _viewMove == null ) || ( _viewMove == _currentMove ) )
+			selectBranch( m );
+		_currentMove = m;
 	}
 	void goToFirst() {
 		placeStones( 0 );

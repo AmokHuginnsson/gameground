@@ -47,7 +47,8 @@ public class SGF {
 		BAD_FILE_FORMAT,
 		MIXED_NODE,
 		DUPLICATED_COORDINATE,
-		MALFORMED_LABEL
+		MALFORMED_LABEL,
+		INCONSISTENT_FIRST_MOVE
 	}
 	private class TERM {
 		static final char GT_OPEN = '(';
@@ -239,7 +240,6 @@ public class SGF {
 	String _blackRank = "30k";
 	String _whiteRank = "30k";
 	HTree<Move> _tree = new HTree<Move>();
-	Player _firstToMove = Player.UNSET;
 	int _gobanSize = 19;
 	int _time = 0;
 	int _handicap = 0;
@@ -301,7 +301,6 @@ public class SGF {
 		_cache = null;
 		_cachePropIdent = null;
 		_cachePropValue.clear();
-		_currentMove = null;
 		_app = "";
 		_gameName = "";
 		_date = "";
@@ -315,14 +314,19 @@ public class SGF {
 		_blackRank = "";
 		_whiteName = "";
 		_whiteRank = "";
-		_tree.clear();
-		_firstToMove = Player.UNSET;
+		clearGame();
 		_gobanSize = 19;
 		_handicap = 0;
 		_komi = 5.5;
 		_result = 0;
 		_place = "";
 		_comment = "";
+		return;
+	}
+
+	void clearGame() {
+		_currentMove = null;
+		_tree.clear();
 		return;
 	}
 
@@ -348,7 +352,8 @@ public class SGF {
 		"Bad file format.",
 		"Cannot mix `move' with `setup' nodes.",
 		"Duplicated coordinate in setup.",
-		"Malformed label."
+		"Malformed label.",
+		"Inconsistent first move."
 	};
 
 	int nonSpace( int first, int last ) {
@@ -444,6 +449,14 @@ public class SGF {
 		return;
 	}
 
+	public Player firstToMove() {
+		return ( _handicap > 1 ? Player.WHITE : Player.BLACK );
+	}
+	
+	private boolean isFirstMove() {
+		return ( ( _currentMove != null ) && ( _currentMove.getParent() == _tree.getRoot() ) );
+	}
+
 	void parseProperty() throws SGFException {
 		_cachePropIdent = parsePropertyIdent();
 		if ( "".equals( _cachePropIdent ) )
@@ -523,21 +536,21 @@ public class SGF {
 				addLabel( new Setup.Label( new Coord( tok[0] ), tok[1] ) );
 			}
 		} else if ( "B".equals( _cachePropIdent ) ) {
-			if ( _firstToMove == Player.UNSET )
-				_firstToMove = Player.BLACK;
+			if ( isFirstMove() && ( firstToMove() != Player.BLACK ) )
+				throw new SGFException( _errMsg_[ERROR.INCONSISTENT_FIRST_MOVE.ordinal()] );
 			_currentMove.value().setCoord( new Coord( singleValue ) );
 		} else if ( "W".equals( _cachePropIdent ) ) {
-			if ( _firstToMove == Player.UNSET )
-				_firstToMove = Player.WHITE;
+			if ( isFirstMove() && ( firstToMove() != Player.WHITE ) )
+				throw new SGFException( _errMsg_[ERROR.INCONSISTENT_FIRST_MOVE.ordinal()] );
 			_currentMove.value().setCoord( new Coord( singleValue ) );
 		} else if ( "C".equals( _cachePropIdent ) ) {
-			if ( _firstToMove != Player.UNSET )
+			if ( ( _currentMove != null ) && ( _currentMove != _tree.getRoot() ) )
 				_currentMove.value().addComment( singleValue );
 			else
 				_comment += singleValue;
-		} else if ( ( _firstToMove != Player.UNSET ) && ( "BL".equals( _cachePropIdent ) || "WL".equals( _cachePropIdent ) ) )
+		} else if ( ( ( _currentMove != null ) && ( _currentMove != _tree.getRoot() ) ) && ( "BL".equals( _cachePropIdent ) || "WL".equals( _cachePropIdent ) ) )
 			_currentMove.value().setTime( Integer.parseInt( singleValue ) );
-		else if ( ( _firstToMove != Player.UNSET ) && ( "OB".equals( _cachePropIdent ) || "OW".equals( _cachePropIdent ) ) )
+		else if ( ( ( _currentMove != null ) && ( _currentMove != _tree.getRoot() ) ) && ( "OB".equals( _cachePropIdent ) || "OW".equals( _cachePropIdent ) ) )
 			_currentMove.value().setTime( -Integer.parseInt( singleValue ) );
 		else
 			System.out.println( "property: `" + _cachePropIdent + "' = `" + singleValue + "'" );
@@ -655,7 +668,7 @@ public class SGF {
 			HTree<Move>.HNode<Move> root = _tree.getRoot();
 			if ( root.value().setup() != null )
 				saveSetup( root, sb, $noNl );
-			saveVariations( _firstToMove, root, sb, $noNl );
+			saveVariations( firstToMove(), root, sb, $noNl );
 		}
 		sb.append( $noNl ? ")" : ")\n" );
 		$stream.print( sb );

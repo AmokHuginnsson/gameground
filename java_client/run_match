@@ -1,6 +1,6 @@
 #! /bin/sh
 
-EXEC="java -Dcom.sun.management.jmxremote -Djava.security.manager -Djava.security.policy=gameground.policy -ea -cp build/gameground.jar GameGround"
+EXEC="java -Dcom.sun.management.jmxremote -Djava.security.manager -Djava.security.policy=gameground.policy -ea -jar build/gameground.jar"
 
 exec multitail -z -s 2 -cT ansi -l "${EXEC} --geometry 800x600+0+0" -cT ansi -l "${EXEC} --login Ktos --geometry 800x600+800+0"
 

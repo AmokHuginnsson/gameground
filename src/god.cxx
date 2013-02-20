@@ -74,7 +74,7 @@ char const* const HGo::PROTOCOL::HANDICAPS = "handicaps";
 char const* const HGo::PROTOCOL::MAINTIME = "maintime";
 char const* const HGo::PROTOCOL::BYOYOMIPERIODS = "byoyomiperiods";
 char const* const HGo::PROTOCOL::BYOYOMITIME = "byoyomitime";
-char const* const HGo::PROTOCOL::STONE = "stone";
+char const* const HGo::PROTOCOL::MOVE = "move";
 char const* const HGo::PROTOCOL::TOMOVE = "to_move";
 char const* const HGo::PROTOCOL::PUTSTONE = "put_stone";
 char const* const HGo::PROTOCOL::SELECT = "select";
@@ -365,7 +365,8 @@ void HGo::handler_put_stone( OClientInfo* clientInfo_, HString const& message_ )
 	}
 	make_move( col, row );
 	_sgf.move( SGF::Coord( col, row ), player._timeLeft - static_cast<int>( time( NULL ) - _start ) );
-	send_goban();
+	_out << PROTOCOL::MOVE << PROTOCOL::SEP << message_ << endl;
+	broadcast( _out.consume() );
 	return;
 	M_EPILOG
 }
@@ -876,7 +877,7 @@ void HGo::reset_goban( bool sgf_ ) {
 	M_PROLOG
 	if ( sgf_ ) {
 		_sgf.clear();
-		_sgf.set_info( SGF::Player::BLACK, _gobanSize, _handicaps, _komi, _mainTime, _byoYomiPeriods, _byoYomiTime );
+		_sgf.set_info( _gobanSize, _handicaps, _komi, _mainTime, _byoYomiPeriods, _byoYomiTime );
 	}
 	_contestants[0].reset( _mainTime, 0, _byoYomiPeriods );
 	_contestants[1].reset( _mainTime, _komi, _byoYomiPeriods );

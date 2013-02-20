@@ -91,7 +91,7 @@ public class SGFTree extends JPanel implements MouseInputListener {
 		super.paintComponent( g );
 		Graphics2D g2d = (Graphics2D) g;
 		g2d.setStroke( _stroke );
-		byte stone = _sgf._firstToMove == SGF.Player.BLACK ? Goban.STONE.BLACK : Goban.STONE.WHITE;
+		byte stone = _sgf.firstToMove() == SGF.Player.BLACK ? Goban.STONE.BLACK : Goban.STONE.WHITE;
 		int diameter = getDiameter();
 		if ( diameter > 28 )
 			diameter = 28;
