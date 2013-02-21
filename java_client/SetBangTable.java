@@ -28,6 +28,7 @@ public class SetBangTable extends JPanel implements MouseInputListener {
 	public static final long serialVersionUID = 7l;
 	public static final int D_MARGIN = 30;
 	HAbstractLogic _logic = null;
+	boolean _invalid = false;
 	int[] _cards = null;
 	int _hovered = -1;
 	SortedSet<Integer> _selected = java.util.Collections.synchronizedSortedSet( new TreeSet<Integer>() );
@@ -45,6 +46,8 @@ public class SetBangTable extends JPanel implements MouseInputListener {
 	}
 	public void setCards( int[] $cards ) {
 		_cards = $cards;
+		_selected.clear();
+		_invalid = false;
 	}
 	public void mouseClicked( MouseEvent $event ) {
 	}
@@ -63,23 +66,61 @@ public class SetBangTable extends JPanel implements MouseInputListener {
 	}
 	public void mousePressed( MouseEvent $event ) {
 		if ( _hovered != -1 ) {
-			if ( _selected.contains( _hovered ) )
+			if ( _selected.contains( _hovered ) ) {
 				_selected.remove( _hovered );
-			else if ( _selected.size() < 3 ) {
+				_invalid = false;
+			} else if ( _selected.size() < 3 ) {
 				_selected.add( _hovered );
 				if ( _selected.size() == 3 ) {
-					StringBuilder val = new StringBuilder();
-					for ( Integer i : _selected ) {
-						if ( val.length() > 0 )
-							val.append( ',' );
-						val.append( i );
-					}
-					_logic._client.println( SetBang.PROTOCOL.CMD + SetBang.PROTOCOL.SEP + _logic.id() + SetBang.PROTOCOL.SEP
-							+ SetBang.PROTOCOL.SET + SetBang.PROTOCOL.SEP + val );
+					Integer[] vals = _selected.toArray( new Integer[0] );
+					if ( makesSet( _cards[ vals[ 0 ].intValue() ], _cards[ vals[ 1 ].intValue() ], _cards[ vals[ 2 ].intValue() ] ) ) {
+						StringBuilder val = new StringBuilder();
+						for ( Integer i : vals ) {
+							if ( val.length() > 0 )
+								val.append( ',' );
+							val.append( i );
+						}
+						_logic._client.println( SetBang.PROTOCOL.CMD + SetBang.PROTOCOL.SEP + _logic.id() + SetBang.PROTOCOL.SEP
+								+ SetBang.PROTOCOL.SET + SetBang.PROTOCOL.SEP + val );
+					} else
+						_invalid = true;
 				}
 			}
 			repaint();
 		}
+	}
+	boolean makesSet( int $n1, int $n2, int $n3 ) {
+		boolean value = true;
+		int b1 = 0;
+		int b2 = 0;
+		int b3 = 0;
+		b1 = $n1 % 3;
+		b2 = $n2 % 3;
+		b3 = $n3 % 3;
+		if ( ( ( b1 == b2 ) && ( b1 != b3 ) ) || ( ( b1 == b3 ) && ( b1 != b2 ) ) || ( ( b2 == b3 ) && ( b2 != b1 ) ) )
+			value = false;
+		if ( value ) {
+			b1 = ( $n1 / 3 ) % 3;
+			b2 = ( $n2 / 3 ) % 3;
+			b3 = ( $n3 / 3 ) % 3;
+			if ( ( ( b1 == b2 ) && ( b1 != b3 ) ) || ( ( b1 == b3 ) && ( b1 != b2 ) ) || ( ( b2 == b3 ) && ( b2 != b1 ) ) )
+				value = false;
+			if ( value ) {
+				b1 = ( $n1 / 9 ) % 3;
+				b2 = ( $n2 / 9 ) % 3;
+				b3 = ( $n3 / 9 ) % 3;
+				if ( ( ( b1 == b2 ) && ( b1 != b3 ) ) || ( ( b1 == b3 ) && ( b1 != b2 ) ) || ( ( b2 == b3 ) && ( b2 != b1 ) ) )
+					value = false;
+				if ( value ) {
+					b1 = ( $n1 / 27 ) % 3;
+					b2 = ( $n2 / 27 ) % 3;
+					b3 = ( $n3 / 27 ) % 3;
+					if ( ( ( b1 == b2 ) && ( b1 != b3 ) ) || ( ( b1 == b3 ) && ( b1 != b2 ) ) || ( ( b2 == b3 ) && ( b2 != b1 ) ) )
+						value = false;
+				}
+			}
+		}
+		return ( value );
 	}
 	public void mouseExited( MouseEvent $event ) {
 		_hovered = -1;
@@ -175,13 +216,14 @@ public class SetBangTable extends JPanel implements MouseInputListener {
 		boolean selected = _selected.contains( $no );
 		g2D.setStroke( new BasicStroke( selected ? 5F : 2F ) );
 		$g.fillRoundRect( $x, $y, $size, height, rounding, rounding );
+		Color c = _invalid ? Color.RED : Color.CYAN;
 		if ( $no == _hovered ) {
 			if ( selected )
-				$g.setColor( Color.CYAN.brighter().brighter() );
+				$g.setColor( c.brighter().brighter() );
 			else
 				$g.setColor( Color.GRAY );
 		} else if ( selected )
-			$g.setColor( Color.CYAN.darker() );
+			$g.setColor( c.darker() );
 		else
 			$g.setColor( Color.BLACK );
 		$g.drawRoundRect( $x, $y, $size, height, rounding, rounding );

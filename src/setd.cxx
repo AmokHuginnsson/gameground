@@ -92,7 +92,10 @@ void HSetBang::handler_set( OClientInfo*, HString const& message_ ) {
 	}
 	if ( ! makes_set( _deck[ val[ 0 ] ], _deck[ val[ 1 ] ], _deck[ val[ 2 ] ] ) )
 		throw HLogicException( SET_MSG[ SET_MSG_NOT_A_SET ] );
-	out << "set: " << message_ << endl;
+	_deck[ val[ 0 ] ] = -1;
+	_deck[ val[ 1 ] ] = -1;
+	_deck[ val[ 2 ] ] = -1;
+	update_table();
 	return;
 	M_EPILOG
 }
@@ -112,6 +115,16 @@ void HSetBang::do_post_accept( OClientInfo* clientInfo_ ) {
 	 */
 	broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
 			<< clientInfo_->_login << PROTOCOL::SEPP << 0 << PROTOCOL::SEPP << 0 << endl << _out );
+	for ( players_t::iterator it = _players.begin(); it != _players.end(); ++ it ) {
+		if ( it->first != clientInfo_ ) {
+			*clientInfo_->_socket << *this
+				<< PROTOCOL::PLAYER << PROTOCOL::SEP << it->first->_login
+				<< PROTOCOL::SEPP << it->second._score << PROTOCOL::SEPP
+				<< it->second._last << endl;
+			*clientInfo_->_socket << *this
+				<< PROTOCOL::MSG << PROTOCOL::SEP << it->first->_login << " joined the mind contest." << endl;
+		}
+	}
 	broadcast(
 			_out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< clientInfo_->_login
@@ -128,7 +141,7 @@ void HSetBang::do_post_accept( OClientInfo* clientInfo_ ) {
 	M_EPILOG
 }
 
-bool HSetBang::makes_set( int n1_, int n2_, int n3_ ) {
+bool HSetBang::makes_set( int n1_, int n2_, int n3_ ) const {
 	bool makesSet( true );
 	int b1( 0 );
 	int b2( 0 );
@@ -136,28 +149,24 @@ bool HSetBang::makes_set( int n1_, int n2_, int n3_ ) {
 	b1 = n1_ % 3;
 	b2 = n2_ % 3;
 	b3 = n3_ % 3;
-	out << "1: b1 = " << b1 << ", b2 = " << b2 << ", b3 = " << b3 << endl;
 	if ( ( ( b1 == b2 ) && ( b1 != b3 ) ) || ( ( b1 == b3 ) && ( b1 != b2 ) ) || ( ( b2 == b3 ) && ( b2 != b1 ) ) )
 		makesSet = false;
 	if ( makesSet ) {
 		b1 = ( n1_ / 3 ) % 3;
 		b2 = ( n2_ / 3 ) % 3;
 		b3 = ( n3_ / 3 ) % 3;
-		out << "3: b1 = " << b1 << ", b2 = " << b2 << ", b3 = " << b3 << endl;
 		if ( ( ( b1 == b2 ) && ( b1 != b3 ) ) || ( ( b1 == b3 ) && ( b1 != b2 ) ) || ( ( b2 == b3 ) && ( b2 != b1 ) ) )
 			makesSet = false;
 		if ( makesSet ) {
 			b1 = ( n1_ / 9 ) % 3;
 			b2 = ( n2_ / 9 ) % 3;
 			b3 = ( n3_ / 9 ) % 3;
-			out << "9: b1 = " << b1 << ", b2 = " << b2 << ", b3 = " << b3 << endl;
 			if ( ( ( b1 == b2 ) && ( b1 != b3 ) ) || ( ( b1 == b3 ) && ( b1 != b2 ) ) || ( ( b2 == b3 ) && ( b2 != b1 ) ) )
 				makesSet = false;
 			if ( makesSet ) {
 				b1 = ( n1_ / 27 ) % 3;
 				b2 = ( n2_ / 27 ) % 3;
 				b3 = ( n3_ / 27 ) % 3;
-				out << "27: b1 = " << b1 << ", b2 = " << b2 << ", b3 = " << b3 << endl;
 				if ( ( ( b1 == b2 ) && ( b1 != b3 ) ) || ( ( b1 == b3 ) && ( b1 != b2 ) ) || ( ( b2 == b3 ) && ( b2 != b1 ) ) )
 					makesSet = false;
 			}
@@ -166,13 +175,39 @@ bool HSetBang::makes_set( int n1_, int n2_, int n3_ ) {
 	return ( makesSet );
 }
 
+bool HSetBang::contains_set( int limit_ ) const {
+	M_ASSERT( ( limit_ >= 3 ) && ! ( limit_ % 3 ) && ( limit_ <= _cardsInDeck ) );
+	bool containsSet( makes_set( _deck[ 0 ], _deck[ 1 ], _deck[ 2 ] ) );
+	int lastCard( 3 );
+	while ( ! containsSet && ( lastCard < _cardsInDeck ) ) {
+		for ( int i( 0 ); ! containsSet && ( i < lastCard ); ++ i ) {
+			for ( int j( i + 1 ); j < lastCard; ++ j ) {
+				if ( ( containsSet = makes_set( _deck[ i ], _deck[ j ], _deck[ lastCard ] ) ) )
+					break;
+			}
+		}
+		++ lastCard;
+	}
+	return ( containsSet );
+}
+
+void HSetBang::update_table( void ) {
+	M_PROLOG
+	broadcast( _out << PROTOCOL::DECK << PROTOCOL::SEP << serialize_deck() << endl << _out );
+	return;
+	M_EPILOG
+}
+
 void HSetBang::generate_deck( void ) {
 	M_PROLOG
+	++ _deckNo;
 	_cardsInDeck = SET_DECK_CARD_COUNT;
 	for ( int i( 0 ); i < _cardsInDeck; ++ i )
 		_deck[ i ] = i;
 	_cardsOnTable = 12;
-	random_shuffle( _deck, _deck + _cardsInDeck );
+	do {
+		random_shuffle( _deck, _deck + _cardsInDeck );
+	} while ( ! contains_set( _cardsOnTable ) );
 	return;
 	M_EPILOG
 }

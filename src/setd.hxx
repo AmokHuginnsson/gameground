@@ -73,7 +73,9 @@ protected:
 	/*{*/
 	yaal::hcore::HString const& serialize_deck( void );
 	void generate_deck( void );
-	bool makes_set( int, int, int );
+	bool makes_set( int, int, int ) const;
+	bool contains_set( int ) const;
+	void update_table( void );
 	virtual bool do_accept( OClientInfo* );
 	virtual void do_post_accept( OClientInfo* );
 	virtual void do_kick( OClientInfo* );
