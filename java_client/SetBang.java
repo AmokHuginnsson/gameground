@@ -5,12 +5,9 @@ import java.util.Date;
 import java.text.SimpleDateFormat;
 
 class SetBang extends HAbstractLogic implements Runnable {
-	public static final class PROTOCOL {
-		public static final String SEP = ":";
-		public static final String SEPP = ",";
-		public static final String CMD = "cmd";
-		public static final String SAY = "say";
+	public static final class PROTOCOL extends HAbstractLogic.PROTOCOL {
 		public static final String SETUP = "setup";
+		public static final String SET = "set";
 		public static final String DECK = "deck";
 		public static final String PLAYER = "player";
 		public static final String PLAYERQUIT = "player_quit";
@@ -61,6 +58,7 @@ class SetBang extends HAbstractLogic implements Runnable {
 	public SetBang( GameGround $applet, String $id, String $configuration ) throws Exception {
 		super( $applet, $id, $configuration );
 		init( _gui = new HGUILocal( LABEL ) );
+		_gui._table.setLogic( this );
 		_players = _gui._players.setColumns( _playerScoreColumns );
 		_handlers.put( PROTOCOL.PLAYER, SetBang.class.getDeclaredMethod( "handlerPlayer", new Class<?>[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYERQUIT, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class<?>[]{ String.class } ) );
@@ -102,6 +100,7 @@ class SetBang extends HAbstractLogic implements Runnable {
 				cards[i] = -1;
 		}
 		_gui._table.setCards( cards );
+		_gui.repaint();
 	}
 	public void cleanup() {
 		_app.flush( this );

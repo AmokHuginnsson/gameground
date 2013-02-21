@@ -46,27 +46,39 @@ private:
 		OPlayerInfo( void ) : _score( 0 ), _last( 0 ) {}
 	};
 	struct PROTOCOL : public HLogic::PROTOCOL {
-		static char const* const PLAY;
+		static char const* const DECK;
+		static char const* const SET;
 	};
+	static int const SET_DECK_CARD_COUNT = 3 * 3 * 3 * 3;
+	static int const SET_TABLE_CARD_COUNT = 12;
 protected:
 	/*{*/
 	typedef yaal::hcore::HMap<OClientInfo*, OPlayerInfo> players_t;
 	int _startupPlayers;
+	int _cardsOnTable;
+	int _cardsInDeck;
+	int _deckNo;
+	int _deckCount;
+	int _interRoundDelay;
 	players_t _players;
+	int _deck[SET_DECK_CARD_COUNT];
 	yaal::hcore::HString _varTmpBuffer;
 	/*}*/
 public:
 	/*{*/
-	HSetBang( HServer*, HLogic::id_t const&, yaal::hcore::HString const&, int );
+	HSetBang( HServer*, HLogic::id_t const&, yaal::hcore::HString const&, int, int, int );
 	virtual ~HSetBang( void );
 	/*}*/
 protected:
 	/*{*/
+	yaal::hcore::HString const& serialize_deck( void );
+	void generate_deck( void );
+	bool makes_set( int, int, int );
 	virtual bool do_accept( OClientInfo* );
 	virtual void do_post_accept( OClientInfo* );
 	virtual void do_kick( OClientInfo* );
 	virtual yaal::hcore::HString do_get_info() const;
-	void handler_play( OClientInfo*, yaal::hcore::HString const& );
+	void handler_set( OClientInfo*, yaal::hcore::HString const& );
 	/*}*/
 private:
 	/*{*/

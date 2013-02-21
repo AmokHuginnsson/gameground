@@ -96,12 +96,17 @@ int HBoggle::RULES[6][16] = {
 		{ 0, 0, 1, 1, 1, 1,  1,  1,  1,   1,   1,   1,    1,    1,    1,    1 }
 };
 
+int const BOGGLE_MSG_MALFORMED = 0;
+char const* const BOGGLE_MSG[] = {
+	"malformed packet"
+};
+
 HBoggle::HBoggle( HServer* server_, id_t const& id_, HString const& comment_, SCORING::scoring_t scoring_, int players_, int roundTime_, int maxRounds_, int interRoundDelay_ )
 	: HLogic( server_, id_, comment_ ), _state( STATE::LOCKED ),
 	_scoring( scoring_ ), _startupPlayers( players_ ),
 	_roundTime( roundTime_ ), _maxRounds( maxRounds_ ),
 	_interRoundDelay( interRoundDelay_ ), _round( 0 ), _players(),
-	_words() {
+	_words(), _varTmpBuffer() {
 	M_PROLOG
 	_handlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HBoggle::handler_play );
 	return;
@@ -134,17 +139,17 @@ void HBoggle::generate_game( void ) {
 	M_EPILOG
 }
 
-HString HBoggle::make_deck( void ) {
+HString const& HBoggle::serialize_deck( void ) {
 	M_PROLOG
-	HString deck;
+	_varTmpBuffer.clear();
 	for ( int i = 0; i < boggle_data::BOGGLE::DICE_COUNT; ++ i )
-		deck += _game[ i ][ 0 ];
+		_varTmpBuffer += _game[ i ][ 0 ];
 	out << "new deck: " << endl;
-	cout << deck.left( 4 ) << endl;
-	cout << deck.mid( 4, 4 ) << endl;
-	cout << deck.mid( 8, 4 ) << endl;
-	cout << deck.mid( 12, 4 ) << endl;
-	return ( deck );
+	cout << _varTmpBuffer.left( 4 ) << endl;
+	cout << _varTmpBuffer.mid( 4, 4 ) << endl;
+	cout << _varTmpBuffer.mid( 8, 4 ) << endl;
+	cout << _varTmpBuffer.mid( 12, 4 ) << endl;
+	return ( _varTmpBuffer );
 	M_EPILOG
 }
 
@@ -235,7 +240,7 @@ void HBoggle::do_post_accept( OClientInfo* clientInfo_ ) {
 		broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
 				<< "The match has begun, good luck!" << endl << _out );
 	} else if ( _round > 0 )
-		*clientInfo_->_socket << *this << PROTOCOL::DECK << PROTOCOL::SEP << make_deck() << endl;
+		*clientInfo_->_socket << *this << PROTOCOL::DECK << PROTOCOL::SEP << serialize_deck() << endl;
 	return;
 	M_EPILOG
 }
@@ -278,7 +283,7 @@ void HBoggle::schedule_end_round( void ) {
 	HScheduledAsyncCaller::get_instance().register_call( time( NULL ) + _roundTime, call( &HBoggle::on_end_round, this ) );
 	generate_game();
 	_state = STATE::ACCEPTING;
-	broadcast( _out << PROTOCOL::DECK << PROTOCOL::SEP << make_deck() << endl << _out );
+	broadcast( _out << PROTOCOL::DECK << PROTOCOL::SEP << serialize_deck() << endl << _out );
 	return;
 	M_EPILOG
 }
@@ -444,12 +449,20 @@ HLogic::ptr_t HBoggleCreator::do_new_instance( HServer* server_, HLogic::id_t co
 	M_PROLOG
 	out << "creating logic: " << argv_ << endl;
 	HTokenizer t( argv_, "," );
-	HString name = t[ 0 ];
-	HString scoringStr = t[ 1 ];
-	int players = lexical_cast<int>( t[ 2 ] );
-	int roundTime = lexical_cast<int>( t[ 3 ] );
-	int maxRounds = lexical_cast<int>( t[ 4 ] );
-	int interRoundDelay = lexical_cast<int>( t[ 5 ] );
+	HString name( t[ 0 ] );
+	HString scoringStr( t[ 1 ] );
+	int players( 0 );
+	int roundTime( 0 );
+	int maxRounds( 0 );
+	int interRoundDelay( 0 );
+	try {
+		players = lexical_cast<int>( t[ 2 ] );
+		roundTime = lexical_cast<int>( t[ 3 ] );
+		maxRounds = lexical_cast<int>( t[ 4 ] );
+		interRoundDelay = lexical_cast<int>( t[ 5 ] );
+	} catch ( HLexicalCastException const& ) {
+		throw HLogicException( boggle::BOGGLE_MSG[boggle::BOGGLE_MSG_MALFORMED] );
+	}
 	boggle::HBoggle::SCORING::scoring_t scoring( boggle::HBoggle::SCORING::ORIGINAL );
 	if ( scoringStr == "original" )
 		scoring = boggle::HBoggle::SCORING::ORIGINAL;
@@ -476,7 +489,7 @@ HString HBoggleCreator::do_get_info( void ) const {
 	HString setupMsg;
 	setupMsg.format( "%s:%s,%d,%d,%d,%d", boggle::HBoggle::PROTOCOL::NAME,
 			setup._scoringSystem.raw(), setup._boggleStarupPlayers,
-			setup._roundTime, setup._maxRounds, setup._interRoundDelay );
+			setup._roundTime, setup._boggleRounds, setup._interRoundDelay );
 	out << setupMsg << endl;
 	return ( setupMsg );
 }

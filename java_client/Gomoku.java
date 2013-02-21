@@ -18,11 +18,7 @@ class GomokuContestant {
 }
 
 class Gomoku extends HAbstractLogic implements Runnable {
-	public static final class PROTOCOL {
-		public static final String SEP = ":";
-		public static final String SEPP = ",";
-		public static final String CMD = "cmd";
-		public static final String SAY = "say";
+	public static final class PROTOCOL extends HAbstractLogic.PROTOCOL {
 		public static final String NAME = "gomoku";
 		public static final String PLAY = "play";
 		public static final String PASS = "pass";

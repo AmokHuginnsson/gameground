@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.TreeSet;
 import java.util.SortedSet;
 import java.awt.Graphics;
@@ -26,6 +27,7 @@ public class SetBangTable extends JPanel implements MouseInputListener {
 	}
 	public static final long serialVersionUID = 7l;
 	public static final int D_MARGIN = 30;
+	HAbstractLogic _logic = null;
 	int[] _cards = null;
 	int _hovered = -1;
 	SortedSet<Integer> _selected = java.util.Collections.synchronizedSortedSet( new TreeSet<Integer>() );
@@ -36,18 +38,10 @@ public class SetBangTable extends JPanel implements MouseInputListener {
 		addMouseListener( this );
 		/* for testing gui only */
 		_cards = new int[12];
-		_cards[0] = 0;
-		_cards[1] = 3;
-		_cards[2] = 6;
-		_cards[3] = 8;
-		_cards[4] = 15;
-		_cards[5] = 22;
-		_cards[6] = 27;
-		_cards[7] = 38;
-		_cards[8] = 45;
-		_cards[9] = 52;
-		_cards[10] = 54;
-		_cards[11] = 58;
+		Arrays.fill( _cards, -1 );
+	}
+	void setLogic( HAbstractLogic $logic ) {
+		_logic = $logic;
 	}
 	public void setCards( int[] $cards ) {
 		_cards = $cards;
@@ -71,8 +65,19 @@ public class SetBangTable extends JPanel implements MouseInputListener {
 		if ( _hovered != -1 ) {
 			if ( _selected.contains( _hovered ) )
 				_selected.remove( _hovered );
-			else if ( _selected.size() < 3 )
+			else if ( _selected.size() < 3 ) {
 				_selected.add( _hovered );
+				if ( _selected.size() == 3 ) {
+					StringBuilder val = new StringBuilder();
+					for ( Integer i : _selected ) {
+						if ( val.length() > 0 )
+							val.append( ',' );
+						val.append( i );
+					}
+					_logic._client.println( SetBang.PROTOCOL.CMD + SetBang.PROTOCOL.SEP + _logic.id() + SetBang.PROTOCOL.SEP
+							+ SetBang.PROTOCOL.SET + SetBang.PROTOCOL.SEP + val );
+				}
+			}
 			repaint();
 		}
 	}

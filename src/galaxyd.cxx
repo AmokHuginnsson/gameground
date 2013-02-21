@@ -49,6 +49,11 @@ namespace gameground {
 
 namespace galaxy {
 
+int const GALAXY_MSG_MALFORMED = 0;
+char const* const GALAXY_MSG[] = {
+	"malformed packet"
+};
+
 int _colors_[] = {
 	( COLORS::FG_BRIGHTBLUE | COLORS::BG_BLACK ),
 	( COLORS::FG_BRIGHTGREEN | COLORS::BG_BLACK ),
@@ -498,9 +503,16 @@ public:
 HLogic::ptr_t HGalaxyCreator::do_new_instance( HServer* server_, HLogic::id_t const& id_, HString const& argv_ ) {
 	M_PROLOG
 	HString name = get_token( argv_, ",", 0 );
-	int emperors = lexical_cast<int>( get_token( argv_, ",", 1 ) );
-	int boardSize = lexical_cast<int>( get_token( argv_, ",", 2 ) );
-	int systems = lexical_cast<int>( get_token( argv_, ",", 3 ) );
+	int emperors( 0 );
+	int boardSize( 0 );
+	int systems( 0 );
+	try {
+		emperors = lexical_cast<int>( get_token( argv_, ",", 1 ) );
+		boardSize = lexical_cast<int>( get_token( argv_, ",", 2 ) );
+		systems = lexical_cast<int>( get_token( argv_, ",", 3 ) );
+	} catch ( HLexicalCastException const& ) {
+		throw HLogicException( galaxy::GALAXY_MSG[galaxy::GALAXY_MSG_MALFORMED] );
+	}
 	char* message = NULL;
 	out << "new glx: ( " << name << " ) {" << endl;
 	cout << "emperors = " << emperors << endl;

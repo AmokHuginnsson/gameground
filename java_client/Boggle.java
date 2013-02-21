@@ -5,11 +5,7 @@ import java.util.Date;
 import java.text.SimpleDateFormat;
 
 class Boggle extends HAbstractLogic implements Runnable {
-	public static final class PROTOCOL {
-		public static final String SEP = ":";
-		public static final String SEPP = ",";
-		public static final String CMD = "cmd";
-		public static final String SAY = "say";
+	public static final class PROTOCOL extends HAbstractLogic.PROTOCOL {
 		public static final String LONGEST = "longest";
 		public static final String ROUND = "round";
 		public static final String SETUP = "setup";

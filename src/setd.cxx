@@ -48,13 +48,23 @@ namespace gameground {
 
 namespace set_bang {
 
-char const* const HSetBang::PROTOCOL::PLAY = "play";
+int const SET_MSG_MALFORMED = 0;
+int const SET_MSG_NOT_A_SET = 1;
+char const* const SET_MSG[] = {
+	"malformed packet",
+	"not a set"
+};
 
-HSetBang::HSetBang( HServer* server_, HLogic::id_t const& id_, HString const& comment_, int startupPlayers_ )
+char const* const HSetBang::PROTOCOL::DECK = "deck";
+char const* const HSetBang::PROTOCOL::SET = "set";
+
+HSetBang::HSetBang( HServer* server_, HLogic::id_t const& id_, HString const& comment_, int startupPlayers_,
+		int deckCount_, int interRoundDelay_ )
 	: HLogic( server_, id_, comment_ ), _startupPlayers( startupPlayers_ ),
-	_players(), _varTmpBuffer() {
+	_cardsOnTable( 0 ), _cardsInDeck( 0 ), _deckNo( 0 ), _deckCount( deckCount_ ),
+	_interRoundDelay( interRoundDelay_ ), _players(), _deck(), _varTmpBuffer() {
 	M_PROLOG
-	_handlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HSetBang::handler_play );
+	_handlers[ PROTOCOL::SET ] = static_cast<handler_t>( &HSetBang::handler_set );
 	return;
 	M_EPILOG
 }
@@ -65,10 +75,24 @@ HSetBang::~HSetBang ( void ) {
 	M_EPILOG
 }
 
-void HSetBang::handler_play( OClientInfo* clientInfo_, HString const& message_ ) {
+void HSetBang::handler_set( OClientInfo*, HString const& message_ ) {
 	M_PROLOG
-	HLock l( _mutex );
-	*clientInfo_->_socket << PROTOCOL::MSG << PROTOCOL::SEP << message_ << endl;
+	HTokenizer t( message_, "," );
+	int val[3];
+	for ( int i( 0 ); i < 3; ++ i ) {
+		try {
+			val[ i ] = lexical_cast<int>( t[ i ] );
+		} catch ( HLexicalCastException const& ) {
+			throw HLogicException( SET_MSG[ SET_MSG_MALFORMED ] );
+		}
+	}
+	for ( int i( 0 ); i < 3; ++ i ) {
+		if ( ( val[ i ] < 0 ) || ( val[ i ] >= _cardsOnTable ) )
+			throw HLogicException( SET_MSG[ SET_MSG_MALFORMED ] );
+	}
+	if ( ! makes_set( _deck[ val[ 0 ] ], _deck[ val[ 1 ] ], _deck[ val[ 2 ] ] ) )
+		throw HLogicException( SET_MSG[ SET_MSG_NOT_A_SET ] );
+	out << "set: " << message_ << endl;
 	return;
 	M_EPILOG
 }
@@ -93,8 +117,74 @@ void HSetBang::do_post_accept( OClientInfo* clientInfo_ ) {
 			<< clientInfo_->_login
 			<< " joined the mind contest." << endl << _out );
 	out << "player [" << clientInfo_->_login << "] accepted" << endl;
+	if ( ! _deckNo && ( _players.size() >= _startupPlayers ) ) {
+		generate_deck();
+		broadcast( _out << PROTOCOL::DECK << PROTOCOL::SEP << serialize_deck() << endl << _out );
+		broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
+				<< "The match has begun, good luck!" << endl << _out );
+	} else if ( _deckNo > 0 )
+		*clientInfo_->_socket << *this << PROTOCOL::DECK << PROTOCOL::SEP << serialize_deck() << endl;
 	return;
 	M_EPILOG
+}
+
+bool HSetBang::makes_set( int n1_, int n2_, int n3_ ) {
+	bool makesSet( true );
+	int b1( 0 );
+	int b2( 0 );
+	int b3( 0 );
+	b1 = n1_ % 3;
+	b2 = n2_ % 3;
+	b3 = n3_ % 3;
+	out << "1: b1 = " << b1 << ", b2 = " << b2 << ", b3 = " << b3 << endl;
+	if ( ( ( b1 == b2 ) && ( b1 != b3 ) ) || ( ( b1 == b3 ) && ( b1 != b2 ) ) || ( ( b2 == b3 ) && ( b2 != b1 ) ) )
+		makesSet = false;
+	if ( makesSet ) {
+		b1 = ( n1_ / 3 ) % 3;
+		b2 = ( n2_ / 3 ) % 3;
+		b3 = ( n3_ / 3 ) % 3;
+		out << "3: b1 = " << b1 << ", b2 = " << b2 << ", b3 = " << b3 << endl;
+		if ( ( ( b1 == b2 ) && ( b1 != b3 ) ) || ( ( b1 == b3 ) && ( b1 != b2 ) ) || ( ( b2 == b3 ) && ( b2 != b1 ) ) )
+			makesSet = false;
+		if ( makesSet ) {
+			b1 = ( n1_ / 9 ) % 3;
+			b2 = ( n2_ / 9 ) % 3;
+			b3 = ( n3_ / 9 ) % 3;
+			out << "9: b1 = " << b1 << ", b2 = " << b2 << ", b3 = " << b3 << endl;
+			if ( ( ( b1 == b2 ) && ( b1 != b3 ) ) || ( ( b1 == b3 ) && ( b1 != b2 ) ) || ( ( b2 == b3 ) && ( b2 != b1 ) ) )
+				makesSet = false;
+			if ( makesSet ) {
+				b1 = ( n1_ / 27 ) % 3;
+				b2 = ( n2_ / 27 ) % 3;
+				b3 = ( n3_ / 27 ) % 3;
+				out << "27: b1 = " << b1 << ", b2 = " << b2 << ", b3 = " << b3 << endl;
+				if ( ( ( b1 == b2 ) && ( b1 != b3 ) ) || ( ( b1 == b3 ) && ( b1 != b2 ) ) || ( ( b2 == b3 ) && ( b2 != b1 ) ) )
+					makesSet = false;
+			}
+		}
+	}
+	return ( makesSet );
+}
+
+void HSetBang::generate_deck( void ) {
+	M_PROLOG
+	_cardsInDeck = SET_DECK_CARD_COUNT;
+	for ( int i( 0 ); i < _cardsInDeck; ++ i )
+		_deck[ i ] = i;
+	_cardsOnTable = 12;
+	random_shuffle( _deck, _deck + _cardsInDeck );
+	return;
+	M_EPILOG
+}
+
+HString const& HSetBang::serialize_deck( void ) {
+	_varTmpBuffer.clear();
+	for ( int i( 0 ); i < SET_TABLE_CARD_COUNT; ++ i ) {
+		if ( i )
+			_varTmpBuffer += ",";
+		_varTmpBuffer += _deck[i];
+	}
+	return ( _varTmpBuffer );
 }
 
 void HSetBang::do_kick( OClientInfo* clientInfo_ ) {
@@ -126,16 +216,25 @@ HLogic::ptr_t HSetBangCreator::do_new_instance( HServer* server_, HLogic::id_t c
 	M_PROLOG
 	out << "creating logic: " << argv_ << endl;
 	HTokenizer t( argv_, "," );
-	HString name = t[ 0 ];
-	int players = lexical_cast<int>( t[ 1 ] );
-	return ( make_pointer<set_bang::HSetBang>( server_, id_, name, players ) );
+	HString name( t[ 0 ] );
+	int players( 0 );
+	int deckCount( 0 );
+	int interRoundDelay( 0 );
+	try {
+		players = lexical_cast<int>( t[ 1 ] );
+		deckCount = lexical_cast<int>( t[ 2 ] );
+		interRoundDelay = lexical_cast<int>( t[ 3 ] );
+	} catch ( HLexicalCastException const& ) {
+		throw HLogicException( set_bang::SET_MSG[set_bang::SET_MSG_MALFORMED] );
+	}
+	return ( make_pointer<set_bang::HSetBang>( server_, id_, name, players, deckCount, interRoundDelay ) );
 	M_EPILOG
 }
 
 HString HSetBangCreator::do_get_info( void ) const {
 	M_PROLOG
 	HString setupMsg;
-	setupMsg.format( "set_bang:%d", setup._setStartupPlayers );
+	setupMsg.format( "set_bang:%d,%d,%d", setup._setStartupPlayers, setup._setDeckCount, setup._interRoundDelay );
 	out << setupMsg << endl;
 	return ( setupMsg );
 	M_EPILOG

@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="iso8859-2"?>
 <!DOCTYPE panel SYSTEM "res/gameground.dtd">
 <panel layout="FlowLayout"><!--{{{-->
-	<label>Players:</label><spinner id="_playerCount" tooltiptext="Minimum number of players to start the match."><textfield horizontalalignment="RIGHT" /></spinner>
+	<layout type="FormLayout" columns="p,4px,p,p:grow" rows="p,4px,p,4px,p,4px,p" />
+	<label constraints="1,1">Players:</label><spinner id="_playerCount" constraints="3,1" tooltiptext="Minimum number of players to start the match."><textfield horizontalalignment="RIGHT" /></spinner>
+	<label constraints="1,3">Number of decks:</label><spinner id="_deckCount" constraints="3,3" tooltiptext="You guessed right, number of decks for whole match."><textfield horizontalalignment="RIGHT" /></spinner>
+	<label constraints="1,5">Inter round delay:</label><spinner id="_interRoundDelay" constraints="3,5" tooltiptext="Interval between rounds expressed in seconds."><textfield horizontalalignment="RIGHT" /></spinner>
 </panel>

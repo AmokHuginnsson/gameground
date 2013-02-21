@@ -95,6 +95,7 @@ protected:
 	players_t _players;
 	char _game[16][2];
 	words_t _words;
+	yaal::hcore::HString _varTmpBuffer;
 	/*}*/
 public:
 	/*{*/
@@ -116,7 +117,7 @@ protected:
 	void schedule_end_round( void );
 	bool word_is_good( yaal::hcore::HString const&, int );
 	bool is_good( int, char const*, int );
-	yaal::hcore::HString make_deck( void );
+	yaal::hcore::HString const& serialize_deck( void );
 	/*}*/
 private:
 	/*{*/
