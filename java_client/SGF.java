@@ -106,6 +106,7 @@ public class SGF {
 			return ( ( _data[0] == coord._data[0] ) && ( _data[1] == coord._data[1] ) );
 		}
 	};
+	static final Coord PASS = new Coord( 0 - 'a', 0 - 'a' );
 	static class Setup {
 		static class Label {
 			Coord _coord;
@@ -676,7 +677,10 @@ public class SGF {
 	}
 
 	void saveMove( Player of_, HTree<Move>.HNode<Move> $node, StringBuilder $stream ) {
-		$stream.append( ";" ).append( of_ == Player.BLACK ? "B[" : "W[" ).append( $node.value().coord().data() ).append( "]" );
+		$stream.append( ";" ).append( of_ == Player.BLACK ? "B[" : "W[" );
+		if ( ! $node.value().coord().equals( PASS ) )
+			$stream.append( $node.value().coord().data() );
+		$stream.append( "]" );
 		int time = $node.value().time();
 		if ( time != 0 ) {
 			if ( time > 0 )

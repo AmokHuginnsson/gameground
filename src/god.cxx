@@ -724,11 +724,11 @@ void HGo::handler_play( OClientInfo* clientInfo_, HString const& message_ ) {
 
 void HGo::after_move( void ) {
 	M_PROLOG
+	if ( ongoing_match() && ! _marking )
+		update_clocks();
 	send_contestants();
 	broadcast( _out << PROTOCOL::TOMOVE << PROTOCOL::SEP
 			<< static_cast<char>( _marking ? STONE::MARK : _toMove ) << endl << _out );
-	if ( ongoing_match() && ! _marking )
-		update_clocks();
 	return;
 	M_EPILOG
 }

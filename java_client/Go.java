@@ -430,6 +430,8 @@ class Go extends HAbstractLogic implements Runnable {
 		contestant._timeLeft = Integer.parseInt( tokens[ 4 ] );
 		Date d = new Date( contestant._timeLeft * 1000 );
 		contestant._timeLeftLabel.setText( new SimpleDateFormat( "mm:ss" ).format( d ) );
+		if ( stone == _toMove )
+			_gui._board._currentMove.value().setTime( contestant._timeLeft );
 		if ( Integer.parseInt( tokens[ 5 ] ) >= 0 )
 			contestant._byoyomi.setText( tokens[ 5 ] );
 		if ( tokens[ 1 ].equals( _app.getName() ) ) {
