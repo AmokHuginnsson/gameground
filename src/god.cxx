@@ -510,11 +510,23 @@ void HGo::handler_undo( OClientInfo* clientInfo_, HString const& message_ ) {
 					*clientInfo_->_socket << *this << _out.consume();
 				}
 			} else {
-				_pendingUndoRequest = clientInfo_;
-				OClientInfo* opp( _contestants[opponentIdx]._client );
-				_out << PROTOCOL::UNDO << endl;
-				*opp->_socket << *this << _out.consume();
-				_toMove = opponent( _toMove );
+				int skip( _toMove == ( opponentIdx == 0 ? STONE::BLACK : STONE::WHITE ) ? 1 : 2 );
+				out << "skip = " << skip << endl;
+				SGF::game_tree_t::const_node_t currentMove( _sgf.get_current_move() );
+				while ( ( skip > 0 ) && currentMove && currentMove->get_parent() ) {
+					currentMove = currentMove->get_parent();
+					-- skip;
+				}
+				if ( ! skip ) {
+					_pendingUndoRequest = clientInfo_;
+					OClientInfo* opp( _contestants[opponentIdx]._client );
+					_out << PROTOCOL::UNDO << endl;
+					*opp->_socket << *this << _out.consume();
+					_toMove = opponent( _toMove );
+				} else {
+					_out << PROTOCOL::MSG << PROTOCOL::SEP << "You cannot undo at this stage." << endl;
+					*clientInfo_->_socket << *this << _out.consume();
+				}
 			}
 		} else {
 			_out << PROTOCOL::MSG << PROTOCOL::SEP << "Your opponent ignores all your undo requests." << endl;
@@ -526,7 +538,8 @@ void HGo::handler_undo( OClientInfo* clientInfo_, HString const& message_ ) {
 		if ( message_ == PROTOCOL::ACCEPT ) {
 			SGF::game_tree_t::const_node_t currentMove( _sgf.get_current_move() );
 			if ( currentMove ) {
-				int skip( _toMove == ( opponentIdx == 0 ? STONE::BLACK : STONE::WHITE ) ? 2 : 1 );
+				int skip( _toMove == ( opponentIdx == 0 ? STONE::BLACK : STONE::WHITE ) ? 1 : 2 );
+				out << "skip = " << skip << endl;
 				for ( int i( 0 ); currentMove->get_parent() && ( i < skip ); ++ i )
 					currentMove = currentMove->get_parent();
 				_sgf.set_current_move( currentMove );
@@ -535,6 +548,8 @@ void HGo::handler_undo( OClientInfo* clientInfo_, HString const& message_ ) {
 				for ( int i( 0 ), SIZE( static_cast<int>( _branch.get_size() - skip ) ); i < SIZE; ++ i, ++ m )
 					apply_move( *m );
 				send_path();
+				if ( skip == 1 )
+					_toMove = opponent( _toMove );
 			}
 		} else if ( message_ == PROTOCOL::REJECT ) {
 			_out << PROTOCOL::MSG << PROTOCOL::SEP << "Your opponent rejected your undo request." << endl;
@@ -962,11 +977,11 @@ void HGo::put_handicap_stones( int handi_, bool sgf_ ) {
 		case ( 8 ):
 			put_handicap_stones( 6, sgf_ );
 			put_stone( col = _gobanSize / 2, row = hoshi, STONE::BLACK );
+			if ( sgf_ )
+				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 			put_stone( col = _gobanSize / 2, row = ( _gobanSize - hoshi ) - 1, STONE::BLACK );
-			if ( sgf_ ) {
+			if ( sgf_ )
 				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
-				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
-			}
 		break;
 		case ( 7 ):
 			put_stone( col = _gobanSize / 2, row = _gobanSize / 2, STONE::BLACK );
@@ -975,11 +990,11 @@ void HGo::put_handicap_stones( int handi_, bool sgf_ ) {
 		case ( 6 ):
 			put_handicap_stones( 4, sgf_ );
 			put_stone( col = hoshi, row = _gobanSize / 2, STONE::BLACK );
+			if ( sgf_ )
+				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 			put_stone( col = ( _gobanSize - hoshi ) - 1, row = _gobanSize / 2, STONE::BLACK );
-			if ( sgf_ ) {
+			if ( sgf_ )
 				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
-				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
-			}
 		break;
 		case ( 5 ):
 			put_stone( col = _gobanSize / 2, row = _gobanSize / 2, STONE::BLACK );
@@ -995,11 +1010,11 @@ void HGo::put_handicap_stones( int handi_, bool sgf_ ) {
 				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 		case ( 2 ):
 			put_stone( col = hoshi, row = ( _gobanSize - hoshi ) - 1, STONE::BLACK );
+			if ( sgf_ )
+				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
 			put_stone( col = ( _gobanSize - hoshi ) - 1, row = hoshi, STONE::BLACK );
-			if ( sgf_ ) {
+			if ( sgf_ )
 				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
-				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
-			}
 		break;
 		default:
 			M_ASSERT( ! "unhandled case" );

@@ -343,9 +343,10 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	void move( String $move ) {
 		String[] tokens = $move.split( ",", 2 );
 		HTree<SGF.Move>.HNode<SGF.Move> m = _currentMove.addNode( new SGF.Move( Integer.parseInt( tokens[0] ), Integer.parseInt( tokens[1] ) ) );
-		_branch.add( m );
 		if ( ( ongoingMatch() && amIPlaying() ) || ( _currentMove == null ) || ( _viewMove == null ) || ( _viewMove == _currentMove ) )
 			selectBranch( m );
+		else
+			_branch.add( m );
 		_currentMove = m;
 	}
 	void goToFirst() {
