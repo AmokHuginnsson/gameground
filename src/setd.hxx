@@ -51,6 +51,7 @@ private:
 	};
 	static int const SET_DECK_CARD_COUNT = 3 * 3 * 3 * 3;
 	static int const SET_TABLE_CARD_COUNT = 12;
+	static int const SET_CERTAIN_SET = 21;
 protected:
 	/*{*/
 	typedef yaal::hcore::HMap<OClientInfo*, OPlayerInfo> players_t;
@@ -71,6 +72,7 @@ public:
 	/*}*/
 protected:
 	/*{*/
+	OPlayerInfo* get_player_info( OClientInfo* );
 	yaal::hcore::HString const& serialize_deck( void );
 	void generate_deck( void );
 	bool makes_set( int, int, int ) const;

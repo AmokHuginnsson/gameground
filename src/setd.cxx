@@ -57,6 +57,7 @@ char const* const SET_MSG[] = {
 
 char const* const HSetBang::PROTOCOL::DECK = "deck";
 char const* const HSetBang::PROTOCOL::SET = "set";
+int const HSetBang::SET_TABLE_CARD_COUNT;
 
 HSetBang::HSetBang( HServer* server_, HLogic::id_t const& id_, HString const& comment_, int startupPlayers_,
 		int deckCount_, int interRoundDelay_ )
@@ -75,7 +76,7 @@ HSetBang::~HSetBang ( void ) {
 	M_EPILOG
 }
 
-void HSetBang::handler_set( OClientInfo*, HString const& message_ ) {
+void HSetBang::handler_set( OClientInfo* clientInfo_, HString const& message_ ) {
 	M_PROLOG
 	HTokenizer t( message_, "," );
 	int val[3];
@@ -87,7 +88,7 @@ void HSetBang::handler_set( OClientInfo*, HString const& message_ ) {
 		}
 	}
 	for ( int i( 0 ); i < 3; ++ i ) {
-		if ( ( val[ i ] < 0 ) || ( val[ i ] >= _cardsOnTable ) )
+		if ( ( val[ i ] < 0 ) || ( val[ i ] >= SET_TABLE_CARD_COUNT ) || ( _deck[ val[ i ] ] == -1 ) )
 			throw HLogicException( SET_MSG[ SET_MSG_MALFORMED ] );
 	}
 	if ( ! makes_set( _deck[ val[ 0 ] ], _deck[ val[ 1 ] ], _deck[ val[ 2 ] ] ) )
@@ -95,6 +96,11 @@ void HSetBang::handler_set( OClientInfo*, HString const& message_ ) {
 	_deck[ val[ 0 ] ] = -1;
 	_deck[ val[ 1 ] ] = -1;
 	_deck[ val[ 2 ] ] = -1;
+	OPlayerInfo& p( *get_player_info( clientInfo_ ) );
+	++ p._score;
+	++ p._last;
+	broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
+			<< clientInfo_->_login << PROTOCOL::SEPP << p._score << PROTOCOL::SEPP << p._last << endl << _out );
 	update_table();
 	return;
 	M_EPILOG
@@ -131,13 +137,21 @@ void HSetBang::do_post_accept( OClientInfo* clientInfo_ ) {
 			<< " joined the mind contest." << endl << _out );
 	out << "player [" << clientInfo_->_login << "] accepted" << endl;
 	if ( ! _deckNo && ( _players.size() >= _startupPlayers ) ) {
-		generate_deck();
-		broadcast( _out << PROTOCOL::DECK << PROTOCOL::SEP << serialize_deck() << endl << _out );
 		broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
 				<< "The match has begun, good luck!" << endl << _out );
+		generate_deck();
+		broadcast( _out << PROTOCOL::DECK << PROTOCOL::SEP << serialize_deck() << endl << _out );
 	} else if ( _deckNo > 0 )
 		*clientInfo_->_socket << *this << PROTOCOL::DECK << PROTOCOL::SEP << serialize_deck() << endl;
 	return;
+	M_EPILOG
+}
+
+HSetBang::OPlayerInfo* HSetBang::get_player_info( OClientInfo* clientInfo_ ) {
+	M_PROLOG
+	players_t::iterator it = _players.find( clientInfo_ );
+	M_ASSERT( it != _players.end() );
+	return ( &it->second );
 	M_EPILOG
 }
 
@@ -179,9 +193,13 @@ bool HSetBang::contains_set( int limit_ ) const {
 	M_ASSERT( ( limit_ >= 3 ) && ! ( limit_ % 3 ) && ( limit_ <= _cardsInDeck ) );
 	bool containsSet( makes_set( _deck[ 0 ], _deck[ 1 ], _deck[ 2 ] ) );
 	int lastCard( 3 );
-	while ( ! containsSet && ( lastCard < _cardsInDeck ) ) {
+	while ( ! containsSet && ( lastCard < limit_ ) ) {
 		for ( int i( 0 ); ! containsSet && ( i < lastCard ); ++ i ) {
+			if ( _deck[ i ] == -1 )
+				continue;
 			for ( int j( i + 1 ); j < lastCard; ++ j ) {
+				if ( _deck[ j ] == -1 )
+					continue;
 				if ( ( containsSet = makes_set( _deck[ i ], _deck[ j ], _deck[ lastCard ] ) ) )
 					break;
 			}
@@ -193,6 +211,34 @@ bool HSetBang::contains_set( int limit_ ) const {
 
 void HSetBang::update_table( void ) {
 	M_PROLOG
+	if ( _cardsInDeck >= ( SET_TABLE_CARD_COUNT + 3 ) ) {
+		for ( int i( 0 ); i < SET_TABLE_CARD_COUNT; ++ i ) {
+			if ( _deck[ i ] == -1 )
+				_deck[ i ] = _deck[ -- _cardsInDeck ];
+		}
+	} else {
+		_cardsOnTable -= 3;
+		_cardsInDeck -= 3;
+	}
+	if ( _cardsInDeck >= SET_CERTAIN_SET ) {
+		while ( ! contains_set( _cardsOnTable ) ) {
+			random_shuffle( _deck, _deck + _cardsInDeck );
+			out << "shuffle needed" << endl;
+		}
+	} else {
+		if ( ! contains_set( max( _cardsInDeck, SET_TABLE_CARD_COUNT ) ) ) {
+			if ( _deckNo < _deckCount )
+				generate_deck();
+			else
+				broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
+						<< "No more decks! The game is over!" << endl << _out );
+		} else {
+			while ( ! contains_set( _cardsOnTable ) ) {
+				random_shuffle( _deck, _deck + _cardsInDeck );
+				out << "shuffle needed" << endl;
+			}
+		}
+	}
 	broadcast( _out << PROTOCOL::DECK << PROTOCOL::SEP << serialize_deck() << endl << _out );
 	return;
 	M_EPILOG
@@ -201,13 +247,17 @@ void HSetBang::update_table( void ) {
 void HSetBang::generate_deck( void ) {
 	M_PROLOG
 	++ _deckNo;
+	for ( players_t::iterator it( _players.begin() ), end( _players.end() ); it != end; ++ it )
+		it->second._last = 0;
 	_cardsInDeck = SET_DECK_CARD_COUNT;
 	for ( int i( 0 ); i < _cardsInDeck; ++ i )
 		_deck[ i ] = i;
-	_cardsOnTable = 12;
+	_cardsOnTable = SET_TABLE_CARD_COUNT;
 	do {
 		random_shuffle( _deck, _deck + _cardsInDeck );
 	} while ( ! contains_set( _cardsOnTable ) );
+	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
+			<< "New deck started, " << ( _deckCount - _deckNo ) << " decks left." << endl << _out );
 	return;
 	M_EPILOG
 }
