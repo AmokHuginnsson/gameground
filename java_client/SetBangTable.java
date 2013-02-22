@@ -33,6 +33,9 @@ public class SetBangTable extends JPanel implements MouseInputListener {
 	int _hovered = -1;
 	SortedSet<Integer> _selected = java.util.Collections.synchronizedSortedSet( new TreeSet<Integer>() );
 	int _virtSize = 0;
+	static final Color _red = new Color( 0xff, 0x00, 0x73 );
+	static final Color _green = new Color( 0x3e, 0xcd, 0x45 );
+	static final Color _blue = new Color( 0x67, 0x64, 0xca );
 //--------------------------------------------//
 	public SetBangTable() {
 		addMouseMotionListener( this );
@@ -237,13 +240,13 @@ public class SetBangTable extends JPanel implements MouseInputListener {
 		int fill = $type % 3;
 		switch ( color ) {
 			case ( 0 ): {
-				$g.setColor( Color.BLUE );
+				$g.setColor( _blue );
 			} break;
 			case ( 1 ): {
-				$g.setColor( Color.GREEN.darker() );
+				$g.setColor( _green );
 			} break;
 			case ( 2 ): {
-				$g.setColor( Color.MAGENTA );
+				$g.setColor( _red );
 			} break;
 		}
 		switch ( count ) {

@@ -2,7 +2,7 @@
 <!DOCTYPE panel SYSTEM "res/gameground.dtd">
 <panel layout="BorderLayout"><!--{{{-->
 	<hbox>
-		<setbangtable id="_table" background="009000" />
+		<setbangtable id="_table" background="a0a070" />
 		<vbox minimumsize="&v_sidebar_width;,1" preferredsize="&v_sidebar_width;,&v_height;" maximumsize="&v_sidebar_width;,2000">
 			<scrollpane preferredsize="&v_sidebar_width;,240" maximumsize="2000,240" autoscrolls="true" tooltiptext="Current highscores.">
 				<scoretable id="_players" />
