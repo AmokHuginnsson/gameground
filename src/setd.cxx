@@ -190,7 +190,7 @@ bool HSetBang::makes_set( int n1_, int n2_, int n3_ ) const {
 }
 
 bool HSetBang::contains_set( int limit_ ) const {
-	M_ASSERT( ( limit_ >= 3 ) && ! ( limit_ % 3 ) && ( limit_ <= _cardsInDeck ) );
+	M_ASSERT( ( limit_ >= 3 ) && ! ( limit_ % 3 ) && ( limit_ <= max( _cardsInDeck, SET_TABLE_CARD_COUNT ) ) );
 	bool containsSet( makes_set( _deck[ 0 ], _deck[ 1 ], _deck[ 2 ] ) );
 	int lastCard( 3 );
 	while ( ! containsSet && ( lastCard < limit_ ) ) {
