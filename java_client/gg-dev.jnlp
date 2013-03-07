@@ -4,7 +4,7 @@
   JNLP File for GameGround client
 -->
 
-<jnlp codebase="http://localhost:8008/" href="jnlp/gg.jnlp">
+<jnlp codebase="http://localhost:8080/" href="jnlp/gg.jnlp">
   <information>
     <title>GameGround client</title>
     <vendor>CodeStation.org</vendor>
