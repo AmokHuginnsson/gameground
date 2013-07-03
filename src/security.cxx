@@ -45,7 +45,7 @@ namespace gameground {
 char const _rawToSafe_[] = "\\\n\"':,";
 char const _safeToRaw_[] = "EnQACK";
 
-EscapeTable _escapeTable_( _rawToSafe_, sizeof ( _rawToSafe_ ) - 1, _safeToRaw_, sizeof ( _safeToRaw_ ) - 1 );
+EscapeTable _escapeTable_( _rawToSafe_, static_cast<int>( sizeof ( _rawToSafe_ ) - 1 ), _safeToRaw_, static_cast<int>( sizeof ( _safeToRaw_ ) - 1 ) );
 
 bool is_sha1( yaal::hcore::HString const& str_ ) {
 	M_PROLOG
