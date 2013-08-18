@@ -42,7 +42,7 @@ Copyright:
 #include <yaal/hconsole/heditcontrol.hxx>
 #include <yaal/hconsole/hlogpad.hxx>
 
-M_VCSID( "$Id: "__ID__" $" )
+M_VCSID( "$Id: " __ID__ " $" )
 #include "galaxy.hxx"
 
 #include "setup.hxx"

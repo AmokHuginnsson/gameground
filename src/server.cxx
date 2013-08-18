@@ -34,7 +34,7 @@ Copyright:
 #include <yaal/hconsole/ansi.hxx>
 #include <yaal/hconsole/console.hxx>
 
-M_VCSID( "$Id: "__ID__" $" )
+M_VCSID( "$Id: " __ID__ " $" )
 #include "server.hxx"
 
 #include "setup.hxx"
@@ -67,7 +67,7 @@ static int const MAX_GAME_NAME_LENGTH = 20;
 #define LEGEAL_CHARACTER_SET_BASE "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
 static int const CONSTR_CHAR_SET_LOGIN_NAME = 0;
 static int const CONSTR_CHAR_SET_GAME_NAME = 1;
-char const* const LEGEAL_CHARACTER_SET[] = { LEGEAL_CHARACTER_SET_BASE, " "LEGEAL_CHARACTER_SET_BASE };
+char const* const LEGEAL_CHARACTER_SET[] = { LEGEAL_CHARACTER_SET_BASE, " " LEGEAL_CHARACTER_SET_BASE };
 char const* const HServer::PROTOCOL::ABANDON = "abandon";
 char const* const HServer::PROTOCOL::ACCOUNT = "account";
 char const* const HServer::PROTOCOL::CLIENT_SETUP = "client_setup";

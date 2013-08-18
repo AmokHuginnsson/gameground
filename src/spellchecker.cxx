@@ -4,7 +4,7 @@
 #include <yaal/hcore/macro.hxx>
 #include <yaal/hcore/hlog.hxx>
 
-M_VCSID( "$Id: "__ID__" $" )
+M_VCSID( "$Id: " __ID__ " $" )
 #include "spellchecker.hxx"
 
 #include "setup.hxx"

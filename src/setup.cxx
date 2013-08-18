@@ -32,7 +32,7 @@ Copyright:
 #include <yaal/tools/util.hxx>
 #include <yaal/dbwrapper/hdatabase.hxx>
 
-M_VCSID( "$Id: "__ID__" $" )
+M_VCSID( "$Id: " __ID__ " $" )
 #include "setup.hxx"
 
 using namespace yaal::hcore;

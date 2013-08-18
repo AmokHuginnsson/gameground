@@ -31,7 +31,7 @@ Copyright:
 #include <yaal/hcore/hlog.hxx>
 #include <yaal/hcore/algorithm.hxx>
 
-M_VCSID( "$Id: "__ID__" $" )
+M_VCSID( "$Id: " __ID__ " $" )
 
 #include "setup.hxx"
 #include "options.hxx"

@@ -30,7 +30,7 @@ Copyright:
 #include <yaal/tools/hasynccaller.hxx>
 #include <yaal/tools/hscheduledasynccaller.hxx>
 
-M_VCSID( "$Id: "__ID__" $" )
+M_VCSID( "$Id: " __ID__ " $" )
 #include "boggled.hxx"
 
 #include "setup.hxx"

@@ -32,7 +32,7 @@ Copyright:
 #include <yaal/tools/util.hxx>
 #include <yaal/hconsole/console.hxx>
 
-M_VCSID( "$Id: "__ID__" $" )
+M_VCSID( "$Id: " __ID__ " $" )
 #include "galaxyd.hxx"
 
 #include "setup.hxx"

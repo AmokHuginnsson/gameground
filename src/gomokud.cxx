@@ -30,7 +30,7 @@ Copyright:
 #include <yaal/hcore/htokenizer.hxx>
 #include <yaal/tools/util.hxx>
 
-M_VCSID( "$Id: "__ID__" $" )
+M_VCSID( "$Id: " __ID__ " $" )
 #include "gomokud.hxx"
 
 #include "setup.hxx"
