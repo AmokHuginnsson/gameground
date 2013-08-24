@@ -143,7 +143,7 @@ HLogic::ptr_t HChat::get_chat( HServer* server_, HLogic::id_t const& id_, HStrin
 		throw HLogicException( "invalid chatters (bad count)" );
 	keyBufferSize += static_cast<int>( chatterNames->get_size() );
 	++ keyBufferSize;
-	HString key( keyBufferSize, true );
+	HString key( keyBufferSize, 0 );
 	for ( chatter_names_t::iterator it( chatterNames->begin() ), end( chatterNames->end() ); it != end; ++ it ) {
 		if ( ! key.is_empty() )
 			key += ':';
