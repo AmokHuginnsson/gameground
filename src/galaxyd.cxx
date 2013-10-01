@@ -185,8 +185,8 @@ HGalaxy::HGalaxy( HServer* server_, id_t const& id_, HString const& comment_, in
 	for ( ctr = 0; ctr < ( emperors_ + systems_ ); ctr ++ ) {
 		system = &_systems[ ctr ];
 		system->_id = ctr;
-		system->_coordinateX = random( _boardSize );
-		system->_coordinateY = random( _boardSize );
+		system->_coordinateX = static_cast<int>( random( _boardSize ) );
+		system->_coordinateY = static_cast<int>( random( _boardSize ) );
 		if ( ctr ) {
 			for ( ctrLoc = 0; ctrLoc < ctr; ctrLoc ++ )
 				if ( ( system->_coordinateX
@@ -201,7 +201,7 @@ HGalaxy::HGalaxy( HServer* server_, id_t const& id_, HString const& comment_, in
 		}
 	}
 	for ( ctr = 0; ctr < ( emperors_ + systems_ ); ctr ++ )
-		_systems[ ctr ]._production = _systems[ ctr ]._fleet = random( 16 );
+		_systems[ ctr ]._production = _systems[ ctr ]._fleet = static_cast<int>( random( 16 ) );
 	_handlers[ "play" ] = static_cast<handler_t>( &HGalaxy::handler_play );
 	_handlers[ "say" ] = static_cast<handler_t>( &HGalaxy::handler_message );
 	return;
@@ -304,7 +304,7 @@ int HGalaxy::assign_system( OClientInfo* clientInfo_ ) {
 	info._systems = 1;
 	int rivals = static_cast<int>( _emperors.size() );
 	HRandomizer rnd( randomizer_helper::make_randomizer() );
-	int motherSystem = rnd( _startupPlayers + _neutralSystemCount - rivals );
+	int motherSystem( static_cast<int>( rnd( _startupPlayers + _neutralSystemCount - rivals ) ) );
 	_emperors[ clientInfo_ ] = info;
 	ctr = 0;
 	for ( int i = 0; i < motherSystem; ++ i, ++ ctr )

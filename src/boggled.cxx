@@ -124,11 +124,12 @@ HBoggle::~HBoggle ( void ) {
 void HBoggle::generate_game( void ) {
 	M_PROLOG
 	HRandomizer rnd( randomizer_helper::make_randomizer() );
-	for ( int i = 0; i < boggle_data::BOGGLE::DICE_COUNT; ++ i )
+	for ( int i( 0 ); i < boggle_data::BOGGLE::DICE_COUNT; ++ i )
 		_game[ i ][ 0 ] = boggle_data::BOGGLE::UNINITIALIZED_SLOT;
-	for ( int i = 0; i < boggle_data::BOGGLE::DICE_COUNT; ++ i ) {
-		int k = 0, slot = rnd( boggle_data::BOGGLE::DICE_COUNT - i );
-		for ( int j = 0; j < slot; ++ j, ++ k )
+	for ( int i( 0 ); i < boggle_data::BOGGLE::DICE_COUNT; ++ i ) {
+		int k( 0 );
+		int slot( static_cast<int>( rnd( boggle_data::BOGGLE::DICE_COUNT - i ) ) );
+		for ( int j( 0 ); j < slot; ++ j, ++ k )
 			while ( _game[ k ][ 0 ] != boggle_data::BOGGLE::UNINITIALIZED_SLOT )
 				++ k;
 		while ( _game[ k ][ 0 ] != boggle_data::BOGGLE::UNINITIALIZED_SLOT )
