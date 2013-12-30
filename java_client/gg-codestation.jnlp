@@ -22,7 +22,7 @@
     <all-permissions/>
   </security>
   <resources>
-    <j2se version="1.6 1.5 1.4+" max-heap-size="150m"/>
+    <j2se version="1.7" max-heap-size="150m"/>
 		<jar href="./jar/gameground.jar" main="true"/>
     <!-- Needed for Apple system 10.4.11 or older. -->
     <property name="apple.awt.textantialiasing" value="on"/>

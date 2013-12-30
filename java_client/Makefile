@@ -30,7 +30,7 @@ $(ENVIRON): lib/jdom.jar lib/swixml.jar lib/commons-cli-1.1.jar lib/forms-1.1.0.
 	jar xf ../lib/swixml.jar; \
 	touch META-INF/info.xml
 
-$(TARGET): $(ENVIRON) $(CLASS) $(RES_DEST)
+$(TARGET): $(ENVIRON) $(CLASS) $(RES_DEST) manifest.mf
 	cd build; \
 	ls -1 *.class > class.list; \
 	jar cfm ../$(TARGET) ../manifest.mf res org com *.class class.list;

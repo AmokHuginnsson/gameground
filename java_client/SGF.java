@@ -7,21 +7,6 @@ import java.util.HashMap;
 import java.util.Collections;
 import java.util.Map;
 
-class SGFException extends Exception {
-	public static final long serialVersionUID = 17l;
-	int _code = 0;
-	public SGFException( String $message, int $code ) {
-		super( $message );
-		_code = $code;
-	}
-	public SGFException( String $message ) {
-		super( $message );
-	}
-	public String getMessage() {
-		return ( super.getMessage() + ": " + _code );
-	}
-}
-
 public class SGF {
 	public enum GAME_TYPE {
 		GO( 1 ),
@@ -104,6 +89,9 @@ public class SGF {
 		@Override public boolean equals( Object $coord ) {
 			Coord coord = (Coord)$coord;
 			return ( ( _data[0] == coord._data[0] ) && ( _data[1] == coord._data[1] ) );
+		}
+		@Override public int hashCode() {
+			return ( java.util.Arrays.hashCode( _data ) );
 		}
 	};
 	static final Coord PASS = new Coord( 0 - 'a', 0 - 'a' );
