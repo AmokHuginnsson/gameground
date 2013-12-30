@@ -57,11 +57,22 @@
 		<jar jarfile="${build}/${target}" basedir="${build}" excludes="${target}">
 			<manifest>
 				<attribute name="Main-Class" value="${project}" />
+				<attribute name="Codebase" value="http://codestation.org/ https://codestation.org/ http://localhost:8080/" />
+				<attribute name="Application-Name" value="${project} client" />
+				<attribute name="Permissions" value="all-permissions" />
+				<attribute name="Trusted-Only" value="true" />
 			</manifest>
 		</jar>
 	</target>
 
 	<target name="build" depends="compile,libs,uptodatecheck,dist" description="Build the application." />
+
+	<target name="sign" depends="build" description="Sign the application.">
+		<input message="Enter password for your keystore:" addproperty="keypass">
+			<handler classname="org.apache.tools.ant.input.SecureInputHandler" />
+		</input>
+		<signjar keystore="codestation.jks" storepass="${keypass}" jar="${build}/${target}" alias="codestation" />
+	</target>
 
 	<target name="clean" description="clean up">
 		<!-- Delete the ${build} and ${dist} directory trees -->
