@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Main-Class: GameGround
-Codebase: http://codestation.org/ https://codestation.org/ http://localhost:8080/
+Codebase: http://codestation.org/ https://codestation.org/ http://localhost:8080/ http://vegeta:8080/
 Application-Name: GameGround client
 Trusted-Only: true
 Permissions: all-permissions

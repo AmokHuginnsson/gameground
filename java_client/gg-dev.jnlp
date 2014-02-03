@@ -8,24 +8,24 @@
   <information>
     <title>GameGround client</title>
     <vendor>CodeStation.org</vendor>
-    <homepage href="http://codestation.org/"/>
+    <homepage href="http://codestation.org/" />
     <description>GameGround client Java Web Start</description>
     <description kind="short">GameGround client can connect to the CodeStation GameGround server.</description>
     <!--icon href="img/gg.png"/-->
-    <offline-allowed/>
+    <offline-allowed />
     <shortcut online="true">
-      <desktop/>
-      <menu submenu="GameGround client"/>
+      <desktop />
+      <menu submenu="GameGround client" />
     </shortcut>
   </information>
   <security>
-    <all-permissions/>
+    <all-permissions />
   </security>
   <resources>
-    <j2se version="1.6 1.5 1.4+" max-heap-size="150m"/>
-		<jar href="./jar/gameground.jar" main="true"/>
+    <j2se version="1.8 1.7" max-heap-size="150m" />
+		<jar href="./jar/gameground.jar" main="true" />
     <!-- Needed for Apple system 10.4.11 or older. -->
-    <property name="apple.awt.textantialiasing" value="on"/>
+    <property name="apple.awt.textantialiasing" value="on" />
   </resources>
   <application-desc main-class="GameGround" />
 </jnlp>
