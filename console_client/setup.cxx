@@ -58,7 +58,7 @@ void OSetup::test_setup( void ) {
 		yaal::tools::util::failure( 1,
 				_( "quiet and verbose options are exclusive\n" ) );
 	if ( _verbose )
-		clog.reset( make_pointer<HFile>( stdout ) );
+		clog.reset( make_pointer<HFile>( stdout, false ) );
 	else
 		std::clog.rdbuf( NULL );
 	if ( _quiet ) {
