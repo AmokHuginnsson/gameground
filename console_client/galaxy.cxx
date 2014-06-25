@@ -259,7 +259,7 @@ protected:
 	int distance( int, int );
 	virtual void do_refresh( void );
 	virtual int do_process_input( int );
-	virtual int do_click( mouse::OMouse& );
+	virtual bool do_click( mouse::OMouse& );
 	/*}*/
 private:
 	/*{*/
@@ -601,19 +601,21 @@ int HBoard::do_process_input( int code_ ) {
 	M_EPILOG
 }
 
-int HBoard::do_click( mouse::OMouse& mouse_ ) {
-	if ( ! HControl::do_click( mouse_ ) )
-		return ( 1 );
-	if ( ( mouse_._row > 1 )
-			&& ( mouse_._row < ( _boardSize + 2 ) )
-			&& ( mouse_._column > 1 )
-			&& ( mouse_._column < ( ( _boardSize * 3 ) + 2 ) ) ) {
-		_cursorY = mouse_._row - 2;
-		_cursorX = ( mouse_._column - 2 ) / 3;
-		_listener.on_show_system_info( get_sys_no( _cursorX, _cursorY ) );
-		schedule_refresh();
+bool HBoard::do_click( mouse::OMouse& mouse_ ) {
+	bool handled( HControl::do_click( mouse_ ) );
+	if ( ! handled ) {
+		if ( ( mouse_._row > 1 )
+				&& ( mouse_._row < ( _boardSize + 2 ) )
+				&& ( mouse_._column > 1 )
+				&& ( mouse_._column < ( ( _boardSize * 3 ) + 2 ) ) ) {
+			_cursorY = mouse_._row - 2;
+			_cursorX = ( mouse_._column - 2 ) / 3;
+			_listener.on_show_system_info( get_sys_no( _cursorX, _cursorY ) );
+			schedule_refresh();
+			handled = true;
+		}
 	}
-	return ( 0 );
+	return ( handled );
 }
 
 void HBoard::set_systems( systems_t* systems_ ) {
