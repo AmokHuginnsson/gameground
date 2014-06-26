@@ -361,7 +361,7 @@ private:
 	/*}*/
 };
 
-HString HClient::CLIENT_VERSION = "2";
+HString HClient::CLIENT_VERSION = "3";
 
 HSystem::HSystem( void )
 	: _coordinateX( -1 ), _coordinateY( -1 ),
@@ -749,7 +749,7 @@ int HGalaxyWindow::handler_enter( int code_, void const* ) {
 		if ( _messageInput->get_text().find_other_than( _whiteSpace_.data() ) >= 0 ) {
 			_varTmpBuffer = "cmd:";
 			_varTmpBuffer += _client->id();
-			_varTmpBuffer += ":glx:say:";
+			_varTmpBuffer += ":say:";
 			_varTmpBuffer += _messageInput->get_text();
 			_varTmpBuffer += "\n";
 			_client->send_message( _varTmpBuffer );
@@ -1065,23 +1065,48 @@ void HClient::handler_error( HString& message_ ) {
 	M_EPILOG
 }
 
+namespace {
+
+int find_color( HString const& message_, int offset_ ) {
+	int colorStartIndex = -1;
+	int start = offset_;
+	int length = static_cast<int>( message_.get_length() );
+	while ( start < length ) {
+		start = static_cast<int>( message_.find( '$', start ) );
+		if ( start < 0 )
+			break;
+		int color = start + 1;
+		while ( ( color < length ) && is_digit( message_[color] ) )
+			++ color;
+		if ( ( color < length ) && ( message_[ color ] == ';' ) ) {
+			colorStartIndex = start;
+			break;
+		}
+		start = color;
+	}
+	return ( colorStartIndex );
+}
+
+}
+
 void HClient::handler_msg( HString& message_ ) {
 	M_PROLOG
-	int index = 0, offset = 0;
-	int length = static_cast<int>( message_.get_length() );
+	int index( 0 );
+	int length( static_cast<int>( message_.get_length() ) );
 	HString part;
 	while ( index < length ) {
-		offset = static_cast<int>( message_.find( ';', index ) );
-		if ( offset < 0 )
-			offset = length;
-		part = message_.mid( index, offset - index );
-		if ( part.is_empty() )
+		int color( find_color( message_, index ) );
+		if ( color > index ) {
+			_window->_logPad->add( message_.substr( index, color - index ) );
+		}
+		if ( color >= 0 ) {
+			int colorEnd( static_cast<int>( message_.find( ';', color ) ) );
+			_window->_logPad->add( _colors_[ lexical_cast<int>( message_.substr( color + 1, colorEnd - color ) ) ] );
+			index = colorEnd + 1;
+		} else {
+			_window->_logPad->add( message_.substr( index ) );
 			break;
-		if ( part[ 0 ] == '$' ) /* color */
-			_window->_logPad->add( _colors_[ lexical_cast<int> ( part.mid( 1 ) ) ] );
-		else /* text */
-			_window->_logPad->add( part );
-		index = offset + 1;
+		}
 	}
 	_window->_logPad->add( "\n" );
 	_window->_logPad->add( COLORS::ATTR_NORMAL );

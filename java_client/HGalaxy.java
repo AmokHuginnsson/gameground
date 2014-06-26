@@ -169,7 +169,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		}
 		public void onMessage() {
 			String msg = _messageInput.getText();
-			if ( msg.matches( ".*\\S+.*" ) ) {	
+			if ( msg.matches( ".*\\S+.*" ) ) {
 				_client.println( "cmd:" + _id + ":say:" + msg );
 				_messageInput.setText( "" );
 			}

@@ -1,7 +1,7 @@
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
 import java.awt.Color;
-import javax.swing.text.SimpleAttributeSet; 
+import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.DefaultStyledDocument;
 
