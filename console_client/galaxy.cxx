@@ -257,7 +257,7 @@ protected:
 	/*{*/
 	int get_sys_no( int, int );
 	int distance( int, int );
-	virtual void do_refresh( void );
+	virtual void do_paint( void );
 	virtual int do_process_input( int );
 	virtual bool do_click( mouse::OMouse& );
 	/*}*/
@@ -298,9 +298,9 @@ public:
 	/*}*/
 protected:
 	/*{*/
-	int handler_enter( int, void const* );
-	int handler_esc( int, void const* );
-	int handler_space( int, void const* );
+	bool handler_enter( hconsole::HEvent const& );
+	bool handler_esc( hconsole::HEvent const& );
+	bool handler_space( hconsole::HEvent const& );
 	virtual void on_show_system_info( int );
 	virtual void make_move( int, int );
 	virtual void msg( int, char const * const );
@@ -447,7 +447,7 @@ HBoard::~HBoard( void ) {
 	M_EPILOG
 }
 
-void HBoard::do_refresh( void ) {
+void HBoard::do_paint( void ) {
 	M_PROLOG
 	int round( _listener.get_round() );
 	client_state_t state( _listener.get_state() );
@@ -594,7 +594,7 @@ int HBoard::do_process_input( int code_ ) {
 		if ( ! code ) {
 			sysNo = get_sys_no( _cursorX, _cursorY );
 			_listener.on_show_system_info( sysNo );
-			schedule_refresh();
+			schedule_repaint();
 		}
 	}
 	return ( code );
@@ -611,7 +611,7 @@ bool HBoard::do_click( mouse::OMouse& mouse_ ) {
 			_cursorY = mouse_._row - 2;
 			_cursorX = ( mouse_._column - 2 ) / 3;
 			_listener.on_show_system_info( get_sys_no( _cursorX, _cursorY ) );
-			schedule_refresh();
+			schedule_repaint();
 			handled = true;
 		}
 	}
@@ -686,9 +686,9 @@ int HGalaxyWindow::init( void ) {
 	_messageInput = new HEditControl( this, - 4, 64, 1, - 1, " &Message \n", 255, "", _maskLoose_ );
 	_logPad->enable( true );
 	_messageInput->enable( true );
-	register_postprocess_handler( '\r', NULL, &HGalaxyWindow::handler_enter );
-	register_postprocess_handler( KEY_CODES::ESC, NULL, &HGalaxyWindow::handler_esc );
-	register_postprocess_handler( ' ', NULL, &HGalaxyWindow::handler_space );
+	register_postprocess_handler( '\r', NULL, call( &HGalaxyWindow::handler_enter, this, _1 ) );
+	register_postprocess_handler( KEY_CODES::ESC, NULL, call( &HGalaxyWindow::handler_esc, this, _1 ) );
+	register_postprocess_handler( ' ', NULL, call( &HGalaxyWindow::handler_space, this, _1 ) );
 	return ( 0 );
 	M_EPILOG
 }
@@ -737,13 +737,14 @@ void HGalaxyWindow::make_move( int sourceSystem_, int destinationSystem_ ) {
 		_fleet->enable( true );
 		_fleet->set_focus();
 	} else
-		handler_esc( 0, NULL );
+		handler_esc( HKeyPressEvent( 27 ) );
 	return;
 	M_EPILOG
 }
 
-int HGalaxyWindow::handler_enter( int code_, void const* ) {
+bool HGalaxyWindow::handler_enter( hconsole::HEvent const& ) {
 	M_PROLOG
+	bool consumed( false );
 	HMove* move( NULL );
 	if ( (*_focusedChild) == _messageInput ) {
 		if ( _messageInput->get_text().find_other_than( _whiteSpace_.data() ) >= 0 ) {
@@ -755,7 +756,7 @@ int HGalaxyWindow::handler_enter( int code_, void const* ) {
 			_client->send_message( _varTmpBuffer );
 			_messageInput->set_text( "" );
 		}
-		code_ = 0;
+		consumed = true;
 	} else if ( _state == INPUT ) {
 		if ( (*_focusedChild) == _fleet ) {
 			int fleet( lexical_cast<int>( _fleet->get_text() ) );
@@ -775,17 +776,17 @@ int HGalaxyWindow::handler_enter( int code_, void const* ) {
 				_statusBar->message( COLORS::FG_RED, "Not enough resources!" );
 			else
 				_statusBar->message( COLORS::FG_RED, "Run! Run! Emperor is mad!" );
-			code_ = 0;
+			consumed = true;
 		}
 	} else if ( _state == LOCKED ) {
 		_statusBar->message( COLORS::FG_RED, _round >= 0 ? "Wait for new round!" : "Challange not started yet!" );
-		code_ = 0;
+		consumed = true;
 	}
-	return ( code_ );
+	return ( consumed );
 	M_EPILOG
 }
 
-int HGalaxyWindow::handler_esc( int, void const* ) {
+bool HGalaxyWindow::handler_esc( hconsole::HEvent const& ) {
 	M_PROLOG
 	if ( _state == INPUT ) {
 		_fleet->enable( false );
@@ -795,12 +796,12 @@ int HGalaxyWindow::handler_esc( int, void const* ) {
 		set_state( SELECT );
 	} else if ( _state == SELECT )
 		set_state( NORMAL );
-	schedule_refresh();
+	schedule_repaint( false );
 	return ( 0 );
 	M_EPILOG
 }
 
-int HGalaxyWindow::handler_space( int, void const* ) {
+bool HGalaxyWindow::handler_space( hconsole::HEvent const& ) {
 	M_PROLOG
 	if ( _state == NORMAL )
 		_client->end_round();
@@ -885,7 +886,7 @@ void HClient::handler_message( int ) {
 			process_command( message );
 	} else if ( msgLength < 0 )
 		_dispatcher.stop();
-	refresh();
+	repaint();
 	return;
 	M_EPILOG
 }
@@ -961,7 +962,7 @@ void HClient::handler_setup( HString& command_ ) {
 		if ( _emperors[ index ] == setup._login )
 			_color = index;
 	} else if ( variable == "ok" ) {
-		_window->schedule_refresh();
+		_window->schedule_repaint( false );
 		_window->set_state( NORMAL );
 		_round = 0;
 	}
@@ -1051,7 +1052,7 @@ void HClient::handler_play( HString& command_ ) {
 		_window->_logPad->add( " -----\n" );
 		_window->_logPad->add( COLORS::ATTR_NORMAL );
 		_window->set_state( NORMAL );
-		_window->schedule_refresh();
+		_window->schedule_repaint( false );
 	}
 	return;
 	M_EPILOG
