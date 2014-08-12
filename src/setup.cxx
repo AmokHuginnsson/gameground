@@ -62,32 +62,40 @@ HStreamInterface& operator << ( HStreamInterface& stream, now_t const& ) {
 
 void OSetup::test_setup( void ) {
 	M_PROLOG
-	if ( _quiet && _verbose )
+	if ( _quiet && _verbose ) {
 		yaal::tools::util::failure( 1,
 				_( "quiet and verbose options are exclusive\n" ) );
-	if ( _verbose )
-		clog.reset( make_pointer<HFile>( stdout, false ) );
-	else
+	}
+	if ( _verbose ) {
+		clog.reset( make_pointer<HFile>( stdout, HFile::OWNERSHIP::EXTERNAL ) );
+	} else {
 		std::clog.rdbuf( NULL );
+	}
 	if ( _quiet ) {
 		cout.reset();
 		std::cout.rdbuf( NULL );
 	}
-	if ( _maxConnections < 2 )
+	if ( _maxConnections < 2 ) {
 		yaal::tools::util::failure ( 3,
 				_( "this server hosts multiplayer games only\n" ) );
-	if ( _port < 1024 )
+	}
+	if ( _port < 1024 ) {
 		yaal::tools::util::failure ( 5,
 				_( "galaxy cannot run on restricted ports\n" ) );
+	}
 	char* message( NULL );
-	if ( test_glx_emperors( _emperors, message ) )
+	if ( test_glx_emperors( _emperors, message ) ) {
 		yaal::tools::util::failure( 4, "%s", message );
-	if ( test_glx_board_size( _boardSize, message ) )
+	}
+	if ( test_glx_board_size( _boardSize, message ) ) {
 		yaal::tools::util::failure( 8, "%s", message );
-	if ( test_glx_emperors_systems( _emperors, _systems, message ) )
+	}
+	if ( test_glx_emperors_systems( _emperors, _systems, message ) ) {
 		yaal::tools::util::failure( 9, "%s", message );
-	if ( test_glx_systems( _systems, message ) )
+	}
+	if ( test_glx_systems( _systems, message ) ) {
 		yaal::tools::util::failure( 10, "%s", message );
+	}
 	HDataBase::ptr_t db = HDataBase::get_connector();
 	db->connect( setup._databasePath, setup._databaseLogin, setup._databasePassword );
 	return;

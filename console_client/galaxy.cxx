@@ -39,7 +39,7 @@ Copyright:
 #include <yaal/hconsole/console.hxx>
 #include <yaal/hconsole/htuiprocess.hxx>
 #include <yaal/hconsole/hwindow.hxx>
-#include <yaal/hconsole/heditcontrol.hxx>
+#include <yaal/hconsole/heditwidget.hxx>
 #include <yaal/hconsole/hlogpad.hxx>
 
 M_VCSID( "$Id: " __ID__ " $" )
@@ -236,7 +236,7 @@ public:
 	/*}*/
 };
 
-class HBoard : public HControl {
+class HBoard : public HWidget {
 protected:
 	/*{*/
 	int _cursorY;
@@ -276,11 +276,11 @@ protected:
 	/*{*/
 	HString _varTmpBuffer;
 	HBoard* _board;
-	HEditControl* _systemName;
-	HEditControl* _emperorName;
-	HEditControl* _production;
-	HEditControl* _fleet;
-	HEditControl* _messageInput;
+	HEditWidget* _systemName;
+	HEditWidget* _emperorName;
+	HEditWidget* _production;
+	HEditWidget* _fleet;
+	HEditWidget* _messageInput;
 	HLogPad* _logPad;
 	HClient* _client;
 	systems_t* _systems;
@@ -432,7 +432,7 @@ void HEventListener::set_state( client_state_t state_ ) {
 }
 
 HBoard::HBoard( HWindow * parent_, HEventListener & listener_ )
-	: HControl( parent_, 0, 1, 0, 0, "&galaxy\n" ),
+	: HWidget( parent_, 0, 1, 0, 0, "&galaxy\n" ),
 	_cursorY ( 0 ), _cursorX ( 0 ), _boardSize( - 1 ),
 	_sourceSystem( - 1 ), _destinationSystem( - 1 ),
 	_systems( NULL ), _listener( listener_ ) {
@@ -524,7 +524,7 @@ int HBoard::do_process_input( int code_ ) {
 	M_PROLOG
 	int code = 0, sysNo = - 1;
 	client_state_t state = _listener.get_state();
-	code_ = HControl::do_process_input( code_ );
+	code_ = HWidget::do_process_input( code_ );
 	if ( state == LOCKED )
 		return ( code_ == '\t' ? '\t' : '\r' );
 	if ( _boardSize >= 0 ) {
@@ -602,7 +602,7 @@ int HBoard::do_process_input( int code_ ) {
 }
 
 bool HBoard::do_click( mouse::OMouse& mouse_ ) {
-	bool handled( HControl::do_click( mouse_ ) );
+	bool handled( HWidget::do_click( mouse_ ) );
 	if ( ! handled ) {
 		if ( ( mouse_._row > 1 )
 				&& ( mouse_._row < ( _boardSize + 2 ) )
@@ -678,12 +678,14 @@ int HGalaxyWindow::init( void ) {
 	_board->enable( true );
 	_board->set_focus();
 	_board->set_systems( _systems );
-	_systemName = new HEditControl( this, 1, 64, 1, 16, " System name \n", 64, "", _maskExtended_ );
-	_emperorName = new HEditControl( this, 4, 64, 1, 16, " Emperor \n", 64, "", _maskExtended_ );
-	_production = new HEditControl( this, 7, 64, 1, 7, "Product\n", 6, "", _maskDigits_ );
-	_fleet = new HEditControl( this, 7, 72, 1, 7, "Fleet\n", 6, "", _maskDigits_ );
-	_logPad = new HLogPad( this, 10, 64, - 5, - 1, " Event &log \n" );
-	_messageInput = new HEditControl( this, - 4, 64, 1, - 1, " &Message \n", 255, "", _maskLoose_ );
+	HEditWidgetAttributes wa;
+	wa.label_decoration( HWidget::LABEL::DECORATION::AUTO ).label_position( HWidget::LABEL::POSITION::STACKED );
+	_systemName = new HEditWidget( this, 1, 64, 1, 16, "System name", wa.pattern( _maskExtended_ ).max_string_size( 64 ) );
+	_emperorName = new HEditWidget( this, 4, 64, 1, 16, "Emperor", wa.pattern( _maskExtended_ ).max_string_size( 64 ) );
+	_production = new HEditWidget( this, 7, 64, 1, 7, "Product", wa.pattern( _maskDigits_ ).max_string_size( 6 ) );
+	_fleet = new HEditWidget( this, 7, 72, 1, 7, "Fleet", wa.pattern( _maskDigits_ ).max_string_size( 6 ) );
+	_logPad = new HLogPad( this, 10, 64, - 5, - 1, "Event &log", wa );
+	_messageInput = new HEditWidget( this, - 4, 64, 1, - 1, "&Message", wa.pattern( _maskLoose_ ).max_string_size( 255 ) );
 	_logPad->enable( true );
 	_messageInput->enable( true );
 	register_postprocess_handler( '\r', NULL, call( &HGalaxyWindow::handler_enter, this, _1 ) );
