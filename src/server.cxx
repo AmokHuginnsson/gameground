@@ -347,14 +347,14 @@ void HServer::handle_login( OClientInfo& client_, HString const& loginInfo_ ) {
 		else if ( _logins.count( login ) > 0 )
 			*client_._socket << "err:" << login << " already logged in." << endl;
 		else {
-			HRecordSet::ptr_t rs( _db->query( ( HFormat( "SELECT ( SELECT COUNT(*) FROM v_user_session WHERE login = LOWER('%s') AND password = LOWER('%s') )"
+			HRecordSet::ptr_t rs( _db->execute_query( ( HFormat( "SELECT ( SELECT COUNT(*) FROM v_user_session WHERE login = LOWER('%s') AND password = LOWER('%s') )"
 							" + ( SELECT COUNT(*) FROM v_user_session WHERE login = LOWER('%s') ), ( SELECT setup FROM v_user_session WHERE login = LOWER('%s') );" )
 							% login % password % login % login ).string() ) );
 			M_ENSURE( !! rs );
 			HRecordSet::iterator row = rs->begin();
 			if ( row == rs->end() ) {
 				out << _db->get_error() << endl;
-				M_ENSURE( ! "database query error" );
+				M_ENSURE( ! "database execute_query error" );
 			}
 			int result( lexical_cast<int>( *row[0] ) );
 			if ( ( result == 2 ) || ( result == 0 ) ) {
@@ -366,7 +366,7 @@ void HServer::handle_login( OClientInfo& client_, HString const& loginInfo_ ) {
 					if ( clientSetup && ! clientSetup->is_empty() )
 						*client_._socket << PROTOCOL::CLIENT_SETUP << PROTOCOL::SEP << *clientSetup << endl;
 				} else if ( password != NULL_PASS ) {
-					rs = _db->query( ( HFormat( "INSERT INTO v_user_session ( login, password ) VALUES ( LOWER('%s'), LOWER('%s') );" ) % login % password ).string() );
+					rs = _db->execute_query( ( HFormat( "INSERT INTO v_user_session ( login, password ) VALUES ( LOWER('%s'), LOWER('%s') );" ) % login % password ).string() );
 					M_ENSURE( !! rs );
 				} else {
 					client_._anonymous = true;
@@ -418,7 +418,7 @@ void HServer::handle_account( OClientInfo& client_, HString const& accountInfo_ 
 		bool newPasswordNull( newPassword == NULL_PASS );
 		bool newPasswordRepeatNull( newPasswordRepeat == NULL_PASS );
 		if ( oldPasswordNull && newPasswordNull && newPasswordRepeatNull ) {
-			HRecordSet::ptr_t rs( _db->query( ( HFormat( "UPDATE tbl_user SET name = '%s', email = '%s', description = '%s', setup = '%s' WHERE login = LOWER('%s');" )
+			HRecordSet::ptr_t rs( _db->execute_query( ( HFormat( "UPDATE tbl_user SET name = '%s', email = '%s', description = '%s', setup = '%s' WHERE login = LOWER('%s');" )
 							% escape_copy( name, _escapeTable_ ) % escape_copy( email, _escapeTable_ ) % escape_copy( description, _escapeTable_ )
 							% escape_copy( clientSetup, _escapeTable_ ) % client_._login ).string() ) );
 			M_ENSURE( !! rs );
@@ -428,7 +428,7 @@ void HServer::handle_account( OClientInfo& client_, HString const& accountInfo_ 
 					if ( ! ( is_sha1( newPassword ) && is_sha1( oldPassword ) ) )
 						kick_client( client_._socket, _msgYourClientIsTainted_ );
 					else {
-						HRecordSet::ptr_t rs( _db->query( ( HFormat( "UPDATE tbl_user SET name = '%s', email = '%s', description = '%s', setup = '%s', password = '%s'"
+						HRecordSet::ptr_t rs( _db->execute_query( ( HFormat( "UPDATE tbl_user SET name = '%s', email = '%s', description = '%s', setup = '%s', password = '%s'"
 											" WHERE login = LOWER('%s') AND password = LOWER('%s');" )
 										% escape_copy( name, _escapeTable_ ) % escape_copy( email, _escapeTable_ ) % escape_copy( description, _escapeTable_ )
 										% escape_copy( clientSetup, _escapeTable_ ) % newPassword % client_._login % oldPassword ).string() ) );
@@ -665,7 +665,7 @@ void HServer::handle_get_account( OClientInfo& client_, HString const& login_ ) 
 		HString const& login( accountSelf ? client_._login : login_ );
 		char const accountQuerySelf[] = "SELECT name, description, email, setup FROM tbl_user WHERE login = LOWER('";
 		char const accountQueryOther[] = "SELECT name, description FROM tbl_user WHERE login = LOWER('";
-		HRecordSet::ptr_t rs( _db->query( _out << ( accountSelf ? accountQuerySelf : accountQueryOther ) << login << "');" << _out ) );
+		HRecordSet::ptr_t rs( _db->execute_query( _out << ( accountSelf ? accountQuerySelf : accountQueryOther ) << login << "');" << _out ) );
 		M_ENSURE( !! rs );
 		HRecordSet::iterator row( rs->begin() );
 		if ( row != rs->end() ) {
@@ -759,7 +759,7 @@ void HServer::send_partys_info( OClientInfo& client_ ) {
 
 void HServer::update_last_activity( OClientInfo const& info_ ) {
 	M_PROLOG
-	HRecordSet::ptr_t rs( _db->query(
+	HRecordSet::ptr_t rs( _db->execute_query(
 		( HFormat(
 				"UPDATE v_user_session SET last_activity = datetime('now', 'localtime') WHERE login = LOWER('%s');"
 		) % info_._login ).string() ) );
