@@ -503,7 +503,7 @@ public class SGF {
 			_place = singleValue;
 		else if ( "RE".equals( _cachePropIdent ) ) {
 			if ( Character.isDigit( singleValue.charAt( 2 ) ) )
-				_result = Integer.parseInt( singleValue.substring( 2 ) );
+				_result = (int)Double.parseDouble( singleValue.substring( 2 ) );
 			else {
 				char r = Character.toUpperCase( singleValue.charAt( 2 ) );
 				if ( r == 'R' )
@@ -538,9 +538,9 @@ public class SGF {
 			else
 				_comment += singleValue;
 		} else if ( ( ( _currentMove != null ) && ( _currentMove != _tree.getRoot() ) ) && ( "BL".equals( _cachePropIdent ) || "WL".equals( _cachePropIdent ) ) )
-			_currentMove.value().setTime( Integer.parseInt( singleValue ) );
+			_currentMove.value().setTime( (int)Double.parseDouble( singleValue ) );
 		else if ( ( ( _currentMove != null ) && ( _currentMove != _tree.getRoot() ) ) && ( "OB".equals( _cachePropIdent ) || "OW".equals( _cachePropIdent ) ) )
-			_currentMove.value().setTime( -Integer.parseInt( singleValue ) );
+			_currentMove.value().setTime( (int)-Double.parseDouble( singleValue ) );
 		else
 			System.out.println( "property: `" + _cachePropIdent + "' = `" + singleValue + "'" );
 		return;
