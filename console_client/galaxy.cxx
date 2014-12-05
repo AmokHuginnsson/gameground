@@ -47,9 +47,9 @@ M_VCSID( "$Id: " __ID__ " $" )
 
 #include "setup.hxx"
 
-#define ATTR_BOARD	 				( COLORS::FG_CYAN | COLORS::BG_BLACK )
-#define ATTR_NEUTRAL_SYSTEM	( COLORS::FG_LIGHTGRAY | COLORS::BG_BLACK )
-#define ATTR_CURSOR  				( COLORS::FG_WHITE | COLORS::BG_BLACK )
+#define ATTR_BOARD           ( COLORS::FG_CYAN | COLORS::BG_BLACK )
+#define ATTR_NEUTRAL_SYSTEM  ( COLORS::FG_LIGHTGRAY | COLORS::BG_BLACK )
+#define ATTR_CURSOR          ( COLORS::FG_WHITE | COLORS::BG_BLACK )
 
 using namespace std;
 using namespace yaal;
@@ -689,7 +689,7 @@ int HGalaxyWindow::init( void ) {
 	_logPad->enable( true );
 	_messageInput->enable( true );
 	register_postprocess_handler( '\r', NULL, call( &HGalaxyWindow::handler_enter, this, _1 ) );
-	register_postprocess_handler( KEY_CODES::ESC, NULL, call( &HGalaxyWindow::handler_esc, this, _1 ) );
+	register_postprocess_handler( KEY_CODES::ESCAPE, NULL, call( &HGalaxyWindow::handler_esc, this, _1 ) );
 	register_postprocess_handler( ' ', NULL, call( &HGalaxyWindow::handler_space, this, _1 ) );
 	return ( 0 );
 	M_EPILOG
