@@ -31,7 +31,7 @@ Copyright:
 #include <yaal/tools/hash.hxx>
 #include <yaal/tools/util.hxx>
 #include <yaal/tools/streamtools.hxx>
-#include <yaal/hconsole/ansi.hxx>
+#include <yaal/tools/ansi.hxx>
 #include <yaal/hconsole/console.hxx>
 
 M_VCSID( "$Id: " __ID__ " $" )

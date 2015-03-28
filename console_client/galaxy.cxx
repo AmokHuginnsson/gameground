@@ -680,12 +680,12 @@ int HGalaxyWindow::init( void ) {
 	_board->set_systems( _systems );
 	HEditWidgetAttributes wa;
 	wa.label_decoration( HWidget::LABEL::DECORATION::AUTO ).label_position( HWidget::LABEL::POSITION::STACKED );
-	_systemName = new HEditWidget( this, 1, 64, 1, 16, "System name", wa.pattern( _maskExtended_ ).max_string_size( 64 ) );
-	_emperorName = new HEditWidget( this, 4, 64, 1, 16, "Emperor", wa.pattern( _maskExtended_ ).max_string_size( 64 ) );
-	_production = new HEditWidget( this, 7, 64, 1, 7, "Product", wa.pattern( _maskDigits_ ).max_string_size( 6 ) );
-	_fleet = new HEditWidget( this, 7, 72, 1, 7, "Fleet", wa.pattern( _maskDigits_ ).max_string_size( 6 ) );
+	_systemName = new HEditWidget( this, 1, 64, 1, 16, "System name", wa.mask( _maskExtended_ ).max_string_size( 64 ) );
+	_emperorName = new HEditWidget( this, 4, 64, 1, 16, "Emperor", wa.mask( _maskExtended_ ).max_string_size( 64 ) );
+	_production = new HEditWidget( this, 7, 64, 1, 7, "Product", wa.mask( _maskDigits_ ).max_string_size( 6 ) );
+	_fleet = new HEditWidget( this, 7, 72, 1, 7, "Fleet", wa.mask( _maskDigits_ ).max_string_size( 6 ) );
 	_logPad = new HLogPad( this, 10, 64, - 5, - 1, "Event &log", wa );
-	_messageInput = new HEditWidget( this, - 4, 64, 1, - 1, "&Message", wa.pattern( _maskLoose_ ).max_string_size( 255 ) );
+	_messageInput = new HEditWidget( this, - 4, 64, 1, - 1, "&Message", wa.mask( _maskLoose_ ).max_string_size( 255 ) );
 	_logPad->enable( true );
 	_messageInput->enable( true );
 	register_postprocess_handler( '\r', NULL, call( &HGalaxyWindow::handler_enter, this, _1 ) );
