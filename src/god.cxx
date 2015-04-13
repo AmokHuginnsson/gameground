@@ -1,7 +1,7 @@
 /*
 ---           `gameground' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski            ---
 
-	god.cxx - this file is integral part of `gameground' project.
+  god.cxx - this file is integral part of `gameground' project.
 
   i.  You may not make any changes in Copyright information.
   ii. You must attach Copyright information to any part of every copy
@@ -30,7 +30,6 @@ Copyright:
 #include <yaal/hcore/hfile.hxx>
 #include <yaal/hcore/htokenizer.hxx>
 #include <yaal/tools/util.hxx>
-#include <yaal/tools/hasynccaller.hxx>
 #include <yaal/tools/hscheduledasynccaller.hxx>
 
 M_VCSID( "$Id: " __ID__ " $" )
@@ -847,13 +846,6 @@ yaal::hcore::HString HGo::do_get_info( void ) const {
 	return ( HString( "go," ) + get_comment() + "," + _gobanSize + "," + _komi + "," + _handicaps + "," + _mainTime + "," + _byoYomiPeriods + "," + _byoYomiTime );
 }
 
-void HGo::reschedule_timeout( void ) {
-	M_PROLOG
-	HAsyncCaller::get_instance().register_call( 0, call( &HGo::schedule_timeout, this ) );
-	return;
-	M_EPILOG
-}
-
 void HGo::schedule_timeout( void ) {
 	M_PROLOG
 	++ _move;
@@ -881,7 +873,7 @@ void HGo::on_timeout( void ) {
 		after_move();
 	} else {
 		p._timeLeft = _byoYomiTime;
-		reschedule_timeout();
+		schedule_timeout();
 		send_contestants();
 	}
 	return;
@@ -1147,7 +1139,7 @@ bool HGo::is_suicide( int x, int y, STONE::stone_t stone ) {
 	clear_goban( false );
 	goban( x, y ) = STONE::NONE;
 	return ( suicide );
-}	
+}
 
 void HGo::ensure_coordinates_validity( int x, int y ) {
 	if ( ( x < 0 ) || ( x > ( _gobanSize - 1 ) )
@@ -1167,7 +1159,7 @@ void HGo::make_move( int x, int y ) {
 			clear_goban( false );
 			throw HLogicException( "suicides forbidden" );
 		}
-	}	
+	}
 	goban( x, y ) = _toMove;
 	if ( is_ko() )
 		throw HLogicException( "forbidden by ko rule" );
@@ -1323,7 +1315,6 @@ void HGo::update_clocks( void ) {
 
 void HGo::revoke_scheduled_tasks( void ) {
 	M_PROLOG
-	HAsyncCaller::get_instance().flush( this );
 	HScheduledAsyncCaller::get_instance().flush( this );
 	return;
 	M_EPILOG

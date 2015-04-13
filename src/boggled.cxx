@@ -1,7 +1,7 @@
 /*
 ---           `gameground' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski            ---
 
-	boggled.cxx - this file is integral part of `gameground' project.
+  boggled.cxx - this file is integral part of `gameground' project.
 
   i.  You may not make any changes in Copyright information.
   ii. You must attach Copyright information to any part of every copy
@@ -27,7 +27,6 @@ Copyright:
 #include <yaal/hcore/macro.hxx>
 #include <yaal/hcore/hfile.hxx>
 #include <yaal/hcore/htokenizer.hxx>
-#include <yaal/tools/hasynccaller.hxx>
 #include <yaal/tools/hscheduledasynccaller.hxx>
 
 M_VCSID( "$Id: " __ID__ " $" )
@@ -115,7 +114,6 @@ HBoggle::HBoggle( HServer* server_, id_t const& id_, HString const& comment_, SC
 
 HBoggle::~HBoggle ( void ) {
 	M_PROLOG
-	HAsyncCaller::get_instance().flush( this );
 	HScheduledAsyncCaller::get_instance().flush( this );
 	return;
 	M_EPILOG
@@ -267,17 +265,6 @@ yaal::hcore::HString HBoggle::do_get_info() const {
 	return ( HString( "bgl," ) + get_comment() + "," + _startupPlayers + "," + _roundTime + "," + _maxRounds + "," + _interRoundDelay );
 }
 
-void HBoggle::schedule( EVENT::event_t event_ ) {
-	M_PROLOG
-	HLock l( _mutex );
-	if ( event_ == EVENT::BEGIN_ROUND )
-		HScheduledAsyncCaller::get_instance().register_call( time( NULL ) + _interRoundDelay, call( &HBoggle::on_begin_round, this ) );
-	else
-		schedule_end_round();
-	return;
-	M_EPILOG
-}
-
 void HBoggle::schedule_end_round( void ) {
 	M_PROLOG
 	++ _round;
@@ -293,7 +280,7 @@ void HBoggle::on_begin_round( void ) {
 	M_PROLOG
 	HLock l( _mutex );
 	out << "<<begin>>" << endl;
-	HAsyncCaller::get_instance().register_call( 0, call( &HBoggle::schedule, this, EVENT::END_ROUND ) );
+	schedule_end_round();
 	broadcast(
 			_out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< "New round started, you have got " << _roundTime
@@ -310,7 +297,7 @@ void HBoggle::on_end_round( void ) {
 	out << "<<end>>" << endl;
 	_state = STATE::LOCKED;
 	if ( _round < _maxRounds ) {
-		HAsyncCaller::get_instance().register_call( 0, call( &HBoggle::schedule, this, EVENT::BEGIN_ROUND ) );
+		HScheduledAsyncCaller::get_instance().register_call( time( NULL ) + _interRoundDelay, call( &HBoggle::on_begin_round, this ) );
 		_out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< "This round has ended, next round in " << _interRoundDelay << " seconds!" << endl;
 	} else

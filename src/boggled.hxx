@@ -51,12 +51,6 @@ private:
 			ACCEPTING
 		} state_t;
 	};
-	struct EVENT {
-		typedef enum {
-			BEGIN_ROUND,
-			END_ROUND
-		} event_t;
-	};
 public:
 	struct SCORING {
 		typedef enum {
@@ -113,7 +107,6 @@ protected:
 	void handler_play( OClientInfo*, yaal::hcore::HString const& );
 	void on_begin_round( void );
 	void on_end_round( void );
-	void schedule( EVENT::event_t );
 	void schedule_end_round( void );
 	bool word_is_good( yaal::hcore::HString const&, int );
 	bool is_good( int, char const*, int );

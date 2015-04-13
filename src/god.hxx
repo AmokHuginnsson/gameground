@@ -144,7 +144,6 @@ protected:
 	void handler_setup( OClientInfo*, yaal::hcore::HString const& );
 	void on_timeout( void );
 	void schedule_timeout( void );
-	void reschedule_timeout( void );
 	void reset_goban( bool );
 	void set_handicaps( int );
 	void put_handicap_stones( int, bool );
