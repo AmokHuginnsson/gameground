@@ -268,7 +268,7 @@ yaal::hcore::HString HBoggle::do_get_info() const {
 void HBoggle::schedule_end_round( void ) {
 	M_PROLOG
 	++ _round;
-	HScheduledAsyncCaller::get_instance().register_call( time( NULL ) + _roundTime, call( &HBoggle::on_end_round, this ) );
+	HScheduledAsyncCaller::get_instance().call_in( time::duration( _roundTime, time::UNIT::SECOND ), call( &HBoggle::on_end_round, this ) );
 	generate_game();
 	_state = STATE::ACCEPTING;
 	broadcast( _out << PROTOCOL::DECK << PROTOCOL::SEP << serialize_deck() << endl << _out );
@@ -297,7 +297,7 @@ void HBoggle::on_end_round( void ) {
 	out << "<<end>>" << endl;
 	_state = STATE::LOCKED;
 	if ( _round < _maxRounds ) {
-		HScheduledAsyncCaller::get_instance().register_call( time( NULL ) + _interRoundDelay, call( &HBoggle::on_begin_round, this ) );
+		HScheduledAsyncCaller::get_instance().call_in( duration( _interRoundDelay, time::UNIT::SECOND ), call( &HBoggle::on_begin_round, this ) );
 		_out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< "This round has ended, next round in " << _interRoundDelay << " seconds!" << endl;
 	} else

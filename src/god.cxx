@@ -363,7 +363,7 @@ void HGo::handler_put_stone( OClientInfo* clientInfo_, HString const& message_ )
 		throw HLogicException( GO_MSG[GO_MSG_MALFORMED] );
 	}
 	make_move( col, row );
-	_sgf.move( SGF::Coord( col, row ), player._timeLeft - static_cast<int>( time( NULL ) - _start ) );
+	_sgf.move( SGF::Coord( col, row ), player._timeLeft - static_cast<int>( ::time( nullptr ) - _start ) );
 	_out << PROTOCOL::MOVE << PROTOCOL::SEP << message_ << endl;
 	broadcast( _out.consume() );
 	return;
@@ -852,7 +852,7 @@ void HGo::schedule_timeout( void ) {
 	OPlayerInfo& p( contestant( _toMove ) );
 	if ( p._byoYomiPeriods < _byoYomiPeriods )
 		p._timeLeft = _byoYomiTime;
-	HScheduledAsyncCaller::get_instance().register_call( time( NULL ) + p._timeLeft, call( &HGo::on_timeout, this ) );
+	HScheduledAsyncCaller::get_instance().call_in( duration( p._timeLeft, time::UNIT::SECOND ), call( &HGo::on_timeout, this ) );
 	return;
 	M_EPILOG
 }
@@ -1303,10 +1303,11 @@ bool HGo::ongoing_match( void ) const {
 void HGo::update_clocks( void ) {
 	M_PROLOG
 	revoke_scheduled_tasks();
-	int long now( time( NULL ) );
+	int long now( ::time( NULL ) );
 	OPlayerInfo& p( contestant( opponent( _toMove ) ) );
-	if ( _start )
+	if ( _start ) {
 		p._timeLeft -= static_cast<int>( now - _start );
+	}
 	schedule_timeout();
 	_start = now;
 	return;
