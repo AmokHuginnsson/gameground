@@ -1,7 +1,7 @@
 /*
 ---            `gameground' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski             ---
 
-	main.cxx - this file is integral part of `gameground' project.
+  main.cxx - this file is integral part of `gameground' project.
 
   i.  You may not make any changes in Copyright information.
   ii. You must attach Copyright information to any part of every copy
@@ -73,13 +73,17 @@ int main( int argc_, char* argv_[] ) {
 			cons.leave_curses (); /* ending ncurses sesion */
 		if ( opt )
 			cout << "Your terminal is too small." << endl;
+		cerr << _( "Done" ) << endl;
 /* ... there is the place main loop ends. :OD-OT */
+	} catch ( int err ) {
+		if ( cons.is_enabled ( ) )
+			cons.leave_curses (); /* ending ncurses sesion */
+		opt = err;
 	} catch ( ... ) {
 		if ( cons.is_enabled ( ) )
 			cons.leave_curses (); /* ending ncurses sesion */
 		throw;
 	}
-	cerr << _( "Done" ) << endl;
 	return ( opt );
 	M_FINAL
 }

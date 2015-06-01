@@ -1,7 +1,7 @@
 /*
 ---       `gameground' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski         ---
 
-	rc_options.cxx - this file is integral part of `gameground' project.
+  options.cxx - this file is integral part of `gameground' project.
 
   i.  You may not make any changes in Copyright information.
   ii. You must attach Copyright information to any part of every copy
@@ -55,8 +55,8 @@ bool set_variables( HString& option_, HString& value_ ) {
 
 }
 
-void version( void* ) __attribute__ ( ( __noreturn__ ) );
-void version( void* ) {
+void version( void ) __attribute__ ( ( __noreturn__ ) );
+void version( void ) {
 	cout << PACKAGE_STRING << endl;
 	throw ( 0 );
 }
@@ -68,26 +68,140 @@ int handle_program_options( int argc_, char** argv_ ) {
 	HProgramOptionsHandler po;
 	OOptionInfo info( po, setup._programName, "GameGround-client - console client for GameGround - an universal networked multiplayer game server.", NULL );
 	bool stop = false;
-	po( "log_path", program_options_helper::option_value( setup._logPath ), HProgramOptionsHandler::OOption::TYPE::REQUIRED, "path pointing to file for application logs", "path" )
-		( "port", program_options_helper::option_value( setup._port ), "P", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "set port number", "num" )
-		( "board", program_options_helper::option_value( setup._boardSize ), "B", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "size of the galaxy board", "size" )
-		( "emperors", program_options_helper::option_value( setup._emperors ), "E", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "set number of players", "count" )
-		( "systems", program_options_helper::option_value( setup._systems ), "S", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "set number of neutral systems", "count" )
-		( "host", program_options_helper::option_value( setup._host ), "H", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "select host to connect", "addr" )
-		( "join", program_options_helper::option_value( setup._game ), "J", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "join to game named {name}", "name" )
-		( "login", program_options_helper::option_value( setup._login ), "L", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "set your player name", "name" )
-		( "password", program_options_helper::option_value( setup._password ), 'p', HProgramOptionsHandler::OOption::TYPE::REQUIRED, "password for your account", "password" )
-		( "new", program_options_helper::option_value( setup._gameType ), "N", HProgramOptionsHandler::OOption::TYPE::REQUIRED, "create game of type {type} and named {name}", "type,name" )
-		( "quiet", program_options_helper::option_value( setup._quiet ), "q", HProgramOptionsHandler::OOption::TYPE::NONE, "inhibit usual output" )
-		( "silent", program_options_helper::option_value( setup._quiet ), "q", HProgramOptionsHandler::OOption::TYPE::NONE, "inhibit usual output" )
-		( "verbose", program_options_helper::option_value( setup._verbose ), "v", HProgramOptionsHandler::OOption::TYPE::NONE, "print more information" )
-		( "debug", program_options_helper::option_value( setup._debug ), "d", HProgramOptionsHandler::OOption::TYPE::NONE, "run in debug mode" )
-		( "help", program_options_helper::option_value( stop ), "h", HProgramOptionsHandler::OOption::TYPE::NONE, "display this help and stop", program_options_helper::callback( util::show_help, &info ) )
-		( "dump-configuration", program_options_helper::option_value( stop ), "W", HProgramOptionsHandler::OOption::TYPE::NONE, "dump current configuration", program_options_helper::callback( util::dump_configuration, &info ) )
-		( "version", program_options_helper::no_value, "V", HProgramOptionsHandler::OOption::TYPE::NONE, "output version information and stop", program_options_helper::callback( version, NULL ) );
+	po(
+		HProgramOptionsHandler::HOption()
+		.long_form( "log_path" )
+		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::REQUIRED )
+		.description( "path pointing to file for application logs" )
+		.recipient(	setup._logPath )
+		.argument_name( "path" )
+		.default_value( "gameground-client.log" )
+	)(
+		HProgramOptionsHandler::HOption()
+		.short_form( 'P' )
+		.long_form( "port" )
+		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::REQUIRED )
+		.description( "set port number" )
+		.recipient( setup._port )
+		.argument_name( "num" )
+	)(
+		HProgramOptionsHandler::HOption()
+		.short_form( 'B' )
+		.long_form( "board" )
+		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::REQUIRED )
+		.description( "size of the galaxy board" )
+		.recipient( setup._boardSize )
+		.argument_name( "size" )
+	)(
+		HProgramOptionsHandler::HOption()
+		.short_form( 'E' )
+		.long_form( "emperors" )
+		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::REQUIRED )
+		.description( "set number of players" )
+		.recipient( setup._emperors )
+		.argument_name( "count" )
+	)(
+		HProgramOptionsHandler::HOption()
+		.short_form( 'S' )
+		.long_form( "systems" )
+		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::REQUIRED )
+		.description( "set number of neutral systems" )
+		.recipient( setup._systems )
+		.argument_name( "count" )
+	)(
+		HProgramOptionsHandler::HOption()
+		.short_form( 'H' )
+		.long_form( "host" )
+		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::REQUIRED )
+		.description( "select host to connect" )
+		.recipient( setup._host )
+		.argument_name( "addr" )
+	)(
+		HProgramOptionsHandler::HOption()
+		.short_form( 'J' )
+		.long_form( "join" )
+		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::REQUIRED )
+		.description( "join to game named {name}" )
+		.recipient( setup._game )
+		.argument_name( "name" )
+	)(
+		HProgramOptionsHandler::HOption()
+		.short_form( 'L' )
+		.long_form( "login" )
+		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::REQUIRED )
+		.description( "set your player name" )
+		.recipient( setup._login )
+		.argument_name( "name" )
+	)(
+		HProgramOptionsHandler::HOption()
+		.short_form( 'p' )
+		.long_form( "password" )
+		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::REQUIRED )
+		.description( "password for your account" )
+		.recipient( setup._password )
+		.argument_name( "password" )
+	)(
+		HProgramOptionsHandler::HOption()
+		.short_form( 'N' )
+		.long_form( "new" )
+		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::REQUIRED )
+		.description( "create game of type {type} and named {name}" )
+		.recipient( setup._gameType )
+		.argument_name( "type,name" )
+	)(
+		HProgramOptionsHandler::HOption()
+		.short_form( 'd' )
+		.long_form( "debug" )
+		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::NONE )
+		.description( "run in debug mode" )
+		.recipient( setup._debug )
+	)(
+		HProgramOptionsHandler::HOption()
+		.short_form( 'q' )
+		.long_form( "quiet" )
+		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::NONE )
+		.description( "inhibit usual output" )
+		.recipient( setup._quiet )
+	)(
+		HProgramOptionsHandler::HOption()
+		.short_form( 'q' )
+		.long_form( "silent" )
+		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::NONE )
+		.description( "inhibit usual output" )
+		.recipient( setup._quiet )
+	)(
+		HProgramOptionsHandler::HOption()
+		.short_form( 'v' )
+		.long_form( "verbose" )
+		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::NONE )
+		.description( "print more information" )
+		.recipient( setup._verbose )
+	)(
+		HProgramOptionsHandler::HOption()
+		.short_form( 'h' )
+		.long_form( "help" )
+		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::NONE )
+		.description( "display this help and stop" )
+		.recipient( stop )
+		.callback( call( &util::show_help, &info ) )
+	)(
+		HProgramOptionsHandler::HOption()
+		.short_form( 'W' )
+		.long_form( "dump-configuration" )
+		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::NONE )
+		.description( "dump current configuration" )
+		.recipient( stop )
+		.callback( call( &util::dump_configuration, &info ) )
+	)(
+		HProgramOptionsHandler::HOption()
+		.short_form( 'V' )
+		.long_form( "version" )
+		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::NONE )
+		.description( "output version information and stop" )
+		.recipient( stop )
+		.callback( call( &version ) )
+	);
 	po.process_rc_file( "gameground-client", "", set_variables );
-	if ( setup._logPath.is_empty() )
-		setup._logPath = "gameground-client.log";
 	int unknown = 0, nonOption = 0;
 	nonOption = po.process_command_line( argc_, argv_, &unknown );
 	if ( unknown > 0 ) {

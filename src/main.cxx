@@ -1,7 +1,7 @@
 /*
 ---            `gameground' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski             ---
 
-	main.cxx - this file is integral part of `gameground' project.
+  main.cxx - this file is integral part of `gameground' project.
 
   i.  You may not make any changes in Copyright information.
   ii. You must attach Copyright information to any part of every copy
@@ -61,16 +61,20 @@ int main( int argc_, char* argv_[] ) {
 /* variables declarations for main loop: */
 	int opt = 0;
 /* end. */
-/* TO-DO: enter main loop code here */
-	HSignalService::get_instance();
-	setup._programName = argv_[ 0 ];
-	opt = handle_program_options( argc_, argv_ );
-	hcore::log.rehash( setup._logPath, setup._programName );
-	setup.test_setup();
-/* *BOOM* */
-	main_server();
-/* ... there is the place main loop ends. :OD-OT */
-	cerr << _( "Done" ) << endl;
+	try {
+	/* TO-DO: enter main loop code here */
+		HSignalService::get_instance();
+		setup._programName = argv_[ 0 ];
+		opt = handle_program_options( argc_, argv_ );
+		hcore::log.rehash( setup._logPath, setup._programName );
+		setup.test_setup();
+	/* *BOOM* */
+		main_server();
+	/* ... there is the place main loop ends. :OD-OT */
+		cerr << _( "Done" ) << endl;
+	} catch ( int err ) {
+		opt = err;
+	}
 	return ( opt );
 	M_FINAL
 }
