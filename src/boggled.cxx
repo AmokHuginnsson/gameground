@@ -126,7 +126,7 @@ void HBoggle::generate_game( void ) {
 		_game[ i ][ 0 ] = boggle_data::BOGGLE::UNINITIALIZED_SLOT;
 	for ( int i( 0 ); i < boggle_data::BOGGLE::DICE_COUNT; ++ i ) {
 		int k( 0 );
-		int slot( static_cast<int>( rnd( boggle_data::BOGGLE::DICE_COUNT - i ) ) );
+		int slot( static_cast<int>( rnd( static_cast<int unsigned>( boggle_data::BOGGLE::DICE_COUNT - i ) ) ) );
 		for ( int j( 0 ); j < slot; ++ j, ++ k )
 			while ( _game[ k ][ 0 ] != boggle_data::BOGGLE::UNINITIALIZED_SLOT )
 				++ k;

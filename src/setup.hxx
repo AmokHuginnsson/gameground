@@ -28,9 +28,8 @@ Copyright:
 #define SETUP_HXX_INCLUDED
 
 #include <libintl.h>
-#include <iostream>
 
-#include <yaal/hcore/hstreaminterface.hxx>
+#include <yaal/hcore/hfile.hxx>
 
 #include "config.hxx"
 
@@ -58,7 +57,7 @@ static int const GO_BYOYOMI_PERIODS        =   5;
 static int const GO_BYOYOMI_TIME           =  30;
 static int const SET_STARTUP_PLAYERS       =   2;
 static int const SET_DECK_COUNT                 =   1;
-#define out ( clog << now << " " << __FILE__ + OSetup::PATH_OFFSET << ":" << __LINE__ << ": " )
+#define out ( yaal::hcore::clog << now << " " << __FILE__ + OSetup::PATH_OFFSET << ":" << __LINE__ << ": " )
 
 #ifndef NDEBUG
 #define SENDF( sock ) tee( sock, out )
@@ -73,10 +72,10 @@ extern now_t now;
 yaal::hcore::HStreamInterface& operator << ( yaal::hcore::HStreamInterface&, now_t const& );
 
 struct OSetup {
-	bool _quiet;			/* --quiet, --silent */
-	bool _verbose;		/* --verbose */
+	bool _quiet;   /* --quiet, --silent */
+	bool _verbose; /* --verbose */
 	bool _debug;
-	int	_maxConnections;
+	int _maxConnections;
 	/* galaxy/boggle specific integers */
 	int _emperors;
 	int _port;

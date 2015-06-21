@@ -28,6 +28,8 @@ Copyright:
 #include <cstring>
 #include <cstdio>
 
+#include "config.hxx"
+
 #include <yaal/hcore/hprogramoptionshandler.hxx>
 #include <yaal/hcore/hlog.hxx>
 #include <yaal/tools/util.hxx>
@@ -35,7 +37,6 @@ Copyright:
 M_VCSID( "$Id: " __ID__ " $" )
 
 #include "options.hxx"
-#include "config.hxx"
 #include "setup.hxx"
 
 using namespace yaal;

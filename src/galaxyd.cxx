@@ -1,7 +1,7 @@
 /*
 ---           `gameground' 0.0.0 (c) 1978 by Marcin 'Amok' Konarski            ---
 
-	gamegroundd.cxx - this file is integral part of `galaxy' project.
+  gamegroundd.cxx - this file is integral part of `galaxy' project.
 
   i.  You may not make any changes in Copyright information.
   ii. You must attach Copyright information to any part of every copy
@@ -185,8 +185,8 @@ HGalaxy::HGalaxy( HServer* server_, id_t const& id_, HString const& comment_, in
 	for ( ctr = 0; ctr < ( emperors_ + systems_ ); ctr ++ ) {
 		system = &_systems[ ctr ];
 		system->_id = ctr;
-		system->_coordinateX = static_cast<int>( random( _boardSize ) );
-		system->_coordinateY = static_cast<int>( random( _boardSize ) );
+		system->_coordinateX = static_cast<int>( random( static_cast<int unsigned>( _boardSize ) ) );
+		system->_coordinateY = static_cast<int>( random( static_cast<int unsigned>( _boardSize ) ) );
 		if ( ctr ) {
 			for ( ctrLoc = 0; ctrLoc < ctr; ctrLoc ++ )
 				if ( ( system->_coordinateX
@@ -304,7 +304,7 @@ int HGalaxy::assign_system( OClientInfo* clientInfo_ ) {
 	info._systems = 1;
 	int rivals = static_cast<int>( _emperors.size() );
 	HRandomizer rnd( randomizer_helper::make_randomizer() );
-	int motherSystem( static_cast<int>( rnd( _startupPlayers + _neutralSystemCount - rivals ) ) );
+	int motherSystem( static_cast<int>( rnd( static_cast<int unsigned>( _startupPlayers + _neutralSystemCount - rivals ) ) ) );
 	_emperors[ clientInfo_ ] = info;
 	ctr = 0;
 	for ( int i = 0; i < motherSystem; ++ i, ++ ctr )

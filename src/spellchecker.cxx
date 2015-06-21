@@ -36,7 +36,7 @@ HSpellChecker::HSpellChecker( void ) : _spellChecker( NULL ), _spellConfig( NULL
 	possible_err = new_aspell_speller( static_cast<AspellConfig*>( _spellConfig ) );
 
 	int err = 0;
-	if ( ( err = aspell_error_number( possible_err ) ) != 0 ) {
+	if ( ( err = static_cast<int>( aspell_error_number( possible_err ) ) ) != 0 ) {
 		HString msg = "Aspell error: ";
 		msg += aspell_error_message( possible_err );
 		cleanup();
