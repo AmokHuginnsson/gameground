@@ -28,7 +28,7 @@ HSpellChecker::HSpellChecker( void ) : _spellChecker( NULL ), _spellConfig( NULL
 		M_THROW( "Maybe console_charset, aspell_lang variable is not set!\n", 0 );
 	}
 
-	hcore::log( LOG_TYPE::INFO ) << "aspell_init - ";
+	hcore::log( LOG_LEVEL::INFO ) << "aspell_init - ";
 
 	_spellConfig = new_aspell_config();
 	::aspell_config_replace( static_cast<AspellConfig*>( _spellConfig ), "encoding", setup._consoleCharset.raw() );
@@ -40,11 +40,11 @@ HSpellChecker::HSpellChecker( void ) : _spellChecker( NULL ), _spellConfig( NULL
 		HString msg = "Aspell error: ";
 		msg += aspell_error_message( possible_err );
 		cleanup();
-		hcore::log( LOG_TYPE::INFO ) << "failure" << endl;
+		hcore::log( LOG_LEVEL::INFO ) << "failure" << endl;
 		M_THROW( msg, err );
 	} else {
 		_spellChecker = to_aspell_speller( possible_err );
-		hcore::log( LOG_TYPE::INFO ) << "success" << endl;
+		hcore::log( LOG_LEVEL::INFO ) << "success" << endl;
 	}
 	return;
 	M_EPILOG
