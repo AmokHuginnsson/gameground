@@ -835,7 +835,7 @@ OClientInfo* HServer::get_client( HString const& login_ ) {
 
 HServer::db_accessor_t HServer::db( void ) {
 	M_PROLOG
-	db_accessor_t eaDB( external_lock_t( ref( _mutex ) ), _db );
+	db_accessor_t eaDB( HLock( _mutex ), _db );
 	return ( eaDB );
 	M_EPILOG
 }
