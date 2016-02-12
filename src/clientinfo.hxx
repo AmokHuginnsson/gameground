@@ -28,7 +28,7 @@ Copyright:
 #define CLIENTINFO_HXX_INCLUDED
 
 #include <yaal/hcore/hset.hxx>
-#include <yaal/hcore/hsocket.hxx>
+#include <yaal/hcore/hstreaminterface.hxx>
 
 #include "logic.hxx"
 
@@ -39,7 +39,7 @@ struct OClientInfo {
 	bool _anonymous;
 	typedef yaal::hcore::HSet<HLogic::id_t> logics_t;
 	yaal::hcore::HString _login;
-	yaal::hcore::HSocket::ptr_t _socket;
+	yaal::hcore::HStreamInterface::ptr_t _socket;
 	logics_t _logics;
 	OClientInfo( void ) : _valid( true ), _anonymous( false ), _login(), _socket(), _logics() {}
 	~OClientInfo( void ) {

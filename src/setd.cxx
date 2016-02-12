@@ -107,13 +107,13 @@ void HSetBang::handler_set( OClientInfo* clientInfo_, HString const& message_ ) 
 }
 
 bool HSetBang::do_accept( OClientInfo* clientInfo_ ) {
-	out << "new candidate " << clientInfo_->_login << endl;
+	OUT << "new candidate " << clientInfo_->_login << endl;
 	return ( false );
 }
 
 void HSetBang::do_post_accept( OClientInfo* clientInfo_ ) {
 	M_PROLOG
-	out << "conditions: _players.size() = " << _players.size() << ", _startupPlayers = " << _startupPlayers << endl;
+	OUT << "conditions: _players.size() = " << _players.size() << ", _startupPlayers = " << _startupPlayers << endl;
 	OPlayerInfo info;
 	_players[ clientInfo_ ] = info;
 	/*
@@ -135,7 +135,7 @@ void HSetBang::do_post_accept( OClientInfo* clientInfo_ ) {
 			_out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< clientInfo_->_login
 			<< " joined the mind contest." << endl << _out );
-	out << "player [" << clientInfo_->_login << "] accepted" << endl;
+	OUT << "player [" << clientInfo_->_login << "] accepted" << endl;
 	if ( ! _deckNo && ( _players.size() >= _startupPlayers ) ) {
 		broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
 				<< "The match has begun, good luck!" << endl << _out );
@@ -223,7 +223,7 @@ void HSetBang::update_table( void ) {
 	if ( _cardsInDeck >= SET_CERTAIN_SET ) {
 		while ( ! contains_set( _cardsOnTable ) ) {
 			random_shuffle( _deck, _deck + _cardsInDeck );
-			out << "shuffle needed" << endl;
+			OUT << "shuffle needed" << endl;
 		}
 	} else {
 		if ( ! contains_set( max( _cardsInDeck, SET_TABLE_CARD_COUNT ) ) ) {
@@ -235,7 +235,7 @@ void HSetBang::update_table( void ) {
 		} else {
 			while ( ! contains_set( _cardsOnTable ) ) {
 				random_shuffle( _deck, _deck + _cardsInDeck );
-				out << "shuffle needed" << endl;
+				OUT << "shuffle needed" << endl;
 			}
 		}
 	}
@@ -299,7 +299,7 @@ protected:
 
 HLogic::ptr_t HSetBangCreator::do_new_instance( HServer* server_, HLogic::id_t const& id_, HString const& argv_ ) {
 	M_PROLOG
-	out << "creating logic: " << argv_ << endl;
+	OUT << "creating logic: " << argv_ << endl;
 	HTokenizer t( argv_, "," );
 	HString name( t[ 0 ] );
 	int players( 0 );
@@ -320,7 +320,7 @@ HString HSetBangCreator::do_get_info( void ) const {
 	M_PROLOG
 	HString setupMsg;
 	setupMsg.format( "set_bang:%d,%d,%d", setup._setStartupPlayers, setup._setDeckCount, setup._interRoundDelay );
-	out << setupMsg << endl;
+	OUT << setupMsg << endl;
 	return ( setupMsg );
 	M_EPILOG
 }

@@ -28,6 +28,7 @@ Copyright:
 
 #include <yaal/hcore/macro.hxx>
 #include <yaal/hcore/hfile.hxx>
+#include <yaal/hcore/hopenssl.hxx>
 #include <yaal/hcore/htokenizer.hxx>
 #include <yaal/tools/util.hxx>
 #include <yaal/tools/hscheduledasynccaller.hxx>
@@ -137,8 +138,8 @@ HGo::~HGo ( void ) {
 void HGo::broadcast_contestants( yaal::hcore::HString const& message_ ) {
 	M_PROLOG
 	M_ASSERT( _contestants[ 0 ]._client && _contestants[ 1 ]._client );
-	_contestants[ 0 ]._client->_socket->write_until_eos( message_ );
-	_contestants[ 1 ]._client->_socket->write_until_eos( message_ );
+	*_contestants[ 0 ]._client->_socket << message_;
+	*_contestants[ 1 ]._client->_socket << message_;
 	return;
 	M_EPILOG
 }
@@ -203,7 +204,7 @@ void HGo::handler_sgf( OClientInfo* clientInfo_, HString const& message_ ) {
 		throw HLogicException( GO_MSG[ GO_MSG_INSUFFICIENT_PRIVILEGES ] );
 	try {
 		SGF sgf( SGF::GAME_TYPE::GO, "gameground" );
-		out << message_ << endl;
+		OUT << message_ << endl;
 		sgf.load( message_ );
 		_sgf.swap( sgf );
 		_gobanSize = _sgf.get_board_size();
@@ -450,7 +451,7 @@ void HGo::handler_dead( OClientInfo* clientInfo_, HString const& message_ ) {
 		} catch ( HLexicalCastException const& ) {
 			throw HLogicException( GO_MSG[GO_MSG_MALFORMED] );
 		}
-		out << "dead: " << col << "," << row << endl;
+		OUT << "dead: " << col << "," << row << endl;
 		ensure_coordinates_validity( col, row );
 		STONE::stone_t stone = goban( col, row );
 		if( ! ( ( stone == STONE::BLACK ) || ( stone == STONE::WHITE )
@@ -510,7 +511,7 @@ void HGo::handler_undo( OClientInfo* clientInfo_, HString const& message_ ) {
 				}
 			} else {
 				int skip( _toMove == ( opponentIdx == 0 ? STONE::BLACK : STONE::WHITE ) ? 1 : 2 );
-				out << "skip = " << skip << endl;
+				OUT << "skip = " << skip << endl;
 				SGF::game_tree_t::const_node_t currentMove( _sgf.get_current_move() );
 				while ( ( skip > 0 ) && currentMove && currentMove->get_parent() ) {
 					currentMove = currentMove->get_parent();
@@ -538,7 +539,7 @@ void HGo::handler_undo( OClientInfo* clientInfo_, HString const& message_ ) {
 			SGF::game_tree_t::const_node_t currentMove( _sgf.get_current_move() );
 			if ( currentMove ) {
 				int skip( _toMove == ( opponentIdx == 0 ? STONE::BLACK : STONE::WHITE ) ? 1 : 2 );
-				out << "skip = " << skip << endl;
+				OUT << "skip = " << skip << endl;
 				for ( int i( 0 ); currentMove->get_parent() && ( i < skip ); ++ i )
 					currentMove = currentMove->get_parent();
 				_sgf.set_current_move( currentMove );
@@ -640,7 +641,7 @@ void HGo::mark_teritory( void ) {
 				case ( STONE::WHITE ): mark = STONE::TERITORY_WHITE; break;
 				case ( STONE::TERITORY_NONE ): mark = STONE::TERITORY_NONE; break;
 				default:
-					out << "teritory: '" << teritory << "', at: " << x << "," << y << endl;
+					OUT << "teritory: '" << teritory << "', at: " << x << "," << y << endl;
 					M_ASSERT( ! "bug in mark_teritory switch" );
 			}
 			replace_stones( static_cast<char>( toupper( STONE::TERITORY_NONE ) ), mark );
@@ -764,7 +765,7 @@ HGo::OPlayerInfo const* HGo::contestant( OClientInfo const* clientInfo_ ) const 
 }
 
 bool HGo::do_accept( OClientInfo* clientInfo_ ) {
-	out << "new candidate " << clientInfo_->_login << endl;
+	OUT << "new candidate " << clientInfo_->_login << endl;
 	return ( false );
 }
 
@@ -1337,7 +1338,7 @@ protected:
 
 HLogic::ptr_t HGoCreator::do_new_instance( HServer* server_, HLogic::id_t const& id_, HString const& argv_ ) {
 	M_PROLOG
-	out << "creating logic: " << argv_ << endl;
+	OUT << "creating logic: " << argv_ << endl;
 	HString name = get_token( argv_, ",", 0 );
 	return ( make_pointer<go::HGo>( server_, id_, name ) );
 	M_EPILOG
@@ -1348,7 +1349,7 @@ HString HGoCreator::do_get_info( void ) const {
 	HString setupMsg;
 	setupMsg.format( "go:%d,%d,%d,%d,%d,%d", setup._gobanSize, setup._komi, setup._handicaps,
 			setup._mainTime, setup._byoYomiPeriods, setup._byoYomiTime );
-	out << setupMsg << endl;
+	OUT << setupMsg << endl;
 	return ( setupMsg );
 	M_EPILOG
 }

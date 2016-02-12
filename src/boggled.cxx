@@ -143,7 +143,7 @@ HString const& HBoggle::serialize_deck( void ) {
 	_varTmpBuffer.clear();
 	for ( int i = 0; i < boggle_data::BOGGLE::DICE_COUNT; ++ i )
 		_varTmpBuffer += _game[ i ][ 0 ];
-	out << "new deck: " << endl;
+	OUT << "new deck: " << endl;
 	cout << _varTmpBuffer.left( 4 ) << endl;
 	cout << _varTmpBuffer.mid( 4, 4 ) << endl;
 	cout << _varTmpBuffer.mid( 8, 4 ) << endl;
@@ -164,7 +164,7 @@ void HBoggle::handler_play( OClientInfo* clientInfo_, HString const& word_ ) {
 		if ( it == _words.end() )
 			it = _words.insert( hcore::make_pair( word_, make_pointer<client_set_t>() ) ).first;
 		it->second->insert( clientInfo_ );
-		out << "word: " << word_ << "< inserted, proof: " << _words.size() << "," << it->second->size() << endl;
+		OUT << "word: " << word_ << "< inserted, proof: " << _words.size() << "," << it->second->size() << endl;
 	}
 	return;
 	M_EPILOG
@@ -179,14 +179,14 @@ HBoggle::OPlayerInfo* HBoggle::get_player_info( OClientInfo* clientInfo_ ) {
 }
 
 bool HBoggle::do_accept( OClientInfo* clientInfo_ ) {
-	out << "new candidate " << clientInfo_->_login << endl;
+	OUT << "new candidate " << clientInfo_->_login << endl;
 	return ( false );
 }
 
 void HBoggle::do_post_accept( OClientInfo* clientInfo_ ) {
 	M_PROLOG
 	HLock l( _mutex );
-	out << "conditions: _players.size() = " << _players.size() << ", _startupPlayers = " << _startupPlayers << endl;
+	OUT << "conditions: _players.size() = " << _players.size() << ", _startupPlayers = " << _startupPlayers << endl;
 	OPlayerInfo info;
 	_players[ clientInfo_ ] = info;
 	/*
@@ -233,7 +233,7 @@ void HBoggle::do_post_accept( OClientInfo* clientInfo_ ) {
 			_out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< clientInfo_->_login
 			<< " joined the mind contest." << endl << _out );
-	out << "player [" << clientInfo_->_login << "] accepted" << endl;
+	OUT << "player [" << clientInfo_->_login << "] accepted" << endl;
 	if ( ! _round && ( _players.size() >= _startupPlayers ) ) {
 		schedule_end_round();
 		broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
@@ -279,7 +279,7 @@ void HBoggle::schedule_end_round( void ) {
 void HBoggle::on_begin_round( void ) {
 	M_PROLOG
 	HLock l( _mutex );
-	out << "<<begin>>" << endl;
+	OUT << "<<begin>>" << endl;
 	schedule_end_round();
 	broadcast(
 			_out << PROTOCOL::MSG << PROTOCOL::SEP
@@ -294,7 +294,7 @@ void HBoggle::on_begin_round( void ) {
 void HBoggle::on_end_round( void ) {
 	M_PROLOG
 	HLock l( _mutex );
-	out << "<<end>>" << endl;
+	OUT << "<<end>>" << endl;
 	_state = STATE::LOCKED;
 	if ( _round < _maxRounds ) {
 		HScheduledAsyncCaller::get_instance().call_in( duration( _interRoundDelay, time::UNIT::SECOND ), call( &HBoggle::on_begin_round, this ) );
@@ -319,7 +319,7 @@ void HBoggle::on_end_round( void ) {
 					longestLength = length;
 				}
 				if ( appearance > 1 ) {
-					out << appearance << " people found: " << del->first << endl;
+					OUT << appearance << " people found: " << del->first << endl;
 					_words.erase( del );
 					continue;
 				}
@@ -329,7 +329,7 @@ void HBoggle::on_end_round( void ) {
 				_words.erase( del );
 		} else {
 			if ( appearance > 1 ) {
-				out << appearance << " people found: " << del->first << endl;
+				OUT << appearance << " people found: " << del->first << endl;
 				_words.erase( del );
 				continue;
 			}
@@ -351,7 +351,7 @@ void HBoggle::on_end_round( void ) {
 			OPlayerInfo& info = *get_player_info( clInfo );
 			*(clInfo->_socket) << *this << PROTOCOL::SCORED << PROTOCOL::SEP << it->first << "[" << scores[ length - 1 ] << "]" << endl;
 			info._last += scores[ length - 1 ];
-			out << clInfo->_login << " scored: " << scores[ length - 1 ] << " for word: " << it->first << "." << endl;
+			OUT << clInfo->_login << " scored: " << scores[ length - 1 ] << " for word: " << it->first << "." << endl;
 		}
 	}
 	for ( players_t::iterator it = _players.begin(); it != _players.end(); ++ it ) {
@@ -435,7 +435,7 @@ protected:
 
 HLogic::ptr_t HBoggleCreator::do_new_instance( HServer* server_, HLogic::id_t const& id_, HString const& argv_ ) {
 	M_PROLOG
-	out << "creating logic: " << argv_ << endl;
+	OUT << "creating logic: " << argv_ << endl;
 	HTokenizer t( argv_, "," );
 	HString name( t[ 0 ] );
 	HString scoringStr( t[ 1 ] );
@@ -478,7 +478,7 @@ HString HBoggleCreator::do_get_info( void ) const {
 	setupMsg.format( "%s:%s,%d,%d,%d,%d", boggle::HBoggle::PROTOCOL::NAME,
 			setup._scoringSystem.raw(), setup._boggleStarupPlayers,
 			setup._roundTime, setup._boggleRounds, setup._interRoundDelay );
-	out << setupMsg << endl;
+	OUT << setupMsg << endl;
 	return ( setupMsg );
 }
 

@@ -57,10 +57,10 @@ static int const GO_BYOYOMI_PERIODS        =   5;
 static int const GO_BYOYOMI_TIME           =  30;
 static int const SET_STARTUP_PLAYERS       =   2;
 static int const SET_DECK_COUNT                 =   1;
-#define out ( yaal::hcore::clog << now << " " << __FILE__ + OSetup::PATH_OFFSET << ":" << __LINE__ << ": " )
+#define OUT ( yaal::hcore::clog << now << " " << __FILE__ + OSetup::PATH_OFFSET << ":" << __LINE__ << ": " )
 
 #ifndef NDEBUG
-#define SENDF( sock ) tee( sock, out )
+#define SENDF( sock ) tee( sock, OUT )
 #define SEND( sock ) tee( sock, clog )
 #else /* #ifndef NDEBUG */
 #define SEND( sock ) ( sock )

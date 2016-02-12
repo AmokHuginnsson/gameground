@@ -103,7 +103,12 @@ char const _msgYourClientIsTainted_[] = "Your client is tainted, go away!";
 
 HServer::HServer( int connections_ )
 	: _maxConnections( connections_ ),
-	_socket( HSocket::socket_type_t( HSocket::TYPE::DEFAULT ) | HSocket::TYPE::NONBLOCKING | HSocket::TYPE::SSL_SERVER, connections_ ),
+	_socket(
+		make_pointer<HSocket>(
+			HSocket::socket_type_t( HSocket::TYPE::DEFAULT ) | HSocket::TYPE::NONBLOCKING | HSocket::TYPE::SSL_SERVER,
+			connections_
+		)
+	),
 	_clients(), _logins(), _logics(), _handlers(), _out(),
 	_db( HDataBase::get_connector() ), _mutex(),
 	_dispatcher( connections_, 3600 * 1000 ), _idPool( 1 ),
@@ -117,7 +122,7 @@ HServer::~HServer( void ) {
 	M_ASSERT( _logics.is_empty() );
 	M_ASSERT( _logins.is_empty() );
 	M_ASSERT( _clients.is_empty() );
-	out << brightred << "<<<GameGround>>>" << lightgray << " server finished." << endl;
+	OUT << brightred << "<<<GameGround>>>" << lightgray << " server finished." << endl;
 }
 
 int HServer::init_server( int port_ ) {
@@ -125,8 +130,8 @@ int HServer::init_server( int port_ ) {
 	HLogicFactory& factory( HLogicFactoryInstance::get_instance() );
 	factory.initialize_globals();
 	_db->connect( setup._databasePath, setup._databaseLogin, setup._databasePassword );
-	_socket.listen( "0.0.0.0", port_ );
-	_dispatcher.register_file_descriptor_handler( _socket.get_file_descriptor(), call( &HServer::handler_connection, this, _1 ) );
+	_socket->listen( "0.0.0.0", port_ );
+	_dispatcher.register_file_descriptor_handler( _socket, call( &HServer::handler_connection, this, _1 ) );
 	_handlers[ PROTOCOL::SHUTDOWN ] = &HServer::handler_shutdown;
 	_handlers[ PROTOCOL::QUIT ] = &HServer::handler_quit;
 	_handlers[ PROTOCOL::MSG ] = &HServer::handler_chat;
@@ -140,54 +145,53 @@ int HServer::init_server( int port_ ) {
 	_handlers[ PROTOCOL::JOIN ] = &HServer::join_party;
 	_handlers[ PROTOCOL::ABANDON ] = &HServer::handler_abandon;
 	_handlers[ PROTOCOL::CMD ] = &HServer::pass_command;
-	out << brightblue << "<<<GameGround>>>" << lightgray << " server started." << endl;
+	OUT << brightblue << "<<<GameGround>>>" << lightgray << " server started." << endl;
 	return ( 0 );
 	M_EPILOG
 }
 
-void HServer::handler_connection( int ) {
+void HServer::handler_connection( yaal::tools::HIODispatcher::stream_t& ) {
 	M_PROLOG
-	HSocket::ptr_t client = _socket.accept();
+	HSocket::ptr_t client = _socket->accept();
 	M_ASSERT( !! client );
-	if ( _socket.get_client_count() >= _maxConnections )
+	if ( _socket->get_client_count() >= _maxConnections ) {
 		client->close();
-	else {
-		_dispatcher.register_file_descriptor_handler( client->get_file_descriptor(), call( &HServer::handler_message, this, _1 ) );
-		_clients[ client->get_file_descriptor() ]._socket = client;
+	} else {
+		_dispatcher.register_file_descriptor_handler( client, call( &HServer::handler_message, this, _1 ) );
+		_clients[ client.raw() ]._socket = client;
 	}
-	out << client->get_host_name() << endl;
+	OUT << client->get_host_name() << endl;
 	return;
 	M_EPILOG
 }
 
-void HServer::handler_message( int fileDescriptor_ ) {
+void HServer::handler_message( yaal::tools::HIODispatcher::stream_t& stream_ ) {
 	M_PROLOG
 	HString message;
 	HString argument;
 	HString command;
 	clients_t::iterator clientIt;
-	HSocket::ptr_t client = _socket.get_client( fileDescriptor_ );
-	if ( ( clientIt = _clients.find( fileDescriptor_ ) ) == _clients.end() )
-		kick_client( client );
-	else {
+	if ( ( clientIt = _clients.find( stream_.raw() ) ) == _clients.end() ) {
+		kick_client( stream_ );
+	} else {
 		int long nRead( -1 );
 		try {
-			nRead = client->read_until( message );
+			nRead = stream_->read_until( message );
 		} catch ( HOpenSSLException& ) {
 			drop_client( &clientIt->second );
 		}
 		if ( nRead > 0 ) {
 			if ( clientIt->second._login.is_empty() )
-				out << "`unnamed'";
+				OUT << "`unnamed'";
 			else
-				out << clientIt->second._login;
+				OUT << clientIt->second._login;
 			clog << "->" << message << endl;
 			command = get_token( message, ":", 0 );
 			argument = message.mid( command.get_length() + 1 );
 			int msgLength = static_cast<int>( command.get_length() );
-			if ( msgLength < 1 )
-				kick_client( client, "Malformed data." );
-			else {
+			if ( msgLength < 1 ) {
+				kick_client( stream_, "Malformed data." );
+			} else {
 				handlers_t::iterator handler = _handlers.find( command );
 				if ( handler != _handlers.end() ) {
 					try {
@@ -196,24 +200,27 @@ void HServer::handler_message( int fileDescriptor_ ) {
 						drop_client( &clientIt->second );
 					}
 					flush_logics();
-				} else
-					kick_client( client, "Unknown command." );
+				} else {
+					kick_client( stream_, "Unknown command." );
+				}
 			}
-		} else if ( ! nRead )
-			kick_client( client, "" );
+		} else if ( ! nRead ) {
+			kick_client( stream_, "" );
+		}
 		/* else nRead < 0 => REPEAT */
 	}
-	if ( ! _dropouts.is_empty() )
+	if ( ! _dropouts.is_empty() ) {
 		flush_droupouts();
+	}
 	return;
 	M_EPILOG
 }
 
-void HServer::kick_client( yaal::hcore::HSocket::ptr_t& client_, char const* const reason_ ) {
+void HServer::kick_client( yaal::tools::HIODispatcher::stream_t& client_, char const* const reason_ ) {
 	M_PROLOG
 	M_ASSERT( !! client_ );
-	int fileDescriptor = client_->get_file_descriptor();
-	clients_t::iterator clientIt( _clients.find( fileDescriptor ) );
+	int fileDescriptor( static_cast<HSocket*>( client_.raw() )->get_file_descriptor() );
+	clients_t::iterator clientIt( _clients.find( client_.raw() ) );
 	M_ASSERT( clientIt != _clients.end() );
 	if ( clientIt->second._valid && reason_ && reason_[0] ) {
 		try {
@@ -222,11 +229,11 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& client_, char const* con
 			/* Kicked client is no longer valid but we cannot do anything about it. */
 		}
 	}
-	_socket.shutdown_client( fileDescriptor );
-	_dispatcher.unregister_file_descriptor_handler( fileDescriptor );
+	_socket->shutdown_client( fileDescriptor );
+	_dispatcher.unregister_file_descriptor_handler( client_ );
 	clientIt->second._valid = false;
 	remove_client_from_all_logics( clientIt->second );
-	out << "client ";
+	OUT << "client ";
 	HString login;
 	if ( ! clientIt->second._login.is_empty() ) {
 		login = clientIt->second._login;
@@ -247,9 +254,10 @@ void HServer::kick_client( yaal::hcore::HSocket::ptr_t& client_, char const* con
 					<< mark( COLORS::FG_YELLOW ) << " " << clientIt->second._login << msgDisconnected << endl << _out );
 		clog << msgDisconnected;
 	}
-	if ( ! login.is_empty() )
+	if ( ! login.is_empty() ) {
 		_logins.erase( login );
-	_clients.erase( fileDescriptor );
+	}
+	_clients.erase( clientIt );
 	clog << endl;
 	if ( ! login.is_empty() )
 		broadcast( _out << PROTOCOL::PLAYER_QUIT << PROTOCOL::SEP << login << endl << _out );
@@ -279,8 +287,9 @@ void HServer::broadcast( HString const& message_ ) {
 	M_PROLOG
 	for ( clients_t::iterator it( _clients.begin() ), end( _clients.end() ); it != end; ++ it ) {
 		try {
-			if ( it->second._valid )
-				it->second._socket->write_until_eos( message_ );
+			if ( it->second._valid ) {
+				*it->second._socket << message_;
+			}
 		} catch ( HOpenSSLException const& ) {
 			drop_client( &it->second );
 		}
@@ -311,8 +320,9 @@ void HServer::broadcast_private( HLogic& party_, HString const& message_ ) {
 	M_PROLOG
 	for ( HLogic::clients_t::HIterator it( party_._clients.begin() ), end( party_._clients.end() ); it != end; ++ it ) {
 		try {
-			if ( (*it)->_valid )
-				(*it)->_socket->write_until_eos( message_ );
+			if ( (*it)->_valid ) {
+				*(*it)->_socket << message_;
+			}
 		} catch ( HOpenSSLException const& ) {
 			drop_client( *it );
 		}
@@ -357,7 +367,7 @@ void HServer::handle_login( OClientInfo& client_, HString const& loginInfo_ ) {
 			M_ENSURE( !! rs );
 			HRecordSet::iterator row = rs->begin();
 			if ( row == rs->end() ) {
-				out << _db->get_error() << endl;
+				OUT << _db->get_error() << endl;
 				M_ENSURE( ! "database query execution error" );
 			}
 			int result( lexical_cast<int>( *row[0] ) );
@@ -450,14 +460,15 @@ void HServer::handle_account( OClientInfo& client_, HString const& accountInfo_ 
 						query->bind( 7, oldPassword );
 						HRecordSet::ptr_t rs( query->execute() );
 						M_ENSURE( !! rs );
-						if ( rs->get_size() != 1 )
-							client_._socket->write_until_eos( "warn:Password not changed - old password do not match.\n" );
+						if ( rs->get_size() != 1 ) {
+							*client_._socket << "warn:Password not changed - old password do not match.\n";
+						}
 					}
 				} else {
-					client_._socket->write_until_eos( "warn:Cannot change your password - passwords do not match.\n" );
+					*client_._socket << "warn:Cannot change your password - passwords do not match.\n";
 				}
 			} else {
-				client_._socket->write_until_eos( "warn:You have to enter all of - old, new and repeated passwords to change the password.\n" );
+				*client_._socket << "warn:You have to enter all of - old, new and repeated passwords to change the password.\n";
 			}
 		}
 	}
@@ -467,17 +478,17 @@ void HServer::handle_account( OClientInfo& client_, HString const& accountInfo_ 
 
 void HServer::pass_command( OClientInfo& client_, HString const& command_ ) {
 	M_PROLOG
-	if ( client_._logics.is_empty() )
-		client_._socket->write_until_eos( "err:Connect to some game first.\n" );
-	else {
+	if ( client_._logics.is_empty() ) {
+		*client_._socket << "err:Connect to some game first.\n";
+	} else {
 		HString id( get_token( command_, ":", 0 ) );
 		logics_t::iterator logic( _logics.find( id ) );
-		if ( logic == _logics.end() )
-			client_._socket->write_until_eos( "err:No such party exists.\n" );
-		else {
-			if ( client_._logics.count( id ) == 0 )
-				client_._socket->write_until_eos( "err:You are not part of this party.\n" );
-			else {
+		if ( logic == _logics.end() ) {
+			*client_._socket << "err:No such party exists.\n";
+		} else {
+			if ( client_._logics.count( id ) == 0 ) {
+				*client_._socket << "err:You are not part of this party.\n";
+			} else {
 				HString msg;
 				try {
 					msg = command_.mid( id.get_length() + 1 );
@@ -488,13 +499,15 @@ void HServer::pass_command( OClientInfo& client_, HString const& command_ ) {
 							msg.erase( MAX_MSG_LEN - ( sizeof ( err ) - 1 ) );
 						}
 						msg.insert( 0, sizeof ( err ) - 1, err );
-					} else
+					} else {
 						msg.clear();
+					}
 				} catch ( HLogicException& e ) {
 					msg = e.what();
 				}
-				if ( ! msg.is_empty() )
+				if ( ! msg.is_empty() ) {
 					remove_client_from_logic( client_, logic->second, msg.raw() );
+				}
 			}
 		}
 	}
@@ -520,10 +533,10 @@ void HServer::create_party( OClientInfo& client_, HString const& arg_ ) {
 				if ( ! logic->accept_client( &client_ ) ) {
 					if ( id == logic->id() ) {
 						_logics[ id ] = logic;
-						out << "creating new party: " << logic->get_name() << "," << id << " (" << type << ')' << endl;
+						OUT << "creating new party: " << logic->get_name() << "," << id << " (" << type << ')' << endl;
 					} else {
 						free_id( id );
-						out << "reusing old party: " << logic->get_name() << "," << logic->id() << " (" << type << ')' << endl;
+						OUT << "reusing old party: " << logic->get_name() << "," << logic->id() << " (" << type << ')' << endl;
 					}
 					_out << PROTOCOL::PARTY_INFO << PROTOCOL::SEP << logic->id() << PROTOCOL::SEPP << logic->get_info() << endl;
 					if ( ! logic->is_private() ) {
@@ -536,7 +549,7 @@ void HServer::create_party( OClientInfo& client_, HString const& arg_ ) {
 					logic->post_accept_client( &client_ );
 				} else {
 					free_id( id );
-					client_._socket->write_until_eos( "err:Specified configuration is inconsistent.\n" );
+					*client_._socket << "err:Specified configuration is inconsistent.\n";
 				}
 			} catch ( HLogicException& e ) {
 				kick_client( client_._socket, e.what() );
@@ -553,20 +566,21 @@ void HServer::join_party( OClientInfo& client_, HString const& id_ ) {
 		kick_client( client_._socket, "Set your name first (Just login with standard client, will ya?)." );
 	else {
 		logics_t::iterator it = _logics.find( id_ );
-		if ( it == _logics.end() )
-			client_._socket->write_until_eos( "err:Party does not exists.\n" );
-		else if ( client_._logics.count( id_ ) != 0 )
+		if ( it == _logics.end() ) {
+			*client_._socket << "err:Party does not exists.\n";
+		} else if ( client_._logics.count( id_ ) != 0 ) {
 			kick_client( client_._socket, "You were already in this party." );
-		else if ( ! it->second->accept_client( &client_ ) ) {
-			if ( ! it->second->is_private() )
+		} else if ( ! it->second->accept_client( &client_ ) ) {
+			if ( ! it->second->is_private() ) {
 				broadcast_player_info( client_ );
-			else {
+			} else {
 				*client_._socket << PROTOCOL::PARTY_INFO << PROTOCOL::SEP << id_ << PROTOCOL::SEPP << it->second->get_info() << endl;
 				broadcast_player_info( client_, *it->second );
 			}
 			it->second->post_accept_client( &client_ );
-		} else
-			client_._socket->write_until_eos( "err:You are not allowed in this party.\n" );
+		} else {
+			*client_._socket << "err:You are not allowed in this party.\n";
+		}
 	}
 	return;
 	M_EPILOG
@@ -596,7 +610,7 @@ void HServer::handler_abandon( OClientInfo& client_, HString const& id_ ) {
 	else {
 		logics_t::iterator logic( _logics.find( id_ ) );
 		if ( logic != _logics.end() ) {
-			out << "client " << client_._login << " abandoned party `" << id_ << "'" << endl;
+			OUT << "client " << client_._login << " abandoned party `" << id_ << "'" << endl;
 			remove_client_from_logic( client_, logic->second );
 		}
 	}
@@ -606,7 +620,7 @@ void HServer::handler_abandon( OClientInfo& client_, HString const& id_ ) {
 
 void HServer::remove_client_from_all_logics( OClientInfo& client_ ) {
 	M_PROLOG
-	out << "removing client from all logics: " << client_._login << endl;
+	OUT << "removing client from all logics: " << client_._login << endl;
 	for ( OClientInfo::logics_t::iterator it( client_._logics.begin() ), end( client_._logics.end() ); it != end; ) {
 		HLogic::id_t id( *it );
 		++ it;
@@ -641,7 +655,7 @@ void HServer::flush_logics( void ) {
 void HServer::remove_client_from_logic( OClientInfo& client_, HLogic::ptr_t logic_, char const* const reason_ ) {
 	M_PROLOG
 	if ( !! logic_ ) {
-		out << "separating logic info from client info for: " << client_._login << " and party: " << logic_->get_info() << endl;
+		OUT << "separating logic info from client info for: " << client_._login << " and party: " << logic_->get_info() << endl;
 		logic_->kick_client( &client_, reason_ );
 		HString const& id( logic_->id() );
 		client_._logics.erase( id );

@@ -142,7 +142,7 @@ char const * const _systemNamesNorse_[ ] = {
 
 char const * const _symbols_ = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 
-char const * const * _systemNames_ = NULL;
+char const * const * _systemNames_ = nullptr;
 
 int _colors_[ ] = {
 	( COLORS::FG_BRIGHTBLUE | COLORS::BG_BLACK ),
@@ -292,7 +292,7 @@ public:
 	typedef HPointer<HGalaxyWindow> ptr_t;
 	HGalaxyWindow( char const * const, HClient *, int &, int &, client_state_t & );
 	virtual ~HGalaxyWindow( void );
-	virtual int init( void );
+	virtual void do_init( void ) override;
 	HBoard * get_board( void );
 	void set_data( systems_t *, emperors_t *, moves_t * );
 	/*}*/
@@ -322,7 +322,7 @@ protected:
 	int _color;
 	int _round;
 	client_state_t _state;
-	HSocket _socket;
+	HSocket::ptr_t _socket;
 	HGalaxyWindow::ptr_t _window;
 	HBoard* _board;
 	systems_t _systems;
@@ -337,7 +337,7 @@ public:
 	HClient( char const* const );
 	virtual ~HClient( void );
 	void init_client( HString&, int );
-	void handler_message( int );
+	void handler_message( yaal::tools::HIODispatcher::stream_t& );
 	void end_round( void );
 	void send_message( HString const& );
 	HString const& id( void ) const;
@@ -364,8 +364,11 @@ private:
 HString HClient::CLIENT_VERSION = "3";
 
 HSystem::HSystem( void )
-	: _coordinateX( -1 ), _coordinateY( -1 ),
-	_color( -1 ), _production( -1 ), _fleet( -1 ) {
+	: _coordinateX( -1 )
+	, _coordinateY( -1 )
+	, _color( -1 )
+	, _production( -1 )
+	, _fleet( -1 ) {
 	M_PROLOG
 	return;
 	M_EPILOG
@@ -432,10 +435,14 @@ void HEventListener::set_state( client_state_t state_ ) {
 }
 
 HBoard::HBoard( HWindow * parent_, HEventListener & listener_ )
-	: HWidget( parent_, 0, 1, 0, 0, "&galaxy\n" ),
-	_cursorY ( 0 ), _cursorX ( 0 ), _boardSize( - 1 ),
-	_sourceSystem( - 1 ), _destinationSystem( - 1 ),
-	_systems( NULL ), _listener( listener_ ) {
+	: HWidget( parent_, 0, 1, 0, 0, "&galaxy\n" )
+	, _cursorY ( 0 )
+	, _cursorX ( 0 )
+	, _boardSize( -1 )
+	, _sourceSystem( -1 )
+	, _destinationSystem( -1 )
+	, _systems( nullptr )
+	, _listener( listener_ ) {
 	M_PROLOG
 	return;
 	M_EPILOG
@@ -649,17 +656,24 @@ int HBoard::distance( int source_, int destination_ ) {
 	M_EPILOG
 }
 
-HGalaxyWindow::HGalaxyWindow( char const* const windowTitle_,
-		HClient* client_,
-		int& round_, int& color_, client_state_t& state_ )
-	: HWindow( windowTitle_ ),
-	HEventListener( round_, color_, state_ ),
-	_varTmpBuffer(),
-	_board( NULL ), _systemName( NULL ), _emperorName( NULL ),
-	_production( NULL ), _fleet( NULL ), _messageInput( NULL ),
-	_logPad( NULL ),
-	_client( client_ ),
-	_systems( NULL ), _emperors( NULL ), _moves( NULL ) {
+HGalaxyWindow::HGalaxyWindow(
+	char const* windowTitle_,
+	HClient* client_,
+	int& round_, int& color_, client_state_t& state_
+) : HWindow( windowTitle_ )
+	, HEventListener( round_, color_, state_ )
+	, _varTmpBuffer()
+	, _board( nullptr )
+	, _systemName( nullptr )
+	, _emperorName( nullptr )
+	, _production( nullptr )
+	, _fleet( nullptr )
+	, _messageInput( nullptr )
+	, _logPad( nullptr )
+	, _client( client_ )
+	, _systems( nullptr )
+	, _emperors( nullptr )
+	, _moves( nullptr ) {
 	M_PROLOG
 	return;
 	M_EPILOG
@@ -671,9 +685,9 @@ HGalaxyWindow::~HGalaxyWindow( void ) {
 	M_EPILOG
 }
 
-int HGalaxyWindow::init( void ) {
+void HGalaxyWindow::do_init( void ) {
 	M_PROLOG
-	HWindow::init();
+	HWindow::do_init();
 	_board = new HBoard( this, * this );
 	_board->enable( true );
 	_board->set_focus();
@@ -688,10 +702,10 @@ int HGalaxyWindow::init( void ) {
 	_messageInput = new HEditWidget( this, - 4, 64, 1, - 1, "&Message", wa.mask( _maskLoose_ ).max_string_size( 255 ) );
 	_logPad->enable( true );
 	_messageInput->enable( true );
-	register_postprocess_handler( '\r', NULL, call( &HGalaxyWindow::handler_enter, this, _1 ) );
-	register_postprocess_handler( KEY_CODES::ESCAPE, NULL, call( &HGalaxyWindow::handler_esc, this, _1 ) );
-	register_postprocess_handler( ' ', NULL, call( &HGalaxyWindow::handler_space, this, _1 ) );
-	return ( 0 );
+	register_postprocess_handler( '\r', nullptr, call( &HGalaxyWindow::handler_enter, this, _1 ) );
+	register_postprocess_handler( KEY_CODES::ESCAPE, nullptr, call( &HGalaxyWindow::handler_esc, this, _1 ) );
+	register_postprocess_handler( ' ', nullptr, call( &HGalaxyWindow::handler_space, this, _1 ) );
+	return;
 	M_EPILOG
 }
 
@@ -747,7 +761,7 @@ void HGalaxyWindow::make_move( int sourceSystem_, int destinationSystem_ ) {
 bool HGalaxyWindow::handler_enter( hconsole::HEvent const& ) {
 	M_PROLOG
 	bool consumed( false );
-	HMove* move( NULL );
+	HMove* move( nullptr );
 	if ( (*_focusedChild) == _messageInput ) {
 		if ( _messageInput->get_text().find_other_than( _whiteSpace_.data() ) >= 0 ) {
 			_varTmpBuffer = "cmd:";
@@ -817,11 +831,19 @@ void HGalaxyWindow::msg( int attr_, char const* const msg_ ) {
 	M_EPILOG
 }
 
-HClient::HClient( char const * const programName_ )
-	: _id(), _color( - 1 ), _round( - 1 ), _state( LOCKED ), _socket(),
-	_window( new HGalaxyWindow( programName_, this, _round, _color, _state ) ),
-	_board( NULL ), _systems( 0 ), _handlers( 16 ), _emperors( 16 ),
-	_moves(), _out() {
+HClient::HClient( char const* programName_ )
+	: _id()
+	, _color( -1 )
+	, _round( -1 )
+	, _state( LOCKED )
+	, _socket( make_pointer<HSocket>() )
+	, _window( new HGalaxyWindow( programName_, this, _round, _color, _state ) )
+	, _board( nullptr )
+	, _systems( 0 )
+	, _handlers( 16 )
+	, _emperors( 16 )
+	, _moves()
+	, _out() {
 	M_PROLOG
 	_handlers[ "setup" ] = &HClient::handler_setup;
 	_handlers[ "play" ] = &HClient::handler_play;
@@ -850,12 +872,13 @@ HString const& HClient::id( void ) const {
 void HClient::init_client( HString& host_, int port_ ) {
 	M_PROLOG
 	HString message;
-	_socket.connect( host_, port_ );
-	_dispatcher.register_file_descriptor_handler( _socket.get_file_descriptor(), call( &HClient::handler_message, this, _1 ) );
-	if ( setup._password.is_empty() )
-		_socket.write_until_eos( _out << "login:" << CLIENT_VERSION << ":" << setup._login << endl << _out );
-	else
-		_socket.write_until_eos( _out << "login:" << CLIENT_VERSION << ":" << setup._login << ":" << tools::hash::sha1( setup._password ) << endl << _out );
+	_socket->connect( host_, port_ );
+	_dispatcher.register_file_descriptor_handler( _socket, call( &HClient::handler_message, this, _1 ) );
+	if ( setup._password.is_empty() ) {
+		*_socket << ( _out << "login:" << CLIENT_VERSION << ":" << setup._login << endl << _out );
+	} else {
+		*_socket << ( _out << "login:" << CLIENT_VERSION << ":" << setup._login << ":" << tools::hash::sha1( setup._password ) << endl << _out );
+	}
 	_window->set_data( &_systems, &_emperors, &_moves );
 	HTUIProcess::init_tui( "galaxy", _window );
 	_board = _window->get_board();
@@ -863,19 +886,20 @@ void HClient::init_client( HString& host_, int port_ ) {
 		message.format( "create:glx:%s,%d,%d,%d\n",
 				setup._game.raw(),
 				setup._emperors, setup._boardSize, setup._systems );
-		_socket.write_until_eos( message );
-	} else
-		_socket.write_until_eos( "get_partys\n" );
+		*_socket << message;
+	} else {
+		*_socket << "get_partys\n";
+	}
 	return;
 	M_EPILOG
 }
 
-void HClient::handler_message( int ) {
+void HClient::handler_message( yaal::tools::HIODispatcher::stream_t& ) {
 	M_PROLOG
 	int long msgLength = 0;
 	HString message;
 	HString command;
-	if ( ( msgLength = _socket.read_until( message ) ) > 0 ) {
+	if ( ( msgLength = _socket->read_until( message ) ) > 0 ) {
 		if ( setup._debug ) {
 			_window->_logPad->add( message );
 			_window->_logPad->add( "\n" );
@@ -932,7 +956,7 @@ void HClient::handler_party_info( HString& command_ ) {
 			_id = newId;
 			if ( setup._gameType.is_empty() ) {
 				setup._gameType = "glx";
-				_socket.write_until_eos( _out << "join:" << _id << endl << _out );
+				*_socket << ( _out << "join:" << _id << endl << _out );
 			}
 		}
 	}
@@ -1128,18 +1152,18 @@ void HClient::end_round( void ) {
 					it->_sourceSystem,
 					it->_destinationSystem,
 					it->_fleet );
-			_socket.write_until_eos( message );
+			*_socket << message;
 		}
 		_moves.clear();
 	}
-	_socket.write_until_eos( _out << "cmd:" << _id << ":glx:play:end_round\n" << _out );
+	*_socket << ( _out << "cmd:" << _id << ":glx:play:end_round\n" << _out );
 	return;
 	M_EPILOG
 }
 
 void HClient::send_message( HString const & message_ ) {
 	M_PROLOG
-	_socket.write_until_eos( message_ );
+	*_socket << message_;
 	return;
 	M_EPILOG
 }

@@ -61,12 +61,12 @@ HLogic::HLogic( HServer* server_, id_t const& id_, HString const& comment_ )
 }
 
 HLogic::~HLogic( void ) {
-	out << "Destroying logic: " << _id << endl;
+	OUT << "Destroying logic: " << _id << endl;
 }
 
 void HLogic::kick_client( OClientInfo* clientInfo_, char const* const reason_ ) {
 	M_PROLOG
-	out << "kicking player `" << clientInfo_->_login << "' from " << _name << "," << _id << endl;
+	OUT << "kicking player `" << clientInfo_->_login << "' from " << _name << "," << _id << endl;
 	clientInfo_->_logics.erase( _id );
 	_clients.erase( clientInfo_ );
 	if ( reason_ )
@@ -132,7 +132,7 @@ bool HLogic::process_command( OClientInfo* clientInfo_, HString const& command_ 
 		( this->*(it->second) )( clientInfo_, argument );
 	else {
 		failure = true;
-		out << "mnemo: " << mnemonic << ", arg: " << argument << ", cmd: " << command_ << endl;
+		OUT << "mnemo: " << mnemonic << ", arg: " << argument << ", cmd: " << command_ << endl;
 	}
 	return ( failure );
 	M_EPILOG
@@ -153,8 +153,9 @@ void HLogic::broadcast( HString const& message_ ) {
 	_bcastBuffer += message_;
 	for ( clients_t::HIterator it( _clients.begin() ), end( _clients.end() ); it != end; ++ it ) {
 		try {
-			if ( (*it)->_valid )
-				(*it)->_socket->write_until_eos( _bcastBuffer );
+			if ( (*it)->_valid ) {
+				*(*it)->_socket << _bcastBuffer;
+			}
 		} catch ( HOpenSSLException const& ) {
 			drop_client( *it );
 		}

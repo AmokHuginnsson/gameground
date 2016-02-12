@@ -97,8 +97,8 @@ HGomoku::~HGomoku ( void ) {
 void HGomoku::broadcast_contestants( yaal::hcore::HString const& message_ ) {
 	M_PROLOG
 	M_ASSERT( _contestants[ 0 ] && _contestants[ 1 ] );
-	_contestants[ 0 ]->_socket->write_until_eos( message_ );
-	_contestants[ 1 ]->_socket->write_until_eos( message_ );
+	*_contestants[ 0 ]->_socket << message_;
+	*_contestants[ 1 ]->_socket << message_;
 	return;
 	M_EPILOG
 }
@@ -194,7 +194,7 @@ void HGomoku::handler_play( OClientInfo* clientInfo_, HString const& message_ ) 
 }
 
 bool HGomoku::do_accept( OClientInfo* clientInfo_ ) {
-	out << "new candidate " << clientInfo_->_login << endl;
+	OUT << "new candidate " << clientInfo_->_login << endl;
 	return ( false );
 }
 
@@ -404,7 +404,7 @@ protected:
 
 HLogic::ptr_t HGomokuCreator::do_new_instance( HServer* server_, HLogic::id_t const& id_, HString const& argv_ ) {
 	M_PROLOG
-	out << "creating logic: " << argv_ << endl;
+	OUT << "creating logic: " << argv_ << endl;
 	HString name = get_token( argv_, ",", 0 );
 	return ( make_pointer<gomoku::HGomoku>( server_, id_, name ) );
 	M_EPILOG
@@ -414,7 +414,7 @@ HString HGomokuCreator::do_get_info( void ) const {
 	M_PROLOG
 	HString setup;
 	setup.format( "gomoku" );
-	out << setup << endl;
+	OUT << setup << endl;
 	return ( setup );
 	M_EPILOG
 }

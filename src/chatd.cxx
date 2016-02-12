@@ -67,7 +67,7 @@ HChat::~HChat ( void ) {
 }
 
 bool HChat::do_accept( OClientInfo* clientInfo_ ) {
-	out << "new candidate " << clientInfo_->_login << endl;
+	OUT << "new candidate " << clientInfo_->_login << endl;
 	return ( _chatterNames->count( clientInfo_->_login ) != 1 );
 }
 
@@ -154,7 +154,7 @@ HLogic::ptr_t HChat::get_chat( HServer* server_, HLogic::id_t const& id_, HStrin
 	if ( it != _chats_.end() ) {
 		logic = it->second;
 	} else {
-		out << "creating logic: " << argv_ << endl;
+		OUT << "creating logic: " << argv_ << endl;
 		logic = make_pointer<chat::HChat>( server_, id_, chatterNames, key );
 		_chats_.insert( make_pair( key, logic ) );
 	}
@@ -197,7 +197,7 @@ HString HChatCreator::do_get_info( void ) const {
 	M_PROLOG
 	HString setup;
 	setup.format( "chat" );
-	out << setup << endl;
+	OUT << setup << endl;
 	return ( setup );
 	M_EPILOG
 }

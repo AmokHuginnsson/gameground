@@ -28,6 +28,7 @@ Copyright:
 #define GAMEGROUND_SERVER_HXX_INCLUDED
 
 #include <yaal/hcore/hnumber.hxx>
+#include <yaal/hcore/hsocket.hxx>
 #include <yaal/tools/hiodispatcher.hxx>
 #include <yaal/tools/hexclusiveaccessor.hxx>
 #include <yaal/dbwrapper/hdatabase.hxx>
@@ -44,12 +45,12 @@ protected:
 	typedef void ( HServer::* handler_t )( OClientInfo&, yaal::hcore::HString const& );
 	typedef yaal::hcore::HMap<HLogic::id_t, HLogic::ptr_t> logics_t;
 	typedef yaal::hcore::HMap<yaal::hcore::HString, handler_t> handlers_t;
-	typedef yaal::hcore::HMap<int, OClientInfo> clients_t;
+	typedef yaal::hcore::HMap<yaal::tools::HIODispatcher::stream_t::value_type*, OClientInfo> clients_t;
 	typedef yaal::hcore::HMap<yaal::hcore::HString, OClientInfo*> logins_t;
 	typedef yaal::hcore::HArray<OClientInfo*> dropouts_t;
 	typedef yaal::tools::HExclusiveAccessor<yaal::dbwrapper::HDataBase::ptr_t> db_accessor_t;
 	int _maxConnections;
-	yaal::hcore::HSocket _socket;
+	yaal::hcore::HSocket::ptr_t _socket;
 	clients_t _clients;
 	logins_t _logins;
 	logics_t _logics;
@@ -102,13 +103,13 @@ public:
 	void join_party( OClientInfo&, yaal::hcore::HString const& );
 	void handle_get_account( OClientInfo&, yaal::hcore::HString const& );
 protected:
-	void handler_connection( int );
-	void handler_message( int );
+	void handler_connection( yaal::tools::HIODispatcher::stream_t& );
+	void handler_message( yaal::tools::HIODispatcher::stream_t& );
 	void handler_shutdown( OClientInfo&, yaal::hcore::HString const& );
 	void handler_quit( OClientInfo&, yaal::hcore::HString const& );
 	void handler_abandon( OClientInfo&, yaal::hcore::HString const& );
 	void handler_chat( OClientInfo&, yaal::hcore::HString const& );
-	void kick_client( yaal::hcore::HSocket::ptr_t&, char const* const = NULL );
+	void kick_client( yaal::tools::HIODispatcher::stream_t&, char const* const = NULL );
 	void broadcast( yaal::hcore::HString const& );
 	void broadcast_party( yaal::hcore::HString const&, yaal::hcore::HString const& );
 	void broadcast_private( HLogic&, yaal::hcore::HString const& );
