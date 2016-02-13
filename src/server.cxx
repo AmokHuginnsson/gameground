@@ -105,7 +105,7 @@ HServer::HServer( int connections_ )
 	: _maxConnections( connections_ ),
 	_socket(
 		make_pointer<HSocket>(
-			HSocket::socket_type_t( HSocket::TYPE::DEFAULT ) | HSocket::TYPE::NONBLOCKING | HSocket::TYPE::SSL_SERVER,
+			HSocket::TYPE::DEFAULT | HSocket::TYPE::NONBLOCKING | HSocket::TYPE::SSL | HSocket::TYPE::SERVER,
 			connections_
 		)
 	),
@@ -154,7 +154,7 @@ void HServer::handler_connection( yaal::tools::HIODispatcher::stream_t& ) {
 	M_PROLOG
 	HSocket::ptr_t client = _socket->accept();
 	M_ASSERT( !! client );
-	if ( _socket->get_client_count() >= _maxConnections ) {
+	if ( static_cast<int>( _clients.get_size() ) >= _maxConnections ) {
 		client->close();
 	} else {
 		_dispatcher.register_file_descriptor_handler( client, call( &HServer::handler_message, this, _1 ) );
@@ -219,7 +219,6 @@ void HServer::handler_message( yaal::tools::HIODispatcher::stream_t& stream_ ) {
 void HServer::kick_client( yaal::tools::HIODispatcher::stream_t& client_, char const* const reason_ ) {
 	M_PROLOG
 	M_ASSERT( !! client_ );
-	int fileDescriptor( static_cast<HSocket*>( client_.raw() )->get_file_descriptor() );
 	clients_t::iterator clientIt( _clients.find( client_.raw() ) );
 	M_ASSERT( clientIt != _clients.end() );
 	if ( clientIt->second._valid && reason_ && reason_[0] ) {
@@ -229,7 +228,6 @@ void HServer::kick_client( yaal::tools::HIODispatcher::stream_t& client_, char c
 			/* Kicked client is no longer valid but we cannot do anything about it. */
 		}
 	}
-	_socket->shutdown_client( fileDescriptor );
 	_dispatcher.unregister_file_descriptor_handler( client_ );
 	clientIt->second._valid = false;
 	remove_client_from_all_logics( clientIt->second );
