@@ -309,7 +309,7 @@ class Go extends HAbstractLogic implements Runnable {
 		public void updateSetup() {
 			_conf.selectGobanSize( "" + _board._sgf._gobanSize );
 			_board.setSize( _board._sgf._gobanSize );
-			_conf.setValue( _conf._confKomi, (int)_board._sgf._komi );
+			_conf.setValue( _conf._confKomi, _board._sgf._komi100 / 100 );
 			_conf.setValue( _conf._confHandicaps, _board._sgf._handicap );
 			_conf.setValue( _conf._confMainTime, _board._sgf._time );
 			GoPlayer contestant = _contestants.get( STONE.BLACK );
@@ -391,7 +391,7 @@ class Go extends HAbstractLogic implements Runnable {
 				_gui._conf.selectGobanSize( tokens[ 1 ] );
 				_gui._board.setSize( value );
 			} else if ( PROTOCOL.KOMI.equals( tokens[ 0 ] ) ) {
-				_gui._conf.setValue( _gui._conf._confKomi, Integer.parseInt( tokens[ 1 ] ) );
+				_gui._conf.setValue( _gui._conf._confKomi, Integer.parseInt( tokens[ 1 ] ) / 100 );
 			} else if ( PROTOCOL.HANDICAPS.equals( tokens[ 0 ] ) ) {
 				_gui._conf.setValue( _gui._conf._confHandicaps, Integer.parseInt( tokens[ 1 ] ) );
 			} else if ( PROTOCOL.MAINTIME.equals( tokens[ 0 ] ) ) {

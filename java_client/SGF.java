@@ -225,24 +225,28 @@ public class SGF {
 	static final int RESIGN = 0xffff;
 	static final int TIME = 0x7fff;
 	String _app = null;
+	String _charset = "";
 	String _gameName = "";
 	String _date = "";
 	String _event = "";
 	String _round = "";
 	String _source = "";
-	String _author = "";
+	String _creator = "";
+	String _annotator = "";
 	String _rules = "";
 	String _overTime = "";
 	String _blackName = "";
 	String _whiteName = "";
 	String _blackRank = "30k";
 	String _whiteRank = "30k";
+	String _blackCountry = "";
+	String _whiteCountry = "";
 	String _verbatimResult = "";
 	HTree<Move> _tree = new HTree<Move>();
 	int _gobanSize = 19;
 	int _time = 0;
 	int _handicap = 0;
-	double _komi = 5.5;
+	int _komi100 = 550;
 	int _result = 0;
 	String _place = "";
 	String _comment = "";
@@ -301,23 +305,27 @@ public class SGF {
 		_cachePropIdent = null;
 		_cachePropValue.clear();
 		_app = "";
+		_charset = "";
 		_gameName = "";
 		_date = "";
 		_event = "";
 		_round = "";
 		_source = "";
-		_author = "";
+		_creator = "";
+		_annotator = "";
 		_rules = "";
 		_overTime = "";
 		_blackName = "";
 		_blackRank = "";
+		_blackCountry = "";
 		_whiteName = "";
 		_whiteRank = "";
+		_whiteCountry = "";
 		_verbatimResult = "";
 		clearGame();
 		_gobanSize = 19;
 		_handicap = 0;
-		_komi = 5.5;
+		_komi100 = 550;
 		_result = 0;
 		_place = "";
 		_comment = "";
@@ -420,8 +428,13 @@ public class SGF {
 			result = result + "R";
 		} else {
 			result = result + res;
-			if ( Math.round( _komi ) != _komi ) {
-				result = result + ".5";
+			if ( ( _komi100 % 100 ) != 0 ) {
+				result = result + ".";
+				if ( ( _komi100 % 10 ) != 0 ) {
+					result = result + ( _komi100 % 100 );
+				} else {
+					result = result + ( ( _komi100 % 100 ) / 10 );
+				}
 			} else if ( _result == 0 ) {
 				result = "jigo";
 			}
@@ -534,6 +547,8 @@ public class SGF {
 				throw new SGFException( _errMsg_[ERROR.BAD_FILE_FORMAT.ordinal()], _cur );
 		} else if ( "AP".equals( _cachePropIdent ) ) {
 			_app = singleValue;
+		} else if ( "CA".equals( _cachePropIdent ) ) {
+			_charset = singleValue;
 		} else if ( "GN".equals( _cachePropIdent ) ) {
 			_gameName = singleValue;
 		} else if ( "DT".equals( _cachePropIdent ) ) {
@@ -544,8 +559,10 @@ public class SGF {
 			_round = singleValue;
 		} else if ( "SO".equals( _cachePropIdent ) ) {
 			_source = singleValue;
+		} else if ( "US".equals( _cachePropIdent ) ) {
+			_creator = singleValue;
 		} else if ( "AN".equals( _cachePropIdent ) ) {
-			_author = singleValue;
+			_annotator = singleValue;
 		} else if ( "RU".equals( _cachePropIdent ) ) {
 			_rules = singleValue;
 		} else if ( "PB".equals( _cachePropIdent ) ) {
@@ -556,33 +573,68 @@ public class SGF {
 			_blackRank = singleValue;
 		} else if ( "WR".equals( _cachePropIdent ) ) {
 			_whiteRank = singleValue;
+		} else if ( "BC".equals( _cachePropIdent ) ) {
+			_blackCountry = singleValue;
+		} else if ( "WC".equals( _cachePropIdent ) ) {
+			_whiteCountry = singleValue;
 		} else if ( "KM".equals( _cachePropIdent ) ) {
-			_komi = Double.parseDouble( singleValue );
+			String[] tok = singleValue.split( "[.]", 2 );
+			_komi100 = "".equals( tok[0] ) ? 0 : Integer.parseInt( tok[0] ) * 100;
+			_komi100 += ( ( tok.length < 2 ) || "".equals( tok[1] ) ) ? 0 : Integer.parseInt( tok[1] );
 		} else if ( "HA".equals( _cachePropIdent ) ) {
 			_handicap = Integer.parseInt( singleValue );
 		} else if ( "SZ".equals( _cachePropIdent ) ) {
 			_gobanSize = Integer.parseInt( singleValue );
 		} else if ( "TM".equals( _cachePropIdent ) ) {
-			_time = Integer.parseInt( singleValue );
+			String numStr = "";
+			_time = 0;
+			for ( int i = 0, C = singleValue.length(); i < C; ++ i ) {
+				if ( Character.isDigit( singleValue.charAt( i ) ) ) {
+					numStr = numStr + Character.toString( singleValue.charAt( i ) );
+				} else if ( numStr.length() > 0 ) {
+					char unit = Character.toLowerCase( singleValue.charAt( i ) );
+					if ( unit == 'h' ) {
+						_time += ( Integer.parseInt( numStr ) * 3600 );
+					} else if ( unit == 'm' ) {
+						_time += ( Integer.parseInt( numStr ) * 60 );
+					} else if ( unit == 's' ) {
+						_time += Integer.parseInt( numStr );
+					} else if ( Character.isWhitespace( unit ) ) {
+						continue;
+					} else {
+						throw new SGFException( "Bad time format", _cur + i );
+					}
+					numStr = "";
+				}
+			}
+			if ( numStr.length() > 0 ) {
+				_time += Integer.parseInt( numStr );
+			}
 		} else if ( "OT".equals( _cachePropIdent ) ) {
 			_overTime = singleValue;
 		} else if ( "PC".equals( _cachePropIdent ) ) {
 			_place = singleValue;
 		} else if ( "RE".equals( _cachePropIdent ) ) {
 			_verbatimResult = singleValue;
-			if ( Character.isDigit( singleValue.charAt( 2 ) ) ) {
-				_result = (int)Double.parseDouble( singleValue.substring( 2 ) );
-			} else {
-				char r = Character.toUpperCase( singleValue.charAt( 2 ) );
-				if ( r == 'R' ) {
+			if ( singleValue.length() > 0 ) {
+				if ( singleValue.length() > 2 ) {
+					if ( Character.isDigit( singleValue.charAt( 2 ) ) ) {
+						_result = (int)Double.parseDouble( singleValue.substring( 2 ) );
+					} else {
+						char r = Character.toUpperCase( singleValue.charAt( 2 ) );
+						if ( r == 'R' ) {
+							_result = RESIGN;
+						} else if ( r == 'T' ) {
+							_result = TIME;
+						}
+					}
+				} else {
 					_result = RESIGN;
-				} else if ( r == 'T' ) {
-					_result = TIME;
 				}
-			}
-			char player = Character.toUpperCase( singleValue.charAt( 0 ) );
-			if ( player == 'W' ) {
-				_result = -_result;
+				char player = Character.toUpperCase( singleValue.charAt( 0 ) );
+				if ( player == 'W' ) {
+					_result = -_result;
+				}
 			}
 		} else if ( _positionTagDict_.containsKey( _cachePropIdent ) ) {
 			for ( String s : _cachePropValue ) {
@@ -690,37 +742,67 @@ public class SGF {
 	}
 	void save( PrintStream $stream, boolean $noNl ) {
 		StringBuilder sb = new StringBuilder();
-		sb.append( "(;GM[" ).append( _gameType.value() ).append( "]FF[4]AP[" ).append( _app )
-			.append( $noNl ? "]" : "]\n" ).append( "RU[" ).append( _rules ).append( "]SZ[" )
-			.append( _gobanSize ).append( "]KM[" ).append( _komi );
-		if ( ! "".equals( _gameName ) )
-			sb.append( "]GN[" ).append( _gameName );
-		if ( ! "".equals( _date ) )
-			sb.append( "]DT[" ).append( _date );
-		if ( ! "".equals( _event ) )
-			sb.append( "]EV[" ).append( _event );
-		if ( ! "".equals( _round ) )
-			sb.append( "]RO[" ).append( _round );
-		if ( ! "".equals( _source ) )
-			sb.append( "]SO[" ).append( _source );
-		if ( ! "".equals( _author ) )
-			sb.append( "]AN[" ).append( _author );
-		sb.append( "]TM[" ).append( _time );
-		if ( ! "".equals( _overTime ) )
-			sb.append( "]OT[" ).append( _overTime );
-		sb.append(  $noNl ? "]PB[" : "]\nPB[" )
-			.append( _blackName ).append( "]PW[" ).append( _whiteName ).append( $noNl ? "]" : "]\n" );
-		boolean rankShown = false;
-		if ( ( _blackRank != null ) && ! "".equals( _blackRank ) ) {
+		String nl = $noNl ? "" : "\n";
+		sb.append( "(;GM[" ).append( _gameType.value() ).append( "]FF[4]AP[" ).append( _app ).append( "]" );
+		sb.append( nl ).append( "RU[" ).append( _rules ).append( "]SZ[" ).append( _gobanSize ).append( "]" );
+		String komiStr = Integer.toString( _komi100 / 100 );
+		if ( ( _komi100 % 100 ) != 0 ) {
+			komiStr = komiStr + ".";
+			if ( ( _komi100 % 10 ) != 0 ) {
+				komiStr = komiStr + Integer.toString( _komi100 % 100 );
+			} else {
+				komiStr = komiStr + Integer.toString( ( _komi100 % 100 ) / 10 );
+			}
+		}
+		sb.append( "KM[" ).append( komiStr ).append( "]" );
+		if ( ! "".equals( _gameName ) ) {
+			sb.append( "GN[" ).append( _gameName ).append( "]" );
+		}
+		if ( ! "".equals( _date ) ) {
+			sb.append( "DT[" ).append( _date ).append( "]" );
+		}
+		if ( ! "".equals( _event ) ) {
+			sb.append( "EV[" ).append( _event ).append( "]" );
+		}
+		if ( ! "".equals( _round ) ) {
+			sb.append( "RO[" ).append( _round ).append( "]" );
+		}
+		if ( ! "".equals( _source ) ) {
+			sb.append( "SO[" ).append( _source ).append( "]" );
+		}
+		if ( ! "".equals( _creator ) ) {
+			sb.append( "AN[" ).append( _creator ).append( "]" );
+		}
+		if ( ! "".equals( _annotator ) ) {
+			sb.append( "AN[" ).append( _annotator ).append( "]" );
+		}
+		sb.append( "TM[" ).append( _time ).append( "]" );
+		if ( ! "".equals( _overTime ) ) {
+			sb.append( "OT[" ).append( _overTime ).append( "]" );
+		}
+		sb.append( nl );
+		sb.append( "PB[" ).append( _blackName ).append( "]PW[" ).append( _whiteName ).append( "]" );
+		sb.append( nl );
+		boolean metaShown = false;
+		if ( "".equals( _blackRank ) ) {
 			sb.append( "BR[" ).append( _blackRank ).append( "]" );
-			rankShown = true;
+			metaShown = true;
 		}
-		if ( ( _whiteRank != null ) && ! "".equals( _whiteRank ) ) {
+		if ( "".equals( _whiteRank ) ) {
 			sb.append( "WR[" ).append( _whiteRank ).append( "]" );
-			rankShown = true;
+			metaShown = true;
 		}
-		if ( rankShown && ! $noNl )
-			sb.append( "\n" );
+		if ( ! "".equals( _blackCountry ) ) {
+			sb.append( "BC[" ).append( _blackCountry ).append( "]" );
+			metaShown = true;
+		}
+		if ( ! "".equals( _whiteCountry ) ) {
+			sb.append( "WR[" ).append( _whiteCountry ).append( "]" );
+			metaShown = true;
+		}
+		if ( metaShown ) {
+			sb.append( nl );
+		}
 		String result = getVerbatimResult();
 		if ( ! "".equals( result ) ) {
 			sb.append( "RE[" ).append( result ).append( "]" );
@@ -735,7 +817,7 @@ public class SGF {
 				saveSetup( root, sb, $noNl );
 			saveVariations( firstToMove(), root, sb, $noNl );
 		}
-		sb.append( $noNl ? ")" : ")\n" );
+		sb.append( ")" ).append( nl );
 		$stream.print( sb );
 		return;
 	}

@@ -50,13 +50,13 @@ static int const BOGGLE_ROUND_TIME         = 180;
 static int const BOGGLE_INTER_ROUND_DELAY  =  15;
 static int const BOGGLE_MAX_ROUNDS         =   5;
 static int const GO_GOBAN_SIZE             =  19;
-static int const GO_KOMI                   =   5;
+static int const GO_KOMI                   = 550;
 static int const GO_HANDICAPS              =   0;
 static int const GO_MAINTIME               = 30 * 60;
 static int const GO_BYOYOMI_PERIODS        =   5;
 static int const GO_BYOYOMI_TIME           =  30;
 static int const SET_STARTUP_PLAYERS       =   2;
-static int const SET_DECK_COUNT                 =   1;
+static int const SET_DECK_COUNT            =   1;
 #define OUT ( yaal::hcore::clog << now << " " << __FILE__ + OSetup::PATH_OFFSET << ":" << __LINE__ << ": " )
 
 #ifndef NDEBUG
@@ -88,7 +88,7 @@ struct OSetup {
 	int _boggleRounds;
 	int _interRoundDelay;
 	int _gobanSize;
-	int _komi;
+	int _komi100;
 	int _handicaps;
 	int _mainTime;
 	int _byoYomiPeriods;
@@ -113,7 +113,7 @@ struct OSetup {
 		_setStartupPlayers( SET_STARTUP_PLAYERS ), _setDeckCount( SET_DECK_COUNT ),
 		_roundTime( BOGGLE_ROUND_TIME ), _boggleRounds( BOGGLE_MAX_ROUNDS ),
 		_interRoundDelay( BOGGLE_INTER_ROUND_DELAY ),
-		_gobanSize( GO_GOBAN_SIZE ), _komi( GO_KOMI ), _handicaps( GO_HANDICAPS ),
+		_gobanSize( GO_GOBAN_SIZE ), _komi100( GO_KOMI ), _handicaps( GO_HANDICAPS ),
 		_mainTime( GO_MAINTIME ), _byoYomiPeriods( GO_BYOYOMI_PERIODS ),
 		_byoYomiTime( GO_BYOYOMI_TIME ), _scoringSystem( BOGGLE_SCORING_SYSTEM ),
 		_consoleCharset(), _aspellLang(), _databasePath( DATABASE_PATH ),

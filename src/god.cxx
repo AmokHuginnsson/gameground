@@ -105,16 +105,27 @@ char const* const GO_MSG[] = {
 };
 
 HGo::HGo( HServer* server_, HLogic::id_t const& id_, HString const& comment_ )
-	: HLogic( server_, id_, comment_ ),
-	_toMove( setup._handicaps <= 1 ? STONE::BLACK : STONE::WHITE ), _marking( false ),
-	_gobanSize( setup._gobanSize ), _komi( setup._komi ), _handicaps( setup._handicaps ),
-	_mainTime( setup._mainTime ), _byoYomiPeriods( setup._byoYomiPeriods ),
-	_byoYomiTime( setup._byoYomiTime ), _move( 0 ), _pass( 0 ), _start( 0 ),
-	_game( GOBAN_SIZE::NORMAL * GOBAN_SIZE::NORMAL + sizeof ( '\0' ) ),
-	_koGame( GOBAN_SIZE::NORMAL * GOBAN_SIZE::NORMAL + sizeof ( '\0' ) ),
-	_oldGame( GOBAN_SIZE::NORMAL * GOBAN_SIZE::NORMAL + sizeof ( '\0' ) ),
-	_sgf( SGF::GAME_TYPE::GO, "gameground" ),
-	_adminQueue(), _path(), _branch(), _varTmpBuffer(), _pendingUndoRequest( NULL ) {
+	: HLogic( server_, id_, comment_ )
+	, _toMove( setup._handicaps <= 1 ? STONE::BLACK : STONE::WHITE )
+	, _marking( false )
+	, _gobanSize( setup._gobanSize )
+	, _komi100( setup._komi100 )
+	, _handicaps( setup._handicaps )
+	, _mainTime( setup._mainTime )
+	, _byoYomiPeriods( setup._byoYomiPeriods )
+	, _byoYomiTime( setup._byoYomiTime )
+	, _move( 0 )
+	, _pass( 0 )
+	, _start( 0 )
+	, _game( GOBAN_SIZE::NORMAL * GOBAN_SIZE::NORMAL + sizeof ( '\0' ) )
+	, _koGame( GOBAN_SIZE::NORMAL * GOBAN_SIZE::NORMAL + sizeof ( '\0' ) )
+	, _oldGame( GOBAN_SIZE::NORMAL * GOBAN_SIZE::NORMAL + sizeof ( '\0' ) )
+	, _sgf( SGF::GAME_TYPE::GO, "gameground" )
+	, _adminQueue()
+	, _path()
+	, _branch()
+	, _varTmpBuffer()
+	, _pendingUndoRequest( NULL ) {
 	M_PROLOG
 	_handlers[ PROTOCOL::SETUP ] = static_cast<handler_t>( &HGo::handler_setup );
 	_handlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HGo::handler_play );
@@ -161,14 +172,14 @@ void HGo::handler_setup( OClientInfo* clientInfo_, HString const& message_ ) {
 		if ( item == PROTOCOL::GOBAN ) {
 			_sgf.set_board_size( _gobanSize = value );
 			regenGoban = true;
-		} else if ( item == PROTOCOL::KOMI )
-			_sgf.set_komi( _komi = value );
-		else if ( item == PROTOCOL::HANDICAPS ) {
+		} else if ( item == PROTOCOL::KOMI ) {
+			_sgf.set_komi100( _komi100 = value );
+		} else if ( item == PROTOCOL::HANDICAPS ) {
 			set_handicaps( value );
 			regenGoban = true;
-		} else if ( item == PROTOCOL::MAINTIME )
+		} else if ( item == PROTOCOL::MAINTIME ) {
 			_sgf.set_time( _mainTime = value );
-		else if ( item == PROTOCOL::BYOYOMIPERIODS ) {
+		} else if ( item == PROTOCOL::BYOYOMIPERIODS ) {
 			SGF::byoyomi_t byoyomi( _sgf.get_byoyomi() );
 			_sgf.set_overtime( _byoYomiPeriods = value, byoyomi.second );
 		} else if ( item == PROTOCOL::BYOYOMITIME ) {
@@ -208,7 +219,7 @@ void HGo::handler_sgf( OClientInfo* clientInfo_, HString const& message_ ) {
 		sgf.load( message_ );
 		_sgf.swap( sgf );
 		_gobanSize = _sgf.get_board_size();
-		_komi = static_cast<int>( _sgf.get_komi() );
+		_komi100 = _sgf.get_komi100();
 		_handicaps = _sgf.get_handicap();
 		_mainTime = _sgf.get_time();
 		SGF::byoyomi_t byoyomi( _sgf.get_byoyomi() );
@@ -230,7 +241,7 @@ void HGo::handler_sgf( OClientInfo* clientInfo_, HString const& message_ ) {
 		broadcast( _out << PROTOCOL::SETUP << PROTOCOL::SEP
 			<< PROTOCOL::GOBAN << PROTOCOL::SEPP << _gobanSize << endl
 			<< *this << PROTOCOL::SETUP << PROTOCOL::SEP
-			<< PROTOCOL::KOMI << PROTOCOL::SEPP << _komi << endl
+			<< PROTOCOL::KOMI << PROTOCOL::SEPP << _komi100 << endl
 			<< *this << PROTOCOL::SETUP << PROTOCOL::SEP
 			<< PROTOCOL::HANDICAPS << PROTOCOL::SEPP << _handicaps << endl
 			<< *this << PROTOCOL::SETUP << PROTOCOL::SEP
@@ -266,7 +277,7 @@ void HGo::handler_sit( OClientInfo* clientInfo_, HString const& message_ ) {
 			info._timeLeft = _mainTime;
 			info._byoYomiPeriods = _byoYomiPeriods;
 			info._stonesCaptured = 0;
-			info._score = ( stone == STONE::WHITE ? _komi : 0 );
+			info._score = ( stone == STONE::WHITE ? _komi100 : 0 );
 			OPlayerInfo& black( contestant( STONE::BLACK ) );
 			OPlayerInfo& white( contestant( STONE::WHITE ) );
 			if ( black._client && white._client ) {
@@ -671,13 +682,22 @@ void HGo::count_score( void ) {
 	w._stonesCaptured += blackCaptures;
 	b._score = b._stonesCaptured + blackTeritory;
 	w._score += ( w._stonesCaptured + whiteTeritory );
+	HString komiStr( _komi100 / 100 );
+	if ( _komi100 % 100 ) {
+		komiStr.append( "." );
+		if ( _komi100 % 10 ) {
+			komiStr.append( _komi100 % 100 );
+		} else {
+			komiStr.append( ( _komi100 % 100 ) / 10 );
+		}
+	}
 	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< "Black's (" << b._client->_login << ") teritory: " << blackTeritory
 			<< ", captutes: " << b._stonesCaptured << "." << endl << _out );
 	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< "White's (" << w._client->_login << ") teritory: " << whiteTeritory
 			<< ", captutes: " << w._stonesCaptured
-			<< ", and " << _komi << " of komi." << endl << _out );
+			<< ", and " << _komi100 << " of komi." << endl << _out );
 	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< ( b._score > w._score ? b._client->_login : w._client->_login )
 			<< ( b._score > w._score ? " (black)" : " (white)" )
@@ -779,7 +799,7 @@ void HGo::do_post_accept( OClientInfo* clientInfo_ ) {
 		<< *this << PROTOCOL::SETUP << PROTOCOL::SEP
 		<< PROTOCOL::GOBAN << PROTOCOL::SEPP << _gobanSize << endl
 		<< *this << PROTOCOL::SETUP << PROTOCOL::SEP
-		<< PROTOCOL::KOMI << PROTOCOL::SEPP << _komi << endl
+		<< PROTOCOL::KOMI << PROTOCOL::SEPP << _komi100 << endl
 		<< *this << PROTOCOL::SETUP << PROTOCOL::SEP
 		<< PROTOCOL::HANDICAPS << PROTOCOL::SEPP << _handicaps << endl
 		<< *this << PROTOCOL::SETUP << PROTOCOL::SEP
@@ -844,7 +864,7 @@ void HGo::do_kick( OClientInfo* clientInfo_ ) {
 
 yaal::hcore::HString HGo::do_get_info( void ) const {
 	HLock l( _mutex );
-	return ( HString( "go," ) + get_comment() + "," + _gobanSize + "," + _komi + "," + _handicaps + "," + _mainTime + "," + _byoYomiPeriods + "," + _byoYomiTime );
+	return ( HString( "go," ) + get_comment() + "," + _gobanSize + "," + _komi100 + "," + _handicaps + "," + _mainTime + "," + _byoYomiPeriods + "," + _byoYomiTime );
 }
 
 void HGo::schedule_timeout( void ) {
@@ -885,10 +905,10 @@ void HGo::reset_goban( bool sgf_ ) {
 	M_PROLOG
 	if ( sgf_ ) {
 		_sgf.clear();
-		_sgf.set_info( _gobanSize, _handicaps, _komi, _mainTime, _byoYomiPeriods, _byoYomiTime );
+		_sgf.set_info( _gobanSize, _handicaps, _komi100, _mainTime, _byoYomiPeriods, _byoYomiTime );
 	}
 	_contestants[0].reset( _mainTime, 0, _byoYomiPeriods );
-	_contestants[1].reset( _mainTime, _komi, _byoYomiPeriods );
+	_contestants[1].reset( _mainTime, _komi100, _byoYomiPeriods );
 	::memset( _game.raw(), STONE::NONE, static_cast<int unsigned>( _gobanSize * _gobanSize ) );
 	_game.get<char>()[ _gobanSize * _gobanSize ] = 0;
 	::memset( _koGame.raw(), STONE::NONE, static_cast<int unsigned>( _gobanSize * _gobanSize ) );
@@ -947,12 +967,12 @@ void HGo::set_handicaps( int handicaps_ ) {
 		throw HLogicException( _out << "bad handicap value: " << handicaps_ << _out );
 	if ( handicaps_ != _handicaps ) {
 		if ( handicaps_ > 0 )
-			_komi = 0;
+			_komi100 = 0;
 		else
-			_komi = setup._komi;
+			_komi100 = setup._komi100;
 		_handicaps = handicaps_;
 		broadcast( _out << PROTOCOL::SETUP << PROTOCOL::SEP
-				<< PROTOCOL::KOMI << PROTOCOL::SEPP << _komi << endl << _out );
+				<< PROTOCOL::KOMI << PROTOCOL::SEPP << _komi100 << endl << _out );
 	}
 	return;
 	M_EPILOG
@@ -1347,7 +1367,7 @@ HLogic::ptr_t HGoCreator::do_new_instance( HServer* server_, HLogic::id_t const&
 HString HGoCreator::do_get_info( void ) const {
 	M_PROLOG
 	HString setupMsg;
-	setupMsg.format( "go:%d,%d,%d,%d,%d,%d", setup._gobanSize, setup._komi, setup._handicaps,
+	setupMsg.format( "go:%d,%d,%d,%d,%d,%d", setup._gobanSize, setup._komi100, setup._handicaps,
 			setup._mainTime, setup._byoYomiPeriods, setup._byoYomiTime );
 	OUT << setupMsg << endl;
 	return ( setupMsg );

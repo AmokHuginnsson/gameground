@@ -48,7 +48,14 @@ private:
 		int _score;
 		bool _ignoreUndo;
 		OClientInfo* _client;
-		OPlayerInfo( void ) : _timeLeft( 0 ), _byoYomiPeriods( 0 ), _stonesCaptured( 0 ), _score( 0 ), _ignoreUndo( false ), _client( NULL ) {}
+		OPlayerInfo( void )
+			: _timeLeft( 0 )
+			, _byoYomiPeriods( 0 )
+			, _stonesCaptured( 0 )
+			, _score( 0 )
+			, _ignoreUndo( false )
+			, _client( NULL ) {
+		}
 		void reset( int time_, int score_, int byo_ ) {
 			_timeLeft = time_;
 			_byoYomiPeriods = byo_;
@@ -110,7 +117,7 @@ protected:
 	STONE::stone_t _toMove;
 	bool _marking;
 	int _gobanSize;
-	int _komi;
+	int _komi100;
 	int _handicaps;
 	int _mainTime;
 	int _byoYomiPeriods;
