@@ -1,3 +1,7 @@
+/*
+ * Shamelessly ripped from qgo.
+ */
+
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 
@@ -47,29 +51,31 @@ class GoImages {
 				int vc = (int)( Math.sin( Math.sqrt( vx * vx + vy * vy ) ) * 8. );
 				int vcr = 236 + vc;
 				int vcg = 166 + vc;
-				if ( vcr > 255 )
+				if ( vcr > 255 ) {
 					vcr = 255;
-				if ( vcg > 255 )
+				}
+				if ( vcg > 255 ) {
 					vcg = 255;
-				buf[ y * $size + x ] = ( vcr << 16 ) | ( vcg << 8 ) | ( 90 );
+				}
+				buf[ y * $size + x ] = ( vcr << 16 ) | ( vcg << 8 ) | 90;
 			}
 		}
 		img.setRGB( 0, 0, $size, $size, buf, 0, $size );
 		return ( img );
 	}
-	private void decideAppearance( WhiteDesc $desc, int $size ) {
-		double  minStripeW, maxStripeW, theta;
 
-		minStripeW = (double)$size / 20.0;
+	private void decideAppearance( WhiteDesc $desc, int $size ) {
+		double minStripeW = (double)$size / 20.0;
 		if (minStripeW < 1.5) {
 			minStripeW = 1.5;
 		}
-		maxStripeW = (double)$size / 10.0;
+
+		double maxStripeW = (double)$size / 10.0;
 		if ( maxStripeW < 2.5 ) {
 			maxStripeW = 2.5;
 		}
 
-		theta = Math.random() * 2.0 * Math.PI;
+		double theta = Math.random() * 2.0 * Math.PI;
 		$desc.cosTheta = Math.cos( theta );
 		$desc.sinTheta = Math.sin( theta );
 		$desc.stripeWidth = 1.5 * minStripeW + ( Math.random() * ( maxStripeW - minStripeW ) );
@@ -79,10 +85,9 @@ class GoImages {
 		$desc.stripeMul = 3.0;
 		$desc.zMul = Math.random() * 650.0 + 70.0;
 	}
-	double getStripe( WhiteDesc white, double bright, double z, int x, int y ) {
-		double wBright;
 
-		bright = bright / 256.0;
+	double getStripe( WhiteDesc white, double bright, double z, int x, int y ) {
+		bright /= 256.0;
 
 		double wStripeLoc = x * white.cosTheta - y * white.sinTheta +	white.xAdd;
 		double wStripeColor = Math.IEEEremainder(
@@ -99,6 +104,7 @@ class GoImages {
 		}
 		wStripeColor = wStripeColor * 0.15 + 0.85;
 
+		double wBright = 0;
 		if ( bright < 0.95 ) {
 			wBright = bright * wStripeColor;
 		} else {
@@ -114,6 +120,7 @@ class GoImages {
 
 		return ( wBright * 255 );
 	}
+
 	private Image white( int $size, boolean $alpha ) {
 		final int D_WIDTH = $size;
 		final int D_HEIGHT = $size;
@@ -122,16 +129,16 @@ class GoImages {
 
 		// the angle from which the shadow starts (measured to the light direction = pi/4)
 		// alpha should be in (0, pi)
-		final double ALPHA = Math.PI / 4;
+		final double ALPHA = Math.PI / 4.0;
 		// how big the shadow is (should be < d/2)
 		final double STRIPE = $size / 5.0;
 		final double pixel = 0.8;
 
 		// these are the images
 		int[] pw = new int[ $size * $size ];
-		double d2 = (double)$size / 2.0 - 5e-1;
-		double r = d2 - 2e-1;
-		double f = Math.sqrt( 3 );
+		double d2 = (double)$size / 2.0 - 0.5;
+		double r = d2 - 0.2;
+		double f = Math.sqrt( 3.0 );
 
 		int k = 0;
 		for ( int i = 0; i < $size; ++ i ) {
@@ -153,46 +160,37 @@ class GoImages {
 					double xg1 = ( xr1 > 0.9 ) ? ( xr1 - 0.9 ) * 10 : 0;
 					double xg2 = ( xr2 > 0.92 ) ? ( xr2 - 0.92 ) * 10 : 0;
 
-
-					double theta = Math.atan2( (double)( j - $size / 2 ), (double)( i - $size / 2 ) ) + Math.PI - Math.PI / 4 + Math.PI / 2;
-					boolean stripeband = theta > ALPHA && theta < 2 * Math.PI - ALPHA;
+					double theta = Math.atan2( (double)( j - $size / 2 ), (double)( i - $size / 2 ) ) + Math.PI - Math.PI / 4.0 + Math.PI / 2.0;
+					boolean stripeband = theta > ALPHA && theta < 2.0 * Math.PI - ALPHA;
 
 					if ( theta > Math.PI ) {
 						theta = ( 2 * Math.PI - theta );
 					}
 
-					double stripe = STRIPE * Math.sin( ( Math.PI / 2 ) * ( theta - ALPHA ) / ( Math.PI - ALPHA ) );
+					double stripe = STRIPE * Math.sin( ( Math.PI / 2.0 ) * ( theta - ALPHA ) / ( Math.PI - ALPHA ) );
 					if ( stripe < 1 ) {
 						stripe = 1;
 					}
 
-					double g1min = (int)( 0 + 10 * xr1 + xg1 * 45 );
-					double g2min = (int)( 0 + 10 * xr2 + xg2 * 45 );
-					double g1max = (int)( 200 + 10 * xr1 + xg1 * 45 );
-					double g2max = (int)( 200 + 10 * xr2 + xg2 * 45 );
-					g1min = g1max - ( g1max - g1min ) * ( 1 - Math.getExponent( -1 * ( theta - ALPHA ) / ( Math.PI - ALPHA ) ) );
-					g2min = g2max - ( g2max - g2min ) * ( 1 - Math.getExponent( -1 * ( theta - ALPHA ) / ( Math.PI - ALPHA ) ) );
+					double g1min = 0 + 10 * xr1 + xg1 * 45;
+					double g2min = 0 + 10 * xr2 + xg2 * 45;
+					double g1max = 200 + 10 * xr1 + xg1 * 45;
+					double g2max = 200 + 10 * xr2 + xg2 * 45;
+					g1min = g1max - ( g1max - g1min ) * ( 1.0 - Math.getExponent( -1.0 * ( theta - ALPHA ) / ( Math.PI - ALPHA ) ) );
+					g2min = g2max - ( g2max - g2min ) * ( 1.0 - Math.getExponent( -1.0 * ( theta - ALPHA ) / ( Math.PI - ALPHA ) ) );
 
 					if ( ( hh < STRIPE ) && ( hh > pixel ) && stripeband ) {
-
-						int g1 = 0;
-						int g2 = 0;
-						if ( hh > stripe ) {
-							g1 = (int)g1max;
-							g2 = (int)g2max;
-						} else { //if (hh < stripe)
-							g1 = (int)( g1min + ( g1max - g1min ) * Math.sqrt( hh / stripe ) );
-							g2 = (int)( g2min + ( g2max - g2min ) * Math.sqrt( hh / stripe ) );
+						double g1 = g1max;
+						double g2 = g2max;
+						if ( hh <= stripe ) {
+							g1 = g1min + ( g1max - g1min ) * Math.sqrt( hh / stripe );
+							g2 = g2min + ( g2max - g2min ) * Math.sqrt( hh / stripe );
 						}
-						int g = ( g1 > g2 ? g1 : g2 );
-
+						int g = (int)( g1 > g2 ? g1 : g2 );
 						g = (int)getStripe( desc, g, xr1 / 7.0, i, j );
 						pw[k] = ( ( $alpha ? 120 : 255 ) << 24 ) | ( g << 16 ) | ( g << 8 ) | g;
 					} else if ( hh > pixel ) {
-						//g1=(int)(190+10*drand48()+10*xr1+xg1*45);
-
 						int g = (int)( g1max > g2max ? g1max : g2max );
-
 						g = (int)getStripe( desc, g, xr1 / 7.0, i, j );
 						pw[k] = ( ( $alpha ? 120 : 255 ) << 24 ) | ( g << 16 ) | ( g << 8 ) | g;
 					} else {
@@ -215,18 +213,16 @@ class GoImages {
 		img.setRGB( 0, 0, $size, $size, pw, 0, $size );
 		return ( img );
 	}
+
 	private Image black( int $size, boolean $alpha ) {
 		final int D_WIDTH = $size;
 		final int D_HEIGHT = $size;
-		final double pixel=0.8;
-		// board color
-		//int col = antialiasingColor; //0xecb164;
-		//int blue=col&0x0000FF,green=(col&0x00FF00)>>8,red=(col&0xFF0000)>>16;
+		final double pixel = 0.8;
 
 		// these are the images
 		int[] pb = new int[$size*$size];
-		double d2 = (double)$size / 2.0 - 5e-1;
-		double r = d2 - 2e-1;
+		double d2 = (double)$size / 2.0 - 0.5;
+		double r = d2 - 0.2;
 		double f = Math.sqrt( 3 );
 
 		int k = 0;
@@ -253,7 +249,7 @@ class GoImages {
 					int g1 = (int)( 5 + 10 * Math.random() + 10 * xr1 + xg1 * 140 );
 					int g2 = (int)( 10 + 10 * xr2 + xg2 * 160 );
 					int g = ( g1 > g2 ? g1 : g2 );
-					// g = (int) 1 / ( 1 / g1 + 1 / g2 );
+					// int = g = (int) 1 / ( 1 / g1 + 1 / g2 );
 
 					if ( hh > pixel ) {
 						pb[k] = ( ( $alpha ? 120 : 255 ) << 24 ) | ( g << 16 ) | ( g << 8 ) | g;
@@ -278,8 +274,8 @@ class GoImages {
 
 		// these are the images
 		int[] pw = new int[ $size * $size ];
-		double d2 = (double)$size / 2.0 - 5e-1;
-		double r = d2 - 2e-1;
+		double d2 = (double)$size / 2.0 - 0.5;
+		double r = d2 - 0.2;
 		int k = 0;
 		for ( int i = 0; i < $size; ++ i ) {
 			for ( int j = 0; j < $size; ++ j ) {
@@ -288,8 +284,8 @@ class GoImages {
 				double hh = r - Math.sqrt( di * di + dj * dj );
 				if ( hh >= 0 ) {
 					hh = 2 * hh / r;
-					if ( hh> 1 ) {
-						hh=1;
+					if ( hh > 1 ) {
+						hh = 1;
 					}
 					pw[k] = ((int)( 255 * hh ) << 24 ) | ( 1 << 16 ) | ( 1 << 8 ) | 1;
 				} else {
