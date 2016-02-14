@@ -1,3 +1,12 @@
+/*
+ * SGF parser Java library
+ *
+ * This library is part of GameGround project.
+ * http://codestation.org/?h-action=menu-project&menu=submenu-project&page=&project=gameground
+ *
+ * (C) 2016 Marcin Konarski - All Rights Reserved
+ */
+
 public class SGFException extends Exception {
 	public static final long serialVersionUID = 17l;
 	int _code = 0;

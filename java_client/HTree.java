@@ -1,6 +1,13 @@
-import java.lang.reflect.ParameterizedType;
+/*
+ * SGF parser Java library
+ *
+ * This library is part of GameGround project.
+ * http://codestation.org/?h-action=menu-project&menu=submenu-project&page=&project=gameground
+ *
+ * (C) 2016 Marcin Konarski - All Rights Reserved
+ */
+
 import java.lang.Iterable;
-import java.util.Iterator;
 import java.util.ArrayList;
 
 abstract class TypeReference<T> {}
