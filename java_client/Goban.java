@@ -145,8 +145,9 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 					++ moveNo;
 				}
 			}
-			if ( $jumpToMove )
+			if ( $jumpToMove ) {
 				placeStones( moveNo > 0 ? moveNo - 1 : 0, $sendSelect );
+			}
 		}
 	}
 	void selectBranch( HTree<SGF.Move>.HNode<SGF.Move> $node, boolean $jumpToMove ) {
@@ -343,10 +344,11 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 	void move( String $move ) {
 		String[] tokens = $move.split( ",", 2 );
 		HTree<SGF.Move>.HNode<SGF.Move> m = _currentMove.addNode( new SGF.Move( Integer.parseInt( tokens[0] ), Integer.parseInt( tokens[1] ) ) );
-		if ( ( ongoingMatch() && amIPlaying() ) || ( _currentMove == null ) || ( _viewMove == null ) || ( _viewMove == _currentMove ) )
+		if ( ( ongoingMatch() && amIPlaying() ) || ( _currentMove == null ) || ( _viewMove == null ) || ( _viewMove == _currentMove ) ) {
 			selectBranch( m );
-		else
+		} else {
 			_branch.add( m );
+		}
 		_currentMove = m;
 	}
 	void goToFirst() {

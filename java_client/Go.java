@@ -201,7 +201,7 @@ class Go extends HAbstractLogic implements Runnable {
 		}
 		public void onMessage() {
 			String msg = _messageInput.getText();
-			if ( msg.matches( ".*\\S+.*" ) ) {	
+			if ( msg.matches( ".*\\S+.*" ) ) {
 				_client.println( PROTOCOL.CMD + PROTOCOL.SEP + _id + PROTOCOL.SEP + PROTOCOL.SAY + PROTOCOL.SEP + msg );
 				_messageInput.setText( "" );
 			}
@@ -500,8 +500,9 @@ class Go extends HAbstractLogic implements Runnable {
 		}
 	}
 	void handlerSGF( String $command ) {
-		if ( ( _toMove == STONE.BLACK ) || ( _toMove == STONE.WHITE ) )
+		if ( ( _toMove == STONE.BLACK ) || ( _toMove == STONE.WHITE ) ) {
 			Sound.play( "stone" );
+		}
 		_gui._board.updateSGF( $command.replace( "\\n", "\n" ) );
 		_gui._board.repaint();
 		_gui._sgftree.repaint();

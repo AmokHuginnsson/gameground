@@ -71,7 +71,7 @@ public class GoGoban extends Goban {
 		if ( getStone( $col, $row ) == Go.STONE.NONE )
 			return ( true );
 		if ( getStone( $col, $row ) == stone ) {
-			setStone( $col, $row, (byte)Character.toUpperCase( stone ) );	
+			setStone( $col, $row, (byte)Character.toUpperCase( stone ) );
 			return ( haveLiberties( $col, $row - 1, stone )
 					|| haveLiberties( $col, $row + 1, stone )
 					|| haveLiberties( $col - 1, $row, stone )
@@ -136,7 +136,7 @@ public class GoGoban extends Goban {
 		if ( ! haveLiberties( x, y, stone ) )
 			suicide = true;
 		return ( suicide );
-	}	
+	}
 	boolean breakTheRules( int x, int y, byte stone ) {
 		boolean invalid = ! validCoords( x, y );
 		if ( ! invalid ) {

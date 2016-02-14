@@ -228,6 +228,7 @@ public class SGF {
 	String _whiteName = "";
 	String _blackRank = "30k";
 	String _whiteRank = "30k";
+	String _verbatimResult = "";
 	HTree<Move> _tree = new HTree<Move>();
 	int _gobanSize = 19;
 	int _time = 0;
@@ -303,6 +304,7 @@ public class SGF {
 		_blackRank = "";
 		_whiteName = "";
 		_whiteRank = "";
+		_verbatimResult = "";
 		clearGame();
 		_gobanSize = 19;
 		_handicap = 0;
@@ -358,8 +360,9 @@ public class SGF {
 		clear();
 		String message = null;
 		try {
-			while ( ( message = $stream.readLine() ) != null )
+			while ( ( message = $stream.readLine() ) != null ) {
 				_rawData += ( message + "\n" );
+			}
 		} catch ( java.io.IOException ioe ) {
 			Con.err( "java.io.IOException: " + ioe.getMessage() );
 		}
@@ -376,6 +379,59 @@ public class SGF {
 			throw e;
 		}
 		return;
+	}
+
+	public String getWhiteName() {
+		return ( _whiteName );
+	}
+
+	public String getWhiteRank() {
+		return ( _whiteRank );
+	}
+
+	public String getBlackName() {
+		return ( _blackName );
+	}
+
+	public String getBlackRank() {
+		return ( _blackRank );
+	}
+
+	public String getResult() {
+		String result;
+		if ( _result > 0 ) {
+			result = "B+";
+		} else {
+			result = "W+";
+		}
+		int res = Math.abs( _result );
+		if ( res == TIME ) {
+			result = result + "T";
+		} else if ( res == RESIGN ) {
+			result = result + "R";
+		} else {
+			result = result + res;
+			if ( Math.round( _komi ) != _komi ) {
+				result = result + ".5";
+			} else if ( _result == 0 ) {
+				result = "jigo";
+			}
+		}
+		return ( result );
+	}
+
+	public String getVerbatimResult() {
+		return ( _verbatimResult );
+	}
+
+	ArrayList<Coord> getMainLine() {
+		ArrayList<Coord> mainLine = new ArrayList<Coord>();
+		HTree<Move>.HNode<Move> m = _tree.getRoot();
+		while ( ( m != null ) && m.getChildAt( 0 ) != null ) {
+			mainLine.add( m.value().coord() );
+			m = m.getChildAt( 0 );
+		}
+		return ( mainLine );
 	}
 
 	void notEof() throws SGFException {
@@ -441,7 +497,7 @@ public class SGF {
 	public Player firstToMove() {
 		return ( _handicap > 1 ? Player.WHITE : Player.BLACK );
 	}
-	
+
 	private boolean isFirstMove() {
 		return ( ( _currentMove != null ) && ( _currentMove.getParent() == _tree.getRoot() ) );
 	}
@@ -465,63 +521,68 @@ public class SGF {
 			int ff = Integer.parseInt( singleValue );
 			if ( ( ff < 1 ) || ( ff > 4 ) )
 				throw new SGFException( _errMsg_[ERROR.BAD_FILE_FORMAT.ordinal()], _cur );
-		} else if ( "AP".equals( _cachePropIdent ) )
+		} else if ( "AP".equals( _cachePropIdent ) ) {
 			_app = singleValue;
-		else if ( "GN".equals( _cachePropIdent ) )
+		} else if ( "GN".equals( _cachePropIdent ) ) {
 			_gameName = singleValue;
-		else if ( "DT".equals( _cachePropIdent ) )
+		} else if ( "DT".equals( _cachePropIdent ) ) {
 			_date = singleValue;
-		else if ( "EV".equals( _cachePropIdent ) )
+		} else if ( "EV".equals( _cachePropIdent ) ) {
 			_event = singleValue;
-		else if ( "RO".equals( _cachePropIdent ) )
+		} else if ( "RO".equals( _cachePropIdent ) ) {
 			_round = singleValue;
-		else if ( "SO".equals( _cachePropIdent ) )
+		} else if ( "SO".equals( _cachePropIdent ) ) {
 			_source = singleValue;
-		else if ( "AN".equals( _cachePropIdent ) )
+		} else if ( "AN".equals( _cachePropIdent ) ) {
 			_author = singleValue;
-		else if ( "RU".equals( _cachePropIdent ) )
+		} else if ( "RU".equals( _cachePropIdent ) ) {
 			_rules = singleValue;
-		else if ( "PB".equals( _cachePropIdent ) )
+		} else if ( "PB".equals( _cachePropIdent ) ) {
 			_blackName = singleValue;
-		else if ( "PW".equals( _cachePropIdent ) )
+		} else if ( "PW".equals( _cachePropIdent ) ) {
 			_whiteName = singleValue;
-		else if ( "BR".equals( _cachePropIdent ) )
+		} else if ( "BR".equals( _cachePropIdent ) ) {
 			_blackRank = singleValue;
-		else if ( "WR".equals( _cachePropIdent ) )
+		} else if ( "WR".equals( _cachePropIdent ) ) {
 			_whiteRank = singleValue;
-		else if ( "KM".equals( _cachePropIdent ) )
+		} else if ( "KM".equals( _cachePropIdent ) ) {
 			_komi = Double.parseDouble( singleValue );
-		else if ( "HA".equals( _cachePropIdent ) )
+		} else if ( "HA".equals( _cachePropIdent ) ) {
 			_handicap = Integer.parseInt( singleValue );
-		else if ( "SZ".equals( _cachePropIdent ) )
+		} else if ( "SZ".equals( _cachePropIdent ) ) {
 			_gobanSize = Integer.parseInt( singleValue );
-		else if ( "TM".equals( _cachePropIdent ) )
+		} else if ( "TM".equals( _cachePropIdent ) ) {
 			_time = Integer.parseInt( singleValue );
-		else if ( "OT".equals( _cachePropIdent ) )
+		} else if ( "OT".equals( _cachePropIdent ) ) {
 			_overTime = singleValue;
-		else if ( "PC".equals( _cachePropIdent ) )
+		} else if ( "PC".equals( _cachePropIdent ) ) {
 			_place = singleValue;
-		else if ( "RE".equals( _cachePropIdent ) ) {
-			if ( Character.isDigit( singleValue.charAt( 2 ) ) )
+		} else if ( "RE".equals( _cachePropIdent ) ) {
+			_verbatimResult = singleValue;
+			if ( Character.isDigit( singleValue.charAt( 2 ) ) ) {
 				_result = (int)Double.parseDouble( singleValue.substring( 2 ) );
-			else {
+			} else {
 				char r = Character.toUpperCase( singleValue.charAt( 2 ) );
-				if ( r == 'R' )
+				if ( r == 'R' ) {
 					_result = RESIGN;
-				else if ( r == 'T' )
+				} else if ( r == 'T' ) {
 					_result = TIME;
+				}
 			}
 			char player = Character.toUpperCase( singleValue.charAt( 0 ) );
-			if ( player == 'W' )
+			if ( player == 'W' ) {
 				_result = -_result;
+			}
 		} else if ( _positionTagDict_.containsKey( _cachePropIdent ) ) {
-			for ( String s : _cachePropValue )
+			for ( String s : _cachePropValue ) {
 				addPosition( _positionTagDict_.get( _cachePropIdent ), new Coord( s ) );
+			}
 		} else if ( "LB".equals( _cachePropIdent ) ) {
 			for ( String s : _cachePropValue ) {
 				String[] tok = s.split( ":", 2 );
-				if ( ( tok.length != 2 ) || ( tok[0].length() != 2 ) )
+				if ( ( tok.length != 2 ) || ( tok[0].length() != 2 ) ) {
 					throw new SGFException( _errMsg_[ERROR.MALFORMED_LABEL.ordinal()], _cur );
+				}
 				addLabel( new Setup.Label( new Coord( tok[0] ), tok[1] ) );
 			}
 		} else if ( "B".equals( _cachePropIdent ) ) {
@@ -649,6 +710,10 @@ public class SGF {
 		}
 		if ( rankShown && ! $noNl )
 			sb.append( "\n" );
+		String result = getVerbatimResult();
+		if ( ! "".equals( result ) ) {
+			sb.append( "RE[" ).append( result ).append( "]" );
+		}
 		if ( ! "".equals( _comment ) ) {
 			_cache = _comment;
 			sb.append( "C[" ).append( _cache.replace( "[", "\\[" ).replace( "]", "\\]" ) ).append( "]" );
