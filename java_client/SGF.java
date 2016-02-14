@@ -52,7 +52,7 @@ public class SGF {
 		static final char NODE_MARK = ';';
 		static final char ESCAPE = '\\';
 	}
-	enum Player {
+	public enum Player {
 		BLACK,
 		WHITE,
 		UNSET
@@ -68,7 +68,7 @@ public class SGF {
 		BLACK_TERITORY,
 		WHITE_TERITORY
 	}
-	static class Coord {
+	public static class Coord {
 		char[] _data = { 0, 0 };
 		Coord() {
 		}
@@ -86,13 +86,13 @@ public class SGF {
 			} else
 				_data[0] = _data[1] = 0;
 		}
-		int col() {
+		public int col() {
 			return ( _data[0] - 'a' );
 		}
-		int row() {
+		public int row() {
 			return ( _data[1] - 'a' );
 		}
-		String data() {
+		public String data() {
 			return ( new String( _data ) );
 		}
 		@Override public boolean equals( Object $coord ) {
@@ -103,7 +103,7 @@ public class SGF {
 			return ( java.util.Arrays.hashCode( _data ) );
 		}
 	};
-	static final Coord PASS = new Coord( 0 - 'a', 0 - 'a' );
+	public static final Coord PASS = new Coord( 0 - 'a', 0 - 'a' );
 	static class Setup {
 		static class Label {
 			Coord _coord;
@@ -365,7 +365,7 @@ public class SGF {
 		return ( first );
 	}
 
-	void load( BufferedReader $stream ) throws SGFException {
+	public void load( BufferedReader $stream ) throws SGFException {
 		clear();
 		String message = null;
 		try {
@@ -433,11 +433,13 @@ public class SGF {
 		return ( _verbatimResult );
 	}
 
-	ArrayList<Coord> getMainLine() {
+	public ArrayList<Coord> getMainLine() {
 		ArrayList<Coord> mainLine = new ArrayList<Coord>();
 		HTree<Move>.HNode<Move> m = _tree.getRoot();
 		while ( ( m != null ) && m.getChildAt( 0 ) != null ) {
-			mainLine.add( m.value().coord() );
+			if ( m.value().type() == Move.Type.MOVE ) {
+				mainLine.add( m.value().coord() );
+			}
 			m = m.getChildAt( 0 );
 		}
 		return ( mainLine );
