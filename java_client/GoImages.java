@@ -176,8 +176,8 @@ class GoImages {
 					double g2min = 0 + 10 * xr2 + xg2 * 45;
 					double g1max = 200 + 10 * xr1 + xg1 * 45;
 					double g2max = 200 + 10 * xr2 + xg2 * 45;
-					g1min = g1max - ( g1max - g1min ) * ( 1.0 - Math.getExponent( -1.0 * ( theta - ALPHA ) / ( Math.PI - ALPHA ) ) );
-					g2min = g2max - ( g2max - g2min ) * ( 1.0 - Math.getExponent( -1.0 * ( theta - ALPHA ) / ( Math.PI - ALPHA ) ) );
+					g1min = g1max - ( g1max - g1min ) * ( 1.0 - Math.exp( -1.0 * ( theta - ALPHA ) / ( Math.PI - ALPHA ) ) );
+					g2min = g2max - ( g2max - g2min ) * ( 1.0 - Math.exp( -1.0 * ( theta - ALPHA ) / ( Math.PI - ALPHA ) ) );
 
 					if ( ( hh < STRIPE ) && ( hh > pixel ) && stripeband ) {
 						double g1 = g1max;
