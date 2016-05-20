@@ -28,6 +28,7 @@ Copyright:
 
 #include <yaal/hcore/hfile.hxx>
 #include <yaal/hcore/hlog.hxx>
+#include <yaal/tools/util.hxx>
 #include <yaal/hconsole/console.hxx>
 
 M_VCSID( "$Id: " __ID__ " $" )
@@ -39,6 +40,7 @@ using namespace yaal;
 using namespace yaal::hcore;
 using namespace yaal::hconsole;
 using namespace yaal::tools;
+using namespace yaal::tools::util;
 using namespace gameground;
 
 namespace gameground {
@@ -48,7 +50,7 @@ OSetup setup;
 }
 
 int main( int argc_, char* argv_[] ) {
-	M_AT_END_OF_SCOPE( HSignalService::get_instance().stop(); );
+	HScopeExitCall sec( call( &HSignalService::stop, &HSignalService::get_instance() ) );
 	M_PROLOG
 /* variables declarations for main loop: */
 	int opt = 0;
