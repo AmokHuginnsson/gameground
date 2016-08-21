@@ -68,7 +68,7 @@ void version( void ) {
    Return the index of the first non-option argument.                    */
 int handle_program_options( int argc_, char** argv_ ) {
 	M_PROLOG
-	HProgramOptionsHandler po;
+	HProgramOptionsHandler po( "gameground-client" );
 	OOptionInfo info( po, setup._programName, "GameGround-client - console client for GameGround - an universal networked multiplayer game server.", NULL );
 	bool help( false );
 	bool conf( false );
@@ -203,7 +203,7 @@ int handle_program_options( int argc_, char** argv_ ) {
 		.description( "output version information and stop" )
 		.recipient( vers )
 	);
-	po.process_rc_file( "gameground-client", "", set_variables );
+	po.process_rc_file( "", set_variables );
 	int unknown = 0, nonOption = 0;
 	nonOption = po.process_command_line( argc_, argv_, &unknown );
 	if ( help || conf || vers || ( unknown > 0 ) ) {
