@@ -229,7 +229,7 @@ void HGo::handler_sgf( OClientInfo* clientInfo_, HString const& message_ ) {
 		SGF::game_tree_t::const_node_t currentMove( _sgf.game_tree().get_root() );
 		_branch.clear();
 		if ( currentMove ) {
-			while ( currentMove->has_childs() ) {
+			while ( currentMove->has_children() ) {
 				currentMove = currentMove->get_child_at( 0 );
 				_branch.push_back( currentMove );
 				apply_move( currentMove );

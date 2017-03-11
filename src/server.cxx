@@ -243,13 +243,13 @@ void HServer::kick_client( yaal::tools::HIODispatcher::stream_t& client_, char c
 		reason += ( reason_ ? reason_ : "connection error" );
 		if ( ! clientIt->second._login.is_empty() )
 			broadcast_all_parties( &clientIt->second, _out << PROTOCOL::MSG << PROTOCOL::SEP
-					<< mark( COLORS::FG_BRIGHTRED ) << " " << clientIt->second._login << reason << endl << _out );
+					<< mark( COLOR::FG_BRIGHTRED ) << " " << clientIt->second._login << reason << endl << _out );
 		clog << reason;
 	} else {
 		char const msgDisconnected[] = " disconnected from server.";
 		if ( ! clientIt->second._login.is_empty() )
 			broadcast_all_parties( &clientIt->second, _out << PROTOCOL::MSG << PROTOCOL::SEP
-					<< mark( COLORS::FG_YELLOW ) << " " << clientIt->second._login << msgDisconnected << endl << _out );
+					<< mark( COLOR::FG_YELLOW ) << " " << clientIt->second._login << msgDisconnected << endl << _out );
 		clog << msgDisconnected;
 	}
 	if ( ! login.is_empty() ) {
@@ -276,7 +276,7 @@ void HServer::handler_quit( OClientInfo& client_, HString const& ) {
 	kick_client( client_._socket, "" );
 	if ( ! login.is_empty() )
 		broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
-				<< mark( COLORS::FG_BROWN ) << " " << login << " has left the GameGround." << endl << _out );
+				<< mark( COLOR::FG_BROWN ) << " " << login << " has left the GameGround." << endl << _out );
 	return;
 	M_EPILOG
 }
@@ -385,11 +385,11 @@ void HServer::handle_login( OClientInfo& client_, HString const& loginInfo_ ) {
 					M_ENSURE( !! rs );
 				} else {
 					client_._anonymous = true;
-					*client_._socket << PROTOCOL::MSG << PROTOCOL::SEP << mark( COLORS::FG_RED ) << " Your game stats will not be preserved nor your login protected." << endl;
+					*client_._socket << PROTOCOL::MSG << PROTOCOL::SEP << mark( COLOR::FG_RED ) << " Your game stats will not be preserved nor your login protected." << endl;
 				}
 				broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << login << endl << _out );
 				broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
-						<< mark( COLORS::FG_BLUE ) << " " << login << " entered the GameGround." << endl << _out );
+						<< mark( COLOR::FG_BLUE ) << " " << login << " entered the GameGround." << endl << _out );
 			} else {
 				M_ENSURE( result == 1 );
 				/* user exists but supplied password was incorrect */
