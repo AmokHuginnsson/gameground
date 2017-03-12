@@ -23,6 +23,12 @@ must_exist ${PARSER}
 
 . ${PARSER}
 
+TARGET="${1}"
+
+if [ "x${TARGET}" != "xdebug" -a "x${TARGET}" != "xrelease" ] ; then
+	TARGET="release"
+fi
+
 if [ ! -d build ] ; then
 	echo "you must start this script from \`gameground' root directory"
 	exit 1
@@ -30,9 +36,19 @@ fi
 
 JAIL="/home/${SERVICE}/"
 
-conditional_chattr() {
+conditional_immutable_off() {
 	if [ -d ${1} ] ; then
-		chattr -i ${1}/*
+		set +e
+		chattr -f -R -i "${1}"
+		set -e
+	fi
+}
+
+conditional_immutable_on() {
+	if [ -d ${1} ] ; then
+		set +e
+		chattr -f -R +i "${1}"
+		set -e
 	fi
 }
 
@@ -45,15 +61,15 @@ conditional_umount() {
 
 adv ./_deploy/init stop
 adv /bin/rm -fr nest
-adv mkdir -p nest/etc/conf nest/var/db/keys
-adv cp build/debug/${DAEMON}/1exec nest/
+adv mkdir -p nest/etc/conf nest/var/db/yaal/keys
+adv cp build/${TARGET}/${DAEMON}/1exec nest/
 adv cp -a ${HOME}/usr/lib nest
-adv cp -a ${HOME}/src/yaal/build/debug/yaalrc nest/etc/conf/
+adv cp -a ${HOME}/src/yaal/build/${TARGET}/yaalrc nest/etc/conf/
 adv cp -a ${HOME}/src/${SERVICE}/gamegroundrc nest/etc/conf/
 adv cp -a ${HOME}/src/${SERVICE}/gameground.sqlite nest/
-adv cp -a ${HOME}/var/db/keys/yaal.* nest/var/db/keys/
+adv cp -a ${HOME}/var/db/yaal/keys/* nest/var/db/yaal/keys/
 adv cp -a ${HOME}/src/yaal/_aux/set-limits.sh nest
-adv conditional_chattr ${JAIL}/nest "${JAIL}/nest/*"
+adv conditional_immutable_off ${JAIL}/nest
 adv conditional_umount
 adv /bin/rm -rf ${JAIL}/*
 adv mkdir -p ${JAIL}/tmp ${JAIL}/bin
@@ -72,7 +88,7 @@ if [ ! -f ${JAIL}/etc/passwd ] ; then
 fi
 adv /bin/rm -f ${JAIL}/nest/x_*
 adv "grep service /etc/group > ${JAIL}/etc/group"
-adv chattr +i ${JAIL}/nest/*
+adv conditional_immutable_on ${JAIL}/nest
 adv chattr -i ${JAIL}/nest/gameground.sqlite
 adv ln -s urandom ${JAIL}/dev/random
 
