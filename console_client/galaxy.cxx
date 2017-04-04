@@ -47,16 +47,16 @@ M_VCSID( "$Id: " __ID__ " $" )
 
 #include "setup.hxx"
 
-#define ATTR_BOARD           ( COLOR::FG_CYAN | COLOR::BG_BLACK )
-#define ATTR_NEUTRAL_SYSTEM  ( COLOR::FG_LIGHTGRAY | COLOR::BG_BLACK )
-#define ATTR_CURSOR          ( COLOR::FG_WHITE | COLOR::BG_BLACK )
-
 using namespace std;
 using namespace yaal;
 using namespace yaal::hcore;
 using namespace yaal::hconsole;
 using namespace yaal::tools;
 using namespace yaal::tools::util;
+
+COLOR::color_t ATTR_BOARD( COLOR::combine( COLOR::FG_CYAN, COLOR::BG_BLACK ) );
+COLOR::color_t ATTR_NEUTRAL_SYSTEM( COLOR::combine( COLOR::FG_LIGHTGRAY, COLOR::BG_BLACK ) );
+COLOR::color_t ATTR_CURSOR( COLOR::combine( COLOR::FG_WHITE, COLOR::BG_BLACK ) );
 
 namespace gameground {
 
@@ -140,27 +140,27 @@ char const * const _systemNamesNorse_[ ] = {
 	"Yggdrasil"
 };
 
-char const * const _symbols_ = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+char const _symbols_[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 
-char const * const * _systemNames_ = nullptr;
+char const* const* _systemNames_ = nullptr;
 
-int _colors_[ ] = {
-	( COLOR::FG_BRIGHTBLUE | COLOR::BG_BLACK ),
-	( COLOR::FG_BRIGHTGREEN | COLOR::BG_BLACK ),
-	( COLOR::FG_BRIGHTRED | COLOR::BG_BLACK ),
-	( COLOR::FG_BRIGHTCYAN | COLOR::BG_BLACK ),
-	( COLOR::FG_BRIGHTMAGENTA | COLOR::BG_BLACK ),
-	( COLOR::FG_YELLOW | COLOR::BG_BLACK ),
-	( COLOR::FG_BLUE | COLOR::BG_BLACK ),
-	( COLOR::FG_GREEN | COLOR::BG_BLACK ),
-	( COLOR::FG_RED | COLOR::BG_BLACK ),
-	( COLOR::FG_CYAN | COLOR::BG_BLACK ),
-	( COLOR::FG_MAGENTA | COLOR::BG_BLACK ),
-	( COLOR::FG_BROWN | COLOR::BG_BLACK ),
-	( COLOR::FG_LIGHTGRAY | COLOR::BG_BLACK ),
-	( COLOR::FG_LIGHTGRAY | COLOR::BG_BLACK ),
-	( COLOR::FG_LIGHTGRAY | COLOR::BG_BLACK ),
-	( COLOR::FG_LIGHTGRAY | COLOR::BG_BLACK )
+COLOR::color_t _colors_[] = {
+	COLOR::combine( COLOR::FG_BRIGHTBLUE, COLOR::BG_BLACK ),
+	COLOR::combine( COLOR::FG_BRIGHTGREEN, COLOR::BG_BLACK ),
+	COLOR::combine( COLOR::FG_BRIGHTRED, COLOR::BG_BLACK ),
+	COLOR::combine( COLOR::FG_BRIGHTCYAN, COLOR::BG_BLACK ),
+	COLOR::combine( COLOR::FG_BRIGHTMAGENTA, COLOR::BG_BLACK ),
+	COLOR::combine( COLOR::FG_YELLOW, COLOR::BG_BLACK ),
+	COLOR::combine( COLOR::FG_BLUE, COLOR::BG_BLACK ),
+	COLOR::combine( COLOR::FG_GREEN, COLOR::BG_BLACK ),
+	COLOR::combine( COLOR::FG_RED, COLOR::BG_BLACK ),
+	COLOR::combine( COLOR::FG_CYAN, COLOR::BG_BLACK ),
+	COLOR::combine( COLOR::FG_MAGENTA, COLOR::BG_BLACK ),
+	COLOR::combine( COLOR::FG_BROWN, COLOR::BG_BLACK ),
+	COLOR::combine( COLOR::FG_LIGHTGRAY, COLOR::BG_BLACK ),
+	COLOR::combine( COLOR::FG_LIGHTGRAY, COLOR::BG_BLACK ),
+	COLOR::combine( COLOR::FG_LIGHTGRAY, COLOR::BG_BLACK ),
+	COLOR::combine( COLOR::FG_LIGHTGRAY, COLOR::BG_BLACK )
 };
 
 class HBoard;
@@ -474,18 +474,18 @@ void HBoard::do_paint( void ) {
 		for ( int ctr( 0 ); ctr < _boardSize; ctr ++ )
 			pen += "-+-";
 		pen += '.';
-		cons.cmvprintf( _rowRaw, _columnRaw, _focused ? ATTR_BOARD : COLOR::ATTR_NORMAL, pen.raw() );
+		cons.cmvprintf( _rowRaw, _columnRaw, _focused ? ATTR_BOARD : COLOR::ATTR_NORMAL, pen.c_str() );
 		pen = '}';
 		for ( int ctr( 0 ); ctr < _boardSize; ctr ++ )
 			pen += " - ";
 		pen += '{';
 		for ( int ctr( 0 ); ctr < _boardSize; ctr ++ )
-			cons.cmvprintf( _rowRaw + ctr + 1, _columnRaw, _focused ? ATTR_BOARD : COLOR::ATTR_NORMAL, pen.raw() );
+			cons.cmvprintf( _rowRaw + ctr + 1, _columnRaw, _focused ? ATTR_BOARD : COLOR::ATTR_NORMAL, pen.c_str() );
 		pen = '`';
 		for ( int ctr( 0 ); ctr < _boardSize; ctr ++ )
 			pen += "-+-";
 		pen += '\'';
-		cons.cmvprintf( _rowRaw + _boardSize + 1, _columnRaw, _focused ? ATTR_BOARD : COLOR::ATTR_NORMAL, pen.raw() );
+		cons.cmvprintf( _rowRaw + _boardSize + 1, _columnRaw, _focused ? ATTR_BOARD : COLOR::ATTR_NORMAL, pen.c_str() );
 		int systems( static_cast<int>( _systems->get_size() ) );
 		if ( systems > 0 ) {
 			int sysNo( -1 );
@@ -737,8 +737,9 @@ void HGalaxyWindow::on_show_system_info( int system_ ) {
 			_fleet->set_text( ( *_systems )[ system_ ]._fleet );
 		color = ( *_systems )[ system_ ]._color;
 		emperors_t::iterator it( _emperors->find( color ) );
-		if ( ( color >= 0 ) && ( it != _emperors->end() ) )
+		if ( ( color >= 0 ) && ( it != _emperors->end() ) ) {
 			_emperorName->set_text( it->second );
+		}
 	}
 	return;
 	M_EPILOG
@@ -884,7 +885,7 @@ void HClient::init_client( HString& host_, int port_ ) {
 	_board = _window->get_board();
 	if ( ! setup._gameType.is_empty() ) {
 		message.format( "create:glx:%s,%d,%d,%d\n",
-				setup._game.raw(),
+				setup._game.c_str(),
 				setup._emperors, setup._boardSize, setup._systems );
 		*_socket << message;
 	} else {
@@ -1148,7 +1149,7 @@ void HClient::end_round( void ) {
 	if ( _moves.size() ) {
 		for ( moves_t::iterator it = _moves.begin(); it != _moves.end(); ++ it ) {
 			message.format( "cmd:%s:glx:play:move=%d,%d,%d\n",
-					_id.raw(),
+					_id.c_str(),
 					it->_sourceSystem,
 					it->_destinationSystem,
 					it->_fleet );
@@ -1179,7 +1180,7 @@ int main_client( void ) {
 	else
 		_systemNames_ = _systemNamesLatin_;
 	M_ENSURE( setup._gameType.is_empty() || ( setup._gameType == "glx" ) );
-	HClient client( setup._login.raw() );
+	HClient client( setup._login.c_str() );
 	client.init_client( setup._host, setup._port );
 	client.run();
 	return ( 0 );

@@ -139,7 +139,7 @@ bool HLogic::process_command( OClientInfo* clientInfo_, HString const& command_ 
 }
 
 void HLogic::party( HStreamInterface& stream_ ) const {
-	stream_.write( _bcastBuffer.raw(), _partyIdPrefixLen );
+	stream_.write( _bcastBuffer.c_str(), _partyIdPrefixLen );
 }
 
 yaal::hcore::HStreamInterface& operator << ( HStreamInterface& stream_, HLogic const& party_ ) {

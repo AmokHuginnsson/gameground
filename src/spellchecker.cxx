@@ -31,8 +31,8 @@ HSpellChecker::HSpellChecker( void ) : _spellChecker( NULL ), _spellConfig( NULL
 	hcore::log( LOG_LEVEL::INFO ) << "aspell_init - ";
 
 	_spellConfig = new_aspell_config();
-	::aspell_config_replace( static_cast<AspellConfig*>( _spellConfig ), "encoding", setup._consoleCharset.raw() );
-	::aspell_config_replace( static_cast<AspellConfig*>( _spellConfig ), "lang", setup._aspellLang.raw() );
+	::aspell_config_replace( static_cast<AspellConfig*>( _spellConfig ), "encoding", setup._consoleCharset.c_str() );
+	::aspell_config_replace( static_cast<AspellConfig*>( _spellConfig ), "lang", setup._aspellLang.c_str() );
 	possible_err = new_aspell_speller( static_cast<AspellConfig*>( _spellConfig ) );
 
 	int err = 0;
@@ -61,7 +61,7 @@ HSpellChecker::~HSpellChecker( void ) {
 bool HSpellChecker::spell_check( HString const& what ) {
 	M_PROLOG
 	M_ASSERT( !! what );
-	return ( aspell_speller_check( static_cast<AspellSpeller*>( _spellChecker ), what.raw(), static_cast<int>( what.length() ) ) == 0 );
+	return ( aspell_speller_check( static_cast<AspellSpeller*>( _spellChecker ), what.c_str(), static_cast<int>( what.length() ) ) == 0 );
 	M_EPILOG
 }
 

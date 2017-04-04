@@ -1265,7 +1265,7 @@ void HGo::send_contestant( char stone, OClientInfo* clientInfo_ ) {
 	int byoyomi( 0 );
 	int score( 0 );
 	if ( info._client ) {
-		name = info._client->_login.raw();
+		name = info._client->_login.c_str();
 		captured = info._stonesCaptured;
 		time = static_cast<int>( info._timeLeft );
 		byoyomi = info._byoYomiPeriods;

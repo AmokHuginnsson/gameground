@@ -384,7 +384,7 @@ void HGomoku::send_contestant( char stone ) {
 	OClientInfo* cinfo = contestant( stone );
 	char const* name = "";
 	if ( cinfo )
-		name = cinfo->_login.raw();
+		name = cinfo->_login.c_str();
 	broadcast( _out << PROTOCOL::CONTESTANT << PROTOCOL::SEP
 			<< stone << PROTOCOL::SEPP
 			<< name << PROTOCOL::SEPP << endl << _out );

@@ -407,7 +407,7 @@ bool HBoggle::is_good( int f, char const* ptr, int length ) {
 bool HBoggle::word_is_good( HString const& word_, int length_ ) {
 	M_PROLOG
 	bool good = false;
-	char const* ptr = word_.raw();
+	char const* ptr = word_.c_str();
 	for ( int f = 0; f < boggle_data::MAXIMUM_WORD_LENGTH; ++ f )
 		_game[ f ][ 1 ] = 0;
 	for ( int f = 0; f < boggle_data::MAXIMUM_WORD_LENGTH; ++ f ) {
@@ -476,7 +476,7 @@ HLogic::ptr_t HBoggleCreator::do_new_instance( HServer* server_, HLogic::id_t co
 HString HBoggleCreator::do_get_info( void ) const {
 	HString setupMsg;
 	setupMsg.format( "%s:%s,%d,%d,%d,%d", boggle::HBoggle::PROTOCOL::NAME,
-			setup._scoringSystem.raw(), setup._boggleStarupPlayers,
+			setup._scoringSystem.c_str(), setup._boggleStarupPlayers,
 			setup._roundTime, setup._boggleRounds, setup._interRoundDelay );
 	OUT << setupMsg << endl;
 	return ( setupMsg );

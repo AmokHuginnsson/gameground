@@ -504,7 +504,7 @@ void HServer::pass_command( OClientInfo& client_, HString const& command_ ) {
 					msg = e.what();
 				}
 				if ( ! msg.is_empty() ) {
-					remove_client_from_logic( client_, logic->second, msg.raw() );
+					remove_client_from_logic( client_, logic->second, msg.c_str() );
 				}
 			}
 		}
