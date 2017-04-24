@@ -1104,7 +1104,7 @@ int find_color( HString const& message_, int offset_ ) {
 		if ( start < 0 )
 			break;
 		int color = start + 1;
-		while ( ( color < length ) && is_digit( message_[color] ) )
+		while ( ( color < length ) && is_digit( static_cast<u32_t>( message_[color] ) ) ) /* *FIXME* *TODO* Remove static_cast after UCS in HString is implemented. */
 			++ color;
 		if ( ( color < length ) && ( message_[ color ] == ';' ) ) {
 			colorStartIndex = start;
