@@ -18,7 +18,10 @@ namespace gameground {
  *
  * it inializes dictionary
  */
-HSpellChecker::HSpellChecker( void ) : _spellChecker( NULL ), _spellConfig( NULL ) {
+HSpellChecker::HSpellChecker( void )
+	: _spellChecker( NULL )
+	, _spellConfig( NULL )
+	, _utf8() {
 	M_PROLOG
 	AspellCanHaveError* possible_err = NULL;
 
@@ -31,8 +34,10 @@ HSpellChecker::HSpellChecker( void ) : _spellChecker( NULL ), _spellConfig( NULL
 	hcore::log( LOG_LEVEL::INFO ) << "aspell_init - ";
 
 	_spellConfig = new_aspell_config();
-	::aspell_config_replace( static_cast<AspellConfig*>( _spellConfig ), "encoding", setup._consoleCharset.c_str() );
-	::aspell_config_replace( static_cast<AspellConfig*>( _spellConfig ), "lang", setup._aspellLang.c_str() );
+	_utf8.assign( setup._consoleCharset );
+	::aspell_config_replace( static_cast<AspellConfig*>( _spellConfig ), "encoding", _utf8.c_str() );
+	_utf8.assign( setup._aspellLang );
+	::aspell_config_replace( static_cast<AspellConfig*>( _spellConfig ), "lang", _utf8.c_str() );
 	possible_err = new_aspell_speller( static_cast<AspellConfig*>( _spellConfig ) );
 
 	int err = 0;
@@ -58,19 +63,22 @@ HSpellChecker::~HSpellChecker( void ) {
  *
  * it checks if the given word is correct
  */
-bool HSpellChecker::spell_check( HString const& what ) {
+bool HSpellChecker::spell_check( HString const& what_ ) {
 	M_PROLOG
-	M_ASSERT( !! what );
-	return ( aspell_speller_check( static_cast<AspellSpeller*>( _spellChecker ), what.c_str(), static_cast<int>( what.length() ) ) == 0 );
+	M_ASSERT( !! what_ );
+	_utf8.assign( what_ );
+	return ( aspell_speller_check( static_cast<AspellSpeller*>( _spellChecker ), _utf8.c_str(), static_cast<int>( _utf8.byte_count() ) ) == 0 );
 	M_EPILOG
 }
 
 void HSpellChecker::cleanup( void ) {
-	if ( _spellChecker )
+	if ( _spellChecker ) {
 		delete_aspell_speller( static_cast<AspellSpeller*>( _spellChecker ) );
+	}
 	_spellChecker = NULL;
-	if ( _spellConfig )
+	if ( _spellConfig ) {
 		delete_aspell_config( static_cast<AspellConfig*>( _spellConfig ) );
+	}
 	_spellConfig = NULL;
 	return;
 }

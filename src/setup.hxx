@@ -105,21 +105,35 @@ struct OSetup {
 	/* self-sufficient */
 	static int const PATH_OFFSET = sizeof ( __FILE__ ) - sizeof ( "setup.hxx" );
 	OSetup ( void )
-		: _quiet( false ), _verbose( false ), _debug( false ),
-		_maxConnections( DEFAULT_MAX_CONNECTIONS ),
-		_emperors( GALAXY_EMPERORS ), _port( 7777 ),
-		_systems( GALAXY_EMPERORS * NEUTRAL_SYSTEM_PER_PLAYER ),
-		_boardSize( GALAXY_BOARD_SIZE ), _boggleStarupPlayers( BOGGLE_PLAYERS ),
-		_setStartupPlayers( SET_STARTUP_PLAYERS ), _setDeckCount( SET_DECK_COUNT ),
-		_roundTime( BOGGLE_ROUND_TIME ), _boggleRounds( BOGGLE_MAX_ROUNDS ),
-		_interRoundDelay( BOGGLE_INTER_ROUND_DELAY ),
-		_gobanSize( GO_GOBAN_SIZE ), _komi100( GO_KOMI ), _handicaps( GO_HANDICAPS ),
-		_mainTime( GO_MAINTIME ), _byoYomiPeriods( GO_BYOYOMI_PERIODS ),
-		_byoYomiTime( GO_BYOYOMI_TIME ), _scoringSystem( BOGGLE_SCORING_SYSTEM ),
-		_consoleCharset(), _aspellLang(), _databasePath( DATABASE_PATH ),
-		_databaseLogin( DATABASE_LOGIN ), _databasePassword( DATABASE_PASSWORD ),
-		_programName( NULL ),
-		_logPath() {}
+		: _quiet( false )
+		, _verbose( false )
+		, _debug( false )
+		, _maxConnections( DEFAULT_MAX_CONNECTIONS )
+		, _emperors( GALAXY_EMPERORS )
+		, _port( 7777 )
+		, _systems( GALAXY_EMPERORS * NEUTRAL_SYSTEM_PER_PLAYER )
+		, _boardSize( GALAXY_BOARD_SIZE )
+		, _boggleStarupPlayers( BOGGLE_PLAYERS )
+		, _setStartupPlayers( SET_STARTUP_PLAYERS )
+		, _setDeckCount( SET_DECK_COUNT )
+		, _roundTime( BOGGLE_ROUND_TIME )
+		, _boggleRounds( BOGGLE_MAX_ROUNDS )
+		, _interRoundDelay( BOGGLE_INTER_ROUND_DELAY )
+		, _gobanSize( GO_GOBAN_SIZE )
+		, _komi100( GO_KOMI )
+		, _handicaps( GO_HANDICAPS )
+		, _mainTime( GO_MAINTIME )
+		, _byoYomiPeriods( GO_BYOYOMI_PERIODS )
+		, _byoYomiTime( GO_BYOYOMI_TIME )
+		, _scoringSystem( BOGGLE_SCORING_SYSTEM )
+		, _consoleCharset()
+		, _aspellLang()
+		, _databasePath( DATABASE_PATH )
+		, _databaseLogin( DATABASE_LOGIN )
+		, _databasePassword( DATABASE_PASSWORD )
+		, _programName( NULL )
+		, _logPath() {
+	}
 	void test_setup( void );
 	static bool test_glx_emperors( int, char*& );
 	static bool test_glx_emperors_systems( int, int, char*& );

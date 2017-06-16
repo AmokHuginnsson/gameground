@@ -127,7 +127,7 @@ protected:
 	void broadcast_player_info( OClientInfo& );
 	void broadcast_player_info( OClientInfo&, HLogic& );
 	void send_partys_info( OClientInfo& );
-	void remove_client_from_logic( OClientInfo&, HLogic::ptr_t, char const* const = NULL );
+	void remove_client_from_logic( OClientInfo&, HLogic::ptr_t, yaal::hcore::HString const& = yaal::hcore::HString() );
 	void remove_client_from_all_logics( OClientInfo& );
 	void flush_logics( void );
 	void update_last_activity( OClientInfo const& );

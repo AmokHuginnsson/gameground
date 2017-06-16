@@ -106,19 +106,19 @@ void HGomoku::broadcast_contestants( yaal::hcore::HString const& message_ ) {
 void HGomoku::handler_sit( OClientInfo* clientInfo_, HString const& message_ ) {
 	M_PROLOG
 	HString place = get_token( message_, ",", 1 );
-	if ( place.get_length() < 1 )
+	if ( place.get_length() < 1 ) {
 		throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
-	else {
-		char stone = place[ 0 ];
-		if ( ( stone != STONE::BLACK ) && ( stone != STONE::WHITE ) )
+	} else {
+		char stone = static_cast<char>( place[ 0 ].get() );
+		if ( ( stone != STONE::BLACK ) && ( stone != STONE::WHITE ) ) {
 			throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
-		else if ( ( contestant( STONE::BLACK ) == clientInfo_ )
-				|| ( contestant( STONE::WHITE ) == clientInfo_ ) )
+		} else if ( ( contestant( STONE::BLACK ) == clientInfo_ )
+				|| ( contestant( STONE::WHITE ) == clientInfo_ ) ) {
 			throw HLogicException( "you were already sitting" );
-		else if ( contestant( stone ) != NULL )
+		} else if ( contestant( stone ) != NULL ) {
 			*clientInfo_->_socket << *this
 				<< PROTOCOL::MSG << PROTOCOL::SEP << "Some one was faster." << endl;
-		else {
+		} else {
 			contestant( stone ) = clientInfo_;
 			OClientInfo* black( contestant( STONE::BLACK ) );
 			OClientInfo* white( contestant( STONE::WHITE ) );
@@ -382,12 +382,10 @@ void HGomoku::send_contestants( void ) {
 void HGomoku::send_contestant( char stone ) {
 	M_PROLOG
 	OClientInfo* cinfo = contestant( stone );
-	char const* name = "";
-	if ( cinfo )
-		name = cinfo->_login.c_str();
 	broadcast( _out << PROTOCOL::CONTESTANT << PROTOCOL::SEP
 			<< stone << PROTOCOL::SEPP
-			<< name << PROTOCOL::SEPP << endl << _out );
+			<< ( cinfo ? cinfo->_login : "" )
+			<< PROTOCOL::SEPP << endl << _out );
 	return;
 	M_EPILOG
 }
@@ -413,7 +411,7 @@ HLogic::ptr_t HGomokuCreator::do_new_instance( HServer* server_, HLogic::id_t co
 HString HGomokuCreator::do_get_info( void ) const {
 	M_PROLOG
 	HString setup;
-	setup.format( "gomoku" );
+	setup.assign( "gomoku" );
 	OUT << setup << endl;
 	return ( setup );
 	M_EPILOG

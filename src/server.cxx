@@ -496,7 +496,7 @@ void HServer::pass_command( OClientInfo& client_, HString const& command_ ) {
 						if ( ( msg.get_length() + ( static_cast<int>( sizeof ( err ) ) - 1 ) ) > MAX_MSG_LEN ) {
 							msg.erase( MAX_MSG_LEN - ( sizeof ( err ) - 1 ) );
 						}
-						msg.insert( 0, sizeof ( err ) - 1, err );
+						msg.insert( 0, err, sizeof ( err ) - 1 );
 					} else {
 						msg.clear();
 					}
@@ -504,7 +504,7 @@ void HServer::pass_command( OClientInfo& client_, HString const& command_ ) {
 					msg = e.what();
 				}
 				if ( ! msg.is_empty() ) {
-					remove_client_from_logic( client_, logic->second, msg.c_str() );
+					remove_client_from_logic( client_, logic->second, msg );
 				}
 			}
 		}
@@ -650,20 +650,22 @@ void HServer::flush_logics( void ) {
 	M_EPILOG
 }
 
-void HServer::remove_client_from_logic( OClientInfo& client_, HLogic::ptr_t logic_, char const* const reason_ ) {
+void HServer::remove_client_from_logic( OClientInfo& client_, HLogic::ptr_t logic_, HString const& reason_ ) {
 	M_PROLOG
 	if ( !! logic_ ) {
 		OUT << "separating logic info from client info for: " << client_._login << " and party: " << logic_->get_info() << endl;
 		logic_->kick_client( &client_, reason_ );
 		HString const& id( logic_->id() );
 		client_._logics.erase( id );
-		if ( ! logic_->is_private() )
+		if ( ! logic_->is_private() ) {
 			broadcast_player_info( client_ );
-		else
+		} else {
 			broadcast_player_info( client_, *logic_ );
+		}
 		if ( ! logic_->active_clients() ) {
-			if ( ! logic_->is_private() )
+			if ( ! logic_->is_private() ) {
 				broadcast( _out << PROTOCOL::PARTY_CLOSE << PROTOCOL::SEP << id << endl << _out );
+			}
 			_logics.erase( id );
 		}
 	}
@@ -687,9 +689,9 @@ void HServer::handle_get_partys( OClientInfo& client_, HString const& ) {
 
 void HServer::handle_get_account( OClientInfo& client_, HString const& login_ ) {
 	M_PROLOG
-	if ( client_._login.is_empty() )
+	if ( client_._login.is_empty() ) {
 		kick_client( client_._socket, "Set your name first (Just login with standard client, will ya?)." );
-	else {
+	} else {
 		bool accountSelf( login_.is_empty() || ( login_ == client_._login ) );
 		HString const& login( accountSelf ? client_._login : login_ );
 		char const accountQuerySelf[] = "SELECT name, description, email, setup FROM tbl_user WHERE login = LOWER('?');";

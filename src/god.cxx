@@ -28,6 +28,7 @@ Copyright:
 
 #include <yaal/hcore/macro.hxx>
 #include <yaal/hcore/hfile.hxx>
+#include <yaal/hcore/hformat.hxx>
 #include <yaal/hcore/hopenssl.hxx>
 #include <yaal/hcore/htokenizer.hxx>
 #include <yaal/tools/util.hxx>
@@ -259,19 +260,19 @@ void HGo::handler_sgf( OClientInfo* clientInfo_, HString const& message_ ) {
 
 void HGo::handler_sit( OClientInfo* clientInfo_, HString const& message_ ) {
 	M_PROLOG
-	if ( message_.get_length() < 1 )
+	if ( message_.get_length() < 1 ) {
 		throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
-	else {
-		char stone = message_[ 0 ];
-		if ( ( stone != STONE::BLACK ) && ( stone != STONE::WHITE ) )
+	} else {
+		char stone = static_cast<char>( message_[ 0 ].get() );
+		if ( ( stone != STONE::BLACK ) && ( stone != STONE::WHITE ) ) {
 			throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
-		else if ( ( contestant( STONE::BLACK )._client == clientInfo_ )
-				|| ( contestant( STONE::WHITE )._client == clientInfo_ ) )
+		} else if ( ( contestant( STONE::BLACK )._client == clientInfo_ )
+				|| ( contestant( STONE::WHITE )._client == clientInfo_ ) ) {
 			throw HLogicException( "you were already sitting" );
-		else if ( contestant( stone )._client != NULL )
+		} else if ( contestant( stone )._client != NULL ) {
 			*clientInfo_->_socket << *this
 				<< PROTOCOL::MSG << PROTOCOL::SEP << "Some one was faster." << endl;
-		else {
+		} else {
 			OPlayerInfo& info = contestant( stone );
 			info._client = clientInfo_;
 			info._timeLeft = _mainTime;
@@ -1259,13 +1260,13 @@ void HGo::send_contestants( OClientInfo* clientInfo_ ) {
 void HGo::send_contestant( char stone, OClientInfo* clientInfo_ ) {
 	M_PROLOG
 	OPlayerInfo& info( contestant( stone ) );
-	char const* name = "";
+	HString name;
 	int captured( 0 );
 	int time( 0 );
 	int byoyomi( 0 );
 	int score( 0 );
 	if ( info._client ) {
-		name = info._client->_login.c_str();
+		name = info._client->_login;
 		captured = info._stonesCaptured;
 		time = static_cast<int>( info._timeLeft );
 		byoyomi = info._byoYomiPeriods;
@@ -1367,7 +1368,7 @@ HLogic::ptr_t HGoCreator::do_new_instance( HServer* server_, HLogic::id_t const&
 HString HGoCreator::do_get_info( void ) const {
 	M_PROLOG
 	HString setupMsg;
-	setupMsg.format( "go:%d,%d,%d,%d,%d,%d", setup._gobanSize, setup._komi100, setup._handicaps,
+	setupMsg = format( "go:%d,%d,%d,%d,%d,%d", setup._gobanSize, setup._komi100, setup._handicaps,
 			setup._mainTime, setup._byoYomiPeriods, setup._byoYomiTime );
 	OUT << setupMsg << endl;
 	return ( setupMsg );

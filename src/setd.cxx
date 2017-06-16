@@ -28,6 +28,7 @@ Copyright:
 
 #include <yaal/hcore/macro.hxx>
 #include <yaal/hcore/hfile.hxx>
+#include <yaal/hcore/hformat.hxx>
 #include <yaal/hcore/htokenizer.hxx>
 #include <yaal/tools/util.hxx>
 
@@ -319,7 +320,7 @@ HLogic::ptr_t HSetBangCreator::do_new_instance( HServer* server_, HLogic::id_t c
 HString HSetBangCreator::do_get_info( void ) const {
 	M_PROLOG
 	HString setupMsg;
-	setupMsg.format( "set_bang:%d,%d,%d", setup._setStartupPlayers, setup._setDeckCount, setup._interRoundDelay );
+	setupMsg = format( "set_bang:%d,%d,%d", setup._setStartupPlayers, setup._setDeckCount, setup._interRoundDelay );
 	OUT << setupMsg << endl;
 	return ( setupMsg );
 	M_EPILOG

@@ -87,7 +87,7 @@ protected:
 	int _interRoundDelay;
 	int _round;
 	players_t _players;
-	char _game[16][2];
+	yaal::code_point_t _game[16][2];
 	words_t _words;
 	yaal::hcore::HString _varTmpBuffer;
 	/*}*/
@@ -108,8 +108,8 @@ protected:
 	void on_begin_round( void );
 	void on_end_round( void );
 	void schedule_end_round( void );
-	bool word_is_good( yaal::hcore::HString const&, int );
-	bool is_good( int, char const*, int );
+	bool word_is_good( yaal::hcore::HString const& );
+	bool is_good( int, yaal::hcore::HString::const_iterator, yaal::hcore::HString::const_iterator );
 	yaal::hcore::HString const& serialize_deck( void );
 	/*}*/
 private:

@@ -59,8 +59,7 @@ protected:
 	yaal::hcore::HString _comment;
 	yaal::tools::HStringStream _out;
 	mutable yaal::hcore::HMutex _mutex;
-	yaal::hcore::HString _bcastBuffer;
-	int _partyIdPrefixLen;
+	yaal::hcore::HString _bcastPrefix;
 	/*}*/
 	struct PROTOCOL {
 		static char const* const SEP;
@@ -82,7 +81,7 @@ public:
 	int active_clients( void ) const;
 	yaal::hcore::HString const& get_comment() const;
 	yaal::hcore::HString get_info() const;
-	void kick_client( OClientInfo*, char const* const = NULL );
+	void kick_client( OClientInfo*, yaal::hcore::HString const& = yaal::hcore::HString() );
 	id_t id( void ) const;
 	yaal::hcore::HString const& get_name( void ) const;
 	bool is_private( void ) const;

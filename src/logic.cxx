@@ -51,26 +51,35 @@ char const* const HLogic::PROTOCOL::PARTY = "party";
 char const* const HLogic::PROTOCOL::PLAYER_QUIT = "player_quit";
 
 HLogic::HLogic( HServer* server_, id_t const& id_, HString const& comment_ )
-	: _server( server_ ), _id( id_ ), _name( get_token( comment_, ",", 0 ) ), _handlers( setup._maxConnections ),
-	_clients(), _comment( comment_ ), _out(), _mutex(),
-	_bcastBuffer(), _partyIdPrefixLen( 0 ) {
+	: _server( server_ )
+	, _id( id_ )
+	, _name( get_token( comment_, ",", 0 ) )
+	, _handlers( setup._maxConnections )
+	, _clients()
+	, _comment( comment_ )
+	, _out()
+	, _mutex()
+	, _bcastPrefix() {
+	M_PROLOG
 	_handlers[ PROTOCOL::SAY ] = static_cast<handler_t>( &HLogic::handler_message );
 	_out << PROTOCOL::PARTY << PROTOCOL::SEP << _id << PROTOCOL::SEPP;
-	_bcastBuffer = _out.consume();
-	_partyIdPrefixLen = static_cast<int>( _bcastBuffer.get_length() );
+	_bcastPrefix = _out.consume();
+	return;
+	M_EPILOG
 }
 
 HLogic::~HLogic( void ) {
 	OUT << "Destroying logic: " << _id << endl;
 }
 
-void HLogic::kick_client( OClientInfo* clientInfo_, char const* const reason_ ) {
+void HLogic::kick_client( OClientInfo* clientInfo_, yaal::hcore::HString const& reason_ ) {
 	M_PROLOG
 	OUT << "kicking player `" << clientInfo_->_login << "' from " << _name << "," << _id << endl;
 	clientInfo_->_logics.erase( _id );
 	_clients.erase( clientInfo_ );
-	if ( reason_ )
+	if ( ! reason_.is_empty() ) {
 		*clientInfo_->_socket << "err:" << reason_ << endl;
+	}
 	do_kick( clientInfo_ );
 	broadcast( _out << PROTOCOL::PLAYER_QUIT << PROTOCOL::SEP << clientInfo_->_login << endl << _out );
 	return;
@@ -91,8 +100,9 @@ bool HLogic::accept_client( OClientInfo* clientInfo_ ) {
 	if ( ! do_accept( clientInfo_ ) ) {
 		_clients.insert( clientInfo_ );
 		clientInfo_->_logics.insert( _id );
-	} else
+	} else {
 		rejected = true;
+	}
 	return ( rejected );
 	M_EPILOG
 }
@@ -128,9 +138,9 @@ bool HLogic::process_command( OClientInfo* clientInfo_, HString const& command_ 
 	HString argument( command_.mid( mnemonic.get_length() + 1 ) );
 	bool failure( false );
 	handlers_t::iterator it( _handlers.find( mnemonic ) );
-	if ( it != _handlers.end() )
+	if ( it != _handlers.end() ) {
 		( this->*(it->second) )( clientInfo_, argument );
-	else {
+	} else {
 		failure = true;
 		OUT << "mnemo: " << mnemonic << ", arg: " << argument << ", cmd: " << command_ << endl;
 	}
@@ -139,7 +149,7 @@ bool HLogic::process_command( OClientInfo* clientInfo_, HString const& command_ 
 }
 
 void HLogic::party( HStreamInterface& stream_ ) const {
-	stream_.write( _bcastBuffer.c_str(), _partyIdPrefixLen );
+	stream_ << _bcastPrefix;
 }
 
 yaal::hcore::HStreamInterface& operator << ( HStreamInterface& stream_, HLogic const& party_ ) {
@@ -149,12 +159,10 @@ yaal::hcore::HStreamInterface& operator << ( HStreamInterface& stream_, HLogic c
 
 void HLogic::broadcast( HString const& message_ ) {
 	M_PROLOG
-	_bcastBuffer.erase( _partyIdPrefixLen );
-	_bcastBuffer += message_;
 	for ( clients_t::HIterator it( _clients.begin() ), end( _clients.end() ); it != end; ++ it ) {
 		try {
 			if ( (*it)->_valid ) {
-				*(*it)->_socket << _bcastBuffer;
+				*(*it)->_socket << _bcastPrefix << message_;
 			}
 		} catch ( HOpenSSLException const& ) {
 			drop_client( *it );

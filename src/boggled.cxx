@@ -26,6 +26,7 @@ Copyright:
 
 #include <yaal/hcore/macro.hxx>
 #include <yaal/hcore/hfile.hxx>
+#include <yaal/hcore/hformat.hxx>
 #include <yaal/hcore/htokenizer.hxx>
 #include <yaal/tools/hscheduledasynccaller.hxx>
 
@@ -47,32 +48,32 @@ namespace boggle_data {
 
 static int const MAXIMUM_WORD_LENGTH = 16;
 
-static char const _dices_[ 16 ][ 6 ] = {
-		{ 'a', 'a', 'd', 'e', '³', 'y' },
-		{ 'a', 'a', 'i', 'k', 'm', 'y' },
-		{ 'a', 'c', 'i', 'n', 'n', 'p' },
-		{ 'a', 'e', 'i', 'o', 'u', 'y' },
-		{ 'a', 'e', 'o', 'y', 'z', 'z' },
-		{ 'a', 'g', 'l', 'o', 'r', 's' },
-		{ '±', 'c', 'g', 'm', 'ñ', 't' },
-		{ 'b', 'e', 'e', 'p', 'z', '¼' },
-		{ 'b', 'i', 'i', 'n', 'r', 'w' },
-		{ 'c', 'o', 's', 't', 'w', '¿' },
-		{ 'æ', 'j', 'm', 't', 'u', 'z' },
-		{ 'd', 'e', 'k', 'n', 'o', 'r' },
-		{ 'd', 'h', 'ó', 'n', 'w', 'z' },
-		{ 'e', 'i', 'l', 's', '¶', 'w' },
-		{ 'ê', 'f', 'h', 'j', 'l', 's' },
-		{ 'i', 'k', '³', 'o', 'p', 'r' }
+static code_point_t const _dices_[ 16 ][ 6 ] = {
+		{ U'a'_ycp, U'a'_ycp, U'd'_ycp, U'e'_ycp, U'Å‚'_ycp, U'y'_ycp },
+		{ U'a'_ycp, U'a'_ycp, U'i'_ycp, U'k'_ycp, U'm'_ycp, U'y'_ycp },
+		{ U'a'_ycp, U'c'_ycp, U'i'_ycp, U'n'_ycp, U'n'_ycp, U'p'_ycp },
+		{ U'a'_ycp, U'e'_ycp, U'i'_ycp, U'o'_ycp, U'u'_ycp, U'y'_ycp },
+		{ U'a'_ycp, U'e'_ycp, U'o'_ycp, U'y'_ycp, U'z'_ycp, U'z'_ycp },
+		{ U'a'_ycp, U'g'_ycp, U'l'_ycp, U'o'_ycp, U'r'_ycp, U's'_ycp },
+		{ U'Ä…'_ycp, U'c'_ycp, U'g'_ycp, U'm'_ycp, U'Å„'_ycp, U't'_ycp },
+		{ U'b'_ycp, U'e'_ycp, U'e'_ycp, U'p'_ycp, U'z'_ycp, U'Åº'_ycp },
+		{ U'b'_ycp, U'i'_ycp, U'i'_ycp, U'n'_ycp, U'r'_ycp, U'w'_ycp },
+		{ U'c'_ycp, U'o'_ycp, U's'_ycp, U't'_ycp, U'w'_ycp, U'Å¼'_ycp },
+		{ U'Ä‡'_ycp, U'j'_ycp, U'm'_ycp, U't'_ycp, U'u'_ycp, U'z'_ycp },
+		{ U'd'_ycp, U'e'_ycp, U'k'_ycp, U'n'_ycp, U'o'_ycp, U'r'_ycp },
+		{ U'd'_ycp, U'h'_ycp, U'Ã³'_ycp, U'n'_ycp, U'w'_ycp, U'z'_ycp },
+		{ U'e'_ycp, U'i'_ycp, U'l'_ycp, U's'_ycp, U'Å›'_ycp, U'w'_ycp },
+		{ U'Ä™'_ycp, U'f'_ycp, U'h'_ycp, U'j'_ycp, U'l'_ycp, U's'_ycp },
+		{ U'i'_ycp, U'k'_ycp, U'Å‚'_ycp, U'o'_ycp, U'p'_ycp, U'r'_ycp }
 };
 
 struct BOGGLE {
-	enum {
-		UNINITIALIZED_SLOT = -1,
-		SIDES = 6,
-		DICE_COUNT = 16
-	};
+	static code_point_t const	UNINITIALIZED_SLOT;
+	static int const SIDES = 6;
+	static int const DICE_COUNT = 16;
 };
+
+code_point_t const BOGGLE::UNINITIALIZED_SLOT = code_point_t( static_cast<u32_t>( -1 ) );
 
 }
 
@@ -122,16 +123,20 @@ HBoggle::~HBoggle ( void ) {
 void HBoggle::generate_game( void ) {
 	M_PROLOG
 	HRandomizer rnd( randomizer_helper::make_randomizer() );
-	for ( int i( 0 ); i < boggle_data::BOGGLE::DICE_COUNT; ++ i )
+	for ( int i( 0 ); i < boggle_data::BOGGLE::DICE_COUNT; ++ i ) {
 		_game[ i ][ 0 ] = boggle_data::BOGGLE::UNINITIALIZED_SLOT;
+	}
 	for ( int i( 0 ); i < boggle_data::BOGGLE::DICE_COUNT; ++ i ) {
 		int k( 0 );
 		int slot( static_cast<int>( rnd( static_cast<int unsigned>( boggle_data::BOGGLE::DICE_COUNT - i ) ) ) );
-		for ( int j( 0 ); j < slot; ++ j, ++ k )
-			while ( _game[ k ][ 0 ] != boggle_data::BOGGLE::UNINITIALIZED_SLOT )
+		for ( int j( 0 ); j < slot; ++ j, ++ k ) {
+			while ( _game[ k ][ 0 ] != boggle_data::BOGGLE::UNINITIALIZED_SLOT ) {
 				++ k;
-		while ( _game[ k ][ 0 ] != boggle_data::BOGGLE::UNINITIALIZED_SLOT )
+			}
+		}
+		while ( _game[ k ][ 0 ] != boggle_data::BOGGLE::UNINITIALIZED_SLOT ) {
 			++ k;
+		}
 		_game[ k ][ 0 ] = boggle_data::_dices_[ i ][ rnd( boggle_data::BOGGLE::SIDES ) ];
 	}
 	return;
@@ -313,7 +318,7 @@ void HBoggle::on_end_round( void ) {
 		int appearance( static_cast<int>( del->second->size() ) );
 		int length( static_cast<int>( del->first.get_length() ) );
 		if ( _scoring == SCORING::LONGEST_WORDS ) {
-			if ( ( scores[ length - 1 ] > 0 ) && word_is_good( del->first, length ) ) {
+			if ( ( scores[ length - 1 ] > 0 ) && word_is_good( del->first ) ) {
 				if ( length > longestLength ) {
 					longest.clear();
 					longestLength = length;
@@ -333,7 +338,7 @@ void HBoggle::on_end_round( void ) {
 				_words.erase( del );
 				continue;
 			}
-			if ( ( scores[ length - 1 ] > 0 ) && word_is_good( del->first, length ) ) {
+			if ( ( scores[ length - 1 ] > 0 ) && word_is_good( del->first ) ) {
 				if ( length > longestLength ) {
 					longest.clear();
 					longestLength = length;
@@ -371,7 +376,7 @@ void HBoggle::on_end_round( void ) {
 	M_EPILOG
 }
 
-bool HBoggle::is_good( int f, char const* ptr, int length ) {
+bool HBoggle::is_good( int f, yaal::hcore::HString::const_iterator it_, yaal::hcore::HString::const_iterator end_ ) {
 	bool good = false;
 	static int const DIRECTIONS = 8;
 	int versor[ DIRECTIONS ][ 2 ] = {
@@ -384,19 +389,21 @@ bool HBoggle::is_good( int f, char const* ptr, int length ) {
 			{ 0, 1 }, /* bottom */
 			{ 1, 1 } /* bottom right */
 	};
-	char saved = _game[ f ][ 1 ];
-	if ( ! _game[ f ][ 1 ] && ( *ptr == _game[ f ][ 0 ] ) ) {
-		if ( length == 1 )
+	code_point_t saved = _game[ f ][ 1 ];
+	if ( ! _game[ f ][ 1 ] && ( *it_ == _game[ f ][ 0 ] ) ) {
+		++ it_;
+		if ( it_ == end_ ) {
 			good = true;
-		else {
-			_game[ f ][ 1 ] = 1;
+		} else {
+			_game[ f ][ 1 ] = boggle_data::BOGGLE::UNINITIALIZED_SLOT;
 			int x = f % 4;
 			int y = f / 4;
 			for ( int i = 0; ! good && ( i < DIRECTIONS ); ++ i ) {
 				int nx = x + versor[ i ][ 0 ];
 				int ny = y + versor[ i ][ 1 ];
-				if ( ( nx >= 0 ) && ( nx < 4 ) && ( ny >= 0 ) && ( ny < 4 ) )
-					good = is_good( ny * 4 + nx, ptr + 1, length - 1 );
+				if ( ( nx >= 0 ) && ( nx < 4 ) && ( ny >= 0 ) && ( ny < 4 ) ) {
+					good = is_good( ny * 4 + nx, it_, end_ );
+				}
 			}
 		}
 	}
@@ -404,20 +411,21 @@ bool HBoggle::is_good( int f, char const* ptr, int length ) {
 	return ( good );
 }
 
-bool HBoggle::word_is_good( HString const& word_, int length_ ) {
+bool HBoggle::word_is_good( HString const& word_ ) {
 	M_PROLOG
 	bool good = false;
-	char const* ptr = word_.c_str();
-	for ( int f = 0; f < boggle_data::MAXIMUM_WORD_LENGTH; ++ f )
-		_game[ f ][ 1 ] = 0;
 	for ( int f = 0; f < boggle_data::MAXIMUM_WORD_LENGTH; ++ f ) {
-		if ( is_good( f, ptr, length_ ) ) {
+		_game[ f ][ 1 ] = 0_ycp;
+	}
+	for ( int f = 0; f < boggle_data::MAXIMUM_WORD_LENGTH; ++ f ) {
+		if ( is_good( f, word_.cbegin(), word_.cend() ) ) {
 			good = true;
 			break;
 		}
 	}
-	if ( good )
+	if ( good ) {
 		good = ! HSpellCheckerService::get_instance().spell_check( word_ );
+	}
 	return ( good );
 	M_EPILOG
 }
@@ -475,8 +483,8 @@ HLogic::ptr_t HBoggleCreator::do_new_instance( HServer* server_, HLogic::id_t co
 
 HString HBoggleCreator::do_get_info( void ) const {
 	HString setupMsg;
-	setupMsg.format( "%s:%s,%d,%d,%d,%d", boggle::HBoggle::PROTOCOL::NAME,
-			setup._scoringSystem.c_str(), setup._boggleStarupPlayers,
+	setupMsg = format( "%s:%s,%d,%d,%d,%d", boggle::HBoggle::PROTOCOL::NAME,
+			setup._scoringSystem, setup._boggleStarupPlayers,
 			setup._roundTime, setup._boggleRounds, setup._interRoundDelay );
 	OUT << setupMsg << endl;
 	return ( setupMsg );

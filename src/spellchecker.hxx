@@ -39,6 +39,7 @@ public:
 private:
 	void* _spellChecker; /* AspellSpeller */
 	void* _spellConfig; /* AspellConfig */
+	yaal::hcore::HUTF8String _utf8;
 public:
 	bool spell_check( yaal::hcore::HString const& );
 private:

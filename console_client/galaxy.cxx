@@ -290,7 +290,7 @@ protected:
 public:
 	/*{*/
 	typedef HPointer<HGalaxyWindow> ptr_t;
-	HGalaxyWindow( char const * const, HClient *, int &, int &, client_state_t & );
+	HGalaxyWindow( HString const&, HClient*, int&, int&, client_state_t& );
 	virtual ~HGalaxyWindow( void );
 	virtual void do_init( void ) override;
 	HBoard * get_board( void );
@@ -334,7 +334,7 @@ protected:
 	/*}*/
 public:
 	/*{*/
-	HClient( char const* const );
+	HClient( HString const& );
 	virtual ~HClient( void );
 	void init_client( HString&, int );
 	void handler_message( yaal::tools::HIODispatcher::stream_t& );
@@ -474,18 +474,18 @@ void HBoard::do_paint( void ) {
 		for ( int ctr( 0 ); ctr < _boardSize; ctr ++ )
 			pen += "-+-";
 		pen += '.';
-		cons.cmvprintf( _rowRaw, _columnRaw, _focused ? ATTR_BOARD : COLOR::ATTR_NORMAL, pen.c_str() );
+		cons.cmvprintf( _rowRaw, _columnRaw, _focused ? ATTR_BOARD : COLOR::ATTR_NORMAL, pen );
 		pen = '}';
 		for ( int ctr( 0 ); ctr < _boardSize; ctr ++ )
 			pen += " - ";
 		pen += '{';
 		for ( int ctr( 0 ); ctr < _boardSize; ctr ++ )
-			cons.cmvprintf( _rowRaw + ctr + 1, _columnRaw, _focused ? ATTR_BOARD : COLOR::ATTR_NORMAL, pen.c_str() );
+			cons.cmvprintf( _rowRaw + ctr + 1, _columnRaw, _focused ? ATTR_BOARD : COLOR::ATTR_NORMAL, pen );
 		pen = '`';
 		for ( int ctr( 0 ); ctr < _boardSize; ctr ++ )
 			pen += "-+-";
 		pen += '\'';
-		cons.cmvprintf( _rowRaw + _boardSize + 1, _columnRaw, _focused ? ATTR_BOARD : COLOR::ATTR_NORMAL, pen.c_str() );
+		cons.cmvprintf( _rowRaw + _boardSize + 1, _columnRaw, _focused ? ATTR_BOARD : COLOR::ATTR_NORMAL, pen );
 		int systems( static_cast<int>( _systems->get_size() ) );
 		if ( systems > 0 ) {
 			int sysNo( -1 );
@@ -657,7 +657,7 @@ int HBoard::distance( int source_, int destination_ ) {
 }
 
 HGalaxyWindow::HGalaxyWindow(
-	char const* windowTitle_,
+	HString const& windowTitle_,
 	HClient* client_,
 	int& round_, int& color_, client_state_t& state_
 ) : HWindow( windowTitle_ )
@@ -753,8 +753,9 @@ void HGalaxyWindow::make_move( int sourceSystem_, int destinationSystem_ ) {
 		_logPad->enable( false );
 		_fleet->enable( true );
 		_fleet->set_focus();
-	} else
+	} else {
 		handler_esc( HKeyPressEvent( 27 ) );
+	}
 	return;
 	M_EPILOG
 }
@@ -764,7 +765,7 @@ bool HGalaxyWindow::handler_enter( hconsole::HEvent const& ) {
 	bool consumed( false );
 	HMove* move( nullptr );
 	if ( (*_focusedChild) == _messageInput ) {
-		if ( _messageInput->get_text().find_other_than( _whiteSpace_.data() ) >= 0 ) {
+		if ( _messageInput->get_text().find_other_than( character_class( CHARACTER_CLASS::WHITESPACE ).data() ) >= 0 ) {
 			_varTmpBuffer = "cmd:";
 			_varTmpBuffer += _client->id();
 			_varTmpBuffer += ":say:";
@@ -832,7 +833,7 @@ void HGalaxyWindow::msg( int attr_, char const* const msg_ ) {
 	M_EPILOG
 }
 
-HClient::HClient( char const* programName_ )
+HClient::HClient( HString const& programName_ )
 	: _id()
 	, _color( -1 )
 	, _round( -1 )
@@ -884,8 +885,8 @@ void HClient::init_client( HString& host_, int port_ ) {
 	HTUIProcess::init_tui( "galaxy", _window );
 	_board = _window->get_board();
 	if ( ! setup._gameType.is_empty() ) {
-		message.format( "create:glx:%s,%d,%d,%d\n",
-				setup._game.c_str(),
+		message = format( "create:glx:%s,%d,%d,%d\n",
+				setup._game,
 				setup._emperors, setup._boardSize, setup._systems );
 		*_socket << message;
 	} else {
@@ -1002,7 +1003,7 @@ void HClient::handler_play( HString& command_ ) {
 	HString variable( get_token( command_, "=", 0 ) );
 	HString value( get_token( command_, "=", 1 ) );
 	if ( variable == "system_info" ) {
-		char event( value[ 0 ] );
+		char event( static_cast<char>( value[ 0 ].get() ) );
 		int sysNo( lexical_cast<int>( get_token( value, ",", 1 ) ) );
 		int production( lexical_cast<int>( get_token( value, ",", 2 ) ) );
 		if ( production >= 0 )
@@ -1024,7 +1025,7 @@ void HClient::handler_play( HString& command_ ) {
 				int temp = _systems[ sysNo ]._color;
 				_window->_logPad->add( ( temp >= 0 ) ? _colors_[ temp ] : COLOR::ATTR_NORMAL );
 				_window->_logPad->add( _systemNames_[ sysNo ] );
-				value.format( "(%c)", _symbols_[ sysNo ] );
+				value = format( "(%c)", _symbols_[ sysNo ] );
 				_window->_logPad->add( value );
 				_window->_logPad->add( COLOR::ATTR_NORMAL );
 				_window->_logPad->add( ".\n" );
@@ -1035,7 +1036,7 @@ void HClient::handler_play( HString& command_ ) {
 				_window->_logPad->add( "Reinforcements for " );
 				_window->_logPad->add( _colors_[ color ] );
 				_window->_logPad->add( _systemNames_[ sysNo ] );
-				value.format( "(%c)", _symbols_[ sysNo ] );
+				value = format( "(%c)", _symbols_[ sysNo ] );
 				_window->_logPad->add( value );
 				_window->_logPad->add( COLOR::ATTR_NORMAL );
 				_window->_logPad->add( " arrived.\n" );
@@ -1052,7 +1053,7 @@ void HClient::handler_play( HString& command_ ) {
 				int temp = _systems[ sysNo ]._color;
 				_window->_logPad->add( ( temp >= 0 ) ? _colors_[ temp ] : COLOR::ATTR_NORMAL );
 				_window->_logPad->add( _systemNames_[ sysNo ] );
-				variable.format( "(%c)", _symbols_[ sysNo ] );
+				variable = format( "(%c)", _symbols_[ sysNo ] );
 				_window->_logPad->add( variable );
 				_window->_logPad->add( COLOR::ATTR_NORMAL );
 				_window->_logPad->add( " resisted attack from " );
@@ -1073,7 +1074,7 @@ void HClient::handler_play( HString& command_ ) {
 		_window->_logPad->add( COLOR::ATTR_NORMAL );
 		_window->_logPad->add( " round: " );
 		_round = lexical_cast<int>( value );
-		value.format( "%d", _round );
+		value = format( "%d", _round );
 		_window->_logPad->add( ATTR_CURSOR );
 		_window->_logPad->add( value );
 		_window->_logPad->add( " -----\n" );
@@ -1100,12 +1101,13 @@ int find_color( HString const& message_, int offset_ ) {
 	int start = offset_;
 	int length = static_cast<int>( message_.get_length() );
 	while ( start < length ) {
-		start = static_cast<int>( message_.find( '$', start ) );
+		start = static_cast<int>( message_.find( '$'_ycp, start ) );
 		if ( start < 0 )
 			break;
 		int color = start + 1;
-		while ( ( color < length ) && is_digit( static_cast<u32_t>( message_[color] ) ) ) /* *FIXME* *TODO* Remove static_cast after UCS in HString is implemented. */
+		while ( ( color < length ) && is_digit( message_[color] ) ) { /* *FIXME* *TODO* Remove static_cast after UCS in HString is implemented. */
 			++ color;
+		}
 		if ( ( color < length ) && ( message_[ color ] == ';' ) ) {
 			colorStartIndex = start;
 			break;
@@ -1128,7 +1130,7 @@ void HClient::handler_msg( HString& message_ ) {
 			_window->_logPad->add( message_.substr( index, color - index ) );
 		}
 		if ( color >= 0 ) {
-			int colorEnd( static_cast<int>( message_.find( ';', color ) ) );
+			int colorEnd( static_cast<int>( message_.find( ';'_ycp, color ) ) );
 			_window->_logPad->add( _colors_[ lexical_cast<int>( message_.substr( color + 1, colorEnd - color ) ) ] );
 			index = colorEnd + 1;
 		} else {
@@ -1148,8 +1150,8 @@ void HClient::end_round( void ) {
 	_window->set_state( LOCKED );
 	if ( _moves.size() ) {
 		for ( moves_t::iterator it = _moves.begin(); it != _moves.end(); ++ it ) {
-			message.format( "cmd:%s:glx:play:move=%d,%d,%d\n",
-					_id.c_str(),
+			message = format( "cmd:%s:glx:play:move=%d,%d,%d\n",
+					_id,
 					it->_sourceSystem,
 					it->_destinationSystem,
 					it->_fleet );
@@ -1180,7 +1182,7 @@ int main_client( void ) {
 	else
 		_systemNames_ = _systemNamesLatin_;
 	M_ENSURE( setup._gameType.is_empty() || ( setup._gameType == "glx" ) );
-	HClient client( setup._login.c_str() );
+	HClient client( setup._login );
 	client.init_client( setup._host, setup._port );
 	client.run();
 	return ( 0 );
