@@ -14,7 +14,10 @@ grant {
 	permission java.io.FilePermission "${user.home}/-", "read,write";
 	permission java.io.FilePermission "/usr/bin/xprop", "execute";
 	permission java.lang.RuntimePermission "loadLibrary.atk-wrapper";
+	permission java.lang.RuntimePermission "accessClassInPackage.org.GNOME.Accessibility";
 	permission java.io.FilePermission "/usr/lib/x86_64-linux-gnu/jni/amd64/libatk-wrapper.so", "read";
+	permission java.io.FilePermission "/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/amd64/libatk-wrapper.so", "read";
+	permission java.io.FilePermission "/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/libatk-wrapper.so", "read";
 	permission java.io.FilePermission "/usr/lib/x86_64-linux-gnu/jni/libatk-wrapper.so", "read";
 	permission java.awt.AWTPermission "listenToAllAWTEvents";
 	permission java.awt.AWTPermission "accessEventQueue";
