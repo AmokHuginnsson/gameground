@@ -985,54 +985,71 @@ void HGo::put_handicap_stones( int handi_, bool sgf_ ) {
 	int col( 0 );
 	int row( 0 );
 	switch ( handi_ ) {
-		case ( 9 ):
+		case ( 9 ): {
 			put_stone( col = _gobanSize / 2, row = _gobanSize / 2, STONE::BLACK );
-			if ( sgf_ )
+			if ( sgf_ ) {
 				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
-		case ( 8 ):
+			}
+		} /* fallthrough */
+		case ( 8 ): {
 			put_handicap_stones( 6, sgf_ );
 			put_stone( col = _gobanSize / 2, row = hoshi, STONE::BLACK );
-			if ( sgf_ )
+			if ( sgf_ ) {
 				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
+			}
 			put_stone( col = _gobanSize / 2, row = ( _gobanSize - hoshi ) - 1, STONE::BLACK );
-			if ( sgf_ )
+			if ( sgf_ ) {
 				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
-		break;
-		case ( 7 ):
+			}
+		} break;
+		case ( 7 ): {
 			put_stone( col = _gobanSize / 2, row = _gobanSize / 2, STONE::BLACK );
-			if ( sgf_ )
+			if ( sgf_ ) {
 				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
-		case ( 6 ):
+			}
+		} /* fallthrough */
+		case ( 6 ): {
 			put_handicap_stones( 4, sgf_ );
 			put_stone( col = hoshi, row = _gobanSize / 2, STONE::BLACK );
-			if ( sgf_ )
+			if ( sgf_ ) {
 				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
+			}
 			put_stone( col = ( _gobanSize - hoshi ) - 1, row = _gobanSize / 2, STONE::BLACK );
-			if ( sgf_ )
+			if ( sgf_ ) {
 				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
-		break;
-		case ( 5 ):
+			}
+		} break;
+		case ( 5 ): {
 			put_stone( col = _gobanSize / 2, row = _gobanSize / 2, STONE::BLACK );
-			if ( sgf_ )
+			if ( sgf_ ) {
 				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
-		case ( 4 ):
+			}
+		} /* fallthrough */
+		case ( 4 ): {
 			put_stone( col = ( _gobanSize - hoshi ) - 1, row = ( _gobanSize - hoshi ) - 1, STONE::BLACK );
-			if ( sgf_ )
+			if ( sgf_ ) {
 				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
-		case ( 3 ):
+			}
+		} /* fallthrough */
+		case ( 3 ): {
 			put_stone( col = hoshi, row = hoshi, STONE::BLACK );
-			if ( sgf_ )
+			if ( sgf_ ) {
 				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
-		case ( 2 ):
+			}
+		} /* fallthrough */
+		case ( 2 ): {
 			put_stone( col = hoshi, row = ( _gobanSize - hoshi ) - 1, STONE::BLACK );
-			if ( sgf_ )
+			if ( sgf_ ) {
 				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
+			}
 			put_stone( col = ( _gobanSize - hoshi ) - 1, row = hoshi, STONE::BLACK );
-			if ( sgf_ )
+			if ( sgf_ ) {
 				_sgf.add_position( SGF::Position::BLACK, SGF::Coord( col, row ) );
-		break;
-		default:
+			}
+		} break;
+		default: {
 			M_ASSERT( ! "unhandled case" );
+		}
 	}
 	return;
 	M_EPILOG

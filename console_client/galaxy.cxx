@@ -1048,7 +1048,7 @@ void HClient::handler_play( HString& command_ ) {
 				emperors_t::iterator it( _emperors.find( color ) );
 				M_ASSERT( it != _emperors.end() );
 				value = it->second;
-			}
+			} /* fallthrough */
 			case ( 's' ): /* resisted attack */ {
 				int temp = _systems[ sysNo ]._color;
 				_window->_logPad->add( ( temp >= 0 ) ? _colors_[ temp ] : COLOR::ATTR_NORMAL );
@@ -1177,10 +1177,11 @@ void HClient::handler_dummy( HString& ) {
 }
 
 int main_client( void ) {
-	if ( now_utc().get_hour() % 2 )
+	if ( now_utc().get_hour() % 2 ) {
 		_systemNames_ = _systemNamesNorse_;
-	else
+	} else {
 		_systemNames_ = _systemNamesLatin_;
+	}
 	M_ENSURE( setup._gameType.is_empty() || ( setup._gameType == "glx" ) );
 	HClient client( setup._login );
 	client.init_client( setup._host, setup._port );

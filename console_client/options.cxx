@@ -69,7 +69,8 @@ void version( void ) {
 int handle_program_options( int argc_, char** argv_ ) {
 	M_PROLOG
 	HProgramOptionsHandler po( "gameground-client" );
-	OOptionInfo info( po, setup._programName, "GameGround-client - console client for GameGround - an universal networked multiplayer game server.", NULL );
+	HOptionInfo info( po );
+	info.name( setup._programName ).intro( "GameGround-client - console client for GameGround - an universal networked multiplayer game server." );
 	bool help( false );
 	bool conf( false );
 	bool vers( false );
