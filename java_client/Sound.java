@@ -44,13 +44,15 @@ class Sound {
 				if ( _clip.isOpen() )
 					_clip.close();
 				_clip.open( audioStream );
-				_clip.start(); 
+				_clip.start();
 			} catch ( javax.sound.sampled.LineUnavailableException lue ) {
 				Con.err( "LineUnavailableException: " + lue.getMessage() );
 			} catch ( javax.sound.sampled.UnsupportedAudioFileException uafe ) {
 				Con.err( "UnsupportedAudioFileException: " + uafe.getMessage() );
 			} catch ( java.io.IOException ioe ) {
 				Con.err( "IOException: " + ioe.getMessage() );
+			} catch ( java.lang.IllegalArgumentException iae ) {
+				Con.err( "IllegalArgumentException: " + iae.getMessage() );
 			}
 			_playing = false;
 		}

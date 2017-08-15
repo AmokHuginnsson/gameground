@@ -52,15 +52,17 @@ private:
 		} state_t;
 	};
 public:
-	struct SCORING {
-		typedef enum {
-			ORIGINAL = 0,
-			FIBONACCI = 1,
-			GEOMETRIC = 2,
-			FIBONACCI_4 = 3,
-			GEOMETRIC_4 = 4,
-			LONGEST_WORDS = 5
-		} scoring_t;
+	enum class LANGUAGE {
+		ENGLISH = 0,
+		POLISH = 1
+	};
+	enum class SCORING {
+		ORIGINAL = 0,
+		FIBONACCI = 1,
+		GEOMETRIC = 2,
+		FIBONACCI_4 = 3,
+		GEOMETRIC_4 = 4,
+		LONGEST_WORDS = 5
 	};
 	struct PROTOCOL : public HLogic::PROTOCOL {
 		static char const* const NAME;
@@ -80,7 +82,8 @@ protected:
 	typedef yaal::hcore::HMap<OClientInfo*, OPlayerInfo> players_t;
 	static int RULES[6][16];
 	STATE::state_t _state;
-	SCORING::scoring_t _scoring;
+	LANGUAGE _language;
+	SCORING _scoring;
 	int _startupPlayers;
 	int _roundTime;
 	int _maxRounds;
@@ -93,7 +96,7 @@ protected:
 	/*}*/
 public:
 	/*{*/
-	HBoggle( HServer*, id_t const&, yaal::hcore::HString const&, SCORING::scoring_t, int, int, int, int );
+	HBoggle( HServer*, id_t const&, yaal::hcore::HString const&, LANGUAGE, SCORING, int, int, int, int );
 	virtual ~HBoggle( void );
 	void generate_game( void );
 	/*}*/

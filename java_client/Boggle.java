@@ -89,7 +89,7 @@ class Boggle extends HAbstractLogic implements Runnable {
 		}
 		public void onWord() {
 			String msg = _wordInput.getText();
-			if ( msg.matches( ".*\\S+.*" ) ) {	
+			if ( msg.matches( ".*\\S+.*" ) ) {
 				_client.println( "cmd:" + _id + ":play:" + msg );
 				_wordInput.setText( "" );
 				add( _wordsSent, msg + "\n" );

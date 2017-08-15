@@ -46,6 +46,7 @@ char const* const DATABASE_PATH     = "gameground";
 char const* const DATABASE_LOGIN    = "gameground";
 char const* const DATABASE_PASSWORD = "g4m3gr0und";
 char const* const BOGGLE_SCORING_SYSTEM = "original";
+char const* const BOGGLE_LANGUAGE = "pl";
 
 now_t now;
 

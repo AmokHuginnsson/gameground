@@ -48,7 +48,7 @@ namespace boggle_data {
 
 static int const MAXIMUM_WORD_LENGTH = 16;
 
-static code_point_t const _dices_[ 16 ][ 6 ] = {
+static code_point_t const _dicesPl_[ 16 ][ 6 ] = {
 		{ U'a'_ycp, U'a'_ycp, U'd'_ycp, U'e'_ycp, U'ł'_ycp, U'y'_ycp },
 		{ U'a'_ycp, U'a'_ycp, U'i'_ycp, U'k'_ycp, U'm'_ycp, U'y'_ycp },
 		{ U'a'_ycp, U'c'_ycp, U'i'_ycp, U'n'_ycp, U'n'_ycp, U'p'_ycp },
@@ -65,6 +65,49 @@ static code_point_t const _dices_[ 16 ][ 6 ] = {
 		{ U'e'_ycp, U'i'_ycp, U'l'_ycp, U's'_ycp, U'ś'_ycp, U'w'_ycp },
 		{ U'ę'_ycp, U'f'_ycp, U'h'_ycp, U'j'_ycp, U'l'_ycp, U's'_ycp },
 		{ U'i'_ycp, U'k'_ycp, U'ł'_ycp, U'o'_ycp, U'p'_ycp, U'r'_ycp }
+};
+
+static code_point_t const _dicesEnNew_[ 16 ][ 6 ] = {
+		{ U'a'_ycp, U'a'_ycp, U'e'_ycp, U'e'_ycp, U'g'_ycp, U'n'_ycp },
+		{ U'e'_ycp, U'l'_ycp, U'r'_ycp, U't'_ycp, U't'_ycp, U'y'_ycp },
+		{ U'a'_ycp, U'o'_ycp, U'o'_ycp, U't'_ycp, U't'_ycp, U'w'_ycp },
+		{ U'a'_ycp, U'b'_ycp, U'b'_ycp, U'j'_ycp, U'o'_ycp, U'o'_ycp },
+		{ U'e'_ycp, U'h'_ycp, U'r'_ycp, U't'_ycp, U'v'_ycp, U'w'_ycp },
+		{ U'c'_ycp, U'i'_ycp, U'm'_ycp, U'o'_ycp, U't'_ycp, U'u'_ycp },
+		{ U'd'_ycp, U'i'_ycp, U's'_ycp, U't'_ycp, U't'_ycp, U'y'_ycp },
+		{ U'e'_ycp, U'i'_ycp, U'o'_ycp, U's'_ycp, U's'_ycp, U't'_ycp },
+		{ U'd'_ycp, U'e'_ycp, U'l'_ycp, U'r'_ycp, U'v'_ycp, U'y'_ycp },
+		{ U'a'_ycp, U'c'_ycp, U'h'_ycp, U'o'_ycp, U'p'_ycp, U's'_ycp },
+		{ U'h'_ycp, U'i'_ycp, U'm'_ycp, U'n'_ycp, U'q'_ycp, U'u'_ycp },
+		{ U'e'_ycp, U'e'_ycp, U'i'_ycp, U'n'_ycp, U's'_ycp, U'u'_ycp },
+		{ U'e'_ycp, U'e'_ycp, U'g'_ycp, U'h'_ycp, U'n'_ycp, U'w'_ycp },
+		{ U'a'_ycp, U'f'_ycp, U'f'_ycp, U'k'_ycp, U'p'_ycp, U's'_ycp },
+		{ U'h'_ycp, U'l'_ycp, U'n'_ycp, U'n'_ycp, U'r'_ycp, U'z'_ycp },
+		{ U'd'_ycp, U'e'_ycp, U'i'_ycp, U'l'_ycp, U'r'_ycp, U'x'_ycp }
+};
+
+static code_point_t const _dicesEnOld_[ 16 ][ 6 ] = {
+		{ U'a'_ycp, U'a'_ycp, U'c'_ycp, U'i'_ycp, U'o'_ycp, U't'_ycp },
+		{ U'a'_ycp, U'h'_ycp, U'm'_ycp, U'o'_ycp, U'r'_ycp, U's'_ycp },
+		{ U'e'_ycp, U'g'_ycp, U'k'_ycp, U'l'_ycp, U'u'_ycp, U'y'_ycp },
+		{ U'a'_ycp, U'b'_ycp, U'i'_ycp, U'l'_ycp, U't'_ycp, U'y'_ycp },
+		{ U'a'_ycp, U'c'_ycp, U'd'_ycp, U'e'_ycp, U'm'_ycp, U'p'_ycp },
+		{ U'e'_ycp, U'g'_ycp, U'i'_ycp, U'n'_ycp, U't'_ycp, U'v'_ycp },
+		{ U'g'_ycp, U'i'_ycp, U'l'_ycp, U'r'_ycp, U'u'_ycp, U'w'_ycp },
+		{ U'e'_ycp, U'l'_ycp, U'p'_ycp, U's'_ycp, U't'_ycp, U'u'_ycp },
+		{ U'd'_ycp, U'e'_ycp, U'n'_ycp, U'o'_ycp, U's'_ycp, U'w'_ycp },
+		{ U'a'_ycp, U'c'_ycp, U'e'_ycp, U'l'_ycp, U'r'_ycp, U's'_ycp },
+		{ U'a'_ycp, U'b'_ycp, U'j'_ycp, U'm'_ycp, U'o'_ycp, U'q'_ycp },
+		{ U'e'_ycp, U'e'_ycp, U'f'_ycp, U'h'_ycp, U'i'_ycp, U'y'_ycp },
+		{ U'e'_ycp, U'h'_ycp, U'i'_ycp, U'n'_ycp, U'p'_ycp, U's'_ycp },
+		{ U'd'_ycp, U'k'_ycp, U'n'_ycp, U'o'_ycp, U't'_ycp, U'u'_ycp },
+		{ U'a'_ycp, U'd'_ycp, U'e'_ycp, U'n'_ycp, U'v'_ycp, U'z'_ycp },
+		{ U'b'_ycp, U'i'_ycp, U'f'_ycp, U'o'_ycp, U'r'_ycp, U'x'_ycp }
+};
+
+static code_point_t const _dices_[ 2 ][ 16 ][ 6 ] = {
+	_dicesEnNew_,
+	_dicesPl_
 };
 
 struct BOGGLE {
@@ -101,12 +144,28 @@ char const* const BOGGLE_MSG[] = {
 	"malformed packet"
 };
 
-HBoggle::HBoggle( HServer* server_, id_t const& id_, HString const& comment_, SCORING::scoring_t scoring_, int players_, int roundTime_, int maxRounds_, int interRoundDelay_ )
-	: HLogic( server_, id_, comment_ ), _state( STATE::LOCKED ),
-	_scoring( scoring_ ), _startupPlayers( players_ ),
-	_roundTime( roundTime_ ), _maxRounds( maxRounds_ ),
-	_interRoundDelay( interRoundDelay_ ), _round( 0 ), _players(),
-	_words(), _varTmpBuffer() {
+HBoggle::HBoggle(
+	HServer* server_,
+	id_t const& id_,
+	HString const& comment_,
+	LANGUAGE language_,
+	SCORING scoring_,
+	int players_,
+	int roundTime_,
+	int maxRounds_,
+	int interRoundDelay_
+) : HLogic( server_, id_, comment_ )
+	, _state( STATE::LOCKED )
+	, _language( language_ )
+	, _scoring( scoring_ )
+	, _startupPlayers( players_ )
+	, _roundTime( roundTime_ )
+	, _maxRounds( maxRounds_ )
+	, _interRoundDelay( interRoundDelay_ )
+	, _round( 0 )
+	, _players()
+	, _words()
+	, _varTmpBuffer() {
 	M_PROLOG
 	_handlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HBoggle::handler_play );
 	return;
@@ -137,7 +196,7 @@ void HBoggle::generate_game( void ) {
 		while ( _game[ k ][ 0 ] != boggle_data::BOGGLE::UNINITIALIZED_SLOT ) {
 			++ k;
 		}
-		_game[ k ][ 0 ] = boggle_data::_dices_[ i ][ rnd( boggle_data::BOGGLE::SIDES ) ];
+		_game[ k ][ 0 ] = boggle_data::_dices_[ static_cast<int>( _language ) ][ i ][ rnd( boggle_data::BOGGLE::SIDES ) ];
 	}
 	return;
 	M_EPILOG
@@ -308,7 +367,7 @@ void HBoggle::on_end_round( void ) {
 	} else
 		_out << PROTOCOL::MSG << PROTOCOL::SEP << "Game Over!" << endl;
 	broadcast( _out << _out );
-	int* scores = RULES[ _scoring ];
+	int* scores = RULES[ static_cast<int>( _scoring ) ];
 	typedef HList<words_t::iterator> longest_t;
 	longest_t longest;
 	int longestLength = 0;
@@ -446,54 +505,76 @@ HLogic::ptr_t HBoggleCreator::do_new_instance( HServer* server_, HLogic::id_t co
 	OUT << "creating logic: " << argv_ << endl;
 	HTokenizer t( argv_, "," );
 	HString name( t[ 0 ] );
-	HString scoringStr( t[ 1 ] );
+	HString languageStr( t[ 1 ] );
+	HString scoringStr( t[ 2 ] );
 	int players( 0 );
 	int roundTime( 0 );
 	int maxRounds( 0 );
 	int interRoundDelay( 0 );
 	try {
-		players = lexical_cast<int>( t[ 2 ] );
-		roundTime = lexical_cast<int>( t[ 3 ] );
-		maxRounds = lexical_cast<int>( t[ 4 ] );
-		interRoundDelay = lexical_cast<int>( t[ 5 ] );
+		players = lexical_cast<int>( t[ 3 ] );
+		roundTime = lexical_cast<int>( t[ 4 ] );
+		maxRounds = lexical_cast<int>( t[ 5 ] );
+		interRoundDelay = lexical_cast<int>( t[ 6 ] );
 	} catch ( HLexicalCastException const& ) {
 		throw HLogicException( boggle::BOGGLE_MSG[boggle::BOGGLE_MSG_MALFORMED] );
 	}
-	boggle::HBoggle::SCORING::scoring_t scoring( boggle::HBoggle::SCORING::ORIGINAL );
-	if ( scoringStr == "original" )
+	boggle::HBoggle::LANGUAGE language( boggle::HBoggle::LANGUAGE::ENGLISH );
+	if ( languageStr == "en" ) {
+		language = boggle::HBoggle::LANGUAGE::ENGLISH;
+	} else if ( languageStr == "pl" ) {
+		language = boggle::HBoggle::LANGUAGE::POLISH;
+	}
+	boggle::HBoggle::SCORING scoring( boggle::HBoggle::SCORING::ORIGINAL );
+	if ( scoringStr == "original" ) {
 		scoring = boggle::HBoggle::SCORING::ORIGINAL;
-	else if ( scoringStr == "fibonacci" )
+	} else if ( scoringStr == "fibonacci" ) {
 		scoring = boggle::HBoggle::SCORING::FIBONACCI;
-	else if ( scoringStr == "fibonacci4" )
+	} else if ( scoringStr == "fibonacci4" ) {
 		scoring = boggle::HBoggle::SCORING::FIBONACCI_4;
-	else if ( scoringStr == "geometric" )
+	} else if ( scoringStr == "geometric" ) {
 		scoring = boggle::HBoggle::SCORING::GEOMETRIC;
-	else if ( scoringStr == "geometric4" )
+	} else if ( scoringStr == "geometric4" ) {
 		scoring = boggle::HBoggle::SCORING::GEOMETRIC_4;
-	else if ( scoringStr == "longestwords" )
+	} else if ( scoringStr == "longestwords" ) {
 		scoring = boggle::HBoggle::SCORING::LONGEST_WORDS;
-	return ( make_pointer<boggle::HBoggle>( server_, id_, name,
-				scoring,
-				players,
-				roundTime,
-				maxRounds,
-				interRoundDelay ) );
+	}
+	return (
+		make_pointer<boggle::HBoggle>(
+			server_,
+			id_,
+			name,
+			language,
+			scoring,
+			players,
+			roundTime,
+			maxRounds,
+			interRoundDelay
+		)
+	);
 	M_EPILOG
 }
 
 HString HBoggleCreator::do_get_info( void ) const {
 	HString setupMsg;
-	setupMsg = format( "%s:%s,%d,%d,%d,%d", boggle::HBoggle::PROTOCOL::NAME,
-			setup._scoringSystem, setup._boggleStarupPlayers,
-			setup._roundTime, setup._boggleRounds, setup._interRoundDelay );
+	setupMsg = format(
+		"%s:%s,%s,%d,%d,%d,%d",
+		boggle::HBoggle::PROTOCOL::NAME,
+		setup._boggleLanguage,
+		setup._scoringSystem,
+		setup._boggleStarupPlayers,
+		setup._roundTime,
+		setup._boggleRounds,
+		setup._interRoundDelay
+	);
 	OUT << setupMsg << endl;
 	return ( setupMsg );
 }
 
 void HBoggleCreator::do_initialize_globals( void ) {
 	M_PROLOG
-	static char const* const MAGIC_WORD = "mama";
-	HSpellCheckerService::get_instance().spell_check( MAGIC_WORD );
+	static char const MAGIC_WORD_PL[] = "mama";
+	HSpellCheckerService::get_instance().spell_check( MAGIC_WORD_PL );
 	return;
 	M_EPILOG
 }
