@@ -97,7 +97,6 @@ struct OSetup {
 	/* galaxy/boggle specific strings */
 	yaal::hcore::HString _boggleLanguage;
 	yaal::hcore::HString _scoringSystem;
-	yaal::hcore::HString _consoleCharset;
 	yaal::hcore::HString _aspellLang;
 	yaal::hcore::HString _databasePath;
 	yaal::hcore::HString _databaseLogin;
@@ -129,7 +128,6 @@ struct OSetup {
 		, _byoYomiTime( GO_BYOYOMI_TIME )
 		, _boggleLanguage( BOGGLE_LANGUAGE )
 		, _scoringSystem( BOGGLE_SCORING_SYSTEM )
-		, _consoleCharset()
 		, _aspellLang()
 		, _databasePath( DATABASE_PATH )
 		, _databaseLogin( DATABASE_LOGIN )

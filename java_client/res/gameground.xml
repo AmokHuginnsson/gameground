@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="iso8859-2"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE frame SYSTEM "res/gameground.dtd">
 <frame id="_frame" size="&v_width;,&v_height;" title="GameGround - a Java(TM) client." background="black" defaultCloseOperation="JFrame.EXIT_ON_CLOSE">
 </frame>

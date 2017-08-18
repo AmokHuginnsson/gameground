@@ -493,12 +493,15 @@ void HBoard::do_paint( void ) {
 				int coordX( ( * _systems )[ ctr ]._coordinateX );
 				int coordY( ( * _systems )[ ctr ]._coordinateY );
 				int color( ( * _systems )[ ctr ]._color );
-				cons.cmvprintf( _rowRaw + 1 + coordY,
-						_columnRaw + 1 + coordX * 3,
-						( ( color >= 0 ) && _focused ) ? _colors_[ color ] : ATTR_NEUTRAL_SYSTEM, "(%c)",
-						ctr + ( ctr < 26 ? 'A' : ( ctr < 35 ? '1' - 26 : '0' - 35 ) ) );
-				if ( ( coordX == _cursorX ) && ( coordY == _cursorY ) )
+				cons.cmvprintf(
+					_rowRaw + 1 + coordY,
+					_columnRaw + 1 + coordX * 3,
+					( ( color >= 0 ) && _focused ) ? _colors_[ color ] : ATTR_NEUTRAL_SYSTEM, "(%c)",
+					static_cast<char>( ctr + ( ctr < 26 ? 'A' : ( ctr < 35 ? '1' - 26 : '0' - 35 ) ) )
+				);
+				if ( ( coordX == _cursorX ) && ( coordY == _cursorY ) ) {
 					sysNo = ctr;
+				}
 			}
 			_listener.on_show_system_info( sysNo );
 		}
@@ -848,6 +851,7 @@ HClient::HClient( HString const& programName_ )
 	, _out() {
 	M_PROLOG
 	_handlers[ "setup" ] = &HClient::handler_setup;
+	_handlers[ "client_setup" ] = &HClient::handler_msg;
 	_handlers[ "play" ] = &HClient::handler_play;
 	_handlers[ "msg" ] = &HClient::handler_msg;
 	_handlers[ "say" ] = &HClient::handler_msg;

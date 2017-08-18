@@ -2,7 +2,6 @@
 # this file ought to be in /etc/ and/or your home dirctory.
 
 log_path x_gameground.log
-console_charset "ISO-8859-2"
 aspell_lang "pl"
 port 7777
 emperors 4

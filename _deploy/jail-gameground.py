@@ -9,8 +9,6 @@ forceCopy=["/dev/urandom",
 		"/usr/lib/aspell/pl.multi",
 		"/usr/lib/aspell/pl.rws",
 		"/usr/lib/aspell/pl.dat",
-		"/usr/lib/aspell/iso-8859-2.cset",
-		"/usr/lib/aspell/iso-8859-2.cmap",
 		"/usr/lib/aspell//pl_affix.dat",
 		"/usr/lib/aspell/standard.kbd",
 		"/lib/tfurca-makejail-to-pizda"]

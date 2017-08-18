@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="iso8859-2"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE panel SYSTEM "res/gameground.dtd">
 <panel layout="FlowLayout"><!--{{{-->
 	<layout type="FormLayout" columns="p,4px,p,p:grow" rows="p,4px,p,4px,p,4px,p" />

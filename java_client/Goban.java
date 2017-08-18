@@ -662,7 +662,7 @@ public abstract class Goban extends JPanel implements MouseInputListener {
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					PrintStream ps = new PrintStream( baos );
 					sgf.save( ps, true );
-					_logic._client.println( HAbstractLogic.PROTOCOL.CMD + HAbstractLogic.PROTOCOL.SEP + _logic.id() + HAbstractLogic.PROTOCOL.SEP + PROTOCOL.SGF + HAbstractLogic.PROTOCOL.SEP + baos.toString( "ISO-8859-2" ).replace( "\n", "\\n" ) );
+					_logic._client.println( HAbstractLogic.PROTOCOL.CMD + HAbstractLogic.PROTOCOL.SEP + _logic.id() + HAbstractLogic.PROTOCOL.SEP + PROTOCOL.SGF + HAbstractLogic.PROTOCOL.SEP + baos.toString( "UTF-8" ).replace( "\n", "\\n" ) );
 				} catch ( java.io.UnsupportedEncodingException uee ) {
 					Con.err( "java.io.UnsupportedEncodingException: " + uee.getMessage() );
 				} catch ( SGFException se ) {

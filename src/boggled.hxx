@@ -30,6 +30,7 @@ Copyright:
 #include <yaal/hcore/hmap.hxx>
 
 #include "logic.hxx"
+#include "spellchecker.hxx"
 
 namespace gameground {
 
@@ -52,10 +53,6 @@ private:
 		} state_t;
 	};
 public:
-	enum class LANGUAGE {
-		ENGLISH = 0,
-		POLISH = 1
-	};
 	enum class SCORING {
 		ORIGINAL = 0,
 		FIBONACCI = 1,
@@ -82,7 +79,7 @@ protected:
 	typedef yaal::hcore::HMap<OClientInfo*, OPlayerInfo> players_t;
 	static int RULES[6][16];
 	STATE::state_t _state;
-	LANGUAGE _language;
+	HSpellChecker::LANGUAGE _language;
 	SCORING _scoring;
 	int _startupPlayers;
 	int _roundTime;
@@ -96,7 +93,7 @@ protected:
 	/*}*/
 public:
 	/*{*/
-	HBoggle( HServer*, id_t const&, yaal::hcore::HString const&, LANGUAGE, SCORING, int, int, int, int );
+	HBoggle( HServer*, id_t const&, yaal::hcore::HString const&, HSpellChecker::LANGUAGE, SCORING, int, int, int, int );
 	virtual ~HBoggle( void );
 	void generate_game( void );
 	/*}*/

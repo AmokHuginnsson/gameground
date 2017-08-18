@@ -28,31 +28,30 @@ Copyright:
 #define SPELLCHECKER_HXX_INCLUDED
 
 #include <yaal/hcore/hstring.hxx>
-#include <yaal/hcore/hsingleton.hxx>
 
 namespace gameground {
 
-class HSpellChecker : public yaal::hcore::HSingletonInterface {
+class HSpellChecker {
 public:
 	typedef HSpellChecker this_type;
-	typedef HSingletonInterface base_type;
+	enum class LANGUAGE {
+		ENGLISH = 0,
+		POLISH = 1
+	};
 private:
 	void* _spellChecker; /* AspellSpeller */
 	void* _spellConfig; /* AspellConfig */
 	yaal::hcore::HUTF8String _utf8;
 public:
+	HSpellChecker( LANGUAGE );
+	HSpellChecker( HSpellChecker&& );
+	~HSpellChecker( void );
 	bool spell_check( yaal::hcore::HString const& );
 private:
-	HSpellChecker( void );
-	~HSpellChecker( void );
 	void cleanup( void );
 	HSpellChecker( HSpellChecker const& );
 	HSpellChecker& operator = ( HSpellChecker const& );
-	friend class yaal::hcore::HSingleton<HSpellChecker>;
-	friend class yaal::hcore::HDestructor<HSpellChecker>;
 };
-
-typedef yaal::hcore::HSingleton<HSpellChecker> HSpellCheckerService;
 
 }
 

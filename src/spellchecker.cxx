@@ -14,18 +14,27 @@ using namespace yaal::hcore;
 
 namespace gameground {
 
+inline char const* lang_id_to_str( HSpellChecker::LANGUAGE langId_ ) {
+	char const* langStr( nullptr );
+	switch ( langId_ ) {
+		case ( HSpellChecker::LANGUAGE::ENGLISH ) : langStr = "en"; break;
+		case ( HSpellChecker::LANGUAGE::POLISH ) : langStr = "pl"; break;
+	}
+	return ( langStr );
+}
+
 /*! \brief Simple constructor.
  *
  * it inializes dictionary
  */
-HSpellChecker::HSpellChecker( void )
-	: _spellChecker( NULL )
-	, _spellConfig( NULL )
+HSpellChecker::HSpellChecker( LANGUAGE language_ )
+	: _spellChecker( nullptr )
+	, _spellConfig( nullptr )
 	, _utf8() {
 	M_PROLOG
-	AspellCanHaveError* possible_err = NULL;
+	AspellCanHaveError* possible_err = nullptr;
 
-	if ( setup._consoleCharset.is_empty() || setup._aspellLang.is_empty() ) {
+	if ( setup._aspellLang.is_empty() ) {
 		/* jesli nie chcemy aspella to wywalamy go z pamieci */
 		cleanup();
 		M_THROW( "Maybe console_charset, aspell_lang variable is not set!\n", 0 );
@@ -34,10 +43,8 @@ HSpellChecker::HSpellChecker( void )
 	hcore::log( LOG_LEVEL::INFO ) << "aspell_init - ";
 
 	_spellConfig = new_aspell_config();
-	_utf8.assign( setup._consoleCharset );
-	::aspell_config_replace( static_cast<AspellConfig*>( _spellConfig ), "encoding", _utf8.c_str() );
-	_utf8.assign( setup._aspellLang );
-	::aspell_config_replace( static_cast<AspellConfig*>( _spellConfig ), "lang", _utf8.c_str() );
+	::aspell_config_replace( static_cast<AspellConfig*>( _spellConfig ), "encoding", "UTF-8" );
+	::aspell_config_replace( static_cast<AspellConfig*>( _spellConfig ), "lang", lang_id_to_str( language_ ) );
 	possible_err = new_aspell_speller( static_cast<AspellConfig*>( _spellConfig ) );
 
 	int err = 0;
@@ -53,6 +60,14 @@ HSpellChecker::HSpellChecker( void )
 	}
 	return;
 	M_EPILOG
+}
+
+HSpellChecker::HSpellChecker( HSpellChecker&& other_ )
+	: _spellChecker( yaal::move( other_._spellChecker ) )
+	, _spellConfig( yaal::move( other_._spellConfig ) )
+	, _utf8( yaal::move( other_._utf8 ) ) {
+	other_._spellConfig = nullptr;
+	other_._spellChecker = nullptr;
 }
 
 HSpellChecker::~HSpellChecker( void ) {
@@ -75,11 +90,11 @@ void HSpellChecker::cleanup( void ) {
 	if ( _spellChecker ) {
 		delete_aspell_speller( static_cast<AspellSpeller*>( _spellChecker ) );
 	}
-	_spellChecker = NULL;
+	_spellChecker = nullptr;
 	if ( _spellConfig ) {
 		delete_aspell_config( static_cast<AspellConfig*>( _spellConfig ) );
 	}
-	_spellConfig = NULL;
+	_spellConfig = nullptr;
 	return;
 }
 

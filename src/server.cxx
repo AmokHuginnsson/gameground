@@ -375,8 +375,9 @@ void HServer::handle_login( OClientInfo& client_, HString const& loginInfo_ ) {
 				if ( result ) { /* user exists and supplied password was correct */
 					update_last_activity( client_ );
 					HRecordSet::value_t clientSetup( row[1] );
-					if ( clientSetup && ! clientSetup->is_empty() )
+					if ( clientSetup && ! clientSetup->is_empty() ) {
 						*client_._socket << PROTOCOL::CLIENT_SETUP << PROTOCOL::SEP << *clientSetup << endl;
+					}
 				} else if ( password != NULL_PASS ) {
 					HQuery::ptr_t queryLogin( _db->prepare_query( "INSERT INTO v_user_session ( login, password ) VALUES ( LOWER('?'), LOWER('?') );" ) );
 					queryLogin->bind( 1, login );

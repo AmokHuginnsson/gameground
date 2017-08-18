@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="iso8859-2"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE dialog SYSTEM "res/gameground.dtd">
 <dialog title="Create a new game ..." modal="true" size="560,320" resizable="false" focuscycleroot="true" defaultCloseOperation="JDialog.DISPOSE_ON_CLOSE"><!--{{{-->
 	<vbox border="EmptyBorder(8,8,8,8)">

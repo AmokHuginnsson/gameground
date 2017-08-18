@@ -122,13 +122,6 @@ int handle_program_options( int argc_, char** argv_ ) {
 		.argument_name( "system" )
 	)(
 		HProgramOptionsHandler::HOption()
-		.long_form( "console_charset" )
-		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::REQUIRED )
-		.description( "charset encoding for current terminal" )
-		.recipient( setup._consoleCharset )
-		.argument_name( "charset" )
-	)(
-		HProgramOptionsHandler::HOption()
 		.short_form( 'P' )
 		.long_form( "port" )
 		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::REQUIRED )

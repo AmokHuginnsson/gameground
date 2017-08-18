@@ -12,7 +12,7 @@ class HClient extends Thread {
 /*--------------------------------------------*/
 	private static SSLContext _sslContext;
 	private static final boolean registered;
-	private static final String D_ENCODING = "iso8859-2";
+	private static final String D_ENCODING = "utf8";
 	static {
 		registered = relaxSSL();
 	}

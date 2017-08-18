@@ -36,7 +36,6 @@ M_VCSID( "$Id: " __ID__ " $" )
 #include "setup.hxx"
 #include "clientinfo.hxx"
 #include "logicfactory.hxx"
-#include "spellchecker.hxx"
 
 using namespace yaal;
 using namespace yaal::hcore;
@@ -118,6 +117,9 @@ struct BOGGLE {
 
 code_point_t const BOGGLE::UNINITIALIZED_SLOT = code_point_t( static_cast<u32_t>( -1 ) );
 
+typedef HArray<HSpellChecker> spell_checkers_t;
+spell_checkers_t _spellCheckers_;
+
 }
 
 namespace boggle {
@@ -148,7 +150,7 @@ HBoggle::HBoggle(
 	HServer* server_,
 	id_t const& id_,
 	HString const& comment_,
-	LANGUAGE language_,
+	HSpellChecker::LANGUAGE language_,
 	SCORING scoring_,
 	int players_,
 	int roundTime_,
@@ -247,6 +249,15 @@ bool HBoggle::do_accept( OClientInfo* clientInfo_ ) {
 	return ( false );
 }
 
+inline char const* lang_id_to_name( HSpellChecker::LANGUAGE langId_ ) {
+	char const* langStr( nullptr );
+	switch ( langId_ ) {
+		case ( HSpellChecker::LANGUAGE::ENGLISH ) : langStr = "English"; break;
+		case ( HSpellChecker::LANGUAGE::POLISH ) : langStr = "Polish"; break;
+	}
+	return ( langStr );
+}
+
 void HBoggle::do_post_accept( OClientInfo* clientInfo_ ) {
 	M_PROLOG
 	HLock l( _mutex );
@@ -270,6 +281,8 @@ void HBoggle::do_post_accept( OClientInfo* clientInfo_ ) {
 	}
 	*clientInfo_->_socket << *this << PROTOCOL::MSG << PROTOCOL::SEP
 		<< "Welcome, this match settings are:" << endl
+		<< *this << PROTOCOL::MSG << PROTOCOL::SEP
+		<< "   language - " << lang_id_to_name( _language ) << endl
 		<< *this << PROTOCOL::MSG << PROTOCOL::SEP
 		<< "   scoring system - " << scoringStr << endl
 		<< *this << PROTOCOL::MSG << PROTOCOL::SEP
@@ -483,7 +496,7 @@ bool HBoggle::word_is_good( HString const& word_ ) {
 		}
 	}
 	if ( good ) {
-		good = ! HSpellCheckerService::get_instance().spell_check( word_ );
+		good = ! boggle_data::_spellCheckers_[static_cast<int>( _language )].spell_check( word_ );
 	}
 	return ( good );
 	M_EPILOG
@@ -519,11 +532,11 @@ HLogic::ptr_t HBoggleCreator::do_new_instance( HServer* server_, HLogic::id_t co
 	} catch ( HLexicalCastException const& ) {
 		throw HLogicException( boggle::BOGGLE_MSG[boggle::BOGGLE_MSG_MALFORMED] );
 	}
-	boggle::HBoggle::LANGUAGE language( boggle::HBoggle::LANGUAGE::ENGLISH );
+	HSpellChecker::LANGUAGE language( HSpellChecker::LANGUAGE::ENGLISH );
 	if ( languageStr == "en" ) {
-		language = boggle::HBoggle::LANGUAGE::ENGLISH;
+		language = HSpellChecker::LANGUAGE::ENGLISH;
 	} else if ( languageStr == "pl" ) {
-		language = boggle::HBoggle::LANGUAGE::POLISH;
+		language = HSpellChecker::LANGUAGE::POLISH;
 	}
 	boggle::HBoggle::SCORING scoring( boggle::HBoggle::SCORING::ORIGINAL );
 	if ( scoringStr == "original" ) {
@@ -573,8 +586,8 @@ HString HBoggleCreator::do_get_info( void ) const {
 
 void HBoggleCreator::do_initialize_globals( void ) {
 	M_PROLOG
-	static char const MAGIC_WORD_PL[] = "mama";
-	HSpellCheckerService::get_instance().spell_check( MAGIC_WORD_PL );
+	boggle_data::_spellCheckers_.emplace_back( HSpellChecker::LANGUAGE::ENGLISH );
+	boggle_data::_spellCheckers_.emplace_back( HSpellChecker::LANGUAGE::POLISH );
 	return;
 	M_EPILOG
 }
