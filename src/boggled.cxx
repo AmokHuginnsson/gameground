@@ -377,8 +377,9 @@ void HBoggle::on_end_round( void ) {
 		HScheduledAsyncCaller::get_instance().call_in( duration( _interRoundDelay, time::UNIT::SECOND ), call( &HBoggle::on_begin_round, this ) );
 		_out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< "This round has ended, next round in " << _interRoundDelay << " seconds!" << endl;
-	} else
+	} else {
 		_out << PROTOCOL::MSG << PROTOCOL::SEP << "Game Over!" << endl;
+	}
 	broadcast( _out << _out );
 	int* scores = RULES[ static_cast<int>( _scoring ) ];
 	typedef HList<words_t::iterator> longest_t;
@@ -400,10 +401,12 @@ void HBoggle::on_end_round( void ) {
 					_words.erase( del );
 					continue;
 				}
-				if ( length == longestLength )
+				if ( length == longestLength ) {
 					longest.push_back( del );
-			} else
+				}
+			} else {
 				_words.erase( del );
+			}
 		} else {
 			if ( appearance > 1 ) {
 				OUT << appearance << " people found: " << del->first << endl;
@@ -417,8 +420,9 @@ void HBoggle::on_end_round( void ) {
 				}
 				if ( length == longestLength )
 					longest.push_back( del );
-			} else
+			} else {
 				_words.erase( del );
+			}
 		}
 	}
 	for ( words_t::iterator it = _words.begin(); it != _words.end(); ++ it ) {
@@ -438,12 +442,14 @@ void HBoggle::on_end_round( void ) {
 				<< PROTOCOL::SEPP << it->second._last << endl << _out );
 		it->second._last = 0;
 	}
-	for ( longest_t::iterator it = longest.begin(); it != longest.end(); ++ it )
+	for ( longest_t::iterator it = longest.begin(); it != longest.end(); ++ it ) {
 		broadcast( _out << PROTOCOL::LONGEST << PROTOCOL::SEP
 				<< (*it)->first << " [" << (*(*it)->second->begin())->_login << "]" << endl << _out );
+	}
 	_words.clear();
-	if ( _round < _maxRounds )
+	if ( _round < _maxRounds ) {
 		broadcast( _out << PROTOCOL::END_ROUND << endl << _out );
+	}
 	return;
 	M_EPILOG
 }
@@ -489,8 +495,10 @@ bool HBoggle::word_is_good( HString const& word_ ) {
 	for ( int f = 0; f < boggle_data::MAXIMUM_WORD_LENGTH; ++ f ) {
 		_game[ f ][ 1 ] = 0_ycp;
 	}
+	HString w( word_ );
+	w.replace( "qu", "q" );
 	for ( int f = 0; f < boggle_data::MAXIMUM_WORD_LENGTH; ++ f ) {
-		if ( is_good( f, word_.cbegin(), word_.cend() ) ) {
+		if ( is_good( f, w.cbegin(), w.cend() ) ) {
 			good = true;
 			break;
 		}

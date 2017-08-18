@@ -166,8 +166,10 @@ class Boggle extends HAbstractLogic implements Runnable {
 			CallStack.print();
 			System.exit( 1 );
 		}
-		for ( int i = 0; i < 16; ++ i )
-			_gui._letters[ i ].setText( $command.substring( i, i + 1 ).toUpperCase() );
+		for ( int i = 0; i < 16; ++ i ) {
+			String letter = $command.substring( i, i + 1 ).toUpperCase();
+			_gui._letters[ i ].setText( "Q".equals( letter ) ? "Qu" : letter );
+		}
 		_start = new Date().getTime();
 		_timeLeft = _roundTime;
 		_state = State.PLAY;
