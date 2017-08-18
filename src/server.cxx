@@ -94,7 +94,7 @@ char const* const HServer::PROTOCOL::SEP = ":";
 char const* const HServer::PROTOCOL::SEPP = ",";
 char const* const HServer::PROTOCOL::SHUTDOWN = "shutdown";
 char const* const HServer::PROTOCOL::VERSION = "version";
-char const* const HServer::PROTOCOL::VERSION_ID = "3";
+char const* const HServer::PROTOCOL::VERSION_ID = "4";
 char const* const HServer::PROTOCOL::WARN = "warn";
 
 static const HString NULL_PASS = tools::hash::sha1( "" );

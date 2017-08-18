@@ -54,7 +54,7 @@ class HWorkArea extends HAbstractWorkArea {
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
 	static Color COLOR_NOTIFY = Color.CYAN.brighter().brighter().brighter().brighter().brighter();
-	private static final String CLIENT_VERSION = "3";
+	private static final String CLIENT_VERSION = "4";
 	private SortedMap<String, Method> _handlers = java.util.Collections.synchronizedSortedMap( new TreeMap<String, Method>() );
 	private SortedMap<String, HLogicInfo> _logics = java.util.Collections.synchronizedSortedMap( new TreeMap<String, HLogicInfo>() );
 	private SortedMap<String, Player> _players = java.util.Collections.synchronizedSortedMap( new TreeMap<String, Player>() );
