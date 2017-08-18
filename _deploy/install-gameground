@@ -59,12 +59,15 @@ conditional_umount() {
 	fi
 }
 
+unset PS_FORMAT
+
 adv ./_deploy/init stop
 adv /bin/rm -fr nest
 adv mkdir -p nest/etc/conf nest/var/db/yaal/keys
 adv cp build/${TARGET}/${DAEMON}/1exec nest/
 adv cp -a ${HOME}/usr/lib nest
 adv cp -a ${HOME}/src/yaal/build/${TARGET}/yaalrc nest/etc/conf/
+adv sed -i -e "s@${HOME}@\${HOME}@" nest/etc/conf/yaalrc
 adv cp -a ${HOME}/src/${SERVICE}/gamegroundrc nest/etc/conf/
 adv cp -a ${HOME}/src/${SERVICE}/gameground.sqlite nest/
 adv cp -a ${HOME}/var/db/yaal/keys/* nest/var/db/yaal/keys/
@@ -89,6 +92,6 @@ fi
 adv /bin/rm -f ${JAIL}/nest/x_*
 adv "grep service /etc/group > ${JAIL}/etc/group"
 adv conditional_immutable_on ${JAIL}/nest
-adv chattr -i ${JAIL}/nest/gameground.sqlite
+adv chattr -i ${JAIL}/nest ${JAIL}/nest/gameground.sqlite
 adv ln -s urandom ${JAIL}/dev/random
 

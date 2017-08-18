@@ -596,6 +596,9 @@ void HBoggleCreator::do_initialize_globals( void ) {
 	M_PROLOG
 	boggle_data::_spellCheckers_.emplace_back( HSpellChecker::LANGUAGE::ENGLISH );
 	boggle_data::_spellCheckers_.emplace_back( HSpellChecker::LANGUAGE::POLISH );
+	/* makejail.py helper */
+	boggle_data::_spellCheckers_[ static_cast<int>( HSpellChecker::LANGUAGE::ENGLISH ) ].spell_check( "mom" );
+	boggle_data::_spellCheckers_[ static_cast<int>( HSpellChecker::LANGUAGE::POLISH ) ].spell_check( "mama" );
 	return;
 	M_EPILOG
 }
