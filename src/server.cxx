@@ -355,8 +355,8 @@ void HServer::handle_login( OClientInfo& client_, HString const& loginInfo_ ) {
 		else if ( _logins.count( login ) > 0 )
 			*client_._socket << "err:" << login << " already logged in." << endl;
 		else {
-			HQuery::ptr_t query( _db->prepare_query( "SELECT ( SELECT COUNT(*) FROM v_user_session WHERE login = LOWER('?') AND password = LOWER('?') )"
-						" + ( SELECT COUNT(*) FROM v_user_session WHERE login = LOWER('?') ), ( SELECT setup FROM v_user_session WHERE login = LOWER('?') );" ) );
+			HQuery::ptr_t query( _db->prepare_query( "SELECT ( SELECT COUNT(*) FROM v_user_session WHERE login = LOWER(?) AND password = LOWER(?) )"
+						" + ( SELECT COUNT(*) FROM v_user_session WHERE login = LOWER(?) ), ( SELECT setup FROM v_user_session WHERE login = LOWER(?) );" ) );
 			query->bind( 1, login );
 			query->bind( 2, password );
 			query->bind( 3, login );
@@ -379,7 +379,7 @@ void HServer::handle_login( OClientInfo& client_, HString const& loginInfo_ ) {
 						*client_._socket << PROTOCOL::CLIENT_SETUP << PROTOCOL::SEP << *clientSetup << endl;
 					}
 				} else if ( password != NULL_PASS ) {
-					HQuery::ptr_t queryLogin( _db->prepare_query( "INSERT INTO v_user_session ( login, password ) VALUES ( LOWER('?'), LOWER('?') );" ) );
+					HQuery::ptr_t queryLogin( _db->prepare_query( "INSERT INTO v_user_session ( login, password ) VALUES ( LOWER(?), LOWER(?) );" ) );
 					queryLogin->bind( 1, login );
 					queryLogin->bind( 2, password );
 					rs = queryLogin->execute();
@@ -434,7 +434,7 @@ void HServer::handle_account( OClientInfo& client_, HString const& accountInfo_ 
 		bool newPasswordNull( newPassword == NULL_PASS );
 		bool newPasswordRepeatNull( newPasswordRepeat == NULL_PASS );
 		if ( oldPasswordNull && newPasswordNull && newPasswordRepeatNull ) {
-			HQuery::ptr_t query( _db->prepare_query( "UPDATE tbl_user SET name = '?', email = '?', description = '?', setup = '?' WHERE login = LOWER('?');" ) );
+			HQuery::ptr_t query( _db->prepare_query( "UPDATE tbl_user SET name = ?, email = ?, description = ?, setup = ? WHERE login = LOWER(?);" ) );
 			query->bind( 1, escape_copy( name, _escapeTable_ ) );
 			query->bind( 2, escape_copy( email, _escapeTable_ ) );
 			query->bind( 3, escape_copy( description, _escapeTable_ ) );
@@ -448,8 +448,8 @@ void HServer::handle_account( OClientInfo& client_, HString const& accountInfo_ 
 					if ( ! ( is_sha1( newPassword ) && is_sha1( oldPassword ) ) )
 						kick_client( client_._socket, _msgYourClientIsTainted_ );
 					else {
-						HQuery::ptr_t query( _db->prepare_query( "UPDATE tbl_user SET name = '?', email = '?', description = '?', setup = '?', password = '?'"
-									" WHERE login = LOWER('?') AND password = LOWER('?');" ) );
+						HQuery::ptr_t query( _db->prepare_query( "UPDATE tbl_user SET name = ?, email = ?, description = ?, setup = ?, password = ?"
+									" WHERE login = LOWER(?) AND password = LOWER(?);" ) );
 						query->bind( 1, escape_copy( name, _escapeTable_ ) );
 						query->bind( 2, escape_copy( email, _escapeTable_ ) );
 						query->bind( 3, escape_copy( description, _escapeTable_ ) );
@@ -695,8 +695,8 @@ void HServer::handle_get_account( OClientInfo& client_, HString const& login_ ) 
 	} else {
 		bool accountSelf( login_.is_empty() || ( login_ == client_._login ) );
 		HString const& login( accountSelf ? client_._login : login_ );
-		char const accountQuerySelf[] = "SELECT name, description, email, setup FROM tbl_user WHERE login = LOWER('?');";
-		char const accountQueryOther[] = "SELECT name, description FROM tbl_user WHERE login = LOWER('?');";
+		char const accountQuerySelf[] = "SELECT name, description, email, setup FROM tbl_user WHERE login = LOWER(?);";
+		char const accountQueryOther[] = "SELECT name, description FROM tbl_user WHERE login = LOWER(?);";
 		HQuery::ptr_t query( _db->prepare_query( ( accountSelf ? accountQuerySelf : accountQueryOther ) ) );
 		query->bind( 1, login );
 		HRecordSet::ptr_t rs( query->execute() );
@@ -796,7 +796,7 @@ void HServer::update_last_activity( OClientInfo const& info_ ) {
 	M_PROLOG
 	HQuery::ptr_t query(
 			_db->prepare_query(
-				"UPDATE v_user_session SET last_activity = datetime('now', 'localtime') WHERE login = LOWER('?');" ) );
+				"UPDATE v_user_session SET last_activity = datetime('now', 'localtime') WHERE login = LOWER(?);" ) );
 	query->bind( 1, info_._login );
 	HRecordSet::ptr_t rs( query->execute() );
 	M_ENSURE( !! rs );
