@@ -57,7 +57,7 @@ dist:
 	@mv gameground.jar.keep gameground.jar
 
 sign: clean $(TARGET)
-	@echo "Enter password for your keystore:" && \
+	@echo -n "Enter password for your keystore: " && \
 	stty -echo; read PASS; stty echo; echo "Signing jar ... " && \
 	jarsigner -keystore codestation.jks -storepass "$${PASS}" ./build/gameground.jar codestation
 

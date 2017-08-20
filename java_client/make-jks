@@ -1,0 +1,21 @@
+#! /bin/sh
+
+# Create Java Key Store
+
+echo -n "Enter password for your keystore: "
+stty -echo
+read PASS
+stty echo
+
+openssl req -key "${1}" -new -x509 -out codestation-self-signed.crt
+openssl pkcs12 -export -name codestation -in codestation-self-signed.crt -inkey "${1}" -password "pass:${PASS}" -out codestation-self-signed.p12
+keytool \
+	-importkeystore \
+	-keystore codestation.jks \
+	-srcstoretype pkcs12 \
+	-srckeystore codestation-self-signed.p12 \
+	-deststorepass "${PASS}" \
+	-srcstorepass "${PASS}" \
+	-destalias codestation \
+	-srcalias codestation
+
