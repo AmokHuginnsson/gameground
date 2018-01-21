@@ -1,3 +1,5 @@
+/* Read gameground/LICENSE.md file for copyright and licensing information. */
+
 #include <string.h>
 #include <aspell.h>
 
