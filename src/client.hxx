@@ -20,68 +20,30 @@ private:
 	yaal::hcore::HStreamInterface::ptr_t _socket;
 	logics_t _logics;
 public:
-	HClient( yaal::hcore::HStreamInterface::ptr_t const& sock_ )
-		: _valid( true )
-		, _authenticated( false )
-		, _login()
-		, _socket( sock_ )
-		, _logics() {
-	}
-	~HClient( void ) {
-		M_PROLOG
-		M_ASSERT( _logics.is_empty() );
-		return;
-		M_EPILOG
-	};
+	HClient( yaal::hcore::HStreamInterface::ptr_t const& );
+	~HClient( void );
 	yaal::hcore::HString const& login( void ) const {
 		return ( _login );
 	}
-	void set_login( yaal::hcore::HString const& login_ ) {
-		M_PROLOG
-		M_ASSERT( _login.is_empty() );
-		_login = login_;
-		return;
-		M_EPILOG
-	}
+	void set_login( yaal::hcore::HString const& );
 	bool is_valid( void ) const {
 		return ( _valid );
 	}
-	void invalidate( void ) {
-		_valid = false;
-	}
+	void invalidate( void );
 	bool is_authenticated( void ) const {
 		return ( _authenticated );
 	}
-	void authenticate( void ) {
-		_authenticated = true;
-	}
+	void authenticate( void );
 	yaal::hcore::HStreamInterface::ptr_t const& sock( void ) const {
 		return ( _socket );
 	}
 	logics_t const& logics( void ) const {
 		return ( _logics );
 	}
-	void enter( HLogic::id_t id_ ) {
-		M_PROLOG
-		_logics.insert( id_ );
-		return;
-		M_EPILOG
-	}
-	void leave( HLogic::id_t id_ ) {
-		M_PROLOG
-		_logics.erase( id_ );
-		return;
-		M_EPILOG
-	}
-	void send( yaal::hcore::HString const& message_ ) {
-		*_socket << message_;
-	}
-	void read( yaal::hcore::HString& line_ ) {
-		M_PROLOG
-		_socket->read_until( line_ );
-		return;
-		M_EPILOG
-	}
+	void enter( HLogic::id_t id_ );
+	void leave( HLogic::id_t id_ );
+	void send( yaal::hcore::HString const& );
+	void read( yaal::hcore::HString& );
 };
 
 }
