@@ -18,14 +18,6 @@ static int const MAX_BOARD_SIZE            =  20;
 static int const MAX_SYSTEM_COUNT          =  36;
 #define out ( clog << now << " " << __FILE__ + OSetup::PATH_OFFSET << ":" << __LINE__ << ": " )
 
-#ifndef NDEBUG
-#define SENDF( sock ) tee( sock, out )
-#define SEND( sock ) tee( sock, clog )
-#else /* #ifndef NDEBUG */
-#define SEND( sock ) ( sock )
-#define SENDF( sock ) ( sock )
-#endif /* #else #ifndef NDEBUG */
-
 typedef double long ( *now_t )( bool, double, char, int, bool, double, void*, void*, double, char );
 extern now_t now;
 yaal::hcore::HStreamInterface& operator << ( yaal::hcore::HStreamInterface&, now_t const& );

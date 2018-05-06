@@ -9,7 +9,7 @@ M_VCSID( "$Id: " __ID__ " $" )
 #include "logic.hxx"
 #include "server.hxx"
 #include "setup.hxx"
-#include "clientinfo.hxx"
+#include "client.hxx"
 
 using namespace yaal;
 using namespace yaal::hcore;
@@ -48,34 +48,34 @@ HLogic::~HLogic( void ) {
 	OUT << "Destroying logic: " << _id << endl;
 }
 
-void HLogic::kick_client( OClientInfo* clientInfo_, yaal::hcore::HString const& reason_ ) {
+void HLogic::kick_client( HClient* client_, yaal::hcore::HString const& reason_ ) {
 	M_PROLOG
-	OUT << "kicking player `" << clientInfo_->_login << "' from " << _name << "," << _id << endl;
-	clientInfo_->_logics.erase( _id );
-	_clients.erase( clientInfo_ );
+	OUT << "kicking player `" << client_->login() << "' from " << _name << "," << _id << endl;
+	client_->leave( _id );
+	_clients.erase( client_ );
 	if ( ! reason_.is_empty() ) {
-		*clientInfo_->_socket << "err:" << reason_ << endl;
+		client_->send( _out << "err:" << reason_ << endl << _out );
 	}
-	do_kick( clientInfo_ );
-	broadcast( _out << PROTOCOL::PLAYER_QUIT << PROTOCOL::SEP << clientInfo_->_login << endl << _out );
+	do_kick( client_ );
+	broadcast( _out << PROTOCOL::PLAYER_QUIT << PROTOCOL::SEP << client_->login() << endl << _out );
 	return;
 	M_EPILOG
 }
 
-bool HLogic::do_accept( OClientInfo* ) {
+bool HLogic::do_accept( HClient* ) {
 	return ( true );
 }
 
-void HLogic::do_kick( OClientInfo* ) {
+void HLogic::do_kick( HClient* ) {
 	return;
 }
 
-bool HLogic::accept_client( OClientInfo* clientInfo_ ) {
+bool HLogic::accept_client( HClient* client_ ) {
 	M_PROLOG
 	bool rejected( false );
-	if ( ! do_accept( clientInfo_ ) ) {
-		_clients.insert( clientInfo_ );
-		clientInfo_->_logics.insert( _id );
+	if ( ! do_accept( client_ ) ) {
+		_clients.insert( client_ );
+		client_->enter( _id );
 	} else {
 		rejected = true;
 	}
@@ -83,9 +83,9 @@ bool HLogic::accept_client( OClientInfo* clientInfo_ ) {
 	M_EPILOG
 }
 
-void HLogic::post_accept_client( OClientInfo* clientInfo_ ) {
+void HLogic::post_accept_client( HClient* client_ ) {
 	M_PROLOG
-	do_post_accept( clientInfo_ );
+	do_post_accept( client_ );
 	return;
 	M_EPILOG
 }
@@ -108,14 +108,14 @@ HString const& HLogic::get_name( void ) const {
 	return ( _name );
 }
 
-bool HLogic::process_command( OClientInfo* clientInfo_, HString const& command_ ) {
+bool HLogic::process_command( HClient* client_, HString const& command_ ) {
 	M_PROLOG
 	HString mnemonic( get_token( command_, ":", 0 ) );
 	HString argument( command_.mid( mnemonic.get_length() + 1 ) );
 	bool failure( false );
 	handlers_t::iterator it( _handlers.find( mnemonic ) );
 	if ( it != _handlers.end() ) {
-		( this->*(it->second) )( clientInfo_, argument );
+		( this->*(it->second) )( client_, argument );
 	} else {
 		failure = true;
 		OUT << "mnemo: " << mnemonic << ", arg: " << argument << ", cmd: " << command_ << endl;
@@ -137,8 +137,9 @@ void HLogic::broadcast( HString const& message_ ) {
 	M_PROLOG
 	for ( clients_t::HIterator it( _clients.begin() ), end( _clients.end() ); it != end; ++ it ) {
 		try {
-			if ( (*it)->_valid ) {
-				*(*it)->_socket << _bcastPrefix << message_;
+			if ( (*it)->is_valid() ) {
+				(*it)->send( _bcastPrefix );
+				(*it)->send( message_ );
 			}
 		} catch ( HOpenSSLException const& ) {
 			drop_client( *it );
@@ -148,10 +149,10 @@ void HLogic::broadcast( HString const& message_ ) {
 	M_EPILOG
 }
 
-void HLogic::handler_message( OClientInfo* clientInfo_, HString const& message_ ) {
+void HLogic::handler_message( HClient* client_, HString const& message_ ) {
 	M_PROLOG
 	HLock l( _mutex );
-	broadcast( _out << PROTOCOL::SAY << PROTOCOL::SEP << clientInfo_->_login << ": " << message_ << endl << _out );
+	broadcast( _out << PROTOCOL::SAY << PROTOCOL::SEP << client_->login() << ": " << message_ << endl << _out );
 	return;
 	M_EPILOG
 }
@@ -186,9 +187,9 @@ HString HLogicCreatorInterface::get_info( void ) const {
 	M_EPILOG
 }
 
-void HLogic::drop_client( OClientInfo* clientInfo_ ) {
+void HLogic::drop_client( HClient* client_ ) {
 	M_PROLOG
-	_server->drop_client( clientInfo_ );
+	_server->drop_client( client_ );
 	return;
 	M_EPILOG
 }

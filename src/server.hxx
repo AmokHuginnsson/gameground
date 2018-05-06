@@ -9,7 +9,7 @@
 #include <yaal/tools/hexclusiveaccessor.hxx>
 #include <yaal/dbwrapper/hdatabase.hxx>
 
-#include "clientinfo.hxx"
+#include "client.hxx"
 #include "logic.hxx"
 
 namespace gameground {
@@ -18,12 +18,12 @@ class HServer {
 public:
 	typedef HServer this_type;
 protected:
-	typedef void ( HServer::* handler_t )( OClientInfo&, yaal::hcore::HString const& );
+	typedef void ( HServer::* handler_t )( HClient&, yaal::hcore::HString const& );
 	typedef yaal::hcore::HMap<HLogic::id_t, HLogic::ptr_t> logics_t;
 	typedef yaal::hcore::HMap<yaal::hcore::HString, handler_t> handlers_t;
-	typedef yaal::hcore::HMap<yaal::tools::HIODispatcher::stream_t::value_type*, OClientInfo> clients_t;
-	typedef yaal::hcore::HMap<yaal::hcore::HString, OClientInfo*> logins_t;
-	typedef yaal::hcore::HArray<OClientInfo*> dropouts_t;
+	typedef yaal::hcore::HMap<yaal::tools::HIODispatcher::stream_t::value_type const*, HClient> clients_t;
+	typedef yaal::hcore::HMap<yaal::hcore::HString, HClient*> logins_t;
+	typedef yaal::hcore::HArray<HClient*> dropouts_t;
 	typedef yaal::tools::HExclusiveAccessor<yaal::dbwrapper::HDataBase::ptr_t> db_accessor_t;
 	int _maxConnections;
 	yaal::hcore::HSocket::ptr_t _socket;
@@ -73,40 +73,41 @@ public:
 	~HServer( void );
 	int init_server( int );
 	void run( void );
-	void drop_client( OClientInfo* );
-	OClientInfo* get_client( yaal::hcore::HString const& );
+	void drop_client( HClient* );
+	HClient* get_client( yaal::hcore::HString const& );
 	db_accessor_t db( void );
-	void join_party( OClientInfo&, yaal::hcore::HString const& );
-	void handle_get_account( OClientInfo&, yaal::hcore::HString const& );
+	void join_party( HClient&, yaal::hcore::HString const& );
+	void handle_get_account( HClient&, yaal::hcore::HString const& );
 protected:
 	void handler_connection( yaal::tools::HIODispatcher::stream_t& );
 	void handler_message( yaal::tools::HIODispatcher::stream_t& );
-	void handler_shutdown( OClientInfo&, yaal::hcore::HString const& );
-	void handler_quit( OClientInfo&, yaal::hcore::HString const& );
-	void handler_abandon( OClientInfo&, yaal::hcore::HString const& );
-	void handler_chat( OClientInfo&, yaal::hcore::HString const& );
-	void kick_client( yaal::tools::HIODispatcher::stream_t&, char const* const = NULL );
+	void handler_shutdown( HClient&, yaal::hcore::HString const& );
+	void handler_quit( HClient&, yaal::hcore::HString const& );
+	void handler_abandon( HClient&, yaal::hcore::HString const& );
+	void handler_chat( HClient&, yaal::hcore::HString const& );
+	void kick_client( HClient&, char const* const = NULL );
 	void broadcast( yaal::hcore::HString const& );
 	void broadcast_party( yaal::hcore::HString const&, yaal::hcore::HString const& );
 	void broadcast_private( HLogic&, yaal::hcore::HString const& );
-	void broadcast_all_parties( OClientInfo*, yaal::hcore::HString const& );
-	void handle_login( OClientInfo&, yaal::hcore::HString const& );
-	void handle_account( OClientInfo&, yaal::hcore::HString const& );
-	void pass_command( OClientInfo&, yaal::hcore::HString const& );
-	void create_party( OClientInfo&, yaal::hcore::HString const& );
-	void handle_get_logics( OClientInfo&, yaal::hcore::HString const& );
-	void handle_get_players( OClientInfo&, yaal::hcore::HString const& );
-	void handle_get_partys( OClientInfo&, yaal::hcore::HString const& );
-	void send_logics_info( OClientInfo& );
-	void send_players_info( OClientInfo& );
-	void send_player_info( OClientInfo&, OClientInfo& );
-	void broadcast_player_info( OClientInfo& );
-	void broadcast_player_info( OClientInfo&, HLogic& );
-	void send_partys_info( OClientInfo& );
-	void remove_client_from_logic( OClientInfo&, HLogic::ptr_t, yaal::hcore::HString const& = yaal::hcore::HString() );
-	void remove_client_from_all_logics( OClientInfo& );
+	void broadcast_all_parties( HClient*, yaal::hcore::HString const& );
+	void handle_login( HClient&, yaal::hcore::HString const& );
+	void websocket_handshake( HClient&, yaal::hcore::HString const& );
+	void handle_account( HClient&, yaal::hcore::HString const& );
+	void pass_command( HClient&, yaal::hcore::HString const& );
+	void create_party( HClient&, yaal::hcore::HString const& );
+	void handle_get_logics( HClient&, yaal::hcore::HString const& );
+	void handle_get_players( HClient&, yaal::hcore::HString const& );
+	void handle_get_partys( HClient&, yaal::hcore::HString const& );
+	void send_logics_info( HClient& );
+	void send_players_info( HClient& );
+	void send_player_info( HClient&, HClient& );
+	void broadcast_player_info( HClient& );
+	void broadcast_player_info( HClient&, HLogic& );
+	void send_partys_info( HClient& );
+	void remove_client_from_logic( HClient&, HLogic::ptr_t, yaal::hcore::HString const& = yaal::hcore::HString() );
+	void remove_client_from_all_logics( HClient& );
 	void flush_logics( void );
-	void update_last_activity( OClientInfo const& );
+	void update_last_activity( HClient const& );
 	void flush_droupouts( void );
 	HLogic::id_t create_id( void );
 	void free_id( HLogic::id_t const& );

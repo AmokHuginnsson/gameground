@@ -30,7 +30,7 @@ private:
 	static int const SET_CERTAIN_SET = 21;
 protected:
 	/*{*/
-	typedef yaal::hcore::HMap<OClientInfo*, OPlayerInfo> players_t;
+	typedef yaal::hcore::HMap<HClient*, OPlayerInfo> players_t;
 	int _startupPlayers;
 	int _cardsOnTable;
 	int _cardsInDeck;
@@ -48,17 +48,17 @@ public:
 	/*}*/
 protected:
 	/*{*/
-	OPlayerInfo* get_player_info( OClientInfo* );
+	OPlayerInfo* get_player_info( HClient* );
 	yaal::hcore::HString const& serialize_deck( void );
 	void generate_deck( void );
 	bool makes_set( int, int, int ) const;
 	bool contains_set( int ) const;
 	void update_table( void );
-	virtual bool do_accept( OClientInfo* );
-	virtual void do_post_accept( OClientInfo* );
-	virtual void do_kick( OClientInfo* );
+	virtual bool do_accept( HClient* );
+	virtual void do_post_accept( HClient* );
+	virtual void do_kick( HClient* );
 	virtual yaal::hcore::HString do_get_info() const;
-	void handler_set( OClientInfo*, yaal::hcore::HString const& );
+	void handler_set( HClient*, yaal::hcore::HString const& );
 	/*}*/
 private:
 	/*{*/

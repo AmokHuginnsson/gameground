@@ -30,10 +30,10 @@ public:
 	static HLogic::ptr_t get_chat( HServer*, HLogic::id_t const&, yaal::hcore::HString const& );
 	static void cleanup( void );
 protected:
-	virtual bool do_accept( OClientInfo* );
-	virtual void do_post_accept( OClientInfo* );
-	virtual void do_kick( OClientInfo* );
-	void handler_message( OClientInfo*, yaal::hcore::HString const& );
+	virtual bool do_accept( HClient* );
+	virtual void do_post_accept( HClient* );
+	virtual void do_kick( HClient* );
+	void handler_message( HClient*, yaal::hcore::HString const& );
 	virtual yaal::hcore::HString do_get_info() const;
 	virtual bool do_is_private( void ) const;
 private:

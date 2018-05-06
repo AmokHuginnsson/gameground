@@ -49,10 +49,10 @@ public:
 	};
 protected:
 	/*{*/
-	typedef yaal::hcore::HSet<OClientInfo*> client_set_t;
+	typedef yaal::hcore::HSet<HClient*> client_set_t;
 	typedef yaal::hcore::HPointer<client_set_t> client_set_ptr_t;
 	typedef yaal::hcore::HMap<yaal::hcore::HString, client_set_ptr_t> words_t;
-	typedef yaal::hcore::HMap<OClientInfo*, OPlayerInfo> players_t;
+	typedef yaal::hcore::HMap<HClient*, OPlayerInfo> players_t;
 	static int RULES[6][16];
 	STATE::state_t _state;
 	HSpellChecker::LANGUAGE _language;
@@ -75,12 +75,12 @@ public:
 	/*}*/
 protected:
 	/*{*/
-	OPlayerInfo* get_player_info( OClientInfo* );
-	virtual bool do_accept( OClientInfo* );
-	virtual void do_post_accept( OClientInfo* );
-	virtual void do_kick( OClientInfo* );
+	OPlayerInfo* get_player_info( HClient* );
+	virtual bool do_accept( HClient* );
+	virtual void do_post_accept( HClient* );
+	virtual void do_kick( HClient* );
 	virtual yaal::hcore::HString do_get_info() const;
-	void handler_play( OClientInfo*, yaal::hcore::HString const& );
+	void handler_play( HClient*, yaal::hcore::HString const& );
 	void on_begin_round( void );
 	void on_end_round( void );
 	void schedule_end_round( void );

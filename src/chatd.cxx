@@ -12,7 +12,7 @@ M_VCSID( "$Id: " __ID__ " $" )
 
 #include "setup.hxx"
 #include "server.hxx"
-#include "clientinfo.hxx"
+#include "client.hxx"
 #include "logicfactory.hxx"
 #include "spellchecker.hxx"
 
@@ -42,51 +42,51 @@ HChat::~HChat ( void ) {
 	M_EPILOG
 }
 
-bool HChat::do_accept( OClientInfo* clientInfo_ ) {
-	OUT << "new candidate " << clientInfo_->_login << endl;
-	return ( _chatterNames->count( clientInfo_->_login ) != 1 );
+bool HChat::do_accept( HClient* client_ ) {
+	OUT << "new candidate " << client_->login() << endl;
+	return ( _chatterNames->count( client_->login() ) != 1 );
 }
 
-void HChat::do_post_accept( OClientInfo* ) {
+void HChat::do_post_accept( HClient* ) {
 	M_PROLOG
 	HLock l( _mutex );
 	return;
 	M_EPILOG
 }
 
-void HChat::do_kick( OClientInfo* clientInfo_ ) {
+void HChat::do_kick( HClient* client_ ) {
 	M_PROLOG
 	HLock l( _mutex );
-	if ( clientInfo_->_valid ) {
+	if ( client_->is_valid() ) {
 		try {
-			*clientInfo_->_socket << HServer::PROTOCOL::PARTY_CLOSE << PROTOCOL::SEP << _id << endl;
+			client_->send( _out << HServer::PROTOCOL::PARTY_CLOSE << PROTOCOL::SEP << _id << endl << _out );
 		} catch ( HOpenSSLException const& ) {
-			drop_client( clientInfo_ );
+			drop_client( client_ );
 		}
 	}
-	_clients.erase( clientInfo_ );
+	_clients.erase( client_ );
 	if ( _clients.is_empty() )
 		_chats_.erase( _key );
 	return;
 	M_EPILOG
 }
 
-void HChat::handler_message( OClientInfo* clientInfo_, HString const& message_ ) {
+void HChat::handler_message( HClient* client_, HString const& message_ ) {
 	M_PROLOG
 	int chattersCount( static_cast<int>( _clients.get_size() ) );
 	if ( chattersCount > 0 ) {
 		if ( chattersCount != _chatterNames->get_size() ) {
 			for ( chatter_names_t::iterator it( _chatterNames->begin() ), end( _chatterNames->end() ); it != end; ++ it ) {
-				if ( *it != clientInfo_->_login ) {
-					OClientInfo* client( _server->get_client( *it ) );
+				if ( *it != client_->login() ) {
+					HClient* client( _server->get_client( *it ) );
 					if ( client && _clients.count( client ) == 0 ) {
-						_server->handle_get_account( *client, clientInfo_->_login );
+						_server->handle_get_account( *client, client_->login() );
 						_server->join_party( *client, _id );
 					}
 				}
 			}
 		}
-		HLogic::handler_message( clientInfo_, message_ );
+		HLogic::handler_message( client_, message_ );
 	}
 	return;
 	M_EPILOG

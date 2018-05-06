@@ -11,7 +11,7 @@
 
 namespace gameground {
 
-struct OClientInfo;
+struct HClient;
 class HServer;
 class HLogic;
 
@@ -22,8 +22,8 @@ public:
 	typedef HLogic this_type;
 	typedef yaal::hcore::HString id_t;
 	typedef yaal::hcore::HPointer<HLogic> ptr_t;
-	typedef yaal::hcore::HSet<OClientInfo*> clients_t;
-	typedef void ( HLogic::*handler_t ) ( OClientInfo*, yaal::hcore::HString const& );
+	typedef yaal::hcore::HSet<HClient*> clients_t;
+	typedef void ( HLogic::*handler_t ) ( HClient*, yaal::hcore::HString const& );
 protected:
 	typedef yaal::hcore::HHashMap<yaal::hcore::HString, handler_t> handlers_t;
 	HServer* _server;
@@ -51,28 +51,28 @@ public:
 	/*{*/
 	HLogic( HServer*, id_t const&, yaal::hcore::HString const& );
 	virtual ~HLogic( void );
-	bool process_command( OClientInfo*, yaal::hcore::HString const& );
-	bool accept_client( OClientInfo* );
-	void post_accept_client( OClientInfo* );
+	bool process_command( HClient*, yaal::hcore::HString const& );
+	bool accept_client( HClient* );
+	void post_accept_client( HClient* );
 	int active_clients( void ) const;
 	yaal::hcore::HString const& get_comment() const;
 	yaal::hcore::HString get_info() const;
-	void kick_client( OClientInfo*, yaal::hcore::HString const& = yaal::hcore::HString() );
+	void kick_client( HClient*, yaal::hcore::HString const& = yaal::hcore::HString() );
 	id_t id( void ) const;
 	yaal::hcore::HString const& get_name( void ) const;
 	bool is_private( void ) const;
 	/*}*/
 protected:
 	/*{*/
-	void drop_client( OClientInfo* );
-	virtual bool do_accept( OClientInfo* ) = 0;
-	virtual void do_post_accept( OClientInfo* ) = 0;
-	virtual void do_kick( OClientInfo* ) = 0;
+	void drop_client( HClient* );
+	virtual bool do_accept( HClient* ) = 0;
+	virtual void do_post_accept( HClient* ) = 0;
+	virtual void do_kick( HClient* ) = 0;
 	virtual bool do_is_private( void ) const;
 	virtual yaal::hcore::HString do_get_info() const = 0;
 	void broadcast( yaal::hcore::HString const& );
-	void handler_message( OClientInfo*, yaal::hcore::HString const& );
-	void handler_play( OClientInfo*, yaal::hcore::HString const& );
+	void handler_message( HClient*, yaal::hcore::HString const& );
+	void handler_play( HClient*, yaal::hcore::HString const& );
 	void party( yaal::hcore::HStreamInterface& ) const;
 	friend yaal::hcore::HStreamInterface& operator << ( yaal::hcore::HStreamInterface&, HLogic const& );
 	/*}*/

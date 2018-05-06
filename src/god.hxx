@@ -23,7 +23,7 @@ private:
 		int _stonesCaptured;
 		int _score;
 		bool _ignoreUndo;
-		OClientInfo* _client;
+		HClient* _client;
 		OPlayerInfo( void )
 			: _timeLeft( 0 )
 			, _byoYomiPeriods( 0 )
@@ -86,7 +86,7 @@ private:
 	};
 protected:
 	/*{*/
-	typedef yaal::hcore::HList<OClientInfo*> admin_queue_t;
+	typedef yaal::hcore::HList<HClient*> admin_queue_t;
 	typedef yaal::hcore::HArray<int> path_t;
 	typedef yaal::hcore::HArray<sgf::SGF::game_tree_t::const_node_t> branch_t;
 	OPlayerInfo _contestants[ 2 ];
@@ -109,7 +109,7 @@ protected:
 	path_t _path;
 	branch_t _branch;
 	yaal::hcore::HString _varTmpBuffer;
-	OClientInfo* _pendingUndoRequest;
+	HClient* _pendingUndoRequest;
 	/*}*/
 public:
 	/*{*/
@@ -118,13 +118,13 @@ public:
 	/*}*/
 protected:
 	/*{*/
-	OPlayerInfo* get_player_info( OClientInfo* );
-	virtual bool do_accept( OClientInfo* );
-	virtual void do_post_accept( OClientInfo* );
-	virtual void do_kick( OClientInfo* );
+	OPlayerInfo* get_player_info( HClient* );
+	virtual bool do_accept( HClient* );
+	virtual void do_post_accept( HClient* );
+	virtual void do_kick( HClient* );
 	virtual yaal::hcore::HString do_get_info() const;
-	void handler_play( OClientInfo*, yaal::hcore::HString const& );
-	void handler_setup( OClientInfo*, yaal::hcore::HString const& );
+	void handler_play( HClient*, yaal::hcore::HString const& );
+	void handler_setup( HClient*, yaal::hcore::HString const& );
 	void on_timeout( void );
 	void schedule_timeout( void );
 	void reset_goban( bool );
@@ -132,34 +132,34 @@ protected:
 	void put_handicap_stones( int, bool );
 	void apply_move( sgf::SGF::game_tree_t::const_node_t );
 	void put_stone( int, int, STONE::stone_t );
-	void send_goban( OClientInfo* = NULL );
-	void send_path( OClientInfo* = NULL );
+	void send_goban( HClient* = NULL );
+	void send_path( HClient* = NULL );
 	bool have_liberties( int, int, STONE::stone_t );
 	char& goban( int, int );
 	OPlayerInfo& contestant( STONE::stone_t );
 	OPlayerInfo const& contestant( STONE::stone_t ) const;
-	OPlayerInfo* contestant( OClientInfo const* );
-	OPlayerInfo const* contestant( OClientInfo const* ) const;
+	OPlayerInfo* contestant( HClient const* );
+	OPlayerInfo const* contestant( HClient const* ) const;
 	void clear_goban( bool );
 	bool have_killed( int, int, STONE::stone_t );
 	HGo::STONE::stone_t opponent( STONE::stone_t );
 	bool is_suicide( int, int, STONE::stone_t );
 	bool is_ko( void );
 	void make_move( int, int );
-	void contestant_gotup( OClientInfo* );
-	void send_contestants( OClientInfo* = NULL );
-	void send_contestant( char, OClientInfo* );
+	void contestant_gotup( HClient* );
+	void send_contestants( HClient* = NULL );
+	void send_contestant( char, HClient* );
 	int count_stones( STONE::stone_t );
-	void handler_sit( OClientInfo*, yaal::hcore::HString const& );
-	void handler_getup( OClientInfo*, yaal::hcore::HString const& );
-	void handler_put_stone( OClientInfo*, yaal::hcore::HString const& );
-	void handler_pass( OClientInfo* );
-	void handler_sgf( OClientInfo*, yaal::hcore::HString const& );
-	void handler_dead( OClientInfo*, yaal::hcore::HString const& );
-	void handler_newgame( OClientInfo*, yaal::hcore::HString const& );
-	void handler_select( OClientInfo*, yaal::hcore::HString const& );
-	void handler_accept( OClientInfo* );
-	void handler_undo( OClientInfo*, yaal::hcore::HString const& );
+	void handler_sit( HClient*, yaal::hcore::HString const& );
+	void handler_getup( HClient*, yaal::hcore::HString const& );
+	void handler_put_stone( HClient*, yaal::hcore::HString const& );
+	void handler_pass( HClient* );
+	void handler_sgf( HClient*, yaal::hcore::HString const& );
+	void handler_dead( HClient*, yaal::hcore::HString const& );
+	void handler_newgame( HClient*, yaal::hcore::HString const& );
+	void handler_select( HClient*, yaal::hcore::HString const& );
+	void handler_accept( HClient* );
+	void handler_undo( HClient*, yaal::hcore::HString const& );
 	void broadcast_contestants( yaal::hcore::HString const& );
 	void ensure_coordinates_validity( int, int );
 	void mark_stone_dead( int, int );
@@ -175,9 +175,9 @@ protected:
 	void replace_stones( STONE::stone_t, STONE::stone_t );
 	void update_clocks( void );
 	void revoke_scheduled_tasks( void );
-	bool is_admin( OClientInfo* ) const;
-	bool can_play( OClientInfo* ) const;
-	bool can_setup( OClientInfo* ) const;
+	bool is_admin( HClient* ) const;
+	bool can_play( HClient* ) const;
+	bool can_setup( HClient* ) const;
 	bool ongoing_match( void ) const;
 	/*}*/
 private:

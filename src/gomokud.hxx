@@ -40,8 +40,8 @@ private:
 	};
 protected:
 	/*{*/
-	typedef yaal::hcore::HMap<OClientInfo*, int> players_t;
-	OClientInfo* _contestants[ 2 ];
+	typedef yaal::hcore::HMap<HClient*, int> players_t;
+	HClient* _contestants[ 2 ];
 	STONE::stone_t _state;
 	int _move;
 	int long _start;
@@ -57,26 +57,26 @@ public:
 	/*}*/
 protected:
 	/*{*/
-	virtual bool do_accept( OClientInfo* );
-	virtual void do_post_accept( OClientInfo* );
-	virtual void do_kick( OClientInfo* );
+	virtual bool do_accept( HClient* );
+	virtual void do_post_accept( HClient* );
+	virtual void do_kick( HClient* );
 	virtual yaal::hcore::HString do_get_info() const;
-	void handler_play( OClientInfo*, yaal::hcore::HString const& );
+	void handler_play( HClient*, yaal::hcore::HString const& );
 	void reschedule_timeout( void );
 	void send_goban( void );
 	char& goban( int, int );
 	char goban( int, int ) const;
-	OClientInfo*& contestant( STONE::stone_t );
+	HClient*& contestant( STONE::stone_t );
 	void clear_goban( bool );
 	HGomoku::STONE::stone_t opponent( STONE::stone_t );
 	void make_move( int, int, STONE::stone_t );
-	void contestant_gotup( OClientInfo* );
+	void contestant_gotup( HClient* );
 	void send_contestants( void );
 	void send_contestant( char );
 	int count_stones( STONE::stone_t );
-	void handler_sit( OClientInfo*, yaal::hcore::HString const& );
-	void handler_getup( OClientInfo*, yaal::hcore::HString const& );
-	void handler_put_stone( OClientInfo*, yaal::hcore::HString const& );
+	void handler_sit( HClient*, yaal::hcore::HString const& );
+	void handler_getup( HClient*, yaal::hcore::HString const& );
+	void handler_put_stone( HClient*, yaal::hcore::HString const& );
 	void broadcast_contestants( yaal::hcore::HString const& );
 	void ensure_coordinates_validity( int, int );
 	int is_winning_stone( int, int ) const;

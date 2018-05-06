@@ -19,7 +19,7 @@ class HFleet {
 protected:
 	/*{*/
 	int _size;
-	OClientInfo* _emperor;
+	HClient* _emperor;
 	int _arrivalTime;
 	/*}*/
 public:
@@ -42,7 +42,7 @@ protected:
 	int _coordinateY;
 	int _production;
 	int _fleet;
-	OClientInfo* _emperor;
+	HClient* _emperor;
 	HLogic const* _logic;
 	attackers_t _attackers;
 	/*}*/
@@ -71,7 +71,7 @@ private:
 		int _systems;
 		OEmperorInfo( void ) : _color( -1 ), _systems( -1 ) {}
 	};
-	typedef yaal::hcore::HMap<OClientInfo*, OEmperorInfo> emperors_t;
+	typedef yaal::hcore::HMap<HClient*, OEmperorInfo> emperors_t;
 protected:
 	/*{*/
 	int _boardSize;
@@ -86,19 +86,19 @@ public:
 	/*{*/
 	HGalaxy( HServer*, id_t const&, yaal::hcore::HString const&, int, int, int );
 	virtual ~HGalaxy( void );
-	int get_color( OClientInfo* );
-	void mark_alive( OClientInfo* );
+	int get_color( HClient* );
+	void mark_alive( HClient* );
 	/*}*/
 protected:
 	/*{*/
-	OEmperorInfo* get_emperor_info( OClientInfo* );
-	int assign_system( OClientInfo* );
-	virtual bool do_accept( OClientInfo* );
-	virtual void do_post_accept( OClientInfo* );
-	virtual void do_kick( OClientInfo* );
+	OEmperorInfo* get_emperor_info( HClient* );
+	int assign_system( HClient* );
+	virtual bool do_accept( HClient* );
+	virtual void do_post_accept( HClient* );
+	virtual void do_kick( HClient* );
 	virtual yaal::hcore::HString do_get_info() const;
-	void handler_message( OClientInfo*, yaal::hcore::HString const& );
-	void handler_play( OClientInfo*, yaal::hcore::HString const& );
+	void handler_message( HClient*, yaal::hcore::HString const& );
+	void handler_play( HClient*, yaal::hcore::HString const& );
 	void end_round( void );
 	/*}*/
 private:

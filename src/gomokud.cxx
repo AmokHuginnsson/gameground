@@ -10,7 +10,7 @@ M_VCSID( "$Id: " __ID__ " $" )
 #include "gomokud.hxx"
 
 #include "setup.hxx"
-#include "clientinfo.hxx"
+#include "client.hxx"
 #include "logicfactory.hxx"
 #include "spellchecker.hxx"
 
@@ -73,13 +73,13 @@ HGomoku::~HGomoku ( void ) {
 void HGomoku::broadcast_contestants( yaal::hcore::HString const& message_ ) {
 	M_PROLOG
 	M_ASSERT( _contestants[ 0 ] && _contestants[ 1 ] );
-	*_contestants[ 0 ]->_socket << message_;
-	*_contestants[ 1 ]->_socket << message_;
+	_contestants[ 0 ]->send( message_ );
+	_contestants[ 1 ]->send( message_ );
 	return;
 	M_EPILOG
 }
 
-void HGomoku::handler_sit( OClientInfo* clientInfo_, HString const& message_ ) {
+void HGomoku::handler_sit( HClient* client_, HString const& message_ ) {
 	M_PROLOG
 	HString place = get_token( message_, ",", 1 );
 	if ( place.get_length() < 1 ) {
@@ -88,16 +88,16 @@ void HGomoku::handler_sit( OClientInfo* clientInfo_, HString const& message_ ) {
 		char stone = static_cast<char>( place[ 0 ].get() );
 		if ( ( stone != STONE::BLACK ) && ( stone != STONE::WHITE ) ) {
 			throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
-		} else if ( ( contestant( STONE::BLACK ) == clientInfo_ )
-				|| ( contestant( STONE::WHITE ) == clientInfo_ ) ) {
+		} else if ( ( contestant( STONE::BLACK ) == client_ )
+				|| ( contestant( STONE::WHITE ) == client_ ) ) {
 			throw HLogicException( "you were already sitting" );
 		} else if ( contestant( stone ) != NULL ) {
-			*clientInfo_->_socket << *this
-				<< PROTOCOL::MSG << PROTOCOL::SEP << "Some one was faster." << endl;
+			client_->send( _out << *this
+				<< PROTOCOL::MSG << PROTOCOL::SEP << "Some one was faster." << endl << _out );
 		} else {
-			contestant( stone ) = clientInfo_;
-			OClientInfo* black( contestant( STONE::BLACK ) );
-			OClientInfo* white( contestant( STONE::WHITE ) );
+			contestant( stone ) = client_;
+			HClient* black( contestant( STONE::BLACK ) );
+			HClient* white( contestant( STONE::WHITE ) );
 			if ( black && white ) {
 				::memset( _game.raw(), STONE::NONE, GOBAN_SIZE * GOBAN_SIZE );
 				_game.get<char>()[ GOBAN_SIZE * GOBAN_SIZE ] = 0;
@@ -107,12 +107,12 @@ void HGomoku::handler_sit( OClientInfo* clientInfo_, HString const& message_ ) {
 				players_t::iterator blackIt( _players.insert( make_pair( black, 0 ) ).first );
 				players_t::iterator whiteIt( _players.insert( make_pair( white, 0 ) ).first );
 				_sgf.clear();
-				_sgf.set_player( SGF::Player::BLACK, black->_login );
-				_sgf.set_player( SGF::Player::WHITE, white->_login );
+				_sgf.set_player( SGF::Player::BLACK, black->login() );
+				_sgf.set_player( SGF::Player::WHITE, white->login() );
 				_sgf.set_info( SGF::Player::BLACK, 15 );
 				send_goban();
-				broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << black->_login << PROTOCOL::SEPP << blackIt->second << endl << _out );
-				broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << white->_login << PROTOCOL::SEPP << whiteIt->second << endl << _out );
+				broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << black->login() << PROTOCOL::SEPP << blackIt->second << endl << _out );
+				broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << white->login() << PROTOCOL::SEPP << whiteIt->second << endl << _out );
 				broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The Gomoku match started." << endl << _out );
 			}
 		}
@@ -121,19 +121,19 @@ void HGomoku::handler_sit( OClientInfo* clientInfo_, HString const& message_ ) {
 	M_EPILOG
 }
 
-void HGomoku::handler_getup( OClientInfo* clientInfo_, HString const& /*message_*/ ) {
+void HGomoku::handler_getup( HClient* client_, HString const& /*message_*/ ) {
 	M_PROLOG
-	contestant_gotup( clientInfo_ );
+	contestant_gotup( client_ );
 	_state = STONE::NONE;
 	return;
 	M_EPILOG
 }
 
-void HGomoku::handler_put_stone( OClientInfo* clientInfo_, HString const& message_ ) {
+void HGomoku::handler_put_stone( HClient* client_, HString const& message_ ) {
 	M_PROLOG
 	if ( ( _state != STONE::BLACK ) && ( _state != STONE::WHITE ) )
 		throw HLogicException( GO_MSG[ GO_MSG_YOU_CANT_DO_IT_NOW ] );
-	if ( contestant( _state ) != clientInfo_ )
+	if ( contestant( _state ) != client_ )
 		throw HLogicException( GO_MSG[ GO_MSG_NOT_YOUR_TURN ] );
 	int col = lexical_cast<int>( get_token( message_, ",", 1 ) );
 	int row = lexical_cast<int>( get_token( message_, ",", 2 ) );
@@ -146,20 +146,20 @@ void HGomoku::handler_put_stone( OClientInfo* clientInfo_, HString const& messag
 	M_EPILOG
 }
 
-void HGomoku::handler_play( OClientInfo* clientInfo_, HString const& message_ ) {
+void HGomoku::handler_play( HClient* client_, HString const& message_ ) {
 	M_PROLOG
 	HLock l( _mutex );
 	HString item = get_token( message_, ",", 0 );
 	if ( ( item != PROTOCOL::SIT )
-			&& ( contestant( STONE::BLACK ) != clientInfo_ )
-			&& ( contestant( STONE::WHITE ) != clientInfo_ ) )
+			&& ( contestant( STONE::BLACK ) != client_ )
+			&& ( contestant( STONE::WHITE ) != client_ ) )
 		throw HLogicException( "you are not playing" );
 	if ( item == PROTOCOL::PUTSTONE )
-		handler_put_stone( clientInfo_, message_ );
+		handler_put_stone( client_, message_ );
 	else if ( item == PROTOCOL::SIT )
-		handler_sit( clientInfo_, message_ );
+		handler_sit( client_, message_ );
 	else if ( item == PROTOCOL::GETUP )
-		handler_getup( clientInfo_, message_ );
+		handler_getup( client_, message_ );
 	else
 		throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
 	broadcast( _out << PROTOCOL::TOMOVE << PROTOCOL::SEP
@@ -169,52 +169,52 @@ void HGomoku::handler_play( OClientInfo* clientInfo_, HString const& message_ ) 
 	M_EPILOG
 }
 
-bool HGomoku::do_accept( OClientInfo* clientInfo_ ) {
-	OUT << "new candidate " << clientInfo_->_login << endl;
+bool HGomoku::do_accept( HClient* client_ ) {
+	OUT << "new candidate " << client_->login() << endl;
 	return ( false );
 }
 
-void HGomoku::do_post_accept( OClientInfo* clientInfo_ ) {
+void HGomoku::do_post_accept( HClient* client_ ) {
 	M_PROLOG
 	HLock l( _mutex );
-	broadcast( _out << PROTOCOL::SPECTATOR << PROTOCOL::SEP << clientInfo_->_login << endl << _out );
+	broadcast( _out << PROTOCOL::SPECTATOR << PROTOCOL::SEP << client_->login() << endl << _out );
 	for ( clients_t::HIterator it = _clients.begin(); it != _clients.end(); ++ it ) {
-		if ( *it != clientInfo_ ) {
-			*clientInfo_->_socket << *this
+		if ( *it != client_ ) {
+			client_->send( _out << *this
 					<< PROTOCOL::SPECTATOR << PROTOCOL::SEP
-					<< (*it)->_login << endl;
-			*clientInfo_->_socket << *this
+					<< (*it)->login() << endl << _out );
+			client_->send( _out << *this
 					<< PROTOCOL::MSG << PROTOCOL::SEP
-					<< "Spectator " << (*it)->_login << " approached this table." << endl;
+					<< "Spectator " << (*it)->login() << " approached this table." << endl << _out );
 		}
 	}
 	for ( players_t::iterator it = _players.begin(); it != _players.end(); ++ it ) {
-		if ( it->first != clientInfo_ ) {
-			*clientInfo_->_socket << *this
+		if ( it->first != client_ ) {
+			client_->send( _out << *this
 					<< PROTOCOL::PLAYER << PROTOCOL::SEP
-					<< it->first->_login << PROTOCOL::SEPP << it->second << endl;
+					<< it->first->login() << PROTOCOL::SEPP << it->second << endl << _out );
 		}
 	}
 	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
-			<< "Spectator " << clientInfo_->_login << " approached this table." << endl << _out );
+			<< "Spectator " << client_->login() << " approached this table." << endl << _out );
 	send_contestants();
 	send_goban();
 	return;
 	M_EPILOG
 }
 
-void HGomoku::do_kick( OClientInfo* clientInfo_ ) {
+void HGomoku::do_kick( HClient* client_ ) {
 	M_PROLOG
 	HLock l( _mutex );
-	_players.erase( clientInfo_ );
-	if ( ( contestant( STONE::BLACK ) == clientInfo_ )
-			|| ( contestant( STONE::WHITE ) == clientInfo_ ) ) {
-		STONE::stone_t stone = ( contestant( STONE::BLACK ) == clientInfo_ ? STONE::BLACK : STONE::WHITE );
+	_players.erase( client_ );
+	if ( ( contestant( STONE::BLACK ) == client_ )
+			|| ( contestant( STONE::WHITE ) == client_ ) ) {
+		STONE::stone_t stone = ( contestant( STONE::BLACK ) == client_ ? STONE::BLACK : STONE::WHITE );
 		contestant_gotup( contestant( stone ) );
 		send_contestants();
 	}
 	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
-			<< "Player " << clientInfo_->_login << " left this match." << endl << _out );
+			<< "Player " << client_->login() << " left this match." << endl << _out );
 	return;
 	M_EPILOG
 }
@@ -313,11 +313,11 @@ void HGomoku::make_move( int x, int y, STONE::stone_t stone ) {
 				if ( line >= 0 ) {
 					_state = STONE::NONE;
 					broadcast( _out << PROTOCOL::FIVE_IN_A_ROW << PROTOCOL::SEP << stone << PROTOCOL::SEPP << r << PROTOCOL::SEPP << c << PROTOCOL::SEPP << line << endl << _out );
-					OClientInfo* winner( contestant( stone ) );
+					HClient* winner( contestant( stone ) );
 					int score( ++ _players[ winner ] );
-					broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << winner->_login << PROTOCOL::SEPP << score << endl << _out );
+					broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << winner->login() << PROTOCOL::SEPP << score << endl << _out );
 					broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The match has ended!" << endl << _out );
-					broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The contestant " << winner->_login << " won this match." << endl << _out );
+					broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The contestant " << winner->login() << " won this match." << endl << _out );
 					contestant( STONE::BLACK ) = NULL;
 					contestant( STONE::WHITE ) = NULL;
 				}
@@ -328,19 +328,19 @@ void HGomoku::make_move( int x, int y, STONE::stone_t stone ) {
 	M_EPILOG
 }
 
-OClientInfo*& HGomoku::contestant( STONE::stone_t stone ) {
+HClient*& HGomoku::contestant( STONE::stone_t stone ) {
 	M_ASSERT( ( stone == STONE::BLACK ) || ( stone == STONE::WHITE ) );
 	return ( ( stone == STONE::BLACK ) ? _contestants[ 0 ] : _contestants[ 1 ] );
 }
 
-void HGomoku::contestant_gotup( OClientInfo* clientInfo_ ) {
-	STONE::stone_t stone = ( contestant( STONE::BLACK ) == clientInfo_ ? STONE::BLACK : STONE::WHITE );
-	OClientInfo* foe = NULL;
+void HGomoku::contestant_gotup( HClient* client_ ) {
+	STONE::stone_t stone = ( contestant( STONE::BLACK ) == client_ ? STONE::BLACK : STONE::WHITE );
+	HClient* foe = NULL;
 	if ( ( _state != STONE::NONE ) && ( foe = contestant( opponent( stone ) ) ) ) {
 		int score( ++ _players[ foe ] );
-		broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << foe->_login << PROTOCOL::SEPP << score << endl << _out );
+		broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << foe->login() << PROTOCOL::SEPP << score << endl << _out );
 		broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
-				<< clientInfo_->_login << " resigned - therefore " << foe->_login << " wins." << endl << _out );
+				<< client_->login() << " resigned - therefore " << foe->login() << " wins." << endl << _out );
 	}
 	contestant( stone ) = NULL;
 	_state = STONE::NONE;
@@ -357,10 +357,10 @@ void HGomoku::send_contestants( void ) {
 
 void HGomoku::send_contestant( char stone ) {
 	M_PROLOG
-	OClientInfo* cinfo = contestant( stone );
+	HClient* cinfo = contestant( stone );
 	broadcast( _out << PROTOCOL::CONTESTANT << PROTOCOL::SEP
 			<< stone << PROTOCOL::SEPP
-			<< ( cinfo ? cinfo->_login : "" )
+			<< ( cinfo ? cinfo->login() : "" )
 			<< PROTOCOL::SEPP << endl << _out );
 	return;
 	M_EPILOG

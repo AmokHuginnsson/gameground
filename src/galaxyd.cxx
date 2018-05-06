@@ -13,7 +13,7 @@ M_VCSID( "$Id: " __ID__ " $" )
 #include "galaxyd.hxx"
 
 #include "setup.hxx"
-#include "clientinfo.hxx"
+#include "client.hxx"
 #include "logicfactory.hxx"
 
 using namespace yaal;
@@ -105,7 +105,7 @@ void HSystem::do_round( HGalaxy& galaxy_ ) {
 					_fleet += it->_size;
 					message = format( "party:%s,play:system_info=%c,%d,%d,%d,%d\n",
 							_logic->id(), 'r', _id, _production, color, _fleet );
-					*_emperor->_socket << message;
+					_emperor->send( message );
 				} else if ( it->_size <= _fleet ) /* failed attack */ {
 					_fleet -= it->_size;
 					color = galaxy_.get_color( it->_emperor );
@@ -113,23 +113,23 @@ void HSystem::do_round( HGalaxy& galaxy_ ) {
 							_logic->id(), 's', _id, _production,
 							color, _fleet );
 					if ( _emperor ) {
-						*_emperor->_socket << message; /* defender */
+						_emperor->send( message ); /* defender */
 					}
 					message = format( "party:%s,play:system_info=%c,%d,%d,%d,%d\n",
 							_logic->id(), 'f', _id, _production, _emperor ? galaxy_.get_color( _emperor ) : -1, -1 );
-					*it->_emperor->_socket << message; /* attacker */
+					it->_emperor->send( message ); /* attacker */
 				} else if ( it->_size > _fleet ) {
 					_fleet = it->_size - _fleet;
 					color = galaxy_.get_color( it->_emperor );
 					message = format( "party:%s,play:system_info=%c,%d,%d,%d,%d\n",
 							_logic->id(), 'd', _id, _production, color, - 1 );
 					if ( _emperor ) {
-						*_emperor->_socket << message; /* loser */
+						_emperor->send( message ); /* loser */
 					}
 					_emperor = it->_emperor;
 					message = format( "party:%s,play:system_info=%c,%d,%d,%d,%d\n",
 							_logic->id(), 'c', _id, _production, color, _fleet );
-					*it->_emperor->_socket << message; /* winer */
+					it->_emperor->send( message ); /* winer */
 				}
 				attackers_t::iterator done = it;
 				++ it;
@@ -145,10 +145,11 @@ void HSystem::do_round( HGalaxy& galaxy_ ) {
 	if ( _emperor != NULL ) {
 		message = format( "party:%s,play:system_info=%c,%d,%d,%d,%d\n",
 				_logic->id(), 'i', _id, - 1, galaxy_.get_color( _emperor ), _fleet );
-		*_emperor->_socket << message;
+		_emperor->send( message );
 	}
-	if ( _emperor )
+	if ( _emperor ) {
 		galaxy_.mark_alive( _emperor );
+	}
 	return;
 	M_EPILOG
 }
@@ -193,11 +194,11 @@ HGalaxy::~HGalaxy ( void ) {
 	M_EPILOG
 }
 
-bool HGalaxy::do_accept( OClientInfo* ) {
+bool HGalaxy::do_accept( HClient* ) {
 	return ( false );
 }
 
-void HGalaxy::do_post_accept( OClientInfo* clientInfo_ ) {
+void HGalaxy::do_post_accept( HClient* client_ ) {
 	M_PROLOG
 	int color = -1, sysNo = -1;
 	HString message;
@@ -205,59 +206,59 @@ void HGalaxy::do_post_accept( OClientInfo* clientInfo_ ) {
 	 * Send basic setup info.
 	 */
 	message = format( "party:%s,setup:board_size=%d\n", _id, _boardSize );
-	*clientInfo_->_socket << message; /* send setup info to new emperor */
+	client_->send( message ); /* send setup info to new emperor */
 	message = format( "party:%s,setup:systems=%d\n", _id, _startupPlayers + _neutralSystemCount );
-	*clientInfo_->_socket << message;
+	client_->send( message );
 	for ( int ctr = 0; ctr < ( _startupPlayers + _neutralSystemCount ); ++ ctr ) {
 		message = format( "party:%s,setup:system_coordinates=%d,%d,%d\n",
 				_id, ctr, _systems[ ctr ]._coordinateX,
 				_systems[ ctr ]._coordinateY );
-		*clientInfo_->_socket << message;
+		client_->send( message );
 		if ( ( _round >= 0 ) && ( _systems[ ctr ]._emperor ) ) {
 			message = format( "party:%s,play:system_info=%c,%d,%d,%d,%d\n",
 					_id, 'i', ctr, _systems[ ctr ]._production, get_color( _systems[ ctr ]._emperor ),
 					_systems[ ctr ]._fleet );
-			*clientInfo_->_socket << message;
+			client_->send( message );
 		}
 	}
 	if ( ( _round < 0 ) && ( _ready < _startupPlayers ) ) {
-		sysNo = assign_system( clientInfo_ ); /* assign mother system for new emperor */
-		color = get_color( clientInfo_ );
+		sysNo = assign_system( client_ ); /* assign mother system for new emperor */
+		color = get_color( client_ );
 		message = format( "setup:emperor=%d,%s\n",
-				color, clientInfo_->_login );
+				color, client_->login() );
 		broadcast( message ); /* send setup information about new rival to all emperors */
 		_systems[ sysNo ]._production = 10;
 		_systems[ sysNo ]._fleet = 10;
 		message = format( "party:%s,play:system_info=%c,%d,%d,%d,%d\n",
 				_id, 'c', sysNo, _systems[ sysNo ]._production, color,
 				_systems[ sysNo ]._fleet );
-		*clientInfo_->_socket << message;
+		client_->send( message );
 		message = format( "msg:$12;Emperor $%d;", color );
-		message += clientInfo_->_login;
+		message += client_->login();
 		message += "$12; invaded the galaxy.\n";
 		_ready ++;
 	} else {
-		_emperors[ clientInfo_ ] = OEmperorInfo();
+		_emperors[ client_ ] = OEmperorInfo();
 		message = format( "party:%s,setup:emperor=%d,%s\n",
-				_id, -1, clientInfo_->_login );
-		*clientInfo_->_socket << message;
-		message = "msg:$12;Spectator " + clientInfo_->_login + " is visiting this galaxy.\n";
+				_id, -1, client_->login() );
+		client_->send( message );
+		message = "msg:$12;Spectator " + client_->login() + " is visiting this galaxy.\n";
 	}
 	broadcast( message ); /* inform every emperor about new rival */
 	for ( emperors_t::iterator it = _emperors.begin(); it != _emperors.end(); ++ it ) {
-		if ( it->first != clientInfo_ ) {
+		if ( it->first != client_ ) {
 			int clr = it->second._color;
 			if ( clr >= 0 ) {
 				message = format( "party:%s,setup:emperor=%d,%s\n",
-						_id, clr, it->first->_login );
-				*clientInfo_->_socket << message;
+						_id, clr, it->first->login() );
+				client_->send( message );
 				message = format( "party:%s,msg:$12;Emperor $%d;", _id, clr );
-				message += it->first->_login;
+				message += it->first->login();
 				message += "$12; invaded the galaxy.\n";
 			} else {
-				message = "party:" + _id + ",msg:$12;Spectator " + it->first->_login + " is visiting this galaxy.\n";
+				message = "party:" + _id + ",msg:$12;Spectator " + it->first->login() + " is visiting this galaxy.\n";
 			}
-			*clientInfo_->_socket << message;
+			client_->send( message );
 		}
 	}
 	if ( ( _round < 0 ) && ( _ready >= _startupPlayers ) ) {
@@ -269,7 +270,7 @@ void HGalaxy::do_post_accept( OClientInfo* clientInfo_ ) {
 	M_EPILOG
 }
 
-int HGalaxy::assign_system( OClientInfo* clientInfo_ ) {
+int HGalaxy::assign_system( HClient* client_ ) {
 	M_PROLOG
 	OEmperorInfo info;
 	typedef HSet<int> integer_set_t;
@@ -285,7 +286,7 @@ int HGalaxy::assign_system( OClientInfo* clientInfo_ ) {
 	int rivals = static_cast<int>( _emperors.size() );
 	HRandomizer rnd( randomizer_helper::make_randomizer() );
 	int motherSystem( static_cast<int>( rnd( static_cast<int unsigned>( _startupPlayers + _neutralSystemCount - rivals ) ) ) );
-	_emperors[ clientInfo_ ] = info;
+	_emperors[ client_ ] = info;
 	ctr = 0;
 	for ( int i = 0; i < motherSystem; ++ i, ++ ctr )
 		while ( _systems[ ctr ]._emperor != NULL )
@@ -293,21 +294,21 @@ int HGalaxy::assign_system( OClientInfo* clientInfo_ ) {
 	while ( _systems[ ctr ]._emperor != NULL )
 		++ ctr;
 	M_ASSERT( ! _systems[ ctr ]._emperor );
-	_systems[ ctr ]._emperor = clientInfo_;
+	_systems[ ctr ]._emperor = client_;
 	return ( ctr );
 	M_EPILOG
 }
 
-void HGalaxy::handler_message( OClientInfo* clientInfo_, HString const& message_ ) {
+void HGalaxy::handler_message( HClient* client_, HString const& message_ ) {
 	M_PROLOG
 	HString message;
 	message = "say:$";
-	int color = get_emperor_info( clientInfo_ )->_color;
+	int color = get_emperor_info( client_ )->_color;
 	if ( color < 0 )
 		color = 12;
 	message += color;
 	message += ';';
-	message += clientInfo_->_login;
+	message += client_->login();
 	message += "$12;: ";
 	message += message_;
 	message += '\n';
@@ -316,10 +317,10 @@ void HGalaxy::handler_message( OClientInfo* clientInfo_, HString const& message_
 	M_EPILOG
 }
 
-void HGalaxy::handler_play ( OClientInfo* clientInfo_, HString const& command_ ) {
+void HGalaxy::handler_play( HClient* client_, HString const& command_ ) {
 	M_PROLOG
-	if ( get_color( clientInfo_ ) == -1 ) {
-		*clientInfo_->_socket << "err:Illegal message!\n" << endl;
+	if ( get_color( client_ ) == -1 ) {
+		client_->send( "err:Illegal message!\n" );
 		return;
 	}
 	HString variable;
@@ -328,14 +329,14 @@ void HGalaxy::handler_play ( OClientInfo* clientInfo_, HString const& command_ )
 	variable = get_token( command_, "=", 0 );
 	value = get_token( command_, "=", 1 );
 	if ( variable == "move" ) {
-		fleet._emperor = clientInfo_;
+		fleet._emperor = client_;
 		int source( lexical_cast<int>( get_token( value, ",", 0 ) ) );
 		int destination( lexical_cast<int>( get_token( value, ",", 1 ) ) );
 		fleet._size = lexical_cast<int>( get_token( value, ",", 2 ) );
 		if ( ( source == destination )
-				&& ( _systems[ source ]._emperor != clientInfo_ )
+				&& ( _systems[ source ]._emperor != client_ )
 				&& ( _systems[ source ]._fleet < fleet._size ) )
-			kick_client( clientInfo_ );
+			kick_client( client_ );
 		else {
 			_systems[ source ]._fleet -= fleet._size;
 			int dX( _systems[ source ]._coordinateX - _systems[ destination ]._coordinateX );
@@ -348,7 +349,7 @@ void HGalaxy::handler_play ( OClientInfo* clientInfo_, HString const& command_ )
 			_systems[ destination ]._attackers.push_front( fleet );
 		}
 	} else if ( variable == "end_round" ) {
-		OEmperorInfo* info = get_emperor_info( clientInfo_ );
+		OEmperorInfo* info = get_emperor_info( client_ );
 		M_ASSERT( info );
 		if ( info->_systems >= 0 )
 			_ready ++;
@@ -377,7 +378,7 @@ void HGalaxy::end_round( void ) {
 		if ( ! it->second._systems ) {
 			it->second._systems = -1;
 			message = format( "msg:$12;Once mighty empire of $%d;%s$12; fall in ruins.\n",
-					it->second._color, it->first->_login );
+					it->second._color, it->first->login() );
 			broadcast( message );
 		}
 		if ( it->second._color >= 0 ) /* not spectator */ {
@@ -391,7 +392,7 @@ void HGalaxy::end_round( void ) {
 		for ( emperors_t::iterator it = _emperors.begin(); it != _emperors.end(); ++ it ) {
 			if ( it->second._systems > 0 ) {
 				message = format( "msg:$12;The invincible $%d;%s$12; crushed the galaxy.\n",
-						it->second._color, it->first->_login );
+						it->second._color, it->first->login() );
 				broadcast( message );
 			}
 		}
@@ -402,7 +403,7 @@ void HGalaxy::end_round( void ) {
 				_systems[ ctr ]._fleet );
 		for ( emperors_t::iterator it = _emperors.begin(); it != _emperors.end(); ++ it ) {
 			if ( it->second._color < 0 ) {
-				*it->first->_socket << message;
+				it->first->send( message );
 			}
 		}
 	}
@@ -414,25 +415,25 @@ void HGalaxy::end_round( void ) {
 	M_EPILOG
 }
 
-int HGalaxy::get_color( OClientInfo* clientInfo_ ) {
+int HGalaxy::get_color( HClient* client_ ) {
 	M_PROLOG
-	OEmperorInfo* info = get_emperor_info( clientInfo_ );
+	OEmperorInfo* info = get_emperor_info( client_ );
 	return ( info ? info->_color : -1 );
 	M_EPILOG
 }
 
-void HGalaxy::mark_alive( OClientInfo* clientInfo_ ) {
+void HGalaxy::mark_alive( HClient* client_ ) {
 	M_PROLOG
-	get_emperor_info( clientInfo_ )->_systems ++;
+	get_emperor_info( client_ )->_systems ++;
 	return;
 	M_EPILOG
 }
 
-HGalaxy::OEmperorInfo* HGalaxy::get_emperor_info( OClientInfo* clientInfo_ ) {
+HGalaxy::OEmperorInfo* HGalaxy::get_emperor_info( HClient* client_ ) {
 	M_PROLOG
 	OEmperorInfo* info = NULL;
-	if ( clientInfo_ ) {
-		emperors_t::iterator it = _emperors.find( clientInfo_ );
+	if ( client_ ) {
+		emperors_t::iterator it = _emperors.find( client_ );
 		M_ASSERT( it != _emperors.end() );
 		info = &it->second;
 	}
@@ -440,27 +441,27 @@ HGalaxy::OEmperorInfo* HGalaxy::get_emperor_info( OClientInfo* clientInfo_ ) {
 	M_EPILOG
 }
 
-void HGalaxy::do_kick( OClientInfo* clientInfo_ ) {
+void HGalaxy::do_kick( HClient* client_ ) {
 	M_PROLOG
 	for ( int ctr = 0; ctr < ( _neutralSystemCount + _startupPlayers ); ++ ctr ) {
 		HSystem::attackers_t& attackers = _systems[ ctr ]._attackers;
 		for ( HSystem::attackers_t::iterator it = attackers.begin();
 				it != attackers.end(); ++ it ) {
-			if ( it->_emperor == clientInfo_ )
+			if ( it->_emperor == client_ )
 				attackers.erase( it ++ ); /* First we increment iterator position and then we pass old iterator to erase() here. */
 		}
-		if ( _systems[ ctr ]._emperor == clientInfo_ )
+		if ( _systems[ ctr ]._emperor == client_ )
 			_systems[ ctr ]._emperor = NULL;
 	}
-	int color( _round >= 0 ? get_color( clientInfo_ ) : -1 );
-	_emperors.erase( clientInfo_ );
+	int color( _round >= 0 ? get_color( client_ ) : -1 );
+	_emperors.erase( client_ );
 	if ( ( color >= 0 ) && ( _round < 0 ) )
 		-- _ready;
 	if ( color >= 0 )
-		broadcast( HString( "msg:$12;Emperor $" ) + color + ";" + clientInfo_->_login + "$12; fleed from the galaxy.\n" );
+		broadcast( HString( "msg:$12;Emperor $" ) + color + ";" + client_->login() + "$12; fleed from the galaxy.\n" );
 	else
-		broadcast( HString( "msg:$12;Spectator " ) + clientInfo_->_login + " left this universum.\n" );
-	OUT << "galaxy: dumping player: " << clientInfo_->_login << endl;
+		broadcast( HString( "msg:$12;Spectator " ) + client_->login() + " left this universum.\n" );
+	OUT << "galaxy: dumping player: " << client_->login() << endl;
 	if ( ( _round >= 0 ) && ( _ready >= _emperors.size() ) )
 		end_round();
 	OUT << "ready: " << _ready << ", emperors: " << _emperors.size() << endl;

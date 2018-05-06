@@ -12,7 +12,7 @@ M_VCSID( "$Id: " __ID__ " $" )
 #include "setd.hxx"
 
 #include "setup.hxx"
-#include "clientinfo.hxx"
+#include "client.hxx"
 #include "logicfactory.hxx"
 #include "spellchecker.hxx"
 
@@ -53,7 +53,7 @@ HSetBang::~HSetBang ( void ) {
 	M_EPILOG
 }
 
-void HSetBang::handler_set( OClientInfo* clientInfo_, HString const& message_ ) {
+void HSetBang::handler_set( HClient* client_, HString const& message_ ) {
 	M_PROLOG
 	HTokenizer t( message_, "," );
 	int val[3];
@@ -73,60 +73,61 @@ void HSetBang::handler_set( OClientInfo* clientInfo_, HString const& message_ ) 
 	_deck[ val[ 0 ] ] = -1;
 	_deck[ val[ 1 ] ] = -1;
 	_deck[ val[ 2 ] ] = -1;
-	OPlayerInfo& p( *get_player_info( clientInfo_ ) );
+	OPlayerInfo& p( *get_player_info( client_ ) );
 	++ p._score;
 	++ p._last;
 	broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
-			<< clientInfo_->_login << PROTOCOL::SEPP << p._score << PROTOCOL::SEPP << p._last << endl << _out );
+			<< client_->login() << PROTOCOL::SEPP << p._score << PROTOCOL::SEPP << p._last << endl << _out );
 	update_table();
 	return;
 	M_EPILOG
 }
 
-bool HSetBang::do_accept( OClientInfo* clientInfo_ ) {
-	OUT << "new candidate " << clientInfo_->_login << endl;
+bool HSetBang::do_accept( HClient* client_ ) {
+	OUT << "new candidate " << client_->login() << endl;
 	return ( false );
 }
 
-void HSetBang::do_post_accept( OClientInfo* clientInfo_ ) {
+void HSetBang::do_post_accept( HClient* client_ ) {
 	M_PROLOG
 	OUT << "conditions: _players.size() = " << _players.size() << ", _startupPlayers = " << _startupPlayers << endl;
 	OPlayerInfo info;
-	_players[ clientInfo_ ] = info;
+	_players[ client_ ] = info;
 	/*
 	 * Send proto info about new contestant to all players.
 	 */
 	broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP
-			<< clientInfo_->_login << PROTOCOL::SEPP << 0 << PROTOCOL::SEPP << 0 << endl << _out );
+			<< client_->login() << PROTOCOL::SEPP << 0 << PROTOCOL::SEPP << 0 << endl << _out );
 	for ( players_t::iterator it = _players.begin(); it != _players.end(); ++ it ) {
-		if ( it->first != clientInfo_ ) {
-			*clientInfo_->_socket << *this
-				<< PROTOCOL::PLAYER << PROTOCOL::SEP << it->first->_login
+		if ( it->first != client_ ) {
+			client_->send( _out << *this
+				<< PROTOCOL::PLAYER << PROTOCOL::SEP << it->first->login()
 				<< PROTOCOL::SEPP << it->second._score << PROTOCOL::SEPP
-				<< it->second._last << endl;
-			*clientInfo_->_socket << *this
-				<< PROTOCOL::MSG << PROTOCOL::SEP << it->first->_login << " joined the mind contest." << endl;
+				<< it->second._last << endl << _out );
+			client_->send( _out << *this
+				<< PROTOCOL::MSG << PROTOCOL::SEP << it->first->login() << " joined the mind contest." << endl << _out );
 		}
 	}
 	broadcast(
 			_out << PROTOCOL::MSG << PROTOCOL::SEP
-			<< clientInfo_->_login
+			<< client_->login()
 			<< " joined the mind contest." << endl << _out );
-	OUT << "player [" << clientInfo_->_login << "] accepted" << endl;
+	OUT << "player [" << client_->login() << "] accepted" << endl;
 	if ( ! _deckNo && ( _players.size() >= _startupPlayers ) ) {
 		broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
 				<< "The match has begun, good luck!" << endl << _out );
 		generate_deck();
 		broadcast( _out << PROTOCOL::DECK << PROTOCOL::SEP << serialize_deck() << endl << _out );
-	} else if ( _deckNo > 0 )
-		*clientInfo_->_socket << *this << PROTOCOL::DECK << PROTOCOL::SEP << serialize_deck() << endl;
+	} else if ( _deckNo > 0 ) {
+		client_->send( _out << *this << PROTOCOL::DECK << PROTOCOL::SEP << serialize_deck() << endl << _out );
+	}
 	return;
 	M_EPILOG
 }
 
-HSetBang::OPlayerInfo* HSetBang::get_player_info( OClientInfo* clientInfo_ ) {
+HSetBang::OPlayerInfo* HSetBang::get_player_info( HClient* client_ ) {
 	M_PROLOG
-	players_t::iterator it = _players.find( clientInfo_ );
+	players_t::iterator it = _players.find( client_ );
 	M_ASSERT( it != _players.end() );
 	return ( &it->second );
 	M_EPILOG
@@ -249,12 +250,12 @@ HString const& HSetBang::serialize_deck( void ) {
 	return ( _varTmpBuffer );
 }
 
-void HSetBang::do_kick( OClientInfo* clientInfo_ ) {
+void HSetBang::do_kick( HClient* client_ ) {
 	M_PROLOG
 	HLock l( _mutex );
-	_players.erase( clientInfo_ );
+	_players.erase( client_ );
 	broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
-			<< "Player " << clientInfo_->_login << " left this match." << endl << _out );
+			<< "Player " << client_->login() << " left this match." << endl << _out );
 	return;
 	M_EPILOG
 }
