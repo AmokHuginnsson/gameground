@@ -137,6 +137,7 @@ int HServer::init_server( int port_ ) {
 	_handlers[ PROTOCOL::ABANDON ] = &HServer::handler_abandon;
 	_handlers[ PROTOCOL::CMD ] = &HServer::pass_command;
 	_handlers[ "GET / HTTP/1.1" ] = &HServer::websocket_handshake;
+	_handlers[ "GET // HTTP/1.1" ] = &HServer::websocket_handshake;
 	OUT << brightblue << "<<<GameGround>>>" << lightgray << " server started." << endl;
 	return ( 0 );
 	M_EPILOG
@@ -172,7 +173,7 @@ void HServer::handler_message( yaal::tools::HIODispatcher::stream_t& stream_ ) {
 	HClient& client( clientIt->second );
 	int long nRead( -1 );
 	try {
-		nRead = stream_->read_until( message );
+		nRead = client.read( message );
 	} catch ( HOpenSSLException& ) {
 		drop_client( &client );
 	} catch ( HStringException const& ) {
@@ -344,16 +345,12 @@ void HServer::handler_chat( HClient& client_, HString const& message_ ) {
 void HServer::websocket_handshake( HClient& client_, HString const& ) {
 	M_PROLOG
 	HString line;
-	client_.read( line );
-	if ( ! line.is_empty() ) {
-		kick_client( client_, _msgYourClientIsTainted_ );
-		return;
-	}
 	HString name;
 	HString value;
 	HString key;
+	int invalid( 0 );
 	bool gotUpgrade( false );
-	do {
+	while ( ( ! gotUpgrade || key.is_empty() || ( invalid < 1 ) ) && ( invalid < 10 ) ) {
 		client_.read( line );
 		int long sepIdx( line.find( ": " ) );
 		if ( sepIdx != HString::npos ) {
@@ -364,9 +361,11 @@ void HServer::websocket_handshake( HClient& client_, HString const& ) {
 			} else if ( name == "sec-websocket-key" ) {
 				key.assign( value ).append( "258EAFA5-E914-47DA-95CA-C5AB0DC85B11" );
 			}
+		} else {
+			++ invalid;
 		}
 		OUT << "received handshake: " << line << endl;
-	} while ( ! line.is_empty() );
+	}
 	if ( ! gotUpgrade ) {
 		kick_client( client_, _msgYourClientIsTainted_ );
 		return;
@@ -383,6 +382,7 @@ void HServer::websocket_handshake( HClient& client_, HString const& ) {
 		"Upgrade: websocket\n"
 		"Connection: Upgrade\n"
 		"Sec-WebSocket-Accept: " << key << "\n" << endl << _out );
+	client_.upgrade();
 	return;
 	M_EPILOG
 }

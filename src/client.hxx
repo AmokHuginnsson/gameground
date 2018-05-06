@@ -14,14 +14,20 @@ class HClient {
 public:
 	typedef yaal::hcore::HSet<HLogic::id_t> logics_t;
 private:
+	bool _webSocket;
 	bool _valid;
 	bool _authenticated;
 	yaal::hcore::HString _login;
 	yaal::hcore::HStreamInterface::ptr_t _socket;
+	yaal::hcore::HChunk _buffer;
+	yaal::hcore::HUTF8String _utf8;
 	logics_t _logics;
 public:
 	HClient( yaal::hcore::HStreamInterface::ptr_t const& );
+	HClient( HClient&& ) = default;
+	HClient& operator = ( HClient&& ) = default;
 	~HClient( void );
+	void upgrade( void );
 	yaal::hcore::HString const& login( void ) const {
 		return ( _login );
 	}
@@ -43,7 +49,10 @@ public:
 	void enter( HLogic::id_t id_ );
 	void leave( HLogic::id_t id_ );
 	void send( yaal::hcore::HString const& );
-	void read( yaal::hcore::HString& );
+	int long read( yaal::hcore::HString& );
+private:
+	HClient( HClient const& ) = delete;
+	HClient& operator = ( HClient const& ) = delete;
 };
 
 }
