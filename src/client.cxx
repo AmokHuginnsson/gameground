@@ -220,13 +220,15 @@ int long HClient::read( yaal::hcore::HString& line_ ) {
 				OUT << "failed to read mask" << endl;
 				break;
 			}
-			_buffer.realloc( payloadLen );
-			if ( _socket->read( _buffer.raw(), payloadLen ) != payloadLen ) {
-				OUT << "failed to read payload" << endl;
-				break;
+			if ( payloadLen > 0 ) {
+				_buffer.realloc( payloadLen );
+				if ( _socket->read( _buffer.raw(), payloadLen ) != payloadLen ) {
+					OUT << "failed to read payload" << endl;
+					break;
+				}
+				apply_mask( _buffer.raw(), payloadLen, mask );
+				line_.assign( _buffer.get<char>(), payloadLen );
 			}
-			apply_mask( _buffer.raw(), payloadLen, mask );
-			line_.assign( _buffer.get<char>(), payloadLen );
 			nRead = payloadLen;
 		} while ( false );
 	}
