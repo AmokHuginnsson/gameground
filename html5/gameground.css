@@ -18,9 +18,6 @@ label, button {
 #root, #app {
 	height: 100%;
 }
-#app {
-	display: none;
-}
 #tab-bar {
 	padding: 8px;
 	padding-bottom: 0px;

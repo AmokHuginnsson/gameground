@@ -7,9 +7,9 @@ let app = null
 
 function on_load() {
 	app = new Vue( {
-		sock: null,
 		el: "#root",
 		data: {
+			sock: null,
 			currentTab: "browser",
 			tabs: ["browser"],
 			players: []
@@ -20,39 +20,36 @@ function on_load() {
 			}
 		},
 		methods: {
+			is_connected: function() {
+				return ( ( this.sock != null ) && ( this.sock.readyState === 1 ) )
+			},
 			connect: function( address, login, password ) {
+				let self = this
 				this.sock = new WebSocket( address )
 				this.sock.onopen = function( event ) {
-					let connectPane = document.querySelector( "#connect" )
-					let appPane = document.querySelector( "#app" )
-					connectPane.style.display = "none"
-					appPane.style.display = "block"
-					app.sock.send( "login:4:" + login + ":" + sha1( password ) )
-					app.sock.send( "get_players" )
-					app.sock.send( "get_logics" )
-					app.sock.send( "get_partys" )
+					let s = self.sock; self.sock = null; self.sock = s
+					self.sock.send( "login:4:" + login + ":" + sha1( password ) )
+					self.sock.send( "get_players" )
+					self.sock.send( "get_logics" )
+					self.sock.send( "get_partys" )
 				}
 				this.sock.onerror = function( event ) {
 					msg = "WebSocket connection error: " + event.type
 					alert( msg );
 					console.log( msg )
-					app.do_disconnect()
+					self.do_disconnect()
 				}
 				this.sock.onmessage = function( event ) {
 					let message = event.data.trim()
 					console.log( "-> " + message )
-					app.dispatch( message )
+					self.dispatch( message )
 				}
 				this.sock.onclose = function( event ) {
-					app.do_disconnect()
+					self.do_disconnect()
 				}
 				console.log( "After connection attempt..." )
 			},
 			do_disconnect: function() {
-				let connectPane = document.querySelector( "#connect" )
-				let appPane = document.querySelector( "#app" )
-				appPane.style.display = "none"
-				connectPane.style.display = "block"
 				if ( this.sock !== null ) {
 					this.sock.close()
 				}
@@ -202,10 +199,6 @@ function on_connect_click() {
 	} else {
 		alert( errMsg )
 	}
-}
-
-function on_disconnect_click() {
-	app.do_disconnect()
 }
 
 function do_connect() {
