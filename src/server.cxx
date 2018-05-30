@@ -364,7 +364,9 @@ void HServer::websocket_handshake( HClient& client_, HString const& ) {
 		} else {
 			++ invalid;
 		}
-		OUT << "received handshake: " << line << endl;
+		if ( setup._debug ) {
+			OUT << "received handshake: " << line << endl;
+		}
 	}
 	if ( ! gotUpgrade ) {
 		kick_client( client_, _msgYourClientIsTainted_ );
@@ -376,7 +378,9 @@ void HServer::websocket_handshake( HClient& client_, HString const& ) {
 	HStringStream ss;
 	base64::encode( m, ss, true );
 	key = ss.string();
-	OUT << "handshake finished, key = " << key << endl;
+	if ( setup._debug ) {
+		OUT << "handshake finished, key = " << key << endl;
+	}
 	client_.send(
 		_out << "HTTP/1.1 101 Switching Protocols\n"
 		"Upgrade: websocket\n"

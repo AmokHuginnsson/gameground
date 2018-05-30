@@ -195,7 +195,9 @@ int long HClient::read( yaal::hcore::HString& line_ ) {
 				OUT << "invalid header" << endl;
 				break;
 			}
-			OUT << "wsfh:\n" << wsfh << endl;
+			if ( setup._debug ) {
+				OUT << "wsfh:\n" << wsfh << endl;
+			}
 			int payloadLen( wsfh._len );
 			if ( payloadLen == 127 ) {
 				u64_t len( 0 );
