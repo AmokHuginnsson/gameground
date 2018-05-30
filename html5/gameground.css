@@ -1,0 +1,94 @@
+html, body {
+	margin: 0px;
+	height: 100%;
+	background: #eee;
+}
+ul, li {
+	list-style-type: none;
+	margin: 0px;
+	padding: 0px;
+}
+.listwidget li:hover {
+	background: #def;
+}
+label, button {
+	font-weight: bold;
+	font-family: sans-serif;
+}
+#root, #app {
+	height: 100%;
+}
+#app {
+	display: none;
+}
+#tab-bar {
+	padding: 8px;
+	padding-bottom: 0px;
+}
+#browser {
+	grid-template-columns: auto 7% 7% 7% 7%;
+	grid-template-rows: 16px auto 24px 24px 24px 24px;
+	grid-column-gap: 8px;
+	grid-row-gap: 8px;
+	height: calc( 100% - 56px );
+	width: calc( 100% - 16px );
+	padding: 8px;
+	display: grid;
+}
+#connect {
+	position: absolute;
+	width: 100%;
+	height: 40ex;
+	margin: auto;
+	top: 0;
+	bottom: 0;
+}
+#connect-info {
+	grid-template-columns: 8em auto;
+	grid-template-rows: auto auto auto auto auto;
+	grid-column-gap: 8px;
+	grid-row-gap: 8px;
+	display: grid;
+	width: 32em;
+	margin: auto;
+}
+#connect-info label {
+	display: flex;
+	margin-left: auto;
+	align-items: center;
+}
+#connect-buttons {
+	grid-template-columns: auto auto;
+	grid-column-gap: 8px;
+	grid-row-gap: 8px;
+	display: grid;
+	width: 16em;
+	margin: auto;
+}
+#chat-view {
+	grid-row: 2 / span 3;
+	overflow-y: auto;
+	background: #fff;
+	border: black solid 1px;
+}
+#chat-input-field {
+	grid-row: 5 / span 2;
+}
+#chat-input {
+	width: calc( 100% - 18px );
+}
+#games {
+	grid-column: 2 / span 2;
+	grid-row: 2;
+	background: #fff;
+	border: black solid 1px;
+}
+#players {
+	grid-column: 4 / span 2;
+	grid-row: 2;
+	background: #fff;
+	border: black solid 1px;
+}
+#btn-join, #btn-create, #btn-account, #btn-disconnect {
+	grid-column: 3 / span 2;
+}

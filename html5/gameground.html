@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+	<head>
+		<meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+		<title>GameGround - an HTML5 client.</title>
+		<link href="gameground.css" rel="stylesheet" type="text/css" />
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<script type="text/JavaScript" src="https://codestation.org/js/sha1.js"></script>
+		<script src="gameground.js"></script>
+		<style>
+		</style>
+	</head>
+	<body onload="JavaScript:post_load()">
+		<div id="root">
+			<div id="connect">
+				<div id="logo" style="height: 140px;background: url(gameground.svg) no-repeat center center;"></div>
+				<form name="connect" action="JavaScript:on_connect_click()">
+					<div id="connect-info">
+						<label>Your name:</label>
+						<input name="login" type="text" title="Your GameGround world name (required)." />
+						<label>Password:</label>
+						<input name="password" type="password" title="Your password (optional)." />
+						<label>Server:</label>
+						<input name="server" type="text" value="127.0.0.1" title="Address of the server that hosts the game (required)." />
+						<label>Port:</label>
+						<input name="port" type="text" value="7777" title="Port that game server is bound to (optional)." />
+					</div>
+					<div id="connect-buttons">
+						<button title="Click me to join the GameGround server.">Connect!</button>
+						<button type="button" title="go to codestation.org" onclick="JavaScript:window.location.href='https://codestation.org/'">Exit!</button>
+					</div>
+				</form>
+			</div>
+			<div id="app">
+				<div id="tab-bar">
+					<button
+						v-for="tab in tabs"
+						v-bind:key="tab"
+						v-bind:class="['tab-button', { active: currentTab === tab }]"
+						v-on:click="currentTab = tab"
+						>{{ tab }}
+					</button>
+				</div>
+				<component v-bind:is="currentTabComponent" class="tab"></component>
+				<div id="browser">
+					<label>Server messages</label>
+					<label>Games</label>
+					<label style="grid-column: 4">People</label>
+					<div id="chat-view"></div>
+					<div id="games"></div>
+					<ul id="players" class="listwidget">
+						<li
+							v-for="player in players"
+						>{{ player }}</li>
+					</ul>
+					<button id="btn-join" title="Click me to join pre-existing game." disabled="disabled">Join</button>
+					<button id="btn-create" title="Click me to create a new game.">Create</button>
+					<button id="btn-account" title="Click me to edit your account information." disabled="disabled">Account</button>
+					<button id="btn-disconnect" title="Click me to disconnet from GameGround server." onclick="JavaScript:on_disconnect_click()">Disconnect</button>
+					<div id="chat-input-field">
+						<label>Type your message</label><br />
+						<input id="chat-input" type="text" name="input" maxlength="1024" title="Send message to all people on the server that are currently not in the game." v-on:keypress.enter="on_enter">
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
