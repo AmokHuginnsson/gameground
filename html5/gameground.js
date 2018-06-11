@@ -1,3 +1,30 @@
+"use strict"
+
+class Player {
+	constructor( login_ ) {
+		if ( login_.match( /^[a-z]+$/i ) == null ) {
+			throw Error( "Invalid login: " + login_ )
+		}
+		this._login = login_
+	}
+	get login() {
+		return ( this._login )
+	}
+}
+
+class Party {
+	constructor( id_, name_, configuration_ ) {
+		this._id = id_
+		this._name = name_
+		this._configuration = configuration_
+		this._players = []
+		this._logic = null
+	}
+}
+
+class Logic {
+}
+
 /*let browser = Vue.component(
 	"browser", {
 		el: "#browser"
@@ -10,6 +37,7 @@ function on_load() {
 		el: "#root",
 		data: {
 			sock: null,
+			_messageBuffer: "",
 			currentTab: "browser",
 			tabs: ["browser"],
 			players: []
@@ -24,28 +52,36 @@ function on_load() {
 				return ( ( this.sock != null ) && ( this.sock.readyState === 1 ) )
 			},
 			connect: function( address, login, password ) {
-				let self = this
 				this.sock = new WebSocket( address )
-				this.sock.onopen = function( event ) {
-					let s = self.sock; self.sock = null; self.sock = s
-					self.sock.send( "login:4:" + login + ":" + sha1( password ) )
-					self.sock.send( "get_players" )
-					self.sock.send( "get_logics" )
-					self.sock.send( "get_partys" )
+				this.sock.onopen = event => {
+					const s = this.sock; this.sock = null; this.sock = s
+					this.sock.send( "login:4:" + login + ":" + sha1( password ) )
+					this.sock.send( "get_players" )
+					this.sock.send( "get_logics" )
+					this.sock.send( "get_partys" )
 				}
-				this.sock.onerror = function( event ) {
+				this.sock.onerror = event => {
 					msg = "WebSocket connection error: " + event.type
 					alert( msg );
 					console.log( msg )
-					self.do_disconnect()
+					this.do_disconnect()
 				}
-				this.sock.onmessage = function( event ) {
-					let message = event.data.trim()
-					console.log( "-> " + message )
-					self.dispatch( message )
+				this.sock.onmessage = event => {
+					this._messageBuffer += event.data
+					while ( true ) {
+						const eol = this._messageBuffer.indexOf( "\n" )
+						if ( eol >= 0 ) {
+							const message = this._messageBuffer.substr( 0, eol )
+							this._messageBuffer = this._messageBuffer.substr( eol + 1 )
+							console.log( "-> " + message )
+							this.dispatch( message )
+						} else {
+							break
+						}
+					}
 				}
-				this.sock.onclose = function( event ) {
-					self.do_disconnect()
+				this.sock.onclose = event => {
+					this.do_disconnect()
 				}
 				console.log( "After connection attempt..." )
 			},
@@ -56,10 +92,10 @@ function on_load() {
 				this.sock = null
 			},
 			dispatch: function( message ) {
-				let sepIdx = message.indexOf( ":" )
+				const sepIdx = message.indexOf( ":" )
 				if ( sepIdx > 0 ) {
-					let proto = message.substr( 0, sepIdx )
-					let data = message.substr( sepIdx + 1 )
+					const proto = message.substr( 0, sepIdx )
+					const data = message.substr( sepIdx + 1 )
 					switch ( proto ) {
 						case "say":
 						case "msg": { this.on_msg( data ) } break
@@ -80,7 +116,7 @@ function on_load() {
 				this.do_disconnect()
 			},
 			on_msg: function( message ) {
-				let pad = document.querySelector( "#chat-view" )
+				const pad = document.querySelector( "#chat-view" )
 				if ( pad ) {
 					pad.appendChild( document.createTextNode( now() ) )
 					pad.innerHTML = pad.innerHTML + ": " + colorize( message )
@@ -88,10 +124,10 @@ function on_load() {
 				}
 			},
 			on_player: function( message ) {
-				let index = this.players.indexOf( message )
+				const index = this.players.findIndex( x => message == x.login )
 				if ( index === -1 ) {
-					this.players.push( message )
-					this.players.sort()
+					this.players.push( new Player( message ) )
+					this.players.sort( ( l, r ) => l.login.localeCompare( r.login ) )
 				}
 			},
 			on_logic: function( message ) {
@@ -104,13 +140,13 @@ function on_load() {
 				console.log( message )
 			},
 			on_player_quit: function( message ) {
-				let index = this.players.indexOf( message )
+				const index = this.players.findIndex( x => message == x.login )
 				if ( index !== -1 ) {
 					this.players.splice( index, 1 )
 				}
 			},
 			on_enter: function( event ) {
-				let chatInput = document.getElementById( "chat-input" )
+				const chatInput = document.getElementById( "chat-input" )
 				if ( chatInput.value !== "" ) {
 					app.sock.send( "msg:" + chatInput.value )
 				}
@@ -157,8 +193,8 @@ function colorize( message ) {
 		}
 		newIdx += idx
 		m += message.substr( idx, newIdx - idx )
-		let end = message.indexOf( ";", newIdx )
-		let col = colorMap( message.substr( newIdx + 1, end - ( newIdx + 1 ) ) )
+		const end = message.indexOf( ";", newIdx )
+		const col = colorMap( message.substr( newIdx + 1, end - ( newIdx + 1 ) ) )
 //		console.log( "len = " + message.length + ", idx = " + idx + ", end = " + end + ", newIdx = " + newIdx + ", col = " + col )
 		if ( needClosing ) {
 			m += "</span>"
@@ -171,7 +207,7 @@ function colorize( message ) {
 }
 
 function now() {
-	let t = new Date()
+	const t = new Date()
 	return (
 		t.getFullYear().toString()
 			+ "-" + ( t.getMonth() + 1 ).toString().padStart( 2, "0" )
@@ -183,7 +219,7 @@ function now() {
 }
 
 function on_connect_click() {
-	let f = document.forms["connect"]
+	const f = document.forms["connect"]
 	let errMsg = "Your setup containg following errors:\n"
 	let setupOk = true
 	if ( f["login"].value == "" ) {
@@ -203,8 +239,8 @@ function on_connect_click() {
 
 function do_connect() {
 	try {
-		let f = document.forms["connect"]
-		let address = "wss://" + f["server"].value + ":" + f["port"].value
+		const f = document.forms["connect"]
+		const address = "wss://" + f["server"].value + ":" + f["port"].value
 		app.connect( address, f["login"].value, f["password"].value )
 	} catch ( e ) {
 		dump_exception( e )
