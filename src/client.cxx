@@ -38,7 +38,7 @@ struct WebSockFragmentHeader {
 		, _masked( false )
 		, _len( 0 )
 		, _valid( false ) {
-		raw_ = hton( raw_ );
+		raw_ = util::hton( raw_ );
 		_final = ( ( raw_ >> 15 ) & 1 ) != 0;
 		int reserved = ( raw_ >> 12 ) & 7;
 		_opcode = static_cast<OPCODE>( ( raw_ >> 8 ) & 15 );
@@ -65,7 +65,7 @@ struct WebSockFragmentHeader {
 		_len = static_cast<int>( str_.byte_count() );
 		if ( _len > 65535 ) {
 			_len = 127;
-		} else if ( _len > 126 ) {
+		} else if ( _len > 125 ) {
 			_len = 126;
 		}
 		_opcode = OPCODE::TEXT;
@@ -73,11 +73,11 @@ struct WebSockFragmentHeader {
 	}
 	u16_t raw( void ) const {
 		u16_t r( 0 );
-		r = static_cast<u16_t>( _len ) & 127;
+		r = static_cast<u16_t>( _len ) & 0xff;
 		r |= static_cast<u16_t>( _masked ? ( 1 << 7 ) : 0 );
 		r |= static_cast<u16_t>( static_cast<u16_t>( _opcode ) << 8 );
 		r |= static_cast<u16_t>( _final ? ( 1 << 15 ) : 0 );
-		return ( hton( r ) );
+		return ( util::hton( r ) );
 	}
 	bool is_valid( void ) const {
 		return ( _valid );
@@ -157,15 +157,17 @@ void HClient::send( yaal::hcore::HString const& message_ ) {
 			}
 			if ( wsfh._len == 127 ) {
 				u64_t len( static_cast<u64_t>( _utf8.byte_count() ) );
+				len = util::hton( len );
 				toWrite = sizeof ( len );
-				if ( _socket->write( &header, toWrite ) != toWrite ) {
+				if ( _socket->write( &len, toWrite ) != toWrite ) {
 					OUT << "failed to write 64-bit len" << endl;
 					break;
 				}
 			} else if ( wsfh._len == 126 ) {
 				u16_t len( static_cast<u16_t>( _utf8.byte_count() ) );
+				len = util::hton( len );
 				toWrite = sizeof ( len );
-				if ( _socket->write( &header, toWrite ) != toWrite ) {
+				if ( _socket->write( &len, toWrite ) != toWrite ) {
 					OUT << "failed to write 16-bit len" << endl;
 					break;
 				}
@@ -206,7 +208,7 @@ int long HClient::read( yaal::hcore::HString& line_ ) {
 					OUT << "failed to read 64-bit len" << endl;
 					break;
 				}
-				payloadLen = safe_int::cast<int>( len );
+				payloadLen = safe_int::cast<int>( util::hton( len ) );
 			} else if ( payloadLen == 126 ) {
 				u16_t len( 0 );
 				toRead = sizeof ( len );
@@ -214,7 +216,7 @@ int long HClient::read( yaal::hcore::HString& line_ ) {
 					OUT << "failed to read 16-bit len" << endl;
 					break;
 				}
-				payloadLen = len;
+				payloadLen = util::hton( len );
 			}
 			u32_t mask( 0 );
 			toRead = sizeof ( mask );

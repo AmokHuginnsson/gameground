@@ -35,7 +35,8 @@ HLogic::HLogic( HServer* server_, id_t const& id_, HString const& comment_ )
 	, _comment( comment_ )
 	, _out()
 	, _mutex()
-	, _bcastPrefix() {
+	, _bcastPrefix()
+	, _cache() {
 	M_PROLOG
 	_handlers[ PROTOCOL::SAY ] = static_cast<handler_t>( &HLogic::handler_message );
 	_out << PROTOCOL::PARTY << PROTOCOL::SEP << _id << PROTOCOL::SEPP;
@@ -135,11 +136,11 @@ yaal::hcore::HStreamInterface& operator << ( HStreamInterface& stream_, HLogic c
 
 void HLogic::broadcast( HString const& message_ ) {
 	M_PROLOG
+	_cache.assign( _bcastPrefix ).append( message_ );
 	for ( clients_t::HIterator it( _clients.begin() ), end( _clients.end() ); it != end; ++ it ) {
 		try {
 			if ( (*it)->is_valid() ) {
-				(*it)->send( _bcastPrefix );
-				(*it)->send( message_ );
+				(*it)->send( _cache );
 			}
 		} catch ( HOpenSSLException const& ) {
 			drop_client( *it );

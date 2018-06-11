@@ -36,6 +36,9 @@ protected:
 	yaal::tools::HStringStream _out;
 	mutable yaal::hcore::HMutex _mutex;
 	yaal::hcore::HString _bcastPrefix;
+private:
+	yaal::hcore::HString _cache;
+public:
 	/*}*/
 	struct PROTOCOL {
 		static char const* const SEP;
