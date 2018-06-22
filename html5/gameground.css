@@ -8,6 +8,15 @@ ul, li {
 	margin: 0px;
 	padding: 0px;
 }
+.noselect, label {
+	-webkit-touch-callout: none; /* iOS Safari */
+	-webkit-user-select: none; /* Safari */
+	-khtml-user-select: none; /* Konqueror HTML */
+	-moz-user-select: none; /* Firefox */
+	-ms-user-select: none; /* Internet Explorer/Edge */
+	-o-user-select: none;
+	user-select: none;
+}
 .listwidget li:hover {
 	background: #def;
 }

@@ -229,7 +229,7 @@ void HServer::kick_client( HClient& client_, char const* const reason_ ) {
 	_dispatcher.unregister_file_descriptor_handler( client_.sock() );
 	client_.invalidate();
 	remove_client_from_all_logics( client_ );
-	OUT << "client_ ";
+	OUT << "client ";
 	HString login;
 	if ( ! client_.login().is_empty() ) {
 		login = client_.login();

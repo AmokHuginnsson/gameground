@@ -13,19 +13,33 @@ class Player {
 }
 
 class Party {
-	constructor( id_, name_, configuration_ ) {
+	constructor( parent_, id_, name_, configuration_ ) {
+		this._parent = parent_
 		this._id = id_
 		this._name = name_
 		this._configuration = configuration_
 		this._players = []
 		this._logic = null
+		this._parent.add_party( id_ )
+	}
+	get name() {
+		return ( this._name )
 	}
 }
 
 class Logic {
 }
 
+class Browser extends Party {
+	constructor( parent_ ) {
+		super( parent_, "browser", "Browser", "" )
+	}
+}
+
 class Chat extends Logic {
+	constructor( parent_, id_, name_, configuration_ ) {
+		super( parent_, "chat" + id_, name_, configuration_ )
+	}
 }
 
 class Boggle extends Logic {
@@ -43,27 +57,93 @@ class SetBang extends Logic {
 class Galaxy extends Logic {
 }
 
-/*let browser = Vue.component(
+Vue.component(
 	"browser", {
-		el: "#browser"
+		data: function( arg ) {
+			return ( new Browser( arg.$parent ) )
+		},
+		template: `
+			<div id="browser">
+				<label>Server messages</label>
+				<label>Games</label>
+				<label style="grid-column: 4">People</label>
+				<div id="chat-view"></div>
+				<div id="games"></div>
+				<ul id="players" class="listwidget">
+					<li
+						class="noselect"
+						v-for="player in $parent.players"
+					>{{ player.login }}</li>
+				</ul>
+				<button id="btn-join" title="Click me to join pre-existing game." disabled="disabled">Join</button>
+				<button id="btn-create" title="Click me to create a new game.">Create</button>
+				<button id="btn-account" title="Click me to edit your account information." disabled="disabled">Account</button>
+				<button id="btn-disconnect" title="Click me to disconnet from GameGround server." v-on:click="$parent.do_disconnect">Disconnect</button>
+				<div id="chat-input-field">
+					<label>Type your message</label><br />
+					<input id="chat-input" type="text" name="input" maxlength="1024" title="Send message to all people on the server that are currently not in the game." v-on:keypress.enter="$parent.on_enter">
+				</div>
+			</div>
+`
 	}
-)*/
+)
+
+Vue.component(
+	"chat", {
+		data: function( arg ) {
+			return ( new Chat( arg.$parent ) )
+		},
+		methods: {
+			on_enter: function() {
+			}
+		},
+		template: `
+		<div>
+			<label>Private chat messages</label>
+			<div></div>
+			<label>Type your message</label>
+			<input class="chat-input" type="text" name="input" maxlength="1024" title="Send message to all people in this private chat room." v-on:keypress.enter="on_enter">
+		</div>
+`
+	}
+)
+
 const _app_ = new Vue( {
 	el: "#root",
 	data: {
 		sock: null,
 		_messageBuffer: "",
-		currentTab: "browser",
-		tabs: ["browser"],
 		players: [],
-		partys: []
-	},
-	computed: {
-		currentTabComponent: function () {
-			return 'tab-' + this.currentTab.toLowerCase()
-		}
+		partys: [],
+		currentTab: null
 	},
 	methods: {
+		party_by_id: function( id_ ) {
+			let p = null
+			for ( let e of this.$children ) {
+				if ( e.$data._id == id_ ) {
+					p = e
+					break
+				}
+			}
+			return ( p )
+		},
+		party_name: function( id_ ) {
+			const p = this.party_by_id( id_ )
+			return ( p != null ? p.$data.name : "" )
+		},
+		add_party: function( id_ ) {
+			this.partys.push( id_ )
+			this.currentTab = id_
+		},
+		make_visible: function( id_ ) {
+			if ( id_ != this.currentTab ) {
+				oldParty = this.party_by_id( this.currentTab )
+				newParty = this.party_by_id( id_ )
+				oldParty.$el.style["display"] = "none"
+				newParty.$el.style["display"] = "block"
+			}
+		},
 		is_connected: function() {
 			return ( ( this.sock != null ) && ( this.sock.readyState === 1 ) )
 		},
@@ -77,7 +157,7 @@ const _app_ = new Vue( {
 				this.sock.send( "get_partys" )
 			}
 			this.sock.onerror = event => {
-				msg = "WebSocket connection error: " + event.type
+				const msg = "WebSocket connection error: " + event.type
 				alert( msg );
 				console.log( msg )
 				this.do_disconnect()
@@ -141,12 +221,13 @@ const _app_ = new Vue( {
 		},
 		on_player: function( message ) {
 			const player = message.split( "," )
-			if ( player.length > 1 ) {
+			if ( player.length == 1 ) {
 				const index = this.players.findIndex( x => player[0] == x.login )
 				if ( index === -1 ) {
 					this.players.push( new Player( player[0] ) )
 					this.players.sort( ( l, r ) => l.login.localeCompare( r.login ) )
 				}
+			} else {
 			}
 		},
 		on_logic: function( message ) {
