@@ -13,14 +13,13 @@ class Player {
 }
 
 class Party {
-	constructor( parent_, id_, name_, configuration_ ) {
-		this._parent = parent_
+	constructor( type_, id_, name_, configuration_ ) {
+		this._type = type_
 		this._id = id_
 		this._name = name_
 		this._configuration = configuration_
 		this._players = []
 		this._logic = null
-		this._parent.add_party( id_ )
 	}
 	get name() {
 		return ( this._name )
@@ -31,14 +30,14 @@ class Logic {
 }
 
 class Browser extends Party {
-	constructor( parent_ ) {
-		super( parent_, "browser", "Browser", "" )
+	constructor() {
+		super( "browser", "browser", "Browser", "" )
 	}
 }
 
-class Chat extends Logic {
-	constructor( parent_, id_, name_, configuration_ ) {
-		super( parent_, "chat" + id_, name_, configuration_ )
+class Chat extends Party {
+	constructor( id_, name_, configuration_ ) {
+		super( "chat", id_, name_, configuration_ )
 	}
 }
 
@@ -59,8 +58,10 @@ class Galaxy extends Logic {
 
 Vue.component(
 	"browser", {
+		props: ["data"],
 		data: function( arg ) {
-			return ( new Browser( arg.$parent ) )
+			this.data._parent = arg
+			return ( this.data )
 		},
 		template: `
 			<div id="browser">
@@ -90,8 +91,10 @@ Vue.component(
 
 Vue.component(
 	"chat", {
+		props: ["data"],
 		data: function( arg ) {
-			return ( new Chat( arg.$parent ) )
+			this.data._parent = arg
+			return ( this.data )
 		},
 		methods: {
 			on_enter: function() {
@@ -114,35 +117,27 @@ const _app_ = new Vue( {
 		sock: null,
 		_messageBuffer: "",
 		players: [],
-		partys: [],
-		currentTab: null
+		partys: [ new Browser() ],
+		currentTab: "browser"
 	},
 	methods: {
 		party_by_id: function( id_ ) {
 			let p = null
-			for ( let e of this.$children ) {
-				if ( e.$data._id == id_ ) {
+			for ( let e of this.partys ) {
+				if ( e._id == id_ ) {
 					p = e
 					break
 				}
 			}
 			return ( p )
 		},
-		party_name: function( id_ ) {
-			const p = this.party_by_id( id_ )
-			return ( p != null ? p.$data.name : "" )
-		},
-		add_party: function( id_ ) {
-			this.partys.push( id_ )
-			this.currentTab = id_
+		add_party: function( party_ ) {
+			this.partys.push( party_ )
+			this.currentTab = party_._id
+			this.make_visible( party_._id )
 		},
 		make_visible: function( id_ ) {
-			if ( id_ != this.currentTab ) {
-				oldParty = this.party_by_id( this.currentTab )
-				newParty = this.party_by_id( id_ )
-				oldParty.$el.style["display"] = "none"
-				newParty.$el.style["display"] = "block"
-			}
+			this.currentTab = id_
 		},
 		is_connected: function() {
 			return ( ( this.sock != null ) && ( this.sock.readyState === 1 ) )
@@ -201,6 +196,7 @@ const _app_ = new Vue( {
 					case "party_info": { this.on_party_info( data ) } break
 					case "player_quit": { this.on_player_quit( data ) } break
 					case "party": { this.on_party( data ) } break
+					case "account": { this.on_account( data ) } break
 					default: console.log( message )
 				}
 			} else {
@@ -221,13 +217,12 @@ const _app_ = new Vue( {
 		},
 		on_player: function( message ) {
 			const player = message.split( "," )
-			if ( player.length == 1 ) {
-				const index = this.players.findIndex( x => player[0] == x.login )
-				if ( index === -1 ) {
-					this.players.push( new Player( player[0] ) )
-					this.players.sort( ( l, r ) => l.login.localeCompare( r.login ) )
-				}
-			} else {
+			const index = this.players.findIndex( x => player[0] == x.login )
+			if ( index === -1 ) {
+				this.players.push( new Player( player[0] ) )
+				this.players.sort( ( l, r ) => l.login.localeCompare( r.login ) )
+			}
+			if ( player.length > 1 ) {
 			}
 		},
 		on_logic: function( message ) {
@@ -238,6 +233,12 @@ const _app_ = new Vue( {
 		},
 		on_party: function( message ) {
 			console.log( message )
+		},
+		on_account: function( message ) {
+			const tokens = message.chop( ",", 2 )
+			const login = tokens[0]
+			const info = tokens[1]
+			this.add_party( new Chat( login, login, info ) )
 		},
 		on_player_quit: function( message ) {
 			const index = this.players.findIndex( x => message == x.login )
@@ -364,3 +365,27 @@ function register_post_load_function( func ) {
 (function() {
 //	register_post_load_function( on_load )
 })();
+
+
+String.prototype.chop = function( by, limit = null ) {
+	let res = []
+	let from = 0
+	let i = 1
+	while ( ( limit == null ) || ( i < limit ) ) {
+		const idx = this.indexOf( by, from )
+		if ( idx >= 0 ) {
+			res.push( this.substr( from, idx - from ) )
+			from = idx + 1
+		} else {
+			res.push( this.substr( from ) )
+			from = this.length
+			break
+		}
+		i += 1
+	}
+	if ( from < this.length ) {
+		res.push( this.substr( from ) )
+	}
+	return ( res )
+}
+

@@ -14,13 +14,13 @@
 				<div id="tab-bar">
 					<button
 						v-for="tab in partys"
-						v-bind:key="tab"
-						v-bind:class="['tab-button', { active: currentTab === tab }]"
-						v-on:click="make_visible( tab )"
-						>{{ party_name( tab ) }}
+						v-bind:key="tab._id"
+						v-bind:class="['tab-button', { active: currentTab === tab._id }]"
+						v-on:click="make_visible( tab._id )"
+						>{{ tab._name }}
 					</button>
 				</div>
-				<browser />
+				<component v-for="tab in partys" v-show="currentTab === tab._id" :data="tab" :key="tab._id" :is="tab._type"></component>
 			</div>
 			<div id="connect" v-else>
 				<div id="logo" style="height: 140px;background: url(gameground.svg) no-repeat center center;"></div>
