@@ -24,21 +24,55 @@ label, button {
 	font-weight: bold;
 	font-family: sans-serif;
 }
+.tab-button {
+	margin: -1px;
+	padding: 4px;
+	padding-left: 8px;
+	padding-right: 8px;
+	background: #eee;
+	border: 1px solid black;
+	border-bottom: 0px none;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px;
+	border-bottom-left-radius: 1px;
+	border-bottom-right-radius: 1px;
+}
+.tab-button.active {
+	background: #def;
+	border-bottom: 1px solid #def;
+}
+.tab-pane {
+	padding: 8px;
+}
+.messages {
+	overflow-y: auto;
+	background: #fff;
+	border: black solid 1px;
+}
 #root, #app {
 	height: 100%;
 }
 #tab-bar {
 	padding: 8px;
 	padding-bottom: 0px;
+	border-bottom: 1px solid black;
+}
+.tab-bar-line {
+	margin: 0px;
+	padding: 0px;
+	height: 8px;
+	color: #def;
+	background: #def;
+	border: 0px none;
+
 }
 #browser {
 	grid-template-columns: auto 7% 7% 7% 7%;
 	grid-template-rows: 16px auto 24px 24px 24px 24px;
 	grid-column-gap: 8px;
 	grid-row-gap: 8px;
-	height: calc( 100% - 56px );
+	height: calc( 100% - 64px );
 	width: calc( 100% - 16px );
-	padding: 8px;
 	display: grid;
 }
 #connect {
@@ -73,14 +107,12 @@ label, button {
 }
 #chat-view {
 	grid-row: 2 / span 3;
-	overflow-y: auto;
-	background: #fff;
-	border: black solid 1px;
 }
 #chat-input-field {
 	grid-row: 5 / span 2;
 }
 #chat-input {
+	margin-top: 5px;
 	width: calc( 100% - 18px );
 }
 #games {
@@ -97,4 +129,13 @@ label, button {
 }
 #btn-join, #btn-create, #btn-account, #btn-disconnect {
 	grid-column: 3 / span 2;
+}
+.chat {
+	grid-template-columns: auto;
+	grid-template-rows: 16px auto 16px 32px;
+	grid-column-gap: 8px;
+	grid-row-gap: 8px;
+	height: calc( 100% - 64px );
+	width: calc( 100% - 16px );
+	display: grid;
 }

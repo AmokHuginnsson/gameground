@@ -20,6 +20,7 @@
 						>{{ tab._name }}
 					</button>
 				</div>
+				<hr class="tab-bar-line" />
 				<component v-for="tab in partys" v-show="currentTab === tab._id" :data="tab" :key="tab._id" :is="tab._type"></component>
 			</div>
 			<div id="connect" v-else>

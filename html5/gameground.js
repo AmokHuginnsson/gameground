@@ -64,11 +64,11 @@ Vue.component(
 			return ( this.data )
 		},
 		template: `
-			<div id="browser">
+			<div id="browser" class="tab-pane">
 				<label>Server messages</label>
 				<label>Games</label>
 				<label style="grid-column: 4">People</label>
-				<div id="chat-view"></div>
+				<div id="chat-view" class="messages"></div>
 				<div id="games"></div>
 				<ul id="players" class="listwidget">
 					<li
@@ -101,9 +101,9 @@ Vue.component(
 			}
 		},
 		template: `
-		<div>
+		<div class="tab-pane chat">
 			<label>Private chat messages</label>
-			<div></div>
+			<div class="messages"></div>
 			<label>Type your message</label>
 			<input class="chat-input" type="text" name="input" maxlength="1024" title="Send message to all people in this private chat room." v-on:keypress.enter="on_enter">
 		</div>
