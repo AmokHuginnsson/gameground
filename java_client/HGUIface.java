@@ -36,14 +36,14 @@ abstract class HGUIface extends JPanel {
 		public static final int BRIGHTCYAN = 14;
 		public static final int WHITE = 15;
 		public static final int OTHERGRAY = 16;
-		public static final int NORMAL = 7;
+		public static final int RESET = 256;
 		public static final int PALLETE_SIZE = 20;
 	}
-	public int COLOR_NORMAL = Colors.NORMAL;
+	public int COLOR_NORMAL = Colors.RESET;
 	public HGUIface( String $resource ) {
 		_resource = $resource;
 		_attribute = new SimpleAttributeSet();
-		_color = Colors.NORMAL;
+		_color = COLOR_NORMAL;
 		_colors = new Color[ Colors.PALLETE_SIZE ];
 
 		_colors[ Colors.BLACK ] = Color.black;
@@ -87,51 +87,59 @@ abstract class HGUIface extends JPanel {
 	public void mapMembers( XUL $se ) {}
 	public void onShow() {}
 	public abstract JTextPane getLogPad();
+	public static int brightness( Color $color ) {
+		double red = (double)$color.getRed();
+		double green = (double)$color.getGreen();
+		double blue = (double)$color.getBlue();
+		double v = Math.sqrt( red * red * 0.299 + green * green * 0.587 + blue * blue * 0.114 );
+		return ( (int)v );
+	}
 	public Color color( int $color ) { return ( color( $color, null ) ); }
 	public Color color( int $color, java.awt.Component $on ) {
-		if ( $on == null )
+		if ( $on == null ) {
 			$on = _logPad;
-		Color bg = $on.getBackground();
-		int red = 255 - bg.getRed();
-		int green = 255 - bg.getGreen();
-		int blue = 255 - bg.getBlue();
-		int max = 16 * 16;
-		if ( ( red * red + green * green + blue * blue ) < ( max + max + max ) ) {
-			if ( ( $color == Colors.LIGHTGRAY ) || ( $color == Colors.WHITE ) )
+		}
+		int lum = brightness( $on.getBackground() );
+		if ( $color == Colors.RESET ) {
+			$color = Colors.LIGHTGRAY;
+		}
+		if ( lum > 128 ) {
+			if ( ( $color == Colors.LIGHTGRAY ) || ( $color == Colors.WHITE ) ) {
 				$color = Colors.BLACK;
-			else if ( $color < Colors.DARKGRAY )
+			} else if ( $color < Colors.DARKGRAY ) {
 				$color += Colors.DARKGRAY;
-			else if ( $color >= Colors.DARKGRAY )
+			} else if ( $color >= Colors.DARKGRAY ) {
 				$color -= Colors.DARKGRAY;
+			}
 		}
 		return ( _colors[ $color ] );
 	}
-	public int lcolor( int $color ) {
+	public int localColor( int $color ) {
 		return ( $color );
 	}
 	void log( String $message, int $color, int $style ) {
-		StyleConstants.setForeground( _attribute, color( lcolor( $color ) ) );
-		if ( ( $style & Style.BOLD ) != 0 )
+		StyleConstants.setForeground( _attribute, color( localColor( $color ) ) );
+		if ( ( $style & Style.BOLD ) != 0 ) {
 			StyleConstants.setBold( _attribute, true );
-		if ( ( $style & Style.ITALIC ) != 0 )
+		}
+		if ( ( $style & Style.ITALIC ) != 0 ) {
 			StyleConstants.setItalic( _attribute, true );
+		}
 		add( _logPad, $message, _attribute );
 	}
 	void log( String $message, int $color ) {
-		StyleConstants.setForeground( _attribute, color( lcolor( $color ) ) );
+		StyleConstants.setForeground( _attribute, color( localColor( $color ) ) );
 		StyleConstants.setBold( _attribute, false );
 		StyleConstants.setItalic( _attribute, false );
 		add( _logPad, $message, _attribute );
 	}
 	void log( String $message ) {
-		StyleConstants.setForeground( _attribute, color( lcolor( _color ) ) );
+		StyleConstants.setForeground( _attribute, color( localColor( _color ) ) );
 		StyleConstants.setBold( _attribute, false );
 		StyleConstants.setItalic( _attribute, false );
 		add( _logPad, $message, _attribute );
 	}
 	void log( int $color ) {
-		if ( $color > 15 )
-			$color = 15;
 		_color = $color;
 	}
 	abstract public void onClose();

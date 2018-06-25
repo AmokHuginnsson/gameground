@@ -135,7 +135,7 @@ public class HBoard extends JPanel implements MouseInputListener {
 				(int)( $coordY * _diameterY + ( _diameterY - 32 ) / 2 ), this );
 		if ( ( $color >= 0 ) || ( ( $coordX == _cursorX ) && ( $coordY == _cursorY ) ) ) {
 			if ( ( $coordX == _cursorX ) && ( $coordY == _cursorY ) ) {
-				$gs.setColor ( _logic._gui._colors[ HGUIface.Colors.WHITE ] );
+				$gs.setColor( _logic._gui._colors[ HGUIface.Colors.WHITE ] );
 				_logic._gui._systemInfo.setText( _logic._systemNames[ $no ] );
 				if ( $color >= 0 )
 					_logic._gui._emperorInfo.setText( _logic._emperors.get( $color ) );
@@ -152,17 +152,17 @@ public class HBoard extends JPanel implements MouseInputListener {
 				if ( _logic.getState() == HGalaxy.State.SELECT )
 					_logic._gui._arrival.setText( String.valueOf( _logic._round + distance( _sourceSystem, $no ) ) );
 			}	else {
-				$gs.setColor ( _logic._gui._colors[ _logic._gui.lcolor( $color ) ] );
+				$gs.setColor( _logic._gui._colors[ _logic._gui.localColor( $color ) ] );
 			}
-			$gs.drawRect ( (int)( $coordX * _diameterX + 1 ),
+			$gs.drawRect( (int)( $coordX * _diameterX + 1 ),
 					(int)( $coordY * _diameterY + 1 ),
 					(int)( _diameterX - 2 ), (int)( _diameterY - 2 ) );
-			$gs.drawRect ( (int)( $coordX * _diameterX + 2 ),
+			$gs.drawRect( (int)( $coordX * _diameterX + 2 ),
 					(int)( $coordY * _diameterY + 2 ),
 					(int)( _diameterX - 4 ), (int)( _diameterY - 4 ) );
 		}
 		if ( _help ) {
-			$gs.setColor ( _logic._gui._colors[ HGUIface.Colors.WHITE ] );
+			$gs.setColor( _logic._gui._colors[ HGUIface.Colors.WHITE ] );
 			$gs.drawString( _logic._systemNames[ $no ],
 					(int)( $coordX * _diameterX + 2 ),
 					(int)( ( $coordY + 1 ) * _diameterY - 2 ) );

@@ -162,9 +162,10 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		public HAbstractConfigurator getConfigurator() {
 			return ( _conf );
 		}
-		public int lcolor( int $color ) {
-			if ( $color >= 0 )
+		public int localColor( int $color ) {
+			if ( $color >= 0 ) {
 				return ( _colorMap[ $color ] );
+			}
 			return ( Colors.BLACK );
 		}
 		public void onMessage() {
@@ -286,7 +287,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 				_emperors.put( index, tokens[1] );
 				if ( _emperors.get( index ).compareTo( _emperor ) == 0 ) {
 					_color = index;
-					_gui._emperor.setForeground( _gui.color( _gui.lcolor( _color ) ) );
+					_gui._emperor.setForeground( _gui.color( _gui.localColor( _color ) ) );
 					System.out.println( "Emperor color: " + _color );
 				}
 			} else if ( variable.compareTo( "ok" ) == 0 ) {

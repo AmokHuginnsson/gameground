@@ -12,6 +12,7 @@
 #include <yaal/tools/hstringstream.hxx>
 #include <yaal/tools/hash.hxx>
 #include <yaal/tools/util.hxx>
+#include <yaal/tools/xmath.hxx>
 #include <yaal/hconsole/console.hxx>
 #include <yaal/hconsole/htuiprocess.hxx>
 #include <yaal/hconsole/hwindow.hxx>
@@ -324,6 +325,7 @@ protected:
 	void handler_setup( HString& );
 	void handler_play( HString& );
 	void handler_msg( HString& );
+	void handler_client_setup( HString& );
 	void handler_error( HString& );
 /* cppcheck-suppress functionConst */
 	void handler_dummy( HString& );
@@ -337,7 +339,7 @@ private:
 	/*}*/
 };
 
-HString HClient::CLIENT_VERSION = "3";
+HString HClient::CLIENT_VERSION = "4";
 
 HSystem::HSystem( void )
 	: _coordinateX( -1 )
@@ -827,7 +829,7 @@ HClient::HClient( HString const& programName_ )
 	, _out() {
 	M_PROLOG
 	_handlers[ "setup" ] = &HClient::handler_setup;
-	_handlers[ "client_setup" ] = &HClient::handler_msg;
+	_handlers[ "client_setup" ] = &HClient::handler_client_setup;
 	_handlers[ "play" ] = &HClient::handler_play;
 	_handlers[ "msg" ] = &HClient::handler_msg;
 	_handlers[ "say" ] = &HClient::handler_msg;
@@ -986,10 +988,11 @@ void HClient::handler_play( HString& command_ ) {
 		char event( static_cast<char>( value[ 0 ].get() ) );
 		int sysNo( lexical_cast<int>( get_token( value, ",", 1 ) ) );
 		int production( lexical_cast<int>( get_token( value, ",", 2 ) ) );
-		if ( production >= 0 )
+		if ( production >= 0 ) {
 			_systems[ sysNo ]._production = production;
+		}
 		_systems[ sysNo ]._fleet = lexical_cast<int>( get_token( value, ",", 4 ) );
-		int color( lexical_cast<int>( get_token( value, ",", 3 ) ) );
+		int color( xmath::clip( 0, lexical_cast<int>( get_token( value, ",", 3 ) ), 15 ) );
 		/* scope to limit `it' visibility */ {
 			emperors_t::iterator it( _emperors.find( color ) );
 			M_ASSERT( it != _emperors.end() );
@@ -1077,15 +1080,16 @@ void HClient::handler_error( HString& message_ ) {
 namespace {
 
 int find_color( HString const& message_, int offset_ ) {
-	int colorStartIndex = -1;
-	int start = offset_;
-	int length = static_cast<int>( message_.get_length() );
+	int colorStartIndex( -1 );
+	int start( offset_ );
+	int length( static_cast<int>( message_.get_length() ) );
 	while ( start < length ) {
 		start = static_cast<int>( message_.find( '$'_ycp, start ) );
-		if ( start < 0 )
+		if ( start < 0 ) {
 			break;
-		int color = start + 1;
-		while ( ( color < length ) && is_digit( message_[color] ) ) { /* *FIXME* *TODO* Remove static_cast after UCS in HString is implemented. */
+		}
+		int color( start + 1 );
+		while ( ( color < length ) && is_digit( message_[color] ) ) {
 			++ color;
 		}
 		if ( ( color < length ) && ( message_[ color ] == ';' ) ) {
@@ -1099,19 +1103,28 @@ int find_color( HString const& message_, int offset_ ) {
 
 }
 
+void HClient::handler_client_setup( HString& message_ ) {
+	M_PROLOG
+	_window->_logPad->add( "client_setup = " );
+	handler_msg( message_ );
+	return;
+	M_EPILOG
+}
+
 void HClient::handler_msg( HString& message_ ) {
 	M_PROLOG
 	int index( 0 );
 	int length( static_cast<int>( message_.get_length() ) );
 	HString part;
 	while ( index < length ) {
-		int color( find_color( message_, index ) );
-		if ( color > index ) {
-			_window->_logPad->add( message_.substr( index, color - index ) );
+		int colorIdx( find_color( message_, index ) );
+		if ( colorIdx > index ) {
+			_window->_logPad->add( message_.substr( index, colorIdx - index ) );
 		}
-		if ( color >= 0 ) {
-			int colorEnd( static_cast<int>( message_.find( ';'_ycp, color ) ) );
-			_window->_logPad->add( _colors_[ lexical_cast<int>( message_.substr( color + 1, colorEnd - color ) ) ] );
+		if ( colorIdx >= 0 ) {
+			int colorEnd( static_cast<int>( message_.find( ';'_ycp, colorIdx ) ) );
+			int color( xmath::clip( 0, lexical_cast<int>( message_.substr( colorIdx + 1, colorEnd - colorIdx ) ), 15 ) );
+			_window->_logPad->add( _colors_[ color ] );
 			index = colorEnd + 1;
 		} else {
 			_window->_logPad->add( message_.substr( index ) );

@@ -60,8 +60,35 @@ Vue.component(
 	"browser", {
 		props: ["data"],
 		data: function( arg ) {
-			this.data._parent = arg
 			return ( this.data )
+		},
+		methods: {
+			on_enter: function( event ) {
+				const source = event.target || event.srcElement
+				if ( source.value !== "" ) {
+					this.$parent.sock.send( "msg:" + source.value )
+				}
+				source.value = ""
+			},
+			on_player_dblclick: function( event ) {
+				const source = event.target || event.srcElement
+				const login = source.textContent
+				if ( login == this.$parent.myLogin ) {
+					return
+				}
+				let id = null
+				for ( let p of this.$parent.partys ) {
+					if ( ( p._type == "chat" ) && ( p._name == login ) ) {
+						id = p._id
+						break
+					}
+				}
+				if ( id == null ) {
+					this.$parent.sock.send( "get_account:" + login )
+				} else {
+					this.$parent.make_visible( id )
+				}
+			}
 		},
 		template: `
 			<div id="browser" class="tab-pane">
@@ -74,6 +101,7 @@ Vue.component(
 					<li
 						class="noselect"
 						v-for="player in $parent.players"
+						v-on:dblclick="on_player_dblclick"
 					>{{ player.login }}</li>
 				</ul>
 				<button id="btn-join" title="Click me to join pre-existing game." disabled="disabled">Join</button>
@@ -82,7 +110,7 @@ Vue.component(
 				<button id="btn-disconnect" title="Click me to disconnet from GameGround server." v-on:click="$parent.do_disconnect">Disconnect</button>
 				<div id="chat-input-field">
 					<label>Type your message</label><br />
-					<input id="chat-input" type="text" name="input" maxlength="1024" title="Send message to all people on the server that are currently not in the game." v-on:keypress.enter="$parent.on_enter">
+					<input id="chat-input" type="text" name="input" maxlength="1024" title="Send message to all people on the server that are currently not in the game." v-on:keypress.enter="on_enter">
 				</div>
 			</div>
 `
@@ -93,8 +121,14 @@ Vue.component(
 	"chat", {
 		props: ["data"],
 		data: function( arg ) {
-			this.data._parent = arg
 			return ( this.data )
+		},
+		mounted: function() {
+			const info = this.data._configuration.split( "," )
+			const m = this.$refs.messages
+			m.append_text( "User: " + this.data._name )
+			m.append_text( "Full name: " + info[0] )
+			m.append_text( "Description:\n" + info[1] )
 		},
 		methods: {
 			on_enter: function() {
@@ -103,7 +137,7 @@ Vue.component(
 		template: `
 		<div class="tab-pane chat">
 			<label>Private chat messages</label>
-			<div class="messages"></div>
+			<div class="messages" ref="messages"></div>
 			<label>Type your message</label>
 			<input class="chat-input" type="text" name="input" maxlength="1024" title="Send message to all people in this private chat room." v-on:keypress.enter="on_enter">
 		</div>
@@ -115,6 +149,7 @@ const _app_ = new Vue( {
 	el: "#root",
 	data: {
 		sock: null,
+		myLogin: null,
 		_messageBuffer: "",
 		players: [],
 		partys: [ new Browser() ],
@@ -147,6 +182,7 @@ const _app_ = new Vue( {
 			this.sock.onopen = event => {
 				const s = this.sock; this.sock = null; this.sock = s
 				this.sock.send( "login:4:" + login + ":" + sha1( password ) )
+				this.myLogin = login
 				this.sock.send( "get_players" )
 				this.sock.send( "get_logics" )
 				this.sock.send( "get_partys" )
@@ -177,6 +213,7 @@ const _app_ = new Vue( {
 			console.log( "After connection attempt..." )
 		},
 		do_disconnect: function() {
+			this.myLogin = null
 			if ( this.sock !== null ) {
 				this.sock.close()
 			}
@@ -210,9 +247,7 @@ const _app_ = new Vue( {
 		on_msg: function( message ) {
 			const pad = document.querySelector( "#chat-view" )
 			if ( pad ) {
-				pad.appendChild( document.createTextNode( now() ) )
-				pad.innerHTML = pad.innerHTML + ": " + colorize( message )
-				pad.appendChild( document.createElement( "br" ) )
+				pad.log_message( message )
 			}
 		},
 		on_player: function( message ) {
@@ -246,34 +281,30 @@ const _app_ = new Vue( {
 				this.players.splice( index, 1 )
 			}
 		},
-		on_enter: function( event ) {
-			const chatInput = document.getElementById( "chat-input" )
-			if ( chatInput.value !== "" ) {
-				this.sock.send( "msg:" + chatInput.value )
-			}
-			chatInput.value = ""
-		}
 	}
 } )
 
 function colorMap( color ) {
+	color = color | 0
 	switch ( color ) {
-		case "0": { color = "black" } break
-		case "1": { color = "red" } break
-		case "2": { color = "green" } break
-		case "3": { color = "brown" } break
-		case "4": { color = "blue" } break
-		case "5": { color = "magenta" } break
-		case "6": { color = "cyan" } break
-		case "7": { color = "lightgray" } break
-		case "8": { color = "darkgray" } break
-		case "9": { color = "brightred" } break
-		case "10": { color = "brightgreen" } break
-		case "11": { color = "yellow" } break
-		case "12": { color = "brightblue" } break
-		case "13": { color = "brightmagenta" } break
-		case "14": { color = "brightcyan" } break
-		case "15": { color = "white" } break
+		case   0: { color = "black" }         break
+		case   1: { color = "red" }           break
+		case   2: { color = "green" }         break
+		case   3: { color = "brown" }         break
+		case   4: { color = "blue" }          break
+		case   5: { color = "magenta" }       break
+		case   6: { color = "cyan" }          break
+		case   7: { color = "lightgray" }     break
+		case   8: { color = "darkgray" }      break
+		case   9: { color = "brightred" }     break
+		case  10: { color = "brightgreen" }   break
+		case  11: { color = "yellow" }        break
+		case  12: { color = "brightblue" }    break
+		case  13: { color = "brightmagenta" } break
+		case  14: { color = "brightcyan" }    break
+		case  15: { color = "white" }         break
+		case 256: { color = "black" }         break
+		default:  { color = "black" }         break
 	}
 	return ( color )
 }
@@ -303,19 +334,7 @@ function colorize( message ) {
 		m += "<span style=\"color: " + col + "\">"
 		idx = end + 1
 	}
-	return ( m )
-}
-
-function now() {
-	const t = new Date()
-	return (
-		t.getFullYear().toString()
-			+ "-" + ( t.getMonth() + 1 ).toString().padStart( 2, "0" )
-			+ "-" + t.getDate().toString().padStart( 2, "0" )
-			+ " " + t.getHours().toString().padStart( 2, "0" )
-			+ ":" + t.getMinutes().toString().padStart( 2, "0" )
-			+ ":" + t.getSeconds().toString().padStart( 2, "0" )
-	)
+	return ( m.replace( /\\K/g, "," ).replace( /\\C/g, ":" ).replace( /\\A/g, "'" ).replace( /\\Q/g, "\"" ).replace( /\\n/g, "<br />" ).replace( /\\E/g, "\\" ) )
 }
 
 function on_connect_click() {
@@ -387,5 +406,26 @@ String.prototype.chop = function( by, limit = null ) {
 		res.push( this.substr( from ) )
 	}
 	return ( res )
+}
+
+Date.prototype.iso8601 = function() {
+	return (
+		this.getFullYear().toString()
+			+ "-" + ( this.getMonth() + 1 ).toString().padStart( 2, "0" )
+			+ "-" + this.getDate().toString().padStart( 2, "0" )
+			+ " " + this.getHours().toString().padStart( 2, "0" )
+			+ ":" + this.getMinutes().toString().padStart( 2, "0" )
+			+ ":" + this.getSeconds().toString().padStart( 2, "0" )
+	)
+}
+
+HTMLDivElement.prototype.log_message = function( message_ ) {
+	this.appendChild( document.createTextNode( new Date().iso8601() ) )
+	this.append_text( ": " + message_ )
+}
+
+HTMLDivElement.prototype.append_text = function( message_ ) {
+	this.innerHTML += colorize( message_ )
+	this.appendChild( document.createElement( "br" ) )
 }
 
