@@ -27,6 +27,18 @@ class Party {
 }
 
 class Logic {
+	constructor( type_, name_ ) {
+		this._type = type_
+		this._name = name_
+		this._partys = []
+		this._expanded = false
+	}
+	add_party( id_ ) {
+		this._partys.push( id_ )
+	}
+	get name() {
+		return ( this._name )
+	}
 }
 
 class Browser extends Party {
@@ -38,6 +50,9 @@ class Browser extends Party {
 class Chat extends Party {
 	constructor( id_, name_, configuration_ ) {
 		super( "chat", id_, name_, configuration_ )
+		this._online = false
+		this._lineBuffer = []
+		this._aboutToCreate = false
 	}
 }
 
@@ -70,9 +85,7 @@ Vue.component(
 				}
 				source.value = ""
 			},
-			on_player_dblclick: function( event ) {
-				const source = event.target || event.srcElement
-				const login = source.textContent
+			on_player_dblclick: function( login ) {
 				if ( login == this.$parent.myLogin ) {
 					return
 				}
@@ -88,6 +101,9 @@ Vue.component(
 				} else {
 					this.$parent.make_visible( id )
 				}
+			},
+			on_logic_dblclick: function( data ) {
+				data._expanded = ! data._expanded
 			}
 		},
 		template: `
@@ -96,12 +112,29 @@ Vue.component(
 				<label>Games</label>
 				<label style="grid-column: 4">People</label>
 				<div id="chat-view" class="messages"></div>
-				<div id="games"></div>
+				<ul id="games" class="treewidget">
+					<li
+						class="noselect"
+						v-for="logic in $parent.logics"
+						v-bind:key="logic._type"
+						v-bind:class="[{ empty: logic._partys.length === 0 }, { expanded: logic._partys.length > 0 && logic._expanded }, { collapsed: logic._partys.length > 0 && ! logic._expanded }]"
+						v-on:dblclick="on_logic_dblclick( logic )"
+					>{{ logic.name }}
+						<ul class="treebranch">
+							<li
+								class="noselect"
+								v-for="party in logic._partys"
+								v-bind:key="party"
+							>{{ party }}
+							</li>
+						</ul>
+					</li>
+				</ul>
 				<ul id="players" class="listwidget">
 					<li
 						class="noselect"
 						v-for="player in $parent.players"
-						v-on:dblclick="on_player_dblclick"
+						v-on:dblclick="on_player_dblclick( player.login )"
 					>{{ player.login }}</li>
 				</ul>
 				<button id="btn-join" title="Click me to join pre-existing game." disabled="disabled">Join</button>
@@ -131,7 +164,21 @@ Vue.component(
 			m.append_text( "Description:\n" + info[1] )
 		},
 		methods: {
-			on_enter: function() {
+			on_enter: function( event ) {
+				const source = event.target || event.srcElement
+				const msg = source.value
+				if ( msg.match( /.*\S+.*/ ) != null ) {
+					if ( this.data._online ) {
+						this.$parent.sock.send( "cmd:" + this.data._id + ":say:" + msg )
+					} else {
+						if ( this.data._lineBuffer.length === 0 ) {
+							this.data._aboutToCreate = true
+							this.$parent.sock.send( "create:chat:" + this.data._name + "," + this.$parent.myLogin )
+						}
+						this.data._lineBuffer.push( msg )
+					}
+				}
+				source.value = ""
 			}
 		},
 		template: `
@@ -152,6 +199,13 @@ const _app_ = new Vue( {
 		myLogin: null,
 		_messageBuffer: "",
 		players: [],
+		logics: [
+			new Logic( "bgl", "Boggle" ),
+			new Logic( "glx", "Galaxy" ),
+			new Logic( "go", "Go" ),
+			new Logic( "gomoku", "Gomoku" ),
+			new Logic( "set_bang", "Set!" )
+		],
 		partys: [ new Browser() ],
 		currentTab: "browser"
 	},
@@ -214,6 +268,10 @@ const _app_ = new Vue( {
 		},
 		do_disconnect: function() {
 			this.myLogin = null
+			this.make_visible( "browser" )
+			while ( this.partys.length > 1 ) {
+				this.partys.pop()
+			}
 			if ( this.sock !== null ) {
 				this.sock.close()
 			}
@@ -248,6 +306,11 @@ const _app_ = new Vue( {
 			const pad = document.querySelector( "#chat-view" )
 			if ( pad ) {
 				pad.log_message( message )
+			}
+		},
+		close_party: function( id_ ) {
+			if ( id_ != "browser" ) {
+				alert( "close " + id_ )
 			}
 		},
 		on_player: function( message ) {

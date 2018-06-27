@@ -8,6 +8,21 @@ ul, li {
 	margin: 0px;
 	padding: 0px;
 }
+li.expanded:before {
+	width: 2em;
+	content: "╰⊟";
+	display: inline-block;
+}
+li.collapsed:before {
+	width: 2em;
+	content: "╰⊞";
+	display: inline-block;
+}
+li.empty:before {
+	width: 2em;
+	content: "╰⊡";
+	display: inline-block;
+}
 .noselect, label {
 	-webkit-touch-callout: none; /* iOS Safari */
 	-webkit-user-select: none; /* Safari */
