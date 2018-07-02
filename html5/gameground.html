@@ -20,6 +20,7 @@
 						v-on:click.middle="close_party( tab._id )"
 						>{{ tab._name }}
 					</button>
+					<button class="tab-button close-button active" v-show="currentTab != 'browser'" v-on:click="close_party( currentTab )">&#10006;</button>
 				</div>
 				<hr class="tab-bar-line" />
 				<component v-for="tab in partys" v-show="currentTab === tab._id" :data="tab" :key="tab._id" :is="tab._type"></component>

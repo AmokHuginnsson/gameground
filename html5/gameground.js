@@ -13,16 +13,20 @@ class Player {
 }
 
 class Party {
-	constructor( type_, id_, name_, configuration_ ) {
+	constructor( app_, type_, id_, name_, configuration_ ) {
 		this._type = type_
 		this._id = id_
 		this._name = name_
 		this._configuration = configuration_
 		this._players = []
-		this._logic = null
+		this._app = app_
 	}
 	get name() {
 		return ( this._name )
+	}
+	close() {
+		this._app.sock.send( "abandon:" + this._id )
+		this._app = null
 	}
 }
 
@@ -39,20 +43,34 @@ class Logic {
 	get name() {
 		return ( this._name )
 	}
+	drop_party( id_ ) {
+		const idx = this._partys.indexOf( id_ );
+		if ( idx >= 0 ) {
+			this._partys.splice( idx, 1 )
+		}
+	}
+	drop_partys() {
+		this._partys.clear()
+	}
 }
 
 class Browser extends Party {
 	constructor() {
-		super( "browser", "browser", "Browser", "" )
+		super( null, "browser", "browser", "Browser", "" )
 	}
 }
 
 class Chat extends Party {
-	constructor( id_, name_, configuration_ ) {
-		super( "chat", id_, name_, configuration_ )
+	constructor( app_, id_, name_, configuration_ ) {
+		super( app_, "chat", id_, name_, configuration_ )
 		this._online = false
 		this._lineBuffer = []
 		this._aboutToCreate = false
+	}
+	close() {
+		if ( this._online ) {
+			super.close()
+		}
 	}
 }
 
@@ -211,14 +229,8 @@ const _app_ = new Vue( {
 	},
 	methods: {
 		party_by_id: function( id_ ) {
-			let p = null
-			for ( let e of this.partys ) {
-				if ( e._id == id_ ) {
-					p = e
-					break
-				}
-			}
-			return ( p )
+			const idx = this.partys.findIndex( p => p._id == id_ );
+			return ( idx >= 0 ? this.partys[idx] : null )
 		},
 		add_party: function( party_ ) {
 			this.partys.push( party_ )
@@ -268,9 +280,11 @@ const _app_ = new Vue( {
 		},
 		do_disconnect: function() {
 			this.myLogin = null
+			this.players.clear()
 			this.make_visible( "browser" )
 			while ( this.partys.length > 1 ) {
-				this.partys.pop()
+				const party = this.partys.pop()
+				this.close_party( party._id )
 			}
 			if ( this.sock !== null ) {
 				this.sock.close()
@@ -310,7 +324,14 @@ const _app_ = new Vue( {
 		},
 		close_party: function( id_ ) {
 			if ( id_ != "browser" ) {
-				alert( "close " + id_ )
+				const idx = this.partys.findIndex( p => p._id == id_ );
+				if ( idx >= 0 ) {
+					for ( const logic of this.logics ) {
+						logic.drop_party( id_ )
+					}
+					this.partys.plop( idx ).close()
+					this.make_visible( this.partys[ Math.min( idx, this.partys.length - 1 ) ]._id )
+				}
 			}
 		},
 		on_player: function( message ) {
@@ -336,7 +357,7 @@ const _app_ = new Vue( {
 			const tokens = message.chop( ",", 2 )
 			const login = tokens[0]
 			const info = tokens[1]
-			this.add_party( new Chat( login, login, info ) )
+			this.add_party( new Chat( this, login, login, info ) )
 		},
 		on_player_quit: function( message ) {
 			const index = this.players.findIndex( x => message == x.login )
@@ -448,6 +469,13 @@ function register_post_load_function( func ) {
 //	register_post_load_function( on_load )
 })();
 
+Array.prototype.clear = function() {
+	this.splice( 0 )
+}
+
+Array.prototype.plop = function( idx_ ) {
+	return ( this.splice( idx_, 1 )[0] )
+}
 
 String.prototype.chop = function( by, limit = null ) {
 	let res = []

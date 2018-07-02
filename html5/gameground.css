@@ -44,6 +44,7 @@ label, button {
 	padding: 4px;
 	padding-left: 8px;
 	padding-right: 8px;
+	color: #333;
 	background: #eee;
 	border: 1px solid black;
 	border-bottom: 0px none;
@@ -52,9 +53,22 @@ label, button {
 	border-bottom-left-radius: 1px;
 	border-bottom-right-radius: 1px;
 }
+.close-button {
+	float: right;
+	font-size: 20px;
+	padding-top: 1px;
+	padding-bottom: 0px;
+	padding-left: 4px;
+	padding-right: 4px;
+	color: #666;
+}
 .tab-button.active {
 	background: #def;
 	border-bottom: 1px solid #def;
+}
+.active:hover, .tab-button:hover {
+	color: #000;
+	background: #d8e8f8;
 }
 .tab-pane {
 	padding: 8px;
