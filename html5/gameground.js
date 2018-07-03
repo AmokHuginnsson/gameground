@@ -12,13 +12,40 @@ class Player {
 	}
 }
 
+class Logic {
+	constructor( class_ ) {
+		this._class = class_
+		this._partys = []
+		this._expanded = false
+	}
+	add_party( party_ ) {
+		this._partys.push( party_ )
+		this._partys.sort( ( l, r ) => l._name.localeCompare( r._name ) )
+	}
+	get name() {
+		return ( this._class.NAME )
+	}
+	drop_party( id_ ) {
+		const idx = this._partys.findIndex( p => p._id == id_ );
+		if ( idx >= 0 ) {
+			this._partys.plop( idx )
+		}
+	}
+	drop_partys() {
+		this._partys.clear()
+	}
+	create( app_, id_, name_, configuration_ ) {
+		return ( this._class.create( app_, id_, name_, configuration_ ) )
+	}
+}
+
 class Party {
-	constructor( app_, type_, id_, name_, configuration_ ) {
-		this._type = type_
+	constructor( app_, id_, name_, configuration_ ) {
 		this._id = id_
 		this._name = name_
 		this._configuration = configuration_
 		this._players = []
+		this._handlers = {}
 		this._app = app_
 	}
 	get name() {
@@ -28,65 +55,34 @@ class Party {
 		this._app.sock.send( "abandon:" + this._id )
 		this._app = null
 	}
-}
-
-class Logic {
-	constructor( type_, name_ ) {
-		this._type = type_
-		this._name = name_
-		this._partys = []
-		this._expanded = false
-	}
-	add_party( id_ ) {
-		this._partys.push( id_ )
-	}
-	get name() {
-		return ( this._name )
-	}
-	drop_party( id_ ) {
-		const idx = this._partys.indexOf( id_ );
+	add_player( player_ ) {
+		const idx = this._players.indexOf( player_ );
 		if ( idx >= 0 ) {
-			this._partys.splice( idx, 1 )
+			return
+		}
+		this._players.push( player_ )
+		this._players.sort()
+	}
+	drop_player( player_ ) {
+		const idx = this._players.indexOf( player_ );
+		if ( idx >= 0 ) {
+			this._players.plop( idx )
 		}
 	}
-	drop_partys() {
-		this._partys.clear()
+	invoke( message_ ) {
+		const message = message_.chop( ":", 2 )
+		const handler = this._handlers[message[0]]
+		if ( handler !== undefined ) {
+			handler( message[1] )
+		}
 	}
 }
 
 class Browser extends Party {
+	static get TAG() { return "browser" }
 	constructor() {
-		super( null, "browser", "browser", "Browser", "" )
+		super( null, "browser", "Browser", "" )
 	}
-}
-
-class Chat extends Party {
-	constructor( app_, id_, name_, configuration_ ) {
-		super( app_, "chat", id_, name_, configuration_ )
-		this._online = false
-		this._lineBuffer = []
-		this._aboutToCreate = false
-	}
-	close() {
-		if ( this._online ) {
-			super.close()
-		}
-	}
-}
-
-class Boggle extends Logic {
-}
-
-class Go extends Logic {
-}
-
-class Gomoku extends Logic {
-}
-
-class SetBang extends Logic {
-}
-
-class Galaxy extends Logic {
 }
 
 Vue.component(
@@ -109,7 +105,7 @@ Vue.component(
 				}
 				let id = null
 				for ( let p of this.$parent.partys ) {
-					if ( ( p._type == "chat" ) && ( p._name == login ) ) {
+					if ( ( p.TAG == Chat.TAG ) && ( p._name == login ) ) {
 						id = p._id
 						break
 					}
@@ -134,7 +130,7 @@ Vue.component(
 					<li
 						class="noselect"
 						v-for="logic in $parent.logics"
-						v-bind:key="logic._type"
+						v-bind:key="logic._class.TAG"
 						v-bind:class="[{ empty: logic._partys.length === 0 }, { expanded: logic._partys.length > 0 && logic._expanded }, { collapsed: logic._partys.length > 0 && ! logic._expanded }]"
 						v-on:dblclick="on_logic_dblclick( logic )"
 					>{{ logic.name }}
@@ -168,6 +164,49 @@ Vue.component(
 	}
 )
 
+class Chat extends Party {
+	static get TAG() { return "chat" }
+	static get NAME() { return "Chat" }
+	static update( app_, id_, name_, configuration_ ) {
+		const names = name_.split( ":" )
+		const name = names[0] === app_.myLogin ? names[1] : names[0]
+		const party = app_.party_by_id( name )
+		if ( party == null ) {
+			return
+		}
+		party.set_id( id_ )
+	}
+	constructor( app_, id_, name_, configuration_ ) {
+		super( app_, id_, name_, configuration_ )
+		this._online = false
+		this._lineBuffer = []
+		this._aboutToCreate = false
+		this._handlers["say"] = ( msg ) => this.on_say( msg )
+		this._handlers["player_quit"] = function(){}
+	}
+	close() {
+		if ( this._online ) {
+			super.close()
+		}
+	}
+	on_say( message_ ) {
+		this._refs.messages.log_message( message_ )
+	}
+	set_id( id_ ) {
+		this._id = id_
+		this._app.make_visible( this._id )
+		this._online = true
+		if ( ! this._aboutToCreate ) {
+			document.getElementById( "snd-call" ).play()
+		}
+		this._aboutToCreate = false
+		for ( let line of this._lineBuffer ) {
+			this._app.sock.send( "cmd:" + this._id + ":say:" + line )
+		}
+		this._lineBuffer.clear()
+	}
+}
+
 Vue.component(
 	"chat", {
 		props: ["data"],
@@ -177,6 +216,7 @@ Vue.component(
 		mounted: function() {
 			const info = this.data._configuration.split( "," )
 			const m = this.$refs.messages
+			this.data._refs = this.$refs
 			m.append_text( "User: " + this.data._name )
 			m.append_text( "Full name: " + info[0] )
 			m.append_text( "Description:\n" + info[1] )
@@ -210,6 +250,31 @@ Vue.component(
 	}
 )
 
+class Boggle extends Party {
+	static get TAG() { return "bgl" }
+	static get NAME() { return "Boggle" }
+}
+
+class Go extends Party {
+	static get TAG() { return "go" }
+	static get NAME() { return "Go" }
+}
+
+class Gomoku extends Party {
+	static get TAG() { return "gomoku" }
+	static get NAME() { return "Gomoku" }
+}
+
+class SetBang extends Party {
+	static get TAG() { return "set_bang" }
+	static get NAME() { return "Set!" }
+}
+
+class Galaxy extends Party {
+	static get TAG() { return "glx" }
+	static get NAME() { return "Galaxy" }
+}
+
 const _app_ = new Vue( {
 	el: "#root",
 	data: {
@@ -218,16 +283,20 @@ const _app_ = new Vue( {
 		_messageBuffer: "",
 		players: [],
 		logics: [
-			new Logic( "bgl", "Boggle" ),
-			new Logic( "glx", "Galaxy" ),
-			new Logic( "go", "Go" ),
-			new Logic( "gomoku", "Gomoku" ),
-			new Logic( "set_bang", "Set!" )
+			new Logic( Boggle ),
+			new Logic( Galaxy ),
+			new Logic( Go ),
+			new Logic( Gomoku ),
+			new Logic( SetBang )
 		],
 		partys: [ new Browser() ],
 		currentTab: "browser"
 	},
 	methods: {
+		logic_by_type: function( type_ ) {
+			const idx = this.logics.findIndex( l => l.TAG == type_ );
+			return ( idx >= 0 ? this.logics[idx] : null )
+		},
 		party_by_id: function( id_ ) {
 			const idx = this.partys.findIndex( p => p._id == id_ );
 			return ( idx >= 0 ? this.partys[idx] : null )
@@ -323,35 +392,60 @@ const _app_ = new Vue( {
 			}
 		},
 		close_party: function( id_ ) {
-			if ( id_ != "browser" ) {
-				const idx = this.partys.findIndex( p => p._id == id_ );
-				if ( idx >= 0 ) {
-					for ( const logic of this.logics ) {
-						logic.drop_party( id_ )
-					}
-					this.partys.plop( idx ).close()
-					this.make_visible( this.partys[ Math.min( idx, this.partys.length - 1 ) ]._id )
-				}
+			if ( id_ == "browser" ) {
+				return
 			}
+			const idx = this.partys.findIndex( p => p._id == id_ );
+			if ( idx < 0 ) {
+				return
+			}
+			for ( const logic of this.logics ) {
+				logic.drop_party( id_ )
+			}
+			this.partys.plop( idx ).close()
+			this.make_visible( this.partys[ Math.min( idx, this.partys.length - 1 ) ]._id )
 		},
 		on_player: function( message ) {
 			const player = message.split( "," )
-			const index = this.players.findIndex( x => player[0] == x.login )
+			const login = player[0]
+			const index = this.players.findIndex( x => login == x.login )
 			if ( index === -1 ) {
-				this.players.push( new Player( player[0] ) )
+				this.players.push( new Player( login ) )
 				this.players.sort( ( l, r ) => l.login.localeCompare( r.login ) )
+			} else {
+				for ( let p of this.partys ) {
+					p.drop_player( login )
+				}
 			}
-			if ( player.length > 1 ) {
+			player.plop( 0 )
+			for ( let id of player ) {
+				const party = this.party_by_id( id )
+				if ( party != null ) {
+					party.add_player( login )
+				}
 			}
 		},
 		on_logic: function( message ) {
 			console.log( message )
 		},
 		on_party_info: function( message ) {
-			console.log( message )
+			const conf = message.split( ",", 4 )
+			const logic = this.logic_by_type( conf[1] )
+			if ( logic != null ) {
+				const party = logic.create( this, conf[0], conf[2], conf[3] )
+				this.add_party( party )
+				logic.add_party( party )
+			} else if ( conf[1] == Chat.TAG ) {
+				Chat.update( this, conf[0], conf[2], conf[3] )
+			}
 		},
 		on_party: function( message ) {
-			console.log( message )
+			const msgData = message.chop( ",", 2 )
+			const party = this.party_by_id( msgData[0] )
+			if ( party == null ) {
+				return
+			}
+			party.invoke( msgData[1] )
 		},
 		on_account: function( message ) {
 			const tokens = message.chop( ",", 2 )

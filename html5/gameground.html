@@ -9,6 +9,9 @@
 		<script src="gameground.js" defer></script>
 	</head>
 	<body>
+		<audio id="snd-call">
+			<source src="phone-incoming-call.wav" type="audio/wav" />
+		</audio>
 		<div id="root">
 			<div id="app" v-if="is_connected()">
 				<div id="tab-bar">
@@ -23,7 +26,7 @@
 					<button class="tab-button close-button active" v-show="currentTab != 'browser'" v-on:click="close_party( currentTab )">&#10006;</button>
 				</div>
 				<hr class="tab-bar-line" />
-				<component v-for="tab in partys" v-show="currentTab === tab._id" :data="tab" :key="tab._id" :is="tab._type"></component>
+				<component v-for="tab in partys" v-show="currentTab === tab._id" :data="tab" :key="tab._id" :is="tab.constructor.TAG"></component>
 			</div>
 			<div id="connect" v-else>
 				<div id="logo" style="height: 140px;background: url(gameground.svg) no-repeat center center;"></div>
