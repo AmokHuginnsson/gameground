@@ -118,6 +118,16 @@ Vue.component(
 			},
 			on_logic_dblclick: function( data ) {
 				data._expanded = ! data._expanded
+			},
+			on_logic_context: function( data ) {
+				alert( data )
+			},
+			on_join: function() {
+			},
+			on_create: function() {
+				this.$parent.show_modal( "Create Game" )
+			},
+			on_account: function() {
 			}
 		},
 		template: `
@@ -133,6 +143,7 @@ Vue.component(
 						v-bind:key="logic._class.TAG"
 						v-bind:class="[{ empty: logic._partys.length === 0 }, { expanded: logic._partys.length > 0 && logic._expanded }, { collapsed: logic._partys.length > 0 && ! logic._expanded }]"
 						v-on:dblclick="on_logic_dblclick( logic )"
+						v-on:click.right="on_logic_context( logic )"
 					>{{ logic.name }}
 						<ul class="treebranch">
 							<li
@@ -151,10 +162,10 @@ Vue.component(
 						v-on:dblclick="on_player_dblclick( player.login )"
 					>{{ player.login }}</li>
 				</ul>
-				<button id="btn-join" title="Click me to join pre-existing game." disabled="disabled">Join</button>
-				<button id="btn-create" title="Click me to create a new game.">Create</button>
-				<button id="btn-account" title="Click me to edit your account information." disabled="disabled">Account</button>
-				<button id="btn-disconnect" title="Click me to disconnet from GameGround server." v-on:click="$parent.do_disconnect">Disconnect</button>
+				<button id="btn-join" v-on:click="on_join" title="Click me to join pre-existing game." disabled="disabled">Join</button>
+				<button id="btn-create" v-on:click="on_create" title="Click me to create a new game.">Create</button>
+				<button id="btn-account" v-on:click="on_account" title="Click me to edit your account information." disabled="disabled">Account</button>
+				<button id="btn-disconnect" v-on:click="$parent.do_disconnect" title="Click me to disconnet from GameGround server.">Disconnect</button>
 				<div id="chat-input-field">
 					<label>Type your message</label><br />
 					<input id="chat-input" type="text" name="input" maxlength="1024" title="Send message to all people on the server that are currently not in the game." v-on:keypress.enter="on_enter">
@@ -290,7 +301,8 @@ const _app_ = new Vue( {
 			new Logic( SetBang )
 		],
 		partys: [ new Browser() ],
-		currentTab: "browser"
+		currentTab: "browser",
+		modal: null
 	},
 	methods: {
 		logic_by_type: function( type_ ) {
@@ -324,9 +336,11 @@ const _app_ = new Vue( {
 			}
 			this.sock.onerror = event => {
 				const msg = "WebSocket connection error: " + event.type
-				alert( msg );
-				console.log( msg )
-				this.do_disconnect()
+				this.sock.onclose = null
+				this.show_modal( msg, () => {
+					console.log( msg )
+					this.do_disconnect()
+				} )
 			}
 			this.sock.onmessage = event => {
 				this._messageBuffer += event.data
@@ -348,6 +362,7 @@ const _app_ = new Vue( {
 			console.log( "After connection attempt..." )
 		},
 		do_disconnect: function() {
+			this.modal = null
 			this.myLogin = null
 			this.players.clear()
 			this.make_visible( "browser" )
@@ -382,8 +397,10 @@ const _app_ = new Vue( {
 			}
 		},
 		on_err: function( message ) {
-			alert( "The GameGround server reported an error condition:\n" + message )
-			this.do_disconnect()
+			this.show_modal(
+				"The GameGround server reported an error condition:\n" + message,
+				() => this.do_disconnect()
+			)
 		},
 		on_msg: function( message ) {
 			const pad = document.querySelector( "#chat-view" )
@@ -459,8 +476,71 @@ const _app_ = new Vue( {
 				this.players.splice( index, 1 )
 			}
 		},
+		show_modal: function( message, resolve ) {
+			this.modal = new MessageBox( this, message ).then( resolve )
+		}
 	}
 } )
+
+class MessageBox {
+	static get TAG() { return ( "messagebox" ) }
+	constructor( app_, message_, label_ = "OK", title_ = "alert!" ) {
+		this._app = app_
+		this._message = colorize( message_ )
+		this._label = label_
+		this._title = "GameGround - " + title_
+		this._handlers = {
+			"OK": () => this.on_ok()
+		}
+	}
+	get message() {
+		return ( this._message )
+	}
+	get label() {
+		return ( this._label )
+	}
+	get title() {
+		return ( this._title )
+	}
+	on_ok() {
+		this.close()
+	}
+	then( callback_ ) {
+		this._then = callback_
+		return ( this )
+	}
+	on( label_, callback_ ) {
+		this._handlers[label_] = callback_
+		return ( this )
+	}
+	close() {
+		this._app.modal = null
+		if ( this._then != undefined ) {
+			this._then()
+		}
+	}
+}
+
+Vue.component(
+	"messagebox", {
+		props: ["data"],
+		data: function( arg ) {
+			return ( this.data )
+		},
+		template: `
+		<div class="modal">
+			<div class="block"></div>
+			<div class="messagebox">
+				<div class="title">{{ data.title }}</div>
+				<div class="content">
+					<p v-html="data.message"></p>
+					<button v-for="handler, label in data._handlers" v-on:click="handler()">{{ label }}</button>
+				</div>
+			</div>
+		</div>
+`
+	}
+)
 
 function colorMap( color ) {
 	color = color | 0
@@ -512,7 +592,16 @@ function colorize( message ) {
 		m += "<span style=\"color: " + col + "\">"
 		idx = end + 1
 	}
-	return ( m.replace( /\\K/g, "," ).replace( /\\C/g, ":" ).replace( /\\A/g, "'" ).replace( /\\Q/g, "\"" ).replace( /\\n/g, "<br />" ).replace( /\\E/g, "\\" ) )
+	return (
+		m
+			.replace( /\\K/g, "," )
+			.replace( /\\C/g, ":" )
+			.replace( /\\A/g, "'" )
+			.replace( /\\Q/g, "\"" )
+			.replace( /\\n/g, "<br />" )
+			.replace( /\n/g, "<br />" )
+			.replace( /\\E/g, "\\" )
+	)
 }
 
 function on_connect_click() {
@@ -530,7 +619,7 @@ function on_connect_click() {
 	if ( setupOk ) {
 		do_connect()
 	} else {
-		alert( errMsg )
+		_app_.show_modal( errMsg )
 	}
 }
 

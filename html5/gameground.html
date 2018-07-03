@@ -47,6 +47,7 @@
 					</div>
 				</form>
 			</div>
+			<component v-if="modal != null" :data="modal" :is="modal.constructor.TAG"></component>
 		</div>
 	</body>
 </html>
