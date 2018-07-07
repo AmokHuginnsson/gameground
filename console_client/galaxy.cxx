@@ -746,7 +746,7 @@ bool HGalaxyWindow::handler_enter( hconsole::HEvent const& ) {
 	bool consumed( false );
 	HMove* move( nullptr );
 	if ( (*_focusedChild) == _messageInput ) {
-		if ( _messageInput->get_text().find_other_than( character_class( CHARACTER_CLASS::WHITESPACE ).data() ) >= 0 ) {
+		if ( _messageInput->get_text().find_other_than( character_class<CHARACTER_CLASS::WHITESPACE>().data() ) >= 0 ) {
 			_varTmpBuffer = "cmd:";
 			_varTmpBuffer += _client->id();
 			_varTmpBuffer += ":say:";
