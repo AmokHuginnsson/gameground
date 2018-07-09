@@ -120,12 +120,12 @@ Vue.component(
 				data._expanded = ! data._expanded
 			},
 			on_logic_context: function( data ) {
-				alert( data )
+				this.$parent.show_modal( "Create game - " + data.name )
 			},
 			on_join: function() {
 			},
 			on_create: function() {
-				this.$parent.show_modal( "Create Game" )
+				this.$parent.modal = new NewGameConfigurator( this.$parent )
 			},
 			on_account: function() {
 			}
@@ -482,6 +482,68 @@ const _app_ = new Vue( {
 	}
 } )
 
+class NewGameConfigurator {
+	static get TAG() { return ( "new-game-configuration" ) }
+	constructor( app_ ) {
+		this._app = app_
+	}
+	on_ok() {
+		this.close()
+	}
+	on_cancel() {
+		this.close()
+	}
+	close() {
+		this._app.modal = null
+	}
+}
+
+Vue.component(
+	"new-game-configuration", {
+		props: ["data"],
+		data: function( arg ) {
+			return ( this.data )
+		},
+		template: `
+		<div class="modal">
+			<div class="block"></div>
+			<div class="messagebox">
+				<div class="title noselect">Create new game ...</div>
+				<div class="creator">
+					<div class="vbox">
+						<div class="hbox">
+							<div class="vbox">
+								<label>Game type ...</label>
+								<ul ref="games" class="listwidget">
+									<li
+										class="noselect"
+										v-for="logic in $parent.logics"
+										v-bind:key="logic._class.TAG"
+										v-on:click="on_logic_context( logic )"
+									>{{ logic.name }}
+									</li>
+								</ul>
+							</div>
+							<div class="vbox">
+								<div class="center label">
+									<label>Name: </label><input type="text"/>
+								</div>
+								<label class="edge">Configuration ...</label>
+								<div id="configuration"></div>
+							</div>
+						</div>
+						<div id="creator-buttons">
+							<button v-on:click="data.on_ok()">Ok</button>
+							<button v-on:click="data.on_cancel()">Cancel</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+`
+	}
+)
+
 class MessageBox {
 	static get TAG() { return ( "messagebox" ) }
 	constructor( app_, message_, label_ = "OK", title_ = "alert!" ) {
@@ -531,7 +593,7 @@ Vue.component(
 		<div class="modal">
 			<div class="block"></div>
 			<div class="messagebox">
-				<div class="title">{{ data.title }}</div>
+				<div class="title noselect">{{ data.title }}</div>
 				<div class="content">
 					<p v-html="data.message"></p>
 					<button v-for="handler, label in data._handlers" v-on:click="handler()">{{ label }}</button>

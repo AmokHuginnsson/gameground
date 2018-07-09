@@ -32,12 +32,53 @@ li.empty:before {
 	-o-user-select: none;
 	user-select: none;
 }
+.hbox {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: space-evenly;
+	align-items: stretch;
+	margin-left: -8px;
+}
+.hbox > * {
+	flex-grow: 1;
+	margin-left: 8px;
+}
+.vbox {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	justify-content: space-evenly;
+	align-items: stretch;
+	margin-top: -8px;
+}
+.vbox > * {
+	flex-grow: 1;
+	margin-top: 8px;
+}
+.listwidget, .treewidget {
+	background: #fff;
+	border: black solid 1px;
+}
 .listwidget li:hover {
 	background: #def;
 }
-label, button {
+label, button, .label {
+	flex-grow: 0 !important;
 	font-weight: bold;
 	font-family: sans-serif;
+}
+.edge {
+	margin-bottom: calc( -8px - 1ex );
+	background: #eee;
+	margin-left: 8px;
+	padding-left: 4px;
+	padding-right: 4px;
+	align-self: flex-start;
+	z-index: 1;
+}
+.center {
+	text-align: center;
 }
 .tab-button {
 	margin: -1px;
@@ -90,12 +131,16 @@ label, button {
 	left: 50%;
 	transform: translate(-50%, -50%);
 	width: 50%;
-	background: #fff;
 	border: 3px outset #888;
-	text-align: center;
 }
 .modal .messagebox .content {
 	padding: 8px;
+	text-align: center;
+	background: #fff;
+}
+.modal .messagebox .creator {
+	padding: 8px;
+	background: #eee;
 }
 .modal .messagebox .content p {
 	text-align: left;
@@ -179,14 +224,10 @@ label, button {
 #games {
 	grid-column: 2 / span 2;
 	grid-row: 2;
-	background: #fff;
-	border: black solid 1px;
 }
 #players {
 	grid-column: 4 / span 2;
 	grid-row: 2;
-	background: #fff;
-	border: black solid 1px;
 }
 #btn-join, #btn-create, #btn-account, #btn-disconnect {
 	grid-column: 3 / span 2;
@@ -200,3 +241,11 @@ label, button {
 	width: calc( 100% - 16px );
 	display: grid;
 }
+#creator-buttons {
+	text-align: center;
+}
+#configuration {
+	border: 2px groove #def;
+	height: 200px;
+}
+
