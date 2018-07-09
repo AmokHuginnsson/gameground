@@ -12,6 +12,7 @@ class Player {
 class Logic {
 	constructor( class_ ) {
 		this._class = class_
+		this._defaults = null
 		this._partys = []
 		this._expanded = false
 	}
@@ -49,7 +50,7 @@ class Party {
 		this._app = app_
 	}
 	get name() {
-		return ( this._name )
+		return ( this._name + ":" + this._id )
 	}
 	close() {
 		this._app.sock.send( "abandon:" + this._id )
@@ -116,11 +117,21 @@ Vue.component(
 					this.$parent.make_visible( id )
 				}
 			},
-			on_filter: function( data ) {
-				this.$parent.selectedLogic = data
+			select_logic: function( data ) {
+				this.$parent.selectedPartyLogic = data
 			},
-			on_logic_dblclick: function( data ) {
+			select_party: function( data, event ) {
+				this.$parent.selectedPartyLogic = data
+				event.stopPropagation()
+			},
+			toggle_expand: function( data, event = null ) {
 				data._expanded = ! data._expanded
+				if ( event != null ) {
+					event.stopPropagation()
+				}
+				if ( ! data._expanded && ( data._partys.indexOf( this.$parent.selectedPartyLogic ) >= 0 ) ) {
+					this.$parent.selectedPartyLogic = data
+				}
 			},
 			on_logic_context: function( data ) {
 				this.on_create( data )
@@ -140,22 +151,29 @@ Vue.component(
 				<label style="grid-column: 4">People</label>
 				<div id="chat-view" class="messages"></div>
 				<ul id="games" class="treewidget">
-					<li :class="['noselect', { selected: $parent.selectedLogic == null }]" v-on:click="on_filter( null )">GameGround</li>
+					<li :class="['noselect', { selected: $parent.selectedPartyLogic == null }]" v-on:click="select_logic( null )">GameGround</li>
 					<li
 						class="noselect"
 						v-for="logic in $parent.logics"
 						:key="logic._class.TAG"
-						:class="[{ empty: logic._partys.length === 0 }, { expanded: logic._partys.length > 0 && logic._expanded }, { collapsed: logic._partys.length > 0 && ! logic._expanded }]"
-						v-on:click="on_filter( logic )"
-						v-on:dblclick="on_logic_dblclick( logic )"
-						v-on:click.right="on_logic_context( logic )"
-					><span :class="[{ selected: $parent.selectedLogic == logic }]">{{ logic.name }}</span>
-						<ul class="treebranch">
+						@click="select_logic( logic )"
+						@dblclick="toggle_expand( logic )"
+						@click.right="on_logic_context( logic )"
+					>
+						<span class="icon" @click="event => toggle_expand( logic, event )">
+							{{ logic._partys.length === 0 ? "╰⊡" : ( ( logic._partys.length &gt; 0 &amp;&amp; logic._expanded ) ? "╰⊟" : "╰⊞" ) }}
+						</span>
+						<span
+							:class="[{ selected: $parent.selectedPartyLogic == logic }]"
+						>{{ logic.name }}</span>
+						<ul class="treebranch" v-show="logic._partys.length > 0 && logic._expanded">
 							<li
+								:title="party.name"
 								class="noselect"
 								v-for="party in logic._partys"
-								v-bind:key="party"
-							>{{ party }}
+								@click="event => select_party( party, event )"
+								:key="party._id"
+							><span :class="[{ selected: $parent.selectedPartyLogic == party }]">{{ party.name }}</span>
 							</li>
 						</ul>
 					</li>
@@ -269,7 +287,48 @@ Vue.component(
 class Boggle extends Party {
 	static get TAG() { return "bgl" }
 	static get NAME() { return "Boggle" }
+	static create( app_, id_, name_, configuration_ ) {
+		return ( new Boggle( app_, id_, name_, configuration_ ) )
+	}
+	constructor( app_, id_, name_, configuration_ ) {
+		super( app_, id_, name_, configuration_ )
+		this._handlers["say"] = ( msg ) => this.on_say( msg )
+		this._handlers["player_quit"] = function(){}
+	}
+	on_say( message_ ) {
+		this._refs.messages.log_message( message_ )
+	}
 }
+
+Vue.component(
+	"bgl", {
+		props: ["data"],
+		data: function( arg ) {
+			return ( this.data )
+		},
+		mounted: function() {
+			this.data._refs = this.$refs
+		},
+		methods: {
+			on_enter: function( event ) {
+				const source = event.target || event.srcElement
+				const msg = source.value
+				if ( msg.match( /.*\S+.*/ ) != null ) {
+					this.$parent.sock.send( "cmd:" + this.data._id + ":say:" + msg )
+				}
+				source.value = ""
+			}
+		},
+		template: `
+		<div class="tab-pane chat">
+			<label>Private chat messages</label>
+			<div class="messages" ref="messages"></div>
+			<label>Type your message</label>
+			<input class="chat-input" type="text" name="input" maxlength="1024" title="Send message to all people in this private chat room." v-on:keypress.enter="on_enter">
+		</div>
+`
+	}
+)
 
 class Go extends Party {
 	static get TAG() { return "go" }
@@ -307,7 +366,7 @@ const _app_ = new Vue( {
 			new Logic( SetBang )
 		],
 		partys: [ new Browser() ],
-		selectedLogic: null,
+		selectedPartyLogic: null,
 		currentTab: Browser.TAG,
 		modal: null
 	},
@@ -452,7 +511,11 @@ const _app_ = new Vue( {
 			}
 		},
 		on_logic: function( message ) {
-			console.log( message )
+			const defaults = message.chop( ":", 2 )
+			const logic = this.logic_by_type( defaults[0] )
+			if ( logic != null ) {
+				logic._defaults = defaults[1]
+			}
 		},
 		on_party_info: function( message ) {
 			const conf = message.split( ",", 4 )
@@ -493,6 +556,25 @@ const _app_ = new Vue( {
 
 class BoggleConfigurator {
 	static get TAG() { return ( Boggle.TAG + "-configurator" ) }
+	constructor( logic_ ) {
+		const defaults = logic_._defaults.chop( ",", 6 )
+		this.language = defaults[0]
+		this.scoring = defaults[1]
+		this.players = parseInt( defaults[2] )
+		this.roundTime = parseInt( defaults[3] )
+		this.noRounds = parseInt( defaults[4] )
+		this.interRoundDelay = parseInt( defaults[5] )
+	}
+	get_configuration_string() {
+		return (
+			this.language
+			+ "," + this.scoring
+			+ "," + this.players
+			+ "," + this.roundTime
+			+ "," + this.noRounds
+			+ "," + this.interRoundDelay
+		)
+	}
 }
 
 Vue.component(
@@ -503,20 +585,24 @@ Vue.component(
 		},
 		template: `
 		<div id="bgl-configurator">
-			<label>Language:</label><select title="Language for dices and dictionary."><option>English</option><option>Polish</option></select>
-			<label>Scoring system:</label>
-			<select title="Choose the way the score is calculated.">
-				<option>Original boggle</option>
-				<option>Fibonacci</option>
-				<option>Geometric</option>
-				<option>Fibonacci 4-based</option>
-				<option>Geometric 4-based</option>
-				<option>Longest words</option>
+			<label>Language:</label>
+			<select v-model="language" title="Language for dices and dictionary.">
+				<option value="en">English</option>
+				<option value="pl">Polish</option>
 			</select>
-			<label>Players:</label><input type="number" title="Minimum number of players to start the match." value="2" />
-			<label>Round time:</label><input type="number" title="Length of one round expressed in seconds." value="180" />
-			<label>Number of rounds:</label><input type="number" title="Number of rounds for whole match." value="5" />
-			<label>Inter round delay:</label><input type="number" title="Interval between rounds expressed in seconds." value="15" />
+			<label>Scoring system:</label>
+			<select v-model="scoring" title="Choose the way the score is calculated.">
+				<option value="original">Original Boggle</option>
+				<option value="fibonacci">Fibonacci</option>
+				<option value="geometric">Geometric</option>
+				<option value="fibonacci4">Fibonacci 4-based</option>
+				<option value="geometric4">Geometric 4-based</option>
+				<option value="longestwords">Longest words</option>
+			</select>
+			<label>Players:</label><input v-model="players" type="number" min="2" title="Minimum number of players to start the match." />
+			<label>Round time:</label><input v-model="roundTime" type="number" min="60" title="Length of one round expressed in seconds." />
+			<label>Number of rounds:</label><input v-model="noRounds" type="number" min="1" title="Number of rounds for whole match." />
+			<label>Inter round delay:</label><input v-model="interRoundDelay" type="number" min="0" title="Interval between rounds expressed in seconds." />
 		</div>
 `
 	}
@@ -524,6 +610,15 @@ Vue.component(
 
 class GalaxyConfigurator {
 	static get TAG() { return ( Galaxy.TAG + "-configurator" ) }
+	constructor( logic_ ) {
+		const defaults = logic_._defaults.chop( ",", 3 )
+		this.emperors = parseInt( defaults[0] )
+		this.boardSize = parseInt( defaults[1] )
+		this.systems = parseInt( defaults[2] )
+	}
+	get_configuration_string() {
+		return ( this.emperors + "," + this.boardSize + "," + this.systems )
+	}
 }
 
 Vue.component(
@@ -534,9 +629,9 @@ Vue.component(
 		},
 		template: `
 		<div id="glx-configurator">
-			<label>Emperors:</label><input type="number" title="Minimum number of players to start the match." value="4" />
-			<label>Systems:</label><input type="number" title="Total numbers of star systems in the game." value="16" />
-			<label>Board size:</label><input type="number" title="Map grid size." value="16" />
+			<label>Emperors:</label><input v-model="emperors" type="number" min="2" title="Minimum number of players to start the match." />
+			<label>Systems:</label><input v-model="systems" type="number" min="0" title="Total numbers of neutral star systems in the game." />
+			<label>Board size:</label><input v-model="boardSize" type="number" min="6" title="Map grid size." />
 		</div>
 `
 	}
@@ -544,16 +639,27 @@ Vue.component(
 
 class GoConfigurator {
 	static get TAG() { return ( Go.TAG + "-configurator" ) }
+	get_configuration_string() { return ( "" ) }
 }
 Vue.component( GoConfigurator.TAG, { template: '<div></div>' } )
 
 class GomokuConfigurator {
 	static get TAG() { return ( Gomoku.TAG + "-configurator" ) }
+	get_configuration_string() { return ( "" ) }
 }
 Vue.component( GomokuConfigurator.TAG, { template: '<div></div>' } )
 
 class SetBangConfigurator {
 	static get TAG() { return ( SetBang.TAG + "-configurator" ) }
+	constructor( logic_ ) {
+		const defaults = logic_._defaults.chop( ",", 3 )
+		this.players = 2
+		this.decks = 1
+		this.interRoundDelay = 15
+	}
+	get_configuration_string() {
+		return ( this.players + "," + this.decks + "," + this.interRoundDelay )
+	}
 }
 
 Vue.component(
@@ -564,9 +670,9 @@ Vue.component(
 		},
 		template: `
 		<div id="set_bang-configurator">
-			<label>Players:</label><input type="number" title="Minimum number of players to start the match." value="2" />
-			<label>Number of decks:</label><input type="number" title="Number of decks dealed for whole match." value="1" />
-			<label>Inter round delay:</label><input type="number" title="Interval between rounds expressed in seconds." value="15" />
+			<label>Players:</label><input v-model="players" type="number" min="2" title="Minimum number of players to start the match." />
+			<label>Number of decks:</label><input v-model="decks" type="number" min="1" title="Number of decks dealed for whole match." />
+			<label>Inter round delay:</label><input v-model="interRoundDelay" type="number" min="0" title="Interval between rounds expressed in seconds." />
 		</div>
 `
 	}
@@ -574,21 +680,37 @@ Vue.component(
 
 class NewGameConfigurator {
 	static get TAG() { return ( "new-game-configuration" ) }
-	constructor( app_ ) {
+	constructor( app_, logic_ ) {
 		this._app = app_
-		this._configurators = {}
-		this._configurators[Boggle.TAG] = new BoggleConfigurator()
-		this._configurators[Galaxy.TAG] = new GalaxyConfigurator()
-		this._configurators[Go.TAG] = new GoConfigurator()
-		this._configurators[Gomoku.TAG] = new GomokuConfigurator()
-		this._configurators[SetBang.TAG] = new SetBangConfigurator()
-		this._selected = null
+		this._configurators = [
+			new BoggleConfigurator( app_.logic_by_type( Boggle.TAG ) ),
+			new GalaxyConfigurator( app_.logic_by_type( Galaxy.TAG ) ),
+			new GoConfigurator( app_.logic_by_type( Go.TAG ) ),
+			new GomokuConfigurator( app_.logic_by_type( Gomoku.TAG ) ),
+			new SetBangConfigurator( app_.logic_by_type( SetBang.TAG ) )
+		]
+		this._selected = -1
+		this.name = ""
+		if ( logic_ != null ) {
+			this._selected = this._configurators.findIndex( c => c.constructor.TAG == ( logic_.TAG + "-configurator" ) )
+			this.name = app_.myLogin + "'s room ..."
+		}
 	}
 	on_logic_context( data ) {
-		const configurator = this._configurators[data.TAG]
-		this._selected = configurator !== undefined ? configurator : null
+		this._selected = data
+	}
+	get selected() {
+		return ( this._selected >= 0 ? this._configurators[this._selected] : null )
 	}
 	on_ok() {
+		const selected = this.selected
+		const confStr = selected.get_configuration_string()
+		const TAG = selected.constructor.TAG
+		let conf = TAG.substr( 0, TAG.length - "-configurator".length ) + ":" + this.name
+		if ( confStr != "" ) {
+			conf += ( "," + confStr )
+		}
+		this._app.sock.send( "create:" + conf )
 		this.close()
 	}
 	on_cancel() {
@@ -605,8 +727,30 @@ Vue.component(
 		data: function( arg ) {
 			return ( this.data )
 		},
+		methods: {
+			on_key_press: function( event ) {
+				switch ( event.key ) {
+					case ( "Home" ): {
+						this.data._selected = 0
+					} break
+					case ( "End" ): {
+						this.data._selected = this.data._configurators.length - 1
+					} break
+					case ( "ArrowUp" ): {
+						if ( this.data._selected > 0 ) {
+							this.data._selected -= 1
+						}
+					} break
+					case ( "ArrowDown" ): {
+						if ( this.data._selected < ( this.data._configurators.length - 1 ) ) {
+							this.data._selected += 1
+						}
+					} break
+				}
+			}
+		},
 		template: `
-		<div class="modal">
+		<div class="modal" tabindex="1" v-on:keypress.escape="data.close()">
 			<div class="block"></div>
 			<div class="messagebox">
 				<div class="title noselect">Create new game ...</div>
@@ -615,29 +759,30 @@ Vue.component(
 						<div class="hbox">
 							<div class="vbox">
 								<label>Game type ...</label>
-								<ul ref="games" class="listwidget" title="Available game types.">
+								<ul ref="games" class="listwidget" title="Available game types." v-on:keypress="on_key_press" tabindex="0">
 									<li
 										class="noselect"
-										:class="[{selected: ( data._selected != null ) && ( data._selected.constructor.TAG == ( logic.TAG + '-configurator') )}]"
-										v-for="logic in $parent.logics"
+										v-for="( logic, index ) in $parent.logics"
+										:class="[{selected: ( data._selected >= 0 ) && ( data._selected == index )}]"
 										v-bind:key="logic._class.TAG"
-										v-on:click="data.on_logic_context( logic )"
+										v-on:click="data.on_logic_context( index )"
 									>{{ logic.name }}
 									</li>
 								</ul>
 							</div>
 							<div class="vbox">
 								<div class="center label">
-									<label>Name: </label><input type="text" title="Name for newly created game." />
+									<label>Name: </label><input v-model="name" type="text" title="Name for newly created game." />
 								</div>
 								<label class="edge">Configuration ...</label>
 								<div id="configuration">
-									<component v-if="data._selected != null" :data="data._selected" :is="data._selected.constructor.TAG"></component>
+									<component v-if="data._selected >= 0" :data="data.selected" :is="data.selected.constructor.TAG"></component>
+									<div v-else></div>
 								</div>
 							</div>
 						</div>
 						<div id="creator-buttons">
-							<button v-on:click="data.on_ok()">Ok</button>
+							<button v-on:click="data.on_ok()" :disabled="( data.selected == null ) || ( name == '' )">Ok</button>
 							<button v-on:click="data.on_cancel()">Cancel</button>
 						</div>
 					</div>
