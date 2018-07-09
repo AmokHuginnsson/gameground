@@ -85,25 +85,29 @@ class HLogin extends HAbstractWorkArea {
 	void onConnectClick() {
 		String errors = "";
 		String login = "";
-		if ( _gui._login.getText().compareTo( "" ) == 0 )
+		if ( _gui._login.getText().compareTo( "" ) == 0 ) {
 			errors += "name not set\n";
-		else
+		} else {
 			login = new String( _gui._login.getText() );
+		}
 		String password = new String( _gui._password.getText() );
 		String server = "";
-		if ( _gui._server.getText().compareTo( "" ) == 0 )
+		if ( _gui._server.getText().compareTo( "" ) == 0 ) {
 			errors += "server not set\n";
-		else
+		} else {
 			server = new String( _gui._server.getText() );
+		}
 		int port = -1;
 		try {
 			port = new Integer( _gui._port.getText() ).intValue();
 		} catch ( NumberFormatException e ) {
 		}
-		if ( port <= 1024 )
+		if ( port <= 1024 ) {
 			errors += "invalid port number (must be over 1024)\n";
-		if ( ( password.length() > 0 ) && ( password.length() < 6 ) )
+		}
+		if ( ( password.length() > 0 ) && ( password.length() < 6 ) ) {
 			errors += "if you want to use password it must be at least 6 characters long";
+		}
 		if( errors.compareTo( "" ) != 0 ) {
 			JOptionPane.showMessageDialog( _gui,
 					"Your setup contains following errors:\n" + errors,

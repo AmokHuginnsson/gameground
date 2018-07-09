@@ -399,8 +399,12 @@ void HServer::handle_login( HClient& client_, HString const& loginInfo_ ) {
 		if ( version != PROTOCOL::VERSION_ID ) {
 			client_.send( "err:Your client version is not supported.\n" );
 			kick_client( client_ );
-		} else if ( login.find_other_than( LEGEAL_CHARACTER_SET[ CONSTR_CHAR_SET_LOGIN_NAME ] ) >= 0 ) {
-			client_.send( "err:Name may only take form of `[a-zA-Z0-9]{4,}'.\n" );
+		} else if (
+			login.is_empty()
+			|| ! character_class<CHARACTER_CLASS::LETTER>().has( login.front() )
+			|| ( login.find_other_than( LEGEAL_CHARACTER_SET[ CONSTR_CHAR_SET_LOGIN_NAME ] ) != HString::npos )
+		) {
+			client_.send( "err:Name may only take form of `[a-zA-Z][a-zA-Z0-9]{3,}'.\n" );
 		} else if ( login.get_length() < MINIMUM_NAME_LENGTH ) {
 			client_.send( _out << "err:Your name is too short, it needs to be at least " << MINIMUM_NAME_LENGTH << " character long." << endl << _out );
 		} else if ( ! is_sha1( password ) ) {

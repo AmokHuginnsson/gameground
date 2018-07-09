@@ -10,16 +10,19 @@ ul, li {
 }
 li.expanded:before {
 	width: 2em;
+	margin-left: 1ex;
 	content: "╰⊟";
 	display: inline-block;
 }
 li.collapsed:before {
 	width: 2em;
+	margin-left: 1ex;
 	content: "╰⊞";
 	display: inline-block;
 }
 li.empty:before {
 	width: 2em;
+	margin-left: 1ex;
 	content: "╰⊡";
 	display: inline-block;
 }
@@ -56,9 +59,9 @@ li.empty:before {
 	flex-grow: 1;
 	margin-top: 8px;
 }
-.listwidget, .treewidget {
+.listwidget, .treewidget, .messages {
 	background: #fff;
-	border: black solid 1px;
+	border: 2px groove #def;
 }
 .listwidget li:hover {
 	background: #def;
@@ -67,6 +70,21 @@ label, button, .label {
 	flex-grow: 0 !important;
 	font-weight: bold;
 	font-family: sans-serif;
+}
+label {
+	font-size: 90%;
+}
+.treewidget .selected {
+	background: #def;
+	border: 1px solid #36a;
+	margin: -1px;
+}
+.listwidget .selected {
+	background: #def;
+	border-top: 1px solid #36a;
+	border-bottom: 1px solid #36a;
+	margin-top: -1px;
+	margin-bottom: -1px;
 }
 .edge {
 	margin-bottom: calc( -8px - 1ex );
@@ -131,7 +149,7 @@ label, button, .label {
 	left: 50%;
 	transform: translate(-50%, -50%);
 	width: 50%;
-	border: 3px outset #888;
+	border: 2px outset #eee;
 }
 .modal .messagebox .content {
 	padding: 8px;
@@ -152,8 +170,6 @@ label, button, .label {
 }
 .messages {
 	overflow-y: auto;
-	background: #fff;
-	border: black solid 1px;
 }
 #root, #app {
 	height: 100%;

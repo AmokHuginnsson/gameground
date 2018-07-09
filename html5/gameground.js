@@ -2,9 +2,6 @@
 
 class Player {
 	constructor( login_ ) {
-		if ( login_.match( /^[a-z]+$/i ) == null ) {
-			throw Error( "Invalid login: " + login_ )
-		}
 		this._login = login_
 	}
 	get login() {
@@ -24,6 +21,9 @@ class Logic {
 	}
 	get name() {
 		return ( this._class.NAME )
+	}
+	get TAG() {
+		return ( this._class.TAG )
 	}
 	drop_party( id_ ) {
 		const idx = this._partys.findIndex( p => p._id == id_ );
@@ -116,16 +116,19 @@ Vue.component(
 					this.$parent.make_visible( id )
 				}
 			},
+			on_filter: function( data ) {
+				this.$parent.selectedLogic = data
+			},
 			on_logic_dblclick: function( data ) {
 				data._expanded = ! data._expanded
 			},
 			on_logic_context: function( data ) {
-				this.$parent.show_modal( "Create game - " + data.name )
+				this.on_create( data )
 			},
 			on_join: function() {
 			},
-			on_create: function() {
-				this.$parent.modal = new NewGameConfigurator( this.$parent )
+			on_create: function( data ) {
+				this.$parent.modal = new NewGameConfigurator( this.$parent, data )
 			},
 			on_account: function() {
 			}
@@ -137,14 +140,16 @@ Vue.component(
 				<label style="grid-column: 4">People</label>
 				<div id="chat-view" class="messages"></div>
 				<ul id="games" class="treewidget">
+					<li :class="['noselect', { selected: $parent.selectedLogic == null }]" v-on:click="on_filter( null )">GameGround</li>
 					<li
 						class="noselect"
 						v-for="logic in $parent.logics"
-						v-bind:key="logic._class.TAG"
-						v-bind:class="[{ empty: logic._partys.length === 0 }, { expanded: logic._partys.length > 0 && logic._expanded }, { collapsed: logic._partys.length > 0 && ! logic._expanded }]"
+						:key="logic._class.TAG"
+						:class="[{ empty: logic._partys.length === 0 }, { expanded: logic._partys.length > 0 && logic._expanded }, { collapsed: logic._partys.length > 0 && ! logic._expanded }]"
+						v-on:click="on_filter( logic )"
 						v-on:dblclick="on_logic_dblclick( logic )"
 						v-on:click.right="on_logic_context( logic )"
-					>{{ logic.name }}
+					><span :class="[{ selected: $parent.selectedLogic == logic }]">{{ logic.name }}</span>
 						<ul class="treebranch">
 							<li
 								class="noselect"
@@ -163,8 +168,8 @@ Vue.component(
 					>{{ player.login }}</li>
 				</ul>
 				<button id="btn-join" v-on:click="on_join" title="Click me to join pre-existing game." disabled="disabled">Join</button>
-				<button id="btn-create" v-on:click="on_create" title="Click me to create a new game.">Create</button>
-				<button id="btn-account" v-on:click="on_account" title="Click me to edit your account information." disabled="disabled">Account</button>
+				<button id="btn-create" v-on:click="on_create( null )" title="Click me to create a new game.">Create</button>
+				<button id="btn-account" v-on:click="on_account" title="Click me to edit your account information." :disabled="!this.$parent.registered">Account</button>
 				<button id="btn-disconnect" v-on:click="$parent.do_disconnect" title="Click me to disconnet from GameGround server.">Disconnect</button>
 				<div id="chat-input-field">
 					<label>Type your message</label><br />
@@ -291,6 +296,7 @@ const _app_ = new Vue( {
 	data: {
 		sock: null,
 		myLogin: null,
+		registered: false,
 		_messageBuffer: "",
 		players: [],
 		logics: [
@@ -301,7 +307,8 @@ const _app_ = new Vue( {
 			new Logic( SetBang )
 		],
 		partys: [ new Browser() ],
-		currentTab: "browser",
+		selectedLogic: null,
+		currentTab: Browser.TAG,
 		modal: null
 	},
 	methods: {
@@ -330,6 +337,7 @@ const _app_ = new Vue( {
 				const s = this.sock; this.sock = null; this.sock = s
 				this.sock.send( "login:4:" + login + ":" + sha1( password ) )
 				this.myLogin = login
+				this.registered = password !== ""
 				this.sock.send( "get_players" )
 				this.sock.send( "get_logics" )
 				this.sock.send( "get_partys" )
@@ -364,8 +372,9 @@ const _app_ = new Vue( {
 		do_disconnect: function() {
 			this.modal = null
 			this.myLogin = null
+			this.registered = false
 			this.players.clear()
-			this.make_visible( "browser" )
+			this.make_visible( Browser.TAG )
 			while ( this.partys.length > 1 ) {
 				const party = this.partys.pop()
 				this.close_party( party._id )
@@ -482,10 +491,83 @@ const _app_ = new Vue( {
 	}
 } )
 
+class BoggleConfigurator {
+	static get TAG() { return ( Boggle.TAG + "-configurator" ) }
+}
+
+Vue.component(
+	BoggleConfigurator.TAG, {
+		props: ["data"],
+		data: function( arg ) {
+			return ( this.data )
+		},
+		template: `
+		<div>
+			<span>Boggle</span>
+		</div>
+`
+	}
+)
+
+class GalaxyConfigurator {
+	static get TAG() { return ( Galaxy.TAG + "-configurator" ) }
+}
+
+Vue.component(
+	GalaxyConfigurator.TAG, {
+		props: ["data"],
+		data: function( arg ) {
+			return ( this.data )
+		},
+		template: `
+		<div>
+		</div>
+`
+	}
+)
+
+class GoConfigurator {
+	static get TAG() { return ( Go.TAG + "-configurator" ) }
+}
+Vue.component( GoConfigurator.TAG, { template: '<div></div>' } )
+
+class GomokuConfigurator {
+	static get TAG() { return ( Gomoku.TAG + "-configurator" ) }
+}
+Vue.component( GomokuConfigurator.TAG, { template: '<div></div>' } )
+
+class SetBangConfigurator {
+	static get TAG() { return ( SetBang.TAG + "-configurator" ) }
+}
+
+Vue.component(
+	SetBangConfigurator.TAG, {
+		props: ["data"],
+		data: function( arg ) {
+			return ( this.data )
+		},
+		template: `
+		<div>
+		</div>
+`
+	}
+)
+
 class NewGameConfigurator {
 	static get TAG() { return ( "new-game-configuration" ) }
 	constructor( app_ ) {
 		this._app = app_
+		this._configurators = {}
+		this._configurators[Boggle.TAG] = new BoggleConfigurator()
+		this._configurators[Galaxy.TAG] = new GalaxyConfigurator()
+		this._configurators[Go.TAG] = new GoConfigurator()
+		this._configurators[Gomoku.TAG] = new GomokuConfigurator()
+		this._configurators[SetBang.TAG] = new SetBangConfigurator()
+		this._selected = null
+	}
+	on_logic_context( data ) {
+		const configurator = this._configurators[data.TAG]
+		this._selected = configurator !== undefined ? configurator : null
 	}
 	on_ok() {
 		this.close()
@@ -499,7 +581,7 @@ class NewGameConfigurator {
 }
 
 Vue.component(
-	"new-game-configuration", {
+	NewGameConfigurator.TAG, {
 		props: ["data"],
 		data: function( arg ) {
 			return ( this.data )
@@ -514,22 +596,25 @@ Vue.component(
 						<div class="hbox">
 							<div class="vbox">
 								<label>Game type ...</label>
-								<ul ref="games" class="listwidget">
+								<ul ref="games" class="listwidget" title="Available game types.">
 									<li
 										class="noselect"
+										:class="[{selected: ( data._selected != null ) && ( data._selected.constructor.TAG == ( logic.TAG + '-configurator') )}]"
 										v-for="logic in $parent.logics"
 										v-bind:key="logic._class.TAG"
-										v-on:click="on_logic_context( logic )"
+										v-on:click="data.on_logic_context( logic )"
 									>{{ logic.name }}
 									</li>
 								</ul>
 							</div>
 							<div class="vbox">
 								<div class="center label">
-									<label>Name: </label><input type="text"/>
+									<label>Name: </label><input type="text" title="Name for newly created game." />
 								</div>
 								<label class="edge">Configuration ...</label>
-								<div id="configuration"></div>
+								<div id="configuration">
+									<component v-if="data._selected != null" :data="data._selected" :is="data._selected.constructor.TAG"></component>
+								</div>
 							</div>
 						</div>
 						<div id="creator-buttons">
@@ -668,31 +753,33 @@ function colorize( message ) {
 
 function on_connect_click() {
 	const f = document.forms["connect"]
+	const login = f["login"].value
+	const password = f["password"].value
+	const server = f["server"].value
+	const port = f["port"].value
 	let errMsg = "Your setup containg following errors:\n"
-	let setupOk = true
-	if ( f["login"].value == "" ) {
+	if ( login == "" ) {
 		errMsg += "name not set\n"
-		setupOk = false
-	}
-	if ( f["server"].value == "" ) {
+	} else if ( login.match( /^[a-z][a-z0-9_]+$/i ) == null ) {
+		errMsg += ( "Invalid login: " + login )
+	} else if ( server == "" ) {
 		errMsg += "server not set\n"
-		server = false
-	}
-	if ( setupOk ) {
-		do_connect()
+	} else if ( isNaN( port ) ) {
+		errMsg += "invalid port specified"
+	} else if ( parseInt( port ) <= 1024 ) {
+		errMsg += "invalid port number (must be over 1024)\n";
 	} else {
-		_app_.show_modal( errMsg )
+		const address = "wss://" + server + ":" + port
+		console.log( "port = " + port )
+		try {
+			_app_.connect( address, login, password )
+			return
+		} catch ( e ) {
+			dump_exception( e )
+			errMsg = e.message
+		}
 	}
-}
-
-function do_connect() {
-	try {
-		const f = document.forms["connect"]
-		const address = "wss://" + f["server"].value + ":" + f["port"].value
-		_app_.connect( address, f["login"].value, f["password"].value )
-	} catch ( e ) {
-		dump_exception( e )
-	}
+	_app_.show_modal( errMsg )
 }
 
 function dump_exception( e ) {
