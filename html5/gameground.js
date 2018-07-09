@@ -502,8 +502,21 @@ Vue.component(
 			return ( this.data )
 		},
 		template: `
-		<div>
-			<span>Boggle</span>
+		<div id="bgl-configurator">
+			<label>Language:</label><select title="Language for dices and dictionary."><option>English</option><option>Polish</option></select>
+			<label>Scoring system:</label>
+			<select title="Choose the way the score is calculated.">
+				<option>Original boggle</option>
+				<option>Fibonacci</option>
+				<option>Geometric</option>
+				<option>Fibonacci 4-based</option>
+				<option>Geometric 4-based</option>
+				<option>Longest words</option>
+			</select>
+			<label>Players:</label><input type="number" title="Minimum number of players to start the match." value="2" />
+			<label>Round time:</label><input type="number" title="Length of one round expressed in seconds." value="180" />
+			<label>Number of rounds:</label><input type="number" title="Number of rounds for whole match." value="5" />
+			<label>Inter round delay:</label><input type="number" title="Interval between rounds expressed in seconds." value="15" />
 		</div>
 `
 	}
@@ -520,7 +533,10 @@ Vue.component(
 			return ( this.data )
 		},
 		template: `
-		<div>
+		<div id="glx-configurator">
+			<label>Emperors:</label><input type="number" title="Minimum number of players to start the match." value="4" />
+			<label>Systems:</label><input type="number" title="Total numbers of star systems in the game." value="16" />
+			<label>Board size:</label><input type="number" title="Map grid size." value="16" />
 		</div>
 `
 	}
@@ -547,7 +563,10 @@ Vue.component(
 			return ( this.data )
 		},
 		template: `
-		<div>
+		<div id="set_bang-configurator">
+			<label>Players:</label><input type="number" title="Minimum number of players to start the match." value="2" />
+			<label>Number of decks:</label><input type="number" title="Number of decks dealed for whole match." value="1" />
+			<label>Inter round delay:</label><input type="number" title="Interval between rounds expressed in seconds." value="15" />
 		</div>
 `
 	}
