@@ -21,7 +21,7 @@
 						v-bind:class="['tab-button', { active: currentTab === tab._id }]"
 						v-on:click="make_visible( tab._id )"
 						v-on:click.middle="close_party( tab._id )"
-						>{{ tab._name }}
+						>{{ tab.name }}
 					</button>
 					<button class="tab-button close-button active" v-show="currentTab != 'browser'" v-on:click="close_party( currentTab )">&#10006;</button>
 				</div>

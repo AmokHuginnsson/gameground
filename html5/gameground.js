@@ -84,6 +84,9 @@ class Browser extends Party {
 	constructor() {
 		super( null, "browser", "Browser", "" )
 	}
+	get name() {
+		return ( this._name )
+	}
 }
 
 Vue.component(
@@ -217,6 +220,9 @@ class Chat extends Party {
 		this._aboutToCreate = false
 		this._handlers["say"] = ( msg ) => this.on_say( msg )
 		this._handlers["player_quit"] = function(){}
+	}
+	get name() {
+		return ( this._name )
 	}
 	close() {
 		if ( this._online ) {
@@ -432,6 +438,7 @@ const _app_ = new Vue( {
 			this.modal = null
 			this.myLogin = null
 			this.registered = false
+			this.selectedPartyLogic = null
 			this.players.clear()
 			this.make_visible( Browser.TAG )
 			while ( this.partys.length > 1 ) {
