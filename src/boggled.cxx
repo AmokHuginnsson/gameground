@@ -1,6 +1,7 @@
 /* Read gameground/LICENSE.md file for copyright and licensing information. */
 
 #include <yaal/hcore/macro.hxx>
+#include <yaal/hcore/hstaticarray.hxx>
 #include <yaal/hcore/hfile.hxx>
 #include <yaal/hcore/hformat.hxx>
 #include <yaal/hcore/htokenizer.hxx>
@@ -23,7 +24,9 @@ namespace boggle_data {
 
 static int const MAXIMUM_WORD_LENGTH = 16;
 
-static code_point_t const _dicesPl_[ 16 ][ 6 ] = {
+typedef yaal::hcore::HStaticArray<code_point_t, 6> dice_t;
+
+static dice_t const _dicesPl_[ 16 ] = {
 		{ U'a'_ycp, U'a'_ycp, U'd'_ycp, U'e'_ycp, U'ł'_ycp, U'y'_ycp },
 		{ U'a'_ycp, U'a'_ycp, U'i'_ycp, U'k'_ycp, U'm'_ycp, U'y'_ycp },
 		{ U'a'_ycp, U'c'_ycp, U'i'_ycp, U'n'_ycp, U'n'_ycp, U'p'_ycp },
@@ -42,7 +45,7 @@ static code_point_t const _dicesPl_[ 16 ][ 6 ] = {
 		{ U'i'_ycp, U'k'_ycp, U'ł'_ycp, U'o'_ycp, U'p'_ycp, U'r'_ycp }
 };
 
-static code_point_t const _dicesEnNew_[ 16 ][ 6 ] = {
+static dice_t const _dicesEnNew_[ 16 ] = {
 		{ U'a'_ycp, U'a'_ycp, U'e'_ycp, U'e'_ycp, U'g'_ycp, U'n'_ycp },
 		{ U'e'_ycp, U'l'_ycp, U'r'_ycp, U't'_ycp, U't'_ycp, U'y'_ycp },
 		{ U'a'_ycp, U'o'_ycp, U'o'_ycp, U't'_ycp, U't'_ycp, U'w'_ycp },
@@ -61,7 +64,7 @@ static code_point_t const _dicesEnNew_[ 16 ][ 6 ] = {
 		{ U'd'_ycp, U'e'_ycp, U'i'_ycp, U'l'_ycp, U'r'_ycp, U'x'_ycp }
 };
 
-static code_point_t const _dicesEnOld_[ 16 ][ 6 ] = {
+static dice_t const _dicesEnOld_[ 16 ] = {
 		{ U'a'_ycp, U'a'_ycp, U'c'_ycp, U'i'_ycp, U'o'_ycp, U't'_ycp },
 		{ U'a'_ycp, U'h'_ycp, U'm'_ycp, U'o'_ycp, U'r'_ycp, U's'_ycp },
 		{ U'e'_ycp, U'g'_ycp, U'k'_ycp, U'l'_ycp, U'u'_ycp, U'y'_ycp },
@@ -80,7 +83,7 @@ static code_point_t const _dicesEnOld_[ 16 ][ 6 ] = {
 		{ U'b'_ycp, U'i'_ycp, U'f'_ycp, U'o'_ycp, U'r'_ycp, U'x'_ycp }
 };
 
-static code_point_t const _dices_[ 2 ][ 16 ][ 6 ] = {
+static dice_t const * const _dices_[] = {
 	_dicesEnNew_,
 	_dicesPl_
 };
@@ -174,7 +177,7 @@ void HBoggle::generate_game( void ) {
 		while ( _game[ k ][ 0 ] != boggle_data::BOGGLE::UNINITIALIZED_SLOT ) {
 			++ k;
 		}
-		_game[ k ][ 0 ] = boggle_data::_dices_[ static_cast<int>( _language ) ][ i ][ rnd( boggle_data::BOGGLE::SIDES ) ];
+		_game[ k ][ 0 ] = boggle_data::_dices_[ static_cast<int>( _language ) ][ i ][ static_cast<int>( rnd( boggle_data::BOGGLE::SIDES ) ) ];
 	}
 	return;
 	M_EPILOG
