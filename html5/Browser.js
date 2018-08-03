@@ -4,9 +4,12 @@ class Browser extends Party {
 	static get TAG() { return "browser" }
 	constructor() {
 		super( null, "browser", "Browser", "" )
+		this._active = true
 	}
 	get name() {
 		return ( this._name )
+	}
+	drop_player( dummy_ ) {
 	}
 }
 

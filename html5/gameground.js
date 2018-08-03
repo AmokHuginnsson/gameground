@@ -35,8 +35,6 @@ const _app_ = new Vue( {
 		},
 		add_party: function( party_ ) {
 			this.partys.push( party_ )
-			this.currentTab = party_._id
-			this.make_visible( party_._id )
 		},
 
 		/* socket */
@@ -49,6 +47,7 @@ const _app_ = new Vue( {
 				const s = this.sock; this.sock = null; this.sock = s
 				this.sock.send( "login:4:" + login + ":" + sha1( password ) )
 				this.myLogin = login
+				this._messageBuffer = ""
 				this.registered = password !== ""
 				this.sock.send( "get_players" )
 				this.sock.send( "get_logics" )
@@ -109,6 +108,7 @@ const _app_ = new Vue( {
 					case "player": { this.on_player( data ) } break
 					case "logic": { this.on_logic( data ) } break
 					case "party_info": { this.on_party_info( data ) } break
+					case "party_close": { this.on_party_close( data ) } break
 					case "player_quit": { this.on_player_quit( data ) } break
 					case "party": { this.on_party( data ) } break
 					case "account": { this.on_account( data ) } break
@@ -139,9 +139,6 @@ const _app_ = new Vue( {
 			const idx = this.partys.findIndex( p => p._id == id_ );
 			if ( idx < 0 ) {
 				return
-			}
-			for ( const logic of this.logics ) {
-				logic.drop_party( id_ )
 			}
 			this.partys.plop( idx ).close()
 			this.make_visible( this.partys[ Math.min( idx, this.partys.length - 1 ) ]._id )
@@ -184,6 +181,11 @@ const _app_ = new Vue( {
 				Chat.update( this, conf[0], conf[2], conf[3] )
 			}
 		},
+		on_party_close: function( message ) {
+			for ( const logic of this.logics ) {
+				logic.drop_party( message )
+			}
+		},
 		on_party: function( message ) {
 			const msgData = message.chop( ",", 2 )
 			const party = this.party_by_id( msgData[0] )
@@ -197,6 +199,7 @@ const _app_ = new Vue( {
 			const login = tokens[0]
 			const info = tokens[1]
 			this.add_party( new Chat( this, login, login, info ) )
+			this.make_visible( login )
 		},
 		on_player_quit: function( message ) {
 			const index = this.players.findIndex( x => message == x.login )

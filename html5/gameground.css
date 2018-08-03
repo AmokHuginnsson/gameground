@@ -33,6 +33,8 @@ input[type="number"] {
 }
 .hbox {
 	display: flex;
+	width: 100%;
+	height: 100%;
 	flex-direction: row;
 	flex-wrap: nowrap;
 	justify-content: space-evenly;
@@ -45,6 +47,8 @@ input[type="number"] {
 }
 .vbox {
 	display: flex;
+	width: 100%;
+	height: 100%;
 	flex-direction: column;
 	flex-wrap: nowrap;
 	justify-content: space-evenly;
@@ -137,6 +141,8 @@ label {
 	background: #d8e8f8;
 }
 .tab-pane {
+	height: calc( 100% - 64px );
+	width: calc( 100% - 16px );
 	padding: 8px;
 }
 .modal, .modal .block {
@@ -200,8 +206,6 @@ label {
 	grid-template-rows: 16px auto 24px 24px 24px 24px;
 	grid-column-gap: 8px;
 	grid-row-gap: 8px;
-	height: calc( 100% - 64px );
-	width: calc( 100% - 16px );
 	display: grid;
 }
 #connect {
@@ -263,6 +267,23 @@ label {
 	height: calc( 100% - 64px );
 	width: calc( 100% - 16px );
 	display: grid;
+}
+.boggle-table {
+	position: relative;
+	width: 100%;
+	height: 50%;
+}
+.boggle {
+	background: orange;
+	width: 50%;
+	height: 0px;
+	padding-bottom: 50%;
+	margin: auto;
+	border-radius: 50%;
+}
+.boggle-chat {
+	width: 24%;
+	height: 100%;
 }
 #creator-buttons {
 	text-align: center;

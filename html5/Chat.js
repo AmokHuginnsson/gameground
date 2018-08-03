@@ -19,6 +19,7 @@ class Chat extends Party {
 		this._aboutToCreate = false
 		this._handlers["say"] = ( msg ) => this.on_say( msg )
 		this._handlers["player_quit"] = function(){}
+		this._active = true
 	}
 	get name() {
 		return ( this._name )
