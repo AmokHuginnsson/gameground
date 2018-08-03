@@ -17,7 +17,6 @@ class Party {
 	}
 	close() {
 		this._app.sock.send( "abandon:" + this._id )
-		this._app = null
 	}
 	add_player( player_ ) {
 		const idx = this._players.indexOf( player_ );

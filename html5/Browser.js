@@ -51,6 +51,19 @@ Vue.component(
 				this.$parent.selectedPartyLogic = data
 				event.stopPropagation()
 			},
+			join_party: function( data, event = null ) {
+				this.$parent.selectedPartyLogic = data
+				if ( event != null ) {
+					event.stopPropagation()
+				}
+				if ( this.$parent.selectedPartyLogic._active !== undefined ) {
+					if ( ! this.$parent.selectedPartyLogic._active ) {
+						this.$parent.sock.send( "join:" + data._id )
+					} else {
+						this.$parent.make_visible( data._id )
+					}
+				}
+			},
 			toggle_expand: function( data, event = null ) {
 				data._expanded = ! data._expanded
 				if ( event != null ) {
@@ -64,6 +77,7 @@ Vue.component(
 				this.on_create( data )
 			},
 			on_join: function() {
+				this.join_party( this.$parent.selectedPartyLogic )
 			},
 			on_create: function( data ) {
 				this.$parent.modal = new NewGameConfigurator( this.$parent, data )
@@ -99,6 +113,7 @@ Vue.component(
 								class="noselect"
 								v-for="party in logic._partys"
 								@click="event => select_party( party, event )"
+								@dblclick="event => join_party( party, event )"
 								:key="party._id"
 							><span :class="[{ selected: $parent.selectedPartyLogic == party }]">{{ party.name }}</span>
 							</li>
@@ -112,7 +127,7 @@ Vue.component(
 						v-on:dblclick="on_player_dblclick( player.login )"
 					>{{ player.login }}</li>
 				</ul>
-				<button id="btn-join" v-on:click="on_join" title="Click me to join pre-existing game." disabled="disabled">Join</button>
+				<button id="btn-join" v-on:click="on_join" title="Click me to join pre-existing game." :disabled="( this.$parent.selectedPartyLogic == null ) || ( this.$parent.selectedPartyLogic._active === undefined ) || this.$parent.selectedPartyLogic._active">Join</button>
 				<button id="btn-create" v-on:click="on_create( null )" title="Click me to create a new game.">Create</button>
 				<button id="btn-account" v-on:click="on_account" title="Click me to edit your account information." :disabled="!this.$parent.registered">Account</button>
 				<button id="btn-disconnect" v-on:click="$parent.do_disconnect" title="Click me to disconnet from GameGround server.">Disconnect</button>

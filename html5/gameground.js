@@ -87,6 +87,9 @@ const _app_ = new Vue( {
 			this.selectedPartyLogic = null
 			this.players.clear()
 			this.make_visible( Browser.TAG )
+			for ( const logic of this.logics ) {
+				logic.drop_partys()
+			}
 			while ( this.partys.length > 1 ) {
 				const party = this.partys.pop()
 				this.close_party( party._id )
@@ -140,8 +143,19 @@ const _app_ = new Vue( {
 			if ( idx < 0 ) {
 				return
 			}
-			this.partys.plop( idx ).close()
-			this.make_visible( this.partys[ Math.min( idx, this.partys.length - 1 ) ]._id )
+			this.partys[idx].close()
+			for ( let i = idx + 1; i < this.partys.lenght; ++ i ) {
+				if ( this.partys[i]._active ) {
+					this.make_visible( this.partys[i]._id )
+					return
+				}
+			}
+			for ( let i = idx - 1; i >= 0; -- i ) {
+				if ( this.partys[i]._active ) {
+					this.make_visible( this.partys[i]._id )
+					break
+				}
+			}
 		},
 		on_player: function( message ) {
 			const player = message.split( "," )
