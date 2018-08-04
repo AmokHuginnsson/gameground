@@ -23,14 +23,29 @@ const _app_ = new Vue( {
 	methods: {
 		/* helpers */
 		logic_by_type: function( type_ ) {
-			const idx = this.logics.findIndex( l => l.TAG == type_ );
+			const idx = this.logics.findIndex( l => l.TAG == type_ )
 			return ( idx >= 0 ? this.logics[idx] : null )
 		},
-		party_by_id: function( id_ ) {
-			const idx = this.partys.findIndex( p => p._id == id_ );
-			return ( idx >= 0 ? this.partys[idx] : null )
+		party_by_id: function( id_, active_ = false ) {
+			const idx = this.partys.findIndex( p => p._id == id_ )
+			let party = null
+			if ( idx >= 0 ) {
+				party = this.partys[idx]
+			} else if ( ! active_ ) {
+				for ( let logic of this.logics ) {
+					party = logic.party_by_id( id_ )
+					if ( party != null ) {
+						break
+					}
+				}
+			}
+			return ( party )
 		},
 		make_visible: function( id_ ) {
+			const idx = this.partys.findIndex( p => p._id == id_ )
+			if ( idx < 0 ) {
+				this.add_party( this.party_by_id( id_ ) )
+			}
 			this.currentTab = id_
 		},
 		add_party: function( party_ ) {
@@ -139,23 +154,12 @@ const _app_ = new Vue( {
 			if ( id_ == "browser" ) {
 				return
 			}
-			const idx = this.partys.findIndex( p => p._id == id_ );
+			const idx = this.partys.findIndex( p => p._id == id_ )
 			if ( idx < 0 ) {
 				return
 			}
-			this.partys[idx].close()
-			for ( let i = idx + 1; i < this.partys.lenght; ++ i ) {
-				if ( this.partys[i]._active ) {
-					this.make_visible( this.partys[i]._id )
-					return
-				}
-			}
-			for ( let i = idx - 1; i >= 0; -- i ) {
-				if ( this.partys[i]._active ) {
-					this.make_visible( this.partys[i]._id )
-					break
-				}
-			}
+			this.partys.plop( idx ).close()
+			this.make_visible( this.partys[ Math.min( idx, this.partys.length - 1 ) ]._id )
 		},
 		on_player: function( message ) {
 			const player = message.split( "," )
@@ -174,6 +178,9 @@ const _app_ = new Vue( {
 				const party = this.party_by_id( id )
 				if ( party != null ) {
 					party.add_player( login )
+					if ( login == this.myLogin ) {
+						this.make_visible( id )
+					}
 				}
 			}
 		},
@@ -189,7 +196,6 @@ const _app_ = new Vue( {
 			const logic = this.logic_by_type( conf[1] )
 			if ( logic != null ) {
 				const party = logic.create( this, conf[0], conf[2], conf[3] )
-				this.add_party( party )
 				logic.add_party( party )
 			} else if ( conf[1] == Chat.TAG ) {
 				Chat.update( this, conf[0], conf[2], conf[3] )
@@ -263,7 +269,7 @@ function colorize( message ) {
 			if ( needClosing ) {
 				m += "</span>"
 			}
-			break;
+			break
 		}
 		newIdx += idx
 		m += message.substr( idx, newIdx - idx )
@@ -305,7 +311,7 @@ function on_connect_click() {
 	} else if ( isNaN( port ) ) {
 		errMsg += "invalid port specified"
 	} else if ( parseInt( port ) <= 1024 ) {
-		errMsg += "invalid port number (must be over 1024)\n";
+		errMsg += "invalid port number (must be over 1024)\n"
 	} else {
 		const address = "wss://" + server + ":" + port
 		console.log( "port = " + port )
@@ -337,7 +343,7 @@ function register_post_load_function( func ) {
 
 (function() {
 //	register_post_load_function( on_load )
-})();
+})()
 
 Array.prototype.clear = function() {
 	this.splice( 0 )

@@ -19,10 +19,14 @@ class Logic {
 		return ( this._class.TAG )
 	}
 	drop_party( id_ ) {
-		const idx = this._partys.findIndex( p => p._id == id_ );
+		const idx = this._partys.findIndex( p => p._id == id_ )
 		if ( idx >= 0 ) {
 			this._partys.plop( idx )
 		}
+	}
+	party_by_id( id_ ) {
+		const idx = this._partys.findIndex( p => p._id == id_ )
+		return ( idx >= 0 ? this._partys[idx] : null )
 	}
 	drop_partys() {
 		this._partys.clear()

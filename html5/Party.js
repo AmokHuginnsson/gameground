@@ -8,7 +8,6 @@ class Party {
 		this._players = []
 		this._handlers = {}
 		this._app = app_
-		this._active = false
 		this._handlers["say"] = ( msg ) => this.on_say( msg )
 		this._handlers["msg"] = ( msg ) => this.on_msg( msg )
 	}
@@ -25,20 +24,11 @@ class Party {
 		}
 		this._players.push( player_ )
 		this._players.sort()
-		if ( player_ == this._app.myLogin ) {
-			if ( ! this._active ) {
-				this._app.make_visible( this._id )
-			}
-			this._active = true
-		}
 	}
 	drop_player( player_ ) {
 		const idx = this._players.indexOf( player_ );
 		if ( idx >= 0 ) {
 			this._players.plop( idx )
-		}
-		if ( ( this._app == null ) || ( player_ == this._app.myLogin ) ) {
-			this._active = false
 		}
 	}
 	invoke( message_ ) {

@@ -1,3 +1,7 @@
+* {
+	grid-column-gap: 8px;
+	grid-row-gap: 8px;
+}
 html, body {
 	margin: 0px;
 	height: 100%;
@@ -204,8 +208,6 @@ label {
 #browser {
 	grid-template-columns: auto 7% 7% 7% 7%;
 	grid-template-rows: 16px auto 24px 24px 24px 24px;
-	grid-column-gap: 8px;
-	grid-row-gap: 8px;
 	display: grid;
 }
 #connect {
@@ -219,8 +221,6 @@ label {
 #connect-info {
 	grid-template-columns: 8em auto;
 	grid-template-rows: auto auto auto auto auto;
-	grid-column-gap: 8px;
-	grid-row-gap: 8px;
 	align-items: center;
 	display: grid;
 	width: 32em;
@@ -232,8 +232,6 @@ label {
 }
 #connect-buttons {
 	grid-template-columns: auto auto;
-	grid-column-gap: 8px;
-	grid-row-gap: 8px;
 	display: grid;
 	width: 16em;
 	margin: auto;
@@ -262,24 +260,31 @@ label {
 .chat {
 	grid-template-columns: auto;
 	grid-template-rows: 16px auto 16px 32px;
-	grid-column-gap: 8px;
-	grid-row-gap: 8px;
 	height: calc( 100% - 64px );
 	width: calc( 100% - 16px );
 	display: grid;
 }
+.boggle-pane {
+	display: grid;
+	width: 75%;
+	height: 100%;
+	grid-template-columns: 33% 33% 33%;
+	grid-template-rows: 60% calc( 40% - 64px ) 64px;
+	grid-template-areas: "table table table" "sent scored longest" "input input input";
+}
 .boggle-table {
-	position: relative;
+	grid-area: table;
 	width: 100%;
-	height: 50%;
+	height:100%;
+	outline: 1px red solid;
 }
 .boggle {
 	background: orange;
-	width: 50%;
-	height: 0px;
-	padding-bottom: 50%;
+	height: calc( 60vh - 64px );
+	width: calc( 60vh - 64px );
 	margin: auto;
 	border-radius: 50%;
+	outline: 1px green solid;
 }
 .boggle-chat {
 	width: 24%;

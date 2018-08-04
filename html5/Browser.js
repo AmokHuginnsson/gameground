@@ -4,7 +4,6 @@ class Browser extends Party {
 	static get TAG() { return "browser" }
 	constructor() {
 		super( null, "browser", "Browser", "" )
-		this._active = true
 	}
 	get name() {
 		return ( this._name )
@@ -56,8 +55,9 @@ Vue.component(
 				if ( event != null ) {
 					event.stopPropagation()
 				}
-				if ( this.$parent.selectedPartyLogic._active !== undefined ) {
-					if ( ! this.$parent.selectedPartyLogic._active ) {
+				if ( data._id !== undefined ) {
+					const party = this.$parent.party_by_id( data._id, true )
+					if ( party == null ) {
 						this.$parent.sock.send( "join:" + data._id )
 					} else {
 						this.$parent.make_visible( data._id )
@@ -127,7 +127,7 @@ Vue.component(
 						v-on:dblclick="on_player_dblclick( player.login )"
 					>{{ player.login }}</li>
 				</ul>
-				<button id="btn-join" v-on:click="on_join" title="Click me to join pre-existing game." :disabled="( this.$parent.selectedPartyLogic == null ) || ( this.$parent.selectedPartyLogic._active === undefined ) || this.$parent.selectedPartyLogic._active">Join</button>
+				<button id="btn-join" v-on:click="on_join" title="Click me to join pre-existing game." :disabled="( this.$parent.selectedPartyLogic == null ) || ( this.$parent.selectedPartyLogic._id === undefined ) || ( this.$parent.party_by_id( this.$parent.selectedPartyLogic._id, true ) != null )">Join</button>
 				<button id="btn-create" v-on:click="on_create( null )" title="Click me to create a new game.">Create</button>
 				<button id="btn-account" v-on:click="on_account" title="Click me to edit your account information." :disabled="!this.$parent.registered">Account</button>
 				<button id="btn-disconnect" v-on:click="$parent.do_disconnect" title="Click me to disconnet from GameGround server.">Disconnect</button>
