@@ -83,7 +83,7 @@ Vue.component(
 			<label>Private chat messages</label>
 			<div class="messages" ref="messages"></div>
 			<label>Type your message</label>
-			<input class="chat-input" type="text" name="input" maxlength="1024" title="Send message to all people in this private chat room." v-on:keypress.enter="on_enter">
+			<input type="text" name="input" maxlength="1024" title="Send message to all people in this private chat room." v-on:keypress.enter="on_enter">
 		</div>
 `
 	}

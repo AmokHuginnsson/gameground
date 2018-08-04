@@ -133,7 +133,7 @@ Vue.component(
 				<button id="btn-disconnect" v-on:click="$parent.do_disconnect" title="Click me to disconnet from GameGround server.">Disconnect</button>
 				<div id="chat-input-field">
 					<label>Type your message</label><br />
-					<input id="chat-input" type="text" name="input" maxlength="1024" title="Send message to all people on the server that are currently not in the game." v-on:keypress.enter="on_enter">
+					<input class="long-input" type="text" name="input" maxlength="1024" title="Send message to all people on the server that are currently not in the game." v-on:keypress.enter="on_enter">
 				</div>
 			</div>
 `
