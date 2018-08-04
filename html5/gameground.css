@@ -277,7 +277,7 @@ label {
 	grid-template-rows: 60% calc( 40% - 72px ) 64px;
 	grid-template-areas: "table table table" "sent scored longest" "input input input";
 }
-.boggle-pane .box .listwidget {
+.boggle-pane .box .messages {
 	height: calc( 100% - 32px );
 }
 .boggle {

@@ -9,6 +9,15 @@ class Boggle extends Party {
 	constructor( app_, id_, name_, configuration_ ) {
 		super( app_, id_, name_, configuration_ )
 		this._handlers["player_quit"] = function(){}
+		this._handlers["deck"] = ( msg ) => this.on_deck( msg )
+		this._handlers["longest"] = ( msg ) => this._refs.longest.append_text( msg )
+		this._handlers["scored"] = ( msg ) => this._refs.scored.append_text( msg )
+	}
+	on_deck( data_ ) {
+		data_ = data_.toUpperCase()
+		for ( let i = 0; i < 16; ++ i ) {
+			this._refs.cube[i].textContent = data_[i]
+		}
 	}
 }
 
@@ -34,7 +43,8 @@ Vue.component(
 				const source = event.target || event.srcElement
 				const msg = source.value
 				if ( msg.match( /.*\S+.*/ ) != null ) {
-					this.$parent.sock.send( "cmd:" + this.data._id + ":say:" + msg )
+					this.$parent.sock.send( "cmd:" + this.data._id + ":play:" + msg )
+					this.data._refs.sent.append_text( msg )
 				}
 				source.value = ""
 			}
@@ -45,35 +55,20 @@ Vue.component(
 				<div class="boggle-pane">
 					<div class="boggle">
 						<div class="cubes">
-							<div ref="cube0">G</div>
-							<div ref="cube1">A</div>
-							<div ref="cube2">M</div>
-							<div ref="cube3">E</div>
-							<div ref="cube4">G</div>
-							<div ref="cube5">R</div>
-							<div ref="cube6">O</div>
-							<div ref="cube7">U</div>
-							<div ref="cube8">N</div>
-							<div ref="cube9">D</div>
-							<div ref="cube10">B</div>
-							<div ref="cube11">O</div>
-							<div ref="cube12">G</div>
-							<div ref="cube13">G</div>
-							<div ref="cube14">L</div>
-							<div ref="cube15">E</div>
+							<div v-for="c in 'GAMEGROUNDBOGGLE'" ref="cube">{{c}}</div>
 						</div>
 					</div>
 					<div class="box" style="grid-area: sent;">
 						<label>Words sent...</label>
-						<ul class="listwidget" title="The word that you send to GameGround server."></ul>
+						<div ref="sent" class="messages" title="The word that you send to GameGround server."></div>
 					</div>
 					<div class="box" style="grid-area: scored;">
 						<label>Words that scored...</label>
-						<ul class="listwidget" title="Your words that both valid and unique."></ul>
+						<div ref="scored" class="messages" title="Your words that both valid and unique."></div>
 					</div>
 					<div class="box" style="grid-area: longest;">
 						<label>Longest words...</label>
-						<ul class="listwidget" title="Longest words found by all players in last round."></ul>
+						<div ref="longest" class="messages" title="Longest words found by all players in last round."></div>
 					</div>
 					<div style="grid-area: input;">
 						<label>Enter your words here ...</label><br />
