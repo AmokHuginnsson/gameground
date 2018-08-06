@@ -67,6 +67,7 @@ const _app_ = new Vue( {
 				this.sock.send( "get_players" )
 				this.sock.send( "get_logics" )
 				this.sock.send( "get_partys" )
+				document.getElementById( "snd-login" ).play()
 			}
 			this.sock.onerror = event => {
 				const msg = "WebSocket connection error: " + event.type
@@ -96,6 +97,7 @@ const _app_ = new Vue( {
 			console.log( "After connection attempt..." )
 		},
 		do_disconnect: function() {
+			document.getElementById( "snd-logout" ).play()
 			this.modal = null
 			this.myLogin = null
 			this.registered = false
@@ -198,7 +200,7 @@ const _app_ = new Vue( {
 				const party = logic.create( this, conf[0], conf[2], conf[3] )
 				logic.add_party( party )
 			} else if ( conf[1] == Chat.TAG ) {
-				Chat.update( this, conf[0], conf[2], conf[3] )
+				Chat.update( this, conf[0], conf[2] )
 			}
 		},
 		on_party_close: function( message ) {
@@ -386,13 +388,29 @@ Date.prototype.iso8601 = function() {
 	)
 }
 
+Node.prototype.removeAllChildren = function() {
+	while ( this.firstChild ) {
+		this.removeChild( this.firstChild )
+	}
+}
+
 HTMLDivElement.prototype.log_message = function( message_ ) {
+	const scrollPos = this.scrollHeight - this.clientHeight
+	const wantScroll = this.scrollTop === scrollPos
 	this.appendChild( document.createTextNode( new Date().iso8601() ) )
 	this.append_text( ": " + message_ )
+	if ( wantScroll ) {
+		this.scrollTop = this.scrollHeight
+	}
 }
 
 HTMLDivElement.prototype.append_text = function( message_ ) {
+	const scrollPos = this.scrollHeight - this.clientHeight
+	const wantScroll = this.scrollTop === scrollPos
 	this.innerHTML += colorize( message_ )
 	this.appendChild( document.createElement( "br" ) )
+	if ( wantScroll ) {
+		this.scrollTop = this.scrollHeight
+	}
 }
 

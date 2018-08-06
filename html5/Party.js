@@ -1,10 +1,9 @@
 "use strict"
 
 class Party {
-	constructor( app_, id_, name_, configuration_ ) {
+	constructor( app_, id_, name_ ) {
 		this._id = id_
 		this._name = name_
-		this._configuration = configuration_
 		this._players = []
 		this._handlers = {}
 		this._app = app_

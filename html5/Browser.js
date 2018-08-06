@@ -3,7 +3,7 @@
 class Browser extends Party {
 	static get TAG() { return "browser" }
 	constructor() {
-		super( null, "browser", "Browser", "" )
+		super( null, "browser", "Browser" )
 	}
 	get name() {
 		return ( this._name )

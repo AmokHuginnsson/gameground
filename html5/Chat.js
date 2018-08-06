@@ -3,7 +3,7 @@
 class Chat extends Party {
 	static get TAG() { return "chat" }
 	static get NAME() { return "Chat" }
-	static update( app_, id_, name_, configuration_ ) {
+	static update( app_, id_, name_ ) {
 		const names = name_.split( ":" )
 		const name = names[0] === app_.myLogin ? names[1] : names[0]
 		const party = app_.party_by_id( name )
@@ -13,12 +13,13 @@ class Chat extends Party {
 		party.set_id( id_ )
 	}
 	constructor( app_, id_, name_, configuration_ ) {
-		super( app_, id_, name_, configuration_ )
+		super( app_, id_, name_ )
 		this._online = false
 		this._lineBuffer = []
 		this._aboutToCreate = false
 		this._handlers["say"] = ( msg ) => this.on_say( msg )
 		this._handlers["player_quit"] = function(){}
+		this._configuration = configuration_
 	}
 	get name() {
 		return ( this._name )

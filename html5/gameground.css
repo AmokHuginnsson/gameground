@@ -67,9 +67,21 @@ input[type="number"] {
 	flex-grow: 1;
 	margin-top: 8px;
 }
-.listwidget, .treewidget, .messages {
+table, .listwidget, .treewidget, .messages {
+	border-collapse: collapse;
 	background: #fff;
 	border: 2px groove #def;
+}
+table {
+	width: 100%;
+	background: transparent;
+}
+table th {
+	border: 2px groove #def;
+}
+table td {
+	background: #fff;
+	border: 1px solid #aaa;
 }
 .listwidget li:hover {
 	background: #def;
@@ -269,7 +281,7 @@ label {
 	width: calc( 100% - 16px );
 	display: grid;
 }
-.boggle-pane {
+.boggle-pane-left {
 	display: grid;
 	width: 75%;
 	height: calc( 100% - 1px );
@@ -277,8 +289,17 @@ label {
 	grid-template-rows: 60% calc( 40% - 72px ) 64px;
 	grid-template-areas: "table table table" "sent scored longest" "input input input";
 }
-.boggle-pane .box .messages {
+.boggle-pane-left .box .messages {
 	height: calc( 100% - 32px );
+}
+.boggle-pane .scores {
+	height: 33%;
+}
+.boggle-chat .messages {
+	height: calc( 67% - 80px );
+}
+.boggle-pane-left .long-input {
+	width: calc( 100% - 11px );
 }
 .boggle {
 	grid-area: table;
@@ -310,6 +331,9 @@ label {
 	font-family: sans-serif;
 	font-size: 5vmin;
 	font-weight: bold;
+}
+.cubes div:active {
+	border: 3px solid #0ff;
 }
 .boggle-chat {
 	width: 24%;
