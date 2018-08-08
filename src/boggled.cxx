@@ -108,7 +108,10 @@ char const* const HBoggle::PROTOCOL::PLAY = "play";
 char const* const HBoggle::PROTOCOL::DECK = "deck";
 char const* const HBoggle::PROTOCOL::SETUP = "setup";
 char const* const HBoggle::PROTOCOL::END_ROUND = "end_round";
+char const* const HBoggle::PROTOCOL::INIT = "init";
 char const* const HBoggle::PROTOCOL::ROUND = "round";
+char const* const HBoggle::PROTOCOL::PAUSE = "pause";
+char const* const HBoggle::PROTOCOL::OVER = "over";
 char const* const HBoggle::PROTOCOL::SCORED = "scored";
 char const* const HBoggle::PROTOCOL::LONGEST = "longest";
 int HBoggle::RULES[6][16] = {
@@ -125,6 +128,21 @@ char const* const BOGGLE_MSG[] = {
 	"malformed packet"
 };
 
+namespace {
+
+char const* state_to_str( HBoggle::STATE state_ ) {
+	char const* str( "" );
+	switch ( state_ ) {
+		case ( HBoggle::STATE::INIT ):  str = HBoggle::PROTOCOL::INIT;  break;
+		case ( HBoggle::STATE::ROUND ): str = HBoggle::PROTOCOL::ROUND; break;
+		case ( HBoggle::STATE::PAUSE ): str = HBoggle::PROTOCOL::PAUSE; break;
+		case ( HBoggle::STATE::OVER ):  str = HBoggle::PROTOCOL::OVER;  break;
+	}
+	return ( str );
+}
+
+}
+
 HBoggle::HBoggle(
 	HServer* server_,
 	id_t const& id_,
@@ -136,7 +154,7 @@ HBoggle::HBoggle(
 	int maxRounds_,
 	int interRoundDelay_
 ) : HLogic( server_, id_, comment_ )
-	, _state( STATE::LOCKED )
+	, _state( STATE::INIT )
 	, _language( language_ )
 	, _scoring( scoring_ )
 	, _startupPlayers( players_ )
@@ -146,6 +164,7 @@ HBoggle::HBoggle(
 	, _round( 0 )
 	, _players()
 	, _words()
+	, _clock()
 	, _varTmpBuffer() {
 	M_PROLOG
 	_handlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HBoggle::handler_play );
@@ -202,7 +221,7 @@ void HBoggle::handler_play( HClient* client_, HString const& word_ ) {
 	HLock l( _mutex );
 	static int const BOGGLE_REAL_MINIMUM_WORD_LENGTH = 3;
 	int length = static_cast<int>( word_.get_length() );
-	if ( ( _state == STATE::ACCEPTING )
+	if ( ( _state == STATE::ROUND )
 			&& ( length >= BOGGLE_REAL_MINIMUM_WORD_LENGTH )
 			&& ( length <= boggle_data::MAXIMUM_WORD_LENGTH ) ) {
 		words_t::iterator it = _words.find( word_ );
@@ -272,9 +291,11 @@ void HBoggle::do_post_accept( HClient* client_ ) {
 		<< "   round interval - " << _interRoundDelay << endl
 		<< *this << PROTOCOL::MSG << PROTOCOL::SEP
 		<< "This match requires " << _startupPlayers << " players to start the game." << endl << _out );
+	int elapsed( static_cast<int>( _clock.get_time_elapsed( time::UNIT::SECOND ) ) );
+	int timeLeft( _state == STATE::ROUND ? _roundTime - elapsed : ( _state == STATE::PAUSE ? _interRoundDelay - elapsed : 0 ) );
 	client_->send( _out << *this
-		<< PROTOCOL::SETUP << PROTOCOL::SEP << _roundTime
-		<< PROTOCOL::SEPP << _interRoundDelay << endl << _out );
+		<< PROTOCOL::SETUP << PROTOCOL::SEP << state_to_str( _state )
+		<< PROTOCOL::SEPP << timeLeft << endl << _out );
 	for ( players_t::iterator it = _players.begin(); it != _players.end(); ++ it ) {
 		if ( it->first != client_ ) {
 			client_->send( _out << *this
@@ -296,6 +317,9 @@ void HBoggle::do_post_accept( HClient* client_ ) {
 				<< "The match has begun, good luck!" << endl << _out );
 	} else if ( _round > 0 ) {
 		client_->send( _out << *this << PROTOCOL::DECK << PROTOCOL::SEP << serialize_deck() << endl << _out );
+		if ( _round >= _maxRounds ) {
+			client_->send( _out << *this << PROTOCOL::MSG << PROTOCOL::SEP << "The game is over." << endl << _out );
+		}
 	}
 	return;
 	M_EPILOG
@@ -329,7 +353,8 @@ void HBoggle::schedule_end_round( void ) {
 	++ _round;
 	HScheduledAsyncCaller::get_instance().call_in( time::duration( _roundTime, time::UNIT::SECOND ), call( &HBoggle::on_end_round, this ) );
 	generate_game();
-	_state = STATE::ACCEPTING;
+	_state = STATE::ROUND;
+	_clock.reset();
 	broadcast( _out << PROTOCOL::DECK << PROTOCOL::SEP << serialize_deck() << endl << _out );
 	return;
 	M_EPILOG
@@ -354,12 +379,14 @@ void HBoggle::on_end_round( void ) {
 	M_PROLOG
 	HLock l( _mutex );
 	OUT << "<<end>>" << endl;
-	_state = STATE::LOCKED;
+	_clock.reset();
 	if ( _round < _maxRounds ) {
+		_state = STATE::PAUSE;
 		HScheduledAsyncCaller::get_instance().call_in( duration( _interRoundDelay, time::UNIT::SECOND ), call( &HBoggle::on_begin_round, this ) );
 		_out << PROTOCOL::MSG << PROTOCOL::SEP
 			<< "This round has ended, next round in " << _interRoundDelay << " seconds!" << endl;
 	} else {
+		_state = STATE::OVER;
 		_out << PROTOCOL::MSG << PROTOCOL::SEP << "Game Over!" << endl;
 	}
 	broadcast( _out << _out );

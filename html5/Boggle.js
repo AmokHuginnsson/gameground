@@ -19,13 +19,22 @@ class Boggle extends Party {
 		this._handlers["end_round"] = ( msg ) => this.on_end_round( msg )
 		this._currentSort = "player"
 	  this._currentSortDir = "asc"
+		this._deck = null
 		this._timeLeft = 0
+		this._state = "init"
+		const conf = configuration_.split( "," )
+		this._roundTime = conf[1] | 0
+		this._pauseTime = conf[3] | 0
 		this.input = ""
 	}
-	on_setup( configuration_ ) {
-		const conf = configuration_.split( "," )
-		this._roundTime = conf[0] | 0
-		this._pauseTime = conf[1] | 0
+	on_setup( data_ ) {
+		const data = data_.split( "," )
+		this._state = data[0]
+		if ( this._state == "init" ) {
+			this._timeLeft = 0
+		} else {
+			this._timeLeft = data[1] | 0
+		}
 	}
 	on_deck( data_ ) {
 		document.getElementById( "snd-dice" ).play()
@@ -34,10 +43,16 @@ class Boggle extends Party {
 		for ( let i = 0; i < 16; ++ i ) {
 			this._refs.cube[i].textContent = data_[i]
 		}
-		this._timeLeft = this._roundTime
+		if ( this._state != "over" ) {
+			if ( ( this._state == "init" ) || ( this._state == "pause" ) ) {
+				this._timeLeft = this._roundTime
+			}
+			this._state = "round"
+		}
 	}
 	on_end_round( data_ ) {
 		this._timeLeft = this._pauseTime
+		this._state = "pause"
 	}
 	on_round( data_ ) {
 		this._refs.sent.removeAllChildren()
@@ -98,7 +113,9 @@ Vue.component(
 				}
 			},
 			add_letter: function( event, i ) {
-				this.input += this.data._deck[i]
+				if ( this.data._deck != null ) {
+					this.input += this.data._deck[i]
+				}
 				event.stopPropagation()
 			}
 		},

@@ -194,7 +194,7 @@ const _app_ = new Vue( {
 			}
 		},
 		on_party_info: function( message ) {
-			const conf = message.split( ",", 4 )
+			const conf = message.chop( ",", 4 )
 			const logic = this.logic_by_type( conf[1] )
 			if ( logic != null ) {
 				const party = logic.create( this, conf[0], conf[2], conf[3] )

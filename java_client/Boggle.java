@@ -7,7 +7,10 @@ import java.text.SimpleDateFormat;
 class Boggle extends HAbstractLogic implements Runnable {
 	public static final class PROTOCOL extends HAbstractLogic.PROTOCOL {
 		public static final String LONGEST = "longest";
+		public static final String INIT = "init";
 		public static final String ROUND = "round";
+		public static final String PAUSE = "pause";
+		public static final String OVER = "over";
 		public static final String SETUP = "setup";
 		public static final String DECK = "deck";
 		public static final String SCORED = "scored";
@@ -68,8 +71,9 @@ class Boggle extends HAbstractLogic implements Runnable {
 			_letters[ 13 ] = _letter31;
 			_letters[ 14 ] = _letter32;
 			_letters[ 15 ] = _letter33;
-			for ( int i = 0; i < 16; ++ i )
+			for ( int i = 0; i < 16; ++ i ) {
 				_letters[ i ].setText( "GAMEGROUNDBOGGLE".substring( i, i + 1 ).toUpperCase() );
+			}
 			clearLog();
 			Boggle.this.handlerRound( "" );
 		}
@@ -99,7 +103,7 @@ class Boggle extends HAbstractLogic implements Runnable {
 			_app.closeParty( Boggle.this );
 		}
 	}
-	enum State { INIT, PLAY, WAIT }
+	enum State { INIT, ROUND, PAUSE, OVER }
 //--------------------------------------------//
 	public static final long serialVersionUID = 17l;
 	public static final String LABEL = "boggle";
@@ -115,6 +119,9 @@ class Boggle extends HAbstractLogic implements Runnable {
 	public Boggle( GameGround $applet, String $id, String $configuration ) throws Exception {
 		super( $applet, $id, $configuration );
 		init( _gui = new HGUILocal( LABEL ) );
+		String[] conf = $configuration.split( ",", 4 );
+		_roundTime = Integer.parseInt( conf[ 1 ] );
+		_pauseTime = Integer.parseInt( conf[ 3 ] );
 		_players = _gui._players.setColumns( _playerScoreColumns );
 		_handlers.put( PROTOCOL.PLAYER, Boggle.class.getDeclaredMethod( "handlerPlayer", new Class<?>[]{ String.class } ) );
 		_handlers.put( PROTOCOL.PLAYERQUIT, HAbstractLogic.class.getDeclaredMethod( "handlerDummy", new Class<?>[]{ String.class } ) );
@@ -149,7 +156,7 @@ class Boggle extends HAbstractLogic implements Runnable {
 	void handlerEndRound( String $command ) {
 		_start = new Date().getTime();
 		_timeLeft = _pauseTime;
-		_state = State.WAIT;
+		_state = State.PAUSE;
 	}
 	void handlerRound( String $command ) {
 		_gui.clear( _gui._wordsSent );
@@ -170,20 +177,35 @@ class Boggle extends HAbstractLogic implements Runnable {
 			String letter = $command.substring( i, i + 1 ).toUpperCase();
 			_gui._letters[ i ].setText( "Q".equals( letter ) ? "Qu" : letter );
 		}
-		_start = new Date().getTime();
-		_timeLeft = _roundTime;
-		_state = State.PLAY;
+		if ( _state != State.OVER ) {
+			if ( ( _state == State.INIT ) || ( _state == State.PAUSE ) ) {
+				_start = new Date().getTime();
+				_timeLeft = _roundTime;
+			}
+			_state = State.ROUND;
+		}
 	}
 	void handlerSetup( String $command ) {
 		String[] tokens = $command.split( ",", 2 );
-		 _roundTime = Integer.parseInt( tokens[ 0 ] );
-		 _pauseTime = Integer.parseInt( tokens[ 1 ] );
+		_start = new Date().getTime();
+		if ( PROTOCOL.INIT.equals( tokens[0] ) || PROTOCOL.OVER.equals( tokens[0] ) ) {
+			_timeLeft = 0;
+			_state = State.INIT;
+		} else {
+			_timeLeft = Integer.parseInt( tokens[1] );
+			if ( PROTOCOL.ROUND.equals( tokens[0] ) ) {
+				_state = State.ROUND;
+			} else {
+				assert PROTOCOL.PAUSE.equals( tokens[0] ) : "Malformed data in protocol.";
+				_state = State.PAUSE;
+			}
+		}
 	}
 	public void cleanup() {
 		_app.flush( this );
 	}
 	public void run() {
-		if ( ( _state == State.PLAY ) || ( _state == State.WAIT ) ) {
+		if ( ( _state == State.ROUND ) || ( _state == State.PAUSE ) ) {
 			long now = new Date().getTime();
 			long left = _timeLeft * 1000 + _start - now;
 			if ( left >= 0 ) {

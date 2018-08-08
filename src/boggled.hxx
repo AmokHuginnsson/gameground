@@ -4,6 +4,7 @@
 #define GAMEGROUND_BOGGLED_HXX_INCLUDED
 
 #include <yaal/hcore/hmap.hxx>
+#include <yaal/hcore/hclock.hxx>
 
 #include "logic.hxx"
 #include "spellchecker.hxx"
@@ -22,13 +23,13 @@ private:
 		int _last;
 		OPlayerInfo( void ) : _score( 0 ), _last( 0 ) {}
 	};
-	struct STATE {
-		typedef enum {
-			LOCKED,
-			ACCEPTING
-		} state_t;
-	};
 public:
+	enum class STATE {
+		INIT,
+		ROUND,
+		PAUSE,
+		OVER
+	};
 	enum class SCORING {
 		ORIGINAL = 0,
 		FIBONACCI = 1,
@@ -42,7 +43,10 @@ public:
 		static char const* const PLAY;
 		static char const* const DECK;
 		static char const* const SETUP;
+		static char const* const INIT;
 		static char const* const ROUND;
+		static char const* const PAUSE;
+		static char const* const OVER;
 		static char const* const END_ROUND;
 		static char const* const SCORED;
 		static char const* const LONGEST;
@@ -54,7 +58,7 @@ protected:
 	typedef yaal::hcore::HMap<yaal::hcore::HString, client_set_ptr_t> words_t;
 	typedef yaal::hcore::HMap<HClient*, OPlayerInfo> players_t;
 	static int RULES[6][16];
-	STATE::state_t _state;
+	STATE _state;
 	HSpellChecker::LANGUAGE _language;
 	SCORING _scoring;
 	int _startupPlayers;
@@ -65,6 +69,7 @@ protected:
 	players_t _players;
 	yaal::code_point_t _game[16][2];
 	words_t _words;
+	yaal::hcore::HClock _clock;
 	yaal::hcore::HString _varTmpBuffer;
 	/*}*/
 public:
