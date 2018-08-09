@@ -306,37 +306,6 @@ function colorize( message ) {
 	)
 }
 
-function on_connect_click() {
-	const f = document.forms["connect"]
-	const login = f["login"].value
-	const password = f["password"].value
-	const server = f["server"].value
-	const port = f["port"].value
-	let errMsg = "Your setup containg following errors:\n"
-	if ( login == "" ) {
-		errMsg += "name not set\n"
-	} else if ( login.match( /^[a-z][a-z0-9_]+$/i ) == null ) {
-		errMsg += ( "Invalid login: " + login )
-	} else if ( server == "" ) {
-		errMsg += "server not set\n"
-	} else if ( isNaN( port ) ) {
-		errMsg += "invalid port specified"
-	} else if ( parseInt( port ) <= 1024 ) {
-		errMsg += "invalid port number (must be over 1024)\n"
-	} else {
-		const address = "wss://" + server + ":" + port
-		console.log( "port = " + port )
-		try {
-			_app_.connect( address, login, password )
-			return
-		} catch ( e ) {
-			dump_exception( e )
-			errMsg = e.message
-		}
-	}
-	_app_.show_modal( errMsg )
-}
-
 function dump_exception( e ) {
 	console.log( e.name + ": " + e.message + " in " + e.fileName + ":" + e.lineNumber )
 }

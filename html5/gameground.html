@@ -23,6 +23,7 @@
 		<script src="GomokuConfigurator.js" defer></script>
 		<script src="SetBang.js" defer></script>
 		<script src="SetBangConfigurator.js" defer></script>
+		<script src="Login.js" defer></script>
 		<script src="gameground.js" defer></script>
 	</head>
 		<audio id="snd-login"><source src="service-login.wav" type="audio/wav" /></audio>
@@ -47,25 +48,7 @@
 				<hr class="tab-bar-line" />
 				<component v-for="tab in partys" v-show="currentTab === tab._id" :data="tab" :key="tab._id" :is="tab.constructor.TAG"></component>
 			</div>
-			<div id="connect" v-else>
-				<div id="logo" style="height: 140px;background: url(gameground.svg) no-repeat center center;"></div>
-				<form name="connect" action="JavaScript:on_connect_click()">
-					<div id="connect-info">
-						<label>Your name:</label>
-						<input name="login" type="text" title="Your GameGround world name (required)." />
-						<label>Password:</label>
-						<input name="password" type="password" title="Your password (optional)." />
-						<label>Server:</label>
-						<input name="server" type="text" value="127.0.0.1" title="Address of the server that hosts the game (required)." />
-						<label>Port:</label>
-						<input name="port" type="number" min="1025" value="7777" title="Port that game server is bound to (optional)." />
-					</div>
-					<div id="connect-buttons">
-						<button title="Click me to join the GameGround server.">Connect!</button>
-						<button type="button" title="go to codestation.org" onclick="JavaScript:window.location.href='https://codestation.org/'">Exit!</button>
-					</div>
-				</form>
-			</div>
+			<login v-else></login>
 			<component v-if="modal != null" :data="modal" :is="modal.constructor.TAG"></component>
 		</div>
 	</body>

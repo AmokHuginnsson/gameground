@@ -10,7 +10,6 @@
 #include <yaal/tools/ansi.hxx>
 #include <yaal/tools/base64.hxx>
 #include <yaal/tools/hmemory.hxx>
-#include <yaal/hconsole/console.hxx>
 
 M_VCSID( "$Id: " __ID__ " $" )
 #include "server.hxx"
@@ -25,7 +24,6 @@ using namespace yaal::tools;
 using namespace yaal::tools::util;
 using namespace yaal::dbwrapper;
 using namespace yaal::ansi;
-using namespace yaal::hconsole;
 
 namespace gameground {
 
