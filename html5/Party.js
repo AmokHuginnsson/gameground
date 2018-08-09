@@ -9,6 +9,7 @@ class Party {
 		this._app = app_
 		this._handlers["say"] = ( msg ) => this.on_say( msg )
 		this._handlers["msg"] = ( msg ) => this.on_msg( msg )
+		this._notification = false
 	}
 	get name() {
 		return ( this._name + ":" + this._id )
@@ -36,6 +37,16 @@ class Party {
 		if ( handler !== undefined ) {
 			handler( message[1] )
 		}
+	}
+	notify() {
+		this._notification = true
+		document.getElementById( "snd-notify" ).play()
+	}
+	visit() {
+		this._notification = false
+	}
+	is_notified() {
+		return ( this._notification )
 	}
 	on_say( message_ ) {
 		this._refs.messages.log_message( message_ )

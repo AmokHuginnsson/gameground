@@ -28,7 +28,7 @@
 		<audio id="snd-login"><source src="service-login.wav" type="audio/wav" /></audio>
 		<audio id="snd-logout"><source src="service-logout.wav" type="audio/wav" /></audio>
 		<audio id="snd-call"><body><source src="phone-incoming-call.wav" type="audio/wav" /></audio>
-		<audio id="snd-message"><source src="message-new-instant.wav" type="audio/wav" /></audio>
+		<audio id="snd-notify"><source src="message-new-instant.wav" type="audio/wav" /></audio>
 		<audio id="snd-dice"><source src="dice-roll.wav" type="audio/wav" /></audio>
 		<audio id="snd-stone"><source src="stone.wav" type="audio/wav" /></audio>
 		<div id="root">
@@ -37,7 +37,7 @@
 					<button
 						v-for="tab in partys"
 						v-bind:key="tab._id"
-						v-bind:class="['tab-button', { active: currentTab === tab._id }]"
+						v-bind:class="['tab-button', { active: currentTab === tab._id }, { notified: tab.is_notified() }]"
 						v-on:click="make_visible( tab._id )"
 						v-on:click.middle="close_party( tab._id )"
 						>{{ tab.name }}

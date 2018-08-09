@@ -42,10 +42,12 @@ const _app_ = new Vue( {
 			return ( party )
 		},
 		make_visible: function( id_ ) {
-			const idx = this.partys.findIndex( p => p._id == id_ )
+			let idx = this.partys.findIndex( p => p._id == id_ )
 			if ( idx < 0 ) {
 				this.add_party( this.party_by_id( id_ ) )
+				idx = this.partys.length - 1
 			}
+			this.partys[idx].visit()
 			this.currentTab = id_
 		},
 		add_party: function( party_ ) {
@@ -150,6 +152,9 @@ const _app_ = new Vue( {
 			const pad = document.querySelector( "#chat-view" )
 			if ( pad ) {
 				pad.log_message( message )
+				if ( this.currentTab != "browser" ) {
+					this.party_by_id( "browser" ).notify()
+				}
 			}
 		},
 		close_party: function( id_ ) {
@@ -210,9 +215,13 @@ const _app_ = new Vue( {
 		},
 		on_party: function( message ) {
 			const msgData = message.chop( ",", 2 )
-			const party = this.party_by_id( msgData[0] )
+			const id = msgData[0]
+			const party = this.party_by_id( id )
 			if ( party == null ) {
 				return
+			}
+			if ( id != this.currentTab ) {
+				party.notify()
 			}
 			party.invoke( msgData[1] )
 		},
