@@ -215,6 +215,7 @@ label {
 	padding: 2px;
 	background: #def;
 	border-bottom: 1px solid #aaa;
+	cursor: move;
 }
 .messages {
 	overflow-y: auto;

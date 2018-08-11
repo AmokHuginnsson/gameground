@@ -1,9 +1,9 @@
 "use strict"
 
-class NewGameConfigurator {
+class NewGameConfigurator extends MessageBox {
 	static get TAG() { return ( "new-game-configuration" ) }
 	constructor( app_, logic_ ) {
-		this._app = app_
+		super( app_, "" )
 		this._configurators = [
 			new BoggleConfigurator( app_.logic_by_type( Boggle.TAG ) ),
 			new GalaxyConfigurator( app_.logic_by_type( Galaxy.TAG ) ),
@@ -47,6 +47,7 @@ Vue.component(
 	NewGameConfigurator.TAG, {
 		props: ["data"],
 		data: function( arg ) {
+			this.data._refs = this.$refs
 			return ( this.data )
 		},
 		methods: {
@@ -74,8 +75,8 @@ Vue.component(
 		template: `
 		<div class="modal" tabindex="1" v-on:keypress.escape="data.close()">
 			<div class="block"></div>
-			<div class="messagebox">
-				<div class="title noselect">Create new game ...</div>
+			<div ref="messagebox" class="messagebox">
+				<div @mousedown="( event ) => data.dragMouseDown( event )" class="title noselect">Create new game ...</div>
 				<div class="creator">
 					<div class="vbox">
 						<div class="hbox">
