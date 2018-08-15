@@ -310,6 +310,13 @@ function dump_exception( e ) {
 	console.log( e.name + ": " + e.message + " in " + e.fileName + ":" + e.lineNumber )
 }
 
+function ensure( condition_, message_ ) {
+	if ( ! condition_() ) {
+		_app_.show_modal( message_ + "\n" + condition_.toString() )
+		_app_.modal._title = "Failed Assertion!"
+	}
+}
+
 function post_load() {
 	for ( let i in postLoadFunctions ) {
 		postLoadFunctions[ i ]()

@@ -350,9 +350,21 @@ label {
 .cubes div:active {
 	border: 3px solid #0ff;
 }
-.boggle-chat {
+.boggle-chat, .galaxy-chat {
 	width: 24%;
 	height: 100%;
+}
+.galaxy-pane-left {
+	width: 75%;
+}
+.galaxy-pane-left .board {
+	background: url( "galaxy.png" ) no-repeat;
+	background-size: 100% 100%;
+	width: 100%;
+	height: 100%;
+}
+.galaxy-chat .messages {
+	height: calc( 100% - 80px );
 }
 #creator-buttons {
 	text-align: center;

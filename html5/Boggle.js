@@ -41,7 +41,8 @@ class Boggle extends Party {
 		this._deck = data_
 		data_ = data_.toUpperCase()
 		for ( let i = 0; i < 16; ++ i ) {
-			this._refs.cube[i].textContent = data_[i]
+			const letter = data_[i]
+			this._refs.cube[i].textContent = letter == "Q" ? "Qu" : letter
 		}
 		if ( this._state != "over" ) {
 			if ( ( this._state == "init" ) || ( this._state == "pause" ) ) {
@@ -76,10 +77,10 @@ Vue.component(
 	"bgl", {
 		props: ["data"],
 		data: function( arg ) {
+			this.data._refs = this.$refs
 			return ( this.data )
 		},
 		mounted: function() {
-			this.data._refs = this.$refs
 			this.data._interval = setInterval( this.updateTimeLeft, 1000 )
 		},
 		beforeDestroy: function() {
