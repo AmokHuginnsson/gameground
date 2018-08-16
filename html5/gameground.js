@@ -270,6 +270,7 @@ function colorMap( color ) {
 }
 
 function colorize( message ) {
+	message = message.replace( /</g, "&lt;" ).replace( />/g, "&gt;" )
 	let m = ""
 	let idx = 0
 	let needClosing = false
@@ -303,6 +304,13 @@ function colorize( message ) {
 			.replace( /\\n/g, "<br />" )
 			.replace( /\n/g, "<br />" )
 			.replace( /\\E/g, "\\" )
+			.replace(
+				/([^\s<]+[.][^\s<]+)/g,
+				function( match_ ) {
+					const url = match_.startsWith( "http" ) ? match_ : "https://" + match_
+					return ( "<a href=\"" + url + "\" target=\"_blank\">" + match_ + "</a>" )
+				}
+			)
 	)
 }
 
