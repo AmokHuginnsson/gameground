@@ -28,6 +28,9 @@ class Galaxy extends Party {
 		this._emperor = null
 		this._emperors = new Map()
 		this._handlers["setup"] = ( msg ) => this.on_setup( msg )
+		this._handlers["play"] = ( msg ) => this.on_play( msg )
+		const fr = " 1fr".repeat( this._boardSize )
+		this._boardStyle = "grid-template-columns:" + fr + "; grid-template-rows:" + fr + ";"
 		// console.log( "ec = " + this._emperorCount + ", spc = " + this._startupPlayerCount + ", bs = " + this._boardSize + ", nsc = " + this._neutralSystemCount )
 	}
 	on_setup( data_ ) {
@@ -58,6 +61,14 @@ class Galaxy extends Party {
 		} else if ( setupItem == "system_info" ) {
 		}
 	}
+	on_play( data_ ) {
+		const play = data_.split( "=" )
+		const playItem = play[0]
+		const playData = play[1]
+		if ( playItem == "system_info" ) {
+		} else if ( playItem == "round" ) {
+		}
+	}
 }
 
 Vue.component(
@@ -80,8 +91,8 @@ Vue.component(
 		template: `
 		<div class="tab-pane hbox galaxy-pane">
 			<div class="galaxy-pane-left">
-				<div class="board">
-					<div v-for="i in data._boardSize"></div>
+				<div class="board" :style="data._boardStyle">
+					<div v-for="i in ( data._boardSize * data._boardSize )" style="outline: 1px solid red;"></div>
 				</div>
 			</div>
 			<div class="galaxy-chat">

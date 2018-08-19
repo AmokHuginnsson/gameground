@@ -50,6 +50,9 @@ Vue.component(
 			this.data._refs = this.$refs
 			return ( this.data )
 		},
+		mounted: function() {
+			this.$refs.name.focus()
+		},
 		methods: {
 			on_key_press: function( event ) {
 				switch ( event.key ) {
@@ -95,7 +98,7 @@ Vue.component(
 							</div>
 							<div class="vbox">
 								<div class="center label">
-									<label>Name: </label><input v-model="name" type="text" title="Name for newly created game." />
+									<label>Name: </label><input ref="name" v-model="name" type="text" title="Name for newly created game." />
 								</div>
 								<label class="edge">Configuration ...</label>
 								<div id="configuration">

@@ -76,14 +76,17 @@ Vue.component(
 			this.data._refs = this.$refs
 			return ( this.data )
 		},
+		mounted: function() {
+			this.$refs[this.data._label][0].focus()
+		},
 		template: `
-		<div class="modal">
+		<div class="modal" v-on:keypress.escape="data.close()">
 			<div class="block"></div>
 			<div ref="messagebox" class="messagebox">
 				<div @mousedown="( event ) => data.dragMouseDown( event )" class="title noselect">{{ data.title }}</div>
 				<div class="content">
 					<p v-html="data.message"></p>
-					<button v-for="handler, label in data._handlers" v-on:click="handler()">{{ label }}</button>
+					<button v-for="handler, label in data._handlers" :ref="label" v-on:click="handler()">{{ label }}</button>
 				</div>
 			</div>
 		</div>

@@ -362,6 +362,9 @@ label {
 	width: 75%;
 }
 .galaxy-pane-left .board {
+	display: grid;
+	grid-column-gap: 0px;
+	grid-row-gap: 0px;
 	background: url( "galaxy.png" ) no-repeat;
 	background-size: 100% 100%;
 	width: 100%;
