@@ -1,9 +1,10 @@
 "use strict"
 
 class System {
-	constructor() {
-		this._coordinateX = -1
-		this._coordinateY = -1
+	constructor( id_, coordX_, coordY_ ) {
+		this._id = id_
+		this._coordinateX = coordX_
+		this._coordinateY = coordY_
 		this._production = -1
 		this._fleet = -1
 		this._emperor = null
@@ -23,12 +24,20 @@ class Galaxy extends Party {
 		this._startupPlayerCount = parseInt( conf[1] )
 		this._boardSize = parseInt( conf[2] )
 		this._neutralSystemCount = parseInt( conf[3] )
-		this._systems = []
+		this._systems = new Map()
 		this._color = -1
 		this._emperor = null
 		this._emperors = new Map()
+		this._coordToSystem = new Map()
 		this._handlers["setup"] = ( msg ) => this.on_setup( msg )
 		this._handlers["play"] = ( msg ) => this.on_play( msg )
+		this.statuses = [
+		 	"Make your imperial fleet moves...",
+		]
+		this.hovered = null
+		this.turn = 0
+		this.arrival = 0
+		this.status = 0
 		const fr = " 1fr".repeat( this._boardSize )
 		this._boardStyle = "grid-template-columns:" + fr + "; grid-template-rows:" + fr + ";"
 		// console.log( "ec = " + this._emperorCount + ", spc = " + this._startupPlayerCount + ", bs = " + this._boardSize + ", nsc = " + this._neutralSystemCount )
@@ -41,16 +50,16 @@ class Galaxy extends Party {
 			ensure( () => parseInt( setupData ) == this._boardSize, "Invalid board size." )
 		} else if ( setupItem == "systems" ) {
 			const systemCount = parseInt( setupData )
-			ensure( () => systemCount == ( this._startupPlayerCount + this._neutralSystemCount ), "Invalid total system count." )
-			for ( let i = 0; i < systemCount; ++ i ) {
-				this._systems.push( new System() )
-			}
-		} else if ( setupItem == "system_coordinate" ) {
+			ensure( () => systemCount == this.system_count(), "Invalid total system count." )
+		} else if ( setupItem == "system_coordinates" ) {
 			const systemCoordinate = setupData.split( "," )
 			const systemNo = parseInt( systemCoordinate[0] )
-			const system = this._systems[systemNo]
-			system._coordinateX = parseInt( systemCoordinate[1] )
-			system._coordinateY = parseInt( systemCoordinate[2] )
+			const system = new System( systemNo, parseInt( systemCoordinate[1] ), parseInt( systemCoordinate[2] ) )
+		 	this._systems.set( systemNo, system )
+			this._coordToSystem.set( this.idx( system ), system )
+			if ( this._systems.size == this.system_count() ) {
+				this.vm.$forceUpdate()
+			}
 		} else if ( setupItem == "emperor" ) {
 			const tokens = setupData.split( "," )
 			const index = parseInt( tokens[0] )
@@ -58,7 +67,6 @@ class Galaxy extends Party {
 			if ( tokens[1] == this._emperor ) {
 				this._color = index
 			}
-		} else if ( setupItem == "system_info" ) {
 		}
 	}
 	on_play( data_ ) {
@@ -69,6 +77,16 @@ class Galaxy extends Party {
 		} else if ( playItem == "round" ) {
 		}
 	}
+	idx( system_ ) {
+		return ( this._boardSize * system_._coordinateY + system_._coordinateX )
+	}
+	system_class( idx_ ) {
+		const system = this._coordToSystem.get( idx_ )
+		return ( system ? "s" + system._id : "s" )
+	}
+	system_count() {
+		return ( this._startupPlayerCount + this._neutralSystemCount )
+	}
 }
 
 Vue.component(
@@ -77,6 +95,9 @@ Vue.component(
 		data: function( arg ) {
 			this.data._refs = this.$refs
 			return ( this.data )
+		},
+		mounted: function() {
+			this.data.vm = this
 		},
 		methods: {
 			on_msg_enter: function( event ) {
@@ -87,19 +108,48 @@ Vue.component(
 				}
 				source.value = ""
 			},
+			on_mouseover( idx_ ) {
+				const system = this.data._coordToSystem.get( idx_ )
+				if ( system ) {
+					this.hovered = system
+				}
+			},
+			on_mouseout( idx_ ) {
+				if ( this.hovered == this.data._coordToSystem.get( idx_ ) ) {
+					this.hovered = null
+				}
+			}
 		},
 		template: `
 		<div class="tab-pane hbox galaxy-pane">
 			<div class="galaxy-pane-left">
-				<div class="board" :style="data._boardStyle">
-					<div v-for="i in ( data._boardSize * data._boardSize )" style="outline: 1px solid red;"></div>
+				<div style="float: left; height: 2em;">
+					<span class="galaxy-label">Galaxy</span><label>Emperor </label><label>{{data._app.myLogin}}</label>
+				</div>
+				<div style="float: right;">
+					<label>Fleet size:</label>
+					<input type="number" size="4" value="0" />
+					<label style="display: inline-block; width: 6em; padding-left: 2em;">Turn: {{turn}}</label>
+					<label style="display: inline-block; width: 7em;">Arrival: {{arrival}}</label>
+					<button>End round!</button>
+				</div>
+				<div ref="board" class="board" :style="data._boardStyle">
+					<div v-for="(_, i) in ( data._boardSize * data._boardSize )" @mouseover="on_mouseover( i )" @mouseout="on_mouseout( i )" :class="['system-box', { active: hovered && ( data.idx( hovered ) == i ) }]">
+						<div :class="['system', data.system_class(i)]"></div>
+					</div>
 				</div>
 			</div>
 			<div class="galaxy-chat">
-				<label>Private chat messages</label>
+				<div class="galaxy-info">
+					<label>System: {{hovered ? hovered._id : "?"}}</label></br>
+					<label>Emperor: {{hovered && hovered._emperor != null ? hovered._emperor : "?"}}</label></br>
+					<label style="display: inline-block; width: 50%;">Production: {{hovered ? hovered._production : "?"}}</label><label>Fleet: {{hovered ? hovered._fleet : "?"}}</label>
+				</div>
+				<label>Party chat messages</label>
 				<div class="messages" ref="messages"></div>
 				<label>Type your message</label><br />
-				<input class="long-input" type="text" name="input" maxlength="1024" title="Enter message You want to send to other players." v-on:keypress.enter="on_msg_enter">
+				<input class="long-input" type="text" name="input" maxlength="1024" title="Enter message You want to send to other players." v-on:keypress.enter="on_msg_enter"><br />
+				<span>{{statuses[status]}}</span>
 			</div>
 		</div>
 `

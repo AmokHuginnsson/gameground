@@ -358,6 +358,20 @@ label {
 	width: 24%;
 	height: 100%;
 }
+.galaxy-pane, .galaxy-pane .messages {
+	background: black;
+	color: lightgray;
+}
+.galaxy-pane input[type="text"] {
+	background: black;
+	color: lightgray;
+	border: 1px solid blue;
+	width: calc( 100% - 6px );
+	padding: 2px;
+}
+.galaxy-pane input[type="number"] {
+	background: lightgreen;
+}
 .galaxy-pane-left {
 	width: 75%;
 }
@@ -368,10 +382,84 @@ label {
 	background: url( "galaxy.png" ) no-repeat;
 	background-size: 100% 100%;
 	width: 100%;
+	height: calc( 100% - 2em );
+	border: 1px solid blue;
+}
+.system-box {
+	width: 100%;
 	height: 100%;
+	border-left: 1px solid #333;
+	border-top: 1px solid #333;
+}
+.system-box.active {
+	background: transparent;
+	border: 2px solid #fff;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding-top: 2px;
+	padding-left: 2px;
+}
+.system {
+	background: url( "systems.png" ) 0px center no-repeat;
+	width: 32px;
+	height: 100%;
+	margin: auto;
+}
+ .s { background: transparent; }
+ .s0 { background-position:    -0px; }
+ .s1 { background-position:   -32px; }
+ .s2 { background-position:   -64px; }
+ .s3 { background-position:   -96px; }
+ .s4 { background-position:  -128px; }
+ .s5 { background-position:  -160px; }
+ .s6 { background-position:  -192px; }
+ .s7 { background-position:  -224px; }
+ .s8 { background-position:  -256px; }
+ .s9 { background-position:  -288px; }
+.s10 { background-position:  -320px; }
+.s11 { background-position:  -352px; }
+.s12 { background-position:  -384px; }
+.s13 { background-position:  -416px; }
+.s14 { background-position:  -448px; }
+.s15 { background-position:  -480px; }
+.s16 { background-position:  -512px; }
+.s17 { background-position:  -544px; }
+.s18 { background-position:  -576px; }
+.s19 { background-position:  -608px; }
+.s20 { background-position:  -640px; }
+.s21 { background-position:  -672px; }
+.s22 { background-position:  -704px; }
+.s23 { background-position:  -736px; }
+.s24 { background-position:  -768px; }
+.s25 { background-position:  -800px; }
+.s26 { background-position:  -832px; }
+.s27 { background-position:  -864px; }
+.s28 { background-position:  -896px; }
+.s29 { background-position:  -928px; }
+.s30 { background-position:  -960px; }
+.s31 { background-position:  -992px; }
+.s32 { background-position: -1024px; }
+.s33 { background-position: -1056px; }
+.s34 { background-position: -1088px; }
+.s35 { background-position: -1120px; }
+.galaxy-info {
+	height: 4em;
+	padding: 4px;
+	border: 1px solid blue;
 }
 .galaxy-chat .messages {
-	height: calc( 100% - 80px );
+	padding: 2px;
+	height: calc( 100% - 82px - 5em );
+	border: 1px solid blue;
+}
+.galaxy-label {
+	font-size: x-large;
+	font-style: italic;
+	font-weight: bolder;
+	padding-left: 1em;
+	padding-right: 1em;
+	color: blue;
 }
 #creator-buttons {
 	text-align: center;
@@ -399,3 +487,4 @@ label {
 	grid-row-gap: 8px;
 	align-items: center;
 }
+

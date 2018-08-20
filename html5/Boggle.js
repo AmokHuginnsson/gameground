@@ -188,7 +188,7 @@ Vue.component(
 						</tr>
 					</table>
 				</div>
-				<label>Private chat messages</label>
+				<label>Party chat messages</label>
 				<div class="messages" ref="messages"></div>
 				<label>Type your message</label><br />
 				<input class="long-input" type="text" name="input" maxlength="1024" title="Enter message You want to send to other players." v-on:keypress.enter="on_msg_enter">
