@@ -389,7 +389,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 				_gui._tips.setText( "Select destination for Your fleet ..." );
 				break;
 			case INPUT:
-				_gui._tips.setText( "How many destroyers You wish to send ?" );
+				_gui._tips.setText( "How many destroyers You wish to send?" );
 				break;
 		}
 		_state = $state;

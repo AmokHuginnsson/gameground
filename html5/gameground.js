@@ -398,12 +398,12 @@ HTMLDivElement.prototype.log_message = function( message_, colorMap_ ) {
 	}
 }
 
-HTMLDivElement.prototype.append_text = function( message_, color_, colorMap_ ) {
+HTMLDivElement.prototype.append_text = function( message_, color_, colorMap_ = colorMap ) {
 	const scrollPos = this.scrollHeight - this.clientHeight
 	const wantScroll = this.scrollTop === scrollPos
 	const colorized = colorize( message_, colorMap_ )
-	if ( typeof color_ === "string" ) {
-		this.innerHTML += ( "<span style=\"color: " + color_ + ";\">" + colorized + "</span>" )
+	if ( ( typeof color_ === "number" ) && colorMap_ ) {
+		this.innerHTML += ( "<span style=\"color: " + colorMap_( color_ ) + ";\">" + colorized + "</span>" )
 	} else {
 		this.innerHTML += colorized
 	}

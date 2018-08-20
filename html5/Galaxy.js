@@ -11,9 +11,35 @@ class System {
 	}
 }
 
+class Move {
+	constructor( sourceSystem_, destinationSystem_, fleet_ ) {
+		this._sourceSystem = sourceSystem_
+		this._destinationSystem = destinationSystem_
+		this._fleet = fleet_
+	}
+}
+
 class Galaxy extends Party {
 	static get TAG() { return ( "glx" ) }
 	static get NAME() { return ( "Galaxy" ) }
+	static get STATE() {
+		return ( {
+			WAIT: 0,
+			LOCKED: 1,
+			NORMAL: 2,
+			SELECT: 3,
+			INPUT: 4,
+		} )
+	}
+	static get STATUSES() {
+		return [
+			"Wait for match to begin ...",
+			"A waiting for GameGround events ...",
+			"Make your imperial fleet moves ...",
+			"Select destination for Your fleet ...",
+			"How many destroyers You wish to send?",
+		]
+	}
 	static get SYSTEM_NAMES() {
 		return ( [ [
 			"Aldebaran",
@@ -119,6 +145,11 @@ class Galaxy extends Party {
 			"lightgray"
 		] )
 	}
+	static get COLORS() {
+		return {
+			WHITE: 15,
+		}
+	}
 	static get COLOR_NORMAL() {
 		return ( Galaxy.COLOR.length - 1 )
 	}
@@ -138,18 +169,26 @@ class Galaxy extends Party {
 		this._coordToSystem = new Map()
 		this._handlers["setup"] = ( msg ) => this.on_setup( msg )
 		this._handlers["play"] = ( msg ) => this.on_play( msg )
+		this._moves = []
+		this._sourceSystem = -1
+		this._destinationSystem = -1
 		this.nameSet = ( new Date().getHours() | 0 ) % 2
-		this.statuses = [
-			"Make your imperial fleet moves...",
-		]
 		this.hovered = null
 		this.turn = 0
 		this.arrival = 0
-		this.status = 0
+		this.state = Galaxy.STATE.WAIT
 		this.showNames = false
+		this.fleet = 0
 		const fr = " 1fr".repeat( this._boardSize )
 		this._boardStyle = "grid-template-columns:" + fr + "; grid-template-rows:" + fr + ";"
 		// console.log( "ec = " + this._emperorCount + ", spc = " + this._startupPlayerCount + ", bs = " + this._boardSize + ", nsc = " + this._neutralSystemCount )
+	}
+	get state() {
+		return ( this._state )
+	}
+	set state( state_ ) {
+		this._state = state_
+		this.arrival = this.turn
 	}
 	on_setup( data_ ) {
 		const setup = data_.split( "=" )
@@ -176,6 +215,8 @@ class Galaxy extends Party {
 			if ( tokens[1] == this._app.myLogin ) {
 				this._emperor = index
 			}
+		} else if ( setupItem == "ok" ) {
+			this.state = Galaxy.STATE.NORMAL
 		}
 	}
 	on_play( data_ ) {
@@ -192,7 +233,7 @@ class Galaxy extends Party {
 				system._production = production
 			}
 			system._fleet = parseInt( systemInfo[4] )
-			const emperor = parseInt( systemInfo[3] )
+			let emperor = parseInt( systemInfo[3] )
 			let value = this._emperors.get( emperor )
 			switch ( event ) {
 				case ( "c" ): /* conquered */
@@ -202,16 +243,14 @@ class Galaxy extends Party {
 					let temp = system._emperor
 					temp = ( temp >= 0 ) ? temp : Galaxy.COLOR_NORMAL
 					this.log( this.system_name( sysNo ), temp )
-					value = "(" + Galaxy.SYMBOLS[ sysNo ] + ")"
-					this.log( value, temp )
+					this.log( "(" + Galaxy.SYMBOLS[ sysNo ] + ")", temp )
 					this.log( ".\n", Galaxy.COLOR_NORMAL )
 					system._emperor = emperor
 				} break
 				case ( 'r' ): { /* reinforcements */
 					this.log( "Reinforcements for ", Galaxy.COLOR_NORMAL )
 					this.log( this.system_name( sysNo ), emperor )
-					value = "(" + Galaxy.SYMBOLS[ sysNo ] + ")"
-					this.log( value, emperor )
+					this.log( "(" + Galaxy.SYMBOLS[ sysNo ] + ")", emperor )
 					this.log( " arrived.\n", Galaxy.COLOR_NORMAL )
 				} break
 				case ( 'f' ):
@@ -219,13 +258,12 @@ class Galaxy extends Party {
 					if ( event == 'f' ) { /* failed to conquer */
 						system._emperor = emperor
 						emperor = this._emperor
-						value = _emperors.get( emperor )
+						value = this._emperors.get( emperor )
 					}
 					let temp = system._emperor
 					temp = ( temp >= 0 ) ? temp : Galaxy.COLOR_NORMAL
 					this.log( this.system_name( sysNo ), temp )
-					variable = "(" + Galaxy.SYMBOLS[ sysNo ] + ")"
-					this.log( variable, temp )
+					this.log( "(" + Galaxy.SYMBOLS[ sysNo ] + ")", temp )
 					this.log( " resisted attack from ", Galaxy.COLOR_NORMAL )
 					this.log( value, emperor )
 					this.log( ".\n", Galaxy.COLOR_NORMAL )
@@ -237,9 +275,14 @@ class Galaxy extends Party {
 					break
 				}
 			}
-			this.vm.$forceUpdate()
 		} else if ( playItem == "round" ) {
+			this.log( "----- ", Galaxy.COLORS.WHITE )
+			this.log( " round: ", Galaxy.COLOR_NORMAL )
+			this.turn = parseInt( playData )
+			this.log( playData + " -----\n", Galaxy.COLORS.WHITE )
+			this.state = Galaxy.STATE.NORMAL
 		}
+		this.vm.$forceUpdate()
 	}
 	idx( system_ ) {
 		return ( this._boardSize * system_._coordinateY + system_._coordinateX )
@@ -265,6 +308,42 @@ class Galaxy extends Party {
 	}
 	on_msg( message_ ) {
 		this._refs.messages.append_text( message_ + "\n", null, this.color_map )
+	}
+	on_end_round() {
+		this.state = Galaxy.STATE.LOCKED
+		for ( let m of this._moves ) {
+			this._app.sock.send( "cmd:" + this._id + ":play:move=" + m._sourceSystem + "," + m._destinationSystem + "," + m._fleet + "\n" );
+		}
+		this._app.sock.send( "cmd:" + this._id + ":play:end_round\n" );
+		this._moves.clear()
+	}
+	on_click( idx_ ) {
+		const system = this._coordToSystem.get( idx_ )
+		if ( system ) {
+			if ( ( this.state == Galaxy.STATE.NORMAL ) && ( system._emperor == this._emperor ) && ( system._fleet > 0 ) ) {
+				this.state = Galaxy.STATE.SELECT
+				this._sourceSystem = system._id
+			} else if ( this.state == Galaxy.STATE.SELECT ) {
+				this.state = Galaxy.STATE.INPUT
+				this._destinationSystem = system._id
+				this.fleet = this._systems.get( this._sourceSystem )._fleet
+				this._refs.fleet.disabled = false
+				this._refs.fleet.focus()
+				this._refs.fleet.select()
+			}
+		}
+	}
+	on_fleet() {
+		if ( this.state == Galaxy.STATE.INPUT ) {
+			const src = this._systems.get( this._sourceSystem )
+			if ( this.fleet > src._fleet ) {
+				this.fleet = src._fleet
+			}
+			src._fleet -= this.fleet
+			this._moves.push( new Move( this._sourceSystem, this._destinationSystem, this.fleet ) )
+			this.state = Galaxy.STATE.NORMAL
+			this.fleet = 0
+		}
 	}
 }
 
@@ -315,6 +394,9 @@ Vue.component(
 			},
 			on_rrelease() {
 				this.showNames = false
+			},
+			status_text() {
+				return ( Galaxy.STATUSES[this.data.state] )
 			}
 		},
 		computed: {
@@ -327,16 +409,17 @@ Vue.component(
 				</div>
 				<div style="float: right;">
 					<label>Fleet size:</label>
-					<input type="number" min="0" size="4" value="0" />
+					<input ref="fleet" v-model="fleet" type="number" min="0" size="4" value="0" v-on:keypress.enter="data.on_fleet" :disabled="data.state != data.constructor.STATE.INPUT" />
 					<label style="display: inline-block; width: 6em; padding-left: 1em;">Turn: {{turn}}</label>
 					<label style="display: inline-block; width: 7em;">Arrival: {{arrival}}</label>
-					<button>End round!</button>
+					<button @click="data.on_end_round()" :disabled="data.state != data.constructor.STATE.NORMAL">End round!</button>
 				</div>
 				<div ref="board" class="board" :style="data._boardStyle" @mousedown.right="on_rpress()" @mouseup.right="on_rrelease()">
 					<div
 						v-for="(_, i) in ( data._boardSize * data._boardSize )"
 						@mouseover="on_mouseover( i )"
 						@mouseout="on_mouseout( i )"
+						@click="data.on_click( i )"
 						:class="['system-box', dynamic_class( i )]"
 						:style="dynamic_style( i )"
 					>
@@ -356,7 +439,7 @@ Vue.component(
 				<div class="messages" ref="messages"></div>
 				<label>Type your message</label><br />
 				<input class="long-input" type="text" name="input" maxlength="1024" title="Enter message You want to send to other players." v-on:keypress.enter="on_msg_enter"><br />
-				<span>{{statuses[status]}}</span>
+				<span>{{status_text()}}</span>
 			</div>
 		</div>
 `
