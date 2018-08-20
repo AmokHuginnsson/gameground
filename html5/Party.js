@@ -52,7 +52,7 @@ class Party {
 		this._refs.messages.log_message( message_ )
 	}
 	on_msg( message_ ) {
-		this._refs.messages.append_text( message_ )
+		this._refs.messages.append_text( message_ + "\n" )
 	}
 }
 

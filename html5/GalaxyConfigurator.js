@@ -21,9 +21,9 @@ Vue.component(
 		},
 		template: `
 		<div id="glx-configurator">
-			<label>Emperors:</label><input v-model="emperors" type="number" min="2" title="Minimum number of players to start the match." />
-			<label>Systems:</label><input v-model="systems" type="number" min="0" title="Total numbers of neutral star systems in the game." />
-			<label>Board size:</label><input v-model="boardSize" type="number" min="6" title="Map grid size." />
+			<label>Emperors:</label><input v-model="emperors" type="number" min="2" max="36" title="Minimum number of players to start the match." />
+			<label>Systems:</label><input v-model="systems" type="number" min="0" max="34" title="Total numbers of neutral star systems in the game." />
+			<label>Board size:</label><input v-model="boardSize" type="number" min="6" max="20" title="Map grid size." />
 		</div>
 `
 	}

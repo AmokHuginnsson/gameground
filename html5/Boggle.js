@@ -11,8 +11,8 @@ class Boggle extends Party {
 		this._scores = []
 		this._handlers["player_quit"] = function(){}
 		this._handlers["deck"] = ( msg ) => this.on_deck( msg )
-		this._handlers["longest"] = ( msg ) => this._refs.longest.append_text( msg )
-		this._handlers["scored"] = ( msg ) => this._refs.scored.append_text( msg )
+		this._handlers["longest"] = ( msg ) => this._refs.longest.append_text( msg + "\n" )
+		this._handlers["scored"] = ( msg ) => this._refs.scored.append_text( msg + "\n" )
 		this._handlers["player"] = ( msg ) => this.on_player( msg )
 		this._handlers["setup"] = ( msg ) => this.on_setup( msg )
 		this._handlers["round"] = ( msg ) => this.on_round( msg )
@@ -98,7 +98,7 @@ Vue.component(
 			on_bgl_enter: function() {
 				if ( this.input.match( /.*\S+.*/ ) != null ) {
 					this.$parent.sock.send( "cmd:" + this.data._id + ":play:" + this.input )
-					this.data._refs.sent.append_text( this.input )
+					this.data._refs.sent.append_text( this.input + "\n" )
 				}
 				this.input = ""
 			},

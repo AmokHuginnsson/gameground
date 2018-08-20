@@ -57,9 +57,9 @@ Vue.component(
 			const info = this.data._configuration.split( "," )
 			const m = this.$refs.messages
 			this.data._refs = this.$refs
-			m.append_text( "User: " + this.data._name )
-			m.append_text( "Full name: " + info[0] )
-			m.append_text( "Description:\n" + info[1] )
+			m.append_text( "User: " + this.data._name + "\n" )
+			m.append_text( "Full name: " + info[0] + "\n" )
+			m.append_text( "Description:\n" + info[1] + "\n" )
 		},
 		methods: {
 			on_enter: function( event ) {

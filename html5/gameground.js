@@ -247,29 +247,29 @@ const _app_ = new Vue( {
 function colorMap( color ) {
 	color = color | 0
 	switch ( color ) {
-		case   0: { color = "black" }         break
-		case   1: { color = "red" }           break
-		case   2: { color = "green" }         break
-		case   3: { color = "brown" }         break
-		case   4: { color = "blue" }          break
-		case   5: { color = "magenta" }       break
-		case   6: { color = "cyan" }          break
-		case   7: { color = "lightgray" }     break
-		case   8: { color = "darkgray" }      break
-		case   9: { color = "brightred" }     break
-		case  10: { color = "brightgreen" }   break
-		case  11: { color = "yellow" }        break
-		case  12: { color = "brightblue" }    break
-		case  13: { color = "brightmagenta" } break
-		case  14: { color = "brightcyan" }    break
-		case  15: { color = "white" }         break
-		case 256: { color = "black" }         break
-		default:  { color = "black" }         break
+		case   0: { color = "black" }           break
+		case   1: { color = "red" }             break
+		case   2: { color = "green" }           break
+		case   3: { color = "brown" }           break
+		case   4: { color = "blue" }            break
+		case   5: { color = "MediumVioletRed" } break
+		case   6: { color = "DarkTurquoise" }   break
+		case   7: { color = "lightgray" }       break
+		case   8: { color = "dimgray" }         break
+		case   9: { color = "brightred" }       break
+		case  10: { color = "LimeGreen" }       break
+		case  11: { color = "yellow" }          break
+		case  12: { color = "DodgerBlue" }      break
+		case  13: { color = "DeepPink" }        break
+		case  14: { color = "cyan" }            break
+		case  15: { color = "white" }           break
+		case 256: { color = "black" }           break
+		default:  { color = "black" }           break
 	}
 	return ( color )
 }
 
-function colorize( message ) {
+function colorize( message, colorMap_ = colorMap ) {
 	message = message.replace( /</g, "&lt;" ).replace( />/g, "&gt;" )
 	let m = ""
 	let idx = 0
@@ -286,7 +286,7 @@ function colorize( message ) {
 		newIdx += idx
 		m += message.substr( idx, newIdx - idx )
 		const end = message.indexOf( ";", newIdx )
-		const col = colorMap( message.substr( newIdx + 1, end - ( newIdx + 1 ) ) )
+		const col = colorMap_( message.substr( newIdx + 1, end - ( newIdx + 1 ) ) )
 //		console.log( "len = " + message.length + ", idx = " + idx + ", end = " + end + ", newIdx = " + newIdx + ", col = " + col )
 		if ( needClosing ) {
 			m += "</span>"
@@ -387,21 +387,26 @@ Node.prototype.removeAllChildren = function() {
 	}
 }
 
-HTMLDivElement.prototype.log_message = function( message_ ) {
+HTMLDivElement.prototype.log_message = function( message_, colorMap_ ) {
 	const scrollPos = this.scrollHeight - this.clientHeight
 	const wantScroll = this.scrollTop === scrollPos
 	this.appendChild( document.createTextNode( new Date().iso8601() ) )
-	this.append_text( ": " + message_ )
+	this.append_text( ": " + message_, null, colorMap_ )
+	this.appendChild( document.createElement( "br" ) )
 	if ( wantScroll ) {
 		this.scrollTop = this.scrollHeight
 	}
 }
 
-HTMLDivElement.prototype.append_text = function( message_ ) {
+HTMLDivElement.prototype.append_text = function( message_, color_, colorMap_ ) {
 	const scrollPos = this.scrollHeight - this.clientHeight
 	const wantScroll = this.scrollTop === scrollPos
-	this.innerHTML += colorize( message_ )
-	this.appendChild( document.createElement( "br" ) )
+	const colorized = colorize( message_, colorMap_ )
+	if ( typeof color_ === "string" ) {
+		this.innerHTML += ( "<span style=\"color: " + color_ + ";\">" + colorized + "</span>" )
+	} else {
+		this.innerHTML += colorized
+	}
 	if ( wantScroll ) {
 		this.scrollTop = this.scrollHeight
 	}
