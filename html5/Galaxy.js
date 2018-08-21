@@ -330,6 +330,7 @@ class Galaxy extends Party {
 				this._refs.fleet.disabled = false
 				this._refs.fleet.focus()
 				this._refs.fleet.select()
+				setTimeout( () => this._refs.fleet.select(), 50 )
 			}
 		}
 	}
@@ -409,7 +410,7 @@ Vue.component(
 				</div>
 				<div style="float: right;">
 					<label>Fleet size:</label>
-					<input ref="fleet" v-model="fleet" type="number" min="0" size="4" value="0" v-on:keypress.enter="data.on_fleet" :disabled="data.state != data.constructor.STATE.INPUT" />
+					<input ref="fleet" v-model="fleet" type="number" min="0" size="4" v-on:keypress.enter="data.on_fleet" :disabled="data.state != data.constructor.STATE.INPUT" />
 					<label style="display: inline-block; width: 6em; padding-left: 1em;">Turn: {{turn}}</label>
 					<label style="display: inline-block; width: 7em;">Arrival: {{arrival}}</label>
 					<button @click="data.on_end_round()" :disabled="data.state != data.constructor.STATE.NORMAL">End round!</button>
