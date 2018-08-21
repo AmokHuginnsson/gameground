@@ -72,6 +72,7 @@ private:
 		OEmperorInfo( void ) : _color( -1 ), _systems( -1 ) {}
 	};
 	typedef yaal::hcore::HMap<HClient*, OEmperorInfo> emperors_t;
+	typedef yaal::hcore::HArray<HSystem> systems_t;
 protected:
 	/*{*/
 	int _boardSize;
@@ -79,7 +80,7 @@ protected:
 	int _startupPlayers;
 	int _round;
 	int _ready;
-	yaal::hcore::HArray<HSystem> _systems;
+	systems_t _systems;
 	emperors_t _emperors;
 	/*}*/
 public:

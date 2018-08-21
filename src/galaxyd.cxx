@@ -56,7 +56,7 @@ HSystem::HSystem( HLogic const* logic_ )
 	, _coordinateY( -1 )
 	, _production( -1 )
 	, _fleet( -1 )
-	, _emperor( NULL )
+	, _emperor( nullptr )
 	, _logic( logic_ )
 	, _attackers() {
 	M_PROLOG
@@ -102,7 +102,7 @@ void HSystem::swap( HSystem& other ) {
 void HSystem::do_round( HGalaxy& galaxy_ ) {
 	M_PROLOG
 	HString message;
-	if ( _emperor != NULL ) {
+	if ( _emperor != nullptr ) {
 		_fleet += _production;
 	} else {
 		_fleet = _production;
@@ -154,12 +154,10 @@ void HSystem::do_round( HGalaxy& galaxy_ ) {
 			}
 		}
 	}
-	if ( _emperor != NULL ) {
+	if ( _emperor ) {
 		message = format( "party:%s,play:system_info=%c,%d,%d,%d,%d\n",
 			_logic->id(), 'i', _id, -1, galaxy_.get_color( _emperor ), _fleet );
 		_emperor->send( message );
-	}
-	if ( _emperor ) {
 		galaxy_.mark_alive( _emperor );
 	}
 	return;
@@ -178,7 +176,7 @@ HGalaxy::HGalaxy( HServer* server_, id_t const& id_, HString const& comment_, in
 	M_PROLOG
 	int ctr = 0, ctrLoc = 0;
 	HRandomizer random( randomizer_helper::make_randomizer() );
-	HSystem* system( NULL );
+	HSystem* system( nullptr );
 	for ( ctr = 0; ctr < ( emperors_ + systems_ ); ctr ++ ) {
 		system = &_systems[ ctr ];
 		system->_id = ctr;
@@ -311,11 +309,11 @@ int HGalaxy::assign_system( HClient* client_ ) {
 	_emperors[ client_ ] = info;
 	ctr = 0;
 	for ( int i = 0; i < motherSystem; ++ i, ++ ctr ) {
-		while ( _systems[ ctr ]._emperor != NULL ) {
+		while ( _systems[ ctr ]._emperor != nullptr ) {
 			++ ctr;
 		}
 	}
-	while ( _systems[ ctr ]._emperor != NULL ) {
+	while ( _systems[ ctr ]._emperor != nullptr ) {
 		++ ctr;
 	}
 	M_ASSERT( ! _systems[ ctr ]._emperor );
@@ -394,51 +392,60 @@ void HGalaxy::handler_play( HClient* client_, HString const& command_ ) {
 
 void HGalaxy::end_round( void ) {
 	M_PROLOG
-	int ctr = 0, dead = 0;
 	_ready = 0;
-	for ( emperors_t::iterator it = _emperors.begin(); it != _emperors.end(); ++ it ) {
-		if ( it->second._systems > 0 ) {
-			it->second._systems = 0;
+	for ( emperors_t::value_type& emperor : _emperors ) {
+		if ( emperor.second._systems > 0 ) {
+			emperor.second._systems = 0;
 		}
 	}
-	for ( ctr = 0; ctr < ( _neutralSystemCount + _startupPlayers ); ctr ++ )
-		_systems[ ctr ].do_round( *this );
+	for ( HSystem& s : _systems ) {
+		s.do_round( *this );
+	}
 	HString message;
-	for ( emperors_t::iterator it = _emperors.begin(); it != _emperors.end(); ++ it ) {
-		if ( ! it->second._systems ) {
-			it->second._systems = -1;
-			message = format( "msg:$12;Once mighty empire of $%d;%s$12; fall in ruins.\n",
-				it->second._color, it->first->login() );
+	int dead( 0 );
+	for ( emperors_t::value_type& emperor : _emperors ) {
+		if ( ! emperor.second._systems ) {
+			emperor.second._systems = -1;
+			message = format(
+				"msg:$12;Once mighty empire of $%d;%s$12; fall in ruins.\n",
+				emperor.second._color, emperor.first->login()
+			);
 			broadcast( message );
 		}
-		if ( it->second._color >= 0 ) { /* not spectator */
-			if ( it->second._systems >= 0 ) {
-				_ready ++;
+		if ( emperor.second._color >= 0 ) { /* not spectator */
+			if ( emperor.second._systems >= 0 ) {
+				++ _ready;
 			} else {
-				dead ++;
+				++ dead;
 			}
 		}
 	}
 	if ( _ready == 1 ) {
-		for ( emperors_t::iterator it = _emperors.begin(); it != _emperors.end(); ++ it ) {
-			if ( it->second._systems > 0 ) {
-				message = format( "msg:$12;The invincible $%d;%s$12; crushed the galaxy.\n",
-					it->second._color, it->first->login() );
+		for ( emperors_t::value_type& emperor : _emperors ) {
+			if ( emperor.second._systems > 0 ) {
+				message = format(
+					"msg:$12;The invincible $%d;%s$12; crushed the galaxy.\n",
+					emperor.second._color, emperor.first->login()
+				);
 				broadcast( message );
 			}
 		}
 	}
-	for ( ctr = 0; ctr < ( _startupPlayers + _neutralSystemCount ); ctr ++ ) {
-		message = format( "party:%s,play:system_info=%c,%d,%d,%d,%d\n",
-			_id, 'i', ctr, _systems[ ctr ]._production, get_color( _systems[ ctr ]._emperor ),
-			_systems[ ctr ]._fleet );
-		for ( emperors_t::iterator it = _emperors.begin(); it != _emperors.end(); ++ it ) {
-			if ( it->second._color < 0 ) {
-				it->first->send( message );
+	int sysNo( 0 );
+	for ( HSystem& s : _systems ) {
+		message = format(
+			"party:%s,play:system_info=%c,%d,%d,%d,%d\n",
+			_id, 'i', sysNo, s._production, get_color( s._emperor ),
+			s._fleet
+		);
+		for ( emperors_t::value_type& emperor : _emperors ) {
+			if ( emperor.second._color < 0 ) {
+				emperor.first->send( message );
 			}
 		}
+		++ sysNo;
 	}
-	_round ++;
+	++ _round;
 	message = format( "play:round=%d\n", _round );
 	broadcast( message );
 	_ready = dead;
@@ -462,7 +469,7 @@ void HGalaxy::mark_alive( HClient* client_ ) {
 
 HGalaxy::OEmperorInfo* HGalaxy::get_emperor_info( HClient* client_ ) {
 	M_PROLOG
-	OEmperorInfo* info = NULL;
+	OEmperorInfo* info = nullptr;
 	if ( client_ ) {
 		emperors_t::iterator it = _emperors.find( client_ );
 		M_ASSERT( it != _emperors.end() );
@@ -474,15 +481,15 @@ HGalaxy::OEmperorInfo* HGalaxy::get_emperor_info( HClient* client_ ) {
 
 void HGalaxy::do_kick( HClient* client_ ) {
 	M_PROLOG
-	for ( int ctr = 0; ctr < ( _neutralSystemCount + _startupPlayers ); ++ ctr ) {
-		HSystem::attackers_t& attackers = _systems[ ctr ]._attackers;
+	for ( HSystem& s : _systems ) {
+		HSystem::attackers_t& attackers = s._attackers;
 		for ( HSystem::attackers_t::iterator it = attackers.begin(); it != attackers.end(); ++ it ) {
 			if ( it->_emperor == client_ ) {
 				attackers.erase( it ++ ); /* First we increment iterator position and then we pass old iterator to erase() here. */
 			}
 		}
-		if ( _systems[ ctr ]._emperor == client_ ) {
-			_systems[ ctr ]._emperor = NULL;
+		if ( s._emperor == client_ ) {
+			s._emperor = nullptr;
 		}
 	}
 	int color( _round >= 0 ? get_color( client_ ) : -1 );
@@ -532,7 +539,7 @@ HLogic::ptr_t HGalaxyCreator::do_new_instance( HServer* server_, HLogic::id_t co
 	} catch ( HLexicalCastException const& ) {
 		throw HLogicException( galaxy::GALAXY_MSG[galaxy::GALAXY_MSG_MALFORMED] );
 	}
-	char* message = NULL;
+	char* message = nullptr;
 	OUT << "new glx: ( " << name << " ) {" << endl;
 	cout << "emperors = " << emperors << endl;
 	cout << "board_size = " << boardSize << endl;
