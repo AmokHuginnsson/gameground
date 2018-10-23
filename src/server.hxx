@@ -17,7 +17,7 @@ namespace gameground {
 class HServer {
 public:
 	typedef HServer this_type;
-protected:
+private:
 	typedef void ( HServer::* handler_t )( HClient&, yaal::hcore::HString const& );
 	typedef yaal::hcore::HMap<HLogic::id_t, HLogic::ptr_t> logics_t;
 	typedef yaal::hcore::HMap<yaal::hcore::HString, handler_t> handlers_t;

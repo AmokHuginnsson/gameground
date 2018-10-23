@@ -109,7 +109,10 @@ HServer::~HServer( void ) {
 	M_ASSERT( _logics.is_empty() );
 	M_ASSERT( _logins.is_empty() );
 	M_ASSERT( _clients.is_empty() );
-	OUT << brightred << "<<<GameGround>>>" << lightgray << " server finished." << endl;
+	try {
+		OUT << brightred << "<<<GameGround>>>" << lightgray << " server finished." << endl;
+	} catch ( HException const& ) {
+	}
 }
 
 int HServer::init_server( int port_ ) {
@@ -790,7 +793,7 @@ void HServer::broadcast_player_info( HClient& client_ ) {
 	for ( HLogic::id_t const& logicId : client_.logics() ) {
 		logics_t::iterator logic( _logics.find( logicId ) );
 		if ( logic != _logics.end() ) {
-		 _out << PROTOCOL::SEPP << logic->first;
+			_out << PROTOCOL::SEPP << logic->first;
 		}
 	}
 	broadcast( _out << endl << _out );
@@ -815,7 +818,7 @@ void HServer::broadcast_player_info( HClient& client_, HLogic& logic_ ) {
 void HServer::send_player_info( HClient& about_, HClient& to_ ) {
 	M_PROLOG
 	try {
-		if ( ! about_.login().is_empty() ) {
+		if ( to_.is_valid() && ! about_.login().is_empty() ) {
 			_out << PROTOCOL::PLAYER << PROTOCOL::SEP << about_.login();
 			for ( HLogic::id_t const& logicId : about_.logics() ) {
 				logics_t::iterator logic( _logics.find( logicId ) );
