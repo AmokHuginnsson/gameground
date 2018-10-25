@@ -13,6 +13,7 @@
 #include <yaal/tools/hash.hxx>
 #include <yaal/tools/util.hxx>
 #include <yaal/tools/xmath.hxx>
+#include <yaal/tools/keycode.hxx>
 #include <yaal/hconsole/console.hxx>
 #include <yaal/hconsole/htuiprocess.hxx>
 #include <yaal/hconsole/hwindow.hxx>
