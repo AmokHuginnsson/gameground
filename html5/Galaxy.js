@@ -349,7 +349,7 @@ class Galaxy extends Party {
 }
 
 Vue.component(
-	"glx", {
+	Galaxy.TAG, {
 		props: ["data"],
 		data: function( arg ) {
 			this.data._refs = this.$refs

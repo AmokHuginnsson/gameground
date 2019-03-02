@@ -74,7 +74,7 @@ class Boggle extends Party {
 }
 
 Vue.component(
-	"bgl", {
+	Boggle.TAG, {
 		props: ["data"],
 		data: function( arg ) {
 			this.data._refs = this.$refs
