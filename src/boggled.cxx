@@ -9,6 +9,8 @@
 
 M_VCSID( "$Id: " __ID__ " $" )
 #include "boggled.hxx"
+#include "spellchecker.hxx"
+#include "bogglesolver.hxx"
 
 #include "setup.hxx"
 #include "client.hxx"
@@ -98,6 +100,8 @@ code_point_t const BOGGLE::UNINITIALIZED_SLOT = code_point_t( static_cast<u32_t>
 
 typedef HArray<HSpellChecker> spell_checkers_t;
 spell_checkers_t _spellCheckers_;
+typedef HArray<HBoggleSolver> boggle_solvers_t;
+boggle_solvers_t _boggleSolvers_;
 
 }
 
@@ -147,7 +151,7 @@ HBoggle::HBoggle(
 	HServer* server_,
 	id_t const& id_,
 	HString const& comment_,
-	HSpellChecker::LANGUAGE language_,
+	LANGUAGE language_,
 	SCORING scoring_,
 	int players_,
 	int roundTime_,
@@ -247,11 +251,11 @@ bool HBoggle::do_accept( HClient* client_ ) {
 	return ( false );
 }
 
-inline char const* lang_id_to_name( HSpellChecker::LANGUAGE langId_ ) {
+inline char const* lang_id_to_name( LANGUAGE langId_ ) {
 	char const* langStr( nullptr );
 	switch ( langId_ ) {
-		case ( HSpellChecker::LANGUAGE::ENGLISH ) : langStr = "English"; break;
-		case ( HSpellChecker::LANGUAGE::POLISH ) : langStr = "Polish"; break;
+		case ( LANGUAGE::ENGLISH ) : langStr = "English"; break;
+		case ( LANGUAGE::POLISH ) : langStr = "Polish"; break;
 	}
 	return ( langStr );
 }
@@ -390,6 +394,9 @@ void HBoggle::on_end_round( void ) {
 		_out << PROTOCOL::MSG << PROTOCOL::SEP << "Game Over!" << endl;
 	}
 	broadcast( _out << _out );
+	if ( !boggle_data::_boggleSolvers_[static_cast<int>( _language )] ) {
+		boggle_data::_boggleSolvers_[static_cast<int>( _language )].solve( _varTmpBuffer );
+	}
 	int* scores = RULES[ static_cast<int>( _scoring ) ];
 	typedef HList<words_t::iterator> longest_t;
 	longest_t longest;
@@ -549,11 +556,11 @@ HLogic::ptr_t HBoggleCreator::do_new_instance( HServer* server_, HLogic::id_t co
 	} catch ( HLexicalCastException const& ) {
 		throw HLogicException( boggle::BOGGLE_MSG[boggle::BOGGLE_MSG_MALFORMED] );
 	}
-	HSpellChecker::LANGUAGE language( HSpellChecker::LANGUAGE::ENGLISH );
+	LANGUAGE language( LANGUAGE::ENGLISH );
 	if ( languageStr == "en" ) {
-		language = HSpellChecker::LANGUAGE::ENGLISH;
+		language = LANGUAGE::ENGLISH;
 	} else if ( languageStr == "pl" ) {
-		language = HSpellChecker::LANGUAGE::POLISH;
+		language = LANGUAGE::POLISH;
 	}
 	boggle::HBoggle::SCORING scoring( boggle::HBoggle::SCORING::ORIGINAL );
 	if ( scoringStr == "original" ) {
@@ -603,11 +610,13 @@ HString HBoggleCreator::do_get_info( void ) const {
 
 void HBoggleCreator::do_initialize_globals( void ) {
 	M_PROLOG
-	boggle_data::_spellCheckers_.emplace_back( HSpellChecker::LANGUAGE::ENGLISH );
-	boggle_data::_spellCheckers_.emplace_back( HSpellChecker::LANGUAGE::POLISH );
+	boggle_data::_spellCheckers_.emplace_back( LANGUAGE::ENGLISH );
+	boggle_data::_spellCheckers_.emplace_back( LANGUAGE::POLISH );
+	boggle_data::_boggleSolvers_.emplace_back( "dict_en.txt" );
+	boggle_data::_boggleSolvers_.emplace_back( "dict_pl.txt" );
 	/* makejail.py helper */
-	boggle_data::_spellCheckers_[ static_cast<int>( HSpellChecker::LANGUAGE::ENGLISH ) ].spell_check( "mom" );
-	boggle_data::_spellCheckers_[ static_cast<int>( HSpellChecker::LANGUAGE::POLISH ) ].spell_check( "mama" );
+	boggle_data::_spellCheckers_[ static_cast<int>( LANGUAGE::ENGLISH ) ].spell_check( "mom" );
+	boggle_data::_spellCheckers_[ static_cast<int>( LANGUAGE::POLISH ) ].spell_check( "mama" );
 	return;
 	M_EPILOG
 }

@@ -5,15 +5,13 @@
 
 #include <yaal/hcore/hstring.hxx>
 
+#include "language.hxx"
+
 namespace gameground {
 
 class HSpellChecker {
 public:
 	typedef HSpellChecker this_type;
-	enum class LANGUAGE {
-		ENGLISH = 0,
-		POLISH = 1
-	};
 private:
 	void* _spellChecker; /* AspellSpeller */
 	void* _spellConfig; /* AspellConfig */

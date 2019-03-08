@@ -16,15 +16,6 @@ using namespace yaal::hcore;
 
 namespace gameground {
 
-inline char const* lang_id_to_str( HSpellChecker::LANGUAGE langId_ ) {
-	char const* langStr( nullptr );
-	switch ( langId_ ) {
-		case ( HSpellChecker::LANGUAGE::ENGLISH ) : langStr = "en"; break;
-		case ( HSpellChecker::LANGUAGE::POLISH ) : langStr = "pl"; break;
-	}
-	return ( langStr );
-}
-
 /*! \brief Simple constructor.
  *
  * it inializes dictionary

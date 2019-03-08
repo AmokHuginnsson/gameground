@@ -7,7 +7,7 @@
 #include <yaal/hcore/hclock.hxx>
 
 #include "logic.hxx"
-#include "spellchecker.hxx"
+#include "language.hxx"
 
 namespace gameground {
 
@@ -59,7 +59,7 @@ protected:
 	typedef yaal::hcore::HMap<HClient*, OPlayerInfo> players_t;
 	static int RULES[6][16];
 	STATE _state;
-	HSpellChecker::LANGUAGE _language;
+	LANGUAGE _language;
 	SCORING _scoring;
 	int _startupPlayers;
 	int _roundTime;
@@ -74,7 +74,7 @@ protected:
 	/*}*/
 public:
 	/*{*/
-	HBoggle( HServer*, id_t const&, yaal::hcore::HString const&, HSpellChecker::LANGUAGE, SCORING, int, int, int, int );
+	HBoggle( HServer*, id_t const&, yaal::hcore::HString const&, LANGUAGE, SCORING, int, int, int, int );
 	virtual ~HBoggle( void );
 	void generate_game( void );
 	/*}*/
