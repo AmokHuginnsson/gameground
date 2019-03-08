@@ -26,15 +26,15 @@ public class SetBangConfigurator extends HAbstractConfigurator {
 			String[] tokens = $defaults.split( ",", 3 );
 			SpinnerNumberModel m = (SpinnerNumberModel)_playerCount.getModel();
 			m.setMinimum( 2 );
-			_playerCount.setValue( new Integer( tokens[0] ).intValue() );
+			_playerCount.setValue( Integer.parseInt( tokens[0] ) );
 			m = (SpinnerNumberModel)_deckCount.getModel();
 			m.setMinimum( 1 );
 			m.setMaximum( 99 );
-			_deckCount.setValue( new Integer( tokens[1] ).intValue() );
+			_deckCount.setValue( Integer.parseInt( tokens[1] ) );
 			m = (SpinnerNumberModel)_interRoundDelay.getModel();
 			m.setMinimum( 0 );
 			m.setMaximum( 60 );
-			_interRoundDelay.setValue( new Integer( tokens[2] ).intValue() );
+			_interRoundDelay.setValue( Integer.parseInt( tokens[2] ) );
 		} catch ( NumberFormatException e ) {
 			e.printStackTrace();
 			System.exit( 1 );

@@ -9,14 +9,14 @@ public class Con {
 	public static String magenta = "\033[0;35m";
 	public static String cyan = "\033[0;36m";
 	public static String lightgray = "\033[0;37m";
-	public static String gray = "\033[1;30m";
-	public static String brightred = "\033[1;31m";
-	public static String brightgreen = "\033[1;32m";
-	public static String yellow = "\033[1;33m";
-	public static String brightblue = "\033[1;34m";
-	public static String brightmagenta = "\033[1;35m";
-	public static String brightcyan = "\033[1;36m";
-	public static String white = "\033[1;37m";
+	public static String gray = "\033[0;90m";
+	public static String brightred = "\033[0;91m";
+	public static String brightgreen = "\033[0;92m";
+	public static String yellow = "\033[0;93m";
+	public static String brightblue = "\033[0;94m";
+	public static String brightmagenta = "\033[0;95m";
+	public static String brightcyan = "\033[0;96m";
+	public static String white = "\033[0;97m";
 	static public void err( String $msg ) {
 		System.err.println( red + $msg + reset );
 	}

@@ -61,19 +61,19 @@ public class BoggleConfigurator extends HAbstractConfigurator {
 			_scoringSystem.setSelectedIndex( defaultScotingSystem );
 			SpinnerNumberModel m = (SpinnerNumberModel)_playerCount.getModel();
 			m.setMinimum( 2 );
-			_playerCount.setValue( new Integer( tokens[2] ).intValue() );
+			_playerCount.setValue( Integer.parseInt( tokens[2] ) );
 			m = (SpinnerNumberModel)_roundTime.getModel();
 			m.setMinimum( 60 );
 			m.setMaximum( 300 );
-			_roundTime.setValue( new Integer( tokens[3] ).intValue() );
+			_roundTime.setValue( Integer.parseInt( tokens[3] ) );
 			m = (SpinnerNumberModel)_maxRounds.getModel();
 			m.setMinimum( 1 );
 			m.setMaximum( 99 );
-			_maxRounds.setValue( new Integer( tokens[4] ).intValue() );
+			_maxRounds.setValue( Integer.parseInt( tokens[4] ) );
 			m = (SpinnerNumberModel)_interRoundDelay.getModel();
 			m.setMinimum( 0 );
 			m.setMaximum( 60 );
-			_interRoundDelay.setValue( new Integer( tokens[5] ).intValue() );
+			_interRoundDelay.setValue( Integer.parseInt( tokens[5] ) );
 		} catch ( NumberFormatException e ) {
 			e.printStackTrace();
 			System.exit( 1 );

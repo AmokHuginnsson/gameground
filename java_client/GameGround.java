@@ -4,7 +4,7 @@ import java.util.TreeMap;
 import java.util.HashMap;
 import java.util.Collections;
 import java.awt.Container;
-import java.awt.Frame;
+import javax.swing.JFrame;
 import java.awt.Dimension;
 import java.awt.Font;
 import javax.swing.JApplet;
@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-public class /* Application or applet name: */ GameGround extends JApplet {
+public class GameGround {
 	static public class Setup {
 		int _fontSize;
 		Font[] _font = new Font[2];
@@ -52,7 +52,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		}
 	}
 	public static final long serialVersionUID = 13l;
-	public Frame _frame;
+	public JFrame _frame;
 	private final ScheduledExecutorService _scheduler = Executors.newScheduledThreadPool( 1 );
 	private SortedMap<String, HLogicInfo> _clientSupportedLogics = java.util.Collections.synchronizedSortedMap( new TreeMap<String, HLogicInfo>() );
 	private Map<Object, ScheduledFuture<?>> _tasks = Collections.synchronizedMap( new HashMap<Object, ScheduledFuture<?>>() );
@@ -61,7 +61,6 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	private String _name;
 	private HLogin _loginScreen = null;
 	private HWorkArea _workArea = null;
-	boolean _applet = false;
 	Ini _ini = new Ini();
 	Setup _setup = new Setup();
 	Geometry _geometry = null;
@@ -69,8 +68,6 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 
 	public GameGround() { this( null ); }
 	GameGround( String[] $argv ) {
-		if ( $argv == null )
-			_applet = true;
 		handleProgramOptions( $argv );
 	}
 
@@ -78,25 +75,16 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		try {
 			SwingEngine se = new SwingEngine( this );
 			org.jdom.Document res = AppletJDOMHelper.loadResource( "/res/gameground.xml", this );
-			if ( _applet == true ) {
-				TagLibrary tl = se.getTaglib();
-				tl.unregisterTag( "frame" );
-				tl.registerTag( "frame", JApplet.class );
-				se.insert( res, this );
-				_frame = getParentFrame();
-			} else {
-				se.render( res );
-				_frame = SwingEngine.getAppFrame();
-				((javax.swing.JFrame)_frame).setContentPane( this );
-				_frame.addWindowListener( new java.awt.event.WindowAdapter() {
-						public void windowClosing( java.awt.event.WindowEvent e ) {
-							if ( _client != null ) {
-								_workArea.gracefullShutdown();
-							}
-							System.out.println( "Bye!" );
+			se.render( res );
+			_frame = (javax.swing.JFrame)SwingEngine.getAppFrame();
+			_frame.addWindowListener( new java.awt.event.WindowAdapter() {
+					public void windowClosing( java.awt.event.WindowEvent e ) {
+						if ( _client != null ) {
+							_workArea.gracefullShutdown();
 						}
-				});
-			}
+						System.out.println( "Bye!" );
+					}
+			});
 			_frameName = _frame.getTitle();
 			EagerStaticInitializer.touch( this, "registerLogic" );
 			_loginScreen = new HLogin( this );
@@ -131,6 +119,9 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 			System.exit( 1 );
 		}
 	}
+	JFrame frame() {
+		return ( _frame );
+	}
 	void showLoginScreen() {
 		if ( _client != null ) {
 			Chat.clearAll();
@@ -143,9 +134,9 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		showWorkArea( _workArea );
 	}
 	void showWorkArea( HAbstractWorkArea $workArea ) {
-		setContentPane( $workArea.getGUI() );
+		_frame.setContentPane( $workArea.getGUI() );
 		$workArea.reinit();
-		validate();
+		_frame.validate();
 	}
 	public void processMessage( final String $message ) {
 		javax.swing.SwingUtilities.invokeLater( new Runnable() {
@@ -162,14 +153,15 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 			_client.disconnect();
 	}
 	void resize( String[] $req ) {
-		Dimension preferred = new Dimension( new Integer( $req[0] ).intValue(), new Integer( $req[1] ).intValue() );
+		Dimension preferred = new Dimension( Integer.parseInt( $req[0] ), Integer.parseInt( $req[1] ) );
 		_frame.setVisible( true );
-		Dimension real = getContentPane().getSize();
+		Dimension real = _frame.getContentPane().getSize();
 		Dimension withJunk = _frame.getSize();
-		if ( _geometry != null )
+		if ( _geometry != null ) {
 			_frame.setBounds( _geometry._xPos, _geometry._yPos, _geometry._width, _geometry._height );
-		else 
+		} else {
 			_frame.setSize( preferred.width + withJunk.width - real.width, preferred.height + withJunk.height - real.height );
+		}
 		_frame.validate();
 	}
 
@@ -185,7 +177,7 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		SwingEngine.DEBUG_MODE = true;
 		GameGround app = new GameGround( $argv );
 		app.init();
-		app.start();
+		app._frame.setVisible( true );
 	}
 
 	public void addGlobalKeyListener( java.awt.Component $component, java.awt.event.KeyListener $who ) {
@@ -208,16 +200,6 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 		return ( _clientSupportedLogics.get( $name ) );
 	}
 
-	private Frame getParentFrame() {
-		Container cont = this;
-		while ( ( cont != null ) && !( cont instanceof Frame ) ) {
-			cont = cont.getParent();
-		}
-		if ( cont != null )
-			return (Frame)cont;
-		return null;
-	} 
-
 	public void closeParty( HAbstractLogic $logic ) {
 		_workArea.closeParty( $logic );
 	}
@@ -233,23 +215,14 @@ public class /* Application or applet name: */ GameGround extends JApplet {
 	}
 
 	public void shutdown() {
-		if ( _applet ) {
-			_frame.setVisible( false );
-		} else {
-			System.exit( 0 );
-		}
-	}
-	public boolean isApplet() {
-		return ( _applet );
+		System.exit( 0 );
 	}
 	public String getParameter( String $name ) {
 		String val;
-		if ( isApplet() )
-			val = super.getParameter( $name );
-		else 
-			val = _cmd.getOptionValue( $name );
-		if ( val == null )
+		val = _cmd.getOptionValue( $name );
+		if ( val == null ) {
 			val = _ini.getProperty( $name );
+		}
 		System.out.println( "Getting parameter: " + $name + ", of value: " + val + "." );
 		return ( val );
 	}

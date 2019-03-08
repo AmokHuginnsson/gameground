@@ -79,7 +79,7 @@ public abstract class HAbstractLogic {
 			if ( color >= 0 ) { /* color */
 				try {
 					int colorEnd = $message.indexOf( ';', color );
-					_gui.log( new Integer( $message.substring( color + 1, colorEnd ) ).intValue() );
+					_gui.log( Integer.parseInt( $message.substring( color + 1, colorEnd ) ) );
 					index = colorEnd + 1;
 				} catch ( NumberFormatException e ) {
 					e.printStackTrace();

@@ -19,15 +19,15 @@ public class HGalaxyConfigurator extends HAbstractConfigurator implements Change
 			SpinnerNumberModel m = (SpinnerNumberModel)_emperors.getModel();
 			m.setMinimum( 2 );
 			m.setMaximum( 36 );
-			_emperors.setValue( new Integer( tokens[0] ).intValue() );
+			_emperors.setValue( Integer.parseInt( tokens[0] ) );
 			m = (SpinnerNumberModel)_boardSize.getModel();
 			m.setMinimum( 6 );
 			m.setMaximum( 20 );
-			_boardSize.setValue( new Integer( tokens[1] ).intValue() );
+			_boardSize.setValue( Integer.parseInt( tokens[1] ) );
 			m = (SpinnerNumberModel)_systems.getModel();
 			m.setMinimum( 0 );
 			m.setMaximum( 34 );
-			_systems.setValue( new Integer( tokens[2] ).intValue() );
+			_systems.setValue( Integer.parseInt( tokens[2] ) );
 		} catch ( NumberFormatException e ) {
 			e.printStackTrace();
 			System.exit( 1 );
@@ -36,8 +36,8 @@ public class HGalaxyConfigurator extends HAbstractConfigurator implements Change
 	public void stateChanged( ChangeEvent e ) {
 		JSpinner i = (JSpinner)e.getSource();
 		JSpinner o = ( i == _emperors ) ? _systems : _emperors;
-		int iv = new Integer( i.getValue().toString() ).intValue();
-		int ov = new Integer( o.getValue().toString() ).intValue();
+		int iv = Integer.parseInt( i.getValue().toString() );
+		int ov = Integer.parseInt( o.getValue().toString() );
 		if ( ( iv + ov ) > 36 )
 			o.setValue( 36 - iv );
 	}

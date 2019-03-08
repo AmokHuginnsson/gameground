@@ -31,14 +31,12 @@ class HLogin extends HAbstractWorkArea {
 			}
 			_login.setText( _app.getParameter( "login" ) );
 			String password = _app.getParameter( "password" );
-			if ( password != null )
+			if ( password != null ) {
 				_password.setText( password );
+			}
 			String host = _app.getParameter( "host" );
-			if ( host != null )
+			if ( host != null ) {
 				_server.setText( host );
-			if ( _app.isApplet() ) {
-				_server.setEditable( false );
-				_port.setEditable( false );
 			}
 		}
 		public void onConnectClick() {
@@ -67,20 +65,17 @@ class HLogin extends HAbstractWorkArea {
 	HGUILocal _gui;
 	OConnectionConfig _connectionConfig;
 //--------------------------------------------//
-	public HLogin( GameGround $applet ) throws Exception {
-		super( $applet );
+	public HLogin( GameGround $app ) throws Exception {
+		super( $app );
 		init( _gui = new HGUILocal( LABEL ) );
 		_connectionConfig = new OConnectionConfig();
 		String serverAddress = "";
-		try {
-			serverAddress = $applet.getCodeBase().getHost();
-		} catch ( java.lang.NullPointerException e ) {
-		} finally {
-			if ( "".equals( serverAddress ) && ( "".equals( _app.getParameter( "host" ) ) || ( _app.getParameter( "host" ) == null ) ) )
-				serverAddress = "127.0.0.1";
+		if ( "".equals( serverAddress ) && ( "".equals( _app.getParameter( "host" ) ) || ( _app.getParameter( "host" ) == null ) ) ) {
+			serverAddress = "127.0.0.1";
 		}
-		if ( ! "".equals( serverAddress ) )
+		if ( ! "".equals( serverAddress ) ) {
 			_gui._server.setText( serverAddress );
+		}
 	}
 	void onConnectClick() {
 		String errors = "";
@@ -99,7 +94,7 @@ class HLogin extends HAbstractWorkArea {
 		}
 		int port = -1;
 		try {
-			port = new Integer( _gui._port.getText() ).intValue();
+			port = Integer.parseInt( _gui._port.getText() );
 		} catch ( NumberFormatException e ) {
 		}
 		if ( port <= 1024 ) {

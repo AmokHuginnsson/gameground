@@ -181,7 +181,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 				if ( HGalaxy.this._state == State.INPUT ) {
 					int fleet = -1;
 					try {
-						fleet = new Integer( _fleet.getText() ).intValue();
+						fleet = Integer.parseInt( _fleet.getText() );
 					} catch ( NumberFormatException e ) {
 					} finally {
 						if ( fleet < 1 ) {
@@ -244,7 +244,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		HImages images = new HImages();
 		_gui._board.setGui( this );
 		_gui._board.setImages( images );
-		$applet.addGlobalKeyListener( $applet, this );
+		$applet.addGlobalKeyListener( $applet.frame(), this );
 		$applet.addGlobalKeyListener( _gui, this );
 		_state = State.LOCKED;
 		_moves = java.util.Collections.<HMove>synchronizedList( new java.util.LinkedList<HMove>() );
@@ -265,17 +265,17 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 			value = tokens[1];
 		try {
 			if ( variable.compareTo( "board_size" ) == 0 ) {
-				_gui._board.setSize( new Integer( value ).intValue() );
+				_gui._board.setSize( Integer.parseInt( value ) );
 			} else if ( variable.compareTo( "systems" ) == 0 ) {
 				if ( _systems != null ) {
 // FIXME					_loop = false;
 				} else
-					_systems = new HSystem[_systemCount = new Integer( value ).intValue()];
+					_systems = new HSystem[_systemCount = Integer.parseInt( value )];
 			} else if ( variable.compareTo( "system_coordinates" ) == 0 ) {
 				tokens = value.split( ",", 3 );
-				index = new Integer( tokens[0] ).intValue();
-				coordX = new Integer( tokens[1] ).intValue();
-				coordY = new Integer( tokens[2] ).intValue();
+				index = Integer.parseInt( tokens[0] );
+				coordX = Integer.parseInt( tokens[1] );
+				coordY = Integer.parseInt( tokens[2] );
 				_systems[index] = new HSystem();
 				_systems[index]._coordinateX = coordX;
 				_systems[index]._coordinateY = coordY;
@@ -283,7 +283,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 					_gui._board.setSystems( _systems );
 			} else if ( variable.compareTo( "emperor" ) == 0 ) {
 				tokens = value.split( ",", 2 );
-				index = new Integer( tokens[0] ).intValue();
+				index = Integer.parseInt( tokens[0] );
 				_emperors.put( index, tokens[1] );
 				if ( _emperors.get( index ).compareTo( _emperor ) == 0 ) {
 					_color = index;
@@ -312,12 +312,12 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 			if ( variable.compareTo( "system_info" ) == 0 ) {
 				event = value.charAt( 0 );
 				tokens = value.split ( ",", 5 );
-				sysNo = new Integer( tokens[1] ).intValue();
-				production = new Integer( tokens[2] ).intValue();
+				sysNo = Integer.parseInt( tokens[1] );
+				production = Integer.parseInt( tokens[2] );
 				if ( production >= 0 )
 					_systems[ sysNo ]._production = production;
-				_systems[ sysNo ]._fleet = new Integer( tokens[4] ).intValue();
-				color = new Integer( tokens[3] ).intValue();
+				_systems[ sysNo ]._fleet = Integer.parseInt( tokens[4] );
+				color = Integer.parseInt( tokens[3] );
 				value = _emperors.get( color );
 				switch ( event ) {
 					case ( 'c' ): /* conquered */
@@ -364,7 +364,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 			} else if ( variable.compareTo( "round" ) == 0 ) {
 				_gui.log( "----- ", HGUIface.Colors.WHITE );
 				_gui.log( " round: ", _gui.COLOR_NORMAL );
-				_round = new Integer( value ).intValue();
+				_round = Integer.parseInt( value );
 				_gui.log( value + " -----\n", HGUIface.Colors.WHITE );
 				_gui.log( _gui.COLOR_NORMAL );
 				setState ( State.NORMAL );
