@@ -13,9 +13,10 @@ class Browser extends Party {
 }
 
 Vue.component(
-	"browser", {
+	Browser.TAG, {
 		props: ["data"],
-		data: function( arg ) {
+		data: function() {
+			this.data._refs = this.$refs
 			return ( this.data )
 		},
 		methods: {
@@ -90,7 +91,7 @@ Vue.component(
 				<label>Server messages</label>
 				<label>Games</label>
 				<label style="grid-column: 4">People</label>
-				<div id="chat-view" class="messages"></div>
+				<logpad id="chat-view" ref="messages" :app="$data._app" />
 				<ul id="games" class="treewidget">
 					<li :class="['noselect', { selected: $parent.selectedPartyLogic == null }]" v-on:click="select_logic( null )">GameGround</li>
 					<li

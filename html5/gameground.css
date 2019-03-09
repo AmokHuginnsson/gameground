@@ -220,6 +220,65 @@ label {
 .messages {
 	overflow-y: auto;
 }
+.me {
+	position: relative;
+	max-width: 66%;
+	min-width: 33%;
+	background: #adf;
+	margin: 8px;
+	margin-left: auto;
+	padding: 4px;
+	border-radius: 8px;
+	border-top-right-radius: 0px;
+	text-align: right;
+}
+.me:after {
+	content: '';
+	position: absolute;
+	right: 0;
+	top: -1px;
+	width: 0;
+	height: 0;
+	border: 8px solid transparent;
+	border-left-color: #adf;
+	border-right: 0;
+	border-top: 0;
+	margin-right: -6px;
+	transform:         rotate( -22deg );
+	-moz-transform:    rotate( -22deg );
+	-ms-transform:     rotate( -22deg );
+	-o-transform:      rotate( -22deg );
+	-webkit-transform: rotate( -22deg );
+}
+.them {
+	position: relative;
+	max-width: 66%;
+	min-width: 33%;
+	background: #fda;
+	margin: 8px;
+	margin-right: auto;
+	padding: 4px;
+	border-radius: 8px;
+	border-top-left-radius: 0px;
+}
+.them:after {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: -1px;
+	width: 0;
+	height: 0;
+	border: 8px solid transparent;
+	border-right-color: #fda;
+	border-left: 0;
+	border-top: 0;
+	margin-left: -6px;
+	transform:         rotate( 22deg );
+	-moz-transform:    rotate( 22deg );
+	-ms-transform:     rotate( 22deg );
+	-o-transform:      rotate( 22deg );
+	-webkit-transform: rotate( 22deg );
+}
 #root, #app {
 	height: 100%;
 }

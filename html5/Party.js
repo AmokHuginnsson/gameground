@@ -49,10 +49,10 @@ class Party {
 		return ( this._notification )
 	}
 	on_say( message_ ) {
-		this._refs.messages.log_message( message_ )
+		this._refs.messages.$data.add_message( message_ )
 	}
 	on_msg( message_ ) {
-		this._refs.messages.append_text( message_ + "\n" )
+		this._refs.messages.$data.append_text( message_ )
 	}
 }
 

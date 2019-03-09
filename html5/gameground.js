@@ -20,6 +20,9 @@ const _app_ = new Vue( {
 		currentTab: Browser.TAG,
 		modal: null
 	},
+	created: function() {
+		this.partys[0]._app = this
+	},
 	methods: {
 		/* helpers */
 		logic_by_type: function( type_ ) {
@@ -124,8 +127,8 @@ const _app_ = new Vue( {
 				const proto = message.substr( 0, sepIdx )
 				const data = message.substr( sepIdx + 1 )
 				switch ( proto ) {
-					case "say":
-					case "msg": { this.on_msg( data ) } break
+					case "say": { this.browser_msg( data, ( b, d ) => b.on_say( d ) ) } break
+					case "msg": { this.browser_msg( data, ( b, d ) => b.on_msg( d ) ) } break
 					case "err": { this.on_err( data ) } break
 					case "player": { this.on_player( data ) } break
 					case "logic": { this.on_logic( data ) } break
@@ -148,13 +151,11 @@ const _app_ = new Vue( {
 				() => this.do_disconnect()
 			)
 		},
-		on_msg: function( message ) {
-			const pad = document.querySelector( "#chat-view" )
-			if ( pad ) {
-				pad.log_message( message )
-				if ( this.currentTab != "browser" ) {
-					this.party_by_id( "browser" ).notify()
-				}
+		browser_msg: function( message, dispatch_msg ) {
+			const browser = this.partys[0]
+			dispatch_msg( browser, message )
+			if ( this.currentTab != "browser" ) {
+				browser.notify()
 			}
 		},
 		close_party: function( id_ ) {
@@ -380,6 +381,9 @@ Date.prototype.iso8601 = function() {
 			+ ":" + this.getSeconds().toString().padStart( 2, "0" )
 	)
 }
+
+Vue.prototype.$helpers = {}
+Vue.prototype.$helpers.colorize = colorize
 
 Node.prototype.removeAllChildren = function() {
 	while ( this.firstChild ) {

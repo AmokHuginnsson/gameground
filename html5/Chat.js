@@ -29,9 +29,6 @@ class Chat extends Party {
 			super.close()
 		}
 	}
-	on_say( message_ ) {
-		this._refs.messages.log_message( message_ )
-	}
 	set_id( id_ ) {
 		this._id = id_
 		this._app.make_visible( this._id )
@@ -48,9 +45,10 @@ class Chat extends Party {
 }
 
 Vue.component(
-	"chat", {
+	Chat.TAG, {
 		props: ["data"],
 		data: function( arg ) {
+			this.data._refs = this.$refs
 			return ( this.data )
 		},
 		mounted: function() {
@@ -82,7 +80,7 @@ Vue.component(
 		template: `
 		<div class="tab-pane chat">
 			<label>Private chat messages</label>
-			<div class="messages" ref="messages"></div>
+			<logpad ref="messages" :app="$data._app" />
 			<label>Type your message</label>
 			<input type="text" name="input" maxlength="1024" title="Send message to all people in this private chat room." v-on:keypress.enter="on_enter">
 		</div>
