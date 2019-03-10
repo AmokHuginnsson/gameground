@@ -127,8 +127,8 @@ const _app_ = new Vue( {
 				const proto = message.substr( 0, sepIdx )
 				const data = message.substr( sepIdx + 1 )
 				switch ( proto ) {
-					case "say": { this.browser_msg( data, ( b, d ) => b.on_say( d ) ) } break
-					case "msg": { this.browser_msg( data, ( b, d ) => b.on_msg( d ) ) } break
+					case "say":
+					case "msg": { this.browser_msg( data ) } break
 					case "err": { this.on_err( data ) } break
 					case "player": { this.on_player( data ) } break
 					case "logic": { this.on_logic( data ) } break
@@ -151,9 +151,9 @@ const _app_ = new Vue( {
 				() => this.do_disconnect()
 			)
 		},
-		browser_msg: function( message, dispatch_msg ) {
+		browser_msg: function( message ) {
 			const browser = this.partys[0]
-			dispatch_msg( browser, message )
+			browser.on_msg( message )
 			if ( this.currentTab != "browser" ) {
 				browser.notify()
 			}

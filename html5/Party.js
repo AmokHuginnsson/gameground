@@ -7,7 +7,6 @@ class Party {
 		this._players = []
 		this._handlers = {}
 		this._app = app_
-		this._handlers["say"] = ( msg ) => this.on_say( msg )
 		this._handlers["msg"] = ( msg ) => this.on_msg( msg )
 		this._notification = false
 	}
@@ -48,11 +47,8 @@ class Party {
 	is_notified() {
 		return ( this._notification )
 	}
-	on_say( message_ ) {
-		this._refs.messages.$data.add_message( message_ )
-	}
 	on_msg( message_ ) {
-		this._refs.messages.$data.append_text( message_ )
+		this._refs.messages.$data.add_message( message_ )
 	}
 }
 
