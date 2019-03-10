@@ -10,6 +10,29 @@
 
 namespace gameground {
 
+struct WebSockFragmentHeader {
+	enum class OPCODE {
+		FRAGMENT = 0x0,
+		TEXT     = 0x1,
+		BINARY   = 0x2,
+		CLOSE    = 0x8,
+		PING     = 0x9,
+		PONG     = 0xa
+	};
+	bool _final;
+	OPCODE _opcode;
+	bool _masked;
+	int _len;
+	bool _valid;
+	WebSockFragmentHeader( yaal::u16_t );
+	WebSockFragmentHeader( yaal::hcore::HUTF8String const&, OPCODE );
+	yaal::u16_t raw( void ) const;
+	bool is_valid( void ) const {
+		return ( _valid );
+	}
+	char const* opcode( void ) const;
+};
+
 class HClient {
 public:
 	typedef yaal::hcore::HSet<HLogic::id_t> logics_t;
@@ -49,8 +72,11 @@ public:
 	void enter( HLogic::id_t id_ );
 	void leave( HLogic::id_t id_ );
 	void send( yaal::hcore::HString const& );
+	void pong( yaal::hcore::HString const& );
 	int long read( yaal::hcore::HString& );
 private:
+	int long read_web_socket( yaal::hcore::HString& );
+	void send_web_socket( yaal::hcore::HString const&, WebSockFragmentHeader::OPCODE = WebSockFragmentHeader::OPCODE::TEXT );
 	HClient( HClient const& ) = delete;
 	HClient& operator = ( HClient const& ) = delete;
 };
