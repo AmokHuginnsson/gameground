@@ -372,8 +372,7 @@ void HServer::websocket_handshake( HClient& client_, HString const& ) {
 		return;
 	}
 	tools::hash::sha1_hash_t hashedKey( tools::hash::sha1( key ) );
-	HMemoryObserver mo( hashedKey.data(), hashedKey.size() );
-	HMemory m( mo );
+	HMemory m( make_resource<HMemoryObserver>( hashedKey.data(), hashedKey.size() ) );
 	HStringStream ss;
 	base64::encode( m, ss, true );
 	key = ss.string();
