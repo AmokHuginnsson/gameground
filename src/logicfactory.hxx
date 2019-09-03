@@ -15,11 +15,20 @@ class HLogicFactory {
 public:
 	typedef HLogicFactory this_type;
 	struct OCreator {
-		OCreator( void ) : _instantiator( NULL ) {}
-		OCreator( OCreator const& c ) : _instantiator( c._instantiator ) {}
-		OCreator& operator = ( OCreator const& c ) { _instantiator = c._instantiator; return ( *this ); }
+		OCreator( void )
+			: _instantiator( nullptr ) {
+		}
+		OCreator( OCreator const& c )
+			: _instantiator( c._instantiator ) {
+		}
+		OCreator& operator = ( OCreator const& c ) {
+			_instantiator = c._instantiator;
+			return ( *this );
+		}
 		HLogicCreatorInterface* _instantiator;
-		yaal::hcore::HString get_info( void ) const { return ( _instantiator->get_info() ); }
+		yaal::hcore::HString get_info( void ) const {
+			return ( _instantiator->get_info() );
+		}
 	};
 	typedef yaal::hcore::HMap<yaal::hcore::HString, OCreator> creators_t;
 private:
@@ -33,7 +42,9 @@ public:
 	void initialize_globals( void );
 	void cleanup_globals( void );
 private:
-	HLogicFactory( void ) : _creators() {}
+	HLogicFactory( void )
+		: _creators() {
+	}
 	~HLogicFactory( void ) {}
 	static int life_time( int );
 	friend class yaal::hcore::HSingleton<HLogicFactory>;

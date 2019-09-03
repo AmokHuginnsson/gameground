@@ -28,7 +28,7 @@ now_t now;
 
 HStreamInterface& operator << ( HStreamInterface& stream, now_t const& ) {
 	static int const TIMESTAMP_SIZE = 16;
-	time_t currentTime = ::time( NULL );
+	time_t currentTime = ::time( nullptr );
 	tm* brokenTime = ::localtime( &currentTime );
 	char buffer[ TIMESTAMP_SIZE ];
 	::memset( buffer, 0, TIMESTAMP_SIZE );
@@ -46,11 +46,11 @@ void OSetup::test_setup( void ) {
 	if ( _verbose ) {
 		clog.reset( make_pointer<HFile>( stdout, HFile::OWNERSHIP::EXTERNAL ) );
 	} else {
-		std::clog.rdbuf( NULL );
+		std::clog.rdbuf( nullptr );
 	}
 	if ( _quiet ) {
 		cout.reset();
-		std::cout.rdbuf( NULL );
+		std::cout.rdbuf( nullptr );
 	}
 	if ( _maxConnections < 2 ) {
 		yaal::tools::util::failure ( 3,
@@ -60,7 +60,7 @@ void OSetup::test_setup( void ) {
 		yaal::tools::util::failure ( 5,
 				_( "galaxy cannot run on restricted ports\n" ) );
 	}
-	char* message( NULL );
+	char* message( nullptr );
 	if ( test_glx_emperors( _emperors, message ) ) {
 		yaal::tools::util::failure( 4, "%s", message );
 	}

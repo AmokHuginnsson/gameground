@@ -85,7 +85,7 @@ protected:
 	void handler_quit( HClient&, yaal::hcore::HString const& );
 	void handler_abandon( HClient&, yaal::hcore::HString const& );
 	void handler_chat( HClient&, yaal::hcore::HString const& );
-	void kick_client( HClient&, char const* const = NULL );
+	void kick_client( HClient&, char const* const = nullptr );
 	void broadcast( yaal::hcore::HString const& );
 	void broadcast_party( yaal::hcore::HString const&, yaal::hcore::HString const& );
 	void broadcast_private( HLogic&, yaal::hcore::HString const& );

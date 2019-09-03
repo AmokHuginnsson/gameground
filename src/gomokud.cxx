@@ -56,7 +56,7 @@ HGomoku::HGomoku( HServer* server_, HLogic::id_t const& id_, HString const& comm
 	_sgf( SGF::GAME_TYPE::GOMOKU, "gameground" ),
 	_players(), _varTmpBuffer() {
 	M_PROLOG
-	_contestants[ 0 ] = _contestants[ 1 ] = NULL;
+	_contestants[ 0 ] = _contestants[ 1 ] = nullptr;
 	::memset( _game.raw(), STONE::NONE, GOBAN_SIZE * GOBAN_SIZE );
 	_game.get<char>()[ GOBAN_SIZE * GOBAN_SIZE ] = 0;
 	_handlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HGomoku::handler_play );
@@ -91,7 +91,7 @@ void HGomoku::handler_sit( HClient* client_, HString const& message_ ) {
 		} else if ( ( contestant( STONE::BLACK ) == client_ )
 				|| ( contestant( STONE::WHITE ) == client_ ) ) {
 			throw HLogicException( "you were already sitting" );
-		} else if ( contestant( stone ) != NULL ) {
+		} else if ( contestant( stone ) != nullptr ) {
 			client_->send( _out << *this
 				<< PROTOCOL::MSG << PROTOCOL::SEP << "Some one was faster." << endl << _out );
 		} else {
@@ -318,8 +318,8 @@ void HGomoku::make_move( int x, int y, STONE::stone_t stone ) {
 					broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << winner->login() << PROTOCOL::SEPP << score << endl << _out );
 					broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The match has ended!" << endl << _out );
 					broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP << "The contestant " << winner->login() << " won this match." << endl << _out );
-					contestant( STONE::BLACK ) = NULL;
-					contestant( STONE::WHITE ) = NULL;
+					contestant( STONE::BLACK ) = nullptr;
+					contestant( STONE::WHITE ) = nullptr;
 				}
 			}
 		}
@@ -335,14 +335,14 @@ HClient*& HGomoku::contestant( STONE::stone_t stone ) {
 
 void HGomoku::contestant_gotup( HClient* client_ ) {
 	STONE::stone_t stone = ( contestant( STONE::BLACK ) == client_ ? STONE::BLACK : STONE::WHITE );
-	HClient* foe = NULL;
+	HClient* foe = nullptr;
 	if ( ( _state != STONE::NONE ) && ( foe = contestant( opponent( stone ) ) ) ) {
 		int score( ++ _players[ foe ] );
 		broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << foe->login() << PROTOCOL::SEPP << score << endl << _out );
 		broadcast( _out << PROTOCOL::MSG << PROTOCOL::SEP
 				<< client_->login() << " resigned - therefore " << foe->login() << " wins." << endl << _out );
 	}
-	contestant( stone ) = NULL;
+	contestant( stone ) = nullptr;
 	_state = STONE::NONE;
 	return;
 }

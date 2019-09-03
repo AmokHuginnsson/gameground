@@ -100,7 +100,7 @@ struct OSetup {
 		, _databasePath( DATABASE_PATH )
 		, _databaseLogin( DATABASE_LOGIN )
 		, _databasePassword( DATABASE_PASSWORD )
-		, _programName( NULL )
+		, _programName( nullptr )
 		, _logPath() {
 	}
 	void test_setup( void );

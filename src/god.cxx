@@ -102,7 +102,7 @@ HGo::HGo( HServer* server_, HLogic::id_t const& id_, HString const& comment_ )
 	, _path()
 	, _branch()
 	, _varTmpBuffer()
-	, _pendingUndoRequest( NULL ) {
+	, _pendingUndoRequest( nullptr ) {
 	M_PROLOG
 	_handlers[ PROTOCOL::SETUP ] = static_cast<handler_t>( &HGo::handler_setup );
 	_handlers[ PROTOCOL::PLAY ] = static_cast<handler_t>( &HGo::handler_play );
@@ -245,7 +245,7 @@ void HGo::handler_sit( HClient* client_, HString const& message_ ) {
 		} else if ( ( contestant( STONE::BLACK )._client == client_ )
 				|| ( contestant( STONE::WHITE )._client == client_ ) ) {
 			throw HLogicException( "you were already sitting" );
-		} else if ( contestant( stone )._client != NULL ) {
+		} else if ( contestant( stone )._client != nullptr ) {
 			client_->send( _out << *this
 				<< PROTOCOL::MSG << PROTOCOL::SEP << "Some one was faster." << endl << _out );
 		} else {
@@ -545,7 +545,7 @@ void HGo::handler_undo( HClient* client_, HString const& message_ ) {
 			throw HLogicException( GO_MSG[ GO_MSG_MALFORMED ] );
 		}
 		_toMove = opponent( _toMove );
-		_pendingUndoRequest = NULL;
+		_pendingUndoRequest = nullptr;
 	}
 	return;
 	M_EPILOG
@@ -727,16 +727,16 @@ void HGo::after_move( void ) {
 
 void HGo::end_match( void ) {
 	M_PROLOG
-	_contestants[0]._client = _contestants[1]._client = NULL;
+	_contestants[0]._client = _contestants[1]._client = nullptr;
 	_marking = false;
-	_pendingUndoRequest = NULL;
+	_pendingUndoRequest = nullptr;
 	return;
 	M_EPILOG
 }
 
 HGo::OPlayerInfo* HGo::contestant( HClient const* client_ ) {
 	M_PROLOG
-	OPlayerInfo* pi( NULL );
+	OPlayerInfo* pi( nullptr );
 	if ( _contestants[0]._client == client_ )
 		pi = &_contestants[0];
 	else if ( _contestants[1]._client == client_ )
@@ -747,7 +747,7 @@ HGo::OPlayerInfo* HGo::contestant( HClient const* client_ ) {
 
 HGo::OPlayerInfo const* HGo::contestant( HClient const* client_ ) const {
 	M_PROLOG
-	OPlayerInfo const* pi( NULL );
+	OPlayerInfo const* pi( nullptr );
 	if ( _contestants[0]._client == client_ )
 		pi = &_contestants[0];
 	else if ( _contestants[1]._client == client_ )
@@ -893,7 +893,7 @@ void HGo::reset_goban( bool sgf_ ) {
 	}
 	_toMove = _handicaps <= 1 ? STONE::BLACK : STONE::WHITE;
 	_marking = false;
-	_pendingUndoRequest = NULL;
+	_pendingUndoRequest = nullptr;
 	return;
 	M_EPILOG
 }
@@ -1241,9 +1241,9 @@ void HGo::contestant_gotup( HClient* client_ ) {
 				<< " resigned - therefore " << foe._client->login() << ( stone == STONE::BLACK ? " (white)" : " (black)" )
 				<< " wins." << endl << _out );
 	}
-	contestant( stone )._client = NULL;
+	contestant( stone )._client = nullptr;
 	_marking = false;
-	_pendingUndoRequest = NULL;
+	_pendingUndoRequest = nullptr;
 	return;
 }
 
@@ -1331,7 +1331,7 @@ bool HGo::ongoing_match( void ) const {
 void HGo::update_clocks( void ) {
 	M_PROLOG
 	revoke_scheduled_tasks();
-	int long now( ::time( NULL ) );
+	int long now( ::time( nullptr ) );
 	OPlayerInfo& p( contestant( opponent( _toMove ) ) );
 	if ( _start ) {
 		p._timeLeft -= static_cast<int>( now - _start );

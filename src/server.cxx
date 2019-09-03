@@ -901,7 +901,7 @@ void HServer::flush_droupouts( void ) {
 		HClient* dropout( _dropouts.back() );
 		_dropouts.pop_back();
 		M_ASSERT( !! dropout->sock() );
-		kick_client( *dropout, NULL );
+		kick_client( *dropout, nullptr );
 	}
 	return;
 	M_EPILOG
@@ -910,7 +910,7 @@ void HServer::flush_droupouts( void ) {
 HClient* HServer::get_client( HString const& login_ ) {
 	M_PROLOG
 	logins_t::iterator it( _logins.find( login_ ) );
-	return ( it != _logins.end() ? it->second : NULL );
+	return ( it != _logins.end() ? it->second : nullptr );
 	M_EPILOG
 }
 

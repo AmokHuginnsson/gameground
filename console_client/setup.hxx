@@ -42,12 +42,21 @@ struct OSetup {
 	/* self-sufficient */
 	static int const PATH_OFFSET = sizeof ( __FILE__ ) - sizeof ( "setup.hxx" );
 	OSetup ( void )
-		: _quiet( false ), _verbose( false ), _debug( false ),
-		_emperors( GALAXY_EMPERORS ), _port( 7777 ),
-		_systems( GALAXY_EMPERORS * NEUTRAL_SYSTEM_PER_PLAYER ),
-		_boardSize( GALAXY_BOARD_SIZE ),
-		_login(), _password(), _host(), _gameType(), _game(),
-		_programName( NULL ), _logPath() {}
+		: _quiet( false )
+		, _verbose( false )
+		, _debug( false )
+		, _emperors( GALAXY_EMPERORS )
+		, _port( 7777 )
+		, _systems( GALAXY_EMPERORS * NEUTRAL_SYSTEM_PER_PLAYER )
+		, _boardSize( GALAXY_BOARD_SIZE )
+		, _login()
+		, _password()
+		, _host()
+		, _gameType()
+		, _game()
+		, _programName( nullptr )
+		, _logPath() {
+	}
 	void test_setup( void );
 private:
 	OSetup ( OSetup const & );

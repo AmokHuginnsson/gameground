@@ -30,7 +30,7 @@ private:
 			, _stonesCaptured( 0 )
 			, _score( 0 )
 			, _ignoreUndo( false )
-			, _client( NULL ) {
+			, _client( nullptr ) {
 		}
 		void reset( int time_, int score_, int byo_ ) {
 			_timeLeft = time_;
@@ -132,8 +132,8 @@ protected:
 	void put_handicap_stones( int, bool );
 	void apply_move( sgf::SGF::game_tree_t::const_node_t );
 	void put_stone( int, int, STONE::stone_t );
-	void send_goban( HClient* = NULL );
-	void send_path( HClient* = NULL );
+	void send_goban( HClient* = nullptr );
+	void send_path( HClient* = nullptr );
 	bool have_liberties( int, int, STONE::stone_t );
 	char& goban( int, int );
 	OPlayerInfo& contestant( STONE::stone_t );
@@ -147,7 +147,7 @@ protected:
 	bool is_ko( void );
 	void make_move( int, int );
 	void contestant_gotup( HClient* );
-	void send_contestants( HClient* = NULL );
+	void send_contestants( HClient* = nullptr );
 	void send_contestant( char, HClient* );
 	int count_stones( STONE::stone_t );
 	void handler_sit( HClient*, yaal::hcore::HString const& );
