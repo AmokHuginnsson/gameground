@@ -35,12 +35,12 @@ void OSetup::test_setup( void ) {
 				_( "quiet and verbose options are exclusive\n" ) );
 	}
 	if ( _verbose ) {
-		clog.reset( make_pointer<HFile>( stdout, HFile::OWNERSHIP::EXTERNAL ) );
+		clog.reset_owned( make_pointer<HFile>( stdout, HFile::OWNERSHIP::EXTERNAL ) );
 	} else {
 		std::clog.rdbuf( nullptr );
 	}
 	if ( _quiet ) {
-		cout.reset();
+		cout.reset_owned();
 		std::cout.rdbuf( nullptr );
 	}
 	if ( _host.is_empty() ) {
