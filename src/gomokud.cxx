@@ -109,7 +109,7 @@ void HGomoku::handler_sit( HClient* client_, HString const& message_ ) {
 				_sgf.clear();
 				_sgf.set_player( SGF::Player::BLACK, black->login() );
 				_sgf.set_player( SGF::Player::WHITE, white->login() );
-				_sgf.set_info( SGF::Player::BLACK, 15 );
+				_sgf.set_info( 15 );
 				send_goban();
 				broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << black->login() << PROTOCOL::SEPP << blackIt->second << endl << _out );
 				broadcast( _out << PROTOCOL::PLAYER << PROTOCOL::SEP << white->login() << PROTOCOL::SEPP << whiteIt->second << endl << _out );
