@@ -20,6 +20,7 @@ M_VCSID( "$Id: " __ID__ " $" )
 
 using namespace yaal;
 using namespace yaal::hcore;
+using namespace yaal::hcore::system;
 using namespace yaal::tools;
 using namespace yaal::tools::util;
 using namespace yaal::dbwrapper;
@@ -121,7 +122,7 @@ int HServer::init_server( int port_ ) {
 	factory.initialize_globals();
 	_db->connect( setup._databasePath, setup._databaseLogin, setup._databasePassword );
 	_socket->listen( "0.0.0.0", port_ );
-	_dispatcher.register_file_descriptor_handler( _socket, call( &HServer::handler_connection, this, _1 ) );
+	_dispatcher.register_file_descriptor_handler( _socket, call( &HServer::handler_connection, this, _1, _2 ), IO_EVENT_TYPE::READ );
 	_handlers[ PROTOCOL::SHUTDOWN ] = &HServer::handler_shutdown;
 	_handlers[ PROTOCOL::QUIT ] = &HServer::handler_quit;
 	_handlers[ PROTOCOL::MSG ] = &HServer::handler_chat;
@@ -142,14 +143,14 @@ int HServer::init_server( int port_ ) {
 	M_EPILOG
 }
 
-void HServer::handler_connection( yaal::tools::HIODispatcher::stream_t& ) {
+void HServer::handler_connection( yaal::tools::HIODispatcher::stream_t&, yaal::hcore::system::IO_EVENT_TYPE ) {
 	M_PROLOG
 	HSocket::ptr_t client = _socket->accept();
 	M_ASSERT( !! client );
 	if ( static_cast<int>( _clients.get_size() ) >= _maxConnections ) {
 		client->close();
 	} else {
-		_dispatcher.register_file_descriptor_handler( client, call( &HServer::handler_message, this, _1 ) );
+		_dispatcher.register_file_descriptor_handler( client, call( &HServer::handler_message, this, _1, _2 ), IO_EVENT_TYPE::READ );
 		_clients.insert( make_pair( client.raw(), client ) );
 	}
 	OUT << client->get_host_name() << endl;
@@ -157,7 +158,7 @@ void HServer::handler_connection( yaal::tools::HIODispatcher::stream_t& ) {
 	M_EPILOG
 }
 
-void HServer::handler_message( yaal::tools::HIODispatcher::stream_t& stream_ ) {
+void HServer::handler_message( yaal::tools::HIODispatcher::stream_t& stream_, yaal::hcore::system::IO_EVENT_TYPE ) {
 	M_PROLOG
 	HString message;
 	HString argument;

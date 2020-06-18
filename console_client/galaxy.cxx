@@ -25,9 +25,9 @@ M_VCSID( "$Id: " __ID__ " $" )
 
 #include "setup.hxx"
 
-using namespace std;
 using namespace yaal;
 using namespace yaal::hcore;
+using namespace yaal::hcore::system;
 using namespace yaal::hconsole;
 using namespace yaal::tools;
 using namespace yaal::tools::util;
@@ -315,7 +315,7 @@ public:
 	HClient( HString const& );
 	virtual ~HClient( void );
 	void init_client( HString&, int );
-	void handler_message( yaal::tools::HIODispatcher::stream_t& );
+	void handler_message( yaal::tools::HIODispatcher::stream_t&, yaal::hcore::system::IO_EVENT_TYPE );
 	void end_round( void );
 	void send_message( HString const& );
 	HString const& id( void ) const;
@@ -858,7 +858,7 @@ void HClient::init_client( HString& host_, int port_ ) {
 	M_PROLOG
 	HString message;
 	_socket->connect( host_, port_ );
-	_dispatcher.register_file_descriptor_handler( _socket, call( &HClient::handler_message, this, _1 ) );
+	_dispatcher.register_file_descriptor_handler( _socket, call( &HClient::handler_message, this, _1, _2 ), IO_EVENT_TYPE::READ );
 	if ( setup._password.is_empty() ) {
 		*_socket << ( _out << "login:" << CLIENT_VERSION << ":" << setup._login << endl << _out );
 	} else {
@@ -879,7 +879,7 @@ void HClient::init_client( HString& host_, int port_ ) {
 	M_EPILOG
 }
 
-void HClient::handler_message( yaal::tools::HIODispatcher::stream_t& ) {
+void HClient::handler_message( yaal::tools::HIODispatcher::stream_t&, yaal::hcore::system::IO_EVENT_TYPE ) {
 	M_PROLOG
 	int long msgLength = 0;
 	HString message;

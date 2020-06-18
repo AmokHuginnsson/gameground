@@ -131,6 +131,7 @@ void HClient::send( yaal::hcore::HString const& message_ ) {
 	} else {
 		send_web_socket( message_ );
 	}
+	_socket->flush();
 	return;
 	M_EPILOG
 }

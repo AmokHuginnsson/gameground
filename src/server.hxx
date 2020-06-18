@@ -79,8 +79,8 @@ public:
 	void join_party( HClient&, yaal::hcore::HString const& );
 	void handle_get_account( HClient&, yaal::hcore::HString const& );
 protected:
-	void handler_connection( yaal::tools::HIODispatcher::stream_t& );
-	void handler_message( yaal::tools::HIODispatcher::stream_t& );
+	void handler_connection( yaal::tools::HIODispatcher::stream_t&, yaal::hcore::system::IO_EVENT_TYPE );
+	void handler_message( yaal::tools::HIODispatcher::stream_t&, yaal::hcore::system::IO_EVENT_TYPE );
 	void handler_shutdown( HClient&, yaal::hcore::HString const& );
 	void handler_quit( HClient&, yaal::hcore::HString const& );
 	void handler_abandon( HClient&, yaal::hcore::HString const& );
