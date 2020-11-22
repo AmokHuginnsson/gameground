@@ -1,6 +1,7 @@
 /* Read gameground/LICENSE.md file for copyright and licensing information. */
 
 #include <cstring>
+#include <cctype>
 
 #include <yaal/hcore/macro.hxx>
 #include <yaal/hcore/htokenizer.hxx>

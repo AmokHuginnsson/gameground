@@ -75,7 +75,7 @@ public:
 		}
 		_size = static_cast<int>( math::square_root( _cubes.size() ) );
 		if ( ( _size * _size ) != static_cast<int>( _cubes.size() ) ) {
-			throw std::runtime_error("board is not a square");
+			throw HRuntimeException("board is not a square");
 		}
 		typedef yaal::hcore::HPair<int, int> direction_t;
 		typedef yaal::hcore::HArray<direction_t> directions_t;
