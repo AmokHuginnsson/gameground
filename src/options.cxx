@@ -52,7 +52,7 @@ int handle_program_options( int argc_, char** argv_ ) {
 	bool vers( false );
 	po(
 		HProgramOptionsHandler::HOption()
-		.long_form( "log_path" )
+		.long_form( "log-path" )
 		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::REQUIRED )
 		.description( "path pointing to file for application logs" )
 		.recipient(	setup._logPath )
@@ -61,7 +61,7 @@ int handle_program_options( int argc_, char** argv_ ) {
 	)(
 		HProgramOptionsHandler::HOption()
 		.short_form( 'D' )
-		.long_form( "database_path" )
+		.long_form( "database-path" )
 		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::REQUIRED )
 		.description( "database connection path scheme" )
 		.recipient( setup._databasePath )
@@ -69,7 +69,7 @@ int handle_program_options( int argc_, char** argv_ ) {
 	)(
 		HProgramOptionsHandler::HOption()
 		.short_form( 'U' )
-		.long_form( "database_login" )
+		.long_form( "database-login" )
 		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::REQUIRED )
 		.description( "datbase connection user name" )
 		.recipient( setup._databaseLogin )
@@ -77,21 +77,21 @@ int handle_program_options( int argc_, char** argv_ ) {
 	)(
 		HProgramOptionsHandler::HOption()
 		.short_form( 'p' )
-		.long_form( "database_password" )
+		.long_form( "database-password" )
 		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::REQUIRED )
 		.description( "database connection password" )
 		.recipient( setup._databasePassword )
 		.argument_name( "password" )
 	)(
 		HProgramOptionsHandler::HOption()
-		.long_form( "aspell_lang" )
+		.long_form( "aspell-lang" )
 		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::REQUIRED )
 		.description( "language used for spell checking" )
 		.recipient( setup._aspellLang )
 		.argument_name( "language" )
 	)(
 		HProgramOptionsHandler::HOption()
-		.long_form( "scoring_system" )
+		.long_form( "scoring-system" )
 		.switch_type( HProgramOptionsHandler::HOption::ARGUMENT::REQUIRED )
 		.description( "scoring system for boggle (original|fibonacci|geometric|longestwords)" )
 		.recipient( setup._scoringSystem )
