@@ -134,7 +134,7 @@ HLogic::ptr_t HChat::get_chat( HServer* server_, HLogic::id_t const& id_, HStrin
 		logic = make_pointer<chat::HChat>( server_, id_, chatterNames, key );
 		_chats_.insert( make_pair( key, logic ) );
 	}
-	return ( logic );
+	return logic;
 	M_EPILOG
 }
 
@@ -174,7 +174,7 @@ HString HChatCreator::do_get_info( void ) const {
 	HString setup;
 	setup.assign( "chat" );
 	OUT << setup << endl;
-	return ( setup );
+	return setup;
 	M_EPILOG
 }
 
@@ -185,7 +185,7 @@ bool registrar( void ) {
 	bool volatile failed( false );
 	HLogicFactory& factory( HLogicFactoryInstance::get_instance() );
 	factory.register_logic_creator( HTokenizer( chatCreator.get_info(), ":"  )[0], &chatCreator );
-	return ( failed );
+	return failed;
 	M_EPILOG
 }
 

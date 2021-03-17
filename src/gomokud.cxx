@@ -299,7 +299,7 @@ int HGomoku::is_winning_stone( int row_, int col_ ) const {
 			break;
 		}
 	} while ( false );
-	return ( line );
+	return line;
 	M_EPILOG
 }
 
@@ -390,7 +390,7 @@ HString HGomokuCreator::do_get_info( void ) const {
 	HString setup;
 	setup.assign( "gomoku" );
 	OUT << setup << endl;
-	return ( setup );
+	return setup;
 	M_EPILOG
 }
 
@@ -401,7 +401,7 @@ bool registrar( void ) {
 	bool volatile failed = false;
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 	factory.register_logic_creator( HTokenizer( gomokuCreator.get_info(), ":"  )[0], &gomokuCreator );
-	return ( failed );
+	return failed;
 	M_EPILOG
 }
 

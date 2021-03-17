@@ -164,7 +164,7 @@ bool HSetBang::makes_set( int n1_, int n2_, int n3_ ) const {
 			}
 		}
 	}
-	return ( makesSet );
+	return makesSet;
 }
 
 bool HSetBang::contains_set( int limit_ ) const {
@@ -184,7 +184,7 @@ bool HSetBang::contains_set( int limit_ ) const {
 		}
 		++ lastCard;
 	}
-	return ( containsSet );
+	return containsSet;
 }
 
 void HSetBang::update_table( void ) {
@@ -299,7 +299,7 @@ HString HSetBangCreator::do_get_info( void ) const {
 	HString setupMsg;
 	setupMsg = format( "set_bang:%d,%d,%d", setup._setStartupPlayers, setup._setDeckCount, setup._interRoundDelay );
 	OUT << setupMsg << endl;
-	return ( setupMsg );
+	return setupMsg;
 	M_EPILOG
 }
 
@@ -310,7 +310,7 @@ bool registrar( void ) {
 	bool volatile failed = false;
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 	factory.register_logic_creator( HTokenizer( setBangCreator.get_info(), ":"  )[0], &setBangCreator );
-	return ( failed );
+	return failed;
 	M_EPILOG
 }
 

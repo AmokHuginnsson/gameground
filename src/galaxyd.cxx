@@ -318,7 +318,7 @@ int HGalaxy::assign_system( HClient* client_ ) {
 	}
 	M_ASSERT( ! _systems[ ctr ]._emperor );
 	_systems[ ctr ]._emperor = client_;
-	return ( ctr );
+	return ctr;
 	M_EPILOG
 }
 
@@ -475,7 +475,7 @@ HGalaxy::OEmperorInfo* HGalaxy::get_emperor_info( HClient* client_ ) {
 		M_ASSERT( it != _emperors.end() );
 		info = &it->second;
 	}
-	return ( info );
+	return info;
 	M_EPILOG
 }
 
@@ -566,7 +566,7 @@ HString HGalaxyCreator::do_get_info( void ) const {
 	HString setupMsg;
 	setupMsg = format( "%s:%d,%d,%d", "glx", setup._emperors, setup._boardSize, setup._systems );
 	OUT << setupMsg << endl;
-	return ( setupMsg );
+	return setupMsg;
 }
 
 namespace {
@@ -576,7 +576,7 @@ bool registrar( void ) {
 	bool volatile failed = false;
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 	factory.register_logic_creator( HTokenizer( galaxyCreator.get_info(), ":" )[0], &galaxyCreator );
-	return ( failed );
+	return failed;
 	M_EPILOG
 }
 

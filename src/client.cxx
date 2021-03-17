@@ -76,7 +76,7 @@ char const* WebSockFragmentHeader::opcode( void ) const {
 		case ( OPCODE::PING ):     oc = "ping";     break;
 		case ( OPCODE::PONG ):     oc = "pong";     break;
 	}
-	return ( oc );
+	return oc;
 }
 
 inline void apply_mask( void* data_, int size_, u32_t mask_ ) {
@@ -99,7 +99,7 @@ inline HStreamInterface& operator << ( HStreamInterface& os, WebSockFragmentHead
 		<< "opcode = " << wsfh.opcode() << "\n"
 		<< "masked = " << wsfh._masked << "\n"
 		<< "len = " << wsfh._len << endl;
-	return ( os );
+	return os;
 }
 
 HClient::HClient( yaal::hcore::HStreamInterface::ptr_t const& sock_ )
@@ -183,7 +183,7 @@ int long HClient::read( yaal::hcore::HString& line_ ) {
 		line_.trim_right( "\r\n" );
 		nRead -= ( len - line_.get_length() );
 	}
-	return ( nRead );
+	return nRead;
 	M_EPILOG
 }
 
@@ -244,7 +244,7 @@ int long HClient::read_web_socket( yaal::hcore::HString& line_ ) {
 			nRead = -1;
 		}
 	} while ( false );
-	return ( nRead );
+	return nRead;
 	M_EPILOG
 }
 

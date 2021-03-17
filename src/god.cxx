@@ -606,7 +606,7 @@ HGo::STONE::stone_t HGo::mark_teritory( int x, int y ) {
 	else {
 		M_ASSERT( ! "bad code path" );
 	}
-	return ( teritory );
+	return teritory;
 }
 
 void HGo::mark_teritory( void ) {
@@ -742,7 +742,7 @@ HGo::OPlayerInfo* HGo::contestant( HClient const* client_ ) {
 		pi = &_contestants[0];
 	else if ( _contestants[1]._client == client_ )
 		pi = &_contestants[1];
-	return ( pi );
+	return pi;
 	M_EPILOG
 }
 
@@ -753,7 +753,7 @@ HGo::OPlayerInfo const* HGo::contestant( HClient const* client_ ) const {
 		pi = &_contestants[0];
 	else if ( _contestants[1]._client == client_ )
 		pi = &_contestants[1];
-	return ( pi );
+	return pi;
 	M_EPILOG
 }
 
@@ -1146,7 +1146,7 @@ bool HGo::have_killed( int x, int y, STONE::stone_t stone ) {
 	else
 		clear_goban( false );
 	goban( x, y ) = STONE::NONE;
-	return ( killed );
+	return killed;
 }
 
 bool HGo::is_ko( void ) {
@@ -1161,7 +1161,7 @@ bool HGo::is_suicide( int x, int y, STONE::stone_t stone ) {
 	}
 	clear_goban( false );
 	goban( x, y ) = STONE::NONE;
-	return ( suicide );
+	return suicide;
 }
 
 void HGo::ensure_coordinates_validity( int x, int y ) {
@@ -1374,7 +1374,7 @@ HString HGoCreator::do_get_info( void ) const {
 	setupMsg = format( "go:%d,%d,%d,%d,%d,%d", setup._gobanSize, setup._komi100, setup._handicaps,
 			setup._mainTime, setup._byoYomiPeriods, setup._byoYomiTime );
 	OUT << setupMsg << endl;
-	return ( setupMsg );
+	return setupMsg;
 	M_EPILOG
 }
 
@@ -1385,7 +1385,7 @@ bool registrar( void ) {
 	bool volatile failed = false;
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 	factory.register_logic_creator( HTokenizer( goCreator.get_info(), ":" )[0], &goCreator );
-	return ( failed );
+	return failed;
 	M_EPILOG
 }
 

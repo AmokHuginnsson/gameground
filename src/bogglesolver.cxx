@@ -123,7 +123,7 @@ public:
 				return ( left_.get_size() < right.get_size() );
 			}
 		);
-		return ( sorted );
+		return sorted;
 	}
 
 private:

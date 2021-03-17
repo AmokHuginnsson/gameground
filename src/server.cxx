@@ -33,7 +33,7 @@ namespace {
 HString const& mark( int color_ ) {
 	static HString buf;
 	buf.assign( "$" ).append( color_ ).append( ";###$" ).append( static_cast<int>( COLOR::ATTR_RESET ) ).append( ";" );
-	return ( buf );
+	return buf;
 }
 
 inline void SENDF( HClient& client_, HString const& message_ ) {
@@ -873,7 +873,7 @@ HLogic::id_t HServer::create_id( void ) {
 	M_PROLOG
 	HLogic::id_t id = _idPool.to_string();
 	++ _idPool;
-	return ( id );
+	return id;
 	M_EPILOG
 }
 
@@ -918,7 +918,7 @@ HClient* HServer::get_client( HString const& login_ ) {
 HServer::db_accessor_t HServer::db( void ) {
 	M_PROLOG
 	db_accessor_t eaDB( HLock( _mutex ), _db );
-	return ( eaDB );
+	return eaDB;
 	M_EPILOG
 }
 

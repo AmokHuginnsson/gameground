@@ -25,7 +25,7 @@ HStreamInterface& operator << ( HStreamInterface& stream, now_t const& ) {
 	::memset( buffer, 0, TIMESTAMP_SIZE );
 	::strftime( buffer, TIMESTAMP_SIZE, "%b %d %H:%M:%S", brokenTime );
 	stream << buffer;
-	return ( stream );
+	return stream;
 }
 
 void OSetup::test_setup( void ) {

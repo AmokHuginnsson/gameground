@@ -586,7 +586,7 @@ int HBoard::do_process_input( int code_ ) {
 			schedule_repaint();
 		}
 	}
-	return ( code );
+	return code;
 	M_EPILOG
 }
 
@@ -604,7 +604,7 @@ bool HBoard::do_click( mouse::OMouse& mouse_ ) {
 			handled = true;
 		}
 	}
-	return ( handled );
+	return handled;
 }
 
 void HBoard::set_systems( systems_t* systems_ ) {
@@ -634,7 +634,7 @@ int HBoard::distance( int source_, int destination_ ) {
 		dY = ( ( _boardSize - dY ) < dY ) ? _boardSize - dY : dY;
 		dist = static_cast<int>( sqrt( dX * dX + dY * dY ) + 0.5 );
 	}
-	return ( dist );
+	return dist;
 	M_EPILOG
 }
 
@@ -782,7 +782,7 @@ bool HGalaxyWindow::handler_enter( hconsole::HEvent const& ) {
 		_statusBar->message( COLOR::FG_RED, _round >= 0 ? "Wait for new round!" : "Challange not started yet!" );
 		consumed = true;
 	}
-	return ( consumed );
+	return consumed;
 	M_EPILOG
 }
 
@@ -1099,7 +1099,7 @@ int find_color( HString const& message_, int offset_ ) {
 		}
 		start = color;
 	}
-	return ( colorStartIndex );
+	return colorStartIndex;
 }
 
 }

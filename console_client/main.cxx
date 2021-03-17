@@ -64,7 +64,7 @@ int main( int argc_, char* argv_[] ) {
 			cons.leave_curses (); /* ending ncurses sesion */
 		throw;
 	}
-	return ( opt );
+	return opt;
 	M_FINAL
 }
 

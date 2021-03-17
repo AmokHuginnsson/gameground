@@ -142,7 +142,7 @@ char const* state_to_str( HBoggle::STATE state_ ) {
 		case ( HBoggle::STATE::PAUSE ): str = HBoggle::PROTOCOL::PAUSE; break;
 		case ( HBoggle::STATE::OVER ):  str = HBoggle::PROTOCOL::OVER;  break;
 	}
-	return ( str );
+	return str;
 }
 
 }
@@ -257,7 +257,7 @@ inline char const* lang_id_to_name( LANGUAGE langId_ ) {
 		case ( LANGUAGE::ENGLISH ) : langStr = "English"; break;
 		case ( LANGUAGE::POLISH ) : langStr = "Polish"; break;
 	}
-	return ( langStr );
+	return langStr;
 }
 
 void HBoggle::do_post_accept( HClient* client_ ) {
@@ -502,7 +502,7 @@ bool HBoggle::is_good( int f, yaal::hcore::HString::const_iterator it_, yaal::hc
 		}
 	}
 	_game[ f ][ 1 ] = saved;
-	return ( good );
+	return good;
 }
 
 bool HBoggle::word_is_good( HString const& word_ ) {
@@ -522,7 +522,7 @@ bool HBoggle::word_is_good( HString const& word_ ) {
 	if ( good ) {
 		good = ! boggle_data::_spellCheckers_[static_cast<int>( _language )].spell_check( word_ );
 	}
-	return ( good );
+	return good;
 	M_EPILOG
 }
 
@@ -605,7 +605,7 @@ HString HBoggleCreator::do_get_info( void ) const {
 		setup._interRoundDelay
 	);
 	OUT << setupMsg << endl;
-	return ( setupMsg );
+	return setupMsg;
 }
 
 void HBoggleCreator::do_initialize_globals( void ) {
@@ -628,7 +628,7 @@ bool registrar( void ) {
 	bool volatile failed = false;
 	HLogicFactory& factory = HLogicFactoryInstance::get_instance();
 	factory.register_logic_creator( HTokenizer( boggleCreator.get_info(), ":" )[0], &boggleCreator );
-	return ( failed );
+	return failed;
 	M_EPILOG
 }
 

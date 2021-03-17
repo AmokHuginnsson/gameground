@@ -80,7 +80,7 @@ bool HLogic::accept_client( HClient* client_ ) {
 	} else {
 		rejected = true;
 	}
-	return ( rejected );
+	return rejected;
 	M_EPILOG
 }
 
@@ -121,7 +121,7 @@ bool HLogic::process_command( HClient* client_, HString const& command_ ) {
 		failure = true;
 		OUT << "mnemo: " << mnemonic << ", arg: " << argument << ", cmd: " << command_ << endl;
 	}
-	return ( failure );
+	return failure;
 	M_EPILOG
 }
 
@@ -131,7 +131,7 @@ void HLogic::party( HStreamInterface& stream_ ) const {
 
 yaal::hcore::HStreamInterface& operator << ( HStreamInterface& stream_, HLogic const& party_ ) {
 	party_.party( stream_ );
-	return ( stream_ );
+	return stream_;
 }
 
 void HLogic::broadcast( HString const& message_ ) {

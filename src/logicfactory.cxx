@@ -33,7 +33,7 @@ HLogic::ptr_t HLogicFactory::create_logic( HString const& type_, HServer* server
 	creators_t::iterator it = _creators.find( type_ );
 	if ( it != _creators.end() )
 		logic = it->second._instantiator->new_instance( server_, id_, argv_ );
-	return ( logic );
+	return logic;
 	M_EPILOG
 }
 
@@ -43,7 +43,7 @@ bool HLogicFactory::is_type_valid( yaal::hcore::HString const& type_ ) {
 	creators_t::iterator it = _creators.find( type_ );
 	if ( it != _creators.end() )
 		valid = true;
-	return ( valid );
+	return valid;
 	M_EPILOG
 }
 
@@ -56,7 +56,7 @@ HLogicFactory::creators_t::iterator HLogicFactory::end( void ) {
 }
 
 int HLogicFactory::life_time( int lifeTime_ ) {
-	return ( lifeTime_ );
+	return lifeTime_;
 }
 
 void HLogicFactory::initialize_globals( void ) {
