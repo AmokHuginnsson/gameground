@@ -171,7 +171,7 @@ public:
 		HString line;
 		int wordCount( 0 );
 		try {
-			while ( dictFile.read_line( line, HFile::READ::BUFFERED_READS ).good() ) {
+			while ( getline( dictFile, line ).good() ) {
 				_root.add_suffix( line );
 				++ wordCount;
 			}
