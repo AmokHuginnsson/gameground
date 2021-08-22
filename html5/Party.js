@@ -8,6 +8,7 @@ class Party {
 		this._handlers = {}
 		this._app = app_
 		this._handlers["msg"] = ( msg ) => this.on_msg( msg )
+		this._handlers["say"] = ( msg ) => this.on_msg( msg )
 		this._notification = false
 	}
 	get name() {

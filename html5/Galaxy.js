@@ -169,6 +169,8 @@ class Galaxy extends Party {
 		this._coordToSystem = new Map()
 		this._handlers["setup"] = ( msg ) => this.on_setup( msg )
 		this._handlers["play"] = ( msg ) => this.on_play( msg )
+		this._handlers["msg"] = ( msg ) => this.on_msg( msg )
+		this._handlers["say"] = ( msg ) => this.on_say( msg )
 		this._moves = []
 		this._sourceSystem = -1
 		this._destinationSystem = -1
@@ -437,7 +439,7 @@ Vue.component(
 					<label>Fleet: {{hovered && ( hovered._fleet >= 0 ) ? hovered._fleet : "?"}}</label>
 				</div>
 				<label>Party chat messages</label>
-				<logpad ref="messages" :app="$data._app" :colorMap="$data.color_map" />
+				<div class="messages" ref="messages" :app="$data._app" :colorMap="$data.color_map" />
 				<label>Type your message</label><br />
 				<input class="long-input" type="text" name="input" maxlength="1024" title="Enter message You want to send to other players." v-on:keypress.enter="on_msg_enter"><br />
 				<span>{{status_text()}}</span>

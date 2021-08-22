@@ -794,8 +794,9 @@ bool HGalaxyWindow::handler_esc( hconsole::HEvent const& ) {
 		_logPad->enable( true );
 		_board->set_focus();
 		set_state( SELECT );
-	} else if ( _state == SELECT )
+	} else if ( _state == SELECT ) {
 		set_state( NORMAL );
+	}
 	schedule_repaint( false );
 	return ( 0 );
 	M_EPILOG
@@ -803,8 +804,9 @@ bool HGalaxyWindow::handler_esc( hconsole::HEvent const& ) {
 
 bool HGalaxyWindow::handler_space( hconsole::HEvent const& ) {
 	M_PROLOG
-	if ( _state == NORMAL )
+	if ( _state == NORMAL ) {
 		_client->end_round();
+	}
 	return ( 0 );
 	M_EPILOG
 }
@@ -875,28 +877,29 @@ void HClient::init_client( HString& host_, int port_ ) {
 	} else {
 		*_socket << "get_partys\n";
 	}
+	_socket->flush();
 	return;
 	M_EPILOG
 }
 
 void HClient::handler_message( yaal::tools::HIODispatcher::stream_t&, yaal::hcore::system::IO_EVENT_TYPE ) {
 	M_PROLOG
-	int long msgLength = 0;
 	HString message;
 	HString command;
-	if ( ( msgLength = _socket->read_until( message ) ) > 0 ) {
+	if ( getline( *_socket, message ).good() ) {
 		if ( setup._debug ) {
 			_window->_logPad->add( message );
 			_window->_logPad->add( "\n" );
 		}
-		msgLength = message.get_length();
-		if ( msgLength < 1 ) {
+		if ( message.is_empty() ) {
 			hcore::log << "got empty message from server" << endl;
 			_dispatcher.stop();
-		} else
+		} else {
 			process_command( message );
-	} else if ( msgLength < 0 )
+		}
+	} else {
 		_dispatcher.stop();
+	}
 	repaint();
 	return;
 	M_EPILOG
@@ -941,7 +944,7 @@ void HClient::handler_party_info( HString& command_ ) {
 			_id = newId;
 			if ( setup._gameType.is_empty() ) {
 				setup._gameType = "glx";
-				*_socket << ( _out << "join:" << _id << endl << _out );
+				*_socket << ( _out << "join:" << _id << endl << _out ) << flush;
 			}
 		}
 	}
@@ -1153,14 +1156,14 @@ void HClient::end_round( void ) {
 		}
 		_moves.clear();
 	}
-	*_socket << ( _out << "cmd:" << _id << ":glx:play:end_round\n" << _out );
+	*_socket << ( _out << "cmd:" << _id << ":glx:play:end_round\n" << _out ) << flush;
 	return;
 	M_EPILOG
 }
 
 void HClient::send_message( HString const & message_ ) {
 	M_PROLOG
-	*_socket << message_;
+	*_socket << message_ << flush;
 	return;
 	M_EPILOG
 }

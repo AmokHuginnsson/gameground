@@ -179,7 +179,7 @@ int long HClient::read( yaal::hcore::HString& line_ ) {
 		nRead = read_web_socket( line_ );
 	}
 	if ( nRead > 1 ) {
-		int long len( line_.get_size() );
+		int long len( line_.get_length() );
 		line_.trim_right( "\r\n" );
 		nRead -= ( len - line_.get_length() );
 	}
