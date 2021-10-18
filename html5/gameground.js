@@ -276,7 +276,7 @@ function colorize( message, colorMap_ = colorMap ) {
 	let idx = 0
 	let needClosing = false
 	while ( true ) {
-		let newIdx = message.substr( idx ).search( /\$\d+;/ )
+		let newIdx = message.substr( idx ).search( /\$-?\d+;/ )
 		if ( newIdx == -1 ) {
 			m += message.substr( idx )
 			if ( needClosing ) {

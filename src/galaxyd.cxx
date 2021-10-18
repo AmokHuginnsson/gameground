@@ -250,16 +250,16 @@ void HGalaxy::do_post_accept( HClient* client_ ) {
 			_id, 'c', sysNo, _systems[ sysNo ]._production, color,
 			_systems[ sysNo ]._fleet );
 		client_->send( message );
-		message = format( "msg:$12;Emperor $%d;", color );
+		message = format( "msg:$-1;Emperor $%d;", color );
 		message += client_->login();
-		message += "$12; invaded the galaxy.\n";
+		message += "$-1; invaded the galaxy.\n";
 		_ready ++;
 	} else {
 		_emperors[ client_ ] = OEmperorInfo();
 		message = format( "party:%s,setup:emperor=%d,%s\n",
 			_id, -1, client_->login() );
 		client_->send( message );
-		message = "msg:$12;Spectator " + client_->login() + " is visiting this galaxy.\n";
+		message = "msg:$-1;Spectator " + client_->login() + " is visiting this galaxy.\n";
 	}
 	broadcast( message ); /* inform every emperor about new rival */
 	for ( emperors_t::iterator it = _emperors.begin(); it != _emperors.end(); ++ it ) {
@@ -269,11 +269,11 @@ void HGalaxy::do_post_accept( HClient* client_ ) {
 				message = format( "party:%s,setup:emperor=%d,%s\n",
 					_id, clr, it->first->login() );
 				client_->send( message );
-				message = format( "party:%s,msg:$12;Emperor $%d;", _id, clr );
+				message = format( "party:%s,msg:$-1;Emperor $%d;", _id, clr );
 				message += it->first->login();
-				message += "$12; invaded the galaxy.\n";
+				message += "$-1; invaded the galaxy.\n";
 			} else {
-				message = "party:" + _id + ",msg:$12;Spectator " + it->first->login() + " is visiting this galaxy.\n";
+				message = "party:" + _id + ",msg:$-1;Spectator " + it->first->login() + " is visiting this galaxy.\n";
 			}
 			client_->send( message );
 		}
@@ -328,12 +328,12 @@ void HGalaxy::handler_message( HClient* client_, HString const& message_ ) {
 	message = "say:$";
 	int color = get_emperor_info( client_ )->_color;
 	if ( color < 0 ) {
-		color = 12;
+		color = -1;
 	}
 	message += color;
 	message += ';';
 	message += client_->login();
-	message += "$12;: ";
+	message += "$-1;: ";
 	message += message_;
 	message += '\n';
 	broadcast( message );
@@ -407,7 +407,7 @@ void HGalaxy::end_round( void ) {
 		if ( ! emperor.second._systems ) {
 			emperor.second._systems = -1;
 			message = format(
-				"msg:$12;Once mighty empire of $%d;%s$12; fall in ruins.\n",
+				"msg:$-1;Once mighty empire of $%d;%s$-1; fall in ruins.\n",
 				emperor.second._color, emperor.first->login()
 			);
 			broadcast( message );
@@ -424,7 +424,7 @@ void HGalaxy::end_round( void ) {
 		for ( emperors_t::value_type& emperor : _emperors ) {
 			if ( emperor.second._systems > 0 ) {
 				message = format(
-					"msg:$12;The invincible $%d;%s$12; crushed the galaxy.\n",
+					"msg:$-1;The invincible $%d;%s$-1; crushed the galaxy.\n",
 					emperor.second._color, emperor.first->login()
 				);
 				broadcast( message );
@@ -498,9 +498,9 @@ void HGalaxy::do_kick( HClient* client_ ) {
 		-- _ready;
 	}
 	if ( color >= 0 ) {
-		broadcast( HString( "msg:$12;Emperor $" ) + color + ";" + client_->login() + "$12; fleed from the galaxy.\n" );
+		broadcast( HString( "msg:$-1;Emperor $" ) + color + ";" + client_->login() + "$-1; fleed from the galaxy.\n" );
 	} else {
-		broadcast( HString( "msg:$12;Spectator " ) + client_->login() + " left this universum.\n" );
+		broadcast( HString( "msg:$-1;Spectator " ) + client_->login() + " left this universum.\n" );
 	}
 	OUT << "galaxy: dumping player: " << client_->login() << endl;
 	if ( ( _round >= 0 ) && ( _ready >= _emperors.size() ) ) {

@@ -15,7 +15,7 @@ public class Ini extends Properties {
 			Con.err( "FATAL ERROR: " + e.getMessage() );
 			e.printStackTrace();
 			System.exit( 1 );
-		} catch ( java.security.AccessControlException e ) {
+		} catch ( Exception e ) {
 			Con.err( "Insufficient privileges to guess home directory: " + e.getMessage() );
 		}
 	}

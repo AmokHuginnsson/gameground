@@ -446,25 +446,25 @@ void HBoard::do_paint( void ) {
 		_height = _boardSize + 1 /* for label */ + 2 /* for borders */;
 		_width = _boardSize * 3 /* for System */ + 2 /* for borders */;
 		if ( _boardSize < 12 ) {
-			cons.cmvprintf( _rowRaw, _columnRaw + 35, _focused ? ATTR_BOARD : COLOR::ATTR_NORMAL, "{" );
-			cons.cmvprintf( _rowRaw + 1, _columnRaw + 20, _focused ? ATTR_BOARD : COLOR::ATTR_NORMAL, "-+--+--+--+--+-'" );
+			cons.cmvprintf( _rowRaw, _columnRaw + 35, _focused ? ATTR_BOARD : COLOR::ATTR_DEFAULT, "{" );
+			cons.cmvprintf( _rowRaw + 1, _columnRaw + 20, _focused ? ATTR_BOARD : COLOR::ATTR_DEFAULT, "-+--+--+--+--+-'" );
 		}
 		pen = ',';
 		for ( int ctr( 0 ); ctr < _boardSize; ctr ++ )
 			pen += "-+-";
 		pen += '.';
-		cons.cmvprintf( _rowRaw, _columnRaw, _focused ? ATTR_BOARD : COLOR::ATTR_NORMAL, pen );
+		cons.cmvprintf( _rowRaw, _columnRaw, _focused ? ATTR_BOARD : COLOR::ATTR_DEFAULT, pen );
 		pen = '}';
 		for ( int ctr( 0 ); ctr < _boardSize; ctr ++ )
 			pen += " - ";
 		pen += '{';
 		for ( int ctr( 0 ); ctr < _boardSize; ctr ++ )
-			cons.cmvprintf( _rowRaw + ctr + 1, _columnRaw, _focused ? ATTR_BOARD : COLOR::ATTR_NORMAL, pen );
+			cons.cmvprintf( _rowRaw + ctr + 1, _columnRaw, _focused ? ATTR_BOARD : COLOR::ATTR_DEFAULT, pen );
 		pen = '`';
 		for ( int ctr( 0 ); ctr < _boardSize; ctr ++ )
 			pen += "-+-";
 		pen += '\'';
-		cons.cmvprintf( _rowRaw + _boardSize + 1, _columnRaw, _focused ? ATTR_BOARD : COLOR::ATTR_NORMAL, pen );
+		cons.cmvprintf( _rowRaw + _boardSize + 1, _columnRaw, _focused ? ATTR_BOARD : COLOR::ATTR_DEFAULT, pen );
 		int systems( static_cast<int>( _systems->get_size() ) );
 		if ( systems > 0 ) {
 			int sysNo( -1 );
@@ -486,25 +486,25 @@ void HBoard::do_paint( void ) {
 		}
 		cons.cmvprintf( _rowRaw + 1 + _cursorY,
 				_columnRaw + 1 + _cursorX * 3,
-				_focused ? ATTR_CURSOR : COLOR::ATTR_NORMAL, "{" );
+				_focused ? ATTR_CURSOR : COLOR::ATTR_DEFAULT, "{" );
 		cons.cmvprintf( _rowRaw + 1 + _cursorY,
 				_columnRaw + 3 + _cursorX * 3,
-				_focused ? ATTR_CURSOR : COLOR::ATTR_NORMAL, "}" );
-		cons.cmvprintf( _rowRaw - 1, _columnRaw + 8, _focused ? ATTR_BOARD : COLOR::ATTR_NORMAL, ",--{" );
+				_focused ? ATTR_CURSOR : COLOR::ATTR_DEFAULT, "}" );
+		cons.cmvprintf( _rowRaw - 1, _columnRaw + 8, _focused ? ATTR_BOARD : COLOR::ATTR_DEFAULT, ",--{" );
 		if ( round >= 0 )
-			cons.cmvprintf( _rowRaw - 1, _columnRaw + 13, COLOR::ATTR_NORMAL, "%4d", round );
-		cons.cmvprintf( _rowRaw - 1, _columnRaw + 17, _focused ? ATTR_BOARD : COLOR::ATTR_NORMAL, "}--." );
-		cons.cmvprintf( _rowRaw - 1, _columnRaw + 23, _focused ? ATTR_BOARD : COLOR::ATTR_NORMAL, ",--{" );
-		cons.cmvprintf( _rowRaw - 1, _columnRaw + 28, _focused ? COLOR::FG_WHITE : COLOR::ATTR_NORMAL, "    " );
+			cons.cmvprintf( _rowRaw - 1, _columnRaw + 13, COLOR::ATTR_DEFAULT, "%4d", round );
+		cons.cmvprintf( _rowRaw - 1, _columnRaw + 17, _focused ? ATTR_BOARD : COLOR::ATTR_DEFAULT, "}--." );
+		cons.cmvprintf( _rowRaw - 1, _columnRaw + 23, _focused ? ATTR_BOARD : COLOR::ATTR_DEFAULT, ",--{" );
+		cons.cmvprintf( _rowRaw - 1, _columnRaw + 28, _focused ? COLOR::FG_WHITE : COLOR::ATTR_DEFAULT, "    " );
 		if ( ( state == SELECT ) || ( state == INPUT ) ) {
 			int sysNo( get_sys_no( _cursorX, _cursorY ) );
 			if ( sysNo >= 0 ) {
 				cons.cmvprintf( _rowRaw - 1, _columnRaw + 28,
-						_focused ? COLOR::FG_WHITE : COLOR::ATTR_NORMAL, "%4d",
+						_focused ? COLOR::FG_WHITE : COLOR::ATTR_DEFAULT, "%4d",
 						distance( _sourceSystem, sysNo ) + round );
 			}
 		}
-		cons.cmvprintf( _rowRaw - 1, _columnRaw + 32, _focused ? ATTR_BOARD : COLOR::ATTR_NORMAL, "}--." );
+		cons.cmvprintf( _rowRaw - 1, _columnRaw + 32, _focused ? ATTR_BOARD : COLOR::ATTR_DEFAULT, "}--." );
 	}
 	M_EPILOG
 }
@@ -1007,14 +1007,14 @@ void HClient::handler_play( HString& command_ ) {
 			case ( 'd' ): /* defeted */ {
 				_window->_logPad->add( _colors_[ color ] );
 				_window->_logPad->add( value );
-				_window->_logPad->add( COLOR::ATTR_NORMAL );
+				_window->_logPad->add( COLOR::ATTR_DEFAULT );
 				_window->_logPad->add( " conquered " );
 				int temp = _systems[ sysNo ]._color;
-				_window->_logPad->add( ( temp >= 0 ) ? _colors_[ temp ] : COLOR::ATTR_NORMAL );
+				_window->_logPad->add( ( temp >= 0 ) ? _colors_[ temp ] : COLOR::ATTR_DEFAULT );
 				_window->_logPad->add( _systemNames_[ sysNo ] );
 				value = format( "(%c)", _symbols_[ sysNo ] );
 				_window->_logPad->add( value );
-				_window->_logPad->add( COLOR::ATTR_NORMAL );
+				_window->_logPad->add( COLOR::ATTR_DEFAULT );
 				_window->_logPad->add( ".\n" );
 				_systems[ sysNo ]._color = color;
 				break;
@@ -1025,7 +1025,7 @@ void HClient::handler_play( HString& command_ ) {
 				_window->_logPad->add( _systemNames_[ sysNo ] );
 				value = format( "(%c)", _symbols_[ sysNo ] );
 				_window->_logPad->add( value );
-				_window->_logPad->add( COLOR::ATTR_NORMAL );
+				_window->_logPad->add( COLOR::ATTR_DEFAULT );
 				_window->_logPad->add( " arrived.\n" );
 				break;
 			}
@@ -1038,15 +1038,15 @@ void HClient::handler_play( HString& command_ ) {
 			} /* fallthrough */
 			case ( 's' ): /* resisted attack */ {
 				int temp = _systems[ sysNo ]._color;
-				_window->_logPad->add( ( temp >= 0 ) ? _colors_[ temp ] : COLOR::ATTR_NORMAL );
+				_window->_logPad->add( ( temp >= 0 ) ? _colors_[ temp ] : COLOR::ATTR_DEFAULT );
 				_window->_logPad->add( _systemNames_[ sysNo ] );
 				variable = format( "(%c)", _symbols_[ sysNo ] );
 				_window->_logPad->add( variable );
-				_window->_logPad->add( COLOR::ATTR_NORMAL );
+				_window->_logPad->add( COLOR::ATTR_DEFAULT );
 				_window->_logPad->add( " resisted attack from " );
 				_window->_logPad->add( _colors_[ color ] );
 				_window->_logPad->add( value );
-				_window->_logPad->add( COLOR::ATTR_NORMAL );
+				_window->_logPad->add( COLOR::ATTR_DEFAULT );
 				_window->_logPad->add( ".\n" );
 				break;
 			}
@@ -1058,14 +1058,14 @@ void HClient::handler_play( HString& command_ ) {
 	} else if ( variable == "round" ) {
 		_window->_logPad->add( ATTR_CURSOR );
 		_window->_logPad->add( "----- " );
-		_window->_logPad->add( COLOR::ATTR_NORMAL );
+		_window->_logPad->add( COLOR::ATTR_DEFAULT );
 		_window->_logPad->add( " round: " );
 		_round = lexical_cast<int>( value );
 		value = format( "%d", _round );
 		_window->_logPad->add( ATTR_CURSOR );
 		_window->_logPad->add( value );
 		_window->_logPad->add( " -----\n" );
-		_window->_logPad->add( COLOR::ATTR_NORMAL );
+		_window->_logPad->add( COLOR::ATTR_DEFAULT );
 		_window->set_state( NORMAL );
 		_window->schedule_repaint( false );
 	}
@@ -1093,6 +1093,9 @@ int find_color( HString const& message_, int offset_ ) {
 			break;
 		}
 		int color( start + 1 );
+		if ( ( color < length ) && ( message_[color] == '-' ) ) {
+			++ color;
+		}
 		while ( ( color < length ) && is_digit( message_[color] ) ) {
 			++ color;
 		}
@@ -1127,8 +1130,8 @@ void HClient::handler_msg( HString& message_ ) {
 		}
 		if ( colorIdx >= 0 ) {
 			int colorEnd( static_cast<int>( message_.find( ';'_ycp, colorIdx ) ) );
-			int color( xmath::clip( 0, lexical_cast<int>( message_.substr( colorIdx + 1, colorEnd - colorIdx ) ), 15 ) );
-			_window->_logPad->add( _colors_[ color ] );
+			int color( xmath::clip( -1, lexical_cast<int>( message_.substr( colorIdx + 1, colorEnd - colorIdx - 1 ) ), 15 ) );
+			_window->_logPad->add( color >= 0 ? _colors_[ color ] : COLOR::ATTR_DEFAULT );
 			index = colorEnd + 1;
 		} else {
 			_window->_logPad->add( message_.substr( index ) );
@@ -1136,7 +1139,7 @@ void HClient::handler_msg( HString& message_ ) {
 		}
 	}
 	_window->_logPad->add( "\n" );
-	_window->_logPad->add( COLOR::ATTR_NORMAL );
+	_window->_logPad->add( COLOR::ATTR_DEFAULT );
 	return;
 	M_EPILOG
 }

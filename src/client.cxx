@@ -111,6 +111,7 @@ HClient::HClient( yaal::hcore::HStreamInterface::ptr_t const& sock_ )
 	, _buffer()
 	, _utf8()
 	, _logics() {
+	M_ASSERT( !! _socket );
 }
 
 HClient::~HClient( void ) {
@@ -126,6 +127,9 @@ void HClient::upgrade( void ) {
 
 void HClient::send( yaal::hcore::HString const& message_ ) {
 	M_PROLOG
+	if ( ! _valid ) {
+		return;
+	}
 	if ( ! _webSocket ) {
 		*_socket << message_;
 	} else {
@@ -172,6 +176,9 @@ void HClient::send_web_socket( yaal::hcore::HString const& message_, WebSockFrag
 
 int long HClient::read( yaal::hcore::HString& line_ ) {
 	M_PROLOG
+	if ( ! _valid ) {
+		return ( 0 );
+	}
 	int long nRead( -1 );
 	if ( ! _webSocket ) {
 		nRead = _socket->read_until( line_, "\n" );
@@ -189,6 +196,9 @@ int long HClient::read( yaal::hcore::HString& line_ ) {
 
 int long HClient::read_web_socket( yaal::hcore::HString& line_ ) {
 	M_PROLOG
+	if ( ! _valid ) {
+		return ( 0 );
+	}
 	int long nRead( 0 );
 	do {
 		u16_t header( 0 );

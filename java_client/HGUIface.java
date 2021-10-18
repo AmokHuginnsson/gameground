@@ -39,11 +39,11 @@ abstract class HGUIface extends JPanel {
 		public static final int RESET = 256;
 		public static final int PALLETE_SIZE = 20;
 	}
-	public int COLOR_NORMAL = Colors.RESET;
+	public int COLOR_DEFAULT = Colors.RESET;
 	public HGUIface( String $resource ) {
 		_resource = $resource;
 		_attribute = new SimpleAttributeSet();
-		_color = COLOR_NORMAL;
+		_color = COLOR_DEFAULT;
 		_colors = new Color[ Colors.PALLETE_SIZE ];
 
 		_colors[ Colors.BLACK ] = Color.black;
@@ -100,6 +100,9 @@ abstract class HGUIface extends JPanel {
 			$on = _logPad;
 		}
 		int lum = brightness( $on.getBackground() );
+		if ( $color == -1 ) {
+			$color = Colors.LIGHTGRAY;
+		}
 		if ( $color == Colors.RESET ) {
 			$color = Colors.LIGHTGRAY;
 		}

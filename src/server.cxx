@@ -32,7 +32,7 @@ namespace {
 
 HString const& mark( int color_ ) {
 	static HString buf;
-	buf.assign( "$" ).append( color_ ).append( ";###$" ).append( static_cast<int>( COLOR::ATTR_RESET ) ).append( ";" );
+	buf.assign( "$" ).append( color_ ).append( ";###$" ).append( static_cast<int>( COLOR::ATTR_DEFAULT ) ).append( ";" );
 	return buf;
 }
 

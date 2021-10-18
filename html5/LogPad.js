@@ -70,8 +70,8 @@ class LogPad {
 			? tokens[1]
 			: tokens[0]
 		const linkPattern = /([^\s<]+[.][^\s<]+)/
-		const colorPattern = /(\$\d+;)/
-		const splitPattern = /(\$\d+;)|(\n)|([^\s<]+[.][^\s<]+)/g
+		const colorPattern = /(\$-?\d+;)/
+		const splitPattern = /(\$-?\d+;)|(\n)|([^\s<]+[.][^\s<]+)/g
 		const items = whatRaw.split( splitPattern );
 		const what = []
 		let color = "";

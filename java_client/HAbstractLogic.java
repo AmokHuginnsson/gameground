@@ -59,8 +59,12 @@ public abstract class HAbstractLogic {
 			if ( start < 0 )
 				break;
 			int color = start + 1;
-			while ( ( color < length ) && Character.isDigit( $message.charAt( color ) ) )
+			if ( ( color < length ) && ( $message.charAt( color ) == '-' ) ) {
 				++ color;
+			}
+			while ( ( color < length ) && Character.isDigit( $message.charAt( color ) ) ) {
+				++ color;
+			}
 			if ( ( color < length ) && ( $message.charAt( color ) == ';' ) ) {
 				colorStartIndex = start;
 				break;
@@ -90,7 +94,7 @@ public abstract class HAbstractLogic {
 			}
 		}
 		_gui.log( "\n" );
-		_gui.log( _gui.COLOR_NORMAL );
+		_gui.log( _gui.COLOR_DEFAULT );
 	}
 	public void handleError( String $message ) {
 		javax.swing.JOptionPane.showMessageDialog( _gui,

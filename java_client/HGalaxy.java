@@ -140,7 +140,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 			_colorMap[ 13 ] = Colors.OTHERGRAY;
 			_colorMap[ 14 ] = Colors.DARKGRAY;
 			_colorMap[ 15 ] = Colors.WHITE;
-			COLOR_NORMAL = 12;
+			COLOR_DEFAULT = -1;
 		}
 		public void updateTagLib( XUL $xul ) {
 			$xul.getTaglib().registerTag( "hboard", HBoard.class );
@@ -148,7 +148,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 		}
 		public void init() {
 			super.init();
-			log( COLOR_NORMAL );
+			log( COLOR_DEFAULT );
 			log( "##", 0 );log( " ##", 1 );log( " ##", 2 );
 			log( " ##", 3 );log( " ##", 4 );log( " ##\n", 5 );
 			log( "##", 6 );log( " ##", 7 );log( " ##", 8 );
@@ -166,7 +166,7 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 			if ( $color >= 0 ) {
 				return ( _colorMap[ $color ] );
 			}
-			return ( Colors.BLACK );
+			return ( COLOR_DEFAULT );
 		}
 		public void onMessage() {
 			String msg = _messageInput.getText();
@@ -323,21 +323,21 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 					case ( 'c' ): /* conquered */
 					case ( 'd' ): { /* defeted */
 						_gui.log( value, color );
-						_gui.log( " conquered ", _gui.COLOR_NORMAL );
+						_gui.log( " conquered ", _gui.COLOR_DEFAULT );
 						int temp = _systems[ sysNo ]._color;
-						temp = ( temp >= 0 ) ? temp : _gui.COLOR_NORMAL;
+						temp = ( temp >= 0 ) ? temp : _gui.COLOR_DEFAULT;
 						_gui.log( _systemNames[ sysNo ], temp );
 						value = "(" + _symbols[ sysNo ] + ")";
 						_gui.log( value, temp );
-						_gui.log( ".\n", _gui.COLOR_NORMAL );
+						_gui.log( ".\n", _gui.COLOR_DEFAULT );
 						_systems[ sysNo ]._color = color;
 					} break;
 					case ( 'r' ): { /* reinforcements */
-						_gui.log( "Reinforcements for ", _gui.COLOR_NORMAL );
+						_gui.log( "Reinforcements for ", _gui.COLOR_DEFAULT );
 						_gui.log( _systemNames[ sysNo ], color );
 						value = "(" + _symbols[ sysNo ] + ")";
 						_gui.log( value, color );
-						_gui.log( " arrived.\n", _gui.COLOR_NORMAL );
+						_gui.log( " arrived.\n", _gui.COLOR_DEFAULT );
 					} break;
 					case ( 'f' ):
 					case ( 's' ): { /* resisted attack */
@@ -347,13 +347,13 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 							value = _emperors.get( color );
 						}
 						int temp = _systems[ sysNo ]._color;
-						temp = ( temp >= 0 ) ? temp : _gui.COLOR_NORMAL;
+						temp = ( temp >= 0 ) ? temp : _gui.COLOR_DEFAULT;
 						_gui.log( _systemNames[ sysNo ], temp );
 						variable = "(" + _symbols[ sysNo ] + ")";
 						_gui.log( variable, temp );
-						_gui.log( " resisted attack from ", _gui.COLOR_NORMAL );
+						_gui.log( " resisted attack from ", _gui.COLOR_DEFAULT );
 						_gui.log( value, color );
-						_gui.log( ".\n", _gui.COLOR_NORMAL );
+						_gui.log( ".\n", _gui.COLOR_DEFAULT );
 					} break;
 					case ( 'i' ): /* info */ {
 						_systems[ sysNo ]._color = color;
@@ -363,10 +363,10 @@ class HGalaxy extends HAbstractLogic implements KeyListener {
 				}
 			} else if ( variable.compareTo( "round" ) == 0 ) {
 				_gui.log( "----- ", HGUIface.Colors.WHITE );
-				_gui.log( " round: ", _gui.COLOR_NORMAL );
+				_gui.log( " round: ", _gui.COLOR_DEFAULT );
 				_round = Integer.parseInt( value );
 				_gui.log( value + " -----\n", HGUIface.Colors.WHITE );
-				_gui.log( _gui.COLOR_NORMAL );
+				_gui.log( _gui.COLOR_DEFAULT );
 				setState ( State.NORMAL );
 				_gui._round.setText( value );
 				_gui._board.repaint();
